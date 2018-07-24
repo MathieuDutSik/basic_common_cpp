@@ -2,7 +2,7 @@
 #define INCLUDE_GRAPH_BITSET
 
 
-
+#include "Face_bitset.h"
 
 
 struct GraphBitset {
