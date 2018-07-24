@@ -4,7 +4,7 @@
 #include "COMB_Combinatorics_elem.h"
 #include "COMB_Vectors.h"
 #include "MAT_Matrix.h"
-#include "Face_bitset.h"
+#include "Boost_bitset.h"
 #include "COMB_Stor.h"
 
 

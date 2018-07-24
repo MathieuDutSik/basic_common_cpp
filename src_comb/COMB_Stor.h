@@ -2,7 +2,7 @@
 #define POLYTOPE_STOR
 
 #include "Temp_common.h"
-#include "Face_bitset.h"
+#include "Boost_bitset.h"
 
 // 
 // This is a set of functionality for storing bits

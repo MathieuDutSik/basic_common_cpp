@@ -3,7 +3,7 @@
 
 #include "Temp_common.h"
 #include "minisat/core/Solver.h"
-#include "Face_bitset.h"
+#include "Boost_bitset.h"
 
 
 struct SATformulation {
