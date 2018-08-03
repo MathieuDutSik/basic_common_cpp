@@ -245,7 +245,7 @@ class QuadField {
 };
 
 template<typename T, int d>
-void GET_DOUBLE(QuadField<T, d> const& eQ, double & eD)
+void TYPE_CONVERSION(QuadField<T, d> const& eQ, double & eD)
 {
   eD=eQ.get_d();
 }

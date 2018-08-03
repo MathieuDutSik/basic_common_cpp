@@ -201,11 +201,6 @@ int IntFloor(double const& x)
   return int(floor(x));
 }
 
-void GET_DOUBLE(double const& eQ, double & eD)
-{
-  eD=eQ;
-}
-
 // Trait definition for is_mpz
 
 template <typename T>
@@ -214,14 +209,6 @@ struct is_mpz_class {
 };
 
 
-
-template<typename T1, typename T2>
-T1 UniversalTypeConversion(T2 const& a)
-{
-  T1 ret;
-  TYPE_CONVERSION(a, ret);
-  return ret;
-}
 
 
 template<typename T>
@@ -277,7 +264,7 @@ void NearestInteger_double_To(double const& xI, To & xO)
   //  std::cerr << "xI=" << xI << "\n";
   auto GetErr=[&](To const& u) -> double {
     double u_doubl;
-    GET_DOUBLE(u, u_doubl);
+    TYPE_CONVERSION(u, u_doubl);
     double diff = u_doubl - xI;
     return T_abs(diff);
   };
@@ -324,6 +311,14 @@ inline typename std::enable_if<is_double_type<Ti>::value,To>::type UniversalNear
   return ret;
 }
 
+
+template<typename T1, typename T2>
+T1 UniversalTypeConversion(T2 const& a)
+{
+  T1 ret;
+  TYPE_CONVERSION(a, ret);
+  return ret;
+}
 
 
 

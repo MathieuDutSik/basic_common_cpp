@@ -599,11 +599,6 @@ mpq_class GetFieldElement(long const& eVal)
 
 
 
-void GET_DOUBLE(mpq_class const& eQ, double & eD)
-{
-  eD=eQ.get_d();
-}
-
 void TYPE_CONVERSION(mpq_class const& a1, double & a2)
 {
   a2=a1.get_d();
