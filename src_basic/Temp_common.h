@@ -319,16 +319,6 @@ struct is_graphbitset_class {
 };
 
 
-template<typename T>
-T T_abs(T const& eVal)
-{
-  if (eVal > 0)
-    return eVal;
-  T fVal= - eVal;
-  return fVal;
-}
-
-
 
 template<typename T>
 T VectorSum(std::vector<T> const& eVect)

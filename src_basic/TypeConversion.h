@@ -10,6 +10,16 @@ T1 UniversalTypeConversion(T2 const& a)
   return ret;
 }
 
+
+template<typename T>
+T T_abs(T const& eVal)
+{
+  if (eVal > 0)
+    return eVal;
+  T fVal= - eVal;
+  return fVal;
+}
+
 void NearestInteger_double_int(double const& xI, int & xO)
 {
   //  std::cerr << "Temp_common : NearestInteger\n";
