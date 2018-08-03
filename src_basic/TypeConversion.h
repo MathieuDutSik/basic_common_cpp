@@ -7,7 +7,7 @@
 // All GMP are in NumberTheory.h
 // All mpreal are in mpreal_related.h
 
-
+#include <math.h>
 
 // Trait definition for subset of integers
 template <typename T>
