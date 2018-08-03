@@ -251,6 +251,11 @@ void NearestInteger_double_int(double const& xI, int & xO)
 }
 
 
+void TYPE_CONVERSION(double const& a1, double & a2)
+{
+  a2 = int(a1);
+}
+
 void TYPE_CONVERSION(double const& a1, int & a2)
 {
   a2 = int(a1);
