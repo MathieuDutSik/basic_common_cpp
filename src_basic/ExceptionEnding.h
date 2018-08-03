@@ -1,6 +1,8 @@
 #ifndef EXCEPTION_ENDING_INCLUDE
 #define EXCEPTION_ENDING_INCLUDE
 
+#include <cassert>
+
 
 // types for exception
 struct TerminalException {
@@ -13,6 +15,7 @@ void TerminalEnding()
 {
   int val1=4;
   assert(val1 == 5);
+  exit(1);
 }
 
 
