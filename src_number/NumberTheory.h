@@ -1,6 +1,8 @@
 #ifndef INCLUDE_NUMBER_THEORY
 #define INCLUDE_NUMBER_THEORY
 
+#include <iostream>
+
 //#include "Temp_common.h"
 #include "TypeConversion.h"
 #include "ExceptionEnding.h"
