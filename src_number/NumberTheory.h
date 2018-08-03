@@ -3,6 +3,7 @@
 
 //#include "Temp_common.h"
 #include "TypeConversion.h"
+#include "ExceptionEnding.h"
 #include "gmpxx.h"
 
 

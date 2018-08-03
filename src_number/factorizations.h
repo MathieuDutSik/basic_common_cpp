@@ -1,6 +1,7 @@
 #ifndef FACTORIZATIONS_INCLUDE
 #define FACTORIZATIONS_INCLUDE
 
+#include <vector>
 
 
 std::vector<mpz_class> FactorsInt(mpz_class const& x)

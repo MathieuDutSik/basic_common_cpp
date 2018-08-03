@@ -73,25 +73,12 @@
 
 // Type conversion
 #include "TypeConversion.h"
+#include "ExceptionEnding.h"
 
 // synonyms
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
-
-// types for exception
-
-struct TerminalException {
-  int eVal;
-};
-
-// This is guaranteed to trigger an end.
-// Also it gives something that can be used for having the stacktrace via gdb.
-void TerminalEnding()
-{
-  int val1=4;
-  assert(val1 == 5);
-}
 
 
 
