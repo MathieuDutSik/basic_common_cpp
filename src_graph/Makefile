@@ -11,7 +11,7 @@ CC		= g++ -std=c++11 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src -I../src_xml -I.
+CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src_comb -I../src_xml -I.
 
 
 CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(LIBBLISS_INCDIR) -I$(LIBSHORT_INCDIR) -I$(BOOST_INCDIR) -I$(MPFR_INCDIR) -I$(EIGEN_PATH) -I$(FLINT_INCDIR) -I$(TBB_INCDIR) -I$(GSL_INCDIR) $(MINISAT_INCLUDE)
