@@ -4,25 +4,6 @@
 #include "MAT_Matrix.h"
 #include "NumberTheory.h"
 
-template<typename T>
-MyMatrix<int> TMat_ConvertToInt(MyMatrix<T> const&eMatI)
-{
-  double eVal_d;
-  int nbRow=eMatI.rows();
-  int nbCol=eMatI.cols();
-  MyMatrix<int> eMatO(nbRow, nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      T eVal=eMatI(iRow, iCol);
-      GET_DOUBLE(eVal, eVal_d);
-      int eVal_i=int(round(eVal_d));
-      eMatO(iRow, iCol)=eVal_i;
-    }
-  return eMatO;
-}
-
-
-
 
 
 // Now declarations of generic code.
