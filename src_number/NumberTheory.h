@@ -1,7 +1,7 @@
 #ifndef INCLUDE_NUMBER_THEORY
 #define INCLUDE_NUMBER_THEORY
 
-#include "Temp_common.h"
+//#include "Temp_common.h"
 #include "gmpxx.h"
 
 
