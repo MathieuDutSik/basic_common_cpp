@@ -8,6 +8,7 @@
 // All mpreal are in mpreal_related.h
 
 #include <math.h>
+#include <type_traits>
 
 // Trait definition for subset of integers
 template <typename T>
