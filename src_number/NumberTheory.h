@@ -2,6 +2,7 @@
 #define INCLUDE_NUMBER_THEORY
 
 //#include "Temp_common.h"
+#include "TypeConversion.h"
 #include "gmpxx.h"
 
 
