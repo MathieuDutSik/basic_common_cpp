@@ -72,7 +72,7 @@
 
 
 // Type conversion
-#incude "TypeConversion.h"
+#include "TypeConversion.h"
 
 // synonyms
 
