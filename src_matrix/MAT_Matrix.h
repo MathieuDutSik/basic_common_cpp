@@ -208,8 +208,8 @@ MyMatrix<T> ReadMatrixLrsCdd(std::istream &is)
 }
 
 
-template<typename T>
-bool IsEqualSizeMatrices(MyMatrix<T> const& X, MyMatrix<T> const& Y)
+template<typename T1, typename T2>
+bool IsEqualSizeMatrices(MyMatrix<T1> const& X, MyMatrix<T2> const& Y)
 {
   if (X.rows() != Y.rows())
     return false;
