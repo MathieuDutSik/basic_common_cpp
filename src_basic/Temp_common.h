@@ -127,6 +127,18 @@ T VectorMax(std::vector<T> const& eVect)
   return eMax;
 }
 
+template<typename T>
+T VectorAvg(std::vector<T> const& eVect)
+{
+  T eSum=0;
+  for (T eVal : eVect)
+    eSum += eVal;
+  T eAvg = eSum / int(eVect.size());
+  return eAvg;
+}
+
+
+
 
 template<typename T>
 void ShowAttainmentVector(std::ostream & os, std::vector<T> const& eVect)
