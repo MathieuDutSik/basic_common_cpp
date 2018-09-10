@@ -145,6 +145,11 @@ int GetNumberDigit(int const& eVal)
 
 std::string StringNumber(int const& nb, int const& nbDigit)
 {
+  if (nb < 0) {
+    std::cerr << "We have nb < 0 which is an error\n";
+    std::cerr << "nb=" << nb << "\n";
+    throw TerminalException{1};
+  }
   if (nb > pow(10, nbDigit) ) {
     std::stringstream s;
     s << "Critical error in StringNumber\n";
