@@ -50,6 +50,57 @@ int STRING_GetCharPositionInString(std::string const& eStr, std::string const& e
 }
 
 
+std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<std::string,std::string>> const& ListSubst)
+{
+  std::string retStr;
+  int len=FileIN.size();
+  int pos=0;
+  std::string CharDollar="$";
+  auto GetIPair=[&](int const& pos) -> int {
+    std::vector<int> ListMatch;
+    for (int iPair=0; iPair<int(ListSubst.size()); iPair++) {
+      std::string eStr=ListSubst[iPair].first;
+      int lenStr=eStr.size();
+      if (pos+lenStr < len) {
+	std::string eSubStr=FileIN.substr(pos, lenStr);
+	if (eSubStr == eStr)
+	  ListMatch.push_back(iPair);
+      }
+    }
+    if (ListMatch.size() > 1) {
+      std::cerr << "Several strings are matching. Bad situation\n";
+      throw TerminalException{1};
+    }
+    if (ListMatch.size() == 0)
+      return -1;
+    if (ListMatch.size() == 1)
+      return ListMatch[0];
+    return -400;
+  };
+  
+  while(true) {
+    if (pos == len)
+      break;
+    std::string eChar=FileIN.substr(pos,1);
+    if (eChar == CharDollar) {
+      pos++;
+      int iPair=GetIPair(pos);
+      if (iPair == -1) {
+	retStr += eChar;
+      }
+      else {
+	retStr += ListSubst[iPair].second;
+	pos += int(ListSubst[iPair].first.size());
+      }
+    }
+    else {
+      retStr += eChar;
+      pos++;
+    }
+  }
+  return retStr;
+}
+
 
 bool IsFullyNumeric(std::string const& eStr)
 {
