@@ -12,12 +12,24 @@ public:
   GraphListAdj() = delete;
   GraphListAdj(int const& inpNbVert) : nbVert(inpNbVert)
   {
-    ListListAdj.clear();
-    std::vector<int> eList;
-    for (int iVert=0; iVert<nbVert; iVert++) {
-      ListListAdj.push_back(eList);
-    }
     HasVertexColor=false;
+    for (int iVert=0; iVert<nbVert; iVert++)
+      ListListAdj.push_back({});
+  }
+  GraphListAdj(MyMatrix<int> const& ListEdge, int const& inpNbVert)
+  {
+    HasVertexColor=false;
+    nbVert = inpNbVert;
+    for (int iVert=0; iVert<nbVert; iVert++)
+      ListListAdj.push_back({});
+    //
+    int nbEdge=ListEdge.rows();
+    for (int iEdge=0; iEdge<nbEdge; iEdge++) {
+      int eVert1=ListEdge(iEdge,0);
+      int eVert2=ListEdge(iEdge,1);
+      ListListAdj[eVert1].push_back(eVert2);
+      ListListAdj[eVert2].push_back(eVert1);
+    }
   }
   ~GraphListAdj()
   {
@@ -125,6 +137,7 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
   }
   GraphSparseImmutable(MyMatrix<int> const& ListEdge, int const& _nbVert) : nbVert(_nbVert)
   {
+    HasVertexColor=false;
     int nbEdge=ListEdge.rows();
     std::vector<int> ListDeg(nbVert,0);
     for (int iEdge=0; iEdge<nbEdge; iEdge++)
