@@ -7,38 +7,38 @@ template<typename T>
 struct Tplusinfinity {
   Tplusinfinity(bool const& val1, T const& val2)
   {
-    IsInfinity = val1;
+    IsInf = val1;
     value = val2;
   }
   Tplusinfinity(T const& val)
   {
-    IsInfinity=false;
+    IsInf = false;
     value = val;
   }
   void SetToInfinity()
   {
-    IsInfinity=true;
+    IsInf = true;
   }
   Tplusinfinity<T> operator=(Tplusinfinity<T> const& x)
   {
-    IsInfinity = x.IsInfinity;
+    IsInf = x.IsInf;
     value = x.value;
   }
   Tplusinfinity<T> operator=(T const& val)
   {
-    IsInfinity = false;
+    IsInf = false;
     value = val;
   }
   bool IsInfinity() const
   {
-    return IsInfinity;
+    return IsInf;
   }
   T GetValue() const
   {
     return value;
   }
 private:
-  bool IsInfinity;
+  bool IsInf;
   T value;
 };
 
