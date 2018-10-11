@@ -29,7 +29,7 @@ struct Tplusinfinity {
     IsInfinity = false;
     value = val;
   }
-  bool GetInfinity() const
+  bool IsInfinity() const
   {
     return IsInfinity;
   }
@@ -46,9 +46,9 @@ private:
 template<typename T>
 bool operator==(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 {
-  if (x.GetInfinity() && y.GetInfinity())
+  if (x.IsInfinity() && y.IsInfinity())
     return true;
-  if (x.GetInfinity() != y.GetInfinity())
+  if (x.IsInfinity() != y.IsInfinity())
     return false;
   return x.GetValue() == y.GetValue();
 }
@@ -57,11 +57,11 @@ bool operator==(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 template<typename T>
 bool operator<(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 {
-  if (x.GetInfinity() && y.GetInfinity())
+  if (x.IsInfinity() && y.IsInfinity())
     return false;
-  if (!x.GetInfinity() && y.GetInfinity())
+  if (!x.IsInfinity() && y.IsInfinity())
     return true;
-  if (x.GetInfinity() && !y.GetInfinity())
+  if (x.IsInfinity() && !y.IsInfinity())
     return false;
   return x.GetValue() < y.GetValue();
 }
@@ -71,24 +71,32 @@ bool operator<(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 template<typename T>
 bool operator<=(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 {
-  if (x.GetInfinity() && y.GetInfinity())
+  if (x.IsInfinity() && y.IsInfinity())
     return true;
-  if (!x.GetInfinity() && y.GetInfinity())
+  if (!x.IsInfinity() && y.IsInfinity())
     return true;
-  if (x.GetInfinity() && !y.GetInfinity())
+  if (x.IsInfinity() && !y.IsInfinity())
     return false;
   return x.GetValue() <= y.GetValue();
+}
+
+template<typename T>
+bool operator<=(T const& x, Tplusinfinity<T> const& y)
+{
+  if (y.IsInfinity())
+    return true;
+  return x <= y.GetValue();
 }
 
 
 template<typename T>
 bool operator>(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 {
-  if (x.GetInfinity() && y.GetInfinity())
+  if (x.IsInfinity() && y.IsInfinity())
     return false;
-  if (!x.GetInfinity() && y.GetInfinity())
+  if (!x.IsInfinity() && y.IsInfinity())
     return false;
-  if (x.GetInfinity() && !y.GetInfinity())
+  if (x.IsInfinity() && !y.IsInfinity())
     return true;
   return x.GetValue() > y.GetValue();
 }
@@ -97,7 +105,7 @@ bool operator>(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 template<typename T>
 Tplusinfinity<T> operator+(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 {
-  if (x.GetInfinity() || y.GetInfinity())
+  if (x.IsInfinity() || y.IsInfinity())
     return Tplusinfinity<T>(true, 0);
   return Tplusinfinity<T>(false, x.GetValue() + y.GetValue());
 }
@@ -105,19 +113,19 @@ Tplusinfinity<T> operator+(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 template<typename T>
 Tplusinfinity<T> operator+(Tplusinfinity<T> const& x, T const& y)
 {
-  return Tplusinfinity<T>(x.GetInfinity(), x.GetValue() + y);
+  return Tplusinfinity<T>(x.IsInfinity(), x.GetValue() + y);
 }
 
 template<typename T>
 Tplusinfinity<T> operator+(T const& x, Tplusinfinity<T> const& y)
 {
-  return Tplusinfinity<T>(y.GetInfinity(), x + y.GetValue());
+  return Tplusinfinity<T>(y.IsInfinity(), x + y.GetValue());
 }
 
 template<typename T>
 Tplusinfinity<T> operator*(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 {
-  if (x.GetInfinity() || y.GetInfinity())
+  if (x.IsInfinity() || y.IsInfinity())
     return Tplusinfinity<T>(true, 0);
   return Tplusinfinity<T>(false, x.GetValue() * y.GetValue());
 }
@@ -125,13 +133,13 @@ Tplusinfinity<T> operator*(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 template<typename T>
 Tplusinfinity<T> operator*(Tplusinfinity<T> const& x, T const& y)
 {
-  return Tplusinfinity<T>(x.GetInfinity(), x.GetValue() * y);
+  return Tplusinfinity<T>(x.IsInfinity(), x.GetValue() * y);
 }
 
 template<typename T>
 Tplusinfinity<T> operator*(T const& x, Tplusinfinity<T> const& y)
 {
-  return Tplusinfinity<T>(y.GetInfinity(), x * y.GetValue());
+  return Tplusinfinity<T>(y.IsInfinity(), x * y.GetValue());
 }
 
 
