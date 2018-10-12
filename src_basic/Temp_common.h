@@ -479,8 +479,11 @@ int PositionProperty(std::vector<T> const& V, std::function<bool(T const&)> cons
   return -1;
 }
 
-template<typename T>
-bool ForAll(std::vector<T> const& V, std::function<bool(T const&)> const& f)
+// Actually there is a version all_of in <algorithm> but it uses iterators
+// which is kind of painful.
+
+template<typename T, class UnaryPredicate>
+bool ForAll(std::vector<T> const& V, UnaryPredicate const& f)
 {
   for (auto & eVal : V)
     if (!f(eVal))
