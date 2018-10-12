@@ -469,8 +469,8 @@ std::vector<T> Concatenation(std::vector<T> const& first, Args... args)
 }
 
 
-template<typename T>
-int PositionProperty(std::vector<T> const& V, std::function<bool(T const&)> const& f)
+template<typename T, class UnaryPredicate>
+int PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
 {
   int len=V.size();
   for (int i=0; i<len; i++)
