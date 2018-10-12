@@ -491,8 +491,8 @@ bool ForAll(std::vector<T> const& V, UnaryPredicate const& f)
   return true;
 }
 
-template<typename T>
-std::vector<T> Filtered(std::vector<T> const& V, std::function<bool(T const&)> const& f)
+template<typename T, class UnaryPredicate>
+std::vector<T> Filtered(std::vector<T> const& V, UnaryPredicate const& f)
 {
   std::vector<T> LRet;
   for (auto & eVal : V)
