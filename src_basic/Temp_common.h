@@ -470,6 +470,18 @@ std::vector<T> Concatenation(std::vector<T> const& first, Args... args)
 
 
 template<typename T, class UnaryPredicate>
+std::vector<T> ListT(std::vector<T> const& V, UnaryPredicate const& f)
+{
+  std::vector<T> retV;
+  for (auto & eVal : V)
+    retV.push_back(f(eVal));
+  return retV;
+}
+
+
+
+
+template<typename T, class UnaryPredicate>
 int PositionProperty(std::vector<T> const& V, UnaryPredicate const& f)
 {
   int len=V.size();
