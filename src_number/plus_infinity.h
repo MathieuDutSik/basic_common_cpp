@@ -77,6 +77,7 @@ std::ostream& operator<<(std::ostream& os, Tplusinfinity<T> const& x)
     os << "infinity";
   else
     os << x.GetValue();
+  return os;
 }
 
 
