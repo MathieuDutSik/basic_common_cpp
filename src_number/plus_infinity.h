@@ -1,6 +1,8 @@
 #ifndef PLUS_INFINITY_INCLUDE
 #define PLUS_INFINITY_INCLUDE
 
+#include <iostream>
+
 
 
 template<typename T>
@@ -68,6 +70,14 @@ bool operator<(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
   return x.GetValue() < y.GetValue();
 }
 
+template<typename T>
+std::ostream& opearator<<(std::ostream& os, Tplusinfinity<T> const& x)
+{
+  if (x.IsInfinity())
+    os << "infinity";
+  else
+    os << x.GetValue();
+}
 
 
 template<typename T>
