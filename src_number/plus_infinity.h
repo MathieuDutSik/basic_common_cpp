@@ -71,7 +71,7 @@ bool operator<(Tplusinfinity<T> const& x, Tplusinfinity<T> const& y)
 }
 
 template<typename T>
-std::ostream& opearator<<(std::ostream& os, Tplusinfinity<T> const& x)
+std::ostream& operator<<(std::ostream& os, Tplusinfinity<T> const& x)
 {
   if (x.IsInfinity())
     os << "infinity";
