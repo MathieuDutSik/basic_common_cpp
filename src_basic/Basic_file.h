@@ -569,29 +569,38 @@ public:
 struct TempDirectory {
 private:
   std::string DirName;
+  bool IsInitialized;
 public:
   TempDirectory()
   {
     DirName="unset_and_irrelevant";
+    IsInitialized=false;
   }
   TempDirectory(std::string const& eDir)
   {
     DirName=eDir;
     CreateDirectory(DirName);
+    IsInitialized=true;
   }
   TempDirectory& operator=(TempDirectory&& eTemp)
   {
     DirName=eTemp.str();
+    IsInitialized=true;
     eTemp.DirName="unset_and_irrelevant";
+    eTemp.IsInitialized=false;
     return *this;
   }
-  TempDirectory(TempDirectory && eTemp) : DirName(eTemp.str())
+  TempDirectory(TempDirectory && eTemp) : DirName(eTemp.str()), IsInitialized(true)
   {
+    eTemp.DirName="unset_and_irrelevant";
+    eTemp.IsInitialized=false;
   }
+  TempDirectory(const TempDirectory & eTemp) = delete;
+  TempDirectory& operator=(const TempDirectory & eTemp) = delete;
   ~TempDirectory()
   {
     //    std::cerr << "Calling destructor\n";
-    if (DirName != "unset_and_irrelevant") {
+    if (IsInitialized) {
       //      std::cerr << "  Destructor is really needed\n";
       //      std::cerr << "  DirName=" << DirName << "\n";
       if (IsExistingDirectory(DirName)) {
