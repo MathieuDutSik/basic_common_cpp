@@ -139,7 +139,7 @@ MyMatrix<T> ReadMatrix(std::istream &is)
   int nbRow, nbCol;
   int iRow, iCol;
   is >> nbRow >> nbCol;
-  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
+  //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   if (nbRow < 0 || nbCol < 0) {
     std::cerr << "We should have nbRow > 0 and nbCol > 0\n";
     std::cerr << "But we have nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
