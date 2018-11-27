@@ -595,8 +595,11 @@ public:
     eTemp.DirName="unset_and_irrelevant";
     eTemp.IsInitialized=false;
   }
+  
   TempDirectory(const TempDirectory & eTemp) = delete;
+  
   TempDirectory& operator=(const TempDirectory & eTemp) = delete;
+  
   ~TempDirectory()
   {
     //    std::cerr << "Calling destructor\n";
