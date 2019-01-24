@@ -64,6 +64,13 @@ void NearestInteger_mpreal(mpfr::mpreal const& xI, int & xO)
   xO=eVal_long;
 }
 
+void NearestInteger_mpreal(mpfr::mpreal const& xI, long & xO)
+{
+  mpz_class x_z;
+  NearestInteger_mpreal(xI, x_z);
+  xO = x_z.get_si();
+}
+
 
 
 
