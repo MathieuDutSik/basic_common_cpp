@@ -223,20 +223,9 @@ std::vector<std::string> FILE_DirectoryFilesSpecificExtension(std::string const&
 }
 
 
-// If the ePrefix ends with / then we do recursive listing
-// If the output is of the form path/WWM_output_
-// then returns all the files having the 
 
-
-std::vector<std::string> FILE_DirectoryFilesSpecificExtension_Gen(std::string const& ePrefix, std::string const& eExtension)
+std::vector<std::string> FILE_DirectoryMatchingPrefixExtension(std::string const& ePrefix, std::string const& eExtension)
 {
-  int len=ePrefix.size();
-  std::string LastChar = ePrefix.substr(len-1,1);
-  if (LastChar == std::string("/"))
-    return FILE_DirectoryFilesSpecificExtension(ePrefix, eExtension);
-  //
-
-
   std::string eDir = FILE_GetDirectoryOfFileName(ePrefix);
   std::string eBeginStr = FILE_GetNakedFilename(ePrefix);
   std::cerr << "ePrefix=" << ePrefix << "\n";
@@ -251,11 +240,28 @@ std::vector<std::string> FILE_DirectoryFilesSpecificExtension_Gen(std::string co
     if (len > lenBegin && len > lenExt) {
       std::string str1=eFile.substr(0, lenBegin);
       std::string str2=eFile.substr(len-lenExt, lenExt);
-      if (str1 == eBeginStr && str2 == eExtension)
-	ListFile_RET.push_back(eFile);
+      if (str1 == eBeginStr && str2 == eExtension) {
+	std::string NewFile = eDir + eFile;
+	ListFile_RET.push_back(NewFile);
+      }
     }
   }
   return ListFile_RET;
+}
+
+
+
+// If the ePrefix ends with / then we do recursive listing
+// If the output is of the form path/WWM_output_
+// then returns all the files having the 
+std::vector<std::string> FILE_DirectoryFilesSpecificExtension_Gen(std::string const& ePrefix, std::string const& eExtension)
+{
+  int len=ePrefix.size();
+  std::string LastChar = ePrefix.substr(len-1,1);
+  if (LastChar == std::string("/"))
+    return FILE_DirectoryFilesSpecificExtension(ePrefix, eExtension);
+  //
+  return FILE_DirectoryMatchingPrefixExtension(ePrefix, eExtension);
 }
 
 
