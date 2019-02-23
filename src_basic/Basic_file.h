@@ -104,12 +104,7 @@ std::string FILE_GetDirectoryOfFileName(std::string const& eFileFull)
     std::cerr << "The file has no / so cannot find the directory\n";
     throw TerminalException{1};
   }
-  std::string retStr="";
-  for (int u=0; u<=posfound; u++) {
-    std::string eChar=eFileFull.substr(u,1);
-    retStr += eChar;
-  }
-  return retStr;
+  return eFileFull.substr(0, posfound+1);
 }
 
 
@@ -225,6 +220,42 @@ std::vector<std::string> FILE_DirectoryFilesSpecificExtension(std::string const&
     }
   }
   return RetListFile;
+}
+
+
+// If the ePrefix ends with / then we do recursive listing
+// If the output is of the form path/WWM_output_
+// then returns all the files having the 
+
+
+std::vector<std::string> FILE_DirectoryFilesSpecificExtension_Gen(std::string const& ePrefix, std::string const& eExtension)
+{
+  int len=ePrefix.size();
+  std::string LastChar = ePrefix.substr(len-1,1);
+  if (LastChar == std::string("/"))
+    return FILE_DirectoryFilesSpecificExtension(ePrefix, eExtension);
+  //
+
+
+  std::string eDir = FILE_GetDirectoryOfFileName(ePrefix);
+  std::string eBeginStr = FILE_GetNakedFilename(ePrefix);
+  std::cerr << "ePrefix=" ePrefix << "\n";
+  std::cerr << "eDir=" << eDir << " eBeginStr=" << eBeginStr << "\n";
+  int lenExt=eExtension.size();
+  int lenBegin=eBeginStr.size();
+  
+  std::vector<std::string> ListFile = FILE_GetDirectoryListFile(eDir);
+  std::vector<std::string> ListFile_RET;
+  for (auto & eFile : ListFile) {
+    int len = eFile.size();
+    if (len > lenBegin && len > lenExt) {
+      std::string str1=eFile.substr(0, lenBegin);
+      std::string str2=eFile.substr(len-lenExt, lenExt);
+      if (str1 == eBeginStr && str2 == eExtension)
+	ListFile_RET.push_back(eFile);
+    }
+  }
+  return ListFile_RET;
 }
 
 
