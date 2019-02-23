@@ -239,7 +239,7 @@ std::vector<std::string> FILE_DirectoryFilesSpecificExtension_Gen(std::string co
 
   std::string eDir = FILE_GetDirectoryOfFileName(ePrefix);
   std::string eBeginStr = FILE_GetNakedFilename(ePrefix);
-  std::cerr << "ePrefix=" ePrefix << "\n";
+  std::cerr << "ePrefix=" << ePrefix << "\n";
   std::cerr << "eDir=" << eDir << " eBeginStr=" << eBeginStr << "\n";
   int lenExt=eExtension.size();
   int lenBegin=eBeginStr.size();
