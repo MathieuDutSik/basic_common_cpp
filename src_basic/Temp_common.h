@@ -34,13 +34,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// STL facilities
+// Basic C++
 
 #include <exception>
+
+// STL containers
+
 #include <vector>
 #include <list>
 #include <set>
 #include <map>
+#include <unordered_map>
 
 // Functional code
 
