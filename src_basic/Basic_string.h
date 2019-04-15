@@ -171,6 +171,14 @@ std::string IntToString(int const & x)
   return converted;
 }
 
+int StringToInt(std::string const& str)
+{
+  int val;
+  std::istringstream s;
+  s >> val;
+  return val;
+}
+
 
 
 
