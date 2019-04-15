@@ -306,6 +306,43 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   return RetList;
 }
 
+// The String is supposed to be "str0" + hs0 + "str1" + hs1 + "hs2"
+// and we return a standard vector of [hs0, hs1]
+std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::vector<std::string> const& LStr)
+{
+  int len1=LStr[0].size();
+  int lentot=strin.size();
+  std::string estr=strin.substr(strin, 0, len1);
+  if (estr != LStr[0]) {
+    return {};
+  }
+  int pos=len1;
+  int nbBlock=LStr.size()-1;
+  std::vector<std::string> LRet(nbBlock);
+  auto GetInit=[&](std::string const& strSearch, int const& posStart) -> int {
+    int lenSearch=strSearch.size();
+    for (int posi=pos; posi<lentot-lenSearch; posi++) {
+      std::string strO = strin.substr(posi, lenSearch);
+      if (strO == strSearch) {
+        return posi;
+      }
+    }
+    return -1;
+  };
+  for (int iBlock=0; iBlock<nbBlock; iBlock++) {
+    std::string strSearch = LStr[iBlock+1];
+    int lenS = strSearch.size();
+    int posF = GetInit(strSearch, pos);
+    if (posF == -1)
+      return {};
+    int lenO = posF - pos;
+    std::string strO = strin.substr(pos, lenO);
+    LRet[iBlock] = strO;
+    pos += lenO + lenS;
+  }
+  return LRet;
+}
+
 
 std::vector<int> STRING_Split_Int(std::string const& eStrA, std::string const& eStrB)
 {
