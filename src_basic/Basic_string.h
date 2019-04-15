@@ -77,7 +77,6 @@ std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<
       return ListMatch[0];
     return -400;
   };
-  
   while(true) {
     if (pos == len)
       break;
@@ -320,7 +319,7 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
 {
   int len1=LStr[0].size();
   int lentot=strin.size();
-  std::string estr=strin.substr(strin, 0, len1);
+  std::string estr=strin.substr(0, len1);
   if (estr != LStr[0]) {
     return {};
   }
