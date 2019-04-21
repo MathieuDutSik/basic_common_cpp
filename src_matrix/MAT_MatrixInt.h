@@ -280,7 +280,7 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
       T eVal=M(iRow,iCol)*eLCM;
       Mret(iRow, iCol)=eVal;
     }
-  T eGCD = 1;
+  T eGCD = Mret(0,0);
   for (int iRow=0; iRow<nbRow; iRow++)
     for (int iCol=0; iCol<nbCol; iCol++)
       eGCD=GcdPair(eGCD, Mret(iRow,iCol));
