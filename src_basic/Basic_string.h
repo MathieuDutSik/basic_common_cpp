@@ -321,7 +321,6 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
   int lentot=strin.size();
   std::string estr=strin.substr(0, len1);
   if (estr != LStr[0]) {
-    std::cerr << "Exiting here\n";
     return {};
   }
   int pos=len1;
@@ -331,9 +330,7 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
     int lenSearch=strSearch.size();
     for (int posi=pos; posi<=lentot-lenSearch; posi++) {
       std::string strO = strin.substr(posi, lenSearch);
-      std::cerr << "posi=" << posi << " strO=" << strO << " strSearch=" << strSearch << "\n";
       if (strO == strSearch) {
-        std::cerr << "  Returining posi=" << posi << "\n";
         return posi;
       }
     }
@@ -344,7 +341,6 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
     int lenS = strSearch.size();
     int posF = GetInit(strSearch, pos);
     if (posF == -1) {
-      std::cerr << "iBlock=" << iBlock << " exit\n";
       return {};
     }
     int lenO = posF - pos;
