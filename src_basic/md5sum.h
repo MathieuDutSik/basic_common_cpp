@@ -3,6 +3,9 @@
 #include <cstdint>
 #include "Temp_common.h"
 
+// Code copy pasted from
+// https://codereview.stackexchange.com/questions/163872/md5-implementation-in-c11
+
 class md5 {
     private:
         std::uint32_t a0_;
