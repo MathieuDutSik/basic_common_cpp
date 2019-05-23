@@ -252,21 +252,21 @@ mpq_class QuoInt(mpq_class const& a, mpq_class const& b)
 
 
 
-int CanonicalizatinUnit(int const& eVal)
+int CanonicalizationUnit(int const& eVal)
 {
   if (eVal < 0)
     return -1;
   return 1;
 }
 
-mpz_class CanonicalizatinUnit(mpz_class const& eVal)
+mpz_class CanonicalizationUnit(mpz_class const& eVal)
 {
   if (eVal < 0)
     return -1;
   return 1;
 }
 
-mpq_class CanonicalizatinUnit(mpq_class const& eVal)
+mpq_class CanonicalizationUnit(mpq_class const& eVal)
 {
   if (eVal < 0)
     return -1;

@@ -1,6 +1,6 @@
 #		  Temp_ImagQuadPerfect
 #		  Temp_ImagQuadPerfect_flint
-PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation
+PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

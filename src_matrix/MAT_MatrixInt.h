@@ -461,12 +461,12 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
   std::vector<int> StatusRow(nbRow,1);
   //
   MyMatrix<T> H = M;
-  MyMatrix<T> U = IdentityMatrix<T>(nbCol);
+  MyMatrix<T> U = IdentityMat<T>(nbCol);
   int TopPosition=0;
   for (int iCol=0; iCol<nbCol; iCol++) {
     std::vector<T> ListX;
     std::vector<int> ListIdx;
-    HasNonZero=false;
+    bool HasNonZero=false;
     for (int iRow=0; iRow<nbRow; iRow++)
       if (StatusRow[iRow] == 1) {
         ListIdx.push_back(iRow);
