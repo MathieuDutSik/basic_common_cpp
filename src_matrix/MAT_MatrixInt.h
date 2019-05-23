@@ -461,9 +461,11 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
   std::vector<int> StatusRow(nbRow,1);
   //
   MyMatrix<T> H = M;
-  MyMatrix<T> U = IdentityMat<T>(nbCol);
+  MyMatrix<T> U = IdentityMat<T>(nbRow);
+  std::cerr << "Begin of ComputeRowHermiteNormalForm\n";
   int TopPosition=0;
   for (int iCol=0; iCol<nbCol; iCol++) {
+    std::cerr << "iCol=" << iCol << "\n";
     std::vector<T> ListX;
     std::vector<int> ListIdx;
     bool HasNonZero=false;
@@ -476,6 +478,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
           HasNonZero=true;
       }
     if (HasNonZero) {
+      std::cerr << "Step 1\n";
       //
       // Ensuring that the column has a pivot and that everything below is ZERO
       int siz = ListIdx.size();
@@ -485,8 +488,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = TrMat(i,j);
+      
       U = TheMat1 * U;
       H = TheMat1 * H;
+      std::cerr << "Step 2\n";
       //
       // Ensuring that the pivot is strictly positive
       // (in the case of integer. For other rings this is a different story)
@@ -495,6 +500,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       TheMat2(TopPosition,TopPosition) = eCanUnit;
       U = TheMat2 * U;
       H = TheMat2 * H;
+      std::cerr << "Step 3\n";
       //
       // Putting the coefficients over the pivot
       MyMatrix<T> TheMat3 = IdentityMat<T>(nbRow);
@@ -506,8 +512,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       }
       U = TheMat3 * U;
       H = TheMat3 * H;
+      std::cerr << "Step 4\n";
       //
       // Increasing the index
+      StatusRow[TopPosition]=0;
       TopPosition++;
      }
   }
