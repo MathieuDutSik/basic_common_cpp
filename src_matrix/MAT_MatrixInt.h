@@ -114,6 +114,16 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
   }
 }
 
+
+// This is the return type for the GCD computations
+// In input a list of entries x=(x_0, ...., x_m)
+// In return we have
+// ---gcd: The greatest common dovisor
+// ---ListA: A list of entries (n_0, ...., n_m)
+//    with gcd = n_0 x_0 + n_1 x_1 + ..... + n_m x_m
+// ---ListLisK: The basis of the kernel of the orthogonal of x.
+// ---Pmat: A matrix P unimodulaire such that
+//    V P = (gcd, 0, ....., 0)
 template<typename T>
 struct GCD_int {
   T gcd;
@@ -158,7 +168,7 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
     f=0;
     std::vector<T> eVect{1, 0};
     std::vector<T> fVect{0, 1};
-    std::vector<std::vector<T> > ListListK = {fVect};
+    std::vector<std::vector<T>> ListListK = {fVect};
     MyMatrix<T> Pmat=IdentityMat<T>(2);
     GCD_int<T> Case2{f, eVect, ListListK, Pmat};
     return Case2;
@@ -193,7 +203,7 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
   //  std::cerr << "n=" << n << " m=" << m << "\n";
   std::vector<T> eVect{eCoeff1, eCoeff2};
   std::vector<T> fVect{-n/f, m/f};
-  std::vector<std::vector<T> > ListListK = {fVect};
+  std::vector<std::vector<T>> ListListK = {fVect};
   MyMatrix<T> Pmat(2,2);
   Pmat(0,0)=eVect[0];
   Pmat(1,0)=eVect[1];
@@ -386,8 +396,6 @@ int IsVectorPrimitive(MyVector<int> const& TheV)
 
 
 
-
-
 template<typename T>
 GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 {
@@ -412,7 +420,7 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
   }
   NewListA.push_back(eGCD2.ListA[1]);
   //
-  std::vector<std::vector<T> > NewListListK(siz-1);
+  std::vector<std::vector<T>> NewListListK(siz-1);
   for (int i=0; i<siz-2; i++) {
     std::vector<T> eVect=eGCD_int.ListListK[i];
     eVect.push_back(0);
@@ -435,6 +443,78 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
   GCD_int<T> retGCD{eGCD2.gcd, NewListA, NewListListK, Pmat};
   return retGCD;
 }
+
+
+// See https://en.wikipedia.org/wiki/Hermite_normal_form
+// for the Row-style Hermite normal form
+//
+// The matrix M is rewritten as U A = H
+// * H is upper triangular with H_{ij}=0 for i > j.
+// * The leading coefficient of H of a row is strictly to the right of the above one.
+// * The elements below pivots are zero and elements above pivots are nonnegative and strictly smaller than the pivot.
+// 
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> const& M)
+{
+  int nbRow=M.rows();
+  int nbCol=M.cols();
+  std::vector<int> StatusRow(nbRow,1);
+  //
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMatrix<T>(nbCol);
+  int TopPosition=0;
+  for (int iCol=0; iCol<nbCol; iCol++) {
+    std::vector<T> ListX;
+    std::vector<int> ListIdx;
+    HasNonZero=false;
+    for (int iRow=0; iRow<nbRow; iRow++)
+      if (StatusRow[iRow] == 1) {
+        ListIdx.push_back(iRow);
+        T eVal = H(iRow,iCol);
+        ListX.push_back(eVal);
+        if (eVal != 0)
+          HasNonZero=true;
+      }
+    if (HasNonZero) {
+      //
+      // Ensuring that the column has a pivot and that everything below is ZERO
+      int siz = ListIdx.size();
+      GCD_int<T> eGCD = ComputeGCD_information(ListX);
+      MyMatrix<T> TrMat = TransposedMat(eGCD.Pmat);
+      MyMatrix<T> TheMat1 = IdentityMat<T>(nbRow);
+      for (int i=0; i<siz; i++)
+        for (int j=0; j<siz; j++)
+          TheMat1(ListIdx[i],ListIdx[j]) = TrMat(i,j);
+      U = TheMat1 * U;
+      H = TheMat1 * H;
+      //
+      // Ensuring that the pivot is strictly positive
+      // (in the case of integer. For other rings this is a different story)
+      T eCanUnit = CanonicalizationUnit(H(TopPosition, iCol));
+      MyMatrix<T> TheMat2 = IdentityMat<T>(nbRow);
+      TheMat2(TopPosition,TopPosition) = eCanUnit;
+      U = TheMat2 * U;
+      H = TheMat2 * H;
+      //
+      // Putting the coefficients over the pivot
+      MyMatrix<T> TheMat3 = IdentityMat<T>(nbRow);
+      T ThePivot = H(TopPosition, iCol);
+      for (int iRow=0; iRow<TopPosition; iRow++) {
+        T eVal = H(iRow, iCol);
+        T TheQ = QuoInt(eVal, ThePivot);
+        TheMat3(iRow, TopPosition) = -TheQ;
+      }
+      U = TheMat3 * U;
+      H = TheMat3 * H;
+      //
+      // Increasing the index
+      TopPosition++;
+     }
+  }
+  return {U, H};
+}
+
+
 
 
 template<typename T>
@@ -524,6 +604,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
   int eRank=0;
   for (int iCol=0; iCol<nbCol; iCol++)
     if (IsColumnNonEmpty(eMatW, eRank, iCol)) {
+
       ListIndex.push_back(iCol);
       int iRowFound=444;
       INT_ClearColumn(eMatW, iCol, eRank, iRowFound);
@@ -534,7 +615,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       ListNonIndex.push_back(iCol);
     }
   int dimSpace=ListNonIndex.size();
-  std::vector<std::vector<T> > TheBasis;
+  std::vector<std::vector<T>> TheBasis;
   for (int i=0; i<dimSpace; i++) {
     std::vector<T> eVect;
     for (int j=0; j<dimSpace; j++) {
@@ -573,7 +654,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       ListX.push_back(eSum);
     }
     GCD_int<T> eGCD=ComputeGCD_information(ListX);
-    std::vector<std::vector<T> > NewBasis;
+    std::vector<std::vector<T>> NewBasis;
     for (int iVect=0; iVect<dimSpace; iVect++) {
       std::vector<T> kerVect=eGCD.ListListK[iVect];
       std::vector<T> eVectNew(sizRelIndex+1,0);
@@ -806,7 +887,7 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 
 
 template<typename T>
-int PositionSubspace(std::vector<MyMatrix<T> > const& ListSubspace, MyMatrix<T> const& OneSubspace)
+int PositionSubspace(std::vector<MyMatrix<T>> const& ListSubspace, MyMatrix<T> const& OneSubspace)
 {
   int nbSpace=ListSubspace.size();
   for (int iSub=0; iSub<nbSpace; iSub++) {
@@ -818,7 +899,7 @@ int PositionSubspace(std::vector<MyMatrix<T> > const& ListSubspace, MyMatrix<T> 
 }
 
 template<typename Ti, typename Td>
-void FuncInsertSubspace(std::vector<MyMatrix<Ti> > & ListSubspace, std::vector<Td> & ListDet, MyMatrix<Ti> const& OneSubspace, Td const& OneDet)
+void FuncInsertSubspace(std::vector<MyMatrix<Ti>> & ListSubspace, std::vector<Td> & ListDet, MyMatrix<Ti> const& OneSubspace, Td const& OneDet)
 {
   if (PositionSubspace(ListSubspace, OneSubspace) == -1) {
     ListSubspace.push_back(OneSubspace);
@@ -829,7 +910,7 @@ void FuncInsertSubspace(std::vector<MyMatrix<Ti> > & ListSubspace, std::vector<T
 
 // T1 is integer type and T2 is real kind type
 template<typename Ti, typename Td>
-void ReorderSubspaceDet(std::vector<MyMatrix<Ti> > &ListSubspace, std::vector<Td> &ListDet)
+void ReorderSubspaceDet(std::vector<MyMatrix<Ti>> &ListSubspace, std::vector<Td> &ListDet)
 {
   int nbSub=ListSubspace.size();
   for (int i=0; i<nbSub-1; i++)
@@ -847,7 +928,7 @@ void ReorderSubspaceDet(std::vector<MyMatrix<Ti> > &ListSubspace, std::vector<Td
 
 /* test if ListSub2 is a subset of ListSub1 */
 template<typename T>
-bool TestInclusionFamilySubspace(std::vector<MyMatrix<T> > const& ListSub1, std::vector<MyMatrix<T> > const& ListSub2)
+bool TestInclusionFamilySubspace(std::vector<MyMatrix<T>> const& ListSub1, std::vector<MyMatrix<T>> const& ListSub2)
 {
   int nbSub2=ListSub2.size();
   for (int i=0; i<nbSub2; i++)
@@ -858,7 +939,7 @@ bool TestInclusionFamilySubspace(std::vector<MyMatrix<T> > const& ListSub1, std:
 
 
 template<typename T>
-bool TestEqualityFamilySubspace(std::vector<MyMatrix<T> > const& ListSub1, std::vector<MyMatrix<T> > const& ListSub2)
+bool TestEqualityFamilySubspace(std::vector<MyMatrix<T>> const& ListSub1, std::vector<MyMatrix<T>> const& ListSub2)
 {
   int nbSub1=ListSub1.size();
   int nbSub2=ListSub2.size();
@@ -870,7 +951,7 @@ bool TestEqualityFamilySubspace(std::vector<MyMatrix<T> > const& ListSub1, std::
 
 
 template<typename T>
-MyMatrix<T> GetNoncontainedSubspace(std::vector<MyMatrix<T> > const& ListSubBig, std::vector<MyMatrix<T> > const& ListSubSma)
+MyMatrix<T> GetNoncontainedSubspace(std::vector<MyMatrix<T>> const& ListSubBig, std::vector<MyMatrix<T>> const& ListSubSma)
 {
   int nbSubBig=ListSubBig.size();
   int nbSubSma=ListSubSma.size();
