@@ -27,19 +27,6 @@ using MySparseMatrix = Eigen::SparseMatrix<T,Eigen::ColMajor>;
 // Matrix type conversion
 //
 
-template<typename T1, typename T2>
-MyVector<T2> ConvertVector(MyVector<T1> const& V, std::function<T2(T1 const&)> const& f)
-{
-  int n=V.size();
-  MyVector<T2> eRet(n);
-  for (int i=0; i<n; i++) {
-    T1 eVal1=V(i);
-    T2 eVal2=f(eVal1);
-    eRet(i)=eVal2;
-  }
-  return eRet;
-}
-
 template<typename T2, typename T1>
 MyVector<T2> ConvertVectorUniversal(MyVector<T1> const& V)
 {
@@ -57,20 +44,6 @@ MyVector<T2> ConvertVectorUniversal(MyVector<T1> const& V)
 
 
 
-template<typename T1, typename T2>
-MyMatrix<T2> ConvertMatrix(MyMatrix<T1> const& M, std::function<T2(const T1&)> const& f)
-{
-  int eta_rho=M.rows();
-  int xi_rho=M.cols();
-  MyMatrix<T2> eRet(eta_rho, xi_rho);
-  for (int i=0; i<eta_rho; i++)
-    for (int j=0; j<xi_rho; j++) {
-      T1 eVal1=M(i,j);
-      T2 eVal2=f(eVal1);
-      eRet(i,j)=eVal2;
-  }
-  return eRet;
-}
 
 template<typename T2, typename T1>
 MyMatrix<T2> ConvertMatrixUniversal(MyMatrix<T1> const& M)
