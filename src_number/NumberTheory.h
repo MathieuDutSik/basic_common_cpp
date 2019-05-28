@@ -513,59 +513,14 @@ void NearestInteger(long const& xI, mpq_class & xO)
 
 void NearestInteger(mpq_class const& xI, int & xO)
 {
-  mpz_class a1_z=xI.get_num();
-  long a1_long=a1_z.get_si();
-  xO=a1_long;
-  auto GetPenalty=[&](int const& eInt) -> mpq_class {
-    mpq_class delta=mpq_class(eInt) - xI;
-    if (delta < 0)
-      return -delta;
-    return delta;
-  };
-  while(true) {
-    mpq_class ePenalty=GetPenalty(xO);
-    mpq_class ePenaltyP=GetPenalty(xO+1);
-    mpq_class ePenaltyM=GetPenalty(xO-1);
-    bool DoSomething=false;
-    if (ePenaltyP < ePenalty) {
-      DoSomething=true;
-      xO++;
-    }
-    if (ePenaltyM < ePenalty) {
-      DoSomething=true;
-      xO--;
-    }
-    if (!DoSomething)
-      return;
-  }
+    mpq_class xO_q=NearestInteger_rni(xI);
+    xO = xO_q.get_num().get_si();
 }
 
 void NearestInteger(mpq_class const& xI, long & xO)
 {
-  mpz_class a1_z=xI.get_num();
-  xO=a1_z.get_si();
-  auto GetPenalty=[&](long const& eInt) -> mpq_class {
-    mpq_class delta=mpq_class(eInt) - xI;
-    if (delta < 0)
-      return -delta;
-    return delta;
-  };
-  while(true) {
-    mpq_class ePenalty=GetPenalty(xO);
-    mpq_class ePenaltyP=GetPenalty(xO+1);
-    mpq_class ePenaltyM=GetPenalty(xO-1);
-    bool DoSomething=false;
-    if (ePenaltyP < ePenalty) {
-      DoSomething=true;
-      xO++;
-    }
-    if (ePenaltyM < ePenalty) {
-      DoSomething=true;
-      xO--;
-    }
-    if (!DoSomething)
-      return;
-  }
+    mpq_class xO_q=NearestInteger_rni(xI);
+    xO = xO_q.get_num().get_si();
 }
 
 
