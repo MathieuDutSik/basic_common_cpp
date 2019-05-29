@@ -716,6 +716,15 @@ void AssignMatrixRow(MyMatrix<T> &eMat, int const& iRow, MyVector<T> const& eVec
 }
 
 
+template<typename T>
+void AssignMatrixCol(MyMatrix<T> &eMat, int const& iCol, MyVector<T> const& eVect)
+{
+  int nbRow=eMat.rows();
+  for (int iRow=0; iRow<nbRow; iRow++)
+    eMat(iRow, iCol)=eVect(iRow);
+}
+
+
 
 template<typename T>
 bool IsVectorPositiveMultiple(MyVector<T> const&eVec1, MyVector<T> const&eVec2)
