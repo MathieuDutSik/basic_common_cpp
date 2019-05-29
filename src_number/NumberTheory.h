@@ -171,6 +171,10 @@ struct underlying_totally_ordered_ring<int> {
   typedef int real_type;
 };
 
+template<>
+struct underlying_totally_ordered_ring<long> {
+  typedef long real_type;
+};
 
 
 
