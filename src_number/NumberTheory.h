@@ -326,9 +326,7 @@ int T_NormGen(int const& x)
 bool IsInteger(mpq_class const& x)
 {
   mpz_class eDen=x.get_den();
-  if (eDen == 1)
-    return true;
-  return false;
+  return eDen == 1;
 }
 
 
@@ -372,7 +370,12 @@ mpq_class GetFieldElement(long const& eVal)
   return eVal;
 }
 
+// mpq_class as input
 
+void TYPE_CONVERSION(mpq_class const& a1, mpq_class & a2)
+{
+  a2=a1;
+}
 
 
 void TYPE_CONVERSION(mpq_class const& a1, double & a2)
@@ -383,16 +386,57 @@ void TYPE_CONVERSION(mpq_class const& a1, double & a2)
 
 void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
 {
-  a2=a1.get_num();
-  mpz_class a1_den=a1.get_den();
-  if (a1_den != 1) {
-    std::cerr << "a1 is not an integer\n";
+  if (!IsInteger(a1)) {
+    std::cerr << "a1=" << a1 << " is not an integer\n";
     throw TerminalException{1};
   }
+  a2=a1.get_num();
 }
 
+void TYPE_CONVERSION(mpq_class const& a1, int & a2)
+{
+  if (!IsInteger(a1)) {
+    std::cerr << "a1=" << a1 << " is not an integer\n";
+    throw TerminalException{1};
+  }
+  mpz_class a1_z=a1.get_num();
+  long a1_long=a1_z.get_si();
+  a2=a1_long;
+}
 
+void TYPE_CONVERSION(mpq_class const& a1, long & a2)
+{
+  if (!IsInteger(a1)) {
+    std::cerr << "a1=" << a1 << " is not an integer\n";
+    throw TerminalException{1};
+  }
+  mpz_class a1_z=a1.get_num();
+  a2=a1_z.get_si();
+}
 
+// long as input
+
+void TYPE_CONVERSION(long const& a1, long & a2)
+{
+  a2=a1;
+}
+
+void TYPE_CONVERSION(long const& a1, mpq_class & a2)
+{
+  a2=a1;
+}
+
+void TYPE_CONVERSION(long const& a1, mpz_class & a2)
+{
+  a2=a1;
+}
+
+// int as input
+
+void TYPE_CONVERSION(int const& a1, int & a2)
+{
+  a2=a1;
+}
 
 void TYPE_CONVERSION(int const& a1, mpq_class & a2)
 {
@@ -404,29 +448,16 @@ void TYPE_CONVERSION(int const& a1, mpz_class & a2)
   a2=a1;
 }
 
-void TYPE_CONVERSION(mpq_class const& a1, int & a2)
+// mpz_class as input
+
+void TYPE_CONVERSION(mpz_class const& a1, mpz_class & a2)
 {
-  if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << "\n";
-    std::cerr << "Error in TYPE_CONVERSION the value is not integer\n";
-    std::cerr << "no conversion possible\n";
-    TerminalEnding();
-    //    throw TerminalException{1};
-  }
-  mpz_class a1_z=a1.get_num();
-  long a1_long=a1_z.get_si();
-  a2=a1_long;
+  a2=a1;
 }
 
 void TYPE_CONVERSION(mpz_class const& a1, mpq_class & a2)
 {
   a2=a1;
-}
-
-void TYPE_CONVERSION(mpq_class const& a1, long & a2)
-{
-  mpz_class a1_z=a1.get_num();
-  a2=a1_z.get_si();
 }
 
 void TYPE_CONVERSION(mpz_class const& a1, int & a2)
