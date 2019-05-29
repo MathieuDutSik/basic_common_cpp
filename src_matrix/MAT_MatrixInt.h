@@ -455,6 +455,8 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 //
 // This implementation is fairly naive. But its advantage is that it follows the
 // same Template structure as other codes in this library.
+// The output of the call of ComputeRowHermiteNormalForm ( M )
+// The return (U,H) is U an unimodular matrix with U M = H
 template<typename T>
 std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> const& M)
 {
