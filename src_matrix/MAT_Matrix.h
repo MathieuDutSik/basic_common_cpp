@@ -927,7 +927,11 @@ struct SelectionRowCol {
 
 
 
-// The NSP array is assigned to NullspaceMat(TransposedMat(Input)) 
+// The NSP array is assigned to NullspaceMat(TransposedMat(Input))
+// The function requires the matrix type to be a field.
+// After reflection this way is unavoidable as working only
+// with ring operation would complicate the code quie a lot
+// and likely lead to explosion of coefficient.
 template<typename T>
 SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 {
@@ -979,7 +983,7 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
       eRank++;
     }
   }
-  int nbVectZero=nbCol-eRank;
+  int nbVectZero=nbCol - eRank;
   MyMatrix<T> NSP=ZeroMatrix<T>(nbVectZero, nbCol);
   int nbVect=0;
   for (int iCol=0; iCol<nbCol; iCol++)
