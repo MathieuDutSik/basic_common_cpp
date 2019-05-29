@@ -152,6 +152,11 @@ struct overlying_field<long> {
   typedef mpq_class field_type;
 };
 
+template<>
+struct overlying_field<mpq_class> {
+  typedef mpq_class field_type;
+};
+
 template<typename T>
 struct underlying_totally_ordered_ring {
 };
