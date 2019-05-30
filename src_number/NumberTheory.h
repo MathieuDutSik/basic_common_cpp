@@ -198,8 +198,44 @@ struct underlying_totally_ordered_ring<long> {
 // We then have a = q b + r
 int QuoInt(int const& a, int const& b)
 {
-  int res=a % b;
-  int TheQ=(a - res)/b;
+  int b_abs;
+  if (b > 0)
+    b_abs = b;
+  else
+    b_abs = -b;
+  int res=a % b_abs;
+  while(true) {
+    if (res >= 0 && res < b_abs)
+      break;
+    if (res < 0)
+      res += b_abs;
+    if (res >= b_abs)
+      res -= b_abs;
+  }
+  int TheQ=(a - res)/b_abs;
+  return TheQ;
+}
+
+
+
+
+long QuoInt(long const& a, long const& b)
+{
+  long b_abs;
+  if (b > 0)
+    b_abs = b;
+  else
+    b_abs = -b;
+  long res=a % b_abs;
+  while(true) {
+    if (res >= 0 && res < b_abs)
+      break;
+    if (res < 0)
+      res += b_abs;
+    if (res >= b_abs)
+      res -= b_abs;
+  }
+  long TheQ=(a - res)/b_abs;
   return TheQ;
 }
 
