@@ -4,8 +4,8 @@ int main(int argc, char *argv[])
 {
   //  using T=mpq_class;
   //  using T=mpz_class;
-  //  using T=int;
-  using T=long;
+  using T=int;
+  //  using T=long;
   try {
     if (argc != 3) {
       fprintf(stderr, "Number of argument is = %d\n", argc);

@@ -212,7 +212,7 @@ int QuoInt(int const& a, int const& b)
     if (res >= b_abs)
       res -= b_abs;
   }
-  int TheQ=(a - res)/b_abs;
+  int TheQ=(a - res)/b;
   return TheQ;
 }
 
@@ -235,7 +235,7 @@ long QuoInt(long const& a, long const& b)
     if (res >= b_abs)
       res -= b_abs;
   }
-  long TheQ=(a - res)/b_abs;
+  long TheQ=(a - res)/b;
   return TheQ;
 }
 

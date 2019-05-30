@@ -95,8 +95,10 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 	if (eVal != 0) {
 	  IsFinished=false;
 	  T TheQ=QuoInt(eVal, ThePivot);
-	  //	  std::cerr << "eVal=" << eVal << " ThePivot=" << ThePivot << " TheQ=" << TheQ << "\n";
-	  eMatW.row(iRow) -= TheQ*eMatW.row(iRowF);
+          if (TheQ != 0) {
+            //	  std::cerr << "eVal=" << eVal << " ThePivot=" << ThePivot << " TheQ=" << TheQ << "\n";
+            eMatW.row(iRow) -= TheQ*eMatW.row(iRowF);
+          }
 	}
       }
     }
@@ -578,7 +580,8 @@ void INT_ClearColumn(MyMatrix<T> & eMat, int const& iCol, int const& MinAllowedR
       if (iRow != iRowFound) {
 	T eVal=eMat(iRow, iCol);
 	T TheQ=QuoInt(eVal, ThePivot);
-	eMat.row(iRow) -= TheQ*eMat.row(iRowFound);
+        if (TheQ != 0)
+          eMat.row(iRow) -= TheQ*eMat.row(iRowFound);
       }
     if (nbFound == 1)
       return;
@@ -874,7 +877,8 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 	  T eVal1=M1copy(idxSelect, idxSearch);
 	  T eVal2=M1copy(j, idxSearch);
 	  T TheQ=QuoInt(eVal2, eVal1);
-	  M1copy.row(j)=M1copy.row(j) - TheQ*M1copy.row(idxSelect);
+          if (TheQ != 0)
+            M1copy.row(j)=M1copy.row(j) - TheQ*M1copy.row(idxSelect);
 	}
     }
     StatusRow[idxSelect]=1;
@@ -885,7 +889,8 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
       T res=eVal2 - TheQ*eVal1;
       if (res != 0)
 	return false;
-      M2copy.row(j)=M2copy.row(j) - TheQ*M1copy.row(idxSelect);
+      if (TheQ != 0)
+        M2copy.row(j)=M2copy.row(j) - TheQ*M1copy.row(idxSelect);
     }
     idxSearch++;
   }
@@ -1049,9 +1054,11 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
 	  T prov1b=TheMatWork(iVectFound, i);
 	  T prov2=TheMatWork(iVect, i);
 	  T TheQ=QuoInt(prov2, prov1b);
-	  //	  std::cerr << "iVect=" << iVect << " prov1b=" << prov1b << " prov2=" << prov2 << " q=" << TheQ << "\n";
-	  TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
-	  eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
+          if (TheQ != 0) {
+            //	  std::cerr << "iVect=" << iVect << " prov1b=" << prov1b << " prov2=" << prov2 << " q=" << TheQ << "\n";
+            TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
+            eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
+          }
 	}
       /*      std::cerr << "Now TheMatWork=\n";
 	      WriteMatrix(std::cerr, TheMatWork);*/
@@ -1074,10 +1081,12 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       T prov1=TheVectWork(i);
       T prov2=TheMatWork(iVectFound, i);
       T TheQ=QuoInt(prov1, prov2);
-      for (int j=0; j<nbCol; j++)
-	TheVectWork(j) -= TheQ*TheMatWork(iVectFound, j);
-      for (int iVect=0; iVect<nbVect; iVect++)
-	eSol(iVect) += TheQ*eEquivMat(iVectFound,iVect);
+      if (TheQ != 0) {
+        for (int j=0; j<nbCol; j++)
+          TheVectWork(j) -= TheQ*TheMatWork(iVectFound, j);
+        for (int iVect=0; iVect<nbVect; iVect++)
+          eSol(iVect) += TheQ*eEquivMat(iVectFound,iVect);
+      }
     }
     if (TheVectWork(i) != 0)
       return {false, {}};
@@ -1165,8 +1174,10 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
 	  T prov1b=TheMatWork(iVectFound, i);
 	  T prov2=TheMatWork(iVect, i);
 	  T TheQ=QuoInt(prov2, prov1b);
-	  TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
-	  eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
+          if (TheQ != 0) {
+            TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
+            eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
+          }
 	}
       /*      MyMatrix<T> eProdMat=eEquivMat*TheMat;
       if (TheMatWork != eProdMat) {
@@ -1206,8 +1217,10 @@ bool CanTestSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVe
       T prov1=TheVectWork(i);
       T prov2=eCan.TheMatWork(iRow, i);
       T TheQ=QuoInt(prov1, prov2);
-      for (int j=0; j<nbCol; j++)
-	TheVectWork(j) -= TheQ*eCan.TheMatWork(iRow, j);
+      if (TheQ != 0) {
+        for (int j=0; j<nbCol; j++)
+          TheVectWork(j) -= TheQ*eCan.TheMatWork(iRow, j);
+      }
     }
     if (TheVectWork(i) != 0)
       return false;
@@ -1228,10 +1241,12 @@ ResultSolutionIntMat<T> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<
       T prov1=TheVectWork(i);
       T prov2=eCan.TheMatWork(iRow, i);
       T TheQ=QuoInt(prov1, prov2);
-      for (int j=0; j<nbCol; j++)
-	TheVectWork(j) -= TheQ*eCan.TheMatWork(iRow, j);
-      for (int iVect=0; iVect<nbVect; iVect++)
-	eSol(iVect) += TheQ*eCan.eEquivMat(iRow,iVect);
+      if (TheQ != 0) {
+        for (int j=0; j<nbCol; j++)
+          TheVectWork(j) -= TheQ*eCan.TheMatWork(iRow, j);
+        for (int iVect=0; iVect<nbVect; iVect++)
+          eSol(iVect) += TheQ*eCan.eEquivMat(iRow,iVect);
+      }
     }
     if (TheVectWork(i) != 0)
       return {false,{}};
@@ -1702,9 +1717,11 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
       }
       for (int iCol=0; iCol<n2; iCol++)
 	if (iCol != ThePivot) {
-	  T q=QuoInt(eVect(iCol), eVect(ThePivot));
-	  TheRedMat.row(ThePivot) += q*TheRedMat.row(iCol);
-	  eVect(iCol) -= q*eVect(ThePivot);
+	  T TheQ=QuoInt(eVect(iCol), eVect(ThePivot));
+          if (TheQ != 0) {
+            TheRedMat.row(ThePivot) += TheQ*TheRedMat.row(iCol);
+            eVect(iCol) -= TheQ*eVect(ThePivot);
+          }
 	}
     }
   };
