@@ -196,6 +196,10 @@ struct underlying_totally_ordered_ring<long> {
 // ---T_Norm for the norm of elements.
 // Result of QuoInt(a,b) is an integer q such that q is the quotient.
 // We then have a = q b + r
+//
+// For natural integer Z (i.e. int/long/mpz_class/mpq_class)
+// We should have a = bq + r
+// with 0 <= r < |b| and q integer.
 int QuoInt(int const& a, int const& b)
 {
   int b_abs;
