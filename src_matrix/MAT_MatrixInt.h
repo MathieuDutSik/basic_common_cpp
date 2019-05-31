@@ -777,12 +777,11 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 	{
 	  T eVal1=TheVcopy(idxSelect);
 	  T eVal2=TheVcopy(j);
-	  T TheQ=QuoInt(eVal2, eVal1);
-	  T res=eVal2 - TheQ*eVal1;
-	  TheVcopy(j)=res;
+          std::pair<T,T> ePair = ResQuoInt(eVal2, eVal1);
+	  TheVcopy(j)=ePair.first;
 	  OperCol1.push_back(idxSelect);
 	  OperCol2.push_back(j);
-	  OperCoef.push_back(TheQ);
+	  OperCoef.push_back(ePair.second);
 	}
   }
   int nbOper=OperCol1.size();
@@ -878,19 +877,18 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 	  T eVal2=M1copy(j, idxSearch);
 	  T TheQ=QuoInt(eVal2, eVal1);
           if (TheQ != 0)
-            M1copy.row(j)=M1copy.row(j) - TheQ*M1copy.row(idxSelect);
+            M1copy.row(j) -= TheQ*M1copy.row(idxSelect);
 	}
     }
     StatusRow[idxSelect]=1;
     T eVal1=M1copy(idxSelect, idxSearch);
     for (int j=0; j<k; j++) {
       T eVal2=M2copy(j, idxSearch);
-      T TheQ=QuoInt(eVal2, eVal1);
-      T res=eVal2 - TheQ*eVal1;
-      if (res != 0)
+      std::pair<T,T> ePair = ResQuoInt(eVal2, eVal1);
+      if (ePair.first != 0)
 	return false;
-      if (TheQ != 0)
-        M2copy.row(j)=M2copy.row(j) - TheQ*M1copy.row(idxSelect);
+      if (ePair.second != 0)
+        M2copy.row(j)=M2copy.row(j) - ePair.second*M1copy.row(idxSelect);
     }
     idxSearch++;
   }
@@ -1176,7 +1174,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
 	  T TheQ=QuoInt(prov2, prov1b);
           if (TheQ != 0) {
             TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
-            eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
+            eEquivMat.row(iVect)  -= TheQ*eEquivMat.row(iVectFound);
           }
 	}
       /*      MyMatrix<T> eProdMat=eEquivMat*TheMat;

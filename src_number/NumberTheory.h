@@ -200,14 +200,15 @@ struct underlying_totally_ordered_ring<long> {
 // For natural integer Z (i.e. int/long/mpz_class/mpq_class)
 // We should have a = bq + r
 // with 0 <= r < |b| and q integer.
-int QuoInt(int const& a, int const& b)
+template<typename T>
+T ResInt_Generic(T const& a, T const& b)
 {
-  int b_abs;
+  T b_abs;
   if (b > 0)
     b_abs = b;
   else
     b_abs = -b;
-  int res=a % b_abs;
+  T res=a % b_abs;
   while(true) {
     if (res >= 0 && res < b_abs)
       break;
@@ -216,56 +217,26 @@ int QuoInt(int const& a, int const& b)
     if (res >= b_abs)
       res -= b_abs;
   }
-  int TheQ=(a - res)/b;
-  return TheQ;
+  return res;
 }
 
-
-
-
-long QuoInt(long const& a, long const& b)
+int ResInt(int const& a, int const& b)
 {
-  long b_abs;
-  if (b > 0)
-    b_abs = b;
-  else
-    b_abs = -b;
-  long res=a % b_abs;
-  while(true) {
-    if (res >= 0 && res < b_abs)
-      break;
-    if (res < 0)
-      res += b_abs;
-    if (res >= b_abs)
-      res -= b_abs;
-  }
-  long TheQ=(a - res)/b;
-  return TheQ;
+  return ResInt_Generic<int>(a, b);
 }
 
-
-mpz_class QuoInt(mpz_class const& a, mpz_class const& b)
+long ResInt(long const& a, long const& b)
 {
-  mpz_class res_z=a % b;
-  mpz_class b_abs;
-  if (b > 0)
-    b_abs = b;
-  else
-    b_abs = -b;
-  while(true) {
-    if (res_z >= 0 && res_z < b_abs)
-      break;
-    if (res_z < 0)
-      res_z += b_abs;
-    if (res_z >= b_abs)
-      res_z -= b_abs;
-  }
-  mpz_class quot_z=(a - res_z)/b;
-  return quot_z;
+  return ResInt_Generic<long>(a, b);
+}
+
+mpz_class ResInt(mpz_class const& a, mpz_class const& b)
+{
+  return ResInt_Generic<mpz_class>(a, b);
 }
 
 
-mpq_class QuoInt(mpq_class const& a, mpq_class const& b)
+mpq_class ResInt(mpq_class const& a, mpq_class const& b)
 {
   mpz_class a_den=a.get_den();
   mpz_class b_den=b.get_den();
@@ -295,9 +266,25 @@ mpq_class QuoInt(mpq_class const& a, mpq_class const& b)
   }
   //std::cerr << "a_num=" << a_num << " b_num=" << b_num << " res_z=" << res_z << "\n";
   mpq_class res_q=res_z;
-  mpq_class quot_q=(a -res_q)/b;
-  return quot_q;
+  return res_q;
 }
+
+template<typename T>
+T QuoInt(T const& a, T const& b)
+{
+  T res = ResInt(a, b);
+  return (a - res) / b;
+}
+
+template<typename T>
+std::pair<T,T> ResQuoInt(T const& a, T const& b)
+{
+  T res = ResInt(a, b);
+  T TheQ = (a - res) / b;
+  return {res, TheQ};
+}
+
+
 
 
 
