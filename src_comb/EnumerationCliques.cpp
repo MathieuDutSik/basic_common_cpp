@@ -152,6 +152,7 @@ FullChain GetTotalFullLevel(int const& nbPoint)
   for (int iPoint=0; iPoint<nbPoint; iPoint++)
     ListLevel[0].ListPoss[iPoint] = iPoint;
   ListLevel[0].nbPossibility = nbPoint;
+  ListLevel[0].CurrPos = 0;
   return {0, ListLevel};
 }
 
@@ -161,11 +162,14 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
   int iLevel=eChain.CurrLevel;
   if (iLevel > 0) {
     int CurrPos=eChain.ListLevel[iLevel-1].CurrPos;
+    //    std::cerr << "CP: iLevel-1=" << (iLevel-1) << " CurrPos=" << CurrPos << "\n";
     int nbPossibility=eChain.ListLevel[iLevel-1].nbPossibility;
     for (int iPoss=CurrPos+1; iPoss<nbPossibility; iPoss++) {
+      //      std::cerr << "CurrPos=" << CurrPos << " iPoss=" << iPoss << "\n";
       eChain.ListLevel[iLevel].eVect[iLevel-1] = eChain.ListLevel[iLevel-1].ListPoss[iPoss];
       bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel].eVect);
       if (test) {
+        //        std::cerr << "Assigning iLevel-1=" << (iLevel-1) << " CurrPos=" << iPoss << "\n";
         eChain.ListLevel[iLevel-1].CurrPos = iPoss;
         SetListPoss(eGraph, eChain, iLevel);
         return true;
