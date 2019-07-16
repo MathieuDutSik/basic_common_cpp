@@ -162,12 +162,20 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
   int iLevel=eChain.CurrLevel;
   if (iLevel > 0) {
     int CurrPos=eChain.ListLevel[iLevel-1].CurrPos;
-    //    std::cerr << "CP: iLevel-1=" << (iLevel-1) << " CurrPos=" << CurrPos << "\n";
     int nbPossibility=eChain.ListLevel[iLevel-1].nbPossibility;
+    /*
+    std::cerr << "CP: iLevel-1=" << (iLevel-1) << " CurrPos=" << CurrPos << " nbPossibility=" << nbPossibility << "\n";
+    std::cerr << "CP: eVect=[";
+    for (int idx=0; idx<iLevel-1; idx++) {
+      if (idx > 0)
+        std::cerr << ",";
+      std::cerr << eChain.ListLevel[iLevel-1].eVect[idx];
+    }
+    std::cerr << "]\n"; */
     for (int iPoss=CurrPos+1; iPoss<nbPossibility; iPoss++) {
-      //      std::cerr << "CurrPos=" << CurrPos << " iPoss=" << iPoss << "\n";
       eChain.ListLevel[iLevel].eVect[iLevel-1] = eChain.ListLevel[iLevel-1].ListPoss[iPoss];
       bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel].eVect);
+      //      std::cerr << "CurrPos=" << CurrPos << " iPoss=" << iPoss << " test=" << test << " ePoint=" << eChain.ListLevel[iLevel-1].ListPoss[iPoss] << "\n";
       if (test) {
         //        std::cerr << "Assigning iLevel-1=" << (iLevel-1) << " CurrPos=" << iPoss << "\n";
         eChain.ListLevel[iLevel-1].CurrPos = iPoss;
@@ -179,6 +187,7 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
   if (iLevel == 0)
     return false;
   eChain.CurrLevel = iLevel-1;
+  //  std::cerr << "Before calling GoUpNextInTree 2\n";
   return GoUpNextInTree(eGroup, eGraph, eChain);
 }
 
@@ -192,12 +201,13 @@ bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eC
     eChain.ListLevel[iLevel+1].eVect[iLevel] = eChain.ListLevel[iLevel].ListPoss[iPoss];
     bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel+1].eVect);
     if (test) {
+      eChain.ListLevel[iLevel].CurrPos = iPoss;
       SetListPoss(eGraph, eChain, iLevel+1);
       eChain.CurrLevel = iLevel + 1;
       return true;
     }
   }
-  std::cerr << "Before calling GoUpNextInTree\n";
+  //  std::cerr << "Before calling GoUpNextInTree 1\n";
   return GoUpNextInTree(eGroup, eGraph, eChain);
 }
 
@@ -227,7 +237,7 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
   FullChain eChain = GetTotalFullLevel(eGraph.nbPoint);
   os << "return [\n";
   while(true) {
-    PrintLastLevel(eChain);
+    //    PrintLastLevel(eChain);
     if (eChain.ListLevel[eChain.CurrLevel].nbPossibilityTotal == 0) {
       if (!IsFirst)
         os << ",\n";
@@ -242,7 +252,7 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
       os << "]";
     }
     bool test = NextInTree(eGroup, eGraph, eChain);
-    std::cerr << "test=" << test << " CurrLevel=" << eChain.CurrLevel << "\n";
+    //    std::cerr << "test=" << test << " CurrLevel=" << eChain.CurrLevel << "\n";
     if (!test)
       break;
   }
