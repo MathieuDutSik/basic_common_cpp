@@ -16,7 +16,7 @@ GraphType ReadGraphFile(std::string const& eFile)
   std::vector<std::vector<int>> LLAdj;
   for (int iPoint=0; iPoint<nbPoint; iPoint++) {
     std::vector<int> LAdj;
-    for (int jPoint; jPoint<nbPoint; jPoint++) {
+    for (int jPoint=0; jPoint<nbPoint; jPoint++) {
       int eVal;
       is >> eVal;
       LAdj.push_back(eVal);
@@ -42,7 +42,7 @@ GroupType ReadGroupFile(std::string const& eFile)
   std::vector<std::vector<int>> ARR;
   for (int iElt=0; iElt<nbElt; iElt++) {
     std::vector<int> LAdj;
-    for (int iPoint; iPoint<nbPoint; iPoint++) {
+    for (int iPoint=0; iPoint<nbPoint; iPoint++) {
       int eVal;
       is >> eVal;
       LAdj.push_back(eVal);
@@ -82,6 +82,7 @@ bool IsMinimal(GroupType const& eGroup, std::vector<int> const& eVect)
 struct OneLevel {
   std::vector<int> eVect;
   int nbPossibility;
+  int nbPossibilityTotal;
   int CurrPos;
   std::vector<int> ListPoss;
 };
@@ -95,26 +96,42 @@ struct FullChain {
 void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
 {
   int nbPoint=eGraph.nbPoint;
-  int nbPossibility=0;
+  /*
+  std::cerr << "iLevel=" << iLevel << " eVect=[";
+  for (int idx=0; idx<iLevel; idx++) {
+    if (idx>0)
+      std::cerr << ",";
+    int jPoint = eChain.ListLevel[iLevel].eVect[idx];
+    std::cerr << jPoint;
+  }
+  std::cerr << "];\n"; */
   auto IsCorrect=[&](int const& iPoint) -> bool {
     for (int idx=0; idx<iLevel; idx++) {
-      int jPoint = eChain.ListLevel[iLevel].ListPoss[idx];
+      int jPoint = eChain.ListLevel[iLevel].eVect[idx];
+      //      std::cerr << "IsCorrect idx=" << idx << " jPoint=" << jPoint << " val=" << eGraph.LLAdj[iPoint][jPoint] << "\n";
       if (eGraph.LLAdj[iPoint][jPoint] == 0)
         return false;
     }
     return true;
   };
+  int nbPossibility=0;
+  int nbComplement=0;
   int iPointStart=0;
   if (iLevel > 0) {
     iPointStart = eChain.ListLevel[iLevel].eVect[iLevel-1] + 1;
   }
+  for (int iPoint=0; iPoint<iPointStart; iPoint++)
+    if (IsCorrect(iPoint))
+      nbComplement++;
   for (int iPoint=iPointStart; iPoint<nbPoint; iPoint++) {
     if (IsCorrect(iPoint)) {
+      //      std::cerr << "Inserting iPoint=" << iPoint << "\n";
       eChain.ListLevel[iLevel].ListPoss[nbPossibility] = iPoint;
       nbPossibility++;
     }
   }
   eChain.ListLevel[iLevel].nbPossibility = nbPossibility;
+  eChain.ListLevel[iLevel].nbPossibilityTotal = nbPossibility + nbComplement;
   eChain.ListLevel[iLevel].CurrPos = 0;
 }
 
@@ -129,7 +146,7 @@ FullChain GetTotalFullLevel(int const& nbPoint)
     int nbPoss=-1;
     int CurrPos=-1;
     std::vector<int> ListPoss(nbPoint);
-    OneLevel eLevel{eVect, nbPoss, CurrPos, ListPoss};
+    OneLevel eLevel{eVect, nbPoss, nbPoss, CurrPos, ListPoss};
     ListLevel[iPoint] = eLevel;
   }
   for (int iPoint=0; iPoint<nbPoint; iPoint++)
@@ -149,6 +166,7 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
       eChain.ListLevel[iLevel].eVect[iLevel-1] = eChain.ListLevel[iLevel-1].ListPoss[iPoss];
       bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel].eVect);
       if (test) {
+        eChain.ListLevel[iLevel-1].CurrPos = iPoss;
         SetListPoss(eGraph, eChain, iLevel);
         return true;
       }
@@ -175,19 +193,41 @@ bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eC
       return true;
     }
   }
+  std::cerr << "Before calling GoUpNextInTree\n";
   return GoUpNextInTree(eGroup, eGraph, eChain);
 }
+
+void PrintLastLevel(FullChain const& eChain)
+{
+  int iLevel=eChain.CurrLevel;
+  std::cerr << "iLevel=" << iLevel << " eVect=[";
+  for (int idx=0; idx<iLevel; idx++) {
+    if (idx>0)
+      std::cerr << ",";
+    std::cerr << eChain.ListLevel[iLevel].eVect[idx];
+  }
+  std::cerr << "] ListPoss=[";
+  for (int iPoss=0; iPoss<eChain.ListLevel[iLevel].nbPossibility; iPoss++) {
+    if (iPoss > 0)
+      std::cerr << ",";
+    std::cerr << eChain.ListLevel[iLevel].ListPoss[iPoss];
+  }
+  std::cerr << "]\n";
+}
+
 
 void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string const& MaximalFile)
 {
   bool IsFirst=true;
   std::ofstream os(MaximalFile);
   FullChain eChain = GetTotalFullLevel(eGraph.nbPoint);
-  os << "return [";
+  os << "return [\n";
   while(true) {
-    if (eChain.ListLevel[eChain.CurrLevel].nbPossibility == 0) {
+    PrintLastLevel(eChain);
+    if (eChain.ListLevel[eChain.CurrLevel].nbPossibilityTotal == 0) {
       if (!IsFirst)
         os << ",\n";
+      IsFirst=false;
       os << "[";
       for (int iPoint=0; iPoint<eChain.CurrLevel; iPoint++) {
         if (iPoint>0)
@@ -198,6 +238,7 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
       os << "]";
     }
     bool test = NextInTree(eGroup, eGraph, eChain);
+    std::cerr << "test=" << test << " CurrLevel=" << eChain.CurrLevel << "\n";
     if (!test)
       break;
   }
@@ -207,6 +248,11 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
 
 int main(int argc, char* argv[])
 {
+  if (argc != 4) {
+    std::cerr << "Program is used as\n";
+    std::cerr << "EnumerationCliques [GraphFile] [GroupFile] [MaximalFile]\n";
+    exit(1);
+  }
   std::string GraphFile = argv[1];
   std::string GroupFile = argv[2];
   std::string MaximalFile = argv[3];
