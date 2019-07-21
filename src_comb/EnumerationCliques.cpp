@@ -53,38 +53,25 @@ GroupType ReadGroupFile(std::string const& eFile)
 }
 
 
-bool IsMinimal(GroupType const& eGroup, std::vector<int> const& eVect)
-{
-  int len=eVect.size();
-  std::vector<int> ImageVect(len);
-  auto IsCounterexample=[&](std::vector<int> const& uVect) -> bool {
-    for (int i=0; i<len; i++) {
-      if (uVect[i] < eVect[i])
-        return true;
-      if (uVect[i] > eVect[i]) // for the next item to be counterexample, it has to be equal
-        return false;
-    }
-    return false;
-  };
-  for (int iElt=0; iElt<eGroup.nbElt; iElt++) {
-    for (int i=0; i<len; i++) {
-      int iImg=eGroup.ARR[iElt][eVect[i]];
-      ImageVect[i]=iImg;
-    }
-    std::sort(ImageVect.begin(), ImageVect.end());
-    if (IsCounterexample(ImageVect))
-      return false;
-  }
-  return true;
-}
+struct TypeVectClique {
+  int lenClique;
+  std::vector<int> eVect;
+};
 
+struct TypeVectBRW {
+  int len;
+  std::vector<int> eVect;
+};
+
+struct TypeListGroupElement {
+  int nbAdmissibleElt;
+  std::vector<int> ListGroupPossibility;
+};
 
 struct OneLevel {
-  std::vector<int> eVect;
-  int nbPossibility;
-  int nbPossibilityTotal;
-  int CurrPos;
-  std::vector<int> ListPoss;
+  TypeVectClique eVectClique;
+  TypeVectBRW eVectBRW;
+  TypeListGroupElement RecAdmissibleGroupElement;
 };
 
 struct FullChain {
@@ -93,96 +80,109 @@ struct FullChain {
 };
 
 
-void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
+bool IsMinimal(GroupType const& eGroup, ArrMinimal const& eArr, TypeVectBRW const& eVectBRW, TypeListGroupElement & ReturnListGroupElement, TypeListGroupElement const& InputListGroupElement)
 {
-  int nbPoint=eGraph.nbPoint;
-  /*
-  std::cerr << "iLevel=" << iLevel << " eVect=[";
-  for (int idx=0; idx<iLevel; idx++) {
-    if (idx>0)
-      std::cerr << ",";
-    int jPoint = eChain.ListLevel[iLevel].eVect[idx];
-    std::cerr << jPoint;
-  }
-  std::cerr << "];\n"; */
-  auto IsCorrect=[&](int const& iPoint) -> bool {
-    for (int idx=0; idx<iLevel; idx++) {
-      int jPoint = eChain.ListLevel[iLevel].eVect[idx];
-      //      std::cerr << "IsCorrect idx=" << idx << " jPoint=" << jPoint << " val=" << eGraph.LLAdj[iPoint][jPoint] << "\n";
-      if (eGraph.LLAdj[iPoint][jPoint] == 0)
-        return false;
+  int lenBRW=eVectBRW.len;
+  int nbPoint=eGroup.nbPoint;
+  // StatusPermutation is about how the permutation stands for later.
+  // status=0 if it is not useful for further computation
+  // status=1 if it may be useful later on.
+  // status=2 if it proves non-minimality.
+  auto StatusPermutation=[&](int const& iElt) -> int {
+    for (int idx=0; idx<lenBRW; idx++) {
+      eArr.VectCompar[idx]=2;
     }
-    return true;
+    for (int idx=0; idx<lenBRW; idx++) {
+      int iImg=eGroup.ARR[iElt][idx];
+      if (iImg < lenBRW)
+        eArr.VectCompar[iImg] = eVectBRW.eVect[idx];
+    }
+    // red is less than blue
+    // we search for the lexicographically minimal element
+    for (int idx=0; idx<lenBRW; idx++) {
+      if (eVectBRW[idx] == 1) { // node is red
+        if (eArr.VectCompar[iImg] == 2) // white, permutation may be useful
+          return 1;
+        if (eArr.VectCompar[iImg] == 0) // blue, permutation cannot help
+          return 0;
+        // last case is neutral, going forward
+      }
+      if (eVectBRW[idx] == 0) { // node is blue
+        if (eArr.VectCompar[iImg] == 2) // white, permutation may be useful
+          return 1;
+        if (eArr.VectCompar[iImg] == 1) // red, permutation allows to conclude non-minimality
+          return 2;
+      }
+    }
+    return 1;
   };
-  int nbPossibility=0;
-  int nbComplement=0;
-  int iPointStart=0;
-  if (iLevel > 0) {
-    iPointStart = eChain.ListLevel[iLevel].eVect[iLevel-1] + 1;
-  }
-  for (int iPoint=0; iPoint<iPointStart; iPoint++)
-    if (IsCorrect(iPoint))
-      nbComplement++;
-  for (int iPoint=iPointStart; iPoint<nbPoint; iPoint++) {
-    if (IsCorrect(iPoint)) {
-      //      std::cerr << "Inserting iPoint=" << iPoint << "\n";
-      eChain.ListLevel[iLevel].ListPoss[nbPossibility] = iPoint;
-      nbPossibility++;
+  int iPoss=0;
+  for (int idx=0; idx<InputListGroupElement.nbAdmissibleElt; idx++) {
+    int iElt = InputListGroupElement.ListGroupPossibility[idx];
+    int status = StatusPermutation(iElt);
+    if (status == 2)
+      return false;
+    if (status == 1) {
+      ReturnListGroupElement.ListGroupPossibility[iPoss]=iElt;
+      iPoss++;
     }
   }
-  eChain.ListLevel[iLevel].nbPossibility = nbPossibility;
-  eChain.ListLevel[iLevel].nbPossibilityTotal = nbPossibility + nbComplement;
-  eChain.ListLevel[iLevel].CurrPos = 0;
+  ReturnListGroupElement.nbAdmissibleElt = iPoss;
+  return true;
 }
+
+
+
+
+
+
 
 
 // At any step, the ListPoss must be initialized at the end
 // of the process.
-FullChain GetTotalFullLevel(int const& nbPoint)
+FullChain GetTotalFullLevel(int const& nbPoint, int const& nbElt)
 {
   std::vector<OneLevel> ListLevel(nbPoint+1);
-  for (int iPoint=0; iPoint<=nbPoint; iPoint++) {
-    std::vector<int> eVect(iPoint, -1);
-    int nbPoss=-1;
-    int CurrPos=-1;
-    std::vector<int> ListPoss(nbPoint);
-    OneLevel eLevel{eVect, nbPoss, nbPoss, CurrPos, ListPoss};
+  std::vector<int> ListGroupPossibility(nbElt);
+  for (int iElt=0; iElt<nbElt; iElt++)
+    ListGroupPossibility[iElt]=iElt;
+  TypeListGroupElement RecAdmissibleGroupElement{nbElt, ListGroupPossibility};
+  for (int iPoint=0; iPoint<nbPoint; iPoint++) {
+    int sizClique=0;
+    std::vector<int> eVect1(iPoint0, 0);
+    TypeVectClique eVectClique{sizClique, eVect1};
+    std::vector<int> eVect2(iPoint, 0);
+    TypeVectBRW eVectBRW{iPoint,eVect2};
+    OneLevel eLevel{eVectClique, eVectBRW, RecAdmissibleGroupElement};
     ListLevel[iPoint] = eLevel;
   }
-  for (int iPoint=0; iPoint<nbPoint; iPoint++)
-    ListLevel[0].ListPoss[iPoint] = iPoint;
-  ListLevel[0].nbPossibility = nbPoint;
-  ListLevel[0].CurrPos = 0;
   return {0, ListLevel};
 }
 
-
-bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eChain)
+bool IsAdmissibleVertex(GraphType const& eGraph, TypeVectClique const& eVectClique, int const& eVert)
+{
+  for (int idx=0; idx<eVectClique.sizClique; idx++) {
+    int iVert = eVectClique.eVect[idx];
+    if (eGraph.ARR[eVert][iVert] == 0)
+      return false;
+  }
+  return true;
+}
+ 
+bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, ArrMinimal & eArr, FullChain & eChain)
 {
   int iLevel=eChain.CurrLevel;
   if (iLevel > 0) {
-    int CurrPos=eChain.ListLevel[iLevel-1].CurrPos;
-    int nbPossibility=eChain.ListLevel[iLevel-1].nbPossibility;
-    /*
-    std::cerr << "CP: iLevel-1=" << (iLevel-1) << " CurrPos=" << CurrPos << " nbPossibility=" << nbPossibility << "\n";
-    std::cerr << "CP: eVect=[";
-    for (int idx=0; idx<iLevel-1; idx++) {
-      if (idx > 0)
-        std::cerr << ",";
-      std::cerr << eChain.ListLevel[iLevel-1].eVect[idx];
-    }
-    std::cerr << "]\n"; */
-    for (int iPoss=CurrPos+1; iPoss<nbPossibility; iPoss++) {
-      eChain.ListLevel[iLevel].eVect[iLevel-1] = eChain.ListLevel[iLevel-1].ListPoss[iPoss];
-      bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel].eVect);
-      //      std::cerr << "CurrPos=" << CurrPos << " iPoss=" << iPoss << " test=" << test << " ePoint=" << eChain.ListLevel[iLevel-1].ListPoss[iPoss] << "\n";
-      if (test) {
-        //        std::cerr << "Assigning iLevel-1=" << (iLevel-1) << " CurrPos=" << iPoss << "\n";
-        eChain.ListLevel[iLevel-1].CurrPos = iPoss;
-        SetListPoss(eGraph, eChain, iLevel);
-        return true;
+    if (eChain.ListLevel[iLevel].eVectBRW.eVect[iLevel-1] == 0) {
+      if (IsAdmissibleVertex(eGraph, iLevel-1)) {
+        eChain.ListLevel[iLevel].eVectBRW.eVect[iLevel-1]=1;
+        if (IsMinimal(eGroup, eArr, eChain.ListLevel[iLevel].eVectBRW, eChain.ListLevel[iLevel].RecAdmissibleGroupElement, eChain.ListLevel[iLevel-1].RecAdmissibleGroupElement)) {
+          int sizClique=eChain.ListLevel[iLevel].eVectClique.sizClique;
+          eChain.ListLevel[iLevel].eVectClique.sizClique++;
+          eChain.ListLevel[iLevel].eVectClique[sizClique] = iLevel-1;
+          return true;
+        }
       }
-    }
   }
   if (iLevel == 0)
     return false;
@@ -195,8 +195,9 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
 bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eChain)
 {
   int iLevel=eChain.CurrLevel;
-  for (int idx=0; idx<iLevel; idx++)
+  for (int idx=0; idx<iLevel; idx++) {
     eChain.ListLevel[iLevel+1].eVect[idx] = eChain.ListLevel[iLevel].eVect[idx];
+  }
   for (int iPoss=0; iPoss<eChain.ListLevel[iLevel].nbPossibility; iPoss++) {
     eChain.ListLevel[iLevel+1].eVect[iLevel] = eChain.ListLevel[iLevel].ListPoss[iPoss];
     bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel+1].eVect);
@@ -207,7 +208,6 @@ bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eC
       return true;
     }
   }
-  //  std::cerr << "Before calling GoUpNextInTree 1\n";
   return GoUpNextInTree(eGroup, eGraph, eChain);
 }
 
@@ -220,13 +220,6 @@ void PrintLastLevel(FullChain const& eChain)
       std::cerr << ",";
     std::cerr << eChain.ListLevel[iLevel].eVect[idx];
   }
-  std::cerr << "] ListPoss=[";
-  for (int iPoss=0; iPoss<eChain.ListLevel[iLevel].nbPossibility; iPoss++) {
-    if (iPoss > 0)
-      std::cerr << ",";
-    std::cerr << eChain.ListLevel[iLevel].ListPoss[iPoss];
-  }
-  std::cerr << "]\n";
 }
 
 
@@ -237,7 +230,6 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
   FullChain eChain = GetTotalFullLevel(eGraph.nbPoint);
   os << "return [\n";
   while(true) {
-    //    PrintLastLevel(eChain);
     if (eChain.ListLevel[eChain.CurrLevel].nbPossibilityTotal == 0) {
       if (!IsFirst)
         os << ",\n";
@@ -252,7 +244,7 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
       os << "]";
     }
     bool test = NextInTree(eGroup, eGraph, eChain);
-    //    std::cerr << "test=" << test << " CurrLevel=" << eChain.CurrLevel << "\n";
+    std::cerr << "test=" << test << " CurrLevel=" << eChain.CurrLevel << "\n";
     if (!test)
       break;
   }
