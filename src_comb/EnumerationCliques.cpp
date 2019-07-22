@@ -92,7 +92,7 @@ ArrMinimal GetRecordArrMinimal(int const& nbPoint)
 
 bool IsMinimal(GroupType const& eGroup, ArrMinimal & eArr, TypeVectBRW const& eVectBRW, TypeListGroupElement & ReturnListGroupElement, TypeListGroupElement const& InputListGroupElement)
 {
-  std::cerr << "IsMinimal beginning\n";
+  //  std::cerr << "IsMinimal beginning\n";
   int lenBRW=eVectBRW.len;
   // StatusPermutation is about how the permutation stands for later.
   // status=0 if it is not useful for further computation
@@ -131,7 +131,7 @@ bool IsMinimal(GroupType const& eGroup, ArrMinimal & eArr, TypeVectBRW const& eV
     int iElt = InputListGroupElement.ListGroupPossibility[idx];
     int status = StatusPermutation(iElt);
     if (status == 2) {
-      std::cerr << "IsMinimal, Returning with false\n";
+      //      std::cerr << "IsMinimal, Returning with false\n";
       return false;
     }
     if (status == 1) {
@@ -139,7 +139,7 @@ bool IsMinimal(GroupType const& eGroup, ArrMinimal & eArr, TypeVectBRW const& eV
       iPoss++;
     }
   }
-  std::cerr << "IsMinimal, Exiting iPoss=" << iPoss << "\n";
+  //  std::cerr << "IsMinimal, Exiting iPoss=" << iPoss << "\n";
   ReturnListGroupElement.nbAdmissibleElt = iPoss;
   return true;
 }
@@ -185,16 +185,16 @@ bool IsAdmissibleVertex(GraphType const& eGraph, TypeVectClique const& eVectCliq
 bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, ArrMinimal & eArr, FullChain & eChain)
 {
   int iLevel=eChain.CurrLevel;
-  std::cerr << "Start of GoUpNextInTree iLevel=" << iLevel << "\n";
+  //  std::cerr << "Start of GoUpNextInTree iLevel=" << iLevel << "\n";
   if (iLevel > 0) {
     if (eChain.ListLevel[iLevel].eVectBRW.eVect[iLevel-1] == 0) {
       if (IsAdmissibleVertex(eGraph, eChain.ListLevel[iLevel].eVectClique, iLevel-1)) {
         eChain.ListLevel[iLevel].eVectBRW.eVect[iLevel-1]=1;
         if (IsMinimal(eGroup, eArr, eChain.ListLevel[iLevel].eVectBRW, eChain.ListLevel[iLevel].RecAdmissibleGroupElement, eChain.ListLevel[iLevel-1].RecAdmissibleGroupElement)) {
           int sizClique=eChain.ListLevel[iLevel].eVectClique.sizClique;
-          std::cerr << "GoUpNextInTree sizClique=" << sizClique << "\n";
+          //          std::cerr << "GoUpNextInTree sizClique=" << sizClique << "\n";
           eChain.ListLevel[iLevel].eVectClique.sizClique++;
-          std::cerr << "GoUpNextInTree ASSIGN eChain.ListLevel[iLevel].eVectClique.sizClique=" << eChain.ListLevel[iLevel].eVectClique.sizClique << "\n";
+          //          std::cerr << "GoUpNextInTree ASSIGN eChain.ListLevel[iLevel].eVectClique.sizClique=" << eChain.ListLevel[iLevel].eVectClique.sizClique << "\n";
           eChain.ListLevel[iLevel].eVectClique.eVect[sizClique] = iLevel-1;
           return true;
         }
@@ -212,13 +212,13 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, ArrMinimal
 bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, ArrMinimal & eArr, FullChain & eChain)
 {
   int iLevel=eChain.CurrLevel;
-  std::cerr << "NextInTree iLevel=" << iLevel << " nbPoint=" << eGraph.nbPoint << "\n";
+  //  std::cerr << "NextInTree iLevel=" << iLevel << " nbPoint=" << eGraph.nbPoint << "\n";
   int nbPoint=eGraph.nbPoint;
   if (iLevel == nbPoint)
     return GoUpNextInTree(eGroup, eGraph, eArr, eChain);
   int sizClique=eChain.ListLevel[iLevel].eVectClique.sizClique;
   eChain.ListLevel[iLevel+1].eVectClique.sizClique=sizClique;
-  std::cerr << "NextInTree After ASSIGN 1 eChain.ListLevel[iLevel+1].eVectClique.sizClique=" << eChain.ListLevel[iLevel+1].eVectClique.sizClique << " sizClique=" << sizClique << "\n";
+  //  std::cerr << "NextInTree After ASSIGN 1 eChain.ListLevel[iLevel+1].eVectClique.sizClique=" << eChain.ListLevel[iLevel+1].eVectClique.sizClique << " sizClique=" << sizClique << "\n";
   for (int idx=0; idx<sizClique; idx++) {
     eChain.ListLevel[iLevel+1].eVectClique.eVect[idx] = eChain.ListLevel[iLevel].eVectClique.eVect[idx];
   }
@@ -228,18 +228,16 @@ bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, ArrMinimal & e
     //    std::cerr << " AFTER idx=" << idx << "\n";
   }
   for (int iColor=0; iColor<2; iColor++) {
-    std::cerr << "NextInTree step 4\n";
     if (iColor == 0 || IsAdmissibleVertex(eGraph, eChain.ListLevel[iLevel].eVectClique, iLevel)) {
-      std::cerr << "NextInTree step 5\n";
       eChain.ListLevel[iLevel+1].eVectBRW.eVect[iLevel] = iColor;
       if (IsMinimal(eGroup, eArr, eChain.ListLevel[iLevel+1].eVectBRW, eChain.ListLevel[iLevel+1].RecAdmissibleGroupElement, eChain.ListLevel[iLevel].RecAdmissibleGroupElement)) {
         eChain.CurrLevel = iLevel + 1;
-        std::cerr << "iColor=" << iColor << " sizClique=" << sizClique << "\n";
+        //        std::cerr << "iColor=" << iColor << " sizClique=" << sizClique << "\n";
         if (iColor == 1) {
           eChain.ListLevel[iLevel+1].eVectClique.sizClique++;
           eChain.ListLevel[iLevel+1].eVectClique.eVect[sizClique] = iLevel;
         }
-        std::cerr << "NextInTree After ASSIGN 2 eChain.ListLevel[iLevel+1].eVectClique.sizClique=" << eChain.ListLevel[iLevel+1].eVectClique.sizClique << "\n";
+        //        std::cerr << "NextInTree After ASSIGN 2 eChain.ListLevel[iLevel+1].eVectClique.sizClique=" << eChain.ListLevel[iLevel+1].eVectClique.sizClique << "\n";
         return true;
       }
     }
