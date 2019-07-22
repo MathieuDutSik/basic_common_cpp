@@ -254,13 +254,12 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
     }
     bool test = NextInTree(eGroup, eGraph, eChain);
     nbIter++;
-    if (nbIter == 10000)
-      break;
     //    std::cerr << "test=" << test << " CurrLevel=" << eChain.CurrLevel << "\n";
     if (!test)
       break;
   }
   os << "];\n";
+  std::cerr << "nbIter=" << nbIter << "\n";
 }
 
 
