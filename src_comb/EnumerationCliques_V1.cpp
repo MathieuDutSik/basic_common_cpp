@@ -120,15 +120,21 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
   if (iLevel > 0) {
     iPointStart = eChain.ListLevel[iLevel].eVect[iLevel-1] + 1;
   }
-  for (int iPoint=0; iPoint<iPointStart; iPoint++)
-    if (IsCorrect(iPoint))
-      nbComplement++;
   for (int iPoint=iPointStart; iPoint<nbPoint; iPoint++) {
     if (IsCorrect(iPoint)) {
       //      std::cerr << "Inserting iPoint=" << iPoint << "\n";
       eChain.ListLevel[iLevel].ListPoss[nbPossibility] = iPoint;
       nbPossibility++;
     }
+  }
+  if (nbPossibility == 0) { // no need to compute if there is already one reular extension
+    auto IsNotMaximal=[&]() -> int {
+      for (int iPoint=0; iPoint<iPointStart; iPoint++)
+        if (IsCorrect(iPoint))
+          return 1;
+      return 0;
+    };
+    nbComplement = IsNotMaximal();
   }
   eChain.ListLevel[iLevel].nbPossibility = nbPossibility;
   eChain.ListLevel[iLevel].nbPossibilityTotal = nbPossibility + nbComplement;
