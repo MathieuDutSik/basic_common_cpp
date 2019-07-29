@@ -3,6 +3,11 @@
 #include <fstream>
 #include <vector>
 
+// This program uses the method of the manuscript of Wendy Myrvold and
+// Patrick Fowler, "Fast Enumeration of all independent sets of a graph"
+// It is more complicated but the group is considered in a more intelligent
+// way.
+
 struct GraphType {
   int nbPoint;
   std::vector<std::vector<int>> LLAdj;
