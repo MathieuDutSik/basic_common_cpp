@@ -3,21 +3,30 @@
 #include <fstream>
 #include <vector>
 
-// This code uses a simple approach of adding element one by one
-// in order to get a clique.
+// This is a variant (INCOMPLETE CODE) of the clique enumeration
 //
-// So for a clique {x1, x2, ...., xk} is built according to
-// {x1}
-// {x1,x2}
-// .
-// .
-// {x1,x2, ...., xk}
-// All cliques built are lexicographically minimum.
-// The algorithm for testing minimality is simple iteration
-// over the group elements.
+// We try to insert the cliques in a more ordered way. The idea
+// is that if we insert one element, then we can just as well
+// insert some other.
+// In the case of 2-dimensional Keller-like clique packing, this
+// would give you the packing done line by line.
+// QUESTION: Is this compatible with the ordered enumeration?
+// ANSWER: 1) If we insert set S = {v1, ...., vM}
+//            then the minimum starting point at the next step
+//            ought to be v1+1, not vM+1.
+//         2) Anything less to consider? It would seem no.
 //
-// The slow part is the group minimality checks, but otherwise
-// it is fairly fast algorithm.
+// Structure of set of points to add.
+// When considering the expansion process, we have a number of possibilities V
+// F(x) = {y in V s.t. x adj y and for all z in V we have z adj x <=> z adj y}
+// So, we can insert the set F(x) right away in the enumeration process.
+//
+// The algorithm needs to keep track of the insertions.
+// We need a data structure for storing the partitions of point sets.
+// or do we need to store the partition? We only need to keep track
+// of which points have been considered in the process.
+// So, we just need to have a vector of point status.
+
 
 struct GraphType {
   int nbPoint;
@@ -130,11 +139,12 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
     }
     return true;
   };
+  int nbPossibility=0;
+  int nbComplement=0;
   int iPointStart=0;
   if (iLevel > 0) {
     iPointStart = eChain.ListLevel[iLevel].eVect[iLevel-1] + 1;
   }
-  int nbPossibility=0;
   for (int iPoint=iPointStart; iPoint<nbPoint; iPoint++) {
     if (IsCorrect(iPoint)) {
       //      std::cerr << "Inserting iPoint=" << iPoint << "\n";
@@ -142,7 +152,6 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
       nbPossibility++;
     }
   }
-  int nbComplement=0;
   if (nbPossibility == 0) { // no need to compute if there is already one reular extension
     auto IsNotMaximal=[&]() -> int {
       for (int iPoint=0; iPoint<iPointStart; iPoint++)

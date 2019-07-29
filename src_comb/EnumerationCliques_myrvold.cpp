@@ -7,6 +7,14 @@
 // Patrick Fowler, "Fast Enumeration of all independent sets of a graph"
 // It is more complicated but the group is considered in a more intelligent
 // way.
+//
+// Idea of the iteration is that we keep the elements in a Blue, Red, White
+// way. So, we go step by step making binary choice about the Blue, Red vertex
+// nature.
+// The group elements are kept if they can potentially be helpful in deciding
+// the minimality of the generated cliques.
+//
+// It is a priori faster but it turned out to be slower than the ordered enumeration.
 
 struct GraphType {
   int nbPoint;
