@@ -19,7 +19,11 @@
 // Structure of set of points to add.
 // When considering the expansion process, we have a number of possibilities V
 // F(x) = {y in V s.t. x adj y and for all z in V we have z adj x <=> z adj y}
-// So, we can insert the set F(x) right away in the enumeration process.
+// So, we can insert the set F(x) right away in the enumeration process. and not
+// just x.
+//
+// Another optimization is that if a point x in V satisfies {y adj x for all y in V}
+// then we can insert it right away.
 //
 // The algorithm needs to keep track of the insertions.
 // We need a data structure for storing the partitions of point sets.
@@ -106,14 +110,19 @@ bool IsMinimal(GroupType const& eGroup, std::vector<int> const& eVect)
 
 struct OneLevel {
   std::vector<int> eVect;
-  int nbPossibility;
   int nbPossibilityTotal;
+  //
+  int nbCompletelyAdjacent;
+  std::vector<int> ListCompletelyAdjacent;
+  int nbComplex;
+  std::vector<int> ListComplex;
   int CurrPos;
-  std::vector<int> ListPoss;
+  std::vector<int> PointStatus;
 };
 
 struct FullChain {
   int CurrLevel;
+  std::vector<int> ListPossibility;
   std::vector<OneLevel> ListLevel;
 };
 
@@ -139,19 +148,41 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
     }
     return true;
   };
-  int nbPossibility=0;
-  int nbComplement=0;
   int iPointStart=0;
   if (iLevel > 0) {
     iPointStart = eChain.ListLevel[iLevel].eVect[iLevel-1] + 1;
   }
+  int nbPossibility=0;
   for (int iPoint=iPointStart; iPoint<nbPoint; iPoint++) {
     if (IsCorrect(iPoint)) {
       //      std::cerr << "Inserting iPoint=" << iPoint << "\n";
-      eChain.ListLevel[iLevel].ListPoss[nbPossibility] = iPoint;
+      eChain.ListPoss[nbPossibility] = iPoint;
       nbPossibility++;
     }
   }
+  int nbCompletelyAdjacent=0;
+  int nbComplex=0;
+  for (int iPoss=0; iPoss<nbCompletelyAdjacent; iPoss++) {
+    auto IsCompletelyAdjacent=[&](int const& iPoss, int const& ePoint) -> bool {
+      for (int jPoss=0; jPoss<nbPossibility; jPoss++)
+        if (iPoss != jPoss) {
+          int fPoint = eChain.ListPossibility[jPoss];
+          if (eGraph.LLAdj[ePoint][fPoint] == 0)
+            return false;
+        }
+      return true;
+    };
+    int eVert = eChain.ListPossibility[iPoss];
+      if (IsCompletelyAdjacent(iPoss, eVert)) {
+      eChain.ListLevel[iLevel].ListCompletelyAdjacent[nbCompletelyAdjacent] = eVert;
+      nbCompletelyAdjacent++;
+    }
+    else {
+      eChain.ListLevel[iLevel].ListComplex[nbComplex] = eVert;
+      nbComplex++;
+    }
+  }
+  int nbComplement=0;
   if (nbPossibility == 0) { // no need to compute if there is already one reular extension
     auto IsNotMaximal=[&]() -> int {
       for (int iPoint=0; iPoint<iPointStart; iPoint++)
@@ -161,8 +192,9 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
     };
     nbComplement = IsNotMaximal();
   }
-  eChain.ListLevel[iLevel].nbPossibility = nbPossibility;
   eChain.ListLevel[iLevel].nbPossibilityTotal = nbPossibility + nbComplement;
+  eChain.ListLevel[iLevel].nbCompletelyAdjacent = nbCompletelyAdjacent;
+  eChain.ListLevel[iLevel].nbComplex = nbComplex;
   eChain.ListLevel[iLevel].CurrPos = 0;
 }
 
@@ -174,17 +206,23 @@ FullChain GetTotalFullLevel(int const& nbPoint)
   std::vector<OneLevel> ListLevel(nbPoint+1);
   for (int iPoint=0; iPoint<=nbPoint; iPoint++) {
     std::vector<int> eVect(iPoint, -1);
-    int nbPoss=-1;
+    int nbPossibilityTotal = -1;
+    //
+    int nbCompletelyAdjacent = 0;
+    std::vector<int> ListCompletelyAdjacent(nbPoint);
+    int nbComplex = 0;
+    std::vector<int> ListComplex(nbPoint);
     int CurrPos=-1;
-    std::vector<int> ListPoss(nbPoint);
-    OneLevel eLevel{eVect, nbPoss, nbPoss, CurrPos, ListPoss};
+    std::vector<int> PointStatus(nbPoint);
+    OneLevel eLevel{eVect, nbPossibilityTotal, nbCompletelyAdjacent, ListCompletelyAdjacent, nbComplex, ListComplex, CurrPos, PointStatus};
     ListLevel[iPoint] = eLevel;
   }
   for (int iPoint=0; iPoint<nbPoint; iPoint++)
     ListLevel[0].ListPoss[iPoint] = iPoint;
   ListLevel[0].nbPossibility = nbPoint;
   ListLevel[0].CurrPos = 0;
-  return {0, ListLevel};
+  std::vector<int> ListPossibility(nbPoint);
+  return {0, ListPossibility, ListLevel};
 }
 
 
