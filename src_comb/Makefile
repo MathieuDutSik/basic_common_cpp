@@ -1,4 +1,4 @@
-PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum
+PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
