@@ -137,6 +137,10 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
 {
   std::cerr << "SetListPoss, iLevel=" << iLevel << "\n";
   std::cerr << "  len=" << eChain.ListLevel[iLevel].eVect.len << "\n";
+  std::cerr << "  V=";
+  for (int idx=0; idx<eChain.ListLevel[iLevel].eVect.len; idx++)
+    std::cerr << eChain.ListLevel[iLevel].eVect.V[idx] << " ";
+  std::cerr << "\n";
   auto IsCorrect=[&](int const& iPoint) -> bool {
     for (int idx=0; idx<eChain.ListLevel[iLevel].eVect.len; idx++) {
       int jPoint = eChain.ListLevel[iLevel].eVect.V[idx];
@@ -277,7 +281,9 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
       if (CurrPos == eChain.ListLevel[iLevel-1].nbComplex)
         break;
       if (eChain.ListLevel[iLevel-1].PointStatus[CurrPos] == 0) {
-        AssignationVect(eGraph, eChain, iLevel, startPos, CurrPos);
+        std::cerr << "  GoUpNextInTree iLevel=" << iLevel << " CurrPos=" << CurrPos << "\n";
+        AssignationVect(eGraph, eChain, iLevel-1, startPos, CurrPos);
+        std::cerr << "  GoUpNextInTree iLevel=" << iLevel << " val=" << eChain.ListLevel[iLevel-1].PointStatus[CurrPos] << "\n";
         bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel].eVect);
         if (test) {
           eChain.ListLevel[iLevel-1].CurrPos = CurrPos;
