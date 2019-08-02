@@ -87,14 +87,27 @@ struct VectRec {
   std::vector<int> V;
 };
 
+void PrintVector(std::string const& eStr, VectRec const& eVect)
+{
+  std::cerr << eStr;
+  for (int idx=0; idx<eVect.len; idx++)
+    std::cerr << " " << eVect.V[idx];
+  std::cerr << "\n";
+}
+
+
 bool IsMinimal(GroupType const& eGroup, VectRec const& eVect)
 {
+  std::vector<int> eVectOrd(eVect.len);
+  for (int i=0; i<eVect.len; i++)
+    eVectOrd[i] = eVect.V[i];
+  std::sort(eVectOrd.begin(), eVectOrd.end());
   std::vector<int> ImageVect(eVect.len);
   auto IsCounterexample=[&](std::vector<int> const& uVect) -> bool {
     for (int i=0; i<eVect.len; i++) {
-      if (uVect[i] < eVect.V[i])
+      if (uVect[i] < eVectOrd[i])
         return true;
-      if (uVect[i] > eVect.V[i]) // for the next item to be counterexample, it has to be equal
+      if (uVect[i] > eVectOrd[i]) // for the next item to be counterexample, it has to be equal
         return false;
     }
     return false;
@@ -160,10 +173,12 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
     if (eChain.ListLevel[iLevel-1].PointStatus[idx] == 0) {
       if (IsCorrect(iPoint)) {
         eChain.ListPossibility[nbPossibility] = iPoint;
+        std::cerr << "      nbPossibility=" << nbPossibility << " iPoint=" << iPoint << "\n";
         nbPossibility++;
       }
     }
   }
+  std::cerr << "  nbPossibility=" << nbPossibility << "\n";
   int nbCompletelyAdjacent=0;
   int nbComplex=0;
   for (int iPoss=0; iPoss<nbPossibility; iPoss++) {
@@ -199,7 +214,6 @@ void SetListPoss(GraphType const& eGraph, FullChain & eChain, int const& iLevel)
     nbComplement = IsNotMaximal();
   }
   std::cerr << "  nbComplex=" << nbComplex << " nbCompletelyAdjacent=" << nbCompletelyAdjacent << "\n";
-  std::cerr << "  nbPossibility=" << nbPossibility << "\n";
   eChain.ListLevel[iLevel].nbPossibilityTotal = nbPossibility + nbComplement;
   eChain.ListLevel[iLevel].nbCompletelyAdjacent = nbCompletelyAdjacent;
   eChain.ListLevel[iLevel].nbComplex = nbComplex;
@@ -260,6 +274,7 @@ void AssignationVect(GraphType const& eGraph, FullChain & eChain, int const& iLe
   auto FuncInsert=[&](int const& idx_v) -> void {
     eChain.ListLevel[iLevel].PointStatus[idx_v] = 1;
     eChain.ListLevel[iLevel+1].eVect.V[posIns] = eChain.ListLevel[iLevel].ListComplex[idx_v];
+    std::cerr << "Assigning posIns=" << posIns << " val=" << eChain.ListLevel[iLevel].ListComplex[idx_v] << "\n";
     posIns++;
   };
   FuncInsert(CurrPos);
@@ -301,6 +316,7 @@ bool GoUpNextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain 
 }
 
 
+
 bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eChain)
 {
   int iLevel=eChain.CurrLevel;
@@ -319,7 +335,9 @@ bool NextInTree(GroupType const& eGroup, GraphType const& eGraph, FullChain & eC
       break;
     if (eChain.ListLevel[iLevel].PointStatus[FirstPos] == 0) {
       AssignationVect(eGraph, eChain, iLevel, startPos, FirstPos);
+      PrintVector("NextInTree eVect=", eChain.ListLevel[iLevel+1].eVect);
       bool test = IsMinimal(eGroup, eChain.ListLevel[iLevel+1].eVect);
+      std::cerr << "test=" << test << "\n";
       if (test) {
         eChain.ListLevel[iLevel].CurrPos = FirstPos;
         SetListPoss(eGraph, eChain, iLevel+1);
@@ -342,16 +360,21 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
   int nbIter = 0;
   os << "return [\n";
   while(true) {
+    PrintVector("Level Main Loop, eVect=", eChain.ListLevel[eChain.CurrLevel].eVect);
+    std::cerr << "nbPossibilityTotal=" << eChain.ListLevel[eChain.CurrLevel].nbPossibilityTotal << "\n";
     if (eChain.ListLevel[eChain.CurrLevel].nbPossibilityTotal == 0) {
       if (!IsFirst)
         os << ",\n";
       IsFirst=false;
+      std::vector<int> eVect(eChain.ListLevel[eChain.CurrLevel].eVect.len);
+      for (int idx=0; idx<eChain.ListLevel[eChain.CurrLevel].eVect.len; idx++)
+        eVect[idx] = eChain.ListLevel[eChain.CurrLevel].eVect.V[idx] + 1;
+      std::sort(eVect.begin(), eVect.end());
       os << "[";
-      for (int iPoint=0; iPoint<eChain.ListLevel[eChain.CurrLevel].eVect.len; iPoint++) {
-        if (iPoint>0)
+      for (int idx=0; idx<eChain.ListLevel[eChain.CurrLevel].eVect.len; idx++) {
+        if (idx > 0)
           os << ",";
-        int eVal = eChain.ListLevel[eChain.CurrLevel].eVect.V[iPoint] + 1;
-        os << eVal;
+        os << eVect[idx];
       }
       os << "]";
     }
