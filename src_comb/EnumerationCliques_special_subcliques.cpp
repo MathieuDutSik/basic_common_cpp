@@ -30,7 +30,14 @@
 // or do we need to store the partition? We only need to keep track
 // of which points have been considered in the process.
 // So, we just need to have a vector of point status.
-
+//
+// TODO:
+// ---move the assignation of the CompletelyAdjacent points higher in the
+//    hierachy, right in SetListPoss. This would simplify things a bit.
+// ---In the SetListPoss, add a search for the totally adjacent points from
+//    0 to iPointStart. If we found some, then we have a proof that the
+//    structure is extendible but that the search will never suceed in finding it.
+//    This could yield huge speed improvements.
 
 #define DEBUG
 #undef DEBUG
