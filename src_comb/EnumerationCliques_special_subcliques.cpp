@@ -357,6 +357,23 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
   bool IsFirst=true;
   std::ofstream os(MaximalFile);
   FullChain eChain = GetTotalFullLevel(eGraph.nbPoint);
+  /*
+  auto SinglePrint=[&](std::ostream& os) -> void {
+    if (eChain.ListLevel[eChain.CurrLevel].nbComplex == 0) {
+      int len=eChain.ListLevel[eChain.CurrLevel].eVect.len;
+      int nbCompletelyAdjacent=eChain.ListLevel[eChain.CurrLevel].nbCompletelyAdjacent;
+      int lenTotal = len + nbCompletelyAdjacent;
+      std::vector<int> eVect(lenTotal);
+      for (int idx=0; idx<len; idx++)
+        eVect[idx] = eChain.ListLevel[eChain.CurrLevel].eVect.V[idx];
+      for (int idx=0; idx<nbCompletelyAdjacent; idx++)
+        eVect[idx+len] = eChain.ListLevel[eChain.CurrLevel].ListCompletelyAdjacent[idx];
+      int CurrPos = eChain.ListLevel[iLevel-1].CurrPos;
+      
+
+      
+    }
+    }*/
   int nbIter = 0;
   os << "return [\n";
   while(true) {
@@ -366,9 +383,15 @@ void DoEnumeration(GroupType const& eGroup, GraphType const& eGraph, std::string
       if (!IsFirst)
         os << ",\n";
       IsFirst=false;
-      std::vector<int> eVect(eChain.ListLevel[eChain.CurrLevel].eVect.len);
-      for (int idx=0; idx<eChain.ListLevel[eChain.CurrLevel].eVect.len; idx++)
+      int len=eChain.ListLevel[eChain.CurrLevel].eVect.len;
+      int nbCompletelyAdjacent=eChain.ListLevel[eChain.CurrLevel].nbCompletelyAdjacent;
+      //      int lenTotal = len + nbCompletelyAdjacent;
+      int lenTotal = len;
+      std::vector<int> eVect(lenTotal);
+      for (int idx=0; idx<len; idx++)
         eVect[idx] = eChain.ListLevel[eChain.CurrLevel].eVect.V[idx] + 1;
+      //      for (int idx=0; idx<nbCompletelyAdjacent; idx++)
+      //        eVect[idx+len] = eChain.ListLevel[eChain.CurrLevel].ListCompletelyAdjacent[idx] + 1;
       std::sort(eVect.begin(), eVect.end());
       os << "[";
       for (int idx=0; idx<eChain.ListLevel[eChain.CurrLevel].eVect.len; idx++) {
