@@ -7,8 +7,8 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= clang++ -Weverything -std=c++11
 #CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++11
 #CC		= g++ -std=c++11 -Wall -g -O9 -ftemplate-backtrace-limit=0
-CC		= g++ -std=c++11 -Wall -g -ftemplate-backtrace-limit=0 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
-#CC		= g++ -std=c++11 -Wall -g -O2 -static-libgcc -static-libstdc++
+#CC		= g++ -std=c++11 -Wall -g -ftemplate-backtrace-limit=0 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
+CC		= g++ -std=c++11 -Wall -O9 -static-libgcc -static-libstdc++
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
