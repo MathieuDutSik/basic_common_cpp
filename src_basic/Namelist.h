@@ -9,10 +9,10 @@ struct SingleBlock {
   std::map<std::string, int> ListIntValues;
   std::map<std::string, bool> ListBoolValues;
   std::map<std::string, double> ListDoubleValues;
-  std::map<std::string, std::vector<double> > ListListDoubleValues;
-  std::map<std::string, std::vector<int> > ListListIntValues;
+  std::map<std::string, std::vector<double>> ListListDoubleValues;
+  std::map<std::string, std::vector<int>> ListListIntValues;
   std::map<std::string, std::string> ListStringValues;
-  std::map<std::string, std::vector<std::string> > ListListStringValues;
+  std::map<std::string, std::vector<std::string>> ListListStringValues;
 };
 
 struct FullNamelist {
@@ -172,8 +172,16 @@ std::string NAMELIST_ConvertFortranStringToCppString(std::string const& eStr)
       throw NamelistException{1};
     }
   }
-  if (RemovableEnding == 1)
+  if (RemovableEnding == 1) {
+    for (int i=1; i<len-1; i++) {
+      std::string eChar = eStr.substr(i,1);
+      if (eChar == eCharFirst) {
+        std::cerr << "It is illegal to have \" or ' character in the middle\n";
+        throw TerminalException{1};
+      }
+    }
     return eStr.substr(1,len-2);
+  }
   return eStr;
 }
 
@@ -294,7 +302,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const& eBlockName, Single
   }
   for (std::map<std::string,double>::const_iterator it=eBlock.ListDoubleValues.begin(); it!=eBlock.ListDoubleValues.end(); ++it)
     os << "  " << it->first << " = " << it->second << "\n";
-  for (std::map<std::string,std::vector<double> >::const_iterator it=eBlock.ListListDoubleValues.begin(); it!=eBlock.ListListDoubleValues.end(); ++it) {
+  for (std::map<std::string,std::vector<double>>::const_iterator it=eBlock.ListListDoubleValues.begin(); it!=eBlock.ListListDoubleValues.end(); ++it) {
     os << "  " << it->first << " = ";
     std::vector<double> eListDoubl=it->second;
     int nbDoubl=eListDoubl.size();
@@ -305,7 +313,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const& eBlockName, Single
     }
     os << "\n";
   }
-  for (std::map<std::string,std::vector<int> >::const_iterator it=eBlock.ListListIntValues.begin(); it!=eBlock.ListListIntValues.end(); ++it) {
+  for (std::map<std::string,std::vector<int>>::const_iterator it=eBlock.ListListIntValues.begin(); it!=eBlock.ListListIntValues.end(); ++it) {
     os << "  " << it->first << " = ";
     std::vector<int> eListInt=it->second;
     int nbInt=eListInt.size();
@@ -318,7 +326,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const& eBlockName, Single
   }
   for (std::map<std::string,std::string>::const_iterator it=eBlock.ListStringValues.begin(); it!=eBlock.ListStringValues.end(); ++it)
     os << "  " << it->first << " = \"" << it->second << "\"\n";
-  for (std::map<std::string,std::vector<std::string> >::const_iterator it=eBlock.ListListStringValues.begin(); it!=eBlock.ListListStringValues.end(); ++it) {
+  for (std::map<std::string,std::vector<std::string>>::const_iterator it=eBlock.ListListStringValues.begin(); it!=eBlock.ListListStringValues.end(); ++it) {
     os << "  " << it->first << " = ";
     std::vector<std::string> eListStr=it->second;
     int nbString=eListStr.size();
