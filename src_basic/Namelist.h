@@ -175,7 +175,7 @@ std::string NAMELIST_ConvertFortranStringToCppString(std::string const& eStr)
   if (RemovableEnding == 1) {
     for (int i=1; i<len-1; i++) {
       std::string eChar = eStr.substr(i,1);
-      if (eChar == eCharFirst) {
+      if (eChar == eFirstChar) {
         std::cerr << "It is illegal to have \" or ' character in the middle\n";
         throw TerminalException{1};
       }
