@@ -1,7 +1,11 @@
+#ifndef INCLUDE_MD5SUM
+#define INCLUDE_MD5SUM
+
 #include <array>
 #include <iterator>
 #include <cstdint>
 #include "Temp_common.h"
+#include "gmpxx.h"
 
 // Code copy pasted from
 // https://codereview.stackexchange.com/questions/163872/md5-implementation-in-c11
@@ -277,4 +281,8 @@ mpz_class MD5_hash_mpz(std::string const& data)
   std::string data_out = MD5_hash_string(data);
   return ConvertHex_to_mpz(data_out);
 }
+
+
+
+#endif
 
