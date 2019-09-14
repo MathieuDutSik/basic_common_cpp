@@ -75,11 +75,11 @@ template<typename Tgr>
 std::string GetCanonicalForm_string(Tgr const& eGR)
 {
   int nof_vertices = eGR.GetNbVert();
-  bliss::Graph g2 = GetBlissGraphFromGraph(eGR);
+  bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
   //
   const unsigned int* cl;
-  cl=g1.canonical_form(stats, &report_aut_void, stderr);
+  cl=g.canonical_form(stats, &report_aut_void, stderr);
   std::vector<int> clR(nof_vertices);
   for (int i=0; i<nof_vertices; i++)
     clR[cl[i]]=i;
