@@ -87,7 +87,7 @@ std::string GetCanonicalForm_string(Tgr const& eGR)
   std::string strRet;
   for (int iVert=0; iVert<nof_vertices; iVert++) {
     int iVertCan = clR[iVert];
-    if (eGR.HasColor()) {
+    if (eGR.GetHasVertexColor()) {
       int eColor = eGR.GetColor(iVertCan);
       strRet += " " + std::to_string(eColor);
     }
