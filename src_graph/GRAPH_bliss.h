@@ -1,12 +1,14 @@
 #ifndef INCLUDE_GRAPH_BLISS
 #define INCLUDE_GRAPH_BLISS
 
-
+#include <string>
 #include "defs.hh"
 #include "graph.hh"
 #include "partition.hh"
 #include "timer.hh"
 #include "utils.hh"
+
+
 
 
 static inline void report_aut_void(void* param, const unsigned int n, const unsigned int* aut)
