@@ -114,8 +114,18 @@ void jacobi_double(MyMatrix<T> const& OrigMat, MyVector<T> & ListEigVal, MyMatri
     for (j=0; j<n; j++)
       a[i+1][j+1]=OrigMat(i,j);
   int nrot=jacobi_kernel(a, n, d, v);
+  auto Terminate=[&]() -> void {
+    for (i=0; i<n+1; i++)
+      delete [] a[i];
+    delete [] a;
+    for (i=0; i<n+1; i++)
+      delete [] v[i];
+    delete [] v;
+    delete [] d;
+  };
   if (nrot < 0) {
     std::cerr << "Wild inconsistency\n";
+    Terminate();
     throw TerminalException{1};
   }
   for (i=0; i<n; i++)
@@ -123,13 +133,7 @@ void jacobi_double(MyMatrix<T> const& OrigMat, MyVector<T> & ListEigVal, MyMatri
   for (i=0; i<n; i++)
     for (j=0; j<n; j++)
       ListEigVect(i,j)=v[j+1][i+1];
-  for (i=0; i<n+1; i++)
-    delete [] a[i];
-  delete [] a;
-  for (i=0; i<n+1; i++)
-    delete [] v[i];
-  delete [] v;
-  delete [] d;
+  Terminate();
 }
 
 template<typename T>
