@@ -193,6 +193,12 @@ Tgr GRAPH_Read(std::istream & is)
     for (int i=0; i<eDeg; i++) {
       int eAdj;
       is >> eAdj;
+      if (eAdj < 0 || eAdj >= nbVert) {
+        std::cerr << "The vertex iVert=" << iVert << " of degree " << eDeg << "\n";
+        std::cerr << "At index i=" << i << " the adjacent vertex is " << eAdj << "\n";
+        std::cerr << "But this is not adequate as the total number of vertices is nbVert=" << nbVert << "\n";
+        throw TerminalException{1};
+      }
       eGR.AddAdjacent(iVert, eAdj);
     }
   }
