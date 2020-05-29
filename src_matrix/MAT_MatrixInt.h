@@ -618,7 +618,6 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
   int eRank=0;
   for (int iCol=0; iCol<nbCol; iCol++)
     if (IsColumnNonEmpty(eMatW, eRank, iCol)) {
-
       ListIndex.push_back(iCol);
       int iRowFound=444;
       INT_ClearColumn(eMatW, iCol, eRank, iRowFound);
@@ -1816,6 +1815,68 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
 
 
 
+template<typename Tint>
+MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const& M)
+{
+  int nb_row = M.rows();
+  int n = M.cols() / 2;
+  MyMatrix<Tint> Mwork = M;
+  MyMatrix<Tint> SympFormMat = ZeroMatrix<Tint>(2*n, 2*n);
+  for (int i=0; i<n; i++) {
+    SympFormMat(i,n+i) = 1;
+    SympFormMat(n+i,i) = -1;
+  }
+  auto GetInitialVector=[&]() -> MyMatrix<Tint> {
+    int pos=0;
+    std::vector<Tint> ListX(2*n);
+    while(true) {
+      MyVector<Tint> V = GetMatrixRow(Mwork, pos);
+      if (!IsZeroVector(V))
+        return CanonicalizeVector(V);
+      pos++;
+      if (pos == 2*n)
+        break;
+    }
+    std::cerr << "Failed to find non-zero vector\n";
+    throw TerminalException{1};
+  };
+  auto GetPairVector=[&](MyVector<Tint> const& w1) -> MyVector<Tint> {
+    std::vector<Tint> ListScal(nb_row);
+    for (int i_row=0; i_row<nb_row; i_row++) {
+      Tint eScal=0;
+      for (int i=0; i<2*n; i++)
+        eScal += w1(i) * Mwork(i_row, i);
+      ListScal[i_row] = eScal;
+    }
+    GCD_int<Tint> eGCD = ComputeGCD_information(ListScal);
+    if (T_abs(eGCD.gcd) != 1) {
+      std::cerr << "The gcd should be equal to 1\n";
+      throw TerminalException{1};
+    }
+    MyVector<Tint> SumVect = ZeroVector<Tint>(2*n);
+    for (int i_row=0; i_row<nb_row; i_row++) {
+      SumVect += GetMatrixRow(Mwork, i_row) * eGCD.ListA[i_row];
+    }
+    return SumVect;
+  };
+  MyMatrix<Tint> CompleteBasis(2*n, 2*n);
+  for (int i=0; i<n; i++) {
+    MyVector<Tint> w1 = GetInitialVector();
+    MyVector<Tint> wN = GetPairVector(w1);
+    CompleteBasis.row(i) = w1;
+    CompleteBasis.row(n + i) = wN;
+    MyVector<Tint> J_w1 = SympFormMat * w1;
+    MyVector<Tint> J_wN = SympFormMat * wN;
+    for (int i_row=0; i_row<nb_row; i_row++) {
+      MyVector<Tint> eRow = Mwork.row(i_row);
+      Tint scal1 = eRow.dot(J_w1);
+      Tint scalN = eRow.dot(J_wN);
+      MyVector<Tint> NewRow = eRow - scalN * w1 + scal1 * wN;
+      Mwork.row(i_row) = NewRow;
+    }
+  }
+  return CompleteBasis;
+}
 
 
 
