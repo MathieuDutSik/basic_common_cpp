@@ -245,6 +245,19 @@ GraphSparseImmutable(int const& _nbVert, std::vector<int> const& _ListStart, std
     }
     return ListVertexColor[iVert];
   }
+  std::pair<std::vector<int>, std::vector<int>> Get_ListStart_ListListAdj() const
+  {
+    return {ListStart, ListListAdj};
+  }
+  int GetIndex(int const& eVert, int const& fVert) const
+  {
+    int eStart=ListStart[eVert];
+    int eEnd=ListStart[eVert+1];
+    for (int i=eStart; i<eEnd; i++)
+      if (ListListAdj[i] == fVert)
+	return i;
+    return -1;
+  }
 private:
   int nbVert;
   std::vector<int> ListStart;
