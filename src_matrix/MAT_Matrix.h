@@ -944,7 +944,7 @@ struct RankTool {
   int insertion_operation(MyVector<T> & V)
   {
     int eCol = -1;
-    for (int i_line; i_line<rank; i_line++) {
+    for (int i_line=0; i_line<rank; i_line++) {
       eCol = ListICol[i_line];
       T alpha = V[eCol] / ListVect[i_line][eCol];
       V -= alpha * ListVect[i_line];
