@@ -965,7 +965,7 @@ struct RankTool {
     }
   }
 
-  bool is_in_span(MyVector<T> const& V)
+  bool is_in_span(MyVector<T> & V)
   {
     int val = insertion_operation(V);
     return val == -1;
