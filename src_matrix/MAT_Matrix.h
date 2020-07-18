@@ -946,8 +946,8 @@ struct RankTool {
     int eCol = -1;
     for (int i_line; i_line<rank; i_line++) {
       eCol = ListICol[i_line];
-      T alpha = V[eCol] / ListV[eCol];
-      V -= alpha * ListV[i_line];
+      T alpha = V[eCol] / ListVect[i_line][eCol];
+      V -= alpha * ListVect[i_line];
     }
     for (int i_dim=0; i_dim<dim; i_dim++)
       if (V[i_dim] != 0)
