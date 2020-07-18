@@ -975,7 +975,7 @@ private:
   int dim;
   std::vector<int> ListICol;
   std::vector<MyVector<T>> ListVect;
-}
+};
 
 
 
