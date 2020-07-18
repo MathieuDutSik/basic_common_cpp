@@ -934,6 +934,51 @@ struct SelectionRowCol {
 };
 
 
+template<typename T>
+struct RankTool {
+  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  RankTool(int const& eDim) : rank(0), dim(eDim), ListVect({})
+  {
+  }
+
+  int insertion_operation(MyVector<T> & V)
+  {
+    int eCol = -1;
+    for (int i_line; i_line<rank; i_line++) {
+      eCol = ListICol[i_line];
+      T alpha = V[eCol] / ListV[eCol];
+      V -= alpha * ListV[i_line];
+    }
+    for (int i_dim=0; i_dim<dim; i_dim++)
+      if (V[i_dim] != 0)
+        return i_dim;
+    return -1;
+  }
+
+  void insert_if_indep(MyVector<T> & V)
+  {
+    int val = insertion_operation(V);
+    if (val != -1) {
+      rank++;
+      ListICol.push_back(val);
+      ListVect.push_back(V);
+    }
+  }
+
+  bool is_in_span(MyVector<T> const& V)
+  {
+    int val = insertion_operation(V);
+    return val == -1;
+  }
+private:
+  int rank;
+  int dim;
+  std::vector<int> ListICol;
+  std::vector<MyVector<T>> ListVect;
+}
+
+
+
 
 
 // The NSP array is assigned to NullspaceMat(TransposedMat(Input))
