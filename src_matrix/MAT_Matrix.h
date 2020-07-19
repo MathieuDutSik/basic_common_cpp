@@ -937,38 +937,39 @@ struct SelectionRowCol {
 template<typename T>
 struct RankTool {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
-  RankTool(int const& eDim) : rank(0), dim(eDim), ListVect({})
+
+  RankTool(int const& eDim) : rank(0), dim(eDim), ListICol({}), ListVect({})
   {
   }
 
   int insertion_operation(MyVector<T> & V)
   {
-    int eCol = -1;
     for (int i_line=0; i_line<rank; i_line++) {
-      eCol = ListICol[i_line];
-      T alpha = V[eCol] / ListVect[i_line][eCol];
-      V -= alpha * ListVect[i_line];
+      int eCol = ListICol[i_line];
+      V -= V[eCol] * ListVect[i_line];
     }
     for (int i_dim=0; i_dim<dim; i_dim++)
-      if (V[i_dim] != 0)
+      if (V[i_dim] != 0) {
+        V /= V[i_dim];
         return i_dim;
+      }
     return -1;
   }
 
   void insert_if_indep(MyVector<T> & V)
   {
-    int val = insertion_operation(V);
-    if (val != -1) {
+    int i_col = insertion_operation(V);
+    if (i_col != -1) {
       rank++;
-      ListICol.push_back(val);
+      ListICol.push_back(i_col);
       ListVect.push_back(V);
     }
   }
 
   bool is_in_span(MyVector<T> & V)
   {
-    int val = insertion_operation(V);
-    return val == -1;
+    int i_col = insertion_operation(V);
+    return i_col == -1;
   }
 
   int get_rank() const
