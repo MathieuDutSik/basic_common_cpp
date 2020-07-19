@@ -970,6 +970,11 @@ struct RankTool {
     int val = insertion_operation(V);
     return val == -1;
   }
+
+  int get_rank() const
+  {
+    return rank;
+  }
 private:
   int rank;
   int dim;
