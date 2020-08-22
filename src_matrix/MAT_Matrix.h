@@ -1586,7 +1586,6 @@ MyMatrix<T> MyMatrixFromSparseMatrix(MySparseMatrix<T> const& eMat)
 {
   int nbRow=eMat.rows();
   int nbCol=eMat.cols();
-  int nnz=eMat.nonZeros();
   MyMatrix<T> M=ZeroMatrix<T>(nbRow,nbCol);
   for (int k=0; k<eMat.outerSize(); ++k)
     for (typename MySparseMatrix<T>::InnerIterator it(eMat,k); it; ++it) {
