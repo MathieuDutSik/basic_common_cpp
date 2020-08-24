@@ -405,7 +405,7 @@ std::string GetCurrentDirectory()
   std::string eRet = buf.data();
   eRet=eRet + "/";
   if (ptr != NULL) {
-    if (ptr != buf) {
+    if (ptr != buf.data()) {
       std::cerr << "Before ptr freeing\n";
       std::free(ptr);
       std::cerr << "After ptr freeing\n";
