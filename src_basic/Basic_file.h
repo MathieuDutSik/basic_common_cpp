@@ -396,20 +396,18 @@ int FILE_GetNumberLine(std::string const& eFile)
 std::string GetCurrentDirectory()
 {
   int size = pathconf(".", _PC_PATH_MAX);
-  char *ptr;
   std::vector<char> buf(size);
-  ptr=getcwd(buf.data(), (size_t)size);
+  char* ptr=getcwd(buf.data(), (size_t)size);
   if (ptr == NULL && errno != ERANGE) {
     std::cerr << "Error while trying to use getcwd\n";
     throw TerminalException{1};
   }
   std::string eRet = buf.data();
   eRet=eRet + "/";
-  free(buf);
   if (ptr != NULL) {
     if (ptr != buf) {
       std::cerr << "Before ptr freeing\n";
-      free(ptr);
+      std::free(ptr);
       std::cerr << "After ptr freeing\n";
     }
   }
