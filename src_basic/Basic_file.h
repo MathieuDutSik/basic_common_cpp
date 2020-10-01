@@ -395,30 +395,22 @@ int FILE_GetNumberLine(std::string const& eFile)
 std::string GetCurrentDirectory()
 {
   int size = pathconf(".", _PC_PATH_MAX);
-  char *buf;
-  char *ptr;
-  if ((buf = (char *)malloc((size_t)size)) != NULL) {
-    ptr=getcwd(buf, (size_t)size);
-    if (ptr == NULL && errno != ERANGE) {
-      std::cerr << "Error while trying to use getcwd\n";
-      throw TerminalException{1};
-    }
-    std::string eRet = buf;
-    eRet=eRet + "/";
-    free(buf);
-    if (ptr != NULL) {
-      if (ptr != buf) {
-	std::cerr << "Before ptr freeing\n";
-	free(ptr);
-	std::cerr << "After ptr freeing\n";
-      }
-    }
-    return eRet;
-  }
-  else {
-    std::cerr << "Not enough memory\n";
+  std::vector<char> buf(size);
+  char* ptr=getcwd(buf.data(), (size_t)size);
+  if (ptr == NULL && errno != ERANGE) {
+    std::cerr << "Error while trying to use getcwd\n";
     throw TerminalException{1};
   }
+  std::string eRet = buf.data();
+  eRet=eRet + "/";
+  if (ptr != NULL) {
+    if (ptr != buf.data()) {
+      std::cerr << "Before ptr freeing\n";
+      std::free(ptr);
+      std::cerr << "After ptr freeing\n";
+    }
+  }
+  return eRet;
 }
 #endif
 

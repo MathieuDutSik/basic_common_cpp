@@ -1353,7 +1353,7 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       }
     return true;
   };
-  auto GetEmbeddingMatrix=[&nbEdge,&ListEdge,&GetGraphIdentityEdge,&GraphIntersectionOne,&ExtendListLabel,&CheckEmbedding](MyMatrix<std::vector<int> > const& MCEwork, MyMatrix<int> & FinalEmbed) -> bool {
+  auto GetEmbeddingMatrix=[&ListEdge,&GetGraphIdentityEdge,&GraphIntersectionOne,&ExtendListLabel,&CheckEmbedding](MyMatrix<std::vector<int> > const& MCEwork, MyMatrix<int> & FinalEmbed) -> bool {
     std::cerr << "GetEmbeddingMatrix, step 1\n";
     /*
     for (int iEdge=0; iEdge<nbEdge; iEdge++)

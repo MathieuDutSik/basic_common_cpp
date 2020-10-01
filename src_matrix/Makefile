@@ -17,9 +17,9 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number
 
 
-CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(LIBSHORT_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) -I$(FLINT_INCDIR)
+CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) -I$(FLINT_INCDIR)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LIBSHORT_LINK) $(FLINT_LINK)
+LIBS		= -lm $(GMP_CXX_LINK) -pthread $(FLINT_LINK)
 
 %.o: %.cpp
 	@echo

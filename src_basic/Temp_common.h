@@ -18,7 +18,6 @@
 // C-style includes
 
 #include <ctype.h>
-#include <malloc.h>
 #include <unistd.h>
 #include <getopt.h>
 #include <chrono>
