@@ -26,9 +26,9 @@ std::string STRING_GETENV(std::string const& eStr)
 
 bool STRING_IsStringReduceToSpace(std::string const& eStr)
 {
-  int len=eStr.length();
+  size_t len=eStr.length();
   std::string eChar=" ";
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     std::string eSubChar=eStr.substr(i,1);
     if (eSubChar != eChar)
       return false;
@@ -40,8 +40,8 @@ bool STRING_IsStringReduceToSpace(std::string const& eStr)
 
 int STRING_GetCharPositionInString(std::string const& eStr, std::string const& eChar)
 {
-  int len=eStr.length();
-  for (int i=0; i<len; i++) {
+  size_t len=eStr.length();
+  for (size_t i=0; i<len; i++) {
     std::string eSubChar=eStr.substr(i,1);
     if (eSubChar == eChar)
       return i;
@@ -53,16 +53,16 @@ int STRING_GetCharPositionInString(std::string const& eStr, std::string const& e
 std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<std::string,std::string>> const& ListSubst)
 {
   std::string retStr;
-  int len=FileIN.size();
-  int pos=0;
+  size_t len=FileIN.size();
+  size_t pos=0;
   std::string CharDollar="$";
-  auto GetIPair=[&](int const& pos) -> int {
-    std::vector<int> ListMatch;
-    for (int iPair=0; iPair<int(ListSubst.size()); iPair++) {
+  auto GetIPair=[&](size_t const& pos_inp) -> std::ptrdiff_t {
+    std::vector<size_t> ListMatch;
+    for (size_t iPair=0; iPair<ListSubst.size(); iPair++) {
       std::string eStr=ListSubst[iPair].first;
-      int lenStr=eStr.size();
-      if (pos+lenStr < len) {
-	std::string eSubStr=FileIN.substr(pos, lenStr);
+      size_t lenStr=eStr.size();
+      if (pos_inp + lenStr < len) {
+	std::string eSubStr=FileIN.substr(pos_inp, lenStr);
 	if (eSubStr == eStr)
 	  ListMatch.push_back(iPair);
       }
@@ -83,13 +83,13 @@ std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<
     std::string eChar=FileIN.substr(pos,1);
     if (eChar == CharDollar) {
       pos++;
-      int iPair=GetIPair(pos);
+      std::ptrdiff_t iPair=GetIPair(pos);
       if (iPair == -1) {
 	retStr += eChar;
       }
       else {
-	retStr += ListSubst[iPair].second;
-	pos += int(ListSubst[iPair].first.size());
+	retStr += ListSubst[size_t(iPair)].second;
+	pos += ListSubst[size_t(iPair)].first.size();
       }
     }
     else {
@@ -104,12 +104,12 @@ std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<
 bool IsFullyNumeric(std::string const& eStr)
 {
   std::string eLS=" 0123456789.";
-  int nbChar=eStr.size();
-  for (int uChar=0; uChar<nbChar; uChar++) {
+  size_t nbChar=eStr.size();
+  for (size_t uChar=0; uChar<nbChar; uChar++) {
     std::string eChar=eStr.substr(uChar,1);
     auto TheFind=[&](std::string const& eCharIn) -> bool {
-      int nbCase=eLS.size();
-      for (int iCase=0; iCase<nbCase; iCase++) {
+      size_t nbCase=eLS.size();
+      for (size_t iCase=0; iCase<nbCase; iCase++) {
 	std::string eCase=eLS.substr(iCase,1);
 	if (eCase == eCharIn)
 	  return true;
@@ -173,8 +173,7 @@ std::string IntToString(int const & x)
 int StringToInt(std::string const& str)
 {
   int val;
-  std::istringstream s;
-  s >> val;
+  std::istringstream(str) >> val;
   return val;
 }
 
@@ -242,22 +241,22 @@ std::string UpperCaseToLowerCase(std::string const& dataIn)
 
 std::string STRING_RemoveSpacesBeginningEnd(std::string const& eStr)
 {
-  int len=eStr.size();
+  size_t len=eStr.size();
   std::vector<int> ListIsSpace(len,0);
   std::string eSpace=" ";
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     std::string eChar=eStr.substr(i, 1);
     if (eChar == eSpace)
       ListIsSpace[i]=1;
   }
-  int PosLow=-1;
-  for (int i=0; i<len; i++)
+  std::ptrdiff_t PosLow=-1;
+  for (size_t i=0; i<len; i++)
     if (PosLow == -1)
       if (ListIsSpace[i] == 0)
 	PosLow=i;
-  int PosUpp=-1;
-  for (int i=0; i<len; i++) {
-    int j=len-1-i;
+  std::ptrdiff_t PosUpp=-1;
+  for (size_t i=0; i<len; i++) {
+    size_t j=len-1-i;
     if (PosUpp == -1)
       if (ListIsSpace[j] == 0)
 	PosUpp=j;
@@ -266,7 +265,7 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const& eStr)
   if (PosLow == -1) {
     return RetStr;
   }
-  for (int iPos=PosLow; iPos<PosUpp+1; iPos++) {
+  for (size_t iPos=PosLow; iPos<=size_t(PosUpp); iPos++) {
     RetStr += eStr.at(iPos);
   }
   return RetStr;
@@ -278,36 +277,36 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const& eStr)
 // Example of use eStrA="A B C D" and eStrB=" "
 std::vector<std::string> STRING_Split(std::string const& eStrA, std::string const& eStrB)
 {
-  int lenA=eStrA.length();
-  int lenB=eStrB.length();
+  size_t lenA=eStrA.length();
+  size_t lenB=eStrB.length();
   std::vector<int> ListStatus(lenA,1);
-  for (int iA=0; iA<lenA - lenB; iA++)
+  for (size_t iA=0; iA<lenA - lenB; iA++)
     if (ListStatus[iA] == 1) {
       bool IsMatch=true;
-      for (int iB=0; iB<lenB; iB++) {
+      for (size_t iB=0; iB<lenB; iB++) {
 	std::string eCharA=eStrA.substr(iA+iB,1);
 	std::string eCharB=eStrB.substr(iB,1);
 	if (eCharA != eCharB)
 	  IsMatch=false;
       }
       if (IsMatch)
-	for (int iB=0; iB<lenB; iB++)
+	for (size_t iB=0; iB<lenB; iB++)
 	  ListStatus[iA + iB]=0;
     }
   std::vector<std::string> RetList;
   std::string eFound;
-  for (int iA=0; iA<lenA; iA++) {
+  for (size_t iA=0; iA<lenA; iA++) {
     std::string eChar=eStrA.substr(iA, 1);
     if (ListStatus[iA] == 1)
       eFound += eChar;
     if (ListStatus[iA] == 0) {
-      int siz=eFound.length();
+      size_t siz=eFound.length();
       if (siz > 0)
 	RetList.push_back(eFound);
       eFound="";
     }
   }
-  int siz=eFound.size();
+  size_t siz=eFound.size();
   if (siz > 0)
     RetList.push_back(eFound);
   return RetList;
@@ -317,18 +316,18 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
 // and we return a standard vector of [hs0, hs1]
 std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::vector<std::string> const& LStr)
 {
-  int len1=LStr[0].size();
-  int lentot=strin.size();
+  size_t len1=LStr[0].size();
+  size_t lentot=strin.size();
   std::string estr=strin.substr(0, len1);
   if (estr != LStr[0]) {
     return {};
   }
-  int pos=len1;
-  int nbBlock=LStr.size()-1;
+  size_t pos=len1;
+  size_t nbBlock=LStr.size()-1;
   std::vector<std::string> LRet(nbBlock);
-  auto GetInit=[&](std::string const& strSearch, int const& posStart) -> int {
-    int lenSearch=strSearch.size();
-    for (int posi=pos; posi<=lentot-lenSearch; posi++) {
+  auto GetInit=[&](std::string const& strSearch, size_t const& posStart) -> std::ptrdiff_t {
+    size_t lenSearch=strSearch.size();
+    for (size_t posi=posStart; posi<=lentot-lenSearch; posi++) {
       std::string strO = strin.substr(posi, lenSearch);
       if (strO == strSearch) {
         return posi;
@@ -336,14 +335,14 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
     }
     return -1;
   };
-  for (int iBlock=0; iBlock<nbBlock; iBlock++) {
+  for (size_t iBlock=0; iBlock<nbBlock; iBlock++) {
     std::string strSearch = LStr[iBlock+1];
-    int lenS = strSearch.size();
-    int posF = GetInit(strSearch, pos);
+    size_t lenS = strSearch.size();
+    std::ptrdiff_t posF = GetInit(strSearch, pos);
     if (posF == -1) {
       return {};
     }
-    int lenO = posF - pos;
+    size_t lenO = posF - pos;
     std::string strO = strin.substr(pos, lenO);
     LRet[iBlock] = strO;
     pos += lenO + lenS;
@@ -371,17 +370,17 @@ std::vector<int> STRING_Split_Int(std::string const& eStrA, std::string const& e
 // of entries as {"", "", ""}, i.e. last and first entry and entry in the middle
 std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::string const& eStrB)
 {
-  int lenA=eStrA.length();
-  int lenB=eStrB.length();
-  std::vector<int> ListStatus(lenA,0);
-  int idx=0;
-  for (int iA=0; iA<lenA - lenB; iA++) {
-    int sumEnt=0;
-    for (int iB=0; iB<lenB; iB++)
+  size_t lenA=eStrA.length();
+  size_t lenB=eStrB.length();
+  std::vector<size_t> ListStatus(lenA,0);
+  size_t idx=0;
+  for (size_t iA=0; iA<lenA - lenB; iA++) {
+    size_t sumEnt=0;
+    for (size_t iB=0; iB<lenB; iB++)
       sumEnt += ListStatus[iA+iB];
     if (sumEnt == 0) {
       bool IsMatch=true;
-      for (int iB=0; iB<lenB; iB++) {
+      for (size_t iB=0; iB<lenB; iB++) {
 	std::string eCharA=eStrA.substr(iA+iB,1);
 	std::string eCharB=eStrB.substr(iB,1);
 	if (eCharA != eCharB)
@@ -389,21 +388,21 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
       }
       if (IsMatch) {
 	idx++;
-	for (int iB=0; iB<lenB; iB++)
+	for (size_t iB=0; iB<lenB; iB++)
 	  ListStatus[iA + iB]=idx;
       }
     }
   }
-  int nbEnt=idx+1;
+  size_t nbEnt=idx+1;
   std::vector<std::string> RetList(nbEnt);
-  for (int iEnt=0; iEnt<nbEnt; iEnt++) {
-    int posFirst=-1, posLast=-1;
+  for (size_t iEnt=0; iEnt<nbEnt; iEnt++) {
+    std::ptrdiff_t posFirst=-1, posLast=-1;
     if (iEnt == 0) {
       posFirst=0;
     }
     else {
       bool WeFound=false;
-      for (int iA=0; iA<lenA; iA++)
+      for (size_t iA=0; iA<lenA; iA++)
 	if (!WeFound)
 	  if (ListStatus[iA] == iEnt) {
 	    WeFound=true;
@@ -415,7 +414,7 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
     }
     else {
       bool WeFound=false;
-      for (int iA=0; iA<lenA; iA++)
+      for (size_t iA=0; iA<lenA; iA++)
 	if (!WeFound)
 	  if (ListStatus[iA] == iEnt+1) {
 	    WeFound=true;
@@ -428,7 +427,7 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
       throw TerminalException{1};
     }
     std::string str;
-    for (int i=posFirst; i<=posLast; i++) {
+    for (size_t i=posFirst; i<=size_t(posLast); i++) {
       std::string eChar=eStrA.substr(i,1);
       str += eChar;
     }
@@ -440,13 +439,10 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
 
 std::string STRING_Replace(std::string const&eStrA, std::string const& eStrB, std::string const& eStrC)
 {
-  //  std::cerr << "Before STRING_Split_Strict eStrA=" << eStrA << " eStrB=" << eStrB << "\n";
   std::vector<std::string> LStr=STRING_Split(eStrA, eStrB);
-  //  std::cerr << " After STRING_Split_Strict\n";
   std::string str=LStr[0];
-  int len=LStr.size();
-  //  std::cerr << " len=" << len << "\n";
-  for (int i=1; i<len; i++)
+  size_t len=LStr.size();
+  for (size_t i=1; i<len; i++)
     str += eStrC + LStr[i];
   return str;
 }
@@ -464,14 +460,14 @@ std::vector<std::string> STRING_SplitCharNb(std::string const& str)
 	return true;
     return false;
   };
-  int len=str.size();
+  size_t len=str.size();
   std::vector<bool> ListStat(len);
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     std::string eChar=str.substr(i,1);
     ListStat[i]=IsNumber(eChar);
   }
   std::string TotStr;
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     TotStr += str.substr(i,1);
     if (i<len-1) {
       if (ListStat[i] != ListStat[i+1]) {

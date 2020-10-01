@@ -258,12 +258,12 @@ std::vector<T> ReadStdVector(std::istream &is)
 template<typename T>
 void WriteMatrix(std::ostream &os, MyMatrix<T> const&TheMat)
 {
-  int nbRow=TheMat.rows();
-  int nbCol=TheMat.cols();
+  long nbRow=TheMat.rows();
+  long nbCol=TheMat.cols();
   //  TerminalEnding();
   os << nbRow << " " << nbCol << "\n";
-  for (int iRow=0; iRow<nbRow; iRow++) {
-    for (int iCol=0; iCol<nbCol; iCol++) {
+  for (long iRow=0; iRow<nbRow; iRow++) {
+    for (long iCol=0; iCol<nbCol; iCol++) {
       T eVal=TheMat(iRow, iCol);
       os << " " << eVal;
     }
@@ -996,30 +996,30 @@ template<typename T>
 SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
-  int nbRow=Input.rows();
-  int nbCol=Input.cols();
-  int maxRank=nbRow;
+  size_t nbRow=Input.rows();
+  size_t nbCol=Input.cols();
+  size_t maxRank=nbRow;
   if (nbCol < maxRank)
     maxRank=nbCol;
-  int sizMat=maxRank+1;
+  size_t sizMat=maxRank+1;
   MyMatrix<T> provMat(sizMat, nbCol);
   std::vector<int> ListColSelect;
   std::vector<int> ListRowSelect;
   std::vector<int> ListColSelect01(nbCol,0);
-  int eRank=0;
-  for (int iRow=0; iRow<nbRow; iRow++) {
-    for (int iCol=0; iCol<nbCol; iCol++)
+  size_t eRank=0;
+  for (size_t iRow=0; iRow<nbRow; iRow++) {
+    for (size_t iCol=0; iCol<nbCol; iCol++)
       provMat(eRank, iCol)=Input(iRow, iCol);
-    for (int iRank=0; iRank<eRank; iRank++) {
+    for (size_t iRank=0; iRank<eRank; iRank++) {
       int eCol=ListColSelect[iRank];
       T eVal1=provMat(eRank, eCol);
       if (eVal1 != 0) {
-	for (int iCol=0; iCol<nbCol; iCol++)
+	for (size_t iCol=0; iCol<nbCol; iCol++)
 	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
       }
     }
-    int FirstNonZeroCol=-1;
-    for (int iCol=0; iCol<nbCol; iCol++)
+    std::ptrdiff_t FirstNonZeroCol=-1;
+    for (size_t iCol=0; iCol<nbCol; iCol++)
       if (FirstNonZeroCol == -1) {
 	T eVal=provMat(eRank, iCol);
 	if (eVal != 0)
@@ -1028,28 +1028,28 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
     if (FirstNonZeroCol != -1) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListRowSelect.push_back(iRow);
-      ListColSelect01[FirstNonZeroCol]=1;
+      ListColSelect01[size_t(FirstNonZeroCol)]=1;
       T eVal=provMat(eRank, FirstNonZeroCol);
       T eVal2=1/eVal;
-      for (int iCol=0; iCol<nbCol; iCol++)
+      for (size_t iCol=0; iCol<nbCol; iCol++)
 	provMat(eRank, iCol) *= eVal2;
-      for (int iRank=0; iRank<eRank; iRank++) {
+      for (size_t iRank=0; iRank<eRank; iRank++) {
 	T eVal1=provMat(iRank, FirstNonZeroCol);
 	if (eVal1 != 0) {
-	  for (int iCol=0; iCol<nbCol; iCol++)
+	  for (size_t iCol=0; iCol<nbCol; iCol++)
 	    provMat(iRank, iCol) -= eVal1*provMat(eRank, iCol);
 	}
       }
       eRank++;
     }
   }
-  int nbVectZero=nbCol - eRank;
+  size_t nbVectZero=nbCol - eRank;
   MyMatrix<T> NSP=ZeroMatrix<T>(nbVectZero, nbCol);
-  int nbVect=0;
-  for (int iCol=0; iCol<nbCol; iCol++)
+  size_t nbVect=0;
+  for (size_t iCol=0; iCol<nbCol; iCol++)
     if (ListColSelect01[iCol] == 0) {
       NSP(nbVect, iCol)=1;
-      for (int iRank=0; iRank<eRank; iRank++) {
+      for (size_t iRank=0; iRank<eRank; iRank++) {
 	int eCol=ListColSelect[iRank];
 	NSP(nbVect, eCol)=-provMat(iRank, iCol);
       }
@@ -1155,40 +1155,39 @@ template<typename T>
 T DeterminantMatKernel(MyMatrix<T> const&TheMat)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
-  int n, i, j, k, jSel;
   T TheDet, hVal, alpha;
   T eVal1, eVal2, nVal;
-  n=TheMat.rows();
+  size_t n=TheMat.rows();
   MyMatrix<T> WorkMat = TheMat;
-  std::vector<int> eVectPos(n,-1);
+  std::vector<std::ptrdiff_t> eVectPos(n,-1);
   TheDet=1;
-  for (i=0; i<n; i++) {
-    jSel=-1;
-    for (j=0; j<n; j++)
+  for (size_t i=0; i<n; i++) {
+    std::ptrdiff_t jSel = -1;
+    for (size_t j=0; j<n; j++)
       if (eVectPos[j] == -1) {
 	hVal=WorkMat(i, j);
 	if (hVal != 0)
-	  jSel=j;
+	  jSel = j;
       }
     if (jSel == -1) {
       TheDet=0;
       return TheDet;
     }
-    eVectPos[jSel]=i;
-    for (j=0; j<n; j++)
-      if (j != jSel) {
+    eVectPos[size_t(jSel)]=i;
+    for (size_t j=0; j<n; j++)
+      if (j != size_t(jSel)) {
 	eVal1=WorkMat(i, j);
 	eVal2=WorkMat(i, jSel);
 	alpha=eVal1/eVal2;
-	for (k=0; k<n; k++) {
+	for (size_t k=0; k<n; k++) {
 	  nVal=WorkMat(k, j) - alpha*WorkMat(k, jSel);
 	  WorkMat(k, j)=nVal;
 	}
       }
     TheDet=TheDet*WorkMat(i, jSel);
   }
-  for (i=0; i<n-1; i++)
-    for (j=i+1; j<n; j++)
+  for (size_t i=0; i<n-1; i++)
+    for (size_t j=i+1; j<n; j++)
       if (eVectPos[i] > eVectPos[j])
 	TheDet=-TheDet;
   return TheDet;
@@ -1273,12 +1272,12 @@ MyVector<T> OrthogonalHyperplane(MyMatrix<T> const& M)
 template<typename T>
 MyMatrix<T> SelectRow(MyMatrix<T> const&TheMat, std::vector<int> const& eList)
 {
-  int nbRowRed=eList.size();
-  int nbCol=TheMat.cols();
+  size_t nbRowRed=eList.size();
+  size_t nbCol=TheMat.cols();
   MyMatrix<T> TheProv(nbRowRed, nbCol);
-  for (int iRow=0; iRow<nbRowRed; iRow++) {
-    int jRow=eList[iRow];
-    for (int iCol=0; iCol<nbCol; iCol++)
+  for (size_t iRow=0; iRow<nbRowRed; iRow++) {
+    size_t jRow=eList[iRow];
+    for (size_t iCol=0; iCol<nbCol; iCol++)
       TheProv(iRow, iCol)=TheMat(jRow, iCol);
   }
   return TheProv;
@@ -1289,12 +1288,12 @@ MyMatrix<T> SelectRow(MyMatrix<T> const&TheMat, std::vector<int> const& eList)
 template<typename T>
 MyMatrix<T> SelectColumn(MyMatrix<T> const& TheMat, std::vector<int> const& eList)
 {
-  int nbRow=TheMat.rows();
-  int nbColRed=eList.size();
+  size_t nbRow=TheMat.rows();
+  size_t nbColRed=eList.size();
   MyMatrix<T> TheProv(nbRow, nbColRed);
-  for (int iCol=0; iCol<nbColRed; iCol++) {
-    int jCol=eList[iCol];
-    for (int iRow=0; iRow<nbRow; iRow++)
+  for (size_t iCol=0; iCol<nbColRed; iCol++) {
+    size_t jCol=eList[iCol];
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       TheProv(iRow, iCol)=TheMat(iRow, jCol);
   }
   return TheProv;
@@ -1436,12 +1435,12 @@ std::vector<int> ColumnReductionSet(MyMatrix<T> const& eMatIn)
 template<typename T>
 MyMatrix<T> ColRowSymmetricMatrix(MyMatrix<T> const& M, std::vector<int> const& LSel)
 {
-  int siz=LSel.size();
+  size_t siz=LSel.size();
   MyMatrix<T> Mred(siz, siz);
-  for (int i=0; i<siz; i++)
-    for (int j=0; j<siz; j++) {
-      int iFull=LSel[i];
-      int jFull=LSel[j];
+  for (size_t i=0; i<siz; i++)
+    for (size_t j=0; j<siz; j++) {
+      size_t iFull=LSel[i];
+      size_t jFull=LSel[j];
       Mred(i,j)=M(iFull,jFull);
     }
   return Mred;
@@ -1586,7 +1585,6 @@ MyMatrix<T> MyMatrixFromSparseMatrix(MySparseMatrix<T> const& eMat)
 {
   int nbRow=eMat.rows();
   int nbCol=eMat.cols();
-  int nnz=eMat.nonZeros();
   MyMatrix<T> M=ZeroMatrix<T>(nbRow,nbCol);
   for (int k=0; k<eMat.outerSize(); ++k)
     for (typename MySparseMatrix<T>::InnerIterator it(eMat,k); it; ++it) {
@@ -2074,10 +2072,10 @@ inline typename std::enable_if<is_float_arithmetic<T>::value,MyVector<T>>::type 
 template<typename T, typename Tint>
 T EvaluationQuadForm(MyMatrix<T> const& eMat, MyVector<Tint> const& eVect)
 {
-  int n=eVect.size();
+  size_t n=eVect.size();
   T eSum=0;
-  for (int i=0; i<n; i++)
-    for (int j=0; j<n; j++) {
+  for (size_t i=0; i<n; i++)
+    for (size_t j=0; j<n; j++) {
       Tint eVal12=eVect(i)*eVect(j);
       T eVal=eMat(i,j);
       eSum += eVal12*eVal;
@@ -2094,16 +2092,16 @@ template<typename T>
 MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const& inputMat)
 {
   MyMatrix<T> WorkMat = inputMat;
-  int nbRow=WorkMat.rows();
-  int nbCol=WorkMat.cols();
+  size_t nbRow=WorkMat.rows();
+  size_t nbCol=WorkMat.cols();
   std::vector<int> ColStatus(nbCol,1);
   std::vector<int> RowStatus(nbRow,1);
-  for (int iRow=0; iRow<nbRow; iRow++) {
+  for (size_t iRow=0; iRow<nbRow; iRow++) {
     int FoundRow=-1;
     int FoundCol=-1;
     T MaxValue=0;
-    for (int eRow=0; eRow<nbRow; eRow++) {
-      for (int eCol=0; eCol<nbCol; eCol++) {
+    for (size_t eRow=0; eRow<nbRow; eRow++) {
+      for (size_t eCol=0; eCol<nbCol; eCol++) {
 	if (ColStatus[eCol] == 1 && RowStatus[eRow] == 1) {
 	  T aVal = T_abs(WorkMat(eRow, eCol));
 	  if (FoundRow == -1) {
@@ -2127,7 +2125,7 @@ MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const& inputMat)
     for (int eRow=0; eRow<nbRow; eRow++) {
       if (eRow != FoundRow) {
 	T alpha=WorkMat(eRow, FoundCol) / WorkMat(FoundRow, FoundCol);
-	for (int iCol=0; iCol<nbCol; iCol++)
+	for (size_t iCol=0; iCol<nbCol; iCol++)
 	  WorkMat(eRow, iCol) -= alpha * WorkMat(FoundRow, iCol);
       }
     }

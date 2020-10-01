@@ -495,7 +495,7 @@ void TYPE_CONVERSION(mpz_class const& a1, mpq_class & a2)
 void TYPE_CONVERSION(mpz_class const& a1, int & a2)
 {
   long eVal_long=a1.get_si();
-  a2=eVal_long;
+  a2=int(eVal_long);
 }
 
 
@@ -581,7 +581,7 @@ void NearestInteger(long const& xI, mpq_class & xO)
 void NearestInteger(mpq_class const& xI, int & xO)
 {
     mpq_class xO_q=NearestInteger_rni(xI);
-    xO = xO_q.get_num().get_si();
+    xO = int(xO_q.get_num().get_si());
 }
 
 void NearestInteger(mpq_class const& xI, long & xO)

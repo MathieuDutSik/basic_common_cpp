@@ -246,8 +246,8 @@ void WriteStdVectorStdVectorGAP(std::ostream & os, std::vector<std::vector<T> > 
       os << ",\n";
     IsFirstVect=false;
     os << "[";
-    int siz=eVect.size();
-    for (int i=0; i<siz; i++) {
+    size_t siz=eVect.size();
+    for (size_t i=0; i<siz; i++) {
       if (i>0)
         os << ",";
       os << eVect[i];
@@ -323,10 +323,10 @@ CollectedResult<T> Collected(std::vector<T> const& eVect)
   std::vector<T> LVal;
   for (auto & eVal : SetVal)
     LVal.push_back(eVal);
-  int eSize=LVal.size();
+  size_t eSize=LVal.size();
   std::vector<int> LMult(eSize,0);
   auto UpPosition=[&](T const& eVal) -> void {
-    for (int i=0; i<eSize; i++)
+    for (size_t i=0; i<eSize; i++)
       if (LVal[i] == eVal) {
 	LMult[i] += 1;
 	return;
@@ -339,14 +339,14 @@ CollectedResult<T> Collected(std::vector<T> const& eVect)
   return {LVal, LMult};
 }
 
-int NextIdx(int const& len,int const& i)
+inline int NextIdx(int const& len,int const& i)
 {
   if (i == len-1)
     return 0;
   return i+1;
 }
 
-int PrevIdx(int const& len,int const& i)
+inline int PrevIdx(int const& len,int const& i)
 {
   if (i == 0)
     return len-1;
@@ -370,10 +370,10 @@ struct EquivTest {
 };
 
 
-std::vector<int> StdVectorFirstNentries(int const& N)
+std::vector<int> StdVectorFirstNentries(size_t const& N)
 {
   std::vector<int> eList(N);
-  for (int i=0; i<N; i++)
+  for (size_t i=0; i<N; i++)
     eList[i]=i;
   return eList;
 }
@@ -405,12 +405,12 @@ bool IsVectorConstant(std::vector<T> const& V)
 
 void WriteVectorInt_GAP(std::ostream &os, std::vector<int> const& OneInc)
 {
-  int siz=OneInc.size();
+  size_t siz=OneInc.size();
   os << "[";
-  for (int i=0; i<siz; i++) {
+  for (size_t i=0; i<siz; i++) {
     if (i>0)
       os << ",";
-    int eVal=OneInc[i]+1;
+    size_t eVal=OneInc[i]+1;
     os << eVal;
   }
   os << "]";
@@ -524,7 +524,7 @@ template<typename T>
 std::pair<std::vector<int>,std::vector<int>> SortingLists(std::vector<T> const & ListV)
 {
   struct PairData {
-    std::size_t i;
+    size_t i;
     T x;
   };
   std::size_t len=ListV.size();
@@ -543,10 +543,10 @@ std::pair<std::vector<int>,std::vector<int>> SortingLists(std::vector<T> const &
        });
   std::vector<int> v1(len);
   std::vector<int> v2(len);
-  for (std::size_t i=0; i<len; i++) {
-    int eIdx=ListPair[i].i;
-    v1[i]=eIdx;
-    v2[eIdx]=i;
+  for (size_t i=0; i<len; i++) {
+    size_t eIdx=int(ListPair[i].i);
+    v1[i]=int(eIdx);
+    v2[eIdx]=int(i);
   }
   return {v1,v2};
 }
