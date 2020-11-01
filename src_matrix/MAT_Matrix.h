@@ -7,6 +7,7 @@
 
 #include "Temp_common.h"
 #include "Basic_string.h"
+#include "hash_functions.h"
 
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
@@ -2187,6 +2188,63 @@ bool IsSymmetricMatrix(MyMatrix<T> const& M)
 	return false;
   return true;
 }
+
+
+
+
+template<typename T>
+int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
+{
+  int TheChoice=4;
+  if (TheChoice == 1) {
+    T TheDet=DeterminantMat(NewMat);
+    int TheDet_i = UniversalTypeConversion<int,T>(TheDet);
+    return TheDet_i % n_pes;
+  }
+  if (TheChoice == 2) {
+    int nRow=NewMat.rows();
+    int nCol=NewMat.cols();
+    int TheInvariant=0;
+    for (int iRow=0; iRow<nRow; iRow++)
+      for (int iCol=0; iCol<nCol; iCol++) {
+        int eCoeff1 = 3 + 5*iRow + 7*iCol;
+        int eVal=NewMat(iRow,iCol);
+        int eCoeff2;
+        if (eVal < 0)
+          eCoeff2 = -2*eVal;
+        else
+          eCoeff2 = 2*eVal + 1;
+        TheInvariant += eCoeff1 * eCoeff2;
+      }
+    return TheInvariant % n_pes;
+  }
+  if (TheChoice == 3) {
+    std::stringstream s;
+    int nbRow=NewMat.rows();
+    int nbCol=NewMat.cols();
+    for (int iRow=0; iRow<nbRow; iRow++)
+      for (int iCol=0; iCol<nbCol; iCol++)
+        s << " " << NewMat(iRow, iCol);
+    std::string converted(s.str());
+    mpz_class e_hash_mpz = MD5_hash_mpz(converted);
+    mpz_class e_modulo = n_pes;
+    mpz_class e_res = e_hash_mpz % e_modulo;
+    int residue = UniversalTypeConversion<int,mpz_class>(e_res);
+    return residue;
+  }
+  if (TheChoice == 4) {
+    T* ptr_T = NewMat.data();
+    uint8_t* ptr_i = (uint8_t*)ptr_T;
+    uint32_t seed= 0x1b873540;
+    size_t len = sizeof(T) * NewMat.size();
+    uint32_t e_hash = murmur3_32(ptr_i, len, seed)
+    mpz_class e_res = e_hash_mpz % e_modulo;
+    int residue = int(e_hash % n_pes);
+    return residue;
+  }
+  return 0;
+}
+
 
 
 
