@@ -927,7 +927,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type 
 */
 template<typename T>
 struct SelectionRowCol {
-  int TheRank;
+  size_t TheRank;
   MyMatrix<T> NSP;
   std::vector<int> ListColSelect;
   std::vector<int> ListRowSelect;
