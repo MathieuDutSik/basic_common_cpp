@@ -2220,8 +2220,8 @@ uint32_t Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
     for (int iRow=0; iRow<nbRow; iRow++)
       for (int iCol=0; iCol<nbCol; iCol++)
         s << " " << NewMat(iRow, iCol);
-    std::string converted(s.str());
-    const uint8_t* ptr_i = (uint8_t*)converted.str();
+    std::string converted(s.c_str());
+    const uint8_t* ptr_i = (uint8_t*)converted.c_str();
     return murmur3_32(ptr_i, converted.size(), seed);
   }
   if (TheChoice == 3) {
