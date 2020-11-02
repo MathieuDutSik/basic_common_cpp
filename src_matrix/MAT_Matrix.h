@@ -2221,12 +2221,12 @@ uint32_t Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
       for (int iCol=0; iCol<nbCol; iCol++)
         s << " " << NewMat(iRow, iCol);
     std::string converted(s.str());
-    uint8_t* ptr_i = (uint8_t*)s.str();
-    return murmur3_32(ptr_i, s.size(), seed);
+    const uint8_t* ptr_i = (uint8_t*)converted.str();
+    return murmur3_32(ptr_i, converted.size(), seed);
   }
   if (TheChoice == 3) {
-    T* ptr_T = NewMat.data();
-    uint8_t* ptr_i = (uint8_t*)ptr_T;
+    const T* ptr_T = NewMat.data();
+    const uint8_t* ptr_i = (uint8_t*)ptr_T;
     size_t len = sizeof(T) * NewMat.size();
     return murmur3_32(ptr_i, len, seed);
   }
