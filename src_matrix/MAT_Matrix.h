@@ -2193,18 +2193,13 @@ bool IsSymmetricMatrix(MyMatrix<T> const& M)
 
 
 template<typename T>
-int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
+uint32_t Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
 {
-  int TheChoice=4;
+  int TheChoice=3;
   if (TheChoice == 1) {
-    T TheDet=DeterminantMat(NewMat);
-    int TheDet_i = UniversalTypeConversion<int,T>(TheDet);
-    return TheDet_i % n_pes;
-  }
-  if (TheChoice == 2) {
     int nRow=NewMat.rows();
     int nCol=NewMat.cols();
-    int TheInvariant=0;
+    uint32_t TheInvariant=seed;
     for (int iRow=0; iRow<nRow; iRow++)
       for (int iCol=0; iCol<nCol; iCol++) {
         int eCoeff1 = 3 + 5*iRow + 7*iCol;
@@ -2216,9 +2211,9 @@ int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
           eCoeff2 = 2*eVal + 1;
         TheInvariant += eCoeff1 * eCoeff2;
       }
-    return TheInvariant % n_pes;
+    return TheInvariant;
   }
-  if (TheChoice == 3) {
+  if (TheChoice == 2) {
     std::stringstream s;
     int nbRow=NewMat.rows();
     int nbCol=NewMat.cols();
@@ -2226,25 +2221,27 @@ int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
       for (int iCol=0; iCol<nbCol; iCol++)
         s << " " << NewMat(iRow, iCol);
     std::string converted(s.str());
-    mpz_class e_hash_mpz = MD5_hash_mpz(converted);
-    mpz_class e_modulo = n_pes;
-    mpz_class e_res = e_hash_mpz % e_modulo;
-    int residue = UniversalTypeConversion<int,mpz_class>(e_res);
-    return residue;
+    uint8_t* ptr_i = (uint8_t*)s.str();
+    return murmur3_32(ptr_i, s.size(), seed);
   }
-  if (TheChoice == 4) {
+  if (TheChoice == 3) {
     T* ptr_T = NewMat.data();
     uint8_t* ptr_i = (uint8_t*)ptr_T;
-    uint32_t seed= 0x1b873540;
     size_t len = sizeof(T) * NewMat.size();
-    uint32_t e_hash = murmur3_32(ptr_i, len, seed)
-    mpz_class e_res = e_hash_mpz % e_modulo;
-    int residue = int(e_hash % n_pes);
-    return residue;
+    return murmur3_32(ptr_i, len, seed);
   }
   return 0;
 }
 
+
+template<typename T>
+int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
+{
+  uint32_t seed= 0x1b873540;
+  uint32_t e_hash = Matrix_Hash(NewMat, seed);
+  int residue = int(e_hash % n_pes);
+  return residue;
+}
 
 
 
