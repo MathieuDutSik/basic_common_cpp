@@ -498,10 +498,12 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       // Ensuring that the pivot is strictly positive
       // (in the case of integer. For other rings this is a different story)
       T eCanUnit = CanonicalizationUnit(H(TopPosition, iCol));
-      MyMatrix<T> TheMat2 = IdentityMat<T>(nbRow);
-      TheMat2(TopPosition,TopPosition) = eCanUnit;
-      U = TheMat2 * U;
-      H = TheMat2 * H;
+      if (eCanUnit != 1) {
+        MyMatrix<T> TheMat2 = IdentityMat<T>(nbRow);
+        TheMat2(TopPosition,TopPosition) = eCanUnit;
+        U = TheMat2 * U;
+        H = TheMat2 * H;
+      }
       //      std::cerr << "Step 3\n";
       //
       // Putting the coefficients over the pivot
