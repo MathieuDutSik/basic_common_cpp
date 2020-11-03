@@ -216,7 +216,7 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
 }
 
 template<typename T>
-T NakedGcdPair(T const& a, T const& b)
+T KernelGcdPair(T const& a, T const& b)
 {
   GCD_int<T> eGCD=ComputePairGcd(a, b);
   return eGCD.gcd;
@@ -225,29 +225,42 @@ T NakedGcdPair(T const& a, T const& b)
 template<typename T>
 inline typename std::enable_if<is_totally_ordered<T>::value,T>::type GcdPair(T const& a, T const& b)
 {
-  T eGCD=NakedGcdPair(a,b);
-  if (eGCD < 0) {
-    return -eGCD;
-  }
-  return eGCD;
+  T eGCD=KernelGcdPair(a,b);
+  if (eGCD > 0)
+    return eGCD;
+  return -eGCD;
 }
 
 template<typename T>
 inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type GcdPair(T const& a, T const& b)
 {
-  T eGCD=NakedGcdPair(a,b);
-  return eGCD;
+  return KernelGcdPair(a,b);
 }
 
 
 template<typename T>
-T LCMpair(T const& a, T const& b)
+T KernelLCMpair(T const& a, T const& b)
 {
   if (a == 0)
     return b;
   if (b == 0)
     return a;
-  return a*b/GcdPair(a,b);
+  return a * b / KernelGcdPair(a,b);
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type LCMpair(T const& a, T const& b)
+{
+  return KernelLCMpair(a, b);
+}
+
+template<typename T>
+inline typename std::enable_if<is_totally_ordered<T>::value,T>::type LCMpair(T const& a, T const& b)
+{
+  T eLCM = KernelLCMpair(a, b);
+  if (eLCM > 0)
+    return eLCM;
+  return -eLCM;
 }
 
 
@@ -257,13 +270,15 @@ T ComputeLCM(std::vector<T> const& eVect)
 {
   int siz=eVect.size();
   T eLCM=1;
-  for (int i=0; i<siz; i++) {
-    //    std::cerr << "i=" << i << " eLCM=" << eLCM << " eVect[i]=" << eVect[i] << "\n";
+  for (int i=0; i<siz; i++)
     eLCM=LCMpair(eLCM, eVect[i]);
-    //    std::cerr << "After LCMpair operation eLCM=" << eLCM << "\n";
-  }
   return eLCM;
 }
+
+
+
+
+
 
 template<typename T>
 struct FractionMatrix {
@@ -277,29 +292,22 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  int idx=0;
-  std::vector<T> eVect(nbRow*nbCol);
+  T eLCM=1;
   for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      T eDen=GetDenominator(M(iRow,iCol));
-      eVect[idx]=eDen;
-      idx++;
-    }
-  T eLCM=ComputeLCM(eVect);
+    for (int iCol=0; iCol<nbCol; iCol++)
+      eLCM = LCMpair(eLCM, GetDenominator(M(iRow,iCol)));
   MyMatrix<T> Mret(nbRow, nbCol);
   for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      T eVal=M(iRow,iCol)*eLCM;
-      Mret(iRow, iCol)=eVal;
-    }
+    for (int iCol=0; iCol<nbCol; iCol++)
+      Mret(iRow, iCol) = M(iRow,iCol) * eLCM;
   T eGCD = Mret(0,0);
   for (int iRow=0; iRow<nbRow; iRow++)
     for (int iCol=0; iCol<nbCol; iCol++)
       eGCD=GcdPair(eGCD, Mret(iRow,iCol));
   for (int iRow=0; iRow<nbRow; iRow++)
     for (int iCol=0; iCol<nbCol; iCol++)
-      Mret(iRow, iCol) = Mret(iRow, iCol) / eGCD;
-  return {eLCM, Mret};
+      Mret(iRow, iCol) /= eGCD;
+  return {eLCM, std::move(Mret)};
 }
 
 template<typename T>
@@ -318,30 +326,20 @@ struct FractionVector {
 template<typename T>
 FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const& V)
 {
-  //  std::cerr << "RemoveFractionVectorPlusCoeff, step 1\n";
   int n=V.size();
   std::vector<T> eVect(n);
-  //  std::cerr << "RemoveFractionVectorPlusCoeff, step 2\n";
-  for (int i=0; i<n; i++) {
-    T eDen=GetDenominator(V(i));
-    eVect[i]=eDen;
-  }
-  //  std::cerr << "RemoveFractionVectorPlusCoeff, step 3\n";
-  T eLCM=ComputeLCM(eVect);
-  //  std::cerr << "RemoveFractionVectorPlusCoeff, step 4\n";
+  T eLCM=1;
+  for (int i=0; i<n; i++)
+    eLCM = LCMpair(eLCM, GetDenominator(V(i)));
   MyVector<T> Vret(n);
-  for (int i=0; i<n; i++) {
-    T eVal=V(i)*eLCM;
-    Vret(i)=eVal;
-  }
-  //  std::cerr << "RemoveFractionVectorPlusCoeff, step 5\n";
-  return {eLCM, Vret};
+  for (int i=0; i<n; i++)
+    Vret(i) = V(i) * eLCM;
+  return {eLCM, std::move(Vret)};
 }
 
 template<typename T>
 inline typename std::enable_if<is_implementation_of_Z<T>::value,MyVector<T>>::type CanonicalizeVector(MyVector<T> const& V)
 {
-  //  std::cerr << "MAT_MatrixInt : CanonicalizeVector\n";
   return RemoveFractionVectorPlusCoeff(V).TheVect;
 }
 
