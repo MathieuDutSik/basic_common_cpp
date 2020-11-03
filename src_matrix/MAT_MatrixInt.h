@@ -487,11 +487,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       // Ensuring that the column has a pivot and that everything below is ZERO
       int siz = ListIdx.size();
       GCD_int<T> eGCD = ComputeGCD_information(ListX);
-      MyMatrix<T> TrMat = TransposedMat(eGCD.Pmat);
       MyMatrix<T> TheMat1 = IdentityMat<T>(nbRow);
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
-          TheMat1(ListIdx[i],ListIdx[j]) = TrMat(i,j);
+          TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
       U = TheMat1 * U;
       H = TheMat1 * H;
       //      std::cerr << "Step 2\n";
