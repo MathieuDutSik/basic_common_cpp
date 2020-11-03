@@ -182,7 +182,32 @@ struct underlying_totally_ordered_ring<long> {
 };
 
 
+// hash functionality
 
+namespace std {
+  template <>
+  struct hash<mpz_class>
+  {
+    std::size_t operator()(const mpz_class& e_val) const
+    {
+      std::stringstream s;
+      s << e_val;
+      std::string converted(s.str());
+      return std::hash<std::string>()(converted);
+    }
+  };
+  template <>
+  struct hash<mpq_class>
+  {
+    std::size_t operator()(const mpq_class& e_val) const
+    {
+      std::stringstream s;
+      s << e_val;
+      std::string converted(s.str());
+      return std::hash<std::string>()(converted);
+    }
+  };
+}
 
 
 
