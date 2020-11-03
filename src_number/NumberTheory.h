@@ -2,6 +2,7 @@
 #define INCLUDE_NUMBER_THEORY
 
 #include <iostream>
+#include <sstream>
 
 //#include "Temp_common.h"
 #include "TypeConversion.h"
