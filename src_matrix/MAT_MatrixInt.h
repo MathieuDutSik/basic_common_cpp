@@ -323,7 +323,13 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
 template<typename T>
 MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const& M)
 {
-  return RemoveFractionMatrixPlusCoeff(M).TheMat;
+  int nbRow=M.rows();
+  int nbCol=M.cols();
+  T eLCM=1;
+  for (int iRow=0; iRow<nbRow; iRow++)
+    for (int iCol=0; iCol<nbCol; iCol++)
+      eLCM = LCMpair(eLCM, GetDenominator(M(iRow,iCol)));
+  return eLCM * M;
 }
 
 template<typename T>
