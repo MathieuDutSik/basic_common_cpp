@@ -897,6 +897,18 @@ MyMatrix<T> InverseKernel(MyMatrix<T> const&Input)
   return Output;
 }
 
+template<typename T>
+MyMatrix<T> Inverse_destroy(MyMatrix<T> & Input)
+{
+  int nbRow=Input.rows();
+  MyMatrix<T> Output(nbRow, nbRow);
+  TMat_Inverse_destroy(Input, Output);
+  return Output;
+}
+
+
+
+
 
 template<typename T>
 inline typename std::enable_if<is_ring_field<T>::value,MyMatrix<T>>::type Inverse(MyMatrix<T> const& Input)
