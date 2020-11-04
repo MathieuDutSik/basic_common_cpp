@@ -217,11 +217,21 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
 }
 
 template<typename T>
-T KernelGcdPair(T const& a, T const& b)
+inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelGcdPair(T const& a, T const& b)
+{
+  mpz_class eGCD;
+  mpz_gcd(eGCD.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  return eGCD;
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelGcdPair(T const& a, T const& b)
 {
   GCD_int<T> eGCD=ComputePairGcd(a, b);
   return eGCD.gcd;
 }
+
+
 
 template<typename T>
 inline typename std::enable_if<is_totally_ordered<T>::value,T>::type GcdPair(T const& a, T const& b)
@@ -240,7 +250,7 @@ inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type GcdPa
 
 
 template<typename T>
-T KernelLCMpair(T const& a, T const& b)
+inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelLCMpair(T const& a, T const& b)
 {
   if (a == 0)
     return b;
@@ -248,6 +258,15 @@ T KernelLCMpair(T const& a, T const& b)
     return a;
   return a * b / KernelGcdPair(a,b);
 }
+
+template<typename T>
+inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelLCMpair(T const& a, T const& b)
+{
+  mpz_class eLCM;
+  mpz_lcm(eLCM.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  return eLCM;
+}
+
 
 template<typename T>
 inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type LCMpair(T const& a, T const& b)
