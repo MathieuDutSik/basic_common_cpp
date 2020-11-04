@@ -877,8 +877,8 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       }
     if (iRowFound != iCol)
       for (iColB=0; iColB<nbCol; iColB++) {
-	SwapValues(Input(iRowFound, iColB), Input(iCol, iColB));
-	SwapValues(Output(iRowFound, iColB), Output(iCol, iColB));
+        std::swap(Input(iRowFound, iColB), Input(iCol, iColB));
+        std::swap(Output(iRowFound, iColB), Output(iCol, iColB));
       }
   }
 }
