@@ -832,10 +832,12 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
   int nbRow=Input.rows();
   int nbCol=Input.cols();
   T prov1, prov2, eVal;
+#ifdef DEBUG
   if (nbRow != nbCol) {
     std::cerr << "Error on nbRow, nbCol in TMat_Inverse_destroy";
     throw TerminalException{1};
   }
+#endif
   for (iRow=0; iRow<nbRow; iRow++)
     for (iCol=0; iCol<nbRow; iCol++) {
       if (iRow == iCol)
@@ -844,7 +846,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 	prov1=0;
       Output(iRow,iCol)=prov1;
     }
-  int iRowFound=-400;
+  int iRowFound=0;
   for (iCol=0; iCol<nbCol; iCol++) {
     prov1=0;
     for (iRow=iCol; iRow<nbRow; iRow++)
@@ -855,13 +857,15 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 	  prov1=1/eVal;
 	}
       }
+#ifdef DEBUG
     if (prov1 == 0) {
       Inverse_exception<T> eExcept;
       eExcept.errmsg="Error in matrix inversion";
       eExcept.pivot=0;
       throw eExcept;
     }
-    for (iColB=0; iColB<nbCol; iColB++) {
+#endif
+    for (iColB=iCol; iColB<nbCol; iColB++) {
       Input(iRowFound,iColB) *= prov1;
       Output(iRowFound,iColB) *= prov1;
     }
@@ -869,14 +873,14 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       if (iRow != iRowFound) {
 	prov2=Input(iRow, iCol);
 	if (prov2 != 0) {
-	  for (iColB=0; iColB<nbCol; iColB++) {
+	  for (iColB=iCol; iColB<nbCol; iColB++) {
 	    Input(iRow, iColB) -= prov2*Input(iRowFound,iColB);
 	    Output(iRow,iColB) -= prov2*Output(iRowFound,iColB);
 	  }
 	}
       }
     if (iRowFound != iCol)
-      for (iColB=0; iColB<nbCol; iColB++) {
+      for (iColB=iCol; iColB<nbCol; iColB++) {
         std::swap(Input(iRowFound, iColB), Input(iCol, iColB));
         std::swap(Output(iRowFound, iColB), Output(iCol, iColB));
       }
