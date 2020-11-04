@@ -316,18 +316,7 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
   for (int iRow=0; iRow<nbRow; iRow++)
     for (int iCol=0; iCol<nbCol; iCol++)
       eLCM = LCMpair(eLCM, GetDenominator(M(iRow,iCol)));
-  MyMatrix<T> Mret(nbRow, nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      Mret(iRow, iCol) = M(iRow,iCol) * eLCM;
-  T eGCD = Mret(0,0);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      eGCD=GcdPair(eGCD, Mret(iRow,iCol));
-  std::cerr << "eGCD : " << eGCD << "\n";
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      Mret(iRow, iCol) /= eGCD;
+  MyMatrix<T> Mret = eLCM * M;
   return {eLCM, std::move(Mret)};
 }
 
@@ -352,9 +341,7 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const& V)
   T eLCM=1;
   for (int i=0; i<n; i++)
     eLCM = LCMpair(eLCM, GetDenominator(V(i)));
-  MyVector<T> Vret(n);
-  for (int i=0; i<n; i++)
-    Vret(i) = V(i) * eLCM;
+  MyVector<T> Vret = eLCM * V;
   return {eLCM, std::move(Vret)};
 }
 
