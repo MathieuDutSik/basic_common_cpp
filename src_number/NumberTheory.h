@@ -412,6 +412,27 @@ mpz_class GetDenominator(mpz_class const& x)
 }
 
 
+mpz_class GetDenominator_z(mpq_class const& x)
+{
+  return x.get_den();
+}
+
+int GetDenominator_z(int const& x)
+{
+  return 1;
+}
+
+long GetDenominator_z(long const& x)
+{
+  return 1;
+}
+
+mpz_class GetDenominator_z(mpz_class const& x)
+{
+  return 1;
+}
+
+
 
 
 

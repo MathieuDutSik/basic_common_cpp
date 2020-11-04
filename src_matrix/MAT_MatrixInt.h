@@ -325,10 +325,14 @@ MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const& M)
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  T eLCM=1;
+  using Tring = typename underlying_ring<T>::ring_type;
+  Tring eLCM_ring=1;
   for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      eLCM = LCMpair(eLCM, GetDenominator(M(iRow,iCol)));
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      Tring eVal = GetDenominator_z(M(iRow,iCol));
+      eLCM_ring = LCMpair(eLCM_ring, eVal);
+    }
+  T eLCM = eLCM_ring;
   return eLCM * M;
 }
 
