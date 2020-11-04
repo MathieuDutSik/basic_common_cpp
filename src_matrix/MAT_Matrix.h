@@ -2206,47 +2206,27 @@ bool IsSymmetricMatrix(MyMatrix<T> const& M)
 }
 
 
-
+template<typename T>
+inline typename std::enable_if<(not std::is_arithmetic<T>),uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
+{
+  std::stringstream s;
+  int nbRow=NewMat.rows();
+  int nbCol=NewMat.cols();
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
+      s << " " << NewMat(iRow, iCol);
+  std::string converted(s.str());
+  const uint8_t* ptr_i = (uint8_t*)converted.c_str();
+  return murmur3_32(ptr_i, converted.size(), seed);
+}
 
 template<typename T>
-uint32_t Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
+inline typename std::enable_if<std::is_arithmetic<T>,uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
 {
-  int TheChoice=3;
-  if (TheChoice == 1) {
-    int nRow=NewMat.rows();
-    int nCol=NewMat.cols();
-    uint32_t TheInvariant=seed;
-    for (int iRow=0; iRow<nRow; iRow++)
-      for (int iCol=0; iCol<nCol; iCol++) {
-        int eCoeff1 = 3 + 5*iRow + 7*iCol;
-        int eVal=NewMat(iRow,iCol);
-        int eCoeff2;
-        if (eVal < 0)
-          eCoeff2 = -2*eVal;
-        else
-          eCoeff2 = 2*eVal + 1;
-        TheInvariant += eCoeff1 * eCoeff2;
-      }
-    return TheInvariant;
-  }
-  if (TheChoice == 2) {
-    std::stringstream s;
-    int nbRow=NewMat.rows();
-    int nbCol=NewMat.cols();
-    for (int iRow=0; iRow<nbRow; iRow++)
-      for (int iCol=0; iCol<nbCol; iCol++)
-        s << " " << NewMat(iRow, iCol);
-    std::string converted(s.str());
-    const uint8_t* ptr_i = (uint8_t*)converted.c_str();
-    return murmur3_32(ptr_i, converted.size(), seed);
-  }
-  if (TheChoice == 3) {
-    const T* ptr_T = NewMat.data();
-    const uint8_t* ptr_i = (uint8_t*)ptr_T;
-    size_t len = sizeof(T) * NewMat.size();
-    return murmur3_32(ptr_i, len, seed);
-  }
-  return 0;
+  const T* ptr_T = NewMat.data();
+  const uint8_t* ptr_i = (uint8_t*)ptr_T;
+  size_t len = sizeof(T) * NewMat.size();
+  return murmur3_32(ptr_i, len, seed);
 }
 
 
