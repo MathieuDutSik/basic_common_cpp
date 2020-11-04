@@ -1579,6 +1579,25 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   return {true, ListIdx};
 }
 
+
+template<typename T>
+MyMatrix<T> RandomUnimodularMatrix(int const& n)
+{
+  MyMatrix<T> RetMat = IdentityMat<T>(n);
+  for (int iter=0; iter<1000; iter++) {
+    MyMatrix<T> eMat = IdentityMat<T>(n);
+    int idx1 = rand() % n;
+    int idx2 = rand() % n;
+    if (idx1 != idx2) {
+      int pivot = (rand() % 21) - 10;
+      eMat(idx1, idx2) = pivot;
+    }
+    RetMat = eMat * RetMat;
+  }
+  return RetMat;
+}
+
+
 template<typename T> 
 AffineBasisResult ComputeAffineBasis(MyMatrix<T> const& EXT)
 {

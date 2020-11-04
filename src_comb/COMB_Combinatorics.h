@@ -22,7 +22,7 @@ public:
 
   // no default constructor
   BlockIteration() = delete;
-  
+
   BlockIteration(int const& eDim, int const& eSize) : dim(eDim), size(eSize), eVect(dim,0)
   {
   }
@@ -81,7 +81,7 @@ public:
 
   // no default constructor
   BlockIterationMultiple() = delete;
-  
+
   BlockIterationMultiple(std::vector<int> const& eListSize) : dim(eListSize.size()), ListSize(eListSize), eVect(dim,0)
   {
   }
@@ -138,6 +138,27 @@ Tint ConvertVectorToNumber(std::vector<int> const& V, int const& N)
     expo *= N;
   }
   return val;
+}
+
+
+std::vector<int> RandomPermutation(int const& n)
+{
+  std::vector<int> RetList(n,-1);
+  for (int i=0; i<n; i++) {
+    int rnd_pos = rand() % (n - i);
+    int idx=0;
+    bool IsAssigned = false;
+    for (int j=0; j<n; j++) {
+      if (RetList[j] == -1 && !IsAssigned) {
+        if (rnd_pos == idx) {
+          RetList[j] = i;
+          IsAssigned = true;
+        }
+        idx++;
+      }
+    }
+  }
+  return RetList;
 }
 
 
