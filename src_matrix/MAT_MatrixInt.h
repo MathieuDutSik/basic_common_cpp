@@ -324,6 +324,7 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
   for (int iRow=0; iRow<nbRow; iRow++)
     for (int iCol=0; iCol<nbCol; iCol++)
       eGCD=GcdPair(eGCD, Mret(iRow,iCol));
+  std::cerr << "eGCD : " << eGCD << "\n";
   for (int iRow=0; iRow<nbRow; iRow++)
     for (int iCol=0; iCol<nbCol; iCol++)
       Mret(iRow, iCol) /= eGCD;
