@@ -313,8 +313,9 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
   int nbRow=M.rows();
   int nbCol=M.cols();
   T eLCM=1;
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
+  // iRow is inner loop because of cache locality
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
       eLCM = LCMpair(eLCM, GetDenominator(M(iRow,iCol)));
   MyMatrix<T> Mret = eLCM * M;
   return {eLCM, std::move(Mret)};
@@ -327,8 +328,9 @@ MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const& M)
   int nbCol=M.cols();
   using Tring = typename underlying_ring<T>::ring_type;
   Tring eLCM_ring=1;
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
+  // iRow is inner loop because of cache locality
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++) {
       Tring eVal = GetDenominator_z(M(iRow,iCol));
       eLCM_ring = LCMpair(eLCM_ring, eVal);
     }
