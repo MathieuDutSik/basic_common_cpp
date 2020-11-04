@@ -2,6 +2,7 @@
 #define TEMP_MATRIX_INTEGRAL_RING
 
 #include "MAT_Matrix.h"
+#include "Boost_bitset.h"
 #include "NumberTheory.h"
 
 
@@ -462,7 +463,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  std::vector<int> StatusRow(nbRow,1);
+  Face StatusRow(nbRow);
   //
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbRow);
@@ -474,7 +475,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
     std::vector<int> ListIdx;
     bool HasNonZero=false;
     for (int iRow=0; iRow<nbRow; iRow++)
-      if (StatusRow[iRow] == 1) {
+      if (StatusRow[iRow] == 0) {
         ListIdx.push_back(iRow);
         T eVal = H(iRow,iCol);
         ListX.push_back(eVal);
@@ -499,27 +500,25 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       // (in the case of integer. For other rings this is a different story)
       T eCanUnit = CanonicalizationUnit(H(TopPosition, iCol));
       if (eCanUnit != 1) {
-        MyMatrix<T> TheMat2 = IdentityMat<T>(nbRow);
-        TheMat2(TopPosition,TopPosition) = eCanUnit;
-        U = TheMat2 * U;
-        H = TheMat2 * H;
+        U.row(TopPosition) = eCanUnit * U.row(TopPosition);
+        H.row(TopPosition) = eCanUnit * H.row(TopPosition);
       }
       //      std::cerr << "Step 3\n";
       //
       // Putting the coefficients over the pivot
-      MyMatrix<T> TheMat3 = IdentityMat<T>(nbRow);
       T ThePivot = H(TopPosition, iCol);
       for (int iRow=0; iRow<TopPosition; iRow++) {
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
-        TheMat3(iRow, TopPosition) = -TheQ;
+        if (TheQ != 0) {
+          U.row(iRow) -= TheQ * U.row(TopPosition);
+          H.row(iRow) -= TheQ * H.row(TopPosition);
+        }
       }
-      U = TheMat3 * U;
-      H = TheMat3 * H;
       //      std::cerr << "Step 4\n";
       //
       // Increasing the index
-      StatusRow[TopPosition]=0;
+      StatusRow[TopPosition]=1;
       TopPosition++;
      }
   }

@@ -1,7 +1,6 @@
-#		  Temp_ImagQuadPerfect
-#		  Temp_ImagQuadPerfect_flint
 #PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
-PROGRAM		= ComputePointer
+#PROGRAM		= ComputePointer
+PROGRAM		= RowHermiteNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -15,7 +14,7 @@ CC		= g++ -std=c++11 -Wall -g -O3
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_basic -I../src_number
+CLOCAL          = -I../src_basic -I../src_number -I../src_comb
 
 
 CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) -I$(FLINT_INCDIR)
