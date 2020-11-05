@@ -831,7 +831,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
   int iRowB;
   int nbRow=Input.rows();
   int nbCol=Input.cols();
-  T prov1, prov2, eVal;
+  T prov1;
 #ifdef DEBUG
   if (nbRow != nbCol) {
     std::cerr << "Error on nbRow, nbCol in TMat_Inverse_destroy";
@@ -846,15 +846,16 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 	prov1=0;
       Output(iRow,iCol)=prov1;
     }
-  int iColFound=0;
+  int iColFound;
   for (iRow=0; iRow<nbRow; iRow++) {
+    iColFound=-1;
     prov1=0;
     for (iCol=iRow; iCol<nbCol; iCol++)
-      if (prov1 == 0) {
-	eVal=Input(iRow,iCol);
-	if (eVal != 0) {
-	  iColFound=iCol;
-	  prov1=1/eVal;
+      if (iColFound == -1) {
+	prov1 = Input(iRow,iCol);
+	if (prov1 != 0) {
+	  iColFound = iCol;
+	  prov1 = 1 / prov1;
 	}
       }
 #ifdef DEBUG
@@ -871,11 +872,11 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
     }
     for (iCol=0; iCol<nbCol; iCol++)
       if (iCol != iColFound) {
-	prov2=Input(iRow, iCol);
-	if (prov2 != 0) {
+	prov1=Input(iRow, iCol);
+	if (prov1 != 0) {
 	  for (iRowB=0; iRowB<nbRow; iRowB++) {
-	    Input(iRowB, iCol) -= prov2*Input(iRowB, iColFound);
-	    Output(iRowB, iCol) -= prov2*Output(iRowB, iColFound);
+	    Input (iRowB, iCol) -= prov1 * Input (iRowB, iColFound);
+	    Output(iRowB, iCol) -= prov1 * Output(iRowB, iColFound);
 	  }
 	}
       }
@@ -1124,8 +1125,8 @@ MyMatrix<T> IdentityMat(int n)
 {
   T t;
   MyMatrix<T> TheMat(n, n);
-  for (int i=0; i<n; i++)
-    for (int j=0; j<n; j++) {
+  for (int j=0; j<n; j++)
+    for (int i=0; i<n; i++) {
       if (i == j)
 	t=1;
       else
