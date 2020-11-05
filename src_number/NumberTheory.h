@@ -7,6 +7,7 @@
 //#include "Temp_common.h"
 #include "TypeConversion.h"
 #include "ExceptionEnding.h"
+#include <cstdlib>
 #include "gmpxx.h"
 
 
@@ -212,6 +213,14 @@ namespace std {
 
 
 
+template<typename T>
+T ResInt_C_integer(T const& a, T const& b)
+{
+  T res2 = a % b;
+  if (a<0) res2 += std::abs(b);
+  return res2;
+}
+
 
 
 
@@ -229,8 +238,8 @@ namespace std {
 template<typename T>
 T ResInt_Generic(T const& a, T const& b)
 {
-  T b_abs;
-  if (b > 0)
+  T b_abs; // We cannot use std::abs which is not defined for all data types.
+  if (b>0)
     b_abs = b;
   else
     b_abs = -b;
@@ -246,23 +255,23 @@ T ResInt_Generic(T const& a, T const& b)
   return res;
 }
 
-int ResInt(int const& a, int const& b)
+inline int ResInt(int const& a, int const& b)
 {
-  return ResInt_Generic<int>(a, b);
+  return ResInt_C_integer<int>(a, b);
 }
 
-long ResInt(long const& a, long const& b)
+inline long ResInt(long const& a, long const& b)
 {
-  return ResInt_Generic<long>(a, b);
+  return ResInt_C_integer<long>(a, b);
 }
 
-mpz_class ResInt(mpz_class const& a, mpz_class const& b)
+inline mpz_class ResInt(mpz_class const& a, mpz_class const& b)
 {
   return ResInt_Generic<mpz_class>(a, b);
 }
 
 
-mpq_class ResInt(mpq_class const& a, mpq_class const& b)
+inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
 {
   mpz_class a_den=a.get_den();
   mpz_class b_den=b.get_den();
@@ -288,19 +297,53 @@ mpq_class ResInt(mpq_class const& a, mpq_class const& b)
       res_z += b_num_pos;
     if (res_z >= b_num_pos)
       res_z -= b_num_pos;
-    //    std::cerr << "res_z=" << res_z << " b_num_pos=" << b_num_pos << "\n";
   }
-  //std::cerr << "a_num=" << a_num << " b_num=" << b_num << " res_z=" << res_z << "\n";
   mpq_class res_q=res_z;
   return res_q;
 }
 
+
 template<typename T>
-T QuoInt(T const& a, T const& b)
+T QuoInt_C_integer(T const& a, T const& b)
+{
+  T res2 = a / b;
+  if (a < 0) {
+    if (b>0)
+      res2--;
+    else
+      res2++;
+  }
+  return res2;
+}
+
+template<typename T>
+T QuoInt_Generic(T const& a, T const& b)
 {
   T res = ResInt(a, b);
   return (a - res) / b;
 }
+
+inline int QuoInt(int const& a, int const& b)
+{
+  return QuoInt_C_integer<int>(a, b);
+}
+
+inline long QuoInt(long const& a, long const& b)
+{
+  return QuoInt_C_integer<long>(a, b);
+}
+
+inline mpz_class QuoInt(mpz_class const& a, mpz_class const& b)
+{
+  return QuoInt_Generic<mpz_class>(a, b);
+}
+
+inline mpq_class QuoInt(mpq_class const& a, mpq_class const& b)
+{
+  return QuoInt_Generic<mpq_class>(a, b);
+}
+
+
 
 template<typename T>
 std::pair<T,T> ResQuoInt(T const& a, T const& b)
@@ -314,21 +357,21 @@ std::pair<T,T> ResQuoInt(T const& a, T const& b)
 
 
 
-int CanonicalizationUnit(int const& eVal)
+inline int CanonicalizationUnit(int const& eVal)
 {
   if (eVal < 0)
     return -1;
   return 1;
 }
 
-mpz_class CanonicalizationUnit(mpz_class const& eVal)
+inline mpz_class CanonicalizationUnit(mpz_class const& eVal)
 {
   if (eVal < 0)
     return -1;
   return 1;
 }
 
-mpq_class CanonicalizationUnit(mpq_class const& eVal)
+inline mpq_class CanonicalizationUnit(mpq_class const& eVal)
 {
   if (eVal < 0)
     return -1;
@@ -338,13 +381,13 @@ mpq_class CanonicalizationUnit(mpq_class const& eVal)
 
 
 // T_Norm should always return an integer, whatever the input type
-int T_Norm(int const& eVal)
+inline int T_Norm(int const& eVal)
 {
   return abs(eVal);
 }
 
 
-int T_Norm(mpq_class const& x)
+inline int T_Norm(mpq_class const& x)
 {
   mpz_class eDen=x.get_den();
   if (eDen != 1) {
@@ -360,17 +403,17 @@ int T_Norm(mpq_class const& x)
   return -eValI;
 }
 
-mpq_class T_NormGen(mpq_class const& x)
+inline mpq_class T_NormGen(mpq_class const& x)
 {
   return T_abs(x);
 }
 
-mpz_class T_NormGen(mpz_class const& x)
+inline mpz_class T_NormGen(mpz_class const& x)
 {
   return T_abs(x);
 }
 
-int T_NormGen(int const& x)
+inline int T_NormGen(int const& x)
 {
   return abs(x);
 }
@@ -381,7 +424,7 @@ int T_NormGen(int const& x)
 
 
 
-bool IsInteger(mpq_class const& x)
+inline bool IsInteger(mpq_class const& x)
 {
   mpz_class eDen=x.get_den();
   return eDen == 1;
@@ -389,45 +432,45 @@ bool IsInteger(mpq_class const& x)
 
 
 
-mpq_class GetDenominator(mpq_class const& x)
+inline mpq_class GetDenominator(mpq_class const& x)
 {
   mpz_class eDen=x.get_den();
   mpq_class eDen_q=eDen;
   return eDen_q;
 }
 
-int GetDenominator(int const& x)
+inline int GetDenominator(int const& x)
 {
   return 1;
 }
 
-long GetDenominator(long const& x)
+inline long GetDenominator(long const& x)
 {
   return 1;
 }
 
-mpz_class GetDenominator(mpz_class const& x)
+inline mpz_class GetDenominator(mpz_class const& x)
 {
   return 1;
 }
 
 
-mpz_class GetDenominator_z(mpq_class const& x)
+inline mpz_class GetDenominator_z(mpq_class const& x)
 {
   return x.get_den();
 }
 
-int GetDenominator_z(int const& x)
+inline int GetDenominator_z(int const& x)
 {
   return 1;
 }
 
-long GetDenominator_z(long const& x)
+inline long GetDenominator_z(long const& x)
 {
   return 1;
 }
 
-mpz_class GetDenominator_z(mpz_class const& x)
+inline mpz_class GetDenominator_z(mpz_class const& x)
 {
   return 1;
 }
@@ -438,32 +481,32 @@ mpz_class GetDenominator_z(mpz_class const& x)
 
 
 
-mpq_class GetFieldElement(mpz_class const& eVal)
+inline mpq_class GetFieldElement(mpz_class const& eVal)
 {
   return eVal;
 }
 
 
-mpq_class GetFieldElement(long const& eVal)
+inline mpq_class GetFieldElement(long const& eVal)
 {
   return eVal;
 }
 
 // mpq_class as input
 
-void TYPE_CONVERSION(mpq_class const& a1, mpq_class & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
 
-void TYPE_CONVERSION(mpq_class const& a1, double & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, double & a2)
 {
   a2=a1.get_d();
 }
 
 
-void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
 {
   if (!IsInteger(a1)) {
     std::cerr << "a1=" << a1 << " is not an integer\n";
@@ -472,7 +515,7 @@ void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
   a2=a1.get_num();
 }
 
-void TYPE_CONVERSION(mpq_class const& a1, int & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, int & a2)
 {
   if (!IsInteger(a1)) {
     std::cerr << "a1=" << a1 << " is not an integer\n";
@@ -483,7 +526,7 @@ void TYPE_CONVERSION(mpq_class const& a1, int & a2)
   a2=a1_long;
 }
 
-void TYPE_CONVERSION(mpq_class const& a1, long & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
 {
   if (!IsInteger(a1)) {
     std::cerr << "a1=" << a1 << " is not an integer\n";
@@ -495,51 +538,51 @@ void TYPE_CONVERSION(mpq_class const& a1, long & a2)
 
 // long as input
 
-void TYPE_CONVERSION(long const& a1, long & a2)
+inline void TYPE_CONVERSION(long const& a1, long & a2)
 {
   a2=a1;
 }
 
-void TYPE_CONVERSION(long const& a1, mpq_class & a2)
+inline void TYPE_CONVERSION(long const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
-void TYPE_CONVERSION(long const& a1, mpz_class & a2)
+inline void TYPE_CONVERSION(long const& a1, mpz_class & a2)
 {
   a2=a1;
 }
 
 // int as input
 
-void TYPE_CONVERSION(int const& a1, int & a2)
+inline void TYPE_CONVERSION(int const& a1, int & a2)
 {
   a2=a1;
 }
 
-void TYPE_CONVERSION(int const& a1, mpq_class & a2)
+inline void TYPE_CONVERSION(int const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
-void TYPE_CONVERSION(int const& a1, mpz_class & a2)
+inline void TYPE_CONVERSION(int const& a1, mpz_class & a2)
 {
   a2=a1;
 }
 
 // mpz_class as input
 
-void TYPE_CONVERSION(mpz_class const& a1, mpz_class & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, mpz_class & a2)
 {
   a2=a1;
 }
 
-void TYPE_CONVERSION(mpz_class const& a1, mpq_class & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
-void TYPE_CONVERSION(mpz_class const& a1, int & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, int & a2)
 {
   long eVal_long=a1.get_si();
   a2=int(eVal_long);
@@ -548,8 +591,8 @@ void TYPE_CONVERSION(mpz_class const& a1, int & a2)
 
 //
 // Nearest integer and similar stuff.
-// 
-mpq_class FractionalPart(mpq_class const& x)
+//
+inline mpq_class FractionalPart(mpq_class const& x)
 {
   mpz_class eNum=x.get_num();
   mpz_class eDen=x.get_den();
@@ -562,13 +605,13 @@ mpq_class FractionalPart(mpq_class const& x)
   return eRet;
 }
 
-mpq_class Floor(mpq_class const& x)
+inline mpq_class Floor(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   return x-eFrac;
 }
 
-mpq_class Ceil(mpq_class const& x)
+inline mpq_class Ceil(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   if (eFrac == 0)
@@ -580,7 +623,7 @@ mpq_class Ceil(mpq_class const& x)
 
 // return the nearest integer to x.
 // If x is of the form y + 1/2 then it returns y.
-mpq_class NearestInteger_rni(mpq_class const& x)
+inline mpq_class NearestInteger_rni(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   mpq_class eDiff1=eFrac;
@@ -597,41 +640,39 @@ mpq_class NearestInteger_rni(mpq_class const& x)
 
 
 
-void NearestInteger(mpq_class const& xI, mpq_class & xO)
+inline void NearestInteger(mpq_class const& xI, mpq_class & xO)
 {
   //  std::cerr << "NearestInteger mpq -> mpq\n";
   xO=NearestInteger_rni(xI);
 }
 
 
-void NearestInteger(mpq_class const& xI, mpz_class & xO)
+inline void NearestInteger(mpq_class const& xI, mpz_class & xO)
 {
   //  std::cerr << "NearestInteger mpq -> mpz\n";
   mpq_class xO_q=NearestInteger_rni(xI);
   xO=xO_q.get_num();
 }
 
-
-
-void NearestInteger(int const& xI, mpq_class & xO)
+inline void NearestInteger(int const& xI, mpq_class & xO)
 {
   xO=xI;
 }
 
-void NearestInteger(long const& xI, mpq_class & xO)
+inline void NearestInteger(long const& xI, mpq_class & xO)
 {
   xO=xI;
 }
 
 
 
-void NearestInteger(mpq_class const& xI, int & xO)
+inline void NearestInteger(mpq_class const& xI, int & xO)
 {
     mpq_class xO_q=NearestInteger_rni(xI);
     xO = int(xO_q.get_num().get_si());
 }
 
-void NearestInteger(mpq_class const& xI, long & xO)
+inline void NearestInteger(mpq_class const& xI, long & xO)
 {
     mpq_class xO_q=NearestInteger_rni(xI);
     xO = xO_q.get_num().get_si();
@@ -648,7 +689,7 @@ void NearestInteger(mpq_class const& xI, long & xO)
 // If x is of the form y + 1/2 then it returns y+1 and not y.
 // rpi: "Rounding towards Positive Integers"
 // See https://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Rounding
-mpq_class NearestInteger_rpi(mpq_class const& x)
+inline mpq_class NearestInteger_rpi(mpq_class const& x)
 {
   //  std::cerr << "--------------------------------------\n";
   mpq_class eFrac=FractionalPart(x);
