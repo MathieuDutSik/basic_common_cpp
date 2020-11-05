@@ -1586,7 +1586,7 @@ template<typename T>
 MyMatrix<T> RandomUnimodularMatrix(int const& n)
 {
   MyMatrix<T> RetMat = IdentityMat<T>(n);
-  for (int iter=0; iter<1000; iter++) {
+  for (int iter=0; iter<10; iter++) {
     MyMatrix<T> eMat = IdentityMat<T>(n);
     int idx1 = rand() % n;
     int idx2 = rand() % n;

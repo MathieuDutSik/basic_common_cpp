@@ -865,7 +865,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       throw eExcept;
     }
 #endif
-    for (iColB=iCol; iColB<nbCol; iColB++) {
+    for (iColB=0; iColB<nbCol; iColB++) {
       Input(iRowFound,iColB) *= prov1;
       Output(iRowFound,iColB) *= prov1;
     }
@@ -873,14 +873,14 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       if (iRow != iRowFound) {
 	prov2=Input(iRow, iCol);
 	if (prov2 != 0) {
-	  for (iColB=iCol; iColB<nbCol; iColB++) {
+	  for (iColB=0; iColB<nbCol; iColB++) {
 	    Input(iRow, iColB) -= prov2*Input(iRowFound,iColB);
 	    Output(iRow,iColB) -= prov2*Output(iRowFound,iColB);
 	  }
 	}
       }
     if (iRowFound != iCol)
-      for (iColB=iCol; iColB<nbCol; iColB++) {
+      for (iColB=0; iColB<nbCol; iColB++) {
         std::swap(Input(iRowFound, iColB), Input(iCol, iColB));
         std::swap(Output(iRowFound, iColB), Output(iCol, iColB));
       }
@@ -2207,7 +2207,7 @@ bool IsSymmetricMatrix(MyMatrix<T> const& M)
 
 
 template<typename T>
-inline typename std::enable_if<(not std::is_arithmetic<T>),uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
+inline typename std::enable_if<(not std::is_arithmetic<T>::value),uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
 {
   std::stringstream s;
   int nbRow=NewMat.rows();
@@ -2220,8 +2220,9 @@ inline typename std::enable_if<(not std::is_arithmetic<T>),uint32_t>::type Matri
   return murmur3_32(ptr_i, converted.size(), seed);
 }
 
+
 template<typename T>
-inline typename std::enable_if<std::is_arithmetic<T>,uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
+inline typename std::enable_if<std::is_arithmetic<T>::value,uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
 {
   const T* ptr_T = NewMat.data();
   const uint8_t* ptr_i = (uint8_t*)ptr_T;
