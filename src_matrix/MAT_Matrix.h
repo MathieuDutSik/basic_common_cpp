@@ -828,7 +828,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
   int iCol, iRow;
-  int iColB;
+  int iRowB;
   int nbRow=Input.rows();
   int nbCol=Input.cols();
   T prov1, prov2, eVal;
@@ -838,22 +838,22 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
     throw TerminalException{1};
   }
 #endif
-  for (iRow=0; iRow<nbRow; iRow++)
-    for (iCol=0; iCol<nbRow; iCol++) {
+  for (iCol=0; iCol<nbRow; iCol++)
+    for (iRow=0; iRow<nbRow; iRow++) {
       if (iRow == iCol)
 	prov1=1;
       else
 	prov1=0;
       Output(iRow,iCol)=prov1;
     }
-  int iRowFound=0;
-  for (iCol=0; iCol<nbCol; iCol++) {
+  int iColFound=0;
+  for (iRow=0; iRow<nbRow; iRow++) {
     prov1=0;
-    for (iRow=iCol; iRow<nbRow; iRow++)
+    for (iCol=iRow; iCol<nbCol; iCol++)
       if (prov1 == 0) {
 	eVal=Input(iRow,iCol);
 	if (eVal != 0) {
-	  iRowFound=iRow;
+	  iColFound=iCol;
 	  prov1=1/eVal;
 	}
       }
@@ -865,24 +865,24 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       throw eExcept;
     }
 #endif
-    for (iColB=0; iColB<nbCol; iColB++) {
-      Input(iRowFound,iColB) *= prov1;
-      Output(iRowFound,iColB) *= prov1;
+    for (iRowB=0; iRowB<nbRow; iRowB++) {
+      Input (iRowB, iColFound) *= prov1;
+      Output(iRowB, iColFound) *= prov1;
     }
-    for (iRow=0; iRow<nbRow; iRow++)
-      if (iRow != iRowFound) {
+    for (iCol=0; iCol<nbCol; iCol++)
+      if (iCol != iColFound) {
 	prov2=Input(iRow, iCol);
 	if (prov2 != 0) {
-	  for (iColB=0; iColB<nbCol; iColB++) {
-	    Input(iRow, iColB) -= prov2*Input(iRowFound,iColB);
-	    Output(iRow,iColB) -= prov2*Output(iRowFound,iColB);
+	  for (iRowB=0; iRowB<nbRow; iRowB++) {
+	    Input(iRowB, iCol) -= prov2*Input(iRowB, iColFound);
+	    Output(iRowB, iCol) -= prov2*Output(iRowB, iColFound);
 	  }
 	}
       }
-    if (iRowFound != iCol)
-      for (iColB=0; iColB<nbCol; iColB++) {
-        std::swap(Input(iRowFound, iColB), Input(iCol, iColB));
-        std::swap(Output(iRowFound, iColB), Output(iCol, iColB));
+    if (iColFound != iRow)
+      for (iRowB=0; iRowB<nbRow; iRowB++) {
+        std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
+        std::swap(Output(iRowB, iColFound), Output(iRowB, iRow));
       }
   }
 }
