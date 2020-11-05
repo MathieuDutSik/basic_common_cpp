@@ -866,25 +866,26 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       throw eExcept;
     }
 #endif
-    for (iRowB=0; iRowB<nbRow; iRowB++) {
-      Input (iRowB, iColFound) *= prov1;
+    for (iRowB=0; iRowB<nbRow; iRowB++)
       Output(iRowB, iColFound) *= prov1;
-    }
+    for (iRowB=iRow; iRowB<nbRow; iRowB++)
+      Input (iRowB, iColFound) *= prov1;
     for (iCol=0; iCol<nbCol; iCol++)
       if (iCol != iColFound) {
 	prov1=Input(iRow, iCol);
 	if (prov1 != 0) {
-	  for (iRowB=0; iRowB<nbRow; iRowB++) {
-	    Input (iRowB, iCol) -= prov1 * Input (iRowB, iColFound);
+	  for (iRowB=0; iRowB<nbRow; iRowB++)
 	    Output(iRowB, iCol) -= prov1 * Output(iRowB, iColFound);
-	  }
+	  for (iRowB=iRow; iRowB<nbRow; iRowB++)
+	    Input (iRowB, iCol) -= prov1 * Input (iRowB, iColFound);
 	}
       }
-    if (iColFound != iRow)
-      for (iRowB=0; iRowB<nbRow; iRowB++) {
-        std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
+    if (iColFound != iRow) {
+      for (iRowB=0; iRowB<nbRow; iRowB++)
         std::swap(Output(iRowB, iColFound), Output(iRowB, iRow));
-      }
+      for (iRowB=iRow; iRowB<nbRow; iRowB++)
+        std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
+    }
   }
 }
 

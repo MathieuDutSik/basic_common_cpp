@@ -1,8 +1,8 @@
 #PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
 #PROGRAM		= ComputePointer
 #PROGRAM		= RowHermiteNormalForm
-#PROGRAM		= TestMatrixInverse
-PROGRAM		= TestPerformanceHNF
+PROGRAM		= TestMatrixInverse
+#PROGRAM		= TestPerformanceHNF
 #PROGRAM		= TestQuoInt
 
 OBJECTS		= $(PROGRAM:%=%.o)
