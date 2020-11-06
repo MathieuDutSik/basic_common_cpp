@@ -162,26 +162,24 @@ void ShowAttainmentVector(std::ostream & os, std::vector<T> const& eVect)
 
 
 
-/*
-use instead std::max
+// use std::max for generic types (int, long, float, ...)
 template<typename T>
-T T_max(T const& eVal1, T const& eVal2)  Use std::max instead
+T T_max(T const& eVal1, T const& eVal2)
 {
   if (eVal1 > eVal2)
     return eVal1;
   return eVal2;
-  }*/
+}
 
 
-/*
-use std::min instead
+// use std::min for generic types (int, long, float, ...)
 template<typename T>
-T T_min(T const& eVal1, T const& eVal2)  Use std::min instead
+T T_min(T const& eVal1, T const& eVal2)
 {
   if (eVal1 > eVal2)
     return eVal2;
   return eVal1;
-  }*/
+}
 
 
 template<typename T>
