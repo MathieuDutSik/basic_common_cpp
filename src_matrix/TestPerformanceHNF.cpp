@@ -8,7 +8,8 @@ int main(int argc, char *argv[])
   //  using T=long;
   try {
     if (argc != 3) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
+      fprintf(stderr, "TestPerformanceHNF is used as\n");
+      fprintf(stderr, "TestPerformanceHNF [n] [m]\n");
       return -1;
     }
     // reading the matrix

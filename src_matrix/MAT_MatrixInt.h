@@ -122,16 +122,11 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 // In input a list of entries x=(x_0, ...., x_m)
 // In return we have
 // ---gcd: The greatest common dovisor
-// ---ListA: A list of entries (n_0, ...., n_m)
-//    with gcd = n_0 x_0 + n_1 x_1 + ..... + n_m x_m
-// ---ListListK: The basis of the kernel of the orthogonal of x.
 // ---Pmat: A matrix P unimodulaire such that
 //    V P = (gcd, 0, ....., 0)
 template<typename T>
 struct GCD_int {
   T gcd;
-  std::vector<T> ListA;
-  std::vector<std::vector<T>> ListListK;
   MyMatrix<T> Pmat;
 };
 
@@ -139,26 +134,9 @@ struct GCD_int {
 template<typename T>
 void WriteGCD_int(std::ostream & os, GCD_int<T> const& eGCD)
 {
-  int siz=eGCD.ListListK.size();
-  auto ThePrint=[&](std::vector<T> const& eV) -> void {
-    os << "[";
-    int len=eV.size();
-    for (int i=0; i<len; i++) {
-      if (i>0)
-	os << ",";
-      os << eV[i];
-    }
-    os << "]";
-  };
   os << "gcd=" << eGCD.gcd << "\n";
-  os << "A=";
-  ThePrint(eGCD.ListA);
-  os << "\n";
-  for (int iVect=0; iVect<siz; iVect++) {
-    os << "iVect=" << iVect << " V=";
-    ThePrint(eGCD.ListListK[iVect]);
-    os << "\n";
-  }
+  os << "Pmat=";
+  WriteMatrix(os, eGCD.Pmat);
 }
 
 
@@ -169,12 +147,8 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
   T f, g, h, fm, gm, hm, q;
   if (n == 0 && m == 0) {
     f=0;
-    std::vector<T> eVect{1, 0};
-    std::vector<T> fVect{0, 1};
-    std::vector<std::vector<T>> ListListK = {fVect};
     MyMatrix<T> Pmat=IdentityMat<T>(2);
-    GCD_int<T> Case2{f, eVect, ListListK, Pmat};
-    return Case2;
+    return {f, std::move(Pmat)};
   }
   if (0 <= m) {
     f=m; fm=1;
@@ -203,15 +177,12 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
     eCoeff1=fm;
     eCoeff2=(f - fm * m) / n;
   }
-  std::vector<T> eVect{eCoeff1, eCoeff2};
-  std::vector<T> fVect{-n/f, m/f};
-  std::vector<std::vector<T>> ListListK = {fVect};
   MyMatrix<T> Pmat(2,2);
-  Pmat(0,0) = eVect[0];
-  Pmat(1,0) = eVect[1];
-  Pmat(0,1) = fVect[0];
-  Pmat(1,1) = fVect[1];
-  return {f, std::move(eVect), std::move(ListListK), std::move(Pmat)};
+  Pmat(0,0) = eCoeff1;
+  Pmat(1,0) = eCoeff2;
+  Pmat(0,1) = -n/f;
+  Pmat(1,1) = m/f;
+  return {f, std::move(Pmat)};
 }
 
 template<typename T>
@@ -289,7 +260,7 @@ T ComputeLCM(std::vector<T> const& eVect)
   int siz=eVect.size();
   T eLCM=1;
   for (int i=0; i<siz; i++)
-    eLCM=LCMpair(eLCM, eVect[i]);
+    eLCM = LCMpair(eLCM, eVect[i]);
   return eLCM;
 }
 
@@ -421,9 +392,8 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
   int siz=ListX.size();
   if (siz == 1) {
     T gcd=ListX[0];
-    std::vector<T> ListA={1};
     MyMatrix<T> Pmat=IdentityMat<T>(1);
-    GCD_int<T> eGCD_int{gcd, ListA, {}, Pmat};
+    GCD_int<T> eGCD_int{gcd, std::move(Pmat)};
     return eGCD_int;
   }
   if (siz == 2)
@@ -431,34 +401,23 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
   std::vector<T> ListXred(ListX.begin(), ListX.end()-1);
   GCD_int<T> eGCD_int=ComputeGCD_information(ListXred);
   GCD_int<T> eGCD2=ComputePairGcd(eGCD_int.gcd, ListX[siz-1]);
-  std::vector<T> NewListA;
-  for (int i=0; i<siz-1; i++) {
-    T eVal=eGCD2.ListA[0]*eGCD_int.ListA[i];
-    NewListA.push_back(eVal);
-  }
-  NewListA.push_back(eGCD2.ListA[1]);
-  //
-  std::vector<std::vector<T>> NewListListK(siz-1);
-  for (int i=0; i<siz-2; i++) {
-    std::vector<T> eVect=eGCD_int.ListListK[i];
-    eVect.push_back(0);
-    NewListListK[i]=eVect;
-  }
-  std::vector<T> fVect(siz);
-  for (int i=0; i<siz-1; i++) {
-    T eVal=eGCD2.ListListK[0][0]*eGCD_int.ListA[i];
-    fVect[i]=eVal;
-  }
-  fVect[siz-1]=eGCD2.ListListK[0][1];
-  NewListListK[siz-2]=fVect;
   MyMatrix<T> Pmat=MyMatrix<T>(siz,siz);
-  for (int i=0; i<siz; i++)
-    Pmat(i,0)=NewListA[i];
-  for (int iCol=1; iCol<siz; iCol++)
-    for (int iRow=0; iRow<siz; iRow++)
-      Pmat(iRow, iCol)=NewListListK[iCol-1][iRow];
+  // 1 : the column for the GCD
+  for (int i=0; i<siz-1; i++)
+    Pmat(i,0) = eGCD2.Pmat(0,0) * eGCD_int.Pmat(i,0);
+  Pmat(siz-1, 0) = eGCD2.Pmat(1,0);
+  // 2 : The columns from the previous block
+  for (int i=0; i<siz-2; i++) {
+    for (int j=0; j<siz-1; j++)
+      Pmat(j, i+1) = eGCD_int.Pmat(j, i+1);
+    Pmat(siz-1, i+1) = 0;
+  }
+  // 3 : The zero columns
+  for (int i=0; i<siz-1; i++)
+    Pmat(i, siz-1) = eGCD2.Pmat(0,1) * eGCD_int.Pmat(i,0);
+  Pmat(siz-1, siz-1) = eGCD2.Pmat(1,1);
   //
-  return {eGCD2.gcd, std::move(NewListA), std::move(NewListListK), std::move(Pmat)};
+  return {eGCD2.gcd, std::move(Pmat)};
 }
 
 
@@ -706,11 +665,10 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     GCD_int<T> eGCD=ComputeGCD_information(ListX);
     std::vector<std::vector<T>> NewBasis;
     for (int iVect=0; iVect<dimSpace; iVect++) {
-      std::vector<T> kerVect=eGCD.ListListK[iVect];
       std::vector<T> eVectNew(sizRelIndex+1,0);
-      eVectNew[0]=kerVect[0];
+      eVectNew[0]=eGCD.Pmat(0,iVect+1);
       for (int i=1; i<=dimSpace; i++) {
-	T fVal=kerVect[i];
+	T fVal=eGCD.Pmat(i,iVect+1);
 	std::vector<T> basVect=TheBasis[i-1];
 	for (int j=0; j<sizRelIndex; j++)
 	  eVectNew[j+1] += fVal*basVect[j];
