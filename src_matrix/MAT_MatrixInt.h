@@ -486,7 +486,11 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
   //
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbRow);
-  //  std::cerr << "Begin of ComputeRowHermiteNormalForm\n";
+#define TRACK_MAXIMUM_SIZE_COEFF
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+  T MaxSizeCoeff = 0;
+#endif
+
   int TopPosition=0;
   MyMatrix<T> TheMat1 = IdentityMat<T>(nbRow);
   for (int iCol=0; iCol<nbCol; iCol++) {
@@ -513,6 +517,11 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
       U = TheMat1 * U;
       H = TheMat1 * H;
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
+#endif
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++) {
           if (i != j)
@@ -541,6 +550,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
           H.row(iRow) -= TheQ * H.row(TopPosition);
         }
       }
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
+#endif
       //      std::cerr << "Step 4\n";
       //
       // Increasing the index
@@ -548,7 +561,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       TopPosition++;
      }
   }
-  return {U, H};
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+  std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
+#endif
+  return {std::move(U), std::move(H)};
 }
 
 
@@ -1022,7 +1038,7 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
   if (nbVect == 0) {
     MyVector<T> eSol;
     if (IsZeroVector(TheVect)) {
-      return {true, eSol};
+      return {true, std::move(eSol)};
     }
     else {
       return {false, {}};
@@ -1123,7 +1139,7 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       std::cerr << "SolutionIntMat: Error in the solutioning algorithm\n";
       throw TerminalException{1};
       }*/
-  return {true, eSol};
+  return {true, std::move(eSol)};
 }
 
 
@@ -1224,7 +1240,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
     }
     ListRow[i]=eVal;
   }
-  return {ListRow, TheMatWork, eEquivMat};
+  return {std::move(ListRow), std::move(TheMatWork), std::move(eEquivMat)};
 }
 
 template<typename T>
@@ -1270,9 +1286,9 @@ ResultSolutionIntMat<T> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<
       }
     }
     if (TheVectWork(i) != 0)
-      return {false,{}};
+      return {false, {}};
   }
-  return {true,eSol};
+  return {true, std::move(eSol)};
 }
 
 
@@ -1578,7 +1594,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     if (eVal == -1)
       return {false, {}};
   }
-  return {true, ListIdx};
+  return {true, std::move(ListIdx)};
 }
 
 

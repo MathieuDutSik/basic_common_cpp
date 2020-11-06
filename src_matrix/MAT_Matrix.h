@@ -1257,7 +1257,7 @@ std::pair<Tfloat,MyVector<Tint>> FindBestIntegerApproximation(MyVector<Tfloat> c
       MinimalApprox = CandApprox;
     }
   }
-  return {MinErr,MinimalApprox};
+  return {MinErr, std::move(MinimalApprox)};
 }
 
 
@@ -1396,9 +1396,9 @@ SolMatResult<T> SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
   if (eMat.rows() == 0) {
     if (!IsZeroVector(eVect))
-      return {false,{}};
+      return {false, {}};
     MyVector<T> eSol(0);
-    return {true, eSol};
+    return {true, std::move(eSol)};
   }
   int nbRow=eMat.rows();
   int nbCol=eMat.cols();
@@ -1420,7 +1420,7 @@ SolMatResult<T> SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
     int iRow=ListRowSelect[iRank];
     eRetSol(iRow)=eSol(iRank);
   }
-  return {true, eRetSol};
+  return {true, std::move(eRetSol)};
 }
 
 
@@ -1953,12 +1953,46 @@ namespace std {
 
 
 template<typename T>
-T L1_norm(MyVector<T> const& V)
+T L1_norm_vect(MyVector<T> const& V)
 {
   int siz=V.size();
   T norm=0;
   for (int i=0; i<siz; i++)
     norm += T_abs(V(i));
+  return norm;
+}
+
+
+template<typename T>
+T Linfinity_norm_vect(MyVector<T> const& V)
+{
+  int siz=V.size();
+  T norm=0;
+  for (int i=0; i<siz; i++)
+    norm = T_max(norm, T_abs(V(i)));
+  return norm;
+}
+
+
+
+template<typename T>
+T L1_norm_mat(MyMatrix<T> const& M)
+{
+  int siz=M.size();
+  T norm=0;
+  for (int i=0; i<siz; i++)
+    norm += T_abs(M(i));
+  return norm;
+}
+
+
+template<typename T>
+T Linfinity_norm_mat(MyMatrix<T> const& M)
+{
+  int siz=M.size();
+  T norm=0;
+  for (int i=0; i<siz; i++)
+    norm = T_max(norm, T_abs(M(i)));
   return norm;
 }
 
