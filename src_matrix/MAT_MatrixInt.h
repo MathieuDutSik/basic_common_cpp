@@ -27,8 +27,8 @@ bool IsIntegralMatrix(MyMatrix<T> const& M)
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
       if (!IsInteger(M(iRow, iCol)))
 	return false;
   return true;
@@ -124,7 +124,7 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 // ---gcd: The greatest common dovisor
 // ---ListA: A list of entries (n_0, ...., n_m)
 //    with gcd = n_0 x_0 + n_1 x_1 + ..... + n_m x_m
-// ---ListLisK: The basis of the kernel of the orthogonal of x.
+// ---ListListK: The basis of the kernel of the orthogonal of x.
 // ---Pmat: A matrix P unimodulaire such that
 //    V P = (gcd, 0, ....., 0)
 template<typename T>
@@ -203,17 +203,15 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
     eCoeff1=fm;
     eCoeff2=(f - fm * m) / n;
   }
-  //  std::cerr << "n=" << n << " m=" << m << "\n";
   std::vector<T> eVect{eCoeff1, eCoeff2};
   std::vector<T> fVect{-n/f, m/f};
   std::vector<std::vector<T>> ListListK = {fVect};
   MyMatrix<T> Pmat(2,2);
-  Pmat(0,0)=eVect[0];
-  Pmat(1,0)=eVect[1];
-  Pmat(0,1)=fVect[0];
-  Pmat(1,1)=fVect[1];
-  GCD_int<T> Case2{f, eVect, ListListK, Pmat};
-  return Case2;
+  Pmat(0,0) = eVect[0];
+  Pmat(1,0) = eVect[1];
+  Pmat(0,1) = fVect[0];
+  Pmat(1,1) = fVect[1];
+  return {f, std::move(eVect), std::move(ListListK), std::move(Pmat)};
 }
 
 template<typename T>
@@ -460,8 +458,7 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
     for (int iRow=0; iRow<siz; iRow++)
       Pmat(iRow, iCol)=NewListListK[iCol-1][iRow];
   //
-  GCD_int<T> retGCD{eGCD2.gcd, NewListA, NewListListK, Pmat};
-  return retGCD;
+  return {eGCD2.gcd, std::move(NewListA), std::move(NewListListK), std::move(Pmat)};
 }
 
 
@@ -1397,13 +1394,8 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     MyMatrix<T> PartMat=IdentityMat<T>(nbCol);
     //    std::cerr << "Before operations: iRank=" << iRank << "\n";
     for (int iCol=iRank; iCol<nbCol; iCol++)
-      for (int iRow=iRank; iRow<nbCol; iRow++) {
-	//	std::cerr << "iRow=" << iRow << " iCol=" << iCol << "\n";
-	T eVal=eGCD.Pmat(iRow-iRank, iCol-iRank);
-	//	std::cerr << "We have eVal\n";
-	PartMat(iRow, iCol)=eVal;
-	//	std::cerr << "Assign PartMat\n";
-      }
+      for (int iRow=iRank; iRow<nbCol; iRow++)
+	PartMat(iRow, iCol) = eGCD.Pmat(iRow-iRank, iCol-iRank);
     //    std::cerr << "Expression of PartMat:\n";
     //    WriteMatrix(std::cerr, PartMat);
 
@@ -1412,7 +1404,6 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
       T a=TheBasisReduced(iRowSearch, iCol);
       T b=TheBasisReduced(iRowSearch, iRank);
       T q=QuoInt(a, b);
-      //      std::cerr << "q=" << q << "\n";
       MyMatrix<T> PartMatB=IdentityMat<T>(nbCol);
       PartMatB(iRank, iCol)=-q;
       SingleMultiplicationUpdate(PartMatB);
@@ -1913,9 +1904,8 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const& M)
       throw TerminalException{1};
     }
     MyVector<Tint> SumVect = ZeroVector<Tint>(2*n);
-    for (int i_row=0; i_row<nb_row; i_row++) {
+    for (int i_row=0; i_row<nb_row; i_row++)
       SumVect += GetMatrixRow(Mwork, i_row) * eGCD.ListA[i_row];
-    }
     return SumVect;
   };
   MyMatrix<Tint> CompleteBasis(2*n, 2*n);
