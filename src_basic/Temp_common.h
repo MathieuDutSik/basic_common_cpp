@@ -335,7 +335,7 @@ CollectedResult<T> Collected(std::vector<T> const& eVect)
   };
   for (auto & eVal : eVect)
     UpPosition(eVal);
-  return {LVal, LMult};
+  return {std::move(LVal), std::move(LMult)};
 }
 
 inline int NextIdx(int const& len,int const& i)
@@ -547,7 +547,7 @@ std::pair<std::vector<int>,std::vector<int>> SortingLists(std::vector<T> const &
     v1[i]=int(eIdx);
     v2[eIdx]=int(i);
   }
-  return {v1,v2};
+  return {std::move(v1), std::move(v2)};
 }
 
 

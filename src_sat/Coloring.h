@@ -55,7 +55,7 @@ std::pair<bool,std::vector<int>> GetColoringOrFail(Tgr eGR, int const& nbColor)
     // Solving the system
     //
     if (!S.solve())
-      return {false,{}};
+      return {false, {}};
     //
     // Extracting the solution
     //
@@ -86,5 +86,5 @@ std::pair<bool,std::vector<int>> GetColoringOrFail(Tgr eGR, int const& nbColor)
         }
       }
     }
-    return {true,V};
+    return {true, std::move(V)};
 }
