@@ -450,7 +450,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
   int TopPosition=0;
   MyMatrix<T> TheMat1 = IdentityMat<T>(nbRow);
   for (int iCol=0; iCol<nbCol; iCol++) {
-    //    std::cerr << "iCol=" << iCol << "\n";
     std::vector<T> ListX;
     std::vector<int> ListIdx;
     bool HasNonZero=false;
@@ -463,7 +462,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
           HasNonZero=true;
       }
     if (HasNonZero) {
-      //      std::cerr << "Step 1\n";
       //
       // Ensuring that the column has a pivot and that everything below is ZERO
       int siz = ListIdx.size();
@@ -485,7 +483,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
           else
             TheMat1(ListIdx[i],ListIdx[j]) = 1;
         }
-      //      std::cerr << "Step 2\n";
       //
       // Ensuring that the pivot is strictly positive
       // (in the case of integer. For other rings this is a different story)
@@ -494,7 +491,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
         U.row(TopPosition) = eCanUnit * U.row(TopPosition);
         H.row(TopPosition) = eCanUnit * H.row(TopPosition);
       }
-      //      std::cerr << "Step 3\n";
       //
       // Putting the coefficients over the pivot
       T ThePivot = H(TopPosition, iCol);
@@ -510,7 +506,92 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
-      //      std::cerr << "Step 4\n";
+      //
+      // Increasing the index
+      StatusRow[TopPosition]=1;
+      TopPosition++;
+     }
+  }
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+  std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
+#endif
+  return {std::move(U), std::move(H)};
+}
+
+
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> const& M)
+{
+  int nbRow=M.rows();
+  int nbCol=M.cols();
+  Face StatusRow(nbCol);
+  //
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMat<T>(nbCol);
+#define TRACK_MAXIMUM_SIZE_COEFF
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+  T MaxSizeCoeff = 0;
+#endif
+
+  int TopPosition=0;
+  MyMatrix<T> TheMat1 = IdentityMat<T>(nbCol);
+  for (int iRow=0; iRow<nbRow; iRow++) {
+    std::vector<T> ListX;
+    std::vector<int> ListIdx;
+    bool HasNonZero=false;
+    for (int iCol=0; iCol<nbCol; iCol++)
+      if (StatusRow[iCol] == 0) {
+        ListIdx.push_back(iCol);
+        T eVal = H(iRow,iCol);
+        ListX.push_back(eVal);
+        if (eVal != 0)
+          HasNonZero=true;
+      }
+    if (HasNonZero) {
+      //
+      // Ensuring that the column has a pivot and that everything below is ZERO
+      int siz = ListIdx.size();
+      GCD_int<T> eGCD = ComputeGCD_information(ListX);
+      for (int i=0; i<siz; i++)
+        for (int j=0; j<siz; j++)
+          TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
+      U = U * TheMat1;
+      H = H * TheMat1;
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
+#endif
+      for (int i=0; i<siz; i++)
+        for (int j=0; j<siz; j++) {
+          if (i != j)
+            TheMat1(ListIdx[i],ListIdx[j]) = 0;
+          else
+            TheMat1(ListIdx[i],ListIdx[j]) = 1;
+        }
+      //
+      // Ensuring that the pivot is strictly positive
+      // (in the case of integer. For other rings this is a different story)
+      T eCanUnit = CanonicalizationUnit(H(iRow, TopPosition));
+      if (eCanUnit != 1) {
+        U.col(TopPosition) = eCanUnit * U.col(TopPosition);
+        H.col(TopPosition) = eCanUnit * H.col(TopPosition);
+      }
+      //
+      // Putting the coefficients over the pivot
+      T ThePivot = H(iRow, TopPosition);
+      for (int iCol=0; iCol<TopPosition; iCol++) {
+        T eVal = H(iRow, iCol);
+        T TheQ = QuoInt(eVal, ThePivot);
+        if (TheQ != 0) {
+          U.col(iCol) -= TheQ * U.col(TopPosition);
+          H.col(iCol) -= TheQ * H.col(TopPosition);
+        }
+      }
+#ifdef TRACK_MAXIMUM_SIZE_COEFF
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
+      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
+#endif
       //
       // Increasing the index
       StatusRow[TopPosition]=1;

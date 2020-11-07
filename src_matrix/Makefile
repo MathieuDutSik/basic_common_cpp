@@ -4,7 +4,7 @@
 #PROGRAM		= TestMatrixInverse
 #PROGRAM		= TestPerformanceHNF
 #PROGRAM		= TestQuoInt
-PROGRAM		= RowHermiteNormalForm TestPerformanceHNF
+PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
