@@ -5,6 +5,7 @@
 #include "Boost_bitset.h"
 #include "NumberTheory.h"
 
+#define TRACK_MAXIMUM_SIZE_COEFF
 
 
 // Now declarations of generic code.
@@ -442,7 +443,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
   //
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbRow);
-#define TRACK_MAXIMUM_SIZE_COEFF
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
@@ -528,7 +528,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
   //
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbCol);
-#define TRACK_MAXIMUM_SIZE_COEFF
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
@@ -554,7 +553,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
       GCD_int<T> eGCD = ComputeGCD_information(ListX);
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
-          TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
+          TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(i,j);
       U = U * TheMat1;
       H = H * TheMat1;
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
