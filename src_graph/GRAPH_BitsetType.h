@@ -37,6 +37,10 @@ public:
     return *this;
   }
   // lighter stuff
+  int GetNbAdjacent() const
+  {
+    return LLAdj.count();
+  }
   int GetNbVert() const
   {
     return nbVert;

@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     if (argc != 5) {
       std::cerr << "Number of argument is = " << argc << "\n";
       std::cerr << "This program is used as\n";
-      std::cerr << "EnumerateDistanceSembedding [DataGraph] [S] [MaxIter] [FileOut]\n";
+      std::cerr << "GRAPH_EnumerateDistanceSembedding [DataGraph] [S] [MaxIter] [FileOut]\n";
       std::cerr << "\n";
       std::cerr << "DataGraph : The file containing the graph\n";
       std::cerr << "S         : The value of k used for the enumeration\n";

@@ -72,7 +72,7 @@ public:
     if (TheVal == HasVertexColor)
       return;
     HasVertexColor=TheVal;
-    if (TheVal) 
+    if (TheVal)
       ListVertexColor=std::vector<int>(nbVert);
     if (!TheVal)
       ListVertexColor.clear();
