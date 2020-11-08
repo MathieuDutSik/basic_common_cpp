@@ -49,15 +49,12 @@ MyVector<T2> ConvertVectorUniversal(MyVector<T1> const& V)
 template<typename T2, typename T1>
 MyMatrix<T2> ConvertMatrixUniversal(MyMatrix<T1> const& M)
 {
-  int eta_rho=M.rows();
-  int xi_rho=M.cols();
-  MyMatrix<T2> eRet(eta_rho, xi_rho);
-  for (int i=0; i<eta_rho; i++)
-    for (int j=0; j<xi_rho; j++) {
-      T1 eVal1=M(i,j);
-      T2 eVal2=UniversalTypeConversion<T2,T1>(eVal1);
-      eRet(i,j)=eVal2;
-    }
+  int n_rows=M.rows();
+  int n_cols=M.cols();
+  MyMatrix<T2> eRet(n_rows, n_cols);
+  for (int j=0; j<n_cols; j++)
+    for (int i=0; i<n_rows; i++)
+      eRet(i,j)=UniversalTypeConversion<T2,T1>(M(i,j));
   return eRet;
 }
 
@@ -198,7 +195,7 @@ std::string StringSizeMatrix(MyMatrix<T> const& X)
 {
   int nbRow=X.rows();
   int nbCol=X.cols();
-  return IntToString(nbRow) + " / " + IntToString(nbCol);
+  return std::to_string(nbRow) + " / " + std::to_string(nbCol);
 }
 
 
@@ -207,10 +204,7 @@ std::string MinMaxMatrix(MyMatrix<T> const& X)
 {
   T minV=X.minCoeff();
   T maxV=X.maxCoeff();
-  std::stringstream s;
-  s << "min/max=" << minV << " / " << maxV;
-  std::string converted(s.str());
-  return converted;
+  return std::string("min/max=") + std::to_string(minV) + " / " << std::to_string(maxV);
 }
 
 
@@ -264,10 +258,8 @@ void WriteMatrix(std::ostream &os, MyMatrix<T> const&TheMat)
   //  TerminalEnding();
   os << nbRow << " " << nbCol << "\n";
   for (long iRow=0; iRow<nbRow; iRow++) {
-    for (long iCol=0; iCol<nbCol; iCol++) {
-      T eVal=TheMat(iRow, iCol);
-      os << " " << eVal;
-    }
+    for (long iCol=0; iCol<nbCol; iCol++)
+      os << " " << TheMat(iRow, iCol);
     os << "\n";
   }
 }
@@ -278,10 +270,8 @@ void WriteMatrixMatlab(std::ostream &os, MyMatrix<T> const&TheMat)
   int nbRow=TheMat.rows();
   int nbCol=TheMat.cols();
   for (int iRow=0; iRow<nbRow; iRow++) {
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      T eVal=TheMat(iRow, iCol);
-      os << " " << eVal;
-    }
+    for (int iCol=0; iCol<nbCol; iCol++)
+      os << " " << TheMat(iRow, iCol);
     os << "\n";
   }
 }
@@ -412,7 +402,7 @@ T ScalarProduct(MyVector<T> const& V1, MyVector<T> const & V2)
   size_t siz=V1.size();
   T eSum=0;
   for (size_t i=0; i<siz; i++)
-    eSum += V1(i)*V2(i);
+    eSum += V1(i) * V2(i);
   return eSum;
 }
 
@@ -430,11 +420,8 @@ MyVector<T> ListScalarProduct(MyVector<T> const& V, MyMatrix<T> const& eMat)
   MyVector<T> retVect(nbRow);
   for (int iRow=0; iRow<nbRow; iRow++) {
     T eSum=0;
-    for (int iCol=0; iCol<dim; iCol++) {
-      T eVal1=V(iCol);
-      T eVal2=eMat(iRow, iCol);
-      eSum += eVal1*eVal2;
-    }
+    for (int iCol=0; iCol<dim; iCol++)
+      eSum += eMat(iRow, iCol) * V(iCol);
     retVect(iRow)=eSum;
   }
   return retVect;
@@ -445,12 +432,8 @@ MyVector<T> ListScalarProduct(MyVector<T> const& V, MyMatrix<T> const& eMat)
 template<typename T>
 MyMatrix<T> ZeroMatrix(int const& nbRow, int const& nbCol)
 {
-  MyMatrix<T> retMat(nbRow, nbCol);
-  T eZero;
-  eZero=0;
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      retMat(iRow, iCol)=eZero;
+  MyMatrix<T> retMat;
+  retMat.setConstant(nbRow, nbCol, T(0));
   return retMat;
 }
 
@@ -458,10 +441,8 @@ MyMatrix<T> ZeroMatrix(int const& nbRow, int const& nbCol)
 template<typename T>
 MyMatrix<T> ConstantMatrix(int const& nbRow, int const& nbCol, T const& eVal)
 {
-  MyMatrix<T> retMat(nbRow, nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      retMat(iRow, iCol)=eVal;
+  MyMatrix<T> retMat;
+  retMat.setConstant(nbRow, nbCol, eVal);
   return retMat;
 }
 
@@ -491,26 +472,6 @@ void TVec_ZeroAssignation(MyVector<T> &TheVect)
   for (i=0; i<TheVect.n; i++)
     TheVect(i)=eZero;
 }
-
-
-
-
-/* eMatO should already be allocated with same ssizes as eMatI */
-template<typename T>
-MyMatrix<T> TMat_ConvertFromInt(MyMatrix<int> const&eMatI)
-{
-  int nbRow=eMatI.rows();
-  int nbCol=eMatI.cols();
-  MyMatrix<T> eMatO(nbRow, nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      int eVal=eMatI(iRow, iCol);
-      T eVal_T=eVal;
-      eMatO(iRow, iCol)=eVal_T;
-    }
-  return eMatO;
-}
-
 
 
 
@@ -555,7 +516,7 @@ MyVector<T> ProductVectorMatrix(MyVector<T> const& X, MyMatrix<T> const& M)
   for (int iCol=0; iCol<nbCol; iCol++) {
     T sum=0;
     for (int iRow=0; iRow<nbRow; iRow++)
-      sum += M(iRow,iCol)*X(iRow);
+      sum += M(iRow,iCol) * X(iRow);
     Vret(iCol)=sum;
   }
   return Vret;
@@ -567,94 +528,10 @@ MyMatrix<T> RankOneMatrix(MyVector<T> const& V)
 {
   int n=V.size();
   MyMatrix<T> retMat(n,n);
-  for (int i=0; i<n; i++)
-    for (int j=0; j<n; j++)
+  for (int j=0; j<n; j++)
+    for (int i=0; i<n; i++)
       retMat(i,j)=V(i) * V(j);
   return retMat;
-}
-
-
-template<typename T1, typename T2, typename T3>
-MyMatrix<T3> MatrixProduct_T1_T2_T3(MyMatrix<T1> const&M1, MyMatrix<T2> const&M2)
-{
-  int nbCol1=M1.cols();
-  int nbRow1=M1.rows();
-  int nbCol2=M2.cols();
-  int nbRow2=M2.rows();
-  if (nbCol1 != nbRow2) {
-    std::cerr << "Error in matrix sizes\n";
-    throw TerminalException{1};
-  }
-  MyMatrix<T3> TheProd(nbRow1, nbCol2);
-  for (int iCol=0; iCol<nbCol2; iCol++)
-    for (int iRow=0; iRow<nbRow1; iRow++) {
-      T3 eSum=0;
-      for (int i=0; i<nbCol1; i++) {
-	T1 prov1=M1(iRow, i);
-	T2 prov2=M2(i, iCol);
-	T3 prov12=prov1*prov2;
-	eSum += prov12;
-      }
-      TheProd(iRow, iCol)=eSum;
-    }
-  return TheProd;
-}
-
-
-
-
-template<typename T1, typename T2>
-MyMatrix<T1> MatrixProduct_T_Oth(MyMatrix<T1> const&M1, MyMatrix<T2> const&M2)
-{
-  int nbCol1=M1.cols();
-  int nbRow1=M1.rows();
-  int nbCol2=M2.cols();
-  int nbRow2=M2.rows();
-  if (nbCol1 != nbRow2) {
-    std::cerr << "Error in matrix sizes\n";
-    throw TerminalException{1};
-  }
-  MyMatrix<T1> TheProd(nbRow1, nbCol2);
-  for (int iCol=0; iCol<nbCol2; iCol++)
-    for (int iRow=0; iRow<nbRow1; iRow++) {
-      T1 eSum=0;
-      for (int i=0; i<nbCol1; i++) {
-	T1 prov1=M1(iRow, i);
-	T2 prov2=M2(i, iCol);
-	T1 prov12=prov1*prov2;
-	eSum += prov12;
-      }
-      TheProd(iRow, iCol)=eSum;
-    }
-  return TheProd;
-}
-
-
-
-
-
-
-
-template<typename T1, typename T2>
-MyMatrix<T2> MatrixProduct_Oth_T(MyMatrix<T1> const&M1, MyMatrix<T2> const&M2)
-{
-  int nbCol1=M1.cols();
-  int nbRow1=M1.rows();
-  int nbCol2=M2.cols();
-  int nbRow2=M2.rows();
-  if (nbCol1 != nbRow2) {
-    std::cerr << "Error in matrix sizes\n";
-    throw TerminalException{1};
-  }
-  MyMatrix<T2> TheProd(nbRow1, nbCol2);
-  for (int iCol=0; iCol<nbCol2; iCol++)
-    for (int iRow=0; iRow<nbRow1; iRow++) {
-      T2 eSum=0;
-      for (int i=0; i<nbCol1; i++)
-	eSum += M1(iRow, i) * M2(i, iCol);
-      TheProd(iRow, iCol)=eSum;
-    }
-  return TheProd;
 }
 
 
@@ -699,14 +576,6 @@ MyVector<T> VectorMatrix(MyVector<T> const& eVect, MyMatrix<T> const& eMat)
   return rVect;
 }
 
-template<typename T>
-void SwapValues(T& val1, T& val2)
-{
-  T prov;
-  prov=val1;
-  val1=val2;
-  val2=prov;
-}
 
 template<typename T>
 void AssignMatrixRow(MyMatrix<T> &eMat, int const& iRow, MyVector<T> const& eVect)
@@ -1132,7 +1001,7 @@ MyMatrix<T> IdentityMat(int n)
 	t=1;
       else
 	t=0;
-      TheMat(i, j)=t;
+      TheMat(i, j) = t;
     }
   return TheMat;
 }
@@ -1142,7 +1011,6 @@ MyMatrix<T> IdentityMat(int n)
 template<typename T>
 void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat, MyVector<T> &eVectImg)
 {
-  T t, prov1, prov2;
   int iCol, nbCol, iRow, nbRow, n;
   n=eVect->n;
   nbRow=TheMat.rows();
@@ -1153,12 +1021,9 @@ void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat, MyVector<T> &e
     throw TerminalException{1};
   }
   for (iCol=0; iCol<nbCol; iCol++) {
-    t=0;
-    for (iRow=0; iRow<n; iRow++) {
-      prov1=TheMat(iRow, iCol);
-      prov2=prov1*eVect(iRow);
-      t=t + prov2;
-    }
+    T t=0;
+    for (iRow=0; iRow<n; iRow++)
+      t += TheMat(iRow, iCol) * eVect(iRow);
     eVectImg(iCol)=t;
   }
 }
@@ -1195,21 +1060,21 @@ T DeterminantMatKernel(MyMatrix<T> const&TheMat)
     eVectPos[size_t(jSel)]=i;
     for (size_t j=0; j<n; j++)
       if (j != size_t(jSel)) {
-	eVal1=WorkMat(i, j);
-	eVal2=WorkMat(i, jSel);
-	alpha=eVal1/eVal2;
-	for (size_t k=0; k<n; k++) {
-	  nVal=WorkMat(k, j) - alpha*WorkMat(k, jSel);
-	  WorkMat(k, j)=nVal;
-	}
+	alpha=WorkMat(i, j) / WorkMat(i, jSel);
+	for (size_t k=0; k<n; k++)
+	  WorkMat(k, j) -= alpha*WorkMat(k, jSel);
       }
     TheDet=TheDet*WorkMat(i, jSel);
   }
+  int nbchg = 0;
   for (size_t i=0; i<n-1; i++)
     for (size_t j=i+1; j<n; j++)
       if (eVectPos[i] > eVectPos[j])
-	TheDet=-TheDet;
-  return TheDet;
+        nbchg++;
+  int res = nbchg % 2;
+  if (res == 0)
+    return TheDet;
+  return -TheDet;
 }
 
 template<typename T>
@@ -1224,8 +1089,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value),T>::type Determinan
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF=ConvertMatrixUniversal<Tfield,T>(Input);
   Tfield eDet_field=DeterminantMatKernel(InputF);
-  T eDet=UniversalTypeConversion<T,Tfield>(eDet_field);
-  return eDet;
+  return UniversalTypeConversion<T,Tfield>(eDet_field);
 }
 
 
@@ -1296,8 +1160,7 @@ MyMatrix<T> SelectRow(MyMatrix<T> const&TheMat, std::vector<int> const& eList)
   MyMatrix<T> TheProv(nbRowRed, nbCol);
   for (size_t iRow=0; iRow<nbRowRed; iRow++) {
     size_t jRow=eList[iRow];
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      TheProv(iRow, iCol)=TheMat(jRow, iCol);
+    TheProv.row(iRow) = TheMat.row(jRow);
   }
   return TheProv;
 }
@@ -1312,8 +1175,7 @@ MyMatrix<T> SelectColumn(MyMatrix<T> const& TheMat, std::vector<int> const& eLis
   MyMatrix<T> TheProv(nbRow, nbColRed);
   for (size_t iCol=0; iCol<nbColRed; iCol++) {
     size_t jCol=eList[iCol];
-    for (size_t iRow=0; iRow<nbRow; iRow++)
-      TheProv(iRow, iCol)=TheMat(iRow, jCol);
+    TheProv.col(iCol) = TheMat(jCol);
   }
   return TheProv;
 }
@@ -1341,12 +1203,9 @@ bool TestEquality(MyVector<T> const& V1, MyVector<T> const& V2)
   int n2=V2.size();
   if (n1 != n2)
     return false;
-  for (int i=0; i<n1; i++) {
-    T eVal1=V1(i);
-    T eVal2=V2(i);
-    if (eVal1 != eVal2)
+  for (int i=0; i<n1; i++)
+    if (V1(i) != V2(i))
       return false;
-  }
   return true;
 }
 
@@ -1447,8 +1306,7 @@ MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const& EXT)
 template<typename T>
 std::vector<int> ColumnReductionSet(MyMatrix<T> const& eMatIn)
 {
-  SelectionRowCol<T> eSelect=TMat_SelectRowCol(eMatIn);
-  return eSelect.ListColSelect;
+  return TMat_SelectRowCol(eMatIn).ListColSelect;
 }
 
 template<typename T>
@@ -1456,12 +1314,9 @@ MyMatrix<T> ColRowSymmetricMatrix(MyMatrix<T> const& M, std::vector<int> const& 
 {
   size_t siz=LSel.size();
   MyMatrix<T> Mred(siz, siz);
-  for (size_t i=0; i<siz; i++)
-    for (size_t j=0; j<siz; j++) {
-      size_t iFull=LSel[i];
-      size_t jFull=LSel[j];
-      Mred(i,j)=M(iFull,jFull);
-    }
+  for (size_t j=0; j<siz; j++)
+    for (size_t i=0; i<siz; i++)
+      Mred(i,j)=M(LSel[i], LSel[j]);
   return Mred;
 }
 
@@ -1494,16 +1349,12 @@ MyMatrix<T> Concatenate(MyMatrix<T> const& eMat1, MyMatrix<T> const& eMat2)
   }
   int nbCol=nbCol1;
   MyMatrix<T> eMatRet(nbRow1+nbRow2, nbCol);
-  for (int iRow=0; iRow<nbRow1; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      T eVal=eMat1(iRow, iCol);
-      eMatRet(iRow, iCol)=eVal;
-    }
-  for (int iRow=0; iRow<nbRow2; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      T eVal=eMat2(iRow, iCol);
-      eMatRet(iRow+nbRow1, iCol)=eVal;
-    }
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow1; iRow++)
+      eMatRet(iRow, iCol) = eMat1(iRow, iCol);
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow2; iRow++)
+      eMatRet(iRow+nbRow1, iCol)=eMat2(iRow, iCol);
   return eMatRet;
 }
 
@@ -1523,8 +1374,8 @@ MyMatrix<T> ConcatenateMatVec(MyMatrix<T> const& M, MyVector<T> const& V)
   //  std::cerr << "M(rows/cols)=" << M.rows() << "/" << M.cols() << "\n";
   //  std::cerr << "V(size)=" << V.size() << "\n";
   MyMatrix<T> Mret(nbRow+1,nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
       Mret(iRow,iCol)=M(iRow,iCol);
   for (int iCol=0; iCol<nbCol; iCol++)
     Mret(nbRow,iCol)=V(iCol);
@@ -1801,11 +1652,10 @@ MyVector<T> Isobarycenter(MyMatrix<T> const& eMat)
   MyVector<T> eVect(nbCol);
   T nbRow_T=nbRow;
   for (int iCol=0; iCol<nbCol; iCol++) {
-    T eSum=0;
+    T eSum = 0;
     for (int iRow=0; iRow<nbRow; iRow++)
       eSum += eMat(iRow, iCol);
-    T eVal=eSum/nbRow_T;
-    eVect(iCol)=eVal;
+    eVect(iCol)=eSum / nbRow_T;
   }
   return eVect;
 }
@@ -1815,8 +1665,8 @@ bool IsZeroMatrix(MyMatrix<T> const& M)
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
       if (M(iRow, iCol) != 0)
 	return false;
   return true;
@@ -1857,11 +1707,7 @@ inline typename std::enable_if<is_ring_field<T>::value,MyVector<T>>::type Canoni
   }
   if (iSelect == -1)
     return V;
-  MyVector<T> Vret(n);
-  T eQuot=1/TheMin;
-  for (int i=0; i<n; i++)
-    Vret(i)=V(i)*eQuot;
-  return Vret;
+  return eQuot * V;
 }
 
 
@@ -2036,7 +1882,7 @@ MyVector<T> GetMatrixRow(MyMatrix<T> const& M, int const& iRow)
   int nbCol=M.cols();
   MyVector<T> V(nbCol);
   for (int iCol=0; iCol<nbCol; iCol++)
-    V(iCol)=M(iRow,iCol);
+    V(iCol) = M(iRow,iCol);
   return V;
 }
 
@@ -2046,7 +1892,7 @@ MyVector<T> GetMatrixColumn(MyMatrix<T> const& M, int const& iCol)
   int nbRow=M.cols();
   MyVector<T> V(nbRow);
   for (int iRow=0; iRow<nbRow; iRow++)
-    V(iRow)=M(iRow,iCol);
+    V(iRow) = M(iRow,iCol);
   return V;
 }
 
@@ -2077,7 +1923,7 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const& ListVect)
   MyMatrix<T> M(nbVect,dim);
   for (int iVect=0; iVect<nbVect; iVect++)
     for (int i=0; i<dim; i++)
-      M(iVect,i)=ListVect[iVect](i);
+      M(iVect,i) = ListVect[iVect](i);
   return M;
 }
 
@@ -2086,10 +1932,13 @@ MyVector<T> SumMatrix(MyMatrix<T> const& M)
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  MyVector<T> V=ZeroVector<T>(nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++)
-    for (int iCol=0; iCol<nbCol; iCol++)
-      V(iCol) += M(iRow,iCol);
+  MyVector<T> V(nbCol);
+  for (int iCol=0; iCol<nbCol; iCol++) {
+    T eSum = 0;
+    for (int iRow=0; iRow<nbRow; iRow++)
+      eSum += M(iRow,iCol);
+    V(iCol) = eSum;
+  }
   return V;
 }
 
@@ -2101,7 +1950,7 @@ std::vector<T> StdVectorFromVector(MyVector<T> const& eV)
   int siz=eV.size();
   std::vector<T> eVect(siz);
   for (int i=0; i<siz; i++)
-    eVect[i]=eV(i);
+    eVect[i] = eV(i);
   return eVect;
 }
 
@@ -2111,7 +1960,7 @@ MyVector<T> VectorFromStdVector(std::vector<T> const& eList)
   int siz=eList.size();
   MyVector<T> eVect(siz);
   for (int i=0; i<siz; i++)
-    eVect(i)=eList[i];
+    eVect(i) = eList[i];
   return eVect;
 }
 
@@ -2196,11 +2045,8 @@ T ScalarProductQuadForm(MyMatrix<T> const& eMat, MyVector<Tint> const& V1, MyVec
   int n=V1.size();
   T eSum=0;
   for (int i=0; i<n; i++)
-    for (int j=0; j<n; j++) {
-      Tint eVal12=V1(i) * V2(j);
-      T eVal=eMat(i,j);
-      eSum += eVal12*eVal;
-    }
+    for (int j=0; j<n; j++)
+      eSum += V1(i) * V2(j) * eMat(i,j);
   return eSum;
 }
 
@@ -2209,11 +2055,8 @@ MyVector<T> SolutionMat_LeastSquare(MyMatrix<T> const& M, MyVector<double> const
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  MyMatrix<double> Msqr=ZeroMatrix<double>(nbCol, nbCol);
-  for (int j1=0; j1<nbCol; j1++)
-    for (int j2=0; j2<nbCol; j2++)
-      for (int i=0; i<nbRow; i++)
-	Msqr(j1,j2) += M(i,j1) * M(i,j2);
+  // Msqr should have size (nbCol, nbCol)
+  MyMatrix<double> Msqr = M.transpose() * M;
   MyVector<double> B=ZeroVector<double>(nbCol);
   for (int j=0; j<nbCol; j++)
     for (int i=0; i<nbRow; i++)
