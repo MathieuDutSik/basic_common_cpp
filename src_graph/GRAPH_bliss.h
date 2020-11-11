@@ -102,6 +102,22 @@ std::string GetCanonicalForm_string(Tgr const& eGR)
 }
 
 
+template<typename Tgr>
+std::vector<int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
+{
+  int nof_vertices = eGR.GetNbVert();
+  bliss::Graph g = GetBlissGraphFromGraph(eGR);
+  bliss::Stats stats;
+  //
+  const unsigned int* cl;
+  cl=g.canonical_form(stats, &report_aut_void, stderr);
+  std::vector<int> vectR(nof_vertices), vectD(nof_vertices);
+  for (int i=0; i<nof_vertices; i++) {
+    vectR[cl[i]]=i;
+    vectD[i] = cl[i];
+  }
+  return vectD;
+}
 
 
 #endif

@@ -1,19 +1,31 @@
 #include "GRAPH_nauty.h"
+#include "GRAPH_bliss.h"
+#include "Temp_common.h"
+#include "GRAPH_BitsetType.h"
+#include "GRAPH_GraphicalFunctions.h"
 
 int main(int argc, char *argv[])
 {
   try {
-    if (argc != 2) {
+    if (argc != 3) {
       std::cerr << "Number of argument is = " << argc << "\n";
-      std::cerr << "GRAPH_CanonicOrdering [DataGraph]\n";
+      std::cerr << "GRAPH_CanonicOrdering [DataGraph] [opt]\n";
       std::cerr << "\n";
       return -1;
     }
     std::cerr << "Reading input\n";
     //
     std::ifstream GRAfs(argv[1]);
+    int opt;
+    sscanf(argv[2], "%d", &opt);
+    //
     GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
-    std::vector<int> V = GetNautyCanonicalOrdering(eGR);
+    std::vector<int> V;
+    if (opt == 1) {
+      V = NAUTY_GetCanonicalOrdering(eGR);
+    } else {
+      V = BLISS_GetCanonicalOrdering(eGR);
+    }
     int nbVert=V.size();
     std::cout << "return [";
     for (int i=0; i<nbVert; i++) {

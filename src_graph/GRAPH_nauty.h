@@ -1,10 +1,11 @@
-#ifndef INCLUDE_GRAPH_BLISS
-#define INCLUDE_GRAPH_BLISS
+#ifndef INCLUDE_GRAPH_NAUTY
+#define INCLUDE_GRAPH_NAUTY
 
 #include "traces.h"
+#include <vector>
 
 template<typename Tgr>
-std::vector<int> GetNautyCanonicalOrdering(Tgr const& eGR)
+std::vector<int> NAUTY_GetCanonicalOrdering(Tgr const& eGR)
 {
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
@@ -16,7 +17,7 @@ std::vector<int> GetNautyCanonicalOrdering(Tgr const& eGR)
     SG_DECL(sg1);
     SG_DECL(cg1);
 
-    int n, m, i;
+    int m, i;
     int n = eGR.GetNbVert();
 
     /* Select option for canonical labelling */

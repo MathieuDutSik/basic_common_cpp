@@ -1707,6 +1707,7 @@ inline typename std::enable_if<is_ring_field<T>::value,MyVector<T>>::type Canoni
   }
   if (iSelect == -1)
     return V;
+  T eQuot = 1 / TheMin;
   return eQuot * V;
 }
 
