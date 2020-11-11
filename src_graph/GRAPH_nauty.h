@@ -17,7 +17,7 @@ std::vector<int> NAUTY_GetCanonicalOrdering(Tgr const& eGR)
     SG_DECL(sg1);
     SG_DECL(cg1);
 
-    int m, i;
+    int m;
     int n = eGR.GetNbVert();
 
     /* Select option for canonical labelling */
@@ -52,7 +52,7 @@ std::vector<int> NAUTY_GetCanonicalOrdering(Tgr const& eGR)
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
     std::vector<int> V(n);
     for (int i=0; i<n; i++)
-      V[i] = cg1[i];
+      V[i] = lab1[i];
 
     DYNFREE(lab1,lab1_sz);
     DYNFREE(ptn,ptn_sz);
