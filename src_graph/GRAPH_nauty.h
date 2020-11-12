@@ -52,7 +52,8 @@ std::vector<int> NAUTY_GetCanonicalOrdering(Tgr const& eGR)
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
     std::vector<int> V(n);
     for (int i=0; i<n; i++)
-      V[i] = lab1[i];
+      //      V[i] = lab1[i];
+      V[lab1[i]] = i;
 
     DYNFREE(lab1,lab1_sz);
     DYNFREE(ptn,ptn_sz);

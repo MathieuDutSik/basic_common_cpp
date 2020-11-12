@@ -113,11 +113,9 @@ std::vector<int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<int> vectR(nof_vertices), vectD(nof_vertices);
-  for (int i=0; i<nof_vertices; i++) {
-    vectR[cl[i]]=i;
+  std::vector<int> vectD(nof_vertices);
+  for (int i=0; i<nof_vertices; i++)
     vectD[i] = cl[i];
-  }
   return vectD;
 }
 
