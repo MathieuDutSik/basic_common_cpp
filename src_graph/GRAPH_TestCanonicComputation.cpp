@@ -24,8 +24,10 @@ int main(int argc, char *argv[])
     auto get_string_expression=[&](GraphBitset const& eGR) -> std::string {
       std::vector<int> V;
       if (opt == 1) {
+        std::cerr << "Running Nauty canonicalization ordering\n";
         V = NAUTY_GetCanonicalOrdering(eGR);
       } else {
+        std::cerr << "Running Bliss canonicalization ordering\n";
         V = BLISS_GetCanonicalOrdering(eGR);
       }
       int nof_vertices = V.size();

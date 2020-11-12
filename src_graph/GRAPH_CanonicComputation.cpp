@@ -22,8 +22,10 @@ int main(int argc, char *argv[])
     GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
     std::vector<int> V;
     if (opt == 1) {
+      std::cerr << "Running NAUTY GetCanonicalOrdering\n";
       V = NAUTY_GetCanonicalOrdering(eGR);
     } else {
+      std::cerr << "Running BLISS GetCanonicalOrdering\n";
       V = BLISS_GetCanonicalOrdering(eGR);
     }
     int nbVert=V.size();

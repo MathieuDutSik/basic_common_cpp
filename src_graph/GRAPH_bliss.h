@@ -23,7 +23,9 @@ bliss::Graph GetBlissGraphFromGraph(Tgr const& eGR)
   int nbVert=eGR.GetNbVert();
   bliss::Graph g(nbVert);
   for (int iVert=0; iVert<nbVert; iVert++) {
-    int eColor=eGR.GetColor(iVert);
+    int eColor = 0;
+    if (eGR.GetHasVertexColor())
+      eColor = eGR.GetColor(iVert);
     g.change_color(iVert, eColor);
   }
   for (int iVert=0; iVert<nbVert-1; iVert++)
