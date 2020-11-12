@@ -32,7 +32,12 @@ it is necessary to check they are correct.
 /* Note that the following is only for running nauty in multiple threads
    and will slow it down a little otherwise. */
 #define HAVE_TLS 1   /* have storage attribute for thread-local */
+
+#ifdef __cplusplus
+#define TLS_ATTR thread_local  /* if so, what it is.  if not, empty */
+#else
 #define TLS_ATTR _Thread_local  /* if so, what it is.  if not, empty */
+#endif
 
 #define USE_ANSICONTROLS 0 
                           /* whether --enable-ansicontrols is used */
