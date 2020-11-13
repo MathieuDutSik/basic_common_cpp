@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
       return eGR2;
     };
     std::string str1 = get_string_expression(eGR);
-    for (int i=0; i<10; i++) {
+    for (int i=0; i<5; i++) {
       GraphBitset eGR2 = random_perm_graph(eGR);
       std::string str2 = get_string_expression(eGR2);
       if (str1 != str2) {

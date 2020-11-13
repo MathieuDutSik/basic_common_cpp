@@ -1175,7 +1175,7 @@ MyMatrix<T> SelectColumn(MyMatrix<T> const& TheMat, std::vector<int> const& eLis
   MyMatrix<T> TheProv(nbRow, nbColRed);
   for (size_t iCol=0; iCol<nbColRed; iCol++) {
     size_t jCol=eList[iCol];
-    TheProv.col(iCol) = TheMat(jCol);
+    TheProv.col(iCol) = TheMat.col(jCol);
   }
   return TheProv;
 }
