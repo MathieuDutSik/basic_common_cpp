@@ -36,7 +36,12 @@ std::vector<int> NAUTY_GetCanonicalOrdering(Tgr const& eGR)
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = n;              /* Number of vertices */
     sg1.nde = nbAdjacent;           /* Number of directed edges */
-
+    for (int i=0; i<n; i++) {
+      int eColor = 0;
+      if (eGR.GetHasVertexColor())
+        eColor = eGR.GetColor(i);
+      ptn[i] = eColor;
+    }
     int pos = 0;
     for (int i=0; i<n; i++) {
       std::vector<int> LAdj = eGR.Adjacency(i);
