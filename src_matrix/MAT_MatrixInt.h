@@ -1943,7 +1943,7 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const& M)
     }
     MyVector<Tint> SumVect = ZeroVector<Tint>(2*n);
     for (int i_row=0; i_row<nb_row; i_row++)
-      SumVect += GetMatrixRow(Mwork, i_row) * eGCD.ListA[i_row];
+      SumVect += GetMatrixRow(Mwork, i_row) * eGCD.Pmat(i_row, 0);
     return SumVect;
   };
   MyMatrix<Tint> CompleteBasis(2*n, 2*n);
