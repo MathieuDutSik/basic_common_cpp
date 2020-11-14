@@ -3,6 +3,7 @@
 
 #include "traces.h"
 #include <vector>
+#include <iostream>
 
 template<typename Tgr>
 std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
@@ -120,12 +121,15 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       }
     }
     /* Calling Traces */
+    std::cerr << "Before Traces\n";
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,NULL);
+    std::cerr << "After Traces\n";
     /* Extracting the list of generators */
     std::vector<std::vector<unsigned int>> ListGen;
     //
     while (gens != NULL)
       {
+        std::cerr << "Inserting generator\n";
         std::vector<unsigned int> V(n);
         for (int i=0; i<n; i++) V[i] = gens->p[i];
         ListGen.push_back(V);

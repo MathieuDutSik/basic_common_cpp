@@ -40,7 +40,8 @@ int main(int argc, char *argv[])
       for (int i=0; i<nbVert; i++) {
         if (i>0)
           std::cout << ",";
-        std::cout << eGen[i];
+        int eVal = 1 + eGen[i];
+        std::cout << eVal;
       }
       std::cout << "]";
     }
