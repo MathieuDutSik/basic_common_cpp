@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
     //
     auto get_string_expression=[&](GraphBitset const& eGR) -> std::string {
-      std::vector<int> V;
+      std::vector<unsigned int> V;
       if (opt == 1) {
         std::cerr << "Running Traces canonicalization ordering\n";
         V = TRACES_GetCanonicalOrdering(eGR);
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
         V = BLISS_GetCanonicalOrdering(eGR);
       }
       int nof_vertices = V.size();
-      std::vector<int> clR(nof_vertices);
+      std::vector<unsigned int> clR(nof_vertices);
       for (int i=0; i<nof_vertices; i++)
         clR[V[i]]=i;
       std::string strRet;
