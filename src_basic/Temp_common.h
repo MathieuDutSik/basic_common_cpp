@@ -84,11 +84,6 @@ typedef unsigned long ulong;
 typedef unsigned int uint;
 
 
-
-typedef std::vector<std::vector<int> > VectVectInt;
-
-
-
 template<typename T>
 struct is_graphsparseimmutable_class {
   static const bool value = false;
