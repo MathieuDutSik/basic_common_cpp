@@ -1,4 +1,4 @@
-#include "GRAPH_nauty.h"
+#include "GRAPH_traces.h"
 #include "GRAPH_bliss.h"
 #include "Temp_common.h"
 #include "GRAPH_BitsetType.h"

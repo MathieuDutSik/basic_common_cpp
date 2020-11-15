@@ -88,8 +88,6 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
     /* Declare and initialize sparse graph structures */
     SG_DECL(sg1);
     int n = eGR.GetNbVert();
-
-
     int m = SETWORDSNEEDED(n);
     nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
 
@@ -132,12 +130,8 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       {
         std::cerr << "Inserting generator\n";
         std::vector<unsigned int> V(n);
-        std::cerr << "V =";
-        for (int i=0; i<n; i++) {
+        for (int i=0; i<n; i++)
           V[i] = pn->p[i];
-          std::cerr << " " << V[i];
-        }
-        std::cerr << "\n";
         ListGen.push_back(V);
         //
         pn = pn->next;
