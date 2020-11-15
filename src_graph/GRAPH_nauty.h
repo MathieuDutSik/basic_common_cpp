@@ -3,6 +3,21 @@
 
 
 template<typename Tgr>
+int GetNbColor(Tgr const& eGR)
+{
+  int nbColor=0;
+  int nbVert=eGR.GetNbVert();
+  for (int iVert=0; iVert<nbVert; iVert++) {
+    int eColor=eGR.GetColor(iVert);
+    if (eColor > nbColor)
+      nbColor=eColor;
+  }
+  nbColor++;
+  return nbColor;
+}
+
+
+template<typename Tgr>
 void NAUTY_PrintPartition(std::ostream & os, Tgr const& eGR)
 {
   int nbVert=eGR.GetNbVert();
