@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GRAPH_NAUTY
-#define INCLUDE_GRAPH_NAUTY
+#ifndef INCLUDE_GRAPH_TRACES
+#define INCLUDE_GRAPH_TRACES
 
 #include "traces.h"
 #include <vector>

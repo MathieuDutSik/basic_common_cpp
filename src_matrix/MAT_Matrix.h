@@ -1137,7 +1137,7 @@ MyVector<T> OrthogonalHyperplane(MyMatrix<T> const& M)
   MyMatrix<T> Mred(nbVert-1,nbVert-1);
   int eCoeff=1;
   for (int iVert=0; iVert<nbVert; iVert++) {
-    int iRow=0; 
+    int iRow=0;
     for (int iLine=0; iLine<nbVert; iLine++)
       if (iLine != iVert) {
 	for (int iCol=0; iCol<nbVert-1; iCol++)
@@ -1978,11 +1978,8 @@ T EvaluationQuadForm(MyMatrix<T> const& eMat, MyVector<Tint> const& eVect)
   size_t n=eVect.size();
   T eSum=0;
   for (size_t i=0; i<n; i++)
-    for (size_t j=0; j<n; j++) {
-      Tint eVal12=eVect(i)*eVect(j);
-      T eVal=eMat(i,j);
-      eSum += eVal12*eVal;
-    }
+    for (size_t j=0; j<n; j++)
+      eSum += eVect(i) * eVect(j) * eMat(i,j);
   return eSum;
 }
 
