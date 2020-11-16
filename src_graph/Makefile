@@ -1,7 +1,8 @@
 #PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles
+PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles GRAPH_TestCanonicComputation GRAPH_CanonicComputation
 #PROGRAM		= GRAPH_CanonicComputation
 #PROGRAM		= GRAPH_TestCanonicComputation
-PROGRAM		= GRAPH_TestCanonicComputation GRAPH_CanonicComputation
+#PROGRAM		= GRAPH_TestCanonicComputation GRAPH_CanonicComputation
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

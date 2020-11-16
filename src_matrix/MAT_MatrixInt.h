@@ -142,7 +142,7 @@ void WriteGCD_int(std::ostream & os, GCD_int<T> const& eGCD)
 
 
 template<typename T>
-GCD_int<T> ComputePairGcd(T const& m, T const& n)
+inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
   T f, g, h, fm, gm, hm, q;
@@ -185,6 +185,21 @@ GCD_int<T> ComputePairGcd(T const& m, T const& n)
   Pmat(1,1) = m/f;
   return {f, std::move(Pmat)};
 }
+
+template<typename T>
+inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
+{
+  mpz_class eGCD, s, t;
+  mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  MyMatrix<T> Pmat(2,2);
+  Pmat(0,0) = s;
+  Pmat(1,0) = t;
+  Pmat(0,1) = -n / eGCD;
+  Pmat(1,1) =  m / eGCD;
+  return {f, std::move(Pmat)};
+}
+
+
 
 template<typename T>
 inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelGcdPair(T const& a, T const& b)
@@ -282,11 +297,13 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
 {
   int nbRow=M.rows();
   int nbCol=M.cols();
-  T eLCM=1;
+  using Tring = typename underlying_ring<T>::ring_type;
+  Tring eLCM_ring = 1;
   // iRow is inner loop because of cache locality
   for (int iCol=0; iCol<nbCol; iCol++)
     for (int iRow=0; iRow<nbRow; iRow++)
-      eLCM = LCMpair(eLCM, GetDenominator(M(iRow,iCol)));
+      eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
+  T eLCM = eLCM_ring;
   MyMatrix<T> Mret = eLCM * M;
   return {eLCM, std::move(Mret)};
 }
@@ -297,13 +314,11 @@ MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const& M)
   int nbRow=M.rows();
   int nbCol=M.cols();
   using Tring = typename underlying_ring<T>::ring_type;
-  Tring eLCM_ring=1;
+  Tring eLCM_ring = 1;
   // iRow is inner loop because of cache locality
   for (int iCol=0; iCol<nbCol; iCol++)
-    for (int iRow=0; iRow<nbRow; iRow++) {
-      Tring eVal = GetDenominator_z(M(iRow,iCol));
-      eLCM_ring = LCMpair(eLCM_ring, eVal);
-    }
+    for (int iRow=0; iRow<nbRow; iRow++)
+      eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
   T eLCM = eLCM_ring;
   return eLCM * M;
 }
