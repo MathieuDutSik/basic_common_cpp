@@ -22,10 +22,10 @@ int main(int argc, char *argv[])
     GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
     std::vector<std::vector<unsigned int>> ListGen;
     if (opt == 1) {
-      std::cerr << "Running TRACES GetCanonicalOrdering\n";
+      std::cerr << "Running TRACES_GetListGenerators\n";
       ListGen = TRACES_GetListGenerators(eGR);
     } else {
-      std::cerr << "Running BLISS GetCanonicalOrdering\n";
+      std::cerr << "Running BLISS_GetListGenerators\n";
       ListGen = BLISS_GetListGenerators(eGR);
     }
     int nbVert=eGR.GetNbVert();
