@@ -190,13 +190,13 @@ template<typename T>
 inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
   mpz_class eGCD, s, t;
-  mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), n.get_mpz_t(), m.get_mpz_t());
   MyMatrix<T> Pmat(2,2);
   Pmat(0,0) = s;
   Pmat(1,0) = t;
   Pmat(0,1) = -n / eGCD;
   Pmat(1,1) =  m / eGCD;
-  return {f, std::move(Pmat)};
+  return {eGCD, std::move(Pmat)};
 }
 
 

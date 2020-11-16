@@ -2,6 +2,8 @@
 #define INCLUDE_GRAPH_BLISS
 
 #include <string>
+#include <iostream>
+#include "ExceptionEnding.h"
 #include "defs.hh"
 #include "graph.hh"
 #include "partition.hh"
@@ -9,7 +11,37 @@
 #include "utils.hh"
 
 
-
+bliss::Graph* ReadGraphFromFile(FILE *f, unsigned int &nof_vertices)
+{
+  unsigned int nof_edges;
+  int ret;
+  bliss::Graph *g =0;
+  ret=fscanf(f, "%u %u\n", &nof_vertices, &nof_edges);
+  if (ret != 1) {
+    std::cerr << "fscanf error while reading graph 1\n";
+    throw TerminalException{1};
+  }
+  g = new bliss::Graph(nof_vertices);
+  for (int i=0; i<int(nof_vertices); i++) {
+    unsigned int color;
+    ret=fscanf(f, "%u\n", &color);
+    if (ret != 1) {
+      std::cerr << "fscanf error while reading graph 2\n";
+      throw TerminalException{1};
+    }
+    g->change_color(i, color);
+  }
+  for (int iEdge=0; iEdge<int(nof_edges); iEdge++) {
+    int a, b;
+    ret=fscanf(f, "%u %u\n", &a, &b);
+    if (ret != 1) {
+      std::cerr << "fscanf error while reading graph 3\n";
+      throw TerminalException{1};
+    }
+    g->add_edge(a-1, b-1);
+  }
+  return g;
+}
 
 static inline void report_aut_void(void* param, const unsigned int n, const unsigned int* aut)
 {
@@ -105,7 +137,7 @@ std::string GetCanonicalForm_string(Tgr const& eGR)
 
 
 template<typename Tgr>
-std::vector<int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
+std::vector<unsigned int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
 {
   int nof_vertices = eGR.GetNbVert();
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
@@ -113,10 +145,31 @@ std::vector<int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<int> vectD(nof_vertices);
+  std::vector<unsigned int> vectD(nof_vertices);
   for (int i=0; i<nof_vertices; i++)
     vectD[i] = cl[i];
   return vectD;
+}
+
+
+static void report_aut_vectvectint(void* param, const unsigned int n, const unsigned int* aut)
+{
+  std::vector<unsigned int> eVect;
+  for (unsigned int i=0; i<n; i++)
+    eVect.push_back(aut[i]);
+  using VectVectInt = std::vector<std::vector<unsigned int>>;
+  ((VectVectInt*)param)->push_back(eVect);
+}
+
+template<typename Tgr>
+std::vector<std::vector<unsigned int>> BLISS_GetListGenerators(Tgr const& eGR)
+{
+  bliss::Graph g = GetBlissGraphFromGraph(eGR);
+  bliss::Stats stats;
+  std::vector<std::vector<unsigned int>> ListGen;
+  std::vector<std::vector<unsigned int>>* h= &ListGen;
+  g.find_automorphisms(stats, &report_aut_vectvectint, (void *)h);
+  return ListGen;
 }
 
 
