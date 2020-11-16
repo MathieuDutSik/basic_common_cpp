@@ -13,7 +13,7 @@ typedef struct permnodestruct
     int nalloc;                          /* size of p[] in ints,
                                             <= 0 for a perm marker */
     int mark;                            /* a mark, 0 unless changed */
-    int p[2];                            /* actual vector, extended to
+    int p[];                            /* actual vector, extended to
                                             nalloc enties */
 } permnode;
 
@@ -29,7 +29,7 @@ typedef struct schreierlevel
     permnode *marker;              /* points to marker for this level */
 } schreier;
 
-#define SCHREIERFAILS 10 
+#define SCHREIERFAILS 10
   /* Default number of Schreier failures before giving up. */
 
 #ifdef __cplusplus

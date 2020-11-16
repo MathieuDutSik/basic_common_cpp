@@ -155,7 +155,7 @@ static permnode
 	    free(p);
     }
 
-    p = (permnode*) malloc(sizeof(permnode)+(n-2)*sizeof(int)); 
+    p = (permnode*) malloc(sizeof(permnode) + n*sizeof(int)); 
 
     if (p == NULL)
     {
