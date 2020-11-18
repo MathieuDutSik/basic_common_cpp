@@ -133,6 +133,8 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
         //
         pn = pn->next;
       } while (pn != gens);
+    freeschreier(NULL,&gens);
+    schreier_freedyn();
 
     DYNFREE(lab1,lab1_sz);
     DYNFREE(ptn,ptn_sz);

@@ -1,5 +1,5 @@
 #PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles
-PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles GRAPH_TestCanonicComputation GRAPH_CanonicComputation
+#PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles GRAPH_TestCanonicComputation GRAPH_CanonicComputation
 #PROGRAM		= GRAPH_CanonicComputation
 #PROGRAM		= GRAPH_TestCanonicComputation
 #PROGRAM		= GRAPH_TestCanonicComputation GRAPH_CanonicComputation
@@ -9,10 +9,10 @@ OBJECTS		= $(PROGRAM:%=%.o)
 
 #CC		= icpc -std=c++11 -Wall -g -O2
 #CC		= clang++ -Weverything -std=c++11
-CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++11
+#CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++11
 #CC		= g++ -std=c++11 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
 #CC		= g++ -std=c++11 -Wall -g -O2 -static-libgcc -static-libstdc++
-#CC		= g++ -std=c++11 -Wall -g -O3
+CC		= g++ -std=c++11 -Wall -g -O3
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
