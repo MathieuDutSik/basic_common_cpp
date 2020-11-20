@@ -204,7 +204,7 @@ std::string MinMaxMatrix(MyMatrix<T> const& X)
 {
   T minV=X.minCoeff();
   T maxV=X.maxCoeff();
-  return std::string("min/max=") + std::to_string(minV) + " / " << std::to_string(maxV);
+  return std::string("min/max=") + std::to_string(minV) + " / " + std::to_string(maxV);
 }
 
 
