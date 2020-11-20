@@ -6,7 +6,7 @@
 #include "NumberTheory.h"
 
 #define TRACK_MAXIMUM_SIZE_COEFF
-
+#define DEBUG
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction ring) of
@@ -183,19 +183,44 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   Pmat(1,0) = eCoeff2;
   Pmat(0,1) = -n/f;
   Pmat(1,1) = m/f;
+#ifdef DEBUG
+  T diff1 = f - Pmat(0,0) * m - Pmat(1,0) * n;
+  T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
+  if (diff1 != 0 || diff2 != 0) {
+    std::cerr << "A: diff1=" << diff1 << " diff2=" << diff2 << "\n";
+    throw TerminalException{1};
+  }
+#endif
   return {f, std::move(Pmat)};
 }
 
 template<typename T>
 inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
-  mpz_class eGCD, s, t;
-  mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), n.get_mpz_t(), m.get_mpz_t());
+  mpz_class eGCD;
+  if (n == 0 && m == 0) {
+    eGCD=0;
+    MyMatrix<T> Pmat=IdentityMat<T>(2);
+    return {eGCD, std::move(Pmat)};
+  }
+  mpz_class s, t;
+  mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), m.get_mpz_t(), n.get_mpz_t());
+  //  std::cerr << "n=" << n << " m=" << m << " eGCD=" << eGCD << "\n";
   MyMatrix<T> Pmat(2,2);
   Pmat(0,0) = s;
   Pmat(1,0) = t;
   Pmat(0,1) = -n / eGCD;
   Pmat(1,1) =  m / eGCD;
+#ifdef DEBUG
+  T diff1 = eGCD - Pmat(0,0) * m - Pmat(1,0) * n;
+  T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
+  if (diff1 != 0 || diff2 != 0) {
+    std::cerr << "m=" << m << " n=" << n << "\n";
+    std::cerr << "s=" << s << " t=" << t << "  eGCD=" << eGCD << "\n";
+    std::cerr << "B: diff1=" << diff1 << " diff2=" << diff2 << "\n";
+    throw TerminalException{1};
+  }
+#endif
   return {eGCD, std::move(Pmat)};
 }
 
