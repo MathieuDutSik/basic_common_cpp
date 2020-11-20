@@ -123,16 +123,18 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
     /* Extracting the list of generators */
     std::vector<std::vector<unsigned int>> ListGen;
     //
-    permnode* pn = gens;
-    do
-      {
-        std::vector<unsigned int> V(n);
-        for (int i=0; i<n; i++)
-          V[i] = pn->p[i];
-        ListGen.push_back(V);
-        //
-        pn = pn->next;
-      } while (pn != gens);
+    if (gens) {
+      permnode* pn = gens;
+      do
+        {
+          std::vector<unsigned int> V(n);
+          for (int i=0; i<n; i++)
+            V[i] = pn->p[i];
+          ListGen.push_back(V);
+          //
+          pn = pn->next;
+        } while (pn != gens);
+    }
     freeschreier(NULL,&gens);
     schreier_freedyn();
 
