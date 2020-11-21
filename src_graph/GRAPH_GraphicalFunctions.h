@@ -186,6 +186,17 @@ Tgr GRAPH_Read(std::istream & is)
   int nbVert;
   is >> nbVert;
   Tgr eGR(nbVert);
+  int SetHasColor_i;;
+  is >> SetHasColor_i;
+  bool SetHasColor = SetHasColor_i;
+  eGR.SetHasColor(SetHasColor);
+  if (SetHasColor) {
+    for (int iVert=0; iVert<nbVert; iVert++) {
+      int eColor;
+      is >> eColor;
+      eGR.SetColor(iVert, eColor);
+    }
+  }
   for (int iVert=0; iVert<nbVert; iVert++) {
     int eDeg;
     is >> eDeg;
