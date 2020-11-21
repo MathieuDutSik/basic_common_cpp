@@ -122,7 +122,6 @@ void GRAPH_PrintOutputGAP_vertex_colored(std::string const& eFile, Tgr const& GR
   for (int iVert=0; iVert<nbVert; iVert++) {
     if (iVert > 0)
       os << ",\n";
-    os << "[";
     std::vector<int> LVert=GR.Adjacency(iVert);
     WriteStdVectorGAP(os, LVert);
   }
