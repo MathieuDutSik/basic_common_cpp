@@ -173,4 +173,27 @@ std::vector<std::vector<unsigned int>> BLISS_GetListGenerators(Tgr const& eGR)
 }
 
 
+template<typename Tgr>
+std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>>  BLISS_GetCanonicalOrdering_ListGenerators(Tgr const& eGR)
+{
+  int nof_vertices = eGR.GetNbVert();
+  bliss::Graph g = GetBlissGraphFromGraph(eGR);
+  bliss::Stats stats;
+  //
+  const unsigned int* cl;
+  cl=g.canonical_form(stats, &report_aut_void, stderr);
+  std::vector<unsigned int> vectD(nof_vertices);
+  for (int i=0; i<nof_vertices; i++)
+    vectD[i] = cl[i];
+  //
+  std::vector<std::vector<unsigned int>> ListGen;
+  std::vector<std::vector<unsigned int>>* h= &ListGen;
+  g.find_automorphisms(stats, &report_aut_vectvectint, (void *)h);
+  //
+  return {std::move(vectD), std::move(ListGen)};
+}
+
+
+
+
 #endif
