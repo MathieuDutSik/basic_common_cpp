@@ -105,8 +105,6 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       "lab" and "ptn" contain the information of the initial partition.
       It is a complex construction that goes deep into the internals of nauty/traces.
       ---Initially ptn contains only two possible values: NAUTY_INFINITY and 0
-      ---
-      Initia
      */
     if (HasVertexColor) {
       options.defaultptn = FALSE;
@@ -122,29 +120,14 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       std::vector<int> ListShift(numcells,0);
       for (int icell=1; icell<numcells; icell++)
         ListShift[icell] = ListShift[icell-1] + ListPartSize[icell-1];
-      std::vector<int> PartReord(n, 0);
       for (int i=0; i<n; i++) {
         int icell = eGR.GetColor(i);
-        PartReord[ListShift[icell]] = i;
+        lab1[ListShift[icell]] = i;
         ListShift[icell]++;
       }
-      for (int icell=0; icell<numcells; icell++)
-        ListShift[icell] -= ListPartSize[icell];
-      std::cerr << "ListShift/ListPartSize =";
       for (int i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
-      int i=0;
-      int j=-1;
-      for (int icell=0; icell<numcells; icell++) {
-        for (int idx=0; idx<ListPartSize[icell]; idx++) {
-          lab1[++j] = PartReord[ListShift[icell] + idx];
-        }
-        if (j >= i) {
-          ptn[j] = 0;
-        }
-        if (icell < numcells-1) {
-          i = j + 1;
-        }
-      }
+      for (int icell=0; icell<numcells; icell++)
+        ptn[ListShift[icell] - 1] = 0;
       std::cerr << "lab1 =";
       for (int i=0; i<n; i++)
         std::cerr << " " << lab1[i];
