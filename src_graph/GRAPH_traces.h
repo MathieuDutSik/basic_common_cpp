@@ -18,7 +18,10 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     SG_DECL(sg1);
     SG_DECL(cg1);
 
+    /* Reading key graph variables */
     int n = eGR.GetNbVert();
+    int nbAdjacent = eGR.GetNbAdjacent();
+    bool HasVertexColor = eGR.GetHasVertexColor();
 
     /* Select option for canonical labelling */
     options.getcanon = TRUE;
@@ -30,19 +33,48 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     DYNALLOC1(int,ptn,ptn_sz,n,"malloc");
     DYNALLOC1(int,orbits,orbits_sz,n,"malloc");
     DYNALLOC1(int,map,map_sz,n,"malloc");
+    if (HasVertexColor) {
+      options.defaultptn = FALSE;
+      int numcells=0;
+      for (int i=0; i<n; i++) {
+        int eVal = 1 + eGR.GetColor(i);
+        if (eVal > numcells)
+          numcells = eVal;
+      }
+      std::vector<int> ListPartSize(numcells,0);
+      for (int i=0; i<n; i++)
+        ListPartSize[eGR.GetColor(i)]++;
+      std::vector<int> ListShift(numcells,0);
+      for (int icell=1; icell<numcells; icell++)
+        ListShift[icell] = ListShift[icell-1] + ListPartSize[icell-1];
+      // lab1 construction
+      for (int i=0; i<n; i++) {
+        int icell = eGR.GetColor(i);
+        lab1[ListShift[icell]] = i;
+        ListShift[icell]++;
+      }
+      // ptn construction
+      for (int i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
+      for (int icell=0; icell<numcells; icell++)
+        ptn[ListShift[icell] - 1] = 0;
+      /*
+      std::cerr << "lab1 =";
+      for (int i=0; i<n; i++)
+        std::cerr << " " << lab1[i];
+      std::cerr << "\n";
+      std::cerr << "ptn =";
+      for (int i=0; i<n; i++)
+        std::cerr << " " << ptn[i];
+      std::cerr << "\n";
+      */
+    }
 
     /* Now make the first graph */
     int nbAdjacent = eGR.GetNbAdjacent();
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = n;              /* Number of vertices */
     sg1.nde = nbAdjacent;           /* Number of directed edges */
-    for (int i=0; i<n; i++) {
-      int eColor = 0;
-      if (eGR.GetHasVertexColor())
-        eColor = eGR.GetColor(i);
-      ptn[i] = eColor;
-      std::cerr << "i=" << i << " eColor=" << eColor << "\n";
-    }
+
     int pos = 0;
     for (int i=0; i<n; i++) {
       std::vector<int> LAdj = eGR.Adjacency(i);
@@ -90,7 +122,6 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
     int n = eGR.GetNbVert();
     int nbAdjacent = eGR.GetNbAdjacent();
     bool HasVertexColor = eGR.GetHasVertexColor();
-    std::cerr << "n=" << n << " nbAdjacent=" << nbAdjacent << " HasVerteColor=" << HasVertexColor << "\n";
 
     /* Declare and initialize sparse graph structures */
     SG_DECL(sg1);
@@ -120,14 +151,17 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       std::vector<int> ListShift(numcells,0);
       for (int icell=1; icell<numcells; icell++)
         ListShift[icell] = ListShift[icell-1] + ListPartSize[icell-1];
+      // lab1 construction
       for (int i=0; i<n; i++) {
         int icell = eGR.GetColor(i);
         lab1[ListShift[icell]] = i;
         ListShift[icell]++;
       }
+      // ptn construction
       for (int i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
       for (int icell=0; icell<numcells; icell++)
         ptn[ListShift[icell] - 1] = 0;
+      /*
       std::cerr << "lab1 =";
       for (int i=0; i<n; i++)
         std::cerr << " " << lab1[i];
@@ -136,6 +170,7 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       for (int i=0; i<n; i++)
         std::cerr << " " << ptn[i];
       std::cerr << "\n";
+      */
     }
 
     /* Now make the first graph */
