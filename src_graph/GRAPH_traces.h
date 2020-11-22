@@ -70,7 +70,6 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     }
 
     /* Now make the first graph */
-    int nbAdjacent = eGR.GetNbAdjacent();
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = n;              /* Number of vertices */
     sg1.nde = nbAdjacent;           /* Number of directed edges */
