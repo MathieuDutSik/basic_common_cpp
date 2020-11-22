@@ -5,7 +5,7 @@
 #include "Boost_bitset.h"
 #include "NumberTheory.h"
 
-#define TRACK_MAXIMUM_SIZE_COEFF
+#undef TRACK_MAXIMUM_SIZE_COEFF
 #undef DEBUG
 
 // Now declarations of generic code.

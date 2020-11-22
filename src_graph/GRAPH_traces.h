@@ -188,9 +188,9 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       }
     }
     /* Calling Traces */
-    std::cerr << "Before Traces\n";
+    //    std::cerr << "Before Traces\n";
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,NULL);
-    std::cerr << "After Traces\n";
+    //    std::cerr << "After Traces\n";
     /* Extracting the list of generators */
     std::vector<std::vector<unsigned int>> ListGen;
     //
