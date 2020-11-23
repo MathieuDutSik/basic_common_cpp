@@ -69,7 +69,7 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
       */
     }
 
-    /* Now make the first graph */
+    /* Now make the graph */
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = n;              /* Number of vertices */
     sg1.nde = nbAdjacent;           /* Number of directed edges */
@@ -172,7 +172,7 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       */
     }
 
-    /* Now make the first graph */
+    /* Now make the graph */
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = n;              /* Number of vertices */
     sg1.nde = nbAdjacent;           /* Number of directed edges */
@@ -276,7 +276,7 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRA
         ptn[ListShift[icell] - 1] = 0;
     }
 
-    /* Now make the first graph */
+    /* Now make the graph */
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = n;              /* Number of vertices */
     sg1.nde = nbAdjacent;           /* Number of directed edges */

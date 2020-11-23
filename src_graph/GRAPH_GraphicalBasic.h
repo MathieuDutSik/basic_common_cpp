@@ -354,6 +354,34 @@ inline typename std::enable_if<is_graphsparseimmutable_class<Tret>::value,Tret>:
 }
 
 
+template<typename Tgr>
+std::string GetCanonicalForm_string(Tgr const& eGR, std::vector<unsigned int> const& cl)
+{
+  int nof_vertices = eGR.GetNbVert();
+  std::vector<int> clR(nof_vertices);
+  for (int i=0; i<nof_vertices; i++)
+    clR[cl[i]]=i;
+
+  std::string strRet;
+  for (int iVert=0; iVert<nof_vertices; iVert++) {
+    int iVertCan = clR[iVert];
+    strRet += std::to_string(iVert) + std::string(" : ");
+    if (eGR.GetHasVertexColor()) {
+      int eColor = eGR.GetColor(iVertCan);
+      strRet += " " + std::to_string(eColor);
+    }
+    strRet += " : ";
+    //
+    for (int jVert=0; jVert<nof_vertices; jVert++) {
+      int jVertCan = clR[jVert];
+      bool eVal_b = eGR.IsAdjacent(iVertCan, jVertCan);
+      strRet += " " + std::to_string(eVal_b);
+    }
+  }
+  return strRet;
+}
+
+
 
 
 #endif
