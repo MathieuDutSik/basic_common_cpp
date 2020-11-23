@@ -214,14 +214,14 @@ namespace std {
 // to_string functionality
 
 namespace std {
-  to_string(const mpz_class& e_val)
+  std::string to_string(const mpz_class& e_val)
   {
     std::stringstream s;
     s << e_val;
     std::string converted(s.str());
     return converted;
   };
-  to_string(const mpq_class& e_val)
+  std::string to_string(const mpq_class& e_val)
   {
     std::stringstream s;
     s << e_val;
