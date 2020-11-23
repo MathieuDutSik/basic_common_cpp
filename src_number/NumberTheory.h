@@ -211,6 +211,27 @@ namespace std {
   };
 }
 
+// to_string functionality
+
+namespace std {
+  template <>
+  to_string<mpz_class>(const mpz_class& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+  template <>
+  to_string<mpq_class>(const mpq_class& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+}
+
 
 
 template<typename T>
