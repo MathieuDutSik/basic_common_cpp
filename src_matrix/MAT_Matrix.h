@@ -1307,7 +1307,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value),SolMatResult<T>>::t
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> eMatF=ConvertMatrixUniversal<Tfield,T>(eMat);
   MyVector<Tfield> eVectF=ConvertVectorUniversal<Tfield,T>(eVect);
-  SolMatResult<Tfield> Solu_F = SolutionMat(eMatF, eVectF);
+  SolMatResult<Tfield> Solu_F = SolutionMatKernel(eMatF, eVectF);
   if (!Solu_F || !IsIntegerVector(Solu_F.eSol)) {
     return {false, {}};
   }
