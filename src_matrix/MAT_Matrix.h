@@ -1250,7 +1250,7 @@ struct SolMatResult {
 // Given the equation Y = XA, we find one solution X if it exists.
 // 
 template<typename T>
-SolMatResult<T> SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
   if (eMat.rows() == 0) {
@@ -1281,6 +1281,36 @@ SolMatResult<T> SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
   }
   return {true, std::move(eRetSol)};
 }
+
+
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value,SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+{
+  return SolutionMatKernel(eMat, eVect);
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_ring_field<T>::value),SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+{
+  using Tfield=typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> eMatF=ConvertMatrixUniversal<Tfield,T>(eMat);
+  MyVector<Tfield> eVectF=ConvertVectorUniversal<Tfield,T>(eVect);
+  SolMatResult<Tfield> Solu_F = SolutionMat(eMatF, eVectF);
+  if (!Solu_F || !IsIntegerVector(Solu_F.eSol)) {
+    return {false, {}};
+  }
+  MyVector<T> eSol = ConvertVectorUniversal<T,Tfield>(Solu_F.eSol);
+  return {true, std::move(eSol)};
+}
+
+
+
+
+template<typename T>
+SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+{
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
+
 
 
 template<typename T>
