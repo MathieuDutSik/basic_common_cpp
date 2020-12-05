@@ -675,7 +675,7 @@ bool IsVectorMultiple(MyVector<T> const&eVec1, MyVector<T> const&eVec2)
 template<typename T>
 T DivideVector(MyVector<T> const& V1, MyVector<T> const& V2)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in DivideVector");
   int n=V1.size();
   for (int i=0; i<n; i++)
     if (V1(i) != 0)
@@ -695,7 +695,7 @@ struct Inverse_exception {
 template<typename T>
 void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in TMat_Inverse_destroy");
   int iCol, iRow;
   int iRowB;
   int nbRow=Input.rows();
@@ -824,7 +824,7 @@ struct SelectionRowCol {
 
 template<typename T>
 struct RankTool {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in RankTool");
 
   RankTool(int const& eDim) : rank(0), dim(eDim), ListICol({}), ListVect({})
   {
@@ -883,7 +883,7 @@ private:
 template<typename T>
 SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in TMat_SelectRowCol");
   size_t nbRow=Input.rows();
   size_t nbCol=Input.cols();
   size_t maxRank=nbRow;
@@ -1038,7 +1038,7 @@ MyMatrix<T> TMat_CongrMap(MyMatrix<T> const&eMat)
 template<typename T>
 T DeterminantMatKernel(MyMatrix<T> const&TheMat)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in DeterminantMatKernel");
   T TheDet, hVal, alpha;
   T eVal1, eVal2, nVal;
   size_t n=TheMat.rows();
@@ -1252,7 +1252,7 @@ struct SolMatResult {
 template<typename T>
 SolMatResult<T> SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
   if (eMat.rows() == 0) {
     if (!IsZeroVector(eVect))
       return {false, {}};
@@ -1605,7 +1605,7 @@ void PrintEigenvalueDefect(MyMatrix<T> const& Sinp, MyVector<T> const& ListEigVa
 template<typename T>
 MyVector<T> SolveConjGrad(MyMatrix<T> const& A, MyVector<T> const& b)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in SolveConjGrad");
   int n=b.size();
   MyVector<T> r(n);
   MyVector<T> p(n);
