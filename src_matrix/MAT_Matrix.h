@@ -1282,6 +1282,18 @@ SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eV
   return {true, std::move(eRetSol)};
 }
 
+template<typename T>
+bool IsIntegerVector(MyVector<T> const& V)
+{
+  int n = V.size();
+  for (int i=0; i<n; i++)
+    if (!IsInteger(V(i)))
+      return false;
+  return true;
+}
+
+
+
 
 template<typename T>
 inline typename std::enable_if<is_ring_field<T>::value,SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
