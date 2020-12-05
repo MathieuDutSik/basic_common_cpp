@@ -330,7 +330,7 @@ uint32_t murmur3_32(const uint8_t* key, size_t len, uint32_t seed)
 
 
 namespace std {
-  template <T>
+  template <typename T>
   struct hash<std::vector<T>>
   {
     std::size_t operator()(const std::vector<T>& Lval) const
