@@ -1318,12 +1318,6 @@ inline typename std::enable_if<(not is_ring_field<T>::value),SolMatResult<T>>::t
 
 
 
-template<typename T>
-SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
-{
-  static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
-
-
 
 template<typename T>
 MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const& EXT)
