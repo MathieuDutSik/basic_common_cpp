@@ -5,12 +5,7 @@ int main(int argc, char *argv[])
   //  using T=int;
   using T=long;
   try {
-    int nb = 100;
-    int siz = 10000;
-    for (int i=0; i<nb; i++) {
-      std::cerr << "i=" << i << "/" << nb << "\n";
-      T a = rand() % (2*siz + 1) - siz;
-      T b = rand() % (2*siz + 1) - siz;
+    auto TestCons=[](T a, T b) -> void {
       if (b != 0) {
         T res1 = ResInt_Generic<T>(a, b);
         T res2 = ResInt(a,b);
@@ -24,7 +19,18 @@ int main(int argc, char *argv[])
           std::cerr << "Inconsistency a=" << a << " b=" << b << " quo1=" << quo1 << " quo2=" << quo2 << "\n";
         }
       }
+    };
+    int nb = 100;
+    int siz = 10000;
+    for (int i=0; i<nb; i++) {
+      std::cerr << "i=" << i << "/" << nb << "\n";
+      T a = rand() % (2*siz + 1) - siz;
+      T b = rand() % (2*siz + 1) - siz;
+      TestCons(a, b);
     }
+    for (int a=-10; a<10; a++)
+      for (int b=-10; b<10; b++)
+        TestCons(a,b);
   }
   catch (TerminalException const& e) {
     exit(e.eVal);

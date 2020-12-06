@@ -236,7 +236,7 @@ template<typename T>
 T ResInt_C_integer(T const& a, T const& b)
 {
   T res2 = a % b;
-  if (a<0) res2 += std::abs(b);
+  if (a<0 && res2 != 0) res2 += std::abs(b);
   return res2;
 }
 
@@ -325,14 +325,14 @@ inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
 template<typename T>
 T QuoInt_C_integer(T const& a, T const& b)
 {
-  T res2 = a / b;
-  if (a < 0) {
+  T quo2 = a / b;
+  if (a < 0 && b * quo2 != a) {
     if (b>0)
-      res2--;
+      quo2--;
     else
-      res2++;
+      quo2++;
   }
-  return res2;
+  return quo2;
 }
 
 template<typename T>
