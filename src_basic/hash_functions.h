@@ -329,6 +329,28 @@ uint32_t murmur3_32(const uint8_t* key, size_t len, uint32_t seed)
 }
 
 
+namespace std {
+  template <typename T>
+  struct hash<std::vector<T>>
+  {
+    std::size_t operator()(const std::vector<T>& Lval) const
+    {
+      auto combine_hash=[](size_t & seed, size_t new_hash) -> void {
+        seed ^= new_hash + 0x9e3779b9 + (seed<<6) + (seed>>2);
+      };
+      int len = Lval.size();
+      size_t seed = 0;
+      for (int i=0; i<len; i++) {
+        size_t e_hash = std::hash<T>()(Lval[i]);
+        combine_hash(seed, e_hash);
+      }
+      return seed;
+    }
+  };
+}
+
+
+
 
 #endif
 

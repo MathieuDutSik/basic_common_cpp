@@ -43,7 +43,7 @@ bool IsIntegralMatrix(MyMatrix<T> const& M)
 template<typename T>
 T Int_IndexLattice(MyMatrix<T> const& eMat)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in Int_IndexLattice");
   int iRowF=-1, iColF=-1;
   MyMatrix<T> eMatW=eMat;
   int nbCol=eMat.cols();
@@ -144,7 +144,7 @@ void WriteGCD_int(std::ostream & os, GCD_int<T> const& eGCD)
 template<typename T>
 inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputePairGcd");
   T f, g, h, fm, gm, hm, q;
   if (n == 0 && m == 0) {
     f=0;
@@ -429,7 +429,7 @@ int IsVectorPrimitive(MyVector<int> const& TheV)
 template<typename T>
 GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputeGCD_information");
   int siz=ListX.size();
   if (siz == 1) {
     T gcd=ListX[0];
@@ -725,7 +725,7 @@ bool IsColumnNonEmpty(MyMatrix<T> const& eMat, int const& minAllowed, int const&
 template<typename T>
 MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in NullspaceIntTrMat");
   MyMatrix<T> eMatW=eMat;
   int nbCol=eMat.cols();
   int nbRow=eMat.rows();
@@ -841,7 +841,7 @@ MyMatrix<T> NullspaceIntMat(MyMatrix<T> const& eMat)
 template<typename T>
 MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComplementToBasis");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   std::vector<int> OperCol1;
   std::vector<int> OperCol2;
@@ -1105,7 +1105,7 @@ struct ResultSolutionIntMat {
 template<typename T>
 ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> const& TheVect)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in SolutionIntMat");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   int nbDiff;
   int nbVect=TheMat.rows();
@@ -1231,7 +1231,7 @@ struct CanSolIntMat {
 template<typename T>
 CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputeCanonicalFormFastReduction");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   int nbDiff;
   int nbVect=TheMat.rows();
@@ -1399,7 +1399,7 @@ struct BasisReduction {
 template<typename T>
 BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputeBasisReduction");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   int nbCol=TheBasis.cols();
   int nbRow=TheBasis.rows();
@@ -1528,7 +1528,7 @@ struct AffineBasisResult {
 template<typename T>
 AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to have inverses");
+  static_assert(is_ring_field<T>::value, "Requires T to have inverses in Kernel_ComputeAffineBasis");
   int nbRow=EXT.rows();
   int nbCol=EXT.cols();
   int n=nbCol;
@@ -1773,7 +1773,7 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
 template<typename T>
 MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
 {
-  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain");
+  static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in GetZbasis");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   int TheDim=ListElement.cols();
   MyMatrix<T> ListEqua;

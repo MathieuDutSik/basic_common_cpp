@@ -3,8 +3,8 @@
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= TestMatrixInverse
 #PROGRAM		= TestPerformanceHNF
-#PROGRAM		= TestQuoInt
-PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
+PROGRAM		= TestQuoInt
+#PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
