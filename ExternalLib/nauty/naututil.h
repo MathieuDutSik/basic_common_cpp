@@ -237,37 +237,38 @@ extern void unitptn(int*,int*,int*,int);
 
 /*************************************************************************/
 
-#ifndef NAUTY_CPU_DEFINED
-#if HAVE_TIMES
-#include <sys/times.h>
-#define CPUDEFS static TLS_ATTR struct tms timebuffer;
-#ifndef CLK_TCK
-#include <time.h>
-#endif
-#if !defined(CLK_TCK) && defined(_SC_CLK_TCK)
-#define CLK_TCK sysconf(_SC_CLK_TCK)
-#endif
-#ifndef CLK_TCK
-#define CLK_TCK 60
-#endif
-#define CPUTIME (times(&timebuffer),\
-              (double)(timebuffer.tms_utime + timebuffer.tms_stime) / CLK_TCK)
-#else
-#if HAVE_GETRUSAGE
-#include <sys/time.h>
-#include <sys/resource.h>
-#define CPUDEFS struct rusage ruse;
-#define CPUTIME (getrusage(RUSAGE_SELF,&ruse),\
-  ruse.ru_utime.tv_sec + ruse.ru_stime.tv_sec + \
-  1e-6 * (ruse.ru_utime.tv_usec + ruse.ru_stime.tv_usec))
-#endif
-#endif
+#ifdef TIMINGS
+#  ifndef NAUTY_CPU_DEFINED
+#    if HAVE_TIMES
+#      include <sys/times.h>
+#      define CPUDEFS static TLS_ATTR struct tms timebuffer;
+#      ifndef CLK_TCK
+#        include <time.h>
+#      endif
+#      if !defined(CLK_TCK) && defined(_SC_CLK_TCK)
+#        define CLK_TCK sysconf(_SC_CLK_TCK)
+#      endif
+#      ifndef CLK_TCK
+#        define CLK_TCK 60
+#      endif
+#      define CPUTIME (times(&timebuffer),(double)(timebuffer.tms_utime + timebuffer.tms_stime) / CLK_TCK)
+#    else
+#      if HAVE_GETRUSAGE
+#        include <sys/time.h>
+#        include <sys/resource.h>
+#        define CPUDEFS struct rusage ruse;
+#        define CPUTIME (getrusage(RUSAGE_SELF,&ruse),\
+          ruse.ru_utime.tv_sec + ruse.ru_stime.tv_sec + \
+          1e-6 * (ruse.ru_utime.tv_usec + ruse.ru_stime.tv_usec))
+#      endif
+#    endif
 
-#ifndef CPUTIME
-#define CPUTIME 0.0
-#endif
+#    ifndef CPUTIME
+#      define CPUTIME 0.0
+#    endif
 
-#endif /*NAUTY_CPU_DEFINED*/
+#  endif /*NAUTY_CPU_DEFINED*/
+#endif /*TIMINGS*/
 
 /*************************************************************************/
 
