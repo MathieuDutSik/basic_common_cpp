@@ -15,9 +15,9 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number -I../src_graph -I../src_comb -I../src_matrix
 
 
-CFLAGS 		= $(MINISAT_INCLUDE) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
+CFLAGS 		= $(MINISAT_INCLUDE) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)  -I$(GMP_INCDIR)
 
-LIBS		= $(MINISAT_CPP_LINK)
+LIBS		= $(MINISAT_CPP_LINK) $(GMP_CXX_LINK)
 
 %.o: %.cpp
 	@echo
