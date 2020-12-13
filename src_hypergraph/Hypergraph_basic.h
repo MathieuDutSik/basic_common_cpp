@@ -3,6 +3,14 @@
 
 
 struct HypergraphBitset {
+  HypergraphBitset(int _nbVert, int _nbHyperedge, std::vector<std::vector<int>> const& ListEdge) : nbVert(_nbVert), nbHyperedge(_nbHyperedge)
+  {
+    ListEntry = Face(nbVert * nbHyperedge);
+    for (int iHyper=0; iHyper<nbHyperedge; iHyper++) {
+      for (auto & eVert : ListEdge[iHyper])
+        ListEntry(iHyper * nbVert + eVert) = 1;
+    }
+  }
   int GetNbVert() const
   {
     return nbVert;
@@ -31,12 +39,53 @@ struct HypergraphBitset {
     }
     return LEnt;
   }
+  bool IsVertexInEdge(int const& iVert, int const& iHyper) const
+  {
+    return ListEntry(iHyper * nbVert + iVert);
+  }
 private:
   int nbVert;
   int nbHyperedge;
   Face ListEntry;
 }
 
+
+template<typename T, typename Tgr>
+MyMatrix<T> GetLaplacianMatrix(std::vector<T> const& ListEdgeWeight, Tgr const& GR)
+{
+  int nbVert = GR.GetNbVert();
+  std::vector<T> ListVertexWeight(nbVert);
+  for (int iVert=0; iVert<nbVert; iVert++) {
+    std::vector<int> ListIEdge = GR.GetContainingHyperedge(iVert);
+    T sum =0;
+    for (auto& iHyper : ListIEdge)
+      sum += ListEdge[iHyper];
+    ListVertexWeight[iVert] = sum;
+  }
+  //
+  // Now building the matrix
+  //
+  int nbHyper = GR.GetNbHyperedge();
+  MyMatrix<T> RetMat = ZeroMatrix<T>(nbVert, nbVert);
+  for (int iHyper=0; iHyper<nbHyper; iHyper++) {
+    std::vector<int> ListIVert = GR.GetHyperedge(iHyper);
+    int nbEnt = ListIVert.size();
+    T coeff = ListEdgeWeight[iHyper] / nbEnt;
+    for (int iEnt=0; iEnt<nbEnt; iEnt++)
+      for (int jEnt=iEnt+1; jEnt<nbEnt; jEnt++) {
+        int iVert = ListIVert[iEnt];
+        int jVert = ListIVert[jEnt];
+        T eWei = ListVertexWeight[iVert];
+        T fWei = ListVertexWeight[jVert];
+        RetMat(iVert, iVert) += coeff / eWei;
+        RetMat(jVert, jVert) += coeff / fWei;
+        T insCoeff = coeff / sqrt(eWei * fWei);
+        RetMat(iVert, jVert) -= insCoeff;
+        RetMat(jVert, iVert) -= insCoeff;
+      }
+  }
+  return RetMat;
+}
 
 
 #endif
