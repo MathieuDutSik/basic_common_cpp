@@ -10,21 +10,21 @@
 struct GraphListAdj {
 public:
   GraphListAdj() = delete;
-  GraphListAdj(int const& inpNbVert) : nbVert(inpNbVert)
+  GraphListAdj(size_t const& inpNbVert) : nbVert(inpNbVert)
   {
     HasVertexColor=false;
-    for (int iVert=0; iVert<nbVert; iVert++)
+    for (size_t iVert=0; iVert<nbVert; iVert++)
       ListListAdj.push_back({});
   }
-  GraphListAdj(MyMatrix<int> const& ListEdge, int const& inpNbVert)
+  GraphListAdj(MyMatrix<int> const& ListEdge, size_t const& inpNbVert)
   {
     HasVertexColor=false;
     nbVert = inpNbVert;
-    for (int iVert=0; iVert<nbVert; iVert++)
+    for (size_t iVert=0; iVert<nbVert; iVert++)
       ListListAdj.push_back({});
     //
-    int nbEdge=ListEdge.rows();
-    for (int iEdge=0; iEdge<nbEdge; iEdge++) {
+    size_t nbEdge=ListEdge.rows();
+    for (size_t iEdge=0; iEdge<nbEdge; iEdge++) {
       int eVert1=ListEdge(iEdge,0);
       int eVert2=ListEdge(iEdge,1);
       ListListAdj[eVert1].push_back(eVert2);
@@ -50,11 +50,18 @@ public:
     return *this;
   }
   // lighter stuff
-  int GetNbVert() const
+  size_t GetNbAdjacent() const
+  {
+    size_t nb_adj = 0;
+    for (auto & LAdj : ListListAdj)
+      nb_adj += LAdj.size();
+    return nb_adj;
+  }
+  size_t GetNbVert() const
   {
     return nbVert;
   }
-  std::vector<std::vector<int> > GetListListAdj() const
+  std::vector<std::vector<int>> GetListListAdj() const
   {
     return ListListAdj;
   }
@@ -77,35 +84,35 @@ public:
     if (!TheVal)
       ListVertexColor.clear();
   }
-  void SetColor(int const& iVert, int const& eColor)
+  void SetColor(size_t const& iVert, int const& eColor)
   {
     ListVertexColor[iVert]=eColor;
   }
-  std::vector<int> Adjacency(int const& iVert) const
+  std::vector<int> Adjacency(size_t const& iVert) const
   {
     return ListListAdj[iVert];
   }
-  void AddAdjacent(int const& iVert, int const& jVert)
+  void AddAdjacent(size_t const& iVert, size_t const& jVert)
   {
     ListListAdj[iVert].push_back(jVert);
   }
-  void RemoveAdjacent(int const& iVert, int const& jVert)
+  void RemoveAdjacent(size_t const& iVert, size_t const& jVert)
   {
     // Not sure to find the right simple code for removing entry in std::vector
     std::vector<int> NewList;
     for (auto & eVert : ListListAdj[iVert])
-      if (eVert != jVert)
+      if (size_t(eVert) != jVert)
 	NewList.push_back(eVert);
     ListListAdj[iVert]=NewList;
   }
-  bool IsAdjacent(int const& iVert, int const& jVert) const
+  bool IsAdjacent(size_t const& iVert, size_t const& jVert) const
   {
     for (auto & eVert : ListListAdj[iVert])
-      if (eVert == jVert)
+      if (size_t(eVert) == jVert)
 	return true;
     return false;
   }
-  int GetColor(int const& iVert) const
+  int GetColor(size_t const& iVert) const
   {
     if (!HasVertexColor) {
       std::cerr << "Call to GetColor while HasVertexColor=false\n";
@@ -114,8 +121,8 @@ public:
     return ListVertexColor[iVert];
   }
 private:
-  int nbVert;
-  std::vector<std::vector<int> > ListListAdj;
+  size_t nbVert;
+  std::vector<std::vector<int>> ListListAdj;
   bool HasVertexColor;
   std::vector<int> ListVertexColor;
 };

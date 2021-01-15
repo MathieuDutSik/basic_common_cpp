@@ -8,9 +8,13 @@
 struct GraphBitset {
 public:
   GraphBitset() = delete;
-  GraphBitset(int const& inpNbVert) : nbVert(inpNbVert)
+  GraphBitset(size_t const& inpNbVert) : nbVert(inpNbVert)
   {
-    LLAdj=boost::dynamic_bitset<>(nbVert*nbVert);
+    size_t eProd = nbVert * nbVert;
+#ifdef DEBUG
+    std::cerr << "nbVert=" << nbVert << " eProd=" << eProd << "\n";
+#endif
+    LLAdj=boost::dynamic_bitset<>(eProd);
     HasVertexColor=false;
   }
   ~GraphBitset()
@@ -37,11 +41,11 @@ public:
     return *this;
   }
   // lighter stuff
-  int GetNbAdjacent() const
+  size_t GetNbAdjacent() const
   {
     return LLAdj.count();
   }
-  int GetNbVert() const
+  size_t GetNbVert() const
   {
     return nbVert;
   }
@@ -69,38 +73,38 @@ public:
     if (!TheVal)
       ListVertexColor.clear();
   }
-  void SetColor(int const& iVert, int const& eColor)
+  void SetColor(size_t const& iVert, int const& eColor)
   {
     ListVertexColor[iVert]=eColor;
   }
-  std::vector<int> Adjacency(int const& iVert) const
+  std::vector<int> Adjacency(size_t const& iVert) const
   {
     std::vector<int> retList;
-    for (int jVert=0; jVert<nbVert; jVert++) {
-      int idxMat=iVert + nbVert*jVert;
+    for (size_t jVert=0; jVert<nbVert; jVert++) {
+      size_t idxMat=iVert + nbVert*jVert;
       if (LLAdj[idxMat])
 	retList.push_back(jVert);
     }
     return retList;
   }
-  void AddAdjacent(int const& iVert, int const& jVert)
+  void AddAdjacent(size_t const& iVert, size_t const& jVert)
   {
-    int idxMat=iVert + nbVert*jVert;
+    size_t idxMat=iVert + nbVert*jVert;
     LLAdj.set(idxMat,1);
   }
-  void RemoveAdjacent(int const& iVert, int const& jVert)
+  void RemoveAdjacent(size_t const& iVert, size_t const& jVert)
   {
-    int idxMat=iVert + nbVert*jVert;
+    size_t idxMat=iVert + nbVert*jVert;
     LLAdj.set(idxMat,1);
   }
-  bool IsAdjacent(int const& iVert, int const& jVert) const
+  bool IsAdjacent(size_t const& iVert, size_t const& jVert) const
   {
-    int idxMat=iVert + nbVert*jVert;
+    size_t idxMat=iVert + nbVert*jVert;
     if (LLAdj[idxMat])
       return true;
     return false;
   }
-  int GetColor(int const& iVert) const
+  int GetColor(size_t const& iVert) const
   {
     if (!HasVertexColor) {
       std::cerr << "Call to GetColor while HasVertexColor=false\n";
@@ -109,7 +113,7 @@ public:
     return ListVertexColor[iVert];
   }
 private:
-  int nbVert;
+  size_t nbVert;
   boost::dynamic_bitset<> LLAdj;
   bool HasVertexColor=false;
   std::vector<int> ListVertexColor;
@@ -124,16 +128,16 @@ struct is_graphbitset_class<GraphBitset> {
 template<typename Tret, typename Tgr>
 inline typename std::enable_if<is_graphbitset_class<Tret>::value,Tret>::type InducedSubgraph(Tgr const& GR, std::vector<int> const& eList)
 {
-  int nbVert=GR.GetNbVert();
+  size_t nbVert=GR.GetNbVert();
   std::vector<int> ListStat(nbVert,-1);
-  int nbVertRed=eList.size();
+  size_t nbVertRed=eList.size();
   GraphBitset GRred(nbVertRed);
-  for (int iVertRed=0; iVertRed<nbVertRed; iVertRed++) {
-    int iVert=eList[iVertRed];
+  for (size_t iVertRed=0; iVertRed<nbVertRed; iVertRed++) {
+    size_t iVert=eList[iVertRed];
     ListStat[iVert]=iVertRed;
   }
-  for (int iVertRed=0; iVertRed<nbVertRed; iVertRed++) {
-    int iVert=eList[iVertRed];
+  for (size_t iVertRed=0; iVertRed<nbVertRed; iVertRed++) {
+    size_t iVert=eList[iVertRed];
     std::vector<int> LLadj=GR.Adjacency(iVert);
     for (int & jVert : LLadj) {
       int jVertRed=ListStat[jVert];
