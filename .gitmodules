@@ -1,0 +1,12 @@
+[submodule "sparse-map"]
+	path = sparse-map
+	url = https://github.com/Tessil/sparse-map
+[submodule "robin-map"]
+	path = robin-map
+	url = https://github.com/Tessil/robin-map
+[submodule "hopscotch-map"]
+	path = hopscotch-map
+	url = https://github.com/Tessil/hopscotch-map
+[submodule "array-hash"]
+	path = array-hash
+	url = https://github.com/Tessil/array-hash
