@@ -140,6 +140,16 @@ mpz_class GetRingElement(mpq_class const& eVal)
 //
 
 template<>
+struct overlying_field<double> {
+  typedef double field_type;
+};
+
+template<>
+struct overlying_field<float> {
+  typedef float field_type;
+};
+
+template<>
 struct overlying_field<mpz_class> {
   typedef mpq_class field_type;
 };
