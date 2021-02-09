@@ -370,7 +370,7 @@ std::vector<std::string> NAMELIST_ListTrueEntryBool(FullNamelist const &eFull, s
 
 void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFullNamelist)
 {
-  std::set<std::pair<std::string, std::string>> ListInsertValues;
+  std::unordered_set<std::pair<std::string, std::string>> ListInsertValues;
   if (!IsExistingFile(eFileName)) {
     std::cerr << "The following namelist file is missing\n";
     std::cerr << "eFileName = " << eFileName << "\n";

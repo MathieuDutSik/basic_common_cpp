@@ -9,7 +9,7 @@
 template<typename T>
 std::vector<T> UnionVect(std::vector<T> const& V1, std::vector<T> const& V2)
 {
-  std::set<T> eSet;
+  std::unordered_set<T> eSet;
   for (auto & eVal : V1)
     eSet.insert(eVal);
   for (auto & eVal : V2)
@@ -24,12 +24,12 @@ std::vector<T> UnionVect(std::vector<T> const& V1, std::vector<T> const& V2)
 template<typename T>
 std::vector<T> DifferenceVect(std::vector<T> const& V1, std::vector<T> const& V2)
 {
-  std::set<T> eSet2;
+  std::unordered_set<T> eSet2;
   for (auto & eVal : V2)
     eSet2.insert(eVal);
   std::vector<T> eV;
   for (auto & eVal : V1) {
-    typename std::set<T>::iterator iter=eSet2.find(eVal);
+    typename std::unordered_set<T>::iterator iter=eSet2.find(eVal);
     if (iter == eSet2.end())
       eV.push_back(eVal);
   }
@@ -61,7 +61,7 @@ bool IsSubset(std::vector<T> const& S1, std::vector<T> const& S2)
 template<typename T>
 std::vector<T> VectorAsSet(std::vector<T> const& V)
 {
-  std::set<T> eSet;
+  std::unordered_set<T> eSet;
   for (auto & eVal : V)
     eSet.insert(eVal);
   std::vector<T> eV;
@@ -74,12 +74,12 @@ std::vector<T> VectorAsSet(std::vector<T> const& V)
 template<typename T>
 std::vector<T> IntersectionVect(std::vector<T> const& V1, std::vector<T> const& V2)
 {
-  std::set<T> eSet2;
+  std::unordered_set<T> eSet2;
   for (auto & eVal : V2)
     eSet2.insert(eVal);
   std::vector<T> eV;
   for (auto & eVal : V1) {
-    typename std::set<T>::iterator iter=eSet2.find(eVal);
+    typename std::unordered_set<T>::iterator iter=eSet2.find(eVal);
     if (iter != eSet2.end())
       eV.push_back(eVal);
   }

@@ -350,7 +350,7 @@ std::vector<std::vector<int>> GRAPH_FindAllCycles(Tgr const& GR)
   std::vector<std::vector<int>> Edges = GetEdgeSet(GR);
   int nbEdge=Edges.size();
   int nbVert=GR.GetNbVert();
-  std::set<std::vector<int>> ListCycle;
+  std::unordered_set<std::vector<int>> ListCycle;
   auto FuncInsertCycle=[&](std::vector<int> const& eL) -> void {
     std::vector<int> eLcan = MinimumDihedralOrbit(eL);
     ListCycle.insert(eLcan);
