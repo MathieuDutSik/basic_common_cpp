@@ -2120,14 +2120,14 @@ bool IsSymmetricMatrix(MyMatrix<T> const& M)
 
 
 template<typename T>
-inline typename std::enable_if<(not std::is_arithmetic<T>::value),uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
+inline typename std::enable_if<(not std::is_arithmetic<T>::value),uint32_t>::type Matrix_Hash(MyMatrix<T> const& M, uint32_t const& seed)
 {
   std::stringstream s;
-  int nbRow=NewMat.rows();
-  int nbCol=NewMat.cols();
+  int nbRow = M.rows();
+  int nbCol = M.cols();
   for (int iCol=0; iCol<nbCol; iCol++)
     for (int iRow=0; iRow<nbRow; iRow++)
-      s << " " << NewMat(iRow, iCol);
+      s << " " << M(iRow, iCol);
   std::string converted(s.str());
   const uint8_t* ptr_i = (uint8_t*)converted.c_str();
   return murmur3_32(ptr_i, converted.size(), seed);
@@ -2135,13 +2135,39 @@ inline typename std::enable_if<(not std::is_arithmetic<T>::value),uint32_t>::typ
 
 
 template<typename T>
-inline typename std::enable_if<std::is_arithmetic<T>::value,uint32_t>::type Matrix_Hash(MyMatrix<T> const& NewMat, uint32_t const& seed)
+inline typename std::enable_if<std::is_arithmetic<T>::value,uint32_t>::type Matrix_Hash(MyMatrix<T> const& M, uint32_t const& seed)
 {
-  const T* ptr_T = NewMat.data();
+  const T* ptr_T = M.data();
   const uint8_t* ptr_i = (uint8_t*)ptr_T;
-  size_t len = sizeof(T) * NewMat.size();
+  size_t len = sizeof(T) * M.size();
   return murmur3_32(ptr_i, len, seed);
 }
+
+
+template<typename T>
+inline typename std::enable_if<(not std::is_arithmetic<T>::value),uint32_t>::type Vector_Hash(MyVector<T> const& V, uint32_t const& seed)
+{
+  std::stringstream s;
+  int n=V.size();
+  for (int i=0; i<n; i++)
+    s << " " << V(i);
+  std::string converted(s.str());
+  const uint8_t* ptr_i = (uint8_t*)converted.c_str();
+  return murmur3_32(ptr_i, converted.size(), seed);
+}
+
+
+template<typename T>
+inline typename std::enable_if<std::is_arithmetic<T>::value,uint32_t>::type Vector_Hash(MyVector<T> const& V, uint32_t const& seed)
+{
+  const T* ptr_T = V.data();
+  const uint8_t* ptr_i = (uint8_t*)ptr_T;
+  size_t len = sizeof(T) * V.size();
+  return murmur3_32(ptr_i, len, seed);
+}
+
+
+
 
 
 namespace std {
@@ -2150,7 +2176,8 @@ namespace std {
   {
     std::size_t operator()(const MyVector<T>& e_val) const
     {
-      return Matrix_Hash(e_val);
+      uint32_t seed= 0x1b873540;
+      return Vector_Hash(e_val, seed);
     }
   };
   template <typename T>
@@ -2158,7 +2185,8 @@ namespace std {
   {
     std::size_t operator()(const MyMatrix<T>& e_val) const
     {
-      return Matrix_Hash(e_val);
+      uint32_t seed= 0x1b873540;
+      return Matrix_Hash(e_val, seed);
     }
   };
 }
