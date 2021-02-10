@@ -347,6 +347,20 @@ namespace std {
       return seed;
     }
   };
+  template <typename T1, typename T2>
+  struct hash<std::pair<T1, T2>>
+  {
+    std::size_t operator()(const std::pair<T1,T2>& ePair) const
+    {
+      auto combine_hash=[](size_t & seed, size_t new_hash) -> void {
+        seed ^= new_hash + 0x9e3779b9 + (seed<<6) + (seed>>2);
+      };
+      size_t seed = std::hash<T>()(ePair.first);
+      size_t e_hash = std::hash<T>()(ePair.second);
+      combine_hash(seed, e_hash);
+      return seed;
+    }
+  };
 }
 
 
