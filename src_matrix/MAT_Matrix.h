@@ -2144,6 +2144,26 @@ inline typename std::enable_if<std::is_arithmetic<T>::value,uint32_t>::type Matr
 }
 
 
+namespace std {
+  template <typename T>
+  struct hash<MyVector<T>>
+  {
+    std::size_t operator()(const MyVector<T>& e_val) const
+    {
+      return Matrix_Hash(e_val);
+    }
+  };
+  template <typename T>
+  struct hash<MyMatrix<T>>
+  {
+    std::size_t operator()(const MyMatrix<T>& e_val) const
+    {
+      return Matrix_Hash(e_val);
+    }
+  };
+}
+
+
 template<typename T>
 int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
 {
