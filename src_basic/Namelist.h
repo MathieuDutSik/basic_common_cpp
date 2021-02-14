@@ -4,6 +4,7 @@
 #include "Temp_common.h"
 #include "Basic_file.h"
 #include "Basic_string.h"
+#include "hash_functions.h"
 
 struct SingleBlock {
   std::map<std::string, int> ListIntValues;
