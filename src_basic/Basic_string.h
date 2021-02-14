@@ -280,19 +280,21 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   size_t lenA=eStrA.length();
   size_t lenB=eStrB.length();
   std::vector<int> ListStatus(lenA,1);
-  for (size_t iA=0; iA<lenA - lenB; iA++)
-    if (ListStatus[iA] == 1) {
-      bool IsMatch=true;
-      for (size_t iB=0; iB<lenB; iB++) {
-	std::string eCharA=eStrA.substr(iA+iB,1);
-	std::string eCharB=eStrB.substr(iB,1);
-	if (eCharA != eCharB)
-	  IsMatch=false;
+  if (lenA >= lenB) {
+    for (size_t iA=0; iA<lenA - lenB; iA++)
+      if (ListStatus[iA] == 1) {
+        bool IsMatch=true;
+        for (size_t iB=0; iB<lenB; iB++) {
+          std::string eCharA=eStrA.substr(iA+iB,1);
+          std::string eCharB=eStrB.substr(iB,1);
+          if (eCharA != eCharB)
+            IsMatch=false;
+        }
+        if (IsMatch)
+          for (size_t iB=0; iB<lenB; iB++)
+            ListStatus[iA + iB]=0;
       }
-      if (IsMatch)
-	for (size_t iB=0; iB<lenB; iB++)
-	  ListStatus[iA + iB]=0;
-    }
+  }
   std::vector<std::string> RetList;
   std::string eFound;
   for (size_t iA=0; iA<lenA; iA++) {
