@@ -161,7 +161,14 @@ public:
   {
     return {dim, size, {}};
   }
-  
+  const_iterator begin() const
+  {
+    return { dim, size, std::vector<int>(dim,0) };
+  }
+  const_iterator end() const
+  {
+    return {dim, size, {}};
+  }
 };
 
 
