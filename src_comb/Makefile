@@ -1,5 +1,6 @@
 #PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques
-PROGRAM		= EnumerationCliques_special_subcliques
+#PROGRAM		= EnumerationCliques_special_subcliques
+PROGRAM		= Block_CppIterator
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -17,9 +18,9 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src_comb -I../src_xml -I.
 
 
-CFLAGS 		= -I$(BOOST_INCDIR)
+CFLAGS 		= -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
 
-LIBS		= -lm -pthread
+LIBS		= -lm -pthread $(GMP_CXX_LINK)
 
 
 %.o: %.cpp

@@ -68,6 +68,107 @@ private:
 
 
 
+struct BlockCppIterator {
+private:
+  int dim;
+  int size;
+  struct IteratorContain {
+  private:
+    int dim_iter;
+    int size_iter;
+    std::vector<int> U;
+    void single_increase()
+    {
+      for (int i=0; i<dim_iter; i++)
+        if (U[i] < size_iter-1) {
+          U[i]++;
+          for (int j=0; j<i; j++)
+            U[j]=0;
+          return;
+        }
+      U = {};
+    }
+  public:
+    IteratorContain(int const& eDim, int const& eSize, std::vector<int> const& eU) : dim_iter(eDim), size_iter(eSize), U(eU)
+    {
+    }
+    std::vector<int> const& operator*()
+    {
+      return U;
+    }
+    IteratorContain & operator++()
+    {
+      single_increase();
+      return *this;
+    }
+    IteratorContain operator++(int)
+    {
+      IteratorContain tmp = *this;
+      single_increase();
+      return tmp;
+    }
+    bool operator!=(IteratorContain const& iter)
+    {
+      if (iter.dim_iter != dim_iter)
+        return true;
+      if (iter.size_iter != size_iter)
+        return true;
+      if (iter.U.size() != U.size())
+        return true;
+      for (size_t i=0; i<U.size(); i++)
+        if (iter.U[i] != U[1])
+          return true;
+      return false;
+    }
+    bool operator==(IteratorContain const& iter)
+    {
+      if (iter.dim_iter != dim_iter)
+        return false;
+      if (iter.size_iter != size_iter)
+        return false;
+      if (iter.U.size() != U.size())
+        return false;
+      for (size_t i=0; i<U.size(); i++)
+        if (iter.U[i] != U[1])
+          return false;
+      return true;
+    }
+  };
+public:
+  // no copy
+  BlockCppIterator(const BlockCppIterator&) = delete;
+
+  // no assign
+  BlockCppIterator& operator=(const BlockCppIterator&) = delete;
+
+  // no move
+  BlockCppIterator(BlockCppIterator&&) = delete;
+
+  // no default constructor
+  BlockCppIterator() = delete;
+
+  BlockCppIterator(int const& eDim, int const& eSize) : dim(eDim), size(eSize)
+  {
+  }
+  // The iterator business
+  using iterator=IteratorContain;
+  using const_iterator=IteratorContain;
+  const_iterator cbegin() const
+  {
+    return { dim, size, std::vector<int>(dim,0) };
+  }
+  const_iterator cend() const
+  {
+    return {dim, size, {}};
+  }
+  
+};
+
+
+
+
+
+
 struct BlockIterationMultiple {
 public:
   // no copy
