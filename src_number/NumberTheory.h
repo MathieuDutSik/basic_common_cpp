@@ -240,7 +240,38 @@ namespace std {
   };
 }
 
+// Parsing strings (It takes a std::string because we would need a const char* with a null terminated string
+// and this we would not have with string_view
 
+
+
+/*
+template<>
+mpz_class ParseScalar(std::string const& estr)
+{
+  const char* str = estr.c_str();
+  mpz_class ret_val;
+  int ret = mpz_set_str(ret_val.get_mpz_t(), str, 10);
+  if (ret != 0) {
+    std::cerr << "The ParseScalar for mpz_class failed\n";
+    throw TerminalException{1};
+  }
+  return ret_val;
+}
+*/
+
+template<typename T>
+T ParseScalar(std::string const& estr)
+{
+  T ret_val;
+  std::istringstream is(estr);
+  is >> ret_val;
+  return ret_val;
+}
+
+
+
+// The remainder and quotient of integers
 
 template<typename T>
 T ResInt_C_integer(T const& a, T const& b)
