@@ -619,28 +619,6 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
   a2=a1_long;
 }
 
-inline void TYPE_CONVERSION(mpq_class const& a1, int32_t & a2)
-{
-  if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
-  }
-  mpz_class a1_z=a1.get_num();
-  long a1_long=a1_z.get_si();
-  a2=a1_long;
-}
-
-inline void TYPE_CONVERSION(mpq_class const& a1, int64_t & a2)
-{
-  if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
-  }
-  mpz_class a1_z=a1.get_num();
-  long a1_long=a1_z.get_si();
-  a2=a1_long;
-}
-
 inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
 {
   if (!IsInteger(a1)) {
