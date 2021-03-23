@@ -304,12 +304,13 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
     if (ListStatus[iA] == 0) {
       size_t siz=eFound.length();
       if (siz > 0)
-	RetList.emplace_back(eFound);
+	RetList.push_back(eFound);
+      eFound = "";
     }
   }
   size_t siz=eFound.size();
   if (siz > 0)
-    RetList.emplace_back(eFound);
+    RetList.push_back(eFound);
   return RetList;
 }
 
