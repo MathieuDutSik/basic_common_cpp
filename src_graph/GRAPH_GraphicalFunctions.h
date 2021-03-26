@@ -4,6 +4,7 @@
 #include "COMB_Combinatorics.h"
 #include "GRAPH_GraphicalBasic.h"
 #include "MAT_Matrix.h"
+#include "COMB_Vectors.h"
 #include "GRAPH_BitsetType.h"
 
 
