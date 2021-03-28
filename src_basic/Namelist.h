@@ -41,32 +41,25 @@ std::string NAMELIST_FindPositionVariableInBlock(std::string const& FullVarName,
 {
   std::vector<std::string> LStr=STRING_Split(FullVarName, ":");
   std::string eVarName=LStr[0];
-  auto search1=eSingleBlock.ListIntValues.find(eVarName);
-  if (search1 != eSingleBlock.ListIntValues.end())
+  if (eSingleBlock.ListIntValues.count(eVarName) > 0)
     return "int";
-  auto search2=eSingleBlock.ListBoolValues.find(eVarName);
-  if (search2 != eSingleBlock.ListBoolValues.end())
+  if (eSingleBlock.ListBoolValues.count(eVarName) > 0)
     return "bool";
-  auto search3=eSingleBlock.ListDoubleValues.find(eVarName);
-  if (search3 != eSingleBlock.ListDoubleValues.end())
+  if (eSingleBlock.ListDoubleValues.count(eVarName) > 0)
     return "double";
-  auto search4=eSingleBlock.ListListDoubleValues.find(eVarName);
-  if (search4 != eSingleBlock.ListListDoubleValues.end())
+  if (eSingleBlock.ListListDoubleValues.count(eVarName) > 0)
     return "listdouble";
-  auto search4b=eSingleBlock.ListListIntValues.find(eVarName);
-  if (search4b != eSingleBlock.ListListIntValues.end())
+  if (eSingleBlock.ListListIntValues.count(eVarName) > 0)
     return "listint";
-  auto search5=eSingleBlock.ListStringValues.find(eVarName);
-  if (search5 != eSingleBlock.ListStringValues.end())
+  if (eSingleBlock.ListStringValues.count(eVarName) > 0)
     return "string";
-  auto search6=eSingleBlock.ListListStringValues.find(eVarName);
-  if (search6 != eSingleBlock.ListListStringValues.end())
+  if (eSingleBlock.ListListStringValues.count(eVarName) > 0)
     return "liststring";
   return "not found";
 }
 
 
-std::string NAMELIST_RemoveAfterCommentChar(std::string const&eStr, std::string &eChar)
+std::string NAMELIST_RemoveAfterCommentChar(std::string const&eStr, std::string const& eChar)
 {
   bool WeFound=false;
   std::string RetStr;
@@ -91,14 +84,12 @@ std::string NAMELIST_RemoveAfterLastChar(std::string const& eStr, std::string co
     int j=len-1-i;
     if (iPos == -1) {
       std::string eChar=eStr.substr(j,1);
-      //      std::cerr << "j=" << j << " eChar=" << eChar << "\n";
       if (eChar == eLastChar)
 	iPos=j;
     }
   }
   if (iPos == -1)
     return eStr;
-  //  std::cerr << "iPos=" << iPos << "\n";
   std::string RetStr;
   for (int i=0; i<iPos; i++)
     RetStr += eStr.at(i);
@@ -157,7 +148,6 @@ bool NAMELIST_ReadBoolValue(std::string const& eVarValue)
 
 std::string NAMELIST_ConvertFortranStringToCppString(std::string const& eStr)
 {
-  //  std::cerr << "eStr=" << eStr << "\n";
   int len=eStr.length();
   if (len == 0)
     return "";
@@ -189,8 +179,6 @@ std::string NAMELIST_ConvertFortranStringToCppString(std::string const& eStr)
 
 std::vector<std::string> NAMELIST_ConvertFortranListStringToCppListString(std::string const& eStr)
 {
-  //  std::cerr << "NAMELIST_ConvertFortranListStringToCppListString, begin\n";
-  //  std::cerr << "eStr=" << eStr << "\n";
   int len=eStr.length();
   if (len == 0)
     return {};
@@ -236,14 +224,12 @@ std::vector<std::string> NAMELIST_ConvertFortranListStringToCppListString(std::s
 	eFound += eChar;
     }
   }
-  //  std::cerr << "NAMELIST_ConvertFortranListStringToCppListString, end\n";
   return eListStr;
 }
 
 
 std::vector<double> NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(std::string const& eVarValue)
 {
-  //  std::cerr << "eVarValue=" << eVarValue << "\n";
   std::string eSepChar=",";
   std::vector<std::string> ListStr=STRING_Split(eVarValue, eSepChar);
   std::vector<double> eListRetDouble;
@@ -255,10 +241,6 @@ std::vector<double> NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(std
     std::istringstream(eStr2) >> eVal;
     eListRetDouble.push_back(eVal);
   }
-  //  std::cerr << "eListRetDouble=";
-  //  for (auto& eVal : eListRetDouble)
-  //    std::cerr << " " << eVal;
-  //  std::cerr << "\n";
   return eListRetDouble;
 }
 
@@ -266,7 +248,6 @@ std::vector<double> NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(std
 
 std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(std::string const& eVarValue)
 {
-  //  std::cerr << "eVarValue=" << eVarValue << "\n";
   std::string eSepChar=",";
   std::vector<std::string> ListStr=STRING_Split(eVarValue, eSepChar);
   std::vector<int> eListRetInt;
@@ -278,10 +259,6 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(std::string 
     std::istringstream(eStr2) >> eVal;
     eListRetInt.push_back(eVal);
   }
-  //  std::cerr << "eListRetDouble=";
-  //  for (auto& eVal : eListRetDouble)
-  //    std::cerr << " " << eVal;
-  //  std::cerr << "\n";
   return eListRetInt;
 }
 
@@ -406,8 +383,7 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 	std::string strRed=eStr.substr(1, len-1);
 	if (!InBlock) {
 	  eBlockName=strRed;
-          auto search=eFullNamelist.ListBlock.find(eBlockName);
-          if (search == eFullNamelist.ListBlock.end() ) {
+          if (eFullNamelist.ListBlock.count(eBlockName) == 0) {
 	    std::cerr << "Find BlockName = " << eBlockName << "\n";
 	    std::cerr << "which is not in the authorized list\n";
 	    std::cerr << "LINE=" << eStr << "\n";
@@ -438,8 +414,7 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 	    std::string eStrPosterior=eStr3.substr(posEqual+1, len3-posEqual-1);
 	    std::string eVarName=STRING_RemoveSpacesBeginningEnd(eStrPrior);
 	    std::pair<std::string, std::string> ePair{eBlockName, eVarName};
-	    auto searchB=ListInsertValues.find(ePair);
-	    if (searchB != ListInsertValues.end()) {
+            if (ListInsertValues.count(ePair) > 0) {
 	      std::cerr << "eFileName = " << eFileName << "\n";
 	      std::cerr << "In the block " << eBlockName << "\n";
 	      std::cerr << "the entry " << eVarName << "\n";
@@ -484,8 +459,6 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 	      eFullNamelist.ListBlock[eBlockName].ListDoubleValues[eVarName]=eVal;
 	    }
 	    if (eVarNature == "string") {
-	      //	      std::cerr << "eVarName=" << eVarName << "\n";
-	      //	      std::cerr << "eVarValue=" << eVarValue << "\n";
 	      try {
 		std::string eVal=NAMELIST_ConvertFortranStringToCppString(eVarValue);
 		eFullNamelist.ListBlock[eBlockName].ListStringValues[eVarName]=eVal;
