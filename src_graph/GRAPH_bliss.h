@@ -152,7 +152,7 @@ std::vector<unsigned int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
 }
 
 
-static void report_aut_vectvectint(void* param, const unsigned int n, const unsigned int* aut)
+static inline void report_aut_vectvectint(void* param, const unsigned int n, const unsigned int* aut)
 {
   std::vector<unsigned int> eVect;
   for (unsigned int i=0; i<n; i++)
