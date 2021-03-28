@@ -53,7 +53,7 @@ std::ostream& operator<<(std::ostream & os, TheHeuristic<T> const& Heu)
   for (size_t i=0; i<Heu.AllTests.size(); i++) {
     os << "i=" << i << "/" << len << " " << Heu.AllTests[i] << "\n";
   }
-  os << "Default=" << Heu.DefaultResult << "\n";
+  os << "Default=" << Heu.DefaultResult;
   return os;
 }
 
