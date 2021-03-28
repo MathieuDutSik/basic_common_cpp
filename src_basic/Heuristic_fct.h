@@ -10,6 +10,14 @@ struct SingleCondition {
   T NumValue;
 };
 
+template<typename T>
+std::ostream& operator<<(std::ostream & os, SingleCondition<T> const& eSingCond)
+{
+  os << eSingCond.eCond << " " << eSingCond.eType << " " << eSingCond.NumValue;
+  return os;
+}
+
+
 
 template<typename T>
 struct OneFullCondition {
@@ -18,10 +26,38 @@ struct OneFullCondition {
 };
 
 template<typename T>
+std::ostream& operator<<(std::ostream & os, OneFullCondition<T> const& eFullCond)
+{
+  size_t len=eFullCond.TheConditions.size();
+  for (size_t i=0; i<len; i++) {
+    if (i>0)
+      os << " && ";
+    os << "(" << eFullCond.TheConditions[i] << ")";
+  }
+  os << " => " << eFullCond.TheResult;
+  return os;
+}
+
+
+template<typename T>
 struct TheHeuristic {
   std::vector<OneFullCondition<T>> AllTests;
   std::string DefaultResult;
 };
+
+
+template<typename T>
+std::ostream& operator<<(std::ostream & os, TheHeuristic<T> const& Heu)
+{
+  size_t len = Heu.AllTests.size();
+  for (size_t i=0; i<Heu.AllTests.size(); i++) {
+    os << "i=" << i << "/" << len << " " << Heu.AllTests[i] << "\n";
+  }
+  os << "Default=" << Heu.DefaultResult << "\n";
+  return os;
+}
+
+
 
 
 
@@ -103,13 +139,11 @@ std::string HeuristicEvaluation(std::map<std::string, T> const& TheCand, TheHeur
       T eValue=0;
       if (search != TheCand.end()) {
 	eValue=search->second;
-      }
-      else {
+      } else {
 	std::cerr << "Entry " << eCond << " is required by heuristic\n";
 	std::cerr << "Yet it is missing in the Candidate\n";
 	std::cerr << "Please correct\n";
 	throw TerminalException{1};
-	//	exit(1);
       }
       bool WeMatch=false;
       if (eValue > eNum && eType == ">")
@@ -149,6 +183,11 @@ TheHeuristic<T> HeuristicFromListString(std::vector<std::string> const& ListStri
   std::remove(TheFile.c_str());
   return TheHeu;
 }
+
+
+
+
+
 
 
 #endif
