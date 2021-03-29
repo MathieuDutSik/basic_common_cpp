@@ -141,7 +141,10 @@ std::string HeuristicEvaluation(std::map<std::string, T> const& TheCand, TheHeur
 	eValue=search->second;
       } else {
 	std::cerr << "Entry " << eCond << " is required by heuristic\n";
-	std::cerr << "Yet it is missing in the Candidate\n";
+	std::cerr << "Yet it is missing in the Candidate. TheCand=\n";
+        for (auto& kv : TheCand) {
+          std::cerr << "  key=" << kv.first << " value=" << kv.second << "\n";
+        }
 	std::cerr << "Please correct\n";
 	throw TerminalException{1};
       }
