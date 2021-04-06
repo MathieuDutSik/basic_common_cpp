@@ -948,9 +948,65 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 }
 
 template<typename T>
-MyMatrix<T> NullspaceTrMat(MyMatrix<T> const& M)
+MyMatrix<T> NullspaceTrMat(MyMatrix<T> const& Input)
 {
-  return TMat_SelectRowCol(M).NSP;
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in TMat_SelectRowCol");
+  size_t nbRow=Input.rows();
+  size_t nbCol=Input.cols();
+  size_t maxRank=nbRow;
+  if (nbCol < maxRank)
+    maxRank = nbCol;
+  size_t sizMat=maxRank+1;
+  MyMatrix<T> provMat(sizMat, nbCol);
+  std::vector<int> ListColSelect;
+  std::vector<int> ListColSelect01(nbCol,0);
+  size_t eRank=0;
+  for (size_t iRow=0; iRow<nbRow; iRow++) {
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      provMat(eRank, iCol)=Input(iRow, iCol);
+    for (size_t iRank=0; iRank<eRank; iRank++) {
+      int eCol=ListColSelect[iRank];
+      T eVal1=provMat(eRank, eCol);
+      if (eVal1 != 0) {
+	for (size_t iCol=0; iCol<nbCol; iCol++)
+	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
+      }
+    }
+    std::ptrdiff_t FirstNonZeroCol=-1;
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      if (FirstNonZeroCol == -1) {
+	if (provMat(eRank, iCol) != 0)
+	  FirstNonZeroCol=iCol;
+      }
+    if (FirstNonZeroCol != -1) {
+      ListColSelect.push_back(FirstNonZeroCol);
+      ListColSelect01[size_t(FirstNonZeroCol)]=1;
+      T eVal2=1 / provMat(eRank, FirstNonZeroCol);
+      for (size_t iCol=0; iCol<nbCol; iCol++)
+	provMat(eRank, iCol) *= eVal2;
+      for (size_t iRank=0; iRank<eRank; iRank++) {
+	T eVal1=provMat(iRank, FirstNonZeroCol);
+	if (eVal1 != 0) {
+	  for (size_t iCol=0; iCol<nbCol; iCol++)
+	    provMat(iRank, iCol) -= eVal1*provMat(eRank, iCol);
+	}
+      }
+      eRank++;
+    }
+  }
+  size_t nbVectZero=nbCol - eRank;
+  MyMatrix<T> NSP=ZeroMatrix<T>(nbVectZero, nbCol);
+  size_t nbVect=0;
+  for (size_t iCol=0; iCol<nbCol; iCol++)
+    if (ListColSelect01[iCol] == 0) {
+      NSP(nbVect, iCol)=1;
+      for (size_t iRank=0; iRank<eRank; iRank++) {
+	int eCol=ListColSelect[iRank];
+	NSP(nbVect, eCol) = -provMat(iRank, iCol);
+      }
+      nbVect++;
+    }
+  return NSP;
 }
 
 template<typename T>
