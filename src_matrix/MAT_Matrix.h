@@ -948,9 +948,8 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 }
 
 template<typename T>
-MyMatrix<T> NullspaceTrMat(MyMatrix<T> const& Input)
+inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type NullspaceTrMat(MyMatrix<T> const& Input)
 {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field in TMat_SelectRowCol");
   size_t nbRow=Input.rows();
   size_t nbCol=Input.cols();
   size_t maxRank=nbRow;
@@ -1008,6 +1007,77 @@ MyMatrix<T> NullspaceTrMat(MyMatrix<T> const& Input)
     }
   return NSP;
 }
+
+
+
+template<typename T>
+inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type NullspaceTrMat(MyMatrix<T> const& Input)
+{
+  // No division allowed. Maybe faster if we can allow for it using mpz_class.
+  size_t nbRow=Input.rows();
+  size_t nbCol=Input.cols();
+  size_t maxRank=nbRow;
+  if (nbCol < maxRank)
+    maxRank = nbCol;
+  size_t sizMat=maxRank+1;
+  MyMatrix<T> provMat(sizMat, nbCol);
+  std::vector<int> ListColSelect;
+  std::vector<int> ListColSelect01(nbCol,0);
+  size_t eRank=0;
+  for (size_t iRow=0; iRow<nbRow; iRow++) {
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      provMat(eRank, iCol)=Input(iRow, iCol);
+    for (size_t iRank=0; iRank<eRank; iRank++) {
+      int eCol=ListColSelect[iRank];
+      T eVal1 = provMat(eRank, eCol);
+      T eVal2 = provMat(iRank, eCol);
+      if (eVal1 != 0) {
+	for (size_t iCol=eCol; iCol<nbCol; iCol++)
+	  provMat(eRank, iCol) = provMat(eRank,iCol) * eVal2 - provMat(iRank,iCol) * eVal1;
+      }
+    }
+    std::ptrdiff_t FirstNonZeroCol=-1;
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      if (FirstNonZeroCol == -1) {
+	if (provMat(eRank, iCol) != 0)
+	  FirstNonZeroCol=iCol;
+      }
+    if (FirstNonZeroCol != -1) {
+      ListColSelect.push_back(FirstNonZeroCol);
+      ListColSelect01[size_t(FirstNonZeroCol)]=1;
+      T eVal2=provMat(eRank, FirstNonZeroCol);
+      for (size_t iRank=0; iRank<eRank; iRank++) {
+	T eVal1=provMat(iRank, FirstNonZeroCol);
+	if (eVal1 != 0) {
+          int StartCol = ListColSelect[iRank];
+	  for (size_t iCol=StartCol; iCol<nbCol; iCol++)
+	    provMat(iRank, iCol) = provMat(iRank,iCol) * eVal2 - provMat(eRank, iCol) * eVal1;
+	}
+      }
+      eRank++;
+    }
+  }
+  // CODE INCOMPLETE BELOW. SOMETHING IS NEEDED.
+  size_t nbVectZero=nbCol - eRank;
+  MyMatrix<T> NSP=ZeroMatrix<T>(nbVectZero, nbCol);
+  size_t nbVect=0;
+  for (size_t iCol=0; iCol<nbCol; iCol++)
+    if (ListColSelect01[iCol] == 0) {
+      NSP(nbVect, iCol)=1;
+      for (size_t iRank=0; iRank<eRank; iRank++) {
+	int eCol=ListColSelect[iRank];
+	NSP(nbVect, eCol) = -provMat(iRank, iCol);
+      }
+      nbVect++;
+    }
+  return NSP;
+}
+
+
+
+
+
+
 
 template<typename T>
 MyMatrix<T> NullspaceMat(MyMatrix<T> const& M)
