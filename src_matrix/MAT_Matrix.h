@@ -893,7 +893,7 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
   MyMatrix<T> provMat(sizMat, nbCol);
   std::vector<int> ListColSelect;
   std::vector<int> ListRowSelect;
-  std::vector<int> ListColSelect01(nbCol,0);
+  std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
   for (size_t iRow=0; iRow<nbRow; iRow++) {
     for (size_t iCol=0; iCol<nbCol; iCol++)
@@ -957,8 +957,8 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
     maxRank = nbCol;
   size_t sizMat=maxRank+1;
   MyMatrix<T> provMat(sizMat, nbCol);
-  std::vector<int> ListColSelect;
-  std::vector<int> ListColSelect01(nbCol,0);
+  std::vector<size_t> ListColSelect;
+  std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
   for (size_t iRow=0; iRow<nbRow; iRow++) {
     for (size_t iCol=0; iCol<nbCol; iCol++)
@@ -967,26 +967,27 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
       int eCol=ListColSelect[iRank];
       T eVal1=provMat(eRank, eCol);
       if (eVal1 != 0) {
-	for (size_t iCol=0; iCol<nbCol; iCol++)
+	for (size_t iCol=eCol; iCol<nbCol; iCol++)
 	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
       }
     }
-    std::ptrdiff_t FirstNonZeroCol=-1;
+    size_t FirstNonZeroCol = std::numeric_limits<size_t>::max();
     for (size_t iCol=0; iCol<nbCol; iCol++)
-      if (FirstNonZeroCol == -1) {
+      if (FirstNonZeroCol == std::numeric_limits<size_t>::max() ) {
 	if (provMat(eRank, iCol) != 0)
 	  FirstNonZeroCol=iCol;
       }
-    if (FirstNonZeroCol != -1) {
+    if (FirstNonZeroCol != std::numeric_limits<size_t>::max() ) {
       ListColSelect.push_back(FirstNonZeroCol);
-      ListColSelect01[size_t(FirstNonZeroCol)]=1;
+      ListColSelect01[FirstNonZeroCol]=1;
       T eVal2=1 / provMat(eRank, FirstNonZeroCol);
       for (size_t iCol=0; iCol<nbCol; iCol++)
 	provMat(eRank, iCol) *= eVal2;
       for (size_t iRank=0; iRank<eRank; iRank++) {
 	T eVal1=provMat(iRank, FirstNonZeroCol);
 	if (eVal1 != 0) {
-	  for (size_t iCol=0; iCol<nbCol; iCol++)
+          size_t StartCol = ListColSelect[iRank];
+	  for (size_t iCol=StartCol; iCol<nbCol; iCol++)
 	    provMat(iRank, iCol) -= eVal1*provMat(eRank, iCol);
 	}
       }
@@ -1022,7 +1023,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
   size_t sizMat=maxRank+1;
   MyMatrix<T> provMat(sizMat, nbCol);
   std::vector<int> ListColSelect;
-  std::vector<int> ListColSelect01(nbCol,0);
+  std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
   for (size_t iRow=0; iRow<nbRow; iRow++) {
     for (size_t iCol=0; iCol<nbCol; iCol++)
@@ -1032,7 +1033,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
       T eVal1 = provMat(eRank, eCol);
       T eVal2 = provMat(iRank, eCol);
       if (eVal1 != 0) {
-	for (size_t iCol=eCol; iCol<nbCol; iCol++)
+	for (size_t iCol=0; iCol<nbCol; iCol++)
 	  provMat(eRank, iCol) = provMat(eRank,iCol) * eVal2 - provMat(iRank,iCol) * eVal1;
       }
     }
@@ -1049,7 +1050,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
       for (size_t iRank=0; iRank<eRank; iRank++) {
 	T eVal1=provMat(iRank, FirstNonZeroCol);
 	if (eVal1 != 0) {
-          int StartCol = ListColSelect[iRank];
+          int StartCol = 0;
 	  for (size_t iCol=StartCol; iCol<nbCol; iCol++)
 	    provMat(iRank, iCol) = provMat(iRank,iCol) * eVal2 - provMat(eRank, iCol) * eVal1;
 	}
@@ -1059,14 +1060,29 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
   }
   // CODE INCOMPLETE BELOW. SOMETHING IS NEEDED.
   size_t nbVectZero=nbCol - eRank;
+  //  std::cerr << "eRank=" << eRank << " nbVectZero=" << nbVectZero << "\n";
+  //  std::cerr << "provMat=\n";
+  //  WriteMatrixGAP(std::cerr, provMat);
+  //  std::cerr << "\n";
   MyMatrix<T> NSP=ZeroMatrix<T>(nbVectZero, nbCol);
   size_t nbVect=0;
   for (size_t iCol=0; iCol<nbCol; iCol++)
     if (ListColSelect01[iCol] == 0) {
       NSP(nbVect, iCol)=1;
+      T prodVal = 1;
       for (size_t iRank=0; iRank<eRank; iRank++) {
-	int eCol=ListColSelect[iRank];
-	NSP(nbVect, eCol) = -provMat(iRank, iCol);
+        int eCol=ListColSelect[iRank];
+        T pivotVal = provMat(iRank, iCol);
+        if (pivotVal != 0) {
+          for (size_t jRank=0; jRank<iRank; jRank++) {
+            size_t fCol = ListColSelect[jRank];
+            NSP(nbVect,fCol) *= provMat(iRank,eCol);
+          }
+          NSP(nbVect,iCol) *= provMat(iRank,eCol);
+          //
+          NSP(nbVect, eCol) = -prodVal * provMat(iRank,iCol);
+          prodVal *= provMat(iRank,eCol);
+        }
       }
       nbVect++;
     }
