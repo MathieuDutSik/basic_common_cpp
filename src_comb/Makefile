@@ -1,6 +1,7 @@
 #PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques
 #PROGRAM		= EnumerationCliques_special_subcliques
-PROGRAM		= Block_CppIterator
+#PROGRAM		= Block_CppIterator
+PROGRAM		= Timing_HashMap
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -15,10 +16,11 @@ CC		= g++ -std=c++11 -Wall -O3
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
+CHASHMAP        = -I../sparse-map/include/tsl/ -I../robin-map/include/tsl/ -I../hopscotch-map/include/tsl/
 CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src_comb -I../src_xml -I.
-
-
 CFLAGS 		= -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
+
+CTOTAL 		= $(CLOCAL) $(CHASHMAP) $(CFLAGS)
 
 LIBS		= -lm -pthread $(GMP_CXX_LINK)
 
@@ -26,7 +28,7 @@ LIBS		= -lm -pthread $(GMP_CXX_LINK)
 %.o: %.cpp
 	@echo
 	@echo compile $<
-	$(CC) $(OUTPUTFLAG) $@ $(CLOCAL) $(CFLAGS) $(NOLINKFLAG) $<
+	$(CC) $(OUTPUTFLAG) $@ $(CTOTAL) $(NOLINKFLAG) $<
 
 all:	$(PROGRAM)
 
