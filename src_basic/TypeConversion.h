@@ -333,7 +333,6 @@ inline typename std::enable_if<(not is_mpreal<Ti>::value) && (not is_double_type
 {
   To ret;
   NearestInteger(a, ret);
-  //  std::cerr << "Temp_common a=" << a << " ret=" << ret << "\n";
   return ret;
 }
 
@@ -343,7 +342,6 @@ inline typename std::enable_if<is_double_type<Ti>::value,To>::type UniversalNear
 {
   To ret;
   NearestInteger_double_To<To>(a, ret);
-  //  std::cerr << "Temp_common(I) a=" << a << " ret=" << ret << "\n";
   return ret;
 }
 
