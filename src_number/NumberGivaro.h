@@ -1,6 +1,12 @@
 #ifndef INCLUDE_NUMBER_GIVARO_H
 #define INCLUDE_NUMBER_GIVARO_H
 
+/*
+  Some documentation
+  https://casys.gricad-pages.univ-grenoble-alpes.fr/givaro/givaro-dev-html/class_givaro_1_1_integer.html
+  https://casys.gricad-pages.univ-grenoble-alpes.fr/givaro/givaro-dev-html/class_givaro_1_1_rational.html
+*/
+
 
 
 #include "NumberTheory.h"
