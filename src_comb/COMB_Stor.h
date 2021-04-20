@@ -338,14 +338,16 @@ public:
 private:
   struct IteratorContain {
   private:
-    vector_face & v;
+    const vector_face & v;
     size_t pos;
+    Face f;
   public:
-    IteratorContain(vector_face & _v, size_t const& _pos) : v(_v), pos(_pos)
+    IteratorContain(vector_face const& _v, size_t const& _pos) : v(_v), pos(_pos)
     {}
     Face const& operator*()
     {
-      return v.GetFace(pos);
+      f = v.GetFace(pos);
+      return f;
     }
     IteratorContain& operator++()
     {

@@ -1,7 +1,8 @@
 #PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques
 #PROGRAM		= EnumerationCliques_special_subcliques
 #PROGRAM		= Block_CppIterator
-PROGRAM		= Timing_HashMap
+#PROGRAM		= Timing_HashMap
+PROGRAM		= Vector_Face_iterator
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
