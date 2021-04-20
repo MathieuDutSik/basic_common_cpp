@@ -281,6 +281,20 @@ private:
 };
 
 
+/* Basic bit operations */
+
+static constexpr uint8_t kBitmask[] = {1, 2, 4, 8, 16, 32, 64, 128};
+
+inline bool getbit(std::vector<uint8_t> const& V, size_t const& pos)
+{
+  return (V[pos >> 3] >> (pos & 0x07)) & 1;
+}
+
+inline void setbit(std::vector<uint8_t> & V, size_t const& pos, bool val) {
+  V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ bits[pos / 8]) & kBitmask[pos % 8];
+}
+
+
 
 
 
