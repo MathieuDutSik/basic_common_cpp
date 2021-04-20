@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.9)
 
-project(nauty VERSION 1.0.0 DESCRIPTION "libshort library")
+project(nauty VERSION 1.0.0 DESCRIPTION "nauty library")
 
 add_library(nauty SHARED
     gtools.c
@@ -16,7 +16,6 @@ add_library(nauty SHARED
 )
 
 set_target_properties(nauty PROPERTIES VERSION ${PROJECT_VERSION})
-#set_target_properties(nauty PROPERTIES PUBLIC_HEADER la_support.h lll_basis.h lrsgmp.h lrslib.h panic.h shvec.h)
 
 
 # Install library
