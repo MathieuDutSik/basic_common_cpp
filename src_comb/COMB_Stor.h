@@ -291,7 +291,7 @@ inline bool getbit(std::vector<uint8_t> const& V, size_t const& pos)
 }
 
 inline void setbit(std::vector<uint8_t> & V, size_t const& pos, bool val) {
-  V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ bits[pos / 8]) & kBitmask[pos % 8];
+  V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ V[pos / 8]) & kBitmask[pos % 8];
 }
 
 
