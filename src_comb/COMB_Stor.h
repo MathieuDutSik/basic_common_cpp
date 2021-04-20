@@ -294,6 +294,100 @@ inline void setbit(std::vector<uint8_t> & V, size_t const& pos, bool val) {
   V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ V[pos / 8]) & kBitmask[pos % 8];
 }
 
+/* Container of vector of faces */
+
+
+struct vector_face {
+private:
+  size_t n;
+  size_t n_face;
+  std::vector<uint8_t> V;
+public:
+  vector_face(size_t const& _n) : n(_n), n_face(0)
+  {}
+
+  void InsertFace(Face f)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = (n_face + 1) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    for (size_t i=curr_len; i<needed_len; i++)
+      V.push_back(0);
+    //
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      bool val = f[i];
+      setbit(V, pos, val);
+      pos++;
+    }
+    n_face++;
+  }
+
+  Face GetFace(size_t i_orb) const
+  {
+    Face f(n);
+    size_t pos = i_orb * n;
+    for (size_t i=0; i<n; i++) {
+      f[i] = getbit(V, pos);
+      pos++;
+    }
+    return f;
+  }
+
+  // Iterating stuff
+private:
+  struct IteratorContain {
+  private:
+    size_t pos;
+  public:
+    IteratorContain(size_t const& _pos) : pos(_pos)
+    {}
+    Face const& operator*()
+    {
+      return GetFace(pos);
+    }
+    IteratorContain& operator++()
+    {
+      pos++;
+      return *this;
+    }
+    IteratorContain operator++(int)
+    {
+      IteratorContain tmp = *this;
+      pos++;
+      return tmp;
+    }
+    bool operator!=(IteratorContain const& iter)
+    {
+      return pos != iter.pos;
+    }
+    bool operator==(IteratorContain const& iter)
+    {
+      return pos == iter.pos;
+    }
+  };
+public:
+  using iterator = IteratorContain;
+  using const_iterator = IteratorContain;
+  const_iterator cbegin() const
+  {
+    return {0};
+  }
+  const_iterator cend() const
+  {
+    return {n_face};
+  }
+  const_iterator begin() const
+  {
+    return {0};
+  }
+  const_iterator end() const
+  {
+    return {n_face};
+  }
+};
+
+
 
 
 
