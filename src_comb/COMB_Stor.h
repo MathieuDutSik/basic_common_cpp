@@ -302,11 +302,10 @@ private:
   size_t n;
   size_t n_face;
   std::vector<uint8_t> V;
-  Face f;
 public:
-  vectface() = deleted;
+  vectface() = delete;
 
-  vectface(size_t const& _n) : n(_n), n_face(0), f(_n)
+  vectface(size_t const& _n) : n(_n), n_face(0)
   {}
 
   // vectface API similar to std::vector<Face>
@@ -351,6 +350,7 @@ public:
   Face pop()
   {
     n_face--;
+    Face f(n);
     size_t pos = n_face * n;
     for (size_t i=0; i<n; i++) {
       f[i] = getbit(V, pos);
@@ -361,7 +361,7 @@ public:
 
   // non standard API
   template<typename F>
-  void InsertFace(F f)
+  void InsertFace(F fct)
   {
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;
@@ -371,14 +371,14 @@ public:
     //
     size_t pos = n_face * n;
     for (size_t i=0; i<n; i++) {
-      bool val = f(i);
+      bool val = fct(i);
       setbit(V, pos, val);
       pos++;
     }
     n_face++;
   }
 
-  void SetFace(size_t i_orb)
+  void SetFace(Face & f, size_t i_orb) const
   {
     size_t pos = i_orb * n;
     for (size_t i=0; i<n; i++) {
@@ -393,13 +393,14 @@ private:
   private:
     const vectface & v;
     size_t pos;
+    Face f;
   public:
-    IteratorContain(vector_face const& _v, size_t const& _pos) : v(_v), pos(_pos)
+    IteratorContain(vectface const& _v, size_t const& _pos) : v(_v), pos(_pos), f(_v.n)
     {}
     Face const& operator*()
     {
-      v.SetFace(pos);
-      return v.f;
+      v.SetFace(f, pos);
+      return f;
     }
     IteratorContain& operator++()
     {

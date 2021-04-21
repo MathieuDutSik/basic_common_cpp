@@ -7,14 +7,14 @@ int main()
 {
   size_t n=10;
   size_t n_iter = 20;
-  vector_face vf(n);
+  vectface vf(n);
 
   for (size_t iter=0; iter<n_iter; iter++) {
     Face f(n);
     for (size_t i=0; i<n; i++) {
       f[i] = rand() % 2;
     }
-    vf.InsertFace(f);
+    vf.push_back(f);
   }
 
   for (auto & f : vf) {
