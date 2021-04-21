@@ -32,7 +32,8 @@ private:
   size_t n_face;
   std::vector<uint8_t> V;
 public:
-  vectface() = delete;
+  vectface() : n(0), n_face(0)
+  {}
 
   vectface(size_t const& _n) : n(_n), n_face(0)
   {}
