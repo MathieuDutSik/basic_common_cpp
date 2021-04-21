@@ -297,16 +297,20 @@ inline void setbit(std::vector<uint8_t> & V, size_t const& pos, bool val) {
 /* Container of vector of faces */
 
 
-struct vector_face {
+struct vectface {
 private:
   size_t n;
   size_t n_face;
   std::vector<uint8_t> V;
+  Face f;
 public:
-  vector_face(size_t const& _n) : n(_n), n_face(0)
+  vectface() = deleted;
+
+  vectface(size_t const& _n) : n(_n), n_face(0), f(_n)
   {}
 
-  void InsertFace(Face f)
+  // vectface API similar to std::vector<Face>
+  void push_back(Face f)
   {
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;
@@ -323,7 +327,7 @@ public:
     n_face++;
   }
 
-  Face GetFace(size_t i_orb) const
+  Face operator[](size_t i_orb) const
   {
     Face f(n);
     size_t pos = i_orb * n;
@@ -334,20 +338,68 @@ public:
     return f;
   }
 
+  size_t size() const
+  {
+    return n_face;
+  }
+
+  void pop_back()
+  {
+    n_face--;
+  }
+
+  Face pop()
+  {
+    n_face--;
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      f[i] = getbit(V, pos);
+      pos++;
+    }
+    return f;
+  }
+
+  // non standard API
+  template<typename F>
+  void InsertFace(F f)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = (n_face + 1) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    for (size_t i=curr_len; i<needed_len; i++)
+      V.push_back(0);
+    //
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      bool val = f(i);
+      setbit(V, pos, val);
+      pos++;
+    }
+    n_face++;
+  }
+
+  void SetFace(size_t i_orb)
+  {
+    size_t pos = i_orb * n;
+    for (size_t i=0; i<n; i++) {
+      f[i] = getbit(V, pos);
+      pos++;
+    }
+  }
+
   // Iterating stuff
 private:
   struct IteratorContain {
   private:
-    const vector_face & v;
+    const vectface & v;
     size_t pos;
-    Face f;
   public:
     IteratorContain(vector_face const& _v, size_t const& _pos) : v(_v), pos(_pos)
     {}
     Face const& operator*()
     {
-      f = v.GetFace(pos);
-      return f;
+      v.SetFace(pos);
+      return v.f;
     }
     IteratorContain& operator++()
     {
