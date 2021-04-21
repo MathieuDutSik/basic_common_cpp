@@ -132,6 +132,7 @@ public:
       setbit(V, pos, val);
       pos++;
     }
+    n_face += w.n_face;
   }
 
   // Iterating stuff
