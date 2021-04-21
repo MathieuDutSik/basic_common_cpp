@@ -9,6 +9,191 @@
 
 typedef boost::dynamic_bitset<> Face;
 
+
+
+
+/* Basic bit operations */
+
+static constexpr uint8_t kBitmask[] = {1, 2, 4, 8, 16, 32, 64, 128};
+
+inline bool getbit(std::vector<uint8_t> const& V, size_t const& pos)
+{
+  return (V[pos >> 3] >> (pos & 0x07)) & 1;
+}
+
+inline void setbit(std::vector<uint8_t> & V, size_t const& pos, bool val) {
+  V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ V[pos / 8]) & kBitmask[pos % 8];
+}
+
+/* Container of vector of faces */
+
+struct vectface {
+private:
+  size_t n;
+  size_t n_face;
+  std::vector<uint8_t> V;
+public:
+  vectface() = delete;
+
+  vectface(size_t const& _n) : n(_n), n_face(0)
+  {}
+
+  // vectface API similar to std::vector<Face>
+  void push_back(Face f)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = (n_face + 1) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    for (size_t i=curr_len; i<needed_len; i++)
+      V.push_back(0);
+    //
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      bool val = f[i];
+      setbit(V, pos, val);
+      pos++;
+    }
+    n_face++;
+  }
+
+  Face operator[](size_t i_orb) const
+  {
+    Face f(n);
+    size_t pos = i_orb * n;
+    for (size_t i=0; i<n; i++) {
+      f[i] = getbit(V, pos);
+      pos++;
+    }
+    return f;
+  }
+
+  size_t size() const
+  {
+    return n_face;
+  }
+
+  void pop_back()
+  {
+    n_face--;
+  }
+
+  Face pop()
+  {
+    n_face--;
+    Face f(n);
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      f[i] = getbit(V, pos);
+      pos++;
+    }
+    return f;
+  }
+
+  // non standard API
+  template<typename F>
+  void InsertFace(F fct)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = (n_face + 1) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    for (size_t i=curr_len; i<needed_len; i++)
+      V.push_back(0);
+    //
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      bool val = fct(i);
+      setbit(V, pos, val);
+      pos++;
+    }
+    n_face++;
+  }
+
+  void SetFace(Face & f, size_t i_orb) const
+  {
+    size_t pos = i_orb * n;
+    for (size_t i=0; i<n; i++) {
+      f[i] = getbit(V, pos);
+      pos++;
+    }
+  }
+
+  void append(vectface const& w)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = ( n_face + w.n_face ) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    for (size_t i=curr_len; i<needed_len; i++)
+      V.push_back(0);
+    // Now appending
+    size_t pos = n_face * n;
+    size_t depl = w.n_face * n;
+    for (size_t i=0; i<depl; i++) {
+      bool val = getbit(w.V, i);
+      setbit(V, pos, val);
+      pos++;
+    }
+  }
+
+  // Iterating stuff
+private:
+  struct IteratorContain {
+  private:
+    const vectface & v;
+    size_t pos;
+    Face f;
+  public:
+    IteratorContain(vectface const& _v, size_t const& _pos) : v(_v), pos(_pos), f(_v.n)
+    {}
+    Face const& operator*()
+    {
+      v.SetFace(f, pos);
+      return f;
+    }
+    IteratorContain& operator++()
+    {
+      pos++;
+      return *this;
+    }
+    IteratorContain operator++(int)
+    {
+      IteratorContain tmp = *this;
+      pos++;
+      return tmp;
+    }
+    bool operator!=(IteratorContain const& iter)
+    {
+      return pos != iter.pos;
+    }
+    bool operator==(IteratorContain const& iter)
+    {
+      return pos == iter.pos;
+    }
+  };
+public:
+  using iterator = IteratorContain;
+  using const_iterator = IteratorContain;
+  const_iterator cbegin() const
+  {
+    return IteratorContain(*this, 0);
+  }
+  const_iterator cend() const
+  {
+    return IteratorContain(*this, n_face);
+  }
+  const_iterator begin() const
+  {
+    return IteratorContain(*this, 0);
+  }
+  const_iterator end() const
+  {
+    return IteratorContain(*this, n_face);
+  }
+};
+
+
+
+
+
 std::vector<int> FaceToVector(Face const& eSet)
 {
   int nbVert=eSet.count();
@@ -70,7 +255,7 @@ Face ReadFace(std::istream & is)
 }
 
 
-std::vector<Face> ReadListFace(std::istream & is)
+vectface ReadListFace(std::istream & is)
 {
   if (!is.good()) {
     std::cerr << "ReadListFace operation failed because stream is not valid\n";
@@ -78,13 +263,21 @@ std::vector<Face> ReadListFace(std::istream & is)
   }
   int nbFace;
   is >> nbFace;
-  std::vector<Face> ListFace(nbFace);
-  for (int iFace=0; iFace<nbFace; iFace++)
-    ListFace[iFace]=ReadFace(is);
+  if (nbFace == 0) {
+    std::cerr << "We cannot handle that case because we need the base length\n";
+    throw TerminalException{1};
+  }
+  Face f = ReadFace(is);
+  vectface ListFace(f.size());
+  ListFace.push_back(f);
+  for (int iFace=0; iFace<nbFace; iFace++) {
+    Face f2 = ReadFace(is);
+    ListFace.push_back(f2);
+  }
   return ListFace;
 }
 
-void WriteListFace(std::ostream & os, std::vector<Face> const& ListFace)
+void WriteListFace(std::ostream & os, vectface const& ListFace)
 {
   int nbFace=ListFace.size();
   os << nbFace << "\n";
@@ -110,7 +303,7 @@ void WriteFaceGAP(std::ostream &os, Face const& f)
 }
 
 
-void WriteListFaceGAP(std::ostream & os, std::vector<Face> const& ListFace)
+void WriteListFaceGAP(std::ostream & os, vectface const& ListFace)
 {
   os << "[";
   bool IsFirst=true;
@@ -123,7 +316,7 @@ void WriteListFaceGAP(std::ostream & os, std::vector<Face> const& ListFace)
   os << "]";
 }
 
-void WriteListFaceGAPfile(std::string const& eFile, std::vector<Face> const& ListFace)
+void WriteListFaceGAPfile(std::string const& eFile, vectface const& ListFace)
 {
   std::ofstream os(eFile);
   os << "return ";
@@ -213,7 +406,7 @@ Face UnsignedLongToFace(int const& len, ulong const& eVal)
   return eFace;
 }
 
-void VectVectInt_Magma_Print(std::ostream &os, std::vector<Face> const&ListOrbit)
+void VectVectInt_Magma_Print(std::ostream &os, vectface const&ListOrbit)
 {
   int nbOrbit=ListOrbit.size();
   os << "[";
