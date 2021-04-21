@@ -387,6 +387,23 @@ public:
     }
   }
 
+  void append(vectface const& w)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = ( n_face + w.n_face ) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    for (size_t i=curr_len; i<needed_len; i++)
+      V.push_back(0);
+    // Now appending
+    size_t pos = n_face * n;
+    size_t depl = w.n_face * n;
+    for (size_t i=0; i<depl; i++) {
+      bool val = getbit(w.V, i);
+      setbit(V, pos, val);
+      pos++;
+    }
+  }
+
   // Iterating stuff
 private:
   struct IteratorContain {
