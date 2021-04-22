@@ -12,9 +12,8 @@
 #include "NumberTheory.h"
 
 
-#include <givaro/gfq.h>
-//#include <givrational.h>
-//#include <gmp++_int.h>
+#include <givaro/givinteger.h>
+#include <givaro/givrational.h>
 
 
 

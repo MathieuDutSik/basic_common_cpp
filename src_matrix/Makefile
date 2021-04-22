@@ -1,9 +1,10 @@
-PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
+#PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
 #PROGRAM		= ComputePointer
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= TestMatrixInverse
 #PROGRAM		= TestPerformanceHNF
 #PROGRAM		= TestQuoInt
+PROGRAM		= NullspaceComputationLinbox
 #PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
@@ -21,9 +22,9 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number -I../src_comb
 
 
-CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
+CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(LINBOX_INCLUDE)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread
+LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LINBOX_LINK)
 
 %.o: %.cpp
 	@echo

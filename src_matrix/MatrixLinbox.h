@@ -1,9 +1,9 @@
 #ifndef INCLUDE_MATRIX_LINBOX_H
 #define INCLUDE_MATRIX_LINBOX_H
 
-#include <MAT_Matrix.h"
+#include "MAT_Matrix.h"
+#include "NumberGivaro.h"
 #include "linbox/matrix/dense-matrix.h"
-#include <givaro/gfq.h>
 #include "linbox/algorithms/gauss.h"
 
 
@@ -19,16 +19,17 @@ MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t e
   for (size_t i_row=0; i_row<n_rows; i_row++)
     for (size_t i_col=0; i_col<n_cols; i_col++) {
       Givaro::Rational val = GetGivaroRational(M(i_row, i_col));
-      B.setEntry(i,j, val);
+      B.setEntry(i_row, i_col, val);
     }
-  DenseMatrix<Rats> NullSpace(QQ, n_cols, expected_rank);
-  GaussDomain<Rats> GD(QQ);
+  LinBox::DenseMatrix<Rats> NullSpace(QQ, n_cols, expected_rank);
+  LinBox::GaussDomain<Rats> GD(QQ);
 
   GD.nullspacebasisin(NullSpace, B);
+  Givaro::Rational zero(0/1);
   auto iszero=[&](size_t i_row) -> bool {
     for (size_t i_col=0; i_col<n_cols; i_col++) {
       Givaro::Rational val = NullSpace.getEntry(i_row, i_col);
-      if (val != 0)
+      if (val != zero)
         return false;
     }
     return true;
@@ -40,14 +41,14 @@ MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t e
     rank++;
   }
   //
-  MyMatrix<mpq_class> M(rank, n_cols);
+  MyMatrix<mpq_class> Ker(rank, n_cols);
   for (size_t i_row=0; i_row<rank; i_row++) {
     for (size_t i_col=0; i_col<n_cols; i_col++) {
       Givaro::Rational val = NullSpace.getEntry(i_row, i_col);
-      M(i_row, i_col) = ConvertGivaroRational(val);
+      Ker(i_row, i_col) = ConvertGivaroRational(val);
     }
   }
-  return M;
+  return Ker;
 }
 
 
