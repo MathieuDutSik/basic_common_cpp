@@ -46,6 +46,21 @@ mpz_class ConvertGivaroInteger(Givaro::Integer const& val)
 
 
 
+Givaro::Rational GetGivaroRational(mpq_class const& val)
+{
+  Givaro::Integer e_den = GetGivaroInteger(val.get_den());
+  Givaro::Integer e_num = GetGivaroInteger(val.get_num());
+  return Givaro::Rational(e_num, e_den);
+}
+
+
+mpq_class ConvertGivaroRational(Givaro::Rational const& val)
+{
+  mpz_class e_num = ConvertGivaroInteger(val.nume());
+  mpz_class e_den = ConvertGivaroInteger(val.deno());
+  return mpq_class(e_num) / mpq_class(e_den);
+}
+
 
 
 #endif

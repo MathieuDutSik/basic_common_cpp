@@ -2175,19 +2175,18 @@ MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const& inputMat)
   std::vector<int> ColStatus(nbCol,1);
   std::vector<int> RowStatus(nbRow,1);
   for (size_t iRow=0; iRow<nbRow; iRow++) {
-    int FoundRow=-1;
-    int FoundCol=-1;
+    size_t FoundRow=std::numeric_limits<size_t>::max();
+    size_t FoundCol=0;
     T MaxValue=0;
     for (size_t eRow=0; eRow<nbRow; eRow++) {
       for (size_t eCol=0; eCol<nbCol; eCol++) {
 	if (ColStatus[eCol] == 1 && RowStatus[eRow] == 1) {
 	  T aVal = T_abs(WorkMat(eRow, eCol));
-	  if (FoundRow == -1) {
+	  if (FoundRow == std::numeric_limits<size_t>::max()) {
 	    MaxValue=aVal;
 	    FoundRow=eRow;
 	    FoundCol=eCol;
-	  }
-	  else {
+	  } else {
 	    if (aVal > MaxValue) {
 	      MaxValue=aVal;
 	      FoundRow=eRow;
@@ -2200,7 +2199,7 @@ MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const& inputMat)
     //
     ColStatus[FoundCol]=0;
     RowStatus[FoundRow]=0;
-    for (int eRow=0; eRow<nbRow; eRow++) {
+    for (size_t eRow=0; eRow<nbRow; eRow++) {
       if (eRow != FoundRow) {
 	T alpha=WorkMat(eRow, FoundCol) / WorkMat(FoundRow, FoundCol);
 	for (size_t iCol=0; iCol<nbCol; iCol++)

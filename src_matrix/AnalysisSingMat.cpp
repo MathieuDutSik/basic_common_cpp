@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
       double eEig=ListEig(iRow);
       MyVector<double> eCol=GetMatrixColumn(ListVect, iRow);
       MyVector<double> TheDiff = eEig * eCol - eMat * eCol;
-      double err=TheDiff.cwiseAbs().maxCoeff();
+      //      double err=TheDiff.cwiseAbs().maxCoeff();
       //      std::cerr << "iRow=" << iRow << " eEig=" << eEig << " err=" << err << "\n";
       if (fabs(eEig) < thrEigenvalueZero) {
 	DimKernel++;

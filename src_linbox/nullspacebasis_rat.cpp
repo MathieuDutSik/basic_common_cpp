@@ -46,7 +46,7 @@ int main (int argc, char **argv)
 	std::ifstream input (argv[1]);
 	if (!input) { std::cerr << "Error opening matrix file " << argv[1] << std::endl; return -1; }
 
-    typedef Givaro::QField<Givaro::Rational> Rats;
+    using Rats=Givaro::QField<Givaro::Rational>;
     Rats QQ;
 	SparseMatrix<Rats, SparseMatrixFormat::SparseSeq > B (QQ);
 	B.read (input);
