@@ -8,7 +8,7 @@
 
 
 
-MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t upper_bound_rank)
+MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M)
 {
   using Rats=Givaro::QField<Givaro::Rational>;
   Rats QQ;
@@ -22,7 +22,9 @@ MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t u
       Givaro::Rational val = GetGivaroRational(M(i_row, i_col));
       B.appendEntry(i_row, i_col, val);
     }
-  LinBox::DenseMatrix<Rats> NullSpace(QQ, n_cols, upper_bound_rank);
+  // The NullSpace matrix. Maybe we can simplify to smaller matrix
+  // but so far no success.
+  LinBox::DenseMatrix<Rats> NullSpace(QQ, n_cols, n_cols);
   LinBox::GaussDomain<Rats> GD(QQ);
 
   GD.nullspacebasisin(NullSpace, B);

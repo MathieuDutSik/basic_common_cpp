@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
     }
     // reading the matrix
     std::ifstream INmat(argv[1]);
-    MyMatrix<T> TheMat=ReadMatrix<T>(INmat);
-    MyMatrix<T> TheKer = NullspaceTrMat_linbox(TheMat, TheMat.cols());
+    MyMatrix<T> TheMat = ReadMatrix<T>(INmat);
+    MyMatrix<T> TheKer = NullspaceTrMat_linbox(TheMat);
     //
     std::ofstream os(argv[2]);
     os << "return ";
