@@ -339,9 +339,9 @@ void WriteMatrixGAP(std::ostream &os, MyMatrix<T> const&TheMat)
 	os << ",";
       os << " " << eVal;
     }
-    os << "]";
+    os << " ]";
   }
-  os << "]";
+  os << " ]";
 }
 
 

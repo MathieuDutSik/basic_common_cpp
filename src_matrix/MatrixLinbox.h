@@ -8,27 +8,28 @@
 
 
 
-MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t expected_rank)
+MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t upper_bound_rank)
 {
   using Rats=Givaro::QField<Givaro::Rational>;
   Rats QQ;
   size_t n_rows = M.rows();
   size_t n_cols = M.cols();
 
-  LinBox::DenseMatrix<Rats> B(QQ, n_rows, n_cols);
+  LinBox::SparseMatrix<Rats> B(QQ);
+  B.resize(n_rows, n_cols);
   for (size_t i_row=0; i_row<n_rows; i_row++)
     for (size_t i_col=0; i_col<n_cols; i_col++) {
       Givaro::Rational val = GetGivaroRational(M(i_row, i_col));
-      B.setEntry(i_row, i_col, val);
+      B.appendEntry(i_row, i_col, val);
     }
-  LinBox::DenseMatrix<Rats> NullSpace(QQ, n_cols, expected_rank);
+  LinBox::DenseMatrix<Rats> NullSpace(QQ, n_cols, upper_bound_rank);
   LinBox::GaussDomain<Rats> GD(QQ);
 
   GD.nullspacebasisin(NullSpace, B);
   Givaro::Rational zero(0/1);
   auto iszero=[&](size_t i_row) -> bool {
     for (size_t i_col=0; i_col<n_cols; i_col++) {
-      Givaro::Rational val = NullSpace.getEntry(i_row, i_col);
+      Givaro::Rational val = NullSpace.getEntry(i_col, i_row);
       if (val != zero)
         return false;
     }
@@ -44,7 +45,7 @@ MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M, size_t e
   MyMatrix<mpq_class> Ker(rank, n_cols);
   for (size_t i_row=0; i_row<rank; i_row++) {
     for (size_t i_col=0; i_col<n_cols; i_col++) {
-      Givaro::Rational val = NullSpace.getEntry(i_row, i_col);
+      Givaro::Rational val = NullSpace.getEntry(i_col, i_row);
       Ker(i_row, i_col) = ConvertGivaroRational(val);
     }
   }
