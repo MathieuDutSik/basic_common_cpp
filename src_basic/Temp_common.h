@@ -188,12 +188,19 @@ int T_sign(T const& eVal)
   return 0;
 }
 
-std::string random_string( size_t length )
+void srand_random_set()
 {
   std::timespec ts;
   std::timespec_get(&ts, TIME_UTC);
   unsigned val = ts.tv_nsec;
   srand(val);
+}
+
+
+
+std::string random_string( size_t length )
+{
+  srand_random_set();
   auto randchar = []() -> char {
     const char charset[] =
     "0123456789"
