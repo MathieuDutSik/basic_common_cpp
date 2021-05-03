@@ -190,10 +190,14 @@ int T_sign(T const& eVal)
 
 void srand_random_set()
 {
+#ifdef USE_NANOSECOND_RAND
   std::timespec ts;
   std::timespec_get(&ts, TIME_UTC);
   unsigned val = ts.tv_nsec;
   srand(val);
+#else
+  srand(time(NULL));
+#endif
 }
 
 
