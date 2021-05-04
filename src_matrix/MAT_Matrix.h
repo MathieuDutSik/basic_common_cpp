@@ -9,20 +9,7 @@
 #include "Basic_string.h"
 #include "hash_functions.h"
 
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
-#include <Eigen/LU>
-#include <Eigen/Eigenvalues>
-
-template <typename T>
-using MyVector = Eigen::Matrix<T,Eigen::Dynamic,1>;
-
-template <typename T>
-using MyMatrix = Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic>;
-
-template <typename T>
-using MySparseMatrix = Eigen::SparseMatrix<T,Eigen::ColMajor>;
-
+#include "MatrixTypes.h"
 
 //
 // Matrix type conversion
