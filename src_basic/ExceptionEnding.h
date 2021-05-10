@@ -13,8 +13,7 @@ struct TerminalException {
 // Also it gives something that can be used for having the stacktrace via gdb.
 void TerminalEnding()
 {
-  int val1=4;
-  assert(val1 == 5);
+  assert(false);
   exit(1);
 }
 
