@@ -218,11 +218,10 @@ std::string StringNumber(int const& nb, int const& nbDigit)
   int idx=1;
   while(true) {
     if (nb < pow(10, idx) ) {
-      std::string TheStr="";
-      for (int i=0; i<nbDigit-idx; i++) {
+      std::string TheStr;
+      for (int i=0; i<nbDigit-idx; i++)
 	TheStr += "0";
-      }
-      TheStr += IntToString(nb);
+      TheStr += std::to_string(nb);
       return TheStr;
     }
     idx++;

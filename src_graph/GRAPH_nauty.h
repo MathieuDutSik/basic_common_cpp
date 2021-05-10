@@ -123,7 +123,7 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const& eGR)
   }
   //
   std::string FileConvert="NautyGroupToCPP";
-  TheCommand=FileConvert + " " + eFileOut.string() + " " + IntToString(nbVert) + " > " + eFileGrp.string();
+  TheCommand=FileConvert + " " + eFileOut.string() + " " + std::to_string(nbVert) + " > " + eFileGrp.string();
   //
   std::ifstream is(eFileGrp.string());
   TheGroupFormat GRP=ReadGroup(is);
