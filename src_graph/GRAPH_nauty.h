@@ -61,8 +61,8 @@ void NAUTY_PrintGraph(std::ostream & os, Tgr const& eGR)
 template<typename T, typename Tgr>
 void NAUTY_AUTO_WriteFile(std::ostream & os, std::vector<MyMatrix<T>> const& ListMatrix, MyMatrix<T> const& SHV)
 {
-  WeightMatrix<std::vector<T>, T> ScalMat = GetWeightMatrix_ListMatrix(ListMatrix, SHV);
-  Tgr eGR=GetGraphFromWeightedMatrix<std::vector<T>, T, Tgr>(ScalMat);
+  WeightMatrix<std::vector<T>> ScalMat = GetWeightMatrix_ListMatrix(ListMatrix, SHV);
+  Tgr eGR=GetGraphFromWeightedMatrix<std::vector<T>, Tgr>(ScalMat);
   int nbVert=eGR.nbVertices;
   os << "n=" << nbVert << "\n";
   NAUTY_PrintPartition(os, eGR);
@@ -76,13 +76,13 @@ bool NAUTY_ISOM_WriteFile(std::ostream & os,
                          std::vector<MyMatrix<T>> const& ListMatrix1, MyMatrix<T> const& SHV1,
                          std::vector<MyMatrix<T>> const& ListMatrix2, MyMatrix<T> const& SHV2)
 {
-  WeightMatrix<std::vector<T>, T> ScalMat1 = GetWeightMatrix_ListMatrix(ListMatrix1, SHV1);
-  WeightMatrix<std::vector<T>, T> ScalMat2 = GetWeightMatrix_ListMatrix(ListMatrix2, SHV2);
+  WeightMatrix<std::vector<T>> ScalMat1 = GetWeightMatrix_ListMatrix(ListMatrix1, SHV1);
+  WeightMatrix<std::vector<T>> ScalMat2 = GetWeightMatrix_ListMatrix(ListMatrix2, SHV2);
   bool test=RenormalizeWeightMatrix(ScalMat1, ScalMat2);
   if (!test)
     return false;
-  Tgr eGR1=GetGraphFromWeightedMatrix<std::vector<T>, T, Tgr>(ScalMat1);
-  Tgr eGR2=GetGraphFromWeightedMatrix<std::vector<T>, T, Tgr>(ScalMat2);
+  Tgr eGR1=GetGraphFromWeightedMatrix<std::vector<T>, Tgr>(ScalMat1);
+  Tgr eGR2=GetGraphFromWeightedMatrix<std::vector<T>, Tgr>(ScalMat2);
   int nbVert=eGR1.GetNbVert();
   os << "n=" << nbVert << "\n";
   NAUTY_PrintPartition(os, eGR1);
@@ -195,14 +195,14 @@ EquivTest<permlib::Permutation> LinPolytopeGram_Isomorphism_Nauty(std::vector<My
 {
   MyMatrix<T> T_SHV1=ConvertMatrixUniversal<T,int>(SHV1);
   MyMatrix<T> T_SHV2=ConvertMatrixUniversal<T,int>(SHV2);
-  WeightMatrix<std::vector<T>, T> ScalMat1 = GetWeightMatrix_ListMatrix(ListMatrix1, T_SHV1);
-  WeightMatrix<std::vector<T>, T> ScalMat2 = GetWeightMatrix_ListMatrix(ListMatrix2, T_SHV2);
+  WeightMatrix<std::vector<T>> ScalMat1 = GetWeightMatrix_ListMatrix(ListMatrix1, T_SHV1);
+  WeightMatrix<std::vector<T>> ScalMat2 = GetWeightMatrix_ListMatrix(ListMatrix2, T_SHV2);
   int nbVert=SHV1.rows();
   bool test=RenormalizeWeightMatrix(ScalMat1, ScalMat2);
   if (!test)
     return {false, {}};
-  Tgr eGR1=GetGraphFromWeightedMatrix<std::vector<T>, T, Tgr>(ScalMat1);
-  Tgr eGR2=GetGraphFromWeightedMatrix<std::vector<T>, T, Tgr>(ScalMat2);
+  Tgr eGR1=GetGraphFromWeightedMatrix<std::vector<T>, Tgr>(ScalMat1);
+  Tgr eGR2=GetGraphFromWeightedMatrix<std::vector<T>, Tgr>(ScalMat2);
   EquivTest<permlib::Permutation> eRes=GRAPH_Isomorphism_Nauty(eGR1, eGR2);
   if (!eRes.TheReply)
     return {false, {}};
@@ -219,8 +219,8 @@ TheGroupFormat LinPolytopeGram_Automorphism_Nauty(std::vector<MyMatrix<T>> const
 {
   int nbVert=SHV.rows();
   MyMatrix<T> T_SHV=ConvertMatrixUniversal<T,int>(SHV);
-  WeightMatrix<std::vector<T>, T> ScalMat = GetWeightMatrix_ListMatrix(ListMatrix, T_SHV);
-  Tgr eGR=GetGraphFromWeightedMatrix<std::vector<T>, T, Tgr>(ScalMat);
+  WeightMatrix<std::vector<T>> ScalMat = GetWeightMatrix_ListMatrix(ListMatrix, T_SHV);
+  Tgr eGR=GetGraphFromWeightedMatrix<std::vector<T>, Tgr>(ScalMat);
   TheGroupFormat GRP=GRAPH_Automorphism_Nauty(eGR);
   //
   std::vector<permlib::Permutation> ListGen;
