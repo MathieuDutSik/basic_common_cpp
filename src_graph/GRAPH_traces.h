@@ -57,16 +57,6 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
       for (int i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
       for (int icell=0; icell<numcells; icell++)
         ptn[ListShift[icell] - 1] = 0;
-      /*
-      std::cerr << "lab1 =";
-      for (int i=0; i<n; i++)
-        std::cerr << " " << lab1[i];
-      std::cerr << "\n";
-      std::cerr << "ptn =";
-      for (int i=0; i<n; i++)
-        std::cerr << " " << ptn[i];
-      std::cerr << "\n";
-      */
     }
 
     /* Now make the graph */
@@ -160,16 +150,6 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
       for (int i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
       for (int icell=0; icell<numcells; icell++)
         ptn[ListShift[icell] - 1] = 0;
-      /*
-      std::cerr << "lab1 =";
-      for (int i=0; i<n; i++)
-        std::cerr << " " << lab1[i];
-      std::cerr << "\n";
-      std::cerr << "ptn =";
-      for (int i=0; i<n; i++)
-        std::cerr << " " << ptn[i];
-      std::cerr << "\n";
-      */
     }
 
     /* Now make the graph */
