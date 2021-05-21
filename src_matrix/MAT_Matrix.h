@@ -2331,4 +2331,55 @@ int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
 
 
 
+template<typename T>
+struct ContainerMatrix {
+private:
+  size_t n_rows;
+  MyMatrix<T> & mat;
+  MyMatrix<T>* ptr;
+  std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
+public:
+  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), ptr(nullptr)
+  {
+    n_rows = mat.rows();
+    size_t n_cols = mat.cols();
+    std::vector<T> V1(n_cols);
+    std::vector<T> V2(n_cols);
+    auto set_v=[&](std::vector<T> & W, size_t idx) -> void {
+       if (idx < n_rows) {
+         for (size_t i=0; i<n_cols; i++)
+           W[i] = mat(idx, i);
+       } else {
+         for (size_t i=0; i<n_cols; i++)
+           W[i] = (*ptr)(idx - n_rows, i);
+       }
+    };
+    auto fct_hash=[&](size_t idx) -> size_t {
+       set_v(V1, idx);
+       return std::hash<std::vector<T>>()(V1);
+    };
+    auto fct_equal=[&](size_t idx1, size_t idx2) -> bool {
+       set_v(V1, idx1);
+       set_v(V2, idx2);
+       for (size_t i=0; i<n_cols; i++)
+         if (V1[i] != V2[i])
+           return false;
+       return true;
+    };
+    set = std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>>({},fct_hash, fct_equal);
+  }
+  bool IsSubset(MyMatrix<T> const& M) const
+  {
+    ptr = &M;
+    size_t n_rows_m = M.rows();
+    for (size_t i_row=0; i_row<n_rows_m; i_row++)
+      if (set.find(i_row + n_rows) == set.end())
+        return false;
+    return true;
+  }
+};
+
+
+
+
 #endif
