@@ -5,6 +5,70 @@
 #include <vector>
 #include <iostream>
 
+struct DataTraces {
+public:
+  int n;
+  int nbAdjacent;
+  int* lab1;
+  int* ptn;
+  int* orbits;
+  int* map;
+  sparsegraph sg1;
+  sparsegraph cg1;
+  DataTraces(int _n, int _nbAdjacent) : n(_n), nbAdjacent(_nbAdjacent)
+  {
+    lab1 = (int*)malloc(n * sizeof(int));
+    ptn = (int*)malloc(n * sizeof(int));
+    orbits = (int*)malloc(n * sizeof(int));
+    map = (int*)malloc(n * sizeof(int));
+    //
+    sg1.nv = n;
+    sg1.nde = nbAdjacent;
+    sg1.d = (int*)malloc(n * sizeof(int));
+    sg1.v = (size_t*)malloc(n * sizeof(size_t));
+    sg1.e = (int*)malloc(nbAdjacent * sizeof(int));
+    //
+    cg1.d = NULL;
+    cg1.v = NULL;
+    cg1.e = NULL;
+  }
+  ~DataTraces()
+  {
+    free(lab1);
+    free(ptn);
+    free(orbits);
+    free(map);
+    //
+    free(sg1.d);
+    free(sg1.v);
+    free(sg1.e);
+    //
+    free(cg1.d);
+    free(cg1.v);
+    free(cg1.e);
+  }
+};
+
+
+std::vector<unsigned int> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
+{
+    static DEFAULTOPTIONS_TRACES(options);
+    TracesStats stats;
+    int n = DT.n;
+
+    options.getcanon = TRUE;
+    options.defaultptn = FALSE;
+
+    Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
+    std::vector<unsigned int> V(n);
+    for (int i=0; i<n; i++)
+      V[DT.lab1[i]] = i;
+    return V;
+}
+
+
+
+  
 template<typename Tgr>
 std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
 {
@@ -88,6 +152,42 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     SG_FREE(sg1);
     SG_FREE(cg1);
     return V;
+}
+
+
+
+std::vector<std::vector<unsigned int>> TRACES_GetListGenerators_Arr(DataTraces DT)
+{
+    static DEFAULTOPTIONS_TRACES(options);
+    TracesStats stats;
+    permnode *gens;
+    options.generators = &gens;
+    gens = NULL;
+    freeschreier(NULL,&gens);
+    options.getcanon = FALSE;
+
+    int n = DT.n;
+    options.defaultptn = FALSE;
+
+    Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, NULL);
+
+    std::vector<std::vector<unsigned int>> ListGen;
+    if (gens) {
+      permnode* pn = gens;
+      do
+        {
+          std::vector<unsigned int> V(n);
+          for (int i=0; i<n; i++)
+            V[i] = pn->p[i];
+          ListGen.push_back(V);
+          //
+          pn = pn->next;
+        } while (pn != gens);
+    }
+    freeschreier(NULL,&gens);
+    schreier_freedyn();
+
+    return ListGen;
 }
 
 
@@ -192,6 +292,43 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
     DYNFREE(map,map_sz);
     SG_FREE(sg1);
     return ListGen;
+}
+
+
+
+std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces DT)
+{
+    static DEFAULTOPTIONS_TRACES(options);
+    TracesStats stats;
+    permnode *gens;
+    options.generators = &gens;
+    gens = NULL;
+    freeschreier(NULL,&gens);
+
+    int n = DT.n;
+    options.getcanon = TRUE;
+    options.defaultptn = FALSE;
+
+    Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
+    std::vector<unsigned int> V(n);
+    for (int i=0; i<n; i++)
+      V[DT.lab1[i]] = i;
+    std::vector<std::vector<unsigned int>> ListGen;
+    if (gens) {
+      permnode* pn = gens;
+      do
+        {
+          std::vector<unsigned int> V(n);
+          for (int i=0; i<n; i++)
+            V[i] = pn->p[i];
+          ListGen.push_back(V);
+          //
+          pn = pn->next;
+        } while (pn != gens);
+    }
+    freeschreier(NULL,&gens);
+    schreier_freedyn();
+    return {std::move(V), std::move(ListGen)};
 }
 
 
