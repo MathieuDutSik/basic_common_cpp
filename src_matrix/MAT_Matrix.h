@@ -2407,14 +2407,12 @@ public:
         return false;
     return true;
   }
-  void SetVectorCont() const
+  void SetVectorCont(MyMatrix<T>* ptr_input) const
   {
-    ptr = &VectorCont;
+    ptr = ptr_input;
   }
-  std::pair<bool,size_t> GetIdx(std::vector<T> const& V) const
+  std::pair<bool,size_t> GetIdx() const
   {
-    for (size_t i_col=0; i_col<n_cols; i_col++)
-      VectorCont(0,i_col) = V[i_col];
     auto iter = set.find(n_rows);
     if (iter == set.end())
       return {false, 0};
