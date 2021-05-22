@@ -113,6 +113,36 @@ MyMatrix<T> ReadMatrix(std::istream &is)
   return TheMat;
 }
 
+template<typename T>
+std::pair<bool, T> ReadMatrixInfo(std::istream &is)
+{
+  T eVal;
+  int nbRow, nbCol;
+  is >> nbRow >> nbCol;
+  //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
+  if (nbRow < 0 || nbCol < 0) {
+    std::cerr << "We should have nbRow > 0 and nbCol > 0\n";
+    std::cerr << "But we have nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
+    throw TerminalException{1};
+  }
+  bool is_integral = true;
+  T TheMax = 0;
+  for (int iRow=0; iRow<nbRow; iRow++)
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      is >> eVal;
+      if (!IsInteger(eVal))
+        is_integral = false;
+      T eValAbs = T_abs(eVal);
+      if (eValAbs > TheMax)
+        TheMax = eValAbs;
+    }
+  return {is_integral, TheMax};
+}
+
+
+
+
+
 
 
 template<typename T>

@@ -28,7 +28,7 @@ public:
     sg1.v = (size_t*)malloc(n * sizeof(size_t));
     sg1.e = (int*)malloc(nbAdjacent * sizeof(int));
     //
-    cg1.d = NULL;
+    cg1.d = NULL; // set to NULL, but it may or may not be expanded.
     cg1.v = NULL;
     cg1.e = NULL;
   }
