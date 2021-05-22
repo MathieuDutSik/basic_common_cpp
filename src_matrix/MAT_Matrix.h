@@ -2368,10 +2368,9 @@ private:
   size_t n_rows;
   size_t n_cols;
   MyMatrix<T>* ptr;
-  MyMatrix<T> VectorCont;
   std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
 public:
-  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), ptr(nullptr), VectorCont(MyMatrix<T>(1,mat.cols()))
+  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), ptr(nullptr)
   {
     std::vector<T> V1(n_cols);
     std::vector<T> V2(n_cols);
@@ -2407,7 +2406,7 @@ public:
         return false;
     return true;
   }
-  void SetVectorCont(MyMatrix<T>* ptr_input) const
+  void SetPtr(MyMatrix<T>* ptr_input) const
   {
     ptr = ptr_input;
   }
