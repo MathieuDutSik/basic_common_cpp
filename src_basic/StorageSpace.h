@@ -17,20 +17,14 @@ public:
   // no move
   StorageSpaceLastN(StorageSpaceLastN<T> &&) = delete;
 
-  StorageSpaceLastN()
+  StorageSpaceLastN() : N(0), lastpos(-1), nbCorrect(0)
   {
-    N = 0;
-    lastpos = -1;
-    nbCorrect = 0;
   }
-  
-  StorageSpaceLastN(int const& _N)
+
+  StorageSpaceLastN(int const& _N) : N(-N), lastpos(-1), nbCorrec(0), ListVal(std::vector<T>(N))
   {
-    N = _N;
-    lastpos = -1;
-    nbCorrect = 0;
-    ListVal.resize(N);
   }
+
   std::vector<T> RetrieveLastRelevantValues() const
   {
     std::vector<T> ListRet(nbCorrect);
