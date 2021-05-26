@@ -155,8 +155,8 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
 }
 
 
-
-std::vector<std::vector<unsigned int>> TRACES_GetListGenerators_Arr(DataTraces DT)
+template<typename Tidx>
+std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces DT, int n_last)
 {
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
@@ -171,13 +171,13 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators_Arr(DataTraces D
 
     Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, NULL);
 
-    std::vector<std::vector<unsigned int>> ListGen;
+    std::vector<std::vector<Tidx>> ListGen;
     if (gens) {
       permnode* pn = gens;
       do
         {
-          std::vector<unsigned int> V(n);
-          for (int i=0; i<n; i++)
+          std::vector<Tidx> V(n_last);
+          for (int i=0; i<n_last; i++)
             V[i] = pn->p[i];
           ListGen.push_back(V);
           //
@@ -186,13 +186,12 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators_Arr(DataTraces D
     }
     freeschreier(NULL,&gens);
     schreier_freedyn();
-
     return ListGen;
 }
 
 
-template<typename Tgr>
-std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
+template<typename Tgr, typename Tidx>
+std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, int n_last)
 {
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
@@ -270,13 +269,13 @@ std::vector<std::vector<unsigned int>> TRACES_GetListGenerators(Tgr const& eGR)
     /* Calling Traces */
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,NULL);
     /* Extracting the list of generators */
-    std::vector<std::vector<unsigned int>> ListGen;
+    std::vector<std::vector<Tidx>> ListGen;
     if (gens) {
       permnode* pn = gens;
       do
         {
-          std::vector<unsigned int> V(n);
-          for (int i=0; i<n; i++)
+          std::vector<Tidx> V(n_last);
+          for (int i=0; i<n_last; i++)
             V[i] = pn->p[i];
           ListGen.push_back(V);
           //

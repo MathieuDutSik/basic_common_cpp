@@ -151,24 +151,38 @@ std::vector<unsigned int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
   return vectD;
 }
 
+struct RecParam {
+  int n_last;
+  std::vector<std::vector<unsigned int>> LGen;
+};
+
 
 static inline void report_aut_vectvectint(void* param, const unsigned int n, const unsigned int* aut)
 {
-  std::vector<unsigned int> eVect;
-  for (unsigned int i=0; i<n; i++)
-    eVect.push_back(aut[i]);
-  using VectVectInt = std::vector<std::vector<unsigned int>>;
-  ((VectVectInt*)param)->push_back(eVect);
+  RecParam* rec_param = (RecParam*)param;
+  int n_last = rec_param->n_last;
+  std::vector<unsigned int> eVect(n_last);
+  for (int i=0; i<n_last; i++)
+    eVect[i] = aut[i];
+  rec_param->LGen.push_back(eVect);
 }
 
-template<typename Tgr>
-std::vector<std::vector<unsigned int>> BLISS_GetListGenerators(Tgr const& eGR)
+template<typename Tgr, typename Tidx>
+std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, int n_last)
 {
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
-  std::vector<std::vector<unsigned int>> ListGen;
-  std::vector<std::vector<unsigned int>>* h= &ListGen;
-  g.find_automorphisms(stats, &report_aut_vectvectint, (void *)h);
+  RecParam rec_param;
+  rec_param.n_last = n_last;
+  RecParam* rec_param_ptr = &rec_param;
+  g.find_automorphisms(stats, &report_aut_vectvectint, (void *)rec_param_ptr);
+  std::vector<std::vector<Tidx>> ListGen;
+  for (auto & eList : rec_param.LGen) {
+    std::vector<Tidx> V(n_last);
+    for (int i=0; i<n_last; i++)
+      V[i] = eList[i];
+    ListGen.push_back(V);
+  }
   return ListGen;
 }
 

@@ -19,14 +19,17 @@ int main(int argc, char *argv[])
     int opt;
     sscanf(argv[2], "%d", &opt);
     //
-    GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
-    std::vector<std::vector<unsigned int>> ListGen;
+    using Tgr = GraphBitset;
+    using Tidx = unsigned int;
+    Tgr eGR=GRAPH_Read<GraphBitset>(GRAfs);
+    int nbRow = eGR.GetNbVert();
+    std::vector<std::vector<Tidx>> ListGen;
     if (opt == 1) {
       std::cerr << "Running TRACES_GetListGenerators\n";
-      ListGen = TRACES_GetListGenerators(eGR);
+      ListGen = TRACES_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
     } else {
       std::cerr << "Running BLISS_GetListGenerators\n";
-      ListGen = BLISS_GetListGenerators(eGR);
+      ListGen = BLISS_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
     }
     int nbVert=eGR.GetNbVert();
     std::cout << "local ListGen;\n";
