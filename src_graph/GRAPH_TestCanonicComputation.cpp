@@ -19,16 +19,18 @@ int main(int argc, char *argv[])
     int opt;
     sscanf(argv[2], "%d", &opt);
     //
-    GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
+    using Tgr = GraphBitset;
+    using Tidx = unsigned int;
+    Tgr eGR=GRAPH_Read<Tgr>(GRAfs);
     //
-    auto get_string_expression=[&](GraphBitset const& eGR) -> std::string {
-      std::vector<unsigned int> V;
+    auto get_string_expression=[&](Tgr const& eGR) -> std::string {
+      std::vector<Tidx> V;
       if (opt == 1) {
         std::cerr << "Running Traces canonicalization ordering\n";
-        V = TRACES_GetCanonicalOrdering(eGR);
+        V = TRACES_GetCanonicalOrdering<Tgr,Tidx>(eGR);
       } else {
         std::cerr << "Running Bliss canonicalization ordering\n";
-        V = BLISS_GetCanonicalOrdering(eGR);
+        V = BLISS_GetCanonicalOrdering<Tgr,Tidx>(eGR);
       }
       int nof_vertices = V.size();
       std::vector<unsigned int> clR(nof_vertices);
@@ -52,10 +54,10 @@ int main(int argc, char *argv[])
       }
       return strRet;
     };
-    auto random_perm_graph=[&](GraphBitset const& eGR) -> GraphBitset {
+    auto random_perm_graph=[&](Tgr const& eGR) -> Tgr {
       int nbVert = eGR.GetNbVert();
       std::vector<int> ePerm = RandomPermutation(nbVert);
-      GraphBitset eGR2(nbVert);
+      Tgr eGR2(nbVert);
       for (int iVert=0; iVert<nbVert; iVert++) {
         int iVert2 = ePerm[iVert];
         for (auto& eAdj : eGR.Adjacency(iVert)) {
@@ -67,7 +69,7 @@ int main(int argc, char *argv[])
     };
     std::string str1 = get_string_expression(eGR);
     for (int i=0; i<5; i++) {
-      GraphBitset eGR2 = random_perm_graph(eGR);
+      Tgr eGR2 = random_perm_graph(eGR);
       std::string str2 = get_string_expression(eGR2);
       if (str1 != str2) {
         std::cerr << "Error with the random permutation\n";

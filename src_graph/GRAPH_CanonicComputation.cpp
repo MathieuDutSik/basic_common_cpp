@@ -19,14 +19,16 @@ int main(int argc, char *argv[])
     int opt;
     sscanf(argv[2], "%d", &opt);
     //
-    GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
-    std::vector<unsigned int> V;
+    using Tgr = GraphBitset;
+    using Tidx = unsigned int;
+    Tgr eGR=GRAPH_Read<Tgr>(GRAfs);
+    std::vector<Tidx> V;
     if (opt == 1) {
       std::cerr << "Running TRACES GetCanonicalOrdering\n";
-      V = TRACES_GetCanonicalOrdering(eGR);
+      V = TRACES_GetCanonicalOrdering<Tgr,Tidx>(eGR);
     } else {
       std::cerr << "Running BLISS GetCanonicalOrdering\n";
-      V = BLISS_GetCanonicalOrdering(eGR);
+      V = BLISS_GetCanonicalOrdering<Tgr,Tidx>(eGR);
     }
     int nbVert=V.size();
     std::cout << "return [";

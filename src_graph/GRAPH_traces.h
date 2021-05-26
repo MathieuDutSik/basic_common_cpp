@@ -50,6 +50,7 @@ public:
 };
 
 
+template<typename Tidx>
 std::vector<unsigned int> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
 {
     static DEFAULTOPTIONS_TRACES(options);
@@ -60,7 +61,7 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
     options.defaultptn = FALSE;
 
     Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
-    std::vector<unsigned int> V(n);
+    std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
       V[DT.lab1[i]] = i;
     return V;
@@ -68,9 +69,8 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
 
 
 
-  
-template<typename Tgr>
-std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
+template<typename Tgr, typename Tidx>
+std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
 {
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
@@ -141,7 +141,7 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     }
 
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
-    std::vector<unsigned int> V(n);
+    std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
       V[lab1[i]] = i;
 
@@ -295,7 +295,8 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, int n_la
 
 
 
-std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces DT)
+template<typename Tidx>
+std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces DT, int n_last)
 {
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
@@ -309,7 +310,7 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRA
     options.defaultptn = FALSE;
 
     Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
-    std::vector<unsigned int> V(n);
+    std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
       V[DT.lab1[i]] = i;
     std::vector<std::vector<unsigned int>> ListGen;
@@ -317,8 +318,8 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRA
       permnode* pn = gens;
       do
         {
-          std::vector<unsigned int> V(n);
-          for (int i=0; i<n; i++)
+          std::vector<Tidx> V(n_last);
+          for (int i=0; i<n_last; i++)
             V[i] = pn->p[i];
           ListGen.push_back(V);
           //
@@ -332,8 +333,8 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRA
 
 
 
-template<typename Tgr>
-std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRACES_GetCanonicalOrdering_ListGenerators(Tgr const& eGR)
+template<typename Tgr, typename Tidx>
+std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonicalOrdering_ListGenerators(Tgr const& eGR, int n_last)
 {
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
@@ -411,7 +412,7 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRA
 
     Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
     // Extracting the canonical ordering
-    std::vector<unsigned int> V(n);
+    std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
       V[lab1[i]] = i;
     // Extracting the list of generators
@@ -420,8 +421,8 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>> TRA
       permnode* pn = gens;
       do
         {
-          std::vector<unsigned int> V(n);
-          for (int i=0; i<n; i++)
+          std::vector<Tidx> V(n_last);
+          for (int i=0; i<n_last; i++)
             V[i] = pn->p[i];
           ListGen.push_back(V);
           //

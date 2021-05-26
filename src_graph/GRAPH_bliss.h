@@ -136,7 +136,7 @@ std::string GetCanonicalForm_string(Tgr const& eGR)
 }
 
 
-template<typename Tgr>
+template<typename Tgr, typename Tidx>
 std::vector<unsigned int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
 {
   int nof_vertices = eGR.GetNbVert();
@@ -145,7 +145,7 @@ std::vector<unsigned int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<unsigned int> vectD(nof_vertices);
+  std::vector<Tidx> vectD(nof_vertices);
   for (int i=0; i<nof_vertices; i++)
     vectD[i] = cl[i];
   return vectD;
@@ -187,8 +187,8 @@ std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, int n_las
 }
 
 
-template<typename Tgr>
-std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>>  BLISS_GetCanonicalOrdering_ListGenerators(Tgr const& eGR)
+template<typename Tgr, typename Tidx>
+std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>>  BLISS_GetCanonicalOrdering_ListGenerators(Tgr const& eGR, int n_last)
 {
   int nof_vertices = eGR.GetNbVert();
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
@@ -196,13 +196,21 @@ std::pair<std::vector<unsigned int>, std::vector<std::vector<unsigned int>>>  BL
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<unsigned int> vectD(nof_vertices);
+  std::vector<Tidx> vectD(nof_vertices);
   for (int i=0; i<nof_vertices; i++)
     vectD[i] = cl[i];
   //
-  std::vector<std::vector<unsigned int>> ListGen;
-  std::vector<std::vector<unsigned int>>* h= &ListGen;
-  g.find_automorphisms(stats, &report_aut_vectvectint, (void *)h);
+  RecParam rec_param;
+  rec_param.n_last = n_last;
+  RecParam* rec_param_ptr = &rec_param;
+  g.find_automorphisms(stats, &report_aut_vectvectint, (void *)rec_param_ptr);
+  std::vector<std::vector<Tidx>> ListGen;
+  for (auto & eList : rec_param.LGen) {
+    std::vector<Tidx> V(n_last);
+    for (int i=0; i<n_last; i++)
+      V[i] = eList[i];
+    ListGen.push_back(V);
+  }
   //
   return {std::move(vectD), std::move(ListGen)};
 }
