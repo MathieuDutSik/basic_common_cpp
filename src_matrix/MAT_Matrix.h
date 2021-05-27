@@ -2378,7 +2378,7 @@ private:
   MyMatrix<T>* ptr;
   std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
 public:
-  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), ptr(nullptr)
+  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols())
   {
     std::vector<T> V1(n_cols);
     std::vector<T> V2(n_cols);
