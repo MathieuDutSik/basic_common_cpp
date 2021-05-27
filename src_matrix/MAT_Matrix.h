@@ -2372,13 +2372,13 @@ int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
 template<typename T>
 struct ContainerMatrix {
 private:
-  MyMatrix<T> & mat;
+  MyMatrix<T> const& mat;
   size_t n_rows;
   size_t n_cols;
   MyMatrix<T>* ptr;
   std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
 public:
-  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols())
+  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), ptr(nullptr)
   {
     std::vector<T> V1(n_cols);
     std::vector<T> V2(n_cols);
