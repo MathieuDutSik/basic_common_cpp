@@ -313,7 +313,7 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
       V[DT.lab1[i]] = i;
-    std::vector<std::vector<unsigned int>> ListGen;
+    std::vector<std::vector<Tidx>> ListGen;
     if (gens) {
       permnode* pn = gens;
       do
@@ -416,7 +416,7 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     for (int i=0; i<n; i++)
       V[lab1[i]] = i;
     // Extracting the list of generators
-    std::vector<std::vector<unsigned int>> ListGen;
+    std::vector<std::vector<Tidx>> ListGen;
     if (gens) {
       permnode* pn = gens;
       do
