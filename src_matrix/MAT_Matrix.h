@@ -890,19 +890,15 @@ private:
 
 
 
-
-
 // The NSP array is assigned to NullspaceMat(TransposedMat(Input))
 // The function requires the matrix type to be a field.
 // After reflection this way is unavoidable as working only
 // with ring operation would complicate the code quie a lot
 // and likely lead to explosion of coefficient.
-template<typename T>
-SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
+template<typename T, typename F>
+SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field in TMat_SelectRowCol");
-  size_t nbRow=Input.rows();
-  size_t nbCol=Input.cols();
   size_t maxRank=nbRow;
   if (nbCol < maxRank)
     maxRank=nbCol;
@@ -913,8 +909,7 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
   std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
   for (size_t iRow=0; iRow<nbRow; iRow++) {
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      provMat(eRank, iCol)=Input(iRow, iCol);
+    f(provMat, eRank, iRow);
     for (size_t iRank=0; iRank<eRank; iRank++) {
       int eCol=ListColSelect[iRank];
       T eVal1=provMat(eRank, eCol);
@@ -960,9 +955,22 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
       }
       nbVect++;
     }
-  SelectionRowCol<T> retSelect{eRank, NSP, ListColSelect, ListRowSelect};
-  return retSelect;
+  return {eRank, std::move(NSP), std::move(ListColSelect), std::move(ListRowSelect)};
 }
+
+
+template<typename T>
+SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
+{
+  size_t nbRow=Input.rows();
+  size_t nbCol=Input.cols();
+  auto f=[&](MyMatrix<T> & M, size_t eRank, size_t iRow) -> void {
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      M(eRank, iCol)=Input(iRow, iCol);
+  };
+  return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f);
+}
+
 
 template<typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type NullspaceTrMat(MyMatrix<T> const& Input)
