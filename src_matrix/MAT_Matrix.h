@@ -2414,7 +2414,7 @@ public:
         return false;
     return true;
   }
-  void SetPtr(MyMatrix<T>* ptr_input) const
+  void SetPtr(MyMatrix<T>* ptr_input)
   {
     ptr = ptr_input;
   }
