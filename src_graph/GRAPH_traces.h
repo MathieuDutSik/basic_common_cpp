@@ -166,7 +166,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces DT, int n
     freeschreier(NULL,&gens);
     options.getcanon = FALSE;
 
-    int n = DT.n;
+    //    int n = DT.n;
     options.defaultptn = FALSE;
 
     Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, NULL);
