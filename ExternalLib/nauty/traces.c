@@ -5602,11 +5602,11 @@ int CheckForAutomorphisms(Candidate *CurrCand, Candidate *NextCand,
 
                     if (isautom_sg_pair((graph*)tv->input_graph, AUTPERM, tv->options->digraph, m, n, tv)) {
                         if (!findperm(gensB, AUTPERM, n)) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier3 -= CPUTIME;
 #endif
                             addgenerator(&gpB, &gensB, AUTPERM, n);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier3 += CPUTIME;
 #endif
                             if (tv->options->verbosity >= 2) {
@@ -5812,11 +5812,11 @@ int CheckForSingAutomorphisms(Candidate *CurrCand, Partition *NextPart, Candidat
                 if (TreeFyTwo(tmp, CheckAutList, NextCand, NextPart, n, tv, ti)) {
                     if (isautom_sg((graph*)tv->input_graph, AUTPERM, tv->options->digraph, m, n)) {
                         if (!findperm(gensB, AUTPERM, n)) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier3 -= CPUTIME;
 #endif
                             addgenerator(&gpB, &gensB, AUTPERM, n);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier3 += CPUTIME;
 #endif
                             result = CheckAutList->name;
@@ -6056,12 +6056,12 @@ int CheckForMatching(Candidate *CurrCand, Candidate *NextCand, Partition *Part, 
                 if (isautom_sg_pair((graph*)tv->input_graph, AUTPERM, tv->options->digraph, m, n, tv)) {
 
                     if (!findperm(gensB, AUTPERM, n)) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                         if (tv->options->verbosity >= 2) tv->schreier3 -= CPUTIME;
 #endif
                         if (tv->options->generators) addpermutation(&gensB, AUTPERM, n);
 
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                         if (tv->options->verbosity >= 2) tv->schreier3 += CPUTIME;
 #endif
 
@@ -6378,11 +6378,11 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                         TempOrbits = NULL;
                         tv->samepref = FixBase(fix, tv, CurrCand, 0, tv->fromlevel);
                         if ((tv->samepref != tv->nfix) || ti->thegrouphaschanged) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier1 -= CPUTIME;
 #endif
                             gom_level = getorbitsmin(fix, tv->nfix, gpB, &gensB, &tv->currorbit, CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell], n, TRUE);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier1 += CPUTIME;
 #endif
                             ti->thegrouphaschanged = FALSE;
@@ -6545,7 +6545,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
 
                                         /* EXPERIMENTAL PATH */
                                         if (NextPart->cells != tv->finalnumcells) {    /* 160712 */
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                             if (tv->options->verbosity >= 2) tv->expaths -= CPUTIME;
 #endif
                                             while (NextPart->cells < n) {
@@ -6578,7 +6578,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                                 }
                                                 PRINT_EXPPATHSTEP(NextCand, TRUE)
                                             }
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                             if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
 #endif
                                         }
@@ -6610,7 +6610,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                     }
 
                                     /* ANY AUTOMORPHISM? */
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                     if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
 #endif
                                     tv->newindex = 0;
@@ -6618,7 +6618,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                         closeloop = CheckForAutomorphisms(CurrCand, NextCand, tv, ti, m, n, NextPart);
                                         if (!NextCand->do_it && closeloop < tv->tolevel) k = SpineTL->tgtend;
                                     }
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                     if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
 #endif
 
@@ -6639,7 +6639,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                     }
 
                                     /* ANY AUTOMORPHISM? */
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                     if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
 #endif
                                     tv->newindex = 0;
@@ -6647,7 +6647,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                         closeloop = CheckForAutomorphisms(CurrCand, NextCand, tv, ti, m, n, NextPart);
                                         if (!NextCand->do_it && closeloop < tv->tolevel) k = SpineTL->tgtend;
                                     }
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                     if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
 #endif
 
@@ -6779,7 +6779,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                     if (tv->steps > 1) {
 
                                         /* EXPERIMENTAL PATH */
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                         if (tv->options->verbosity >= 2) tv->expaths -= CPUTIME;
 #endif
                                         PRINTF2("CStage0 2: %d\n", tv->finalnumcells);
@@ -6805,7 +6805,7 @@ int CompStage0(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                             UPDATEMIN(tv->expathlength, tv->tolevel_tl);
                                         }
 
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                         if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
 #endif
 
@@ -6906,11 +6906,11 @@ int CompStage1(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
     FixBase(fix, tv, NextCand, 0, tv->fromlevel);
 
     if (!ti->identitygroup) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
         if (tv->options->verbosity >= 2) tv->schreier2 -= CPUTIME;
 #endif
         tv->currorbit = getorbits(fix, tv->nfix, gpB, &gensB, n);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
         if (tv->options->verbosity >= 2) tv->schreier2 += CPUTIME;
 #endif
     }
@@ -6974,13 +6974,13 @@ int CompStage1(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
             if (tv->options->verbosity >= 2) PRINT_CANDIDATE(NextCand, tv->tolevel);
 
             /* ANY AUTOMORPHISM? */
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
             if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
 #endif
 
             PRINTF2("CS1 2?: finalnumcells: %d\n", tv->finalnumcells);
             CheckForAutomorphisms(CurrCand, NextCand, tv, ti, m, n, NextPart);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
             if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
 #endif
 
@@ -7040,13 +7040,13 @@ int CompStage1(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
     tv->compstage = 2;
     tv->steps = n;
 
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
     if (tv->options->verbosity >= 2) tv->schreier1 -= CPUTIME;
 #endif
 
     gom_level = getorbitsmin(fix, tv->nfix, gpB, &gensB, &tv->currorbit,
                              CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell], n, TRUE);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
     if (tv->options->verbosity >= 2) tv->schreier1 += CPUTIME;
 #endif
     ORBITSIZES
@@ -7203,7 +7203,7 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                             if (tv->options->verbosity >= 2) PRINT_CANDIDATE(NextCand, tv->tolevel)
                                 if (tv->tolevel == tv->maxtreelevel) {
                                     tv->tolevel_tl = tv->tolevel;
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                     if (tv->options->verbosity >= 2) tv->expaths -= CPUTIME;
 #endif
                                     TargetCellExpPath(NextCand, NextPart, tv);
@@ -7214,7 +7214,7 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                         UPDATEMIN(tv->expathlength, tv->tolevel_tl);
                                     }
 
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                     if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
 #endif
                                     if (!tv->answ) {
@@ -7226,13 +7226,13 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                     if (tv->answ) {
                         PRINTF2("CS2 2?: finalnumcells: %d\n", tv->finalnumcells);
                         if ((NextPart->cells == tv->finalnumcells) || (NextPart->cells == n)) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
 #endif
                             temp = (tv->tolevel_tl == tv->tolevel+1);
                             autom = CheckForAutomorphisms(CurrCand, NextCand,
                                                           tv, ti, temp, n, NextPart);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
 #endif
 
@@ -7286,13 +7286,13 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                             CuOrb = tv->currorbit;
                         }
                         else {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier1 -= CPUTIME;
 #endif
 
                             gom_level = getorbitsmin(fix, tv->nfix, gpB, &gensB, &tv->currorbit,
                                                      CurrCand->lab+tv->tcell, CurrPart->cls[tv->tcell], n, TRUE);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                             if (tv->options->verbosity >= 2) tv->schreier1 += CPUTIME;
 #endif
 
@@ -7439,7 +7439,7 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                 if (tv->options->verbosity >= 2) PRINT_CANDIDATE(NextCand, tv->tolevel)
                                     if (tv->tolevel == tv->maxtreelevel) {
                                         tv->tolevel_tl = tv->tolevel;
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                         if (tv->options->verbosity >= 2) tv->expaths -= CPUTIME;
 #endif
                                         if (TargetCellExpPath(NextCand, NextPart, tv)) {
@@ -7451,7 +7451,7 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                                             }
 
                                         }
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                         if (tv->options->verbosity >= 2) tv->expaths += CPUTIME;
 #endif
                                         if (!tv->answ) {
@@ -7463,13 +7463,13 @@ int CompStage2(Partition *CurrPart, Partition *NextPart, Candidate *CurrCand, Ca
                         if (tv->answ) {
                             PRINTF2("CS2 6?: finalnumcells: %d\n", tv->finalnumcells);
                             if ((NextPart->cells == tv->finalnumcells) || (NextPart->cells == n)) {
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                 if (tv->options->verbosity >= 2) tv->autchk -= CPUTIME;
 #endif
                                 temp = (tv->tolevel_tl == tv->tolevel+1);
                                 autom = CheckForAutomorphisms(CurrCand, NextCand,
                                                               tv, ti, temp, n, NextPart);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                 if (tv->options->verbosity >= 2) tv->autchk += CPUTIME;
 #endif
                                 if (autom) {
@@ -9595,11 +9595,11 @@ boolean SelectNextLevel(int n, struct TracesVars *tv, struct TracesInfo *ti) {
                             if (orbitcell) {
                                 FirstCand = Spine[tv->nextlevel].liststart;
                                 FixBase(fix, tv, FirstCand, 0, tv->firstpathlength);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                 if (tv->options->verbosity >= 2) tv->schreier1 -= CPUTIME;
 #endif
                                 getorbitsmin(fix, tv->nfix, gpB, &gensB, &tv->currorbit, NULL, n, n, TRUE);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
                                 if (tv->options->verbosity >= 2) tv->schreier1 += CPUTIME;
 #endif
                                 for (j=2; j<=tv->firstpathlength; j++) {

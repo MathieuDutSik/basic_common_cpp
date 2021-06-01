@@ -237,7 +237,7 @@ extern void unitptn(int*,int*,int*,int);
 
 /*************************************************************************/
 
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
 #  ifndef NAUTY_CPU_DEFINED
 #    if HAVE_TIMES
 #      include <sys/times.h>
