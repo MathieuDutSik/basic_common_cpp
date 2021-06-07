@@ -20,19 +20,23 @@ public:
     lab1 = (int*)malloc(n * sizeof(int));
     ptn = (int*)malloc(n * sizeof(int));
     orbits = (int*)malloc(n * sizeof(int));
+    orbits = (int*)malloc(n * sizeof(int));
     //
     sg1.nv = n;
     sg1.nde = nbAdjacent;
     sg1.v = (size_t*)malloc(n * sizeof(size_t));
     sg1.d = (int*)malloc(n * sizeof(int));
     sg1.e = (int*)malloc(nbAdjacent * sizeof(int));
+    sg1.w = NULL;
     sg1.vlen = n;
     sg1.dlen = n;
     sg1.elen = nbAdjacent;
+    sg1.wlen = 0;
     //
     cg1.d = NULL; // set to NULL, but it may or may not be expanded.
     cg1.v = NULL;
     cg1.e = NULL;
+    cg1.w = NULL;
   }
   ~DataTraces()
   {
@@ -52,19 +56,19 @@ public:
 
 
 template<typename Tidx>
-std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
+std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces* DT)
 {
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
-    int n = DT.n;
+    int n = DT->n;
 
     options.getcanon = TRUE;
     options.defaultptn = FALSE;
 
-    Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
+    Traces(&DT->sg1, DT->lab1, DT->ptn, DT->orbits, &options, &stats, &DT->cg1);
     std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
-      V[DT.lab1[i]] = i;
+      V[DT->lab1[i]] = i;
     return V;
 }
 
@@ -213,14 +217,14 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const& eGR)
 {
   DataTraces DT = GetDataTraces_from_G(eGR);
   std::cerr << "After TRACES_GetCanonicalOrdering_Arr_Test\n";
-  return TRACES_GetCanonicalOrdering_Arr<Tidx>(DT);
+  return TRACES_GetCanonicalOrdering_Arr<Tidx>(&DT);
 }
 
 
 
 
 template<typename Tidx>
-std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces DT, int n_last)
+std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces* DT, int n_last)
 {
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
@@ -230,10 +234,15 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces DT, int n
     freeschreier(NULL,&gens);
     options.getcanon = FALSE;
 
-    //    int n = DT.n;
+    /*
+    int n = DT->n;
+    int m = SETWORDSNEEDED(n);
+    nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
+    */
+
     options.defaultptn = FALSE;
 
-    Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, NULL);
+    Traces(&DT->sg1, DT->lab1, DT->ptn, DT->orbits, &options, &stats, NULL);
 
     std::vector<std::vector<Tidx>> ListGen;
     if (gens) {
@@ -359,13 +368,13 @@ template<typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr_Test(Tgr const& eGR, int n_last)
 {
   DataTraces DT = GetDataTraces_from_G(eGR);
-  std::cerr << "After TRACES_GetCanonicalOrdering_Arr_Test\n";
-  return TRACES_GetListGenerators_Arr<Tidx>(DT, n_last);
+  std::cerr << "After TRACES_GetListGenerators_Arr_Test\n";
+  return TRACES_GetListGenerators_Arr<Tidx>(&DT, n_last);
 }
 
 
 template<typename Tidx>
-std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces DT, int n_last)
+std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces* DT, int n_last)
 {
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
@@ -374,14 +383,14 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     gens = NULL;
     freeschreier(NULL,&gens);
 
-    int n = DT.n;
+    int n = DT->n;
     options.getcanon = TRUE;
     options.defaultptn = FALSE;
 
-    Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
+    Traces(&DT->sg1, DT->lab1, DT->ptn, DT->orbits, &options, &stats, &DT->cg1);
     std::vector<Tidx> V(n);
     for (int i=0; i<n; i++)
-      V[DT.lab1[i]] = i;
+      V[DT->lab1[i]] = i;
     std::vector<std::vector<Tidx>> ListGen;
     if (gens) {
       permnode* pn = gens;

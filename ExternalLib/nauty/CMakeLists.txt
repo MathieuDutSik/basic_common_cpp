@@ -16,6 +16,9 @@ add_library(nauty SHARED
 )
 
 set_target_properties(nauty PROPERTIES VERSION ${PROJECT_VERSION})
+#add_definitions(-g)
+#set(CMAKE_C_FLAGS " -O3 -g")
+set(CMAKE_C_FLAGS " -O3")
 
 
 # Install library
