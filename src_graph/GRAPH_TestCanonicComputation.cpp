@@ -60,10 +60,18 @@ int main(int argc, char *argv[])
       }
       return strRet;
     };
-    auto random_perm_graph=[&](Tgr const& eGR) -> Tgr {
+    auto random_perm_graph=[&](Tgr const& eGR, std::vector<int> const& ePerm) -> Tgr {
       int nbVert = eGR.GetNbVert();
-      std::vector<int> ePerm = RandomPermutation(nbVert);
       Tgr eGR2(nbVert);
+      bool HasVertexColor = eGR.GetHasVertexColor();
+      if (HasVertexColor) {
+        eGR2.SetHasColor(HasVertexColor);
+        for (int iVert=0; iVert<nbVert; iVert++) {
+          int eColor = eGR2.GetColor(iVert);
+          int iVert2 = ePerm[iVert];
+          eGR2.SetColor(iVert2, eColor);
+        }
+      }
       for (int iVert=0; iVert<nbVert; iVert++) {
         int iVert2 = ePerm[iVert];
         for (auto& eAdj : eGR.Adjacency(iVert)) {
@@ -74,14 +82,19 @@ int main(int argc, char *argv[])
       return eGR2;
     };
     std::string str1 = get_string_expression(eGR);
+    int nbVert = eGR.GetNbVert();
     for (int i=0; i<5; i++) {
-      Tgr eGR2 = random_perm_graph(eGR);
+      std::vector<int> ePerm = RandomPermutation(nbVert);
+      Tgr eGR2 = random_perm_graph(eGR, ePerm);
       std::string str2 = get_string_expression(eGR2);
       if (str1 != str2) {
+        std::cerr << "str1=" << str1 << "\n";
+        std::cerr << "str2=" << str2 << "\n";
         std::cerr << "Error with the random permutation\n";
         throw TerminalException{1};
       }
     }
+    std::cerr << "Normal termination of the program\n";
   }
   catch (TerminalException const& e) {
     exit(e.eVal);
