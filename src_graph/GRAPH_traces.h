@@ -55,7 +55,7 @@ public:
 
 
 template<typename Tidx>
-std::vector<unsigned int> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
+std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
 {
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
@@ -211,6 +211,17 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     SG_FREE(cg1);
     return V;
 }
+
+
+
+template<typename Tgr, typename Tidx>
+std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const& eGR)
+{
+  DataTraces DT = GetDataTraces_from_G(eGR);
+  return TRACES_GetCanonicalOrdering_Arr<Tidx>(DT);
+}
+
+
 
 
 template<typename Tidx>

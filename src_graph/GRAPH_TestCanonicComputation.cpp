@@ -28,7 +28,12 @@ int main(int argc, char *argv[])
       if (opt == 1) {
         std::cerr << "Running Traces canonicalization ordering\n";
         V = TRACES_GetCanonicalOrdering<Tgr,Tidx>(eGR);
-      } else {
+      }
+      if (opt == 2) {
+        std::cerr << "Running Traces canonicalization ordering_arr_test\n";
+        V= TRACES_GetCanonicalOrdering_Arr_Test<Tgr,Tidx>(eGR);
+      }
+      if (opt == 3) {
         std::cerr << "Running Bliss canonicalization ordering\n";
         V = BLISS_GetCanonicalOrdering<Tgr,Tidx>(eGR);
       }
