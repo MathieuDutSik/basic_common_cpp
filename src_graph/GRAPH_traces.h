@@ -4,6 +4,7 @@
 #include "traces.h"
 #include <vector>
 #include <iostream>
+#include <ExceptionEnding.h>
 
 struct DataTraces {
 public:
@@ -69,6 +70,60 @@ std::vector<unsigned int> TRACES_GetCanonicalOrdering_Arr(DataTraces DT)
       V[DT.lab1[i]] = i;
     return V;
 }
+
+
+template<typename Tgr>
+DataTraces GetDataTraces_from_G(Tgr const& eGR)
+{
+  int n = eGR.GetNbVert();
+  int nbAdjacent = eGR.GetNbAdjacent();
+  bool HasVertexColor = eGR.GetHasVertexColor();
+  if (!HasVertexColor) {
+    std::cerr << "The graph should have vertex color\n";
+    throw TerminalException{1};
+  }
+  // allocating the DataTraces
+  DataTraces DT(n, nbAdjacent);
+  // Determining the color symbolic information
+  int numcells=0;
+  for (int i=0; i<n; i++) {
+    int eVal = 1 + eGR.GetColor(i);
+    if (eVal > numcells)
+      numcells = eVal;
+  }
+  std::vector<int> ListPartSize(numcells,0);
+  for (int i=0; i<n; i++)
+    ListPartSize[eGR.GetColor(i)]++;
+  std::vector<int> ListShift(numcells,0);
+  for (int icell=1; icell<numcells; icell++)
+    ListShift[icell] = ListShift[icell-1] + ListPartSize[icell-1];
+  // lab1 construction
+  for (int i=0; i<n; i++) {
+    int icell = eGR.GetColor(i);
+    DT.lab1[ListShift[icell]] = i;
+    ListShift[icell]++;
+  }
+  // ptn construction
+  for (int i=0; i<n; i++) DT.ptn[i] = NAUTY_INFINITY;
+  for (int icell=0; icell<numcells; icell++)
+    DT.ptn[ListShift[icell] - 1] = 0;
+  // The adjacencies
+  int pos = 0;
+  for (int i=0; i<n; i++) {
+    std::vector<int> LAdj = eGR.Adjacency(i);
+    int len = LAdj.size();
+    DT.sg1.d[i] = len;
+    DT.sg1.v[i] = pos;
+    for (auto & eAdj : LAdj) {
+      DT.sg1.e[pos] = eAdj;
+      pos++;
+    }
+  }
+  // Returning the final entry
+  return DT;
+}
+
+
 
 
 
