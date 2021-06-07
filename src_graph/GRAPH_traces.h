@@ -13,7 +13,6 @@ public:
   int* lab1;
   int* ptn;
   int* orbits;
-  int* map;
   sparsegraph sg1;
   sparsegraph cg1;
   DataTraces(int _n, int _nbAdjacent) : n(_n), nbAdjacent(_nbAdjacent)
@@ -21,7 +20,6 @@ public:
     lab1 = (int*)malloc(n * sizeof(int));
     ptn = (int*)malloc(n * sizeof(int));
     orbits = (int*)malloc(n * sizeof(int));
-    map = (int*)malloc(n * sizeof(int));
     //
     sg1.nv = n;
     sg1.nde = nbAdjacent;
@@ -41,7 +39,6 @@ public:
     free(lab1);
     free(ptn);
     free(orbits);
-    free(map);
     //
     free(sg1.d);
     free(sg1.v);
@@ -133,7 +130,6 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
     DYNALLSTAT(int,orbits,orbits_sz);
-    DYNALLSTAT(int,map,map_sz);
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
     /* Declare and initialize sparse graph structures */
@@ -154,7 +150,6 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     DYNALLOC1(int,lab1,lab1_sz,n,"malloc");
     DYNALLOC1(int,ptn,ptn_sz,n,"malloc");
     DYNALLOC1(int,orbits,orbits_sz,n,"malloc");
-    DYNALLOC1(int,map,map_sz,n,"malloc");
     if (HasVertexColor) {
       options.defaultptn = FALSE;
       int numcells=0;
@@ -206,7 +201,6 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     DYNFREE(lab1,lab1_sz);
     DYNFREE(ptn,ptn_sz);
     DYNFREE(orbits,orbits_sz);
-    DYNFREE(map,map_sz);
     SG_FREE(sg1);
     SG_FREE(cg1);
     return V;
@@ -218,6 +212,7 @@ template<typename Tgr, typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const& eGR)
 {
   DataTraces DT = GetDataTraces_from_G(eGR);
+  std::cerr << "After TRACES_GetCanonicalOrdering_Arr_Test\n";
   return TRACES_GetCanonicalOrdering_Arr<Tidx>(DT);
 }
 
@@ -265,7 +260,6 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, int n_la
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
     DYNALLSTAT(int,orbits,orbits_sz);
-    DYNALLSTAT(int,map,map_sz);
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
     /* Declare the generator stuff */
@@ -288,7 +282,6 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, int n_la
     DYNALLOC1(int,lab1,lab1_sz,n,"malloc");
     DYNALLOC1(int,ptn,ptn_sz,n,"malloc");
     DYNALLOC1(int,orbits,orbits_sz,n,"malloc");
-    DYNALLOC1(int,map,map_sz,n,"malloc");
     /*
       "lab" and "ptn" contain the information of the initial partition.
       It is a complex construction that goes deep into the internals of nauty/traces.
@@ -357,7 +350,6 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, int n_la
     DYNFREE(lab1,lab1_sz);
     DYNFREE(ptn,ptn_sz);
     DYNFREE(orbits,orbits_sz);
-    DYNFREE(map,map_sz);
     SG_FREE(sg1);
     return ListGen;
 }
@@ -408,7 +400,6 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     DYNALLSTAT(int,lab1,lab1_sz);
     DYNALLSTAT(int,ptn,ptn_sz);
     DYNALLSTAT(int,orbits,orbits_sz);
-    DYNALLSTAT(int,map,map_sz);
     static DEFAULTOPTIONS_TRACES(options);
     TracesStats stats;
     /* Declare the generator stuff */
@@ -435,7 +426,6 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     DYNALLOC1(int,lab1,lab1_sz,n,"malloc");
     DYNALLOC1(int,ptn,ptn_sz,n,"malloc");
     DYNALLOC1(int,orbits,orbits_sz,n,"malloc");
-    DYNALLOC1(int,map,map_sz,n,"malloc");
     if (HasVertexColor) {
       options.defaultptn = FALSE;
       int numcells=0;
@@ -504,7 +494,6 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     DYNFREE(lab1,lab1_sz);
     DYNFREE(ptn,ptn_sz);
     DYNFREE(orbits,orbits_sz);
-    DYNFREE(map,map_sz);
     SG_FREE(sg1);
     SG_FREE(cg1);
     return {std::move(V), std::move(ListGen)};
