@@ -13,21 +13,28 @@ int main(int argc, char *argv[])
       std::cerr << "\n";
       return -1;
     }
-    std::cerr << "Reading input\n";
-    //
-    std::ifstream GRAfs(argv[1]);
-    int opt;
-    sscanf(argv[2], "%d", &opt);
-    //
     using Tgr = GraphBitset;
     using Tidx = unsigned int;
+    //
+    std::ifstream GRAfs(argv[1]);
     Tgr eGR=GRAPH_Read<GraphBitset>(GRAfs);
+    GRAPH_Write(std::cerr, eGR);
+    //
+    int opt;
+    sscanf(argv[2], "%d", &opt);
+    std::cerr << "opt=" << opt << "\n";
+    //
     int nbRow = eGR.GetNbVert();
     std::vector<std::vector<Tidx>> ListGen;
     if (opt == 1) {
       std::cerr << "Running TRACES_GetListGenerators\n";
       ListGen = TRACES_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
-    } else {
+    }
+    if (opt == 2) {
+      std::cerr << "Running TRACES_GetListGenerators\n";
+      ListGen = TRACES_GetListGenerators_Arr_Test<Tgr,Tidx>(eGR, nbRow);
+    }
+    if (opt == 3) {
       std::cerr << "Running BLISS_GetListGenerators\n";
       ListGen = BLISS_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
     }
