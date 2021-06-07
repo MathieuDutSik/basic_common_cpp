@@ -24,9 +24,12 @@ public:
     //
     sg1.nv = n;
     sg1.nde = nbAdjacent;
-    sg1.d = (int*)malloc(n * sizeof(int));
     sg1.v = (size_t*)malloc(n * sizeof(size_t));
+    sg1.d = (int*)malloc(n * sizeof(int));
     sg1.e = (int*)malloc(nbAdjacent * sizeof(int));
+    sg1.vlen = n;
+    sg1.dlen = n;
+    sg1.elen = nbAdjacent;
     //
     cg1.d = NULL; // set to NULL, but it may or may not be expanded.
     cg1.v = NULL;
