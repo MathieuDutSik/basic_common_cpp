@@ -13,15 +13,16 @@ int main(int argc, char *argv[])
       std::cerr << "\n";
       return -1;
     }
-    std::cerr << "Reading input\n";
-    //
-    std::ifstream GRAfs(argv[1]);
-    int opt;
-    sscanf(argv[2], "%d", &opt);
-    //
     using Tgr = GraphBitset;
     using Tidx = unsigned int;
+    //
+    std::ifstream GRAfs(argv[1]);
     Tgr eGR=GRAPH_Read<Tgr>(GRAfs);
+    GRAPH_Write(std::cerr, eGR);
+    //
+    int opt;
+    sscanf(argv[2], "%d", &opt);
+    std::cerr << "opt=" << opt << "\n";
     //
     auto get_string_expression=[&](Tgr const& eGR) -> std::string {
       std::vector<Tidx> V;

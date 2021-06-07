@@ -178,7 +178,30 @@ void GRAPH_PrintOutputGAP(std::ostream &os, Tgr const& GR)
 
 
 template<typename Tgr>
-Tgr GRAPH_Read(std::istream & is)
+void GRAPH_Write(std::ostream& os, const Tgr& eGR)
+{
+  size_t n = eGR.GetNbVert();
+  bool HasVertexColor = eGR.GetHasVertexColor();
+  os << "n=" << n << " HasColor=" << HasVertexColor << "\n";
+  if (HasVertexColor) {
+    os << "ListColor =";
+    for (size_t i=0; i<n; i++) {
+      os << " " << eGR.GetColor(i);
+    }
+    os << "\n";
+  }
+  for (size_t i=0; i<n; i++) {
+    os << i << " :";
+    for (auto & eAdj : eGR.Adjacency(i)) {
+      os << " " << eAdj;
+    }
+    os << "\n";
+  }
+}
+
+
+template<typename Tgr>
+Tgr GRAPH_Read(std::istream& is)
 {
   if (!is.good()) {
     std::cerr << "GRAPH_Read operation failed because stream is not valied\n";
