@@ -21,7 +21,7 @@ public:
     ptn = (int*)malloc(n * sizeof(int));
     orbits = (int*)malloc(n * sizeof(int));
     orbits = (int*)malloc(n * sizeof(int));
-    //
+    // We allocate the arrays for Traces
     sg1.nv = n;
     sg1.nde = nbAdjacent;
     sg1.v = (size_t*)malloc(n * sizeof(size_t));
@@ -32,11 +32,17 @@ public:
     sg1.dlen = n;
     sg1.elen = nbAdjacent;
     sg1.wlen = 0;
-    //
+    // We imitate SG_DECL here
+    cg1.nv = 0;
+    cg1.nde = 0;
     cg1.d = NULL; // set to NULL, but it may or may not be expanded.
     cg1.v = NULL;
     cg1.e = NULL;
     cg1.w = NULL;
+    cg1.vlen = 0;
+    cg1.dlen = 0;
+    cg1.elen = 0;
+    cg1.wlen = 0;
   }
   ~DataTraces()
   {
