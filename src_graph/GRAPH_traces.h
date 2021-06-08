@@ -222,7 +222,6 @@ template<typename Tgr, typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const& eGR)
 {
   DataTraces DT = GetDataTraces_from_G(eGR);
-  std::cerr << "After TRACES_GetCanonicalOrdering_Arr_Test\n";
   return TRACES_GetCanonicalOrdering_Arr<Tidx>(DT);
 }
 
@@ -374,7 +373,6 @@ template<typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr_Test(Tgr const& eGR, int n_last)
 {
   DataTraces DT = GetDataTraces_from_G(eGR);
-  std::cerr << "After TRACES_GetListGenerators_Arr_Test\n";
   return TRACES_GetListGenerators_Arr<Tidx>(DT, n_last);
 }
 
