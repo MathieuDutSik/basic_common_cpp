@@ -2396,7 +2396,7 @@ public:
           std::cerr << "i=" << i << "\n";
           size_t alpha=idx - n_rows;
           std::cerr << "alpha=" << alpha << "\n";
-          T val = mat_test(alpha, i);
+          T val = mat(alpha, i);
           std::cerr << "val=" << val << "\n";
           W[i] = val;
         }
