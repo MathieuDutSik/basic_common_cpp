@@ -2404,16 +2404,33 @@ public:
       std::cerr << "A : set_v\n";
     };
     std::function<size_t(size_t)> fct_hash=[&](size_t idx) -> size_t {
+      std::cerr << "fct_hash : Before set_v idx=" << idx << "\n";
       set_v(V1, idx);
-      return std::hash<std::vector<T>>()(V1);
+      std::cerr << "fct_hash : After set_v\n";
+      std::cerr << "V1 =";
+      for (size_t i=0; i<n_cols; i++)
+        std::cerr << " " << V1[i];
+      std::cerr << "\n";
+      size_t hash = std::hash<std::vector<T>>()(V1);
+      std::cerr << "fct_hash : hash=" << hash << "\n";
+      return hash;
     };
     std::function<bool(size_t, size_t)> fct_equal=[&](size_t idx1, size_t idx2) -> bool {
-      return true;
+      std::cerr << "fct_equal : idx1=" << idx1 << " idx2=" << idx2 << "\n";
       set_v(V1, idx1);
+      std::cerr << "V1 =";
+      for (size_t i=0; i<n_cols; i++)
+        std::cerr << " " << V1[i];
+      std::cerr << "\n";
       set_v(V2, idx2);
+      std::cerr << "V2 =";
+      for (size_t i=0; i<n_cols; i++)
+        std::cerr << " " << V2[i];
+      std::cerr << "\n";
       for (size_t i=0; i<n_cols; i++)
         if (V1[i] != V2[i])
           return false;
+      std::cerr << "Now returning true\n";
       return true;
     };
     set = std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>>({},fct_hash, fct_equal);
