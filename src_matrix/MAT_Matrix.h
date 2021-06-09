@@ -2436,7 +2436,9 @@ public:
     auto iter = set.find(n_rows);
     if (iter == set.end())
       return {false, 0};
-    return {true, *iter};
+    size_t idx = *iter;
+    std::cerr << "idx=" << idx << "\n";
+    return {true, idx};
   }
 };
 
