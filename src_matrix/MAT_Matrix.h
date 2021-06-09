@@ -2434,7 +2434,8 @@ public:
     std::cerr << "B : GetIdx()\n";
     std::cerr << "n_rows=" << n_rows << "\n";
     std::cerr << "Before find\n";
-    auto iter = set.find(n_rows);
+    size_t test_val = n_rows;
+    auto iter = set.find(test_val);
     if (iter == set.end())
       return {false, 0};
     size_t idx = *iter;
