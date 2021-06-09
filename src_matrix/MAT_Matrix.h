@@ -2390,7 +2390,7 @@ public:
     } else {
       for (size_t i=0; i<n_cols; i++) {
         size_t alpha=idx - n_rows;
-        T val = mat(alpha, i);
+        T val = mat_test(alpha, i);
         W[i] = val;
       }
     }
