@@ -2418,6 +2418,7 @@ public:
     set = std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>>({},fct_hash, fct_equal);
     for (size_t i_row=0; i_row<n_rows; i_row++)
       set.insert(i_row);
+    std::cerr << "End of constructor n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
   }
   bool IsSubset(MyMatrix<T> & M) const
   {
@@ -2437,7 +2438,7 @@ public:
     if (iter == set.end())
       return {false, 0};
     size_t idx = *iter;
-    std::cerr << "idx=" << idx << "\n";
+    std::cerr << "GetIdx : idx=" << idx << "\n";
     return {true, idx};
   }
 };
