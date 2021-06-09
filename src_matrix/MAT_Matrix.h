@@ -2383,14 +2383,20 @@ public:
   {
     std::cerr << "ContainerMatrix n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
     auto set_v=[&](std::vector<T> & W, const size_t& idx) -> void {
-      std::cerr << "B : set_v idx=" << idx << "\n";
+      std::cerr << "B : set_v idx=" << idx << " |W|=" << W.size() << "\n";
       if (idx < n_rows) {
+        std::cerr << "Case 1\n";
         for (size_t i=0; i<n_cols; i++)
           W[i] = mat(idx, i);
       } else {
+        std::cerr << "Case 2\n";
         for (size_t i=0; i<n_cols; i++) {
+          std::cerr << "i=" << i << "\n";
           size_t alpha=idx - n_rows;
-          W[i] = mat_test(alpha, i);
+          std::cerr << "alpha=" << alpha << "\n";
+          T val = mat_test(alpha, i);
+          std::cerr << "val=" << val << "\n";
+          W[i] = val;
         }
       }
       std::cerr << "A : set_v\n";
