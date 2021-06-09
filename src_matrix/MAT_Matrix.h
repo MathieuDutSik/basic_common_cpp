@@ -2382,6 +2382,29 @@ private:
   std::vector<T> V1, V2;
   std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
 public:
+  void set_v(std::vector<T> & W, const size_t& idx)
+  {
+    std::cerr << "set_v 1 : n_rows=" << n_rows << "\n";
+    std::cerr << "B : set_v idx=" << idx << " |W|=" << W.size() << "\n";
+    std::cerr << "set_v 2 : n_rows=" << n_rows << "\n";
+    std::cerr << "Before the test\n";
+    if (idx < n_rows) {
+      std::cerr << "Case 1\n";
+      for (size_t i=0; i<n_cols; i++)
+        W[i] = mat(idx, i);
+    } else {
+      std::cerr << "Case 2\n";
+      for (size_t i=0; i<n_cols; i++) {
+        std::cerr << "i=" << i << "\n";
+        size_t alpha=idx - n_rows;
+        std::cerr << "alpha=" << alpha << "\n";
+        T val = mat(alpha, i);
+        std::cerr << "val=" << val << "\n";
+        W[i] = val;
+      }
+    }
+    std::cerr << "A : set_v\n";
+  }
   ContainerMatrix(MyMatrix<T> const& _mat, MyMatrix<T>& _mat_test) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), mat_test(_mat_test), V1(n_cols), V2(n_cols)
   {
     std::cerr << "ContainerMatrix n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
@@ -2390,28 +2413,6 @@ public:
         std::cerr << " " << mat(i_row,i_col);
       std::cerr << "\n";
     }
-    auto set_v=[&](std::vector<T> & W, const size_t& idx) -> void {
-      std::cerr << "set_v 1 : n_rows=" << n_rows << "\n";
-      std::cerr << "B : set_v idx=" << idx << " |W|=" << W.size() << "\n";
-      std::cerr << "set_v 2 : n_rows=" << n_rows << "\n";
-      std::cerr << "Before the test\n";
-      if (idx < n_rows) {
-        std::cerr << "Case 1\n";
-        for (size_t i=0; i<n_cols; i++)
-          W[i] = mat(idx, i);
-      } else {
-        std::cerr << "Case 2\n";
-        for (size_t i=0; i<n_cols; i++) {
-          std::cerr << "i=" << i << "\n";
-          size_t alpha=idx - n_rows;
-          std::cerr << "alpha=" << alpha << "\n";
-          T val = mat(alpha, i);
-          std::cerr << "val=" << val << "\n";
-          W[i] = val;
-        }
-      }
-      std::cerr << "A : set_v\n";
-    };
     std::function<size_t(size_t)> fct_hash=[&](size_t idx) -> size_t {
       std::cerr << "fct_hash : Before set_v idx=" << idx << "\n";
       std::cerr << "n_rows=" << n_rows << "\n";
