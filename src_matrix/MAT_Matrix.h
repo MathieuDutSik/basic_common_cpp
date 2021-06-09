@@ -2381,7 +2381,9 @@ private:
 public:
   ContainerMatrix(MyMatrix<T> const& _mat, MyMatrix<T>& _mat_test) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), mat_test(_mat_test), V1(n_cols), V2(n_cols)
   {
+    std::cerr << "ContainerMatrix n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
     auto set_v=[&](std::vector<T> & W, const size_t& idx) -> void {
+      std::cerr << "B : set_v idx=" << idx << "\n";
       if (idx < n_rows) {
         for (size_t i=0; i<n_cols; i++)
           W[i] = mat(idx, i);
@@ -2391,6 +2393,7 @@ public:
           W[i] = mat_test(alpha, i);
         }
       }
+      std::cerr << "A : set_v\n";
     };
     auto fct_hash=[&](size_t idx) -> size_t {
        set_v(V1, idx);
@@ -2419,6 +2422,7 @@ public:
   }
   std::pair<bool,size_t> GetIdx() const
   {
+    std::cerr << "B : GetIdx()\n";
     auto iter = set.find(n_rows);
     if (iter == set.end())
       return {false, 0};
