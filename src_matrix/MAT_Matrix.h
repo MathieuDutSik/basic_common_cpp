@@ -2382,6 +2382,11 @@ public:
   ContainerMatrix(MyMatrix<T> const& _mat, MyMatrix<T>& _mat_test) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), mat_test(_mat_test), V1(n_cols), V2(n_cols)
   {
     std::cerr << "ContainerMatrix n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
+    for (size_t i_row=0; i_row<n_rows; i_row++) {
+      for (size_t i_col=0; i_col<n_cols; i_col++)
+        std::cerr << " " << mat(i_row,i_col);
+      std::cerr << "\n";
+    }
     auto set_v=[&](std::vector<T> & W, const size_t& idx) -> void {
       std::cerr << "B : set_v idx=" << idx << " |W|=" << W.size() << "\n";
       std::cerr << "n_rows=" << n_rows << "\n";
