@@ -2403,17 +2403,17 @@ public:
       }
       std::cerr << "A : set_v\n";
     };
-    auto fct_hash=[&](size_t idx) -> size_t {
-       set_v(V1, idx);
-       return std::hash<std::vector<T>>()(V1);
+    std::function<size_t(size_t)> fct_hash=[&](size_t idx) -> size_t {
+      set_v(V1, idx);
+      return std::hash<std::vector<T>>()(V1);
     };
-    auto fct_equal=[&](size_t idx1, size_t idx2) -> bool {
-       set_v(V1, idx1);
-       set_v(V2, idx2);
-       for (size_t i=0; i<n_cols; i++)
-         if (V1[i] != V2[i])
-           return false;
-       return true;
+    std::function<bool(size_t, size_t)> fct_equal=[&](size_t idx1, size_t idx2) -> bool {
+      set_v(V1, idx1);
+      set_v(V2, idx2);
+      for (size_t i=0; i<n_cols; i++)
+        if (V1[i] != V2[i])
+          return false;
+      return true;
     };
     set = std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>>({},fct_hash, fct_equal);
     for (size_t i_row=0; i_row<n_rows; i_row++)
