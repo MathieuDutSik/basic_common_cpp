@@ -2420,7 +2420,7 @@ public:
       set.insert(i_row);
     std::cerr << "End of constructor n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
   }
-  bool IsSubset(MyMatrix<T> & M) const
+  bool IsSubset(MyMatrix<T> & M)
   {
     mat_test = M;
     size_t n_rows_m = M.rows();
@@ -2429,7 +2429,7 @@ public:
         return false;
     return true;
   }
-  std::pair<bool,size_t> GetIdx() const
+  std::pair<bool,size_t> GetIdx()
   {
     std::cerr << "B : GetIdx()\n";
     std::cerr << "n_rows=" << n_rows << "\n";
