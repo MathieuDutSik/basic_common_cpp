@@ -2431,6 +2431,8 @@ public:
   std::pair<bool,size_t> GetIdx() const
   {
     std::cerr << "B : GetIdx()\n";
+    std::cerr << "n_rows=" << n_rows << "\n";
+    std::cerr << "Before find\n";
     auto iter = set.find(n_rows);
     if (iter == set.end())
       return {false, 0};
