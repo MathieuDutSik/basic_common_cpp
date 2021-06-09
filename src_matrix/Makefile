@@ -1,4 +1,4 @@
-PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
+#PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm
 #PROGRAM		= ComputePointer
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= TestMatrixInverse
@@ -6,14 +6,17 @@ PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNorm
 #PROGRAM		= TestQuoInt
 #PROGRAM		= NullspaceComputationLinbox
 #PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
+PROGRAM		= Matrix_As_Set
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
 #CC		= icpc -std=c++11 -Wall -g -O2
 #CC		= clang++ -Weverything -std=c++11
 #CC		= clang++ -g -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++11
+#CC		= clang++ -g -Weverything -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
 #CC		= g++ -std=c++11 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
-CC		= g++ -std=c++11 -Wall -g -O3
+#CC		= g++ -std=c++11 -Wall -g -O3
+CC		= g++ -std=c++11 -Wall -g -O3 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
 #CC		= g++ -std=c++11 -Wall -g -O2 -static-libgcc -static-libstdc++
 
 NOLINKFLAG 	= -c

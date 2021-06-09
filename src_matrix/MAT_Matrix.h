@@ -2375,21 +2375,22 @@ private:
   MyMatrix<T> const& mat;
   size_t n_rows;
   size_t n_cols;
-  MyMatrix<T>* ptr;
+  MyMatrix<T> & mat_test;
+  std::vector<T> V1, V2;
   std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
 public:
-  ContainerMatrix(MyMatrix<T> const& _mat) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), ptr(nullptr)
+  ContainerMatrix(MyMatrix<T> const& _mat, MyMatrix<T>& _mat_test) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), mat_test(_mat_test), V1(n_cols), V2(n_cols)
   {
-    std::vector<T> V1(n_cols);
-    std::vector<T> V2(n_cols);
-    auto set_v=[&](std::vector<T> & W, size_t idx) -> void {
-       if (idx < n_rows) {
-         for (size_t i=0; i<n_cols; i++)
-           W[i] = mat(idx, i);
-       } else {
-         for (size_t i=0; i<n_cols; i++)
-           W[i] = (*ptr)(idx - n_rows, i);
-       }
+    auto set_v=[&](std::vector<T> & W, const size_t& idx) -> void {
+      if (idx < n_rows) {
+        for (size_t i=0; i<n_cols; i++)
+          W[i] = mat(idx, i);
+      } else {
+        for (size_t i=0; i<n_cols; i++) {
+          size_t alpha=idx - n_rows;
+          W[i] = mat_test(alpha, i);
+        }
+      }
     };
     auto fct_hash=[&](size_t idx) -> size_t {
        set_v(V1, idx);
@@ -2404,19 +2405,17 @@ public:
        return true;
     };
     set = std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>>({},fct_hash, fct_equal);
+    for (size_t i_row=0; i_row<n_rows; i_row++)
+      set.insert(i_row);
   }
-  bool IsSubset(MyMatrix<T> const& M) const
+  bool IsSubset(MyMatrix<T> & M) const
   {
-    ptr = &M;
+    mat_test = M;
     size_t n_rows_m = M.rows();
     for (size_t i_row=0; i_row<n_rows_m; i_row++)
       if (set.find(i_row + n_rows) == set.end())
         return false;
     return true;
-  }
-  void SetPtr(MyMatrix<T>* ptr_input)
-  {
-    ptr = ptr_input;
   }
   std::pair<bool,size_t> GetIdx() const
   {
