@@ -2384,6 +2384,8 @@ public:
     std::cerr << "ContainerMatrix n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
     auto set_v=[&](std::vector<T> & W, const size_t& idx) -> void {
       std::cerr << "B : set_v idx=" << idx << " |W|=" << W.size() << "\n";
+      std::cerr << "n_rows=" << n_rows << "\n";
+      std::cerr << "Before the test\n";
       if (idx < n_rows) {
         std::cerr << "Case 1\n";
         for (size_t i=0; i<n_cols; i++)
