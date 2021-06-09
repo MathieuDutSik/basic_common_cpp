@@ -2384,75 +2384,35 @@ private:
 public:
   void set_v(std::vector<T> & W, const size_t& idx)
   {
-    std::cerr << "set_v 1 : n_rows=" << n_rows << "\n";
-    std::cerr << "B : set_v idx=" << idx << " |W|=" << W.size() << "\n";
-    std::cerr << "set_v 2 : n_rows=" << n_rows << "\n";
-    std::cerr << "Before the test\n";
     if (idx < n_rows) {
-      std::cerr << "Case 1\n";
       for (size_t i=0; i<n_cols; i++)
         W[i] = mat(idx, i);
     } else {
-      std::cerr << "Case 2\n";
       for (size_t i=0; i<n_cols; i++) {
-        std::cerr << "i=" << i << "\n";
         size_t alpha=idx - n_rows;
-        std::cerr << "alpha=" << alpha << "\n";
         T val = mat(alpha, i);
-        std::cerr << "val=" << val << "\n";
         W[i] = val;
       }
     }
-    std::cerr << "A : set_v\n";
   }
   ContainerMatrix(MyMatrix<T> const& _mat, MyMatrix<T>& _mat_test) : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), mat_test(_mat_test), V1(n_cols), V2(n_cols)
   {
-    std::cerr << "ContainerMatrix n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
-    for (size_t i_row=0; i_row<n_rows; i_row++) {
-      for (size_t i_col=0; i_col<n_cols; i_col++)
-        std::cerr << " " << mat(i_row,i_col);
-      std::cerr << "\n";
-    }
     std::function<size_t(size_t)> fct_hash=[&](size_t idx) -> size_t {
-      std::cerr << "fct_hash : Before set_v idx=" << idx << "\n";
-      std::cerr << "n_rows=" << n_rows << "\n";
       set_v(V1, idx);
-      std::cerr << "n_rows=" << n_rows << "\n";
-      std::cerr << "fct_hash : After set_v\n";
-      std::cerr << "V1 =";
-      for (size_t i=0; i<n_cols; i++)
-        std::cerr << " " << V1[i];
-      std::cerr << "\n";
       size_t hash = std::hash<std::vector<T>>()(V1);
-      std::cerr << "fct_hash : hash=" << hash << "\n";
-      std::cerr << "n_rows=" << n_rows << "\n";
       return hash;
     };
     std::function<bool(size_t, size_t)> fct_equal=[&](size_t idx1, size_t idx2) -> bool {
-      std::cerr << "fct_equal : idx1=" << idx1 << " idx2=" << idx2 << "\n";
-      std::cerr << "n_rows=" << n_rows << "\n";
       set_v(V1, idx1);
-      std::cerr << "V1 =";
-      for (size_t i=0; i<n_cols; i++)
-        std::cerr << " " << V1[i];
-      std::cerr << "\n";
-      std::cerr << "n_rows=" << n_rows << "\n";
       set_v(V2, idx2);
-      std::cerr << "V2 =";
-      for (size_t i=0; i<n_cols; i++)
-        std::cerr << " " << V2[i];
-      std::cerr << "\n";
-      std::cerr << "n_rows=" << n_rows << "\n";
       for (size_t i=0; i<n_cols; i++)
         if (V1[i] != V2[i])
           return false;
-      std::cerr << "Now returning true\n";
       return true;
     };
     set = std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>>({},fct_hash, fct_equal);
     for (size_t i_row=0; i_row<n_rows; i_row++)
       set.insert(i_row);
-    std::cerr << "End of constructor n_rows=" << n_rows << " n_cols=" << n_cols << "\n";
   }
   bool IsSubset(MyMatrix<T> & M)
   {
@@ -2465,15 +2425,10 @@ public:
   }
   std::pair<bool,size_t> GetIdx()
   {
-    std::cerr << "B : GetIdx()\n";
-    std::cerr << "n_rows=" << n_rows << "\n";
-    std::cerr << "Before find\n";
-    size_t test_val = n_rows;
-    auto iter = set.find(test_val);
+    auto iter = set.find(n_rows);
     if (iter == set.end())
       return {false, 0};
     size_t idx = *iter;
-    std::cerr << "GetIdx : idx=" << idx << "\n";
     return {true, idx};
   }
 };
