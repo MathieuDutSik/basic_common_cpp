@@ -2404,10 +2404,12 @@ public:
       std::cerr << "A : set_v\n";
     };
     std::function<size_t(size_t)> fct_hash=[&](size_t idx) -> size_t {
+      return 0;
       set_v(V1, idx);
       return std::hash<std::vector<T>>()(V1);
     };
     std::function<bool(size_t, size_t)> fct_equal=[&](size_t idx1, size_t idx2) -> bool {
+      return true;
       set_v(V1, idx1);
       set_v(V2, idx2);
       for (size_t i=0; i<n_cols; i++)
