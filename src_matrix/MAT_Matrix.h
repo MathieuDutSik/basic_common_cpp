@@ -2373,8 +2373,8 @@ template<typename T>
 struct ContainerMatrix {
 private:
   MyMatrix<T> const& mat;
-  size_t n_rows;
-  size_t n_cols;
+  const size_t n_rows;
+  const size_t n_cols;
   MyMatrix<T> & mat_test;
   std::vector<T> V1, V2;
   std::unordered_set<size_t, std::function<size_t(size_t)>, std::function<bool(size_t, size_t)>> set;
