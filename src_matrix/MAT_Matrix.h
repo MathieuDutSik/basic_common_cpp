@@ -2369,6 +2369,9 @@ int IntegerDiscriminantInvariant(MyMatrix<T> const& NewMat, int const& n_pes)
 
 
 
+
+
+
 template<typename T>
 struct ContainerMatrix {
 private:
@@ -2410,7 +2413,9 @@ public:
     };
     std::function<size_t(size_t)> fct_hash=[&](size_t idx) -> size_t {
       std::cerr << "fct_hash : Before set_v idx=" << idx << "\n";
+      std::cerr << "n_rows=" << n_rows << "\n";
       set_v(V1, idx);
+      std::cerr << "n_rows=" << n_rows << "\n";
       std::cerr << "fct_hash : After set_v\n";
       std::cerr << "V1 =";
       for (size_t i=0; i<n_cols; i++)
@@ -2418,20 +2423,24 @@ public:
       std::cerr << "\n";
       size_t hash = std::hash<std::vector<T>>()(V1);
       std::cerr << "fct_hash : hash=" << hash << "\n";
+      std::cerr << "n_rows=" << n_rows << "\n";
       return hash;
     };
     std::function<bool(size_t, size_t)> fct_equal=[&](size_t idx1, size_t idx2) -> bool {
       std::cerr << "fct_equal : idx1=" << idx1 << " idx2=" << idx2 << "\n";
+      std::cerr << "n_rows=" << n_rows << "\n";
       set_v(V1, idx1);
       std::cerr << "V1 =";
       for (size_t i=0; i<n_cols; i++)
         std::cerr << " " << V1[i];
       std::cerr << "\n";
+      std::cerr << "n_rows=" << n_rows << "\n";
       set_v(V2, idx2);
       std::cerr << "V2 =";
       for (size_t i=0; i<n_cols; i++)
         std::cerr << " " << V2[i];
       std::cerr << "\n";
+      std::cerr << "n_rows=" << n_rows << "\n";
       for (size_t i=0; i<n_cols; i++)
         if (V1[i] != V2[i])
           return false;
