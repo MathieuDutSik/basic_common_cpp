@@ -1935,6 +1935,7 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const& M)
 }
 
 
+template<typename T>
 MyMatrix<T> CanonicalizeOrderedMatrix_Kernel(const MyMatrix<T>& M)
 {
   static_assert(is_ring_field<T>::value, "Requires T to have inverses in Kernel_ComputeAffineBasis");
