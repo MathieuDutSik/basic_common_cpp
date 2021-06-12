@@ -66,8 +66,7 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 		iRowF=iRow;
 		iColF=iCol;
 		MinPivot=eValA;
-	      }
-	      else {
+	      } else {
 		if (eValA < MinPivot) {
 		  iRowF=iRow;
 		  iColF=iCol;
@@ -153,14 +152,12 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   }
   if (0 <= m) {
     f=m; fm=1;
-  }
-  else {
+  } else {
     f=-m; fm=-1;
   }
   if (0 <= n) {
     g=n; gm=0;
-  }
-  else {
+  } else {
     g=-n; gm=0;
   }
   while (g != 0) {
@@ -173,8 +170,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   if (n == 0) {
     eCoeff1=fm;
     eCoeff2=0;
-  }
-  else {
+  } else {
     eCoeff1=fm;
     eCoeff2=(f - fm * m) / n;
   }
@@ -474,15 +470,13 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 // same Template structure as other codes in this library.
 // The output of the call of ComputeRowHermiteNormalForm ( M )
 // The return (U,H) is U an unimodular matrix with U M = H
-template<typename T>
-std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> const& M)
+template<typename T, typename F>
+void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
 {
-  int nbRow=M.rows();
-  int nbCol=M.cols();
+  int nbRow=H.rows();
+  int nbCol=H.cols();
   Face StatusRow(nbRow);
   //
-  MyMatrix<T> H = M;
-  MyMatrix<T> U = IdentityMat<T>(nbRow);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
@@ -509,8 +503,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
-      U = TheMat1 * U;
-      H = TheMat1 * H;
+      auto fct1=[&](MyMatrix<T> & m) -> void {
+        m = TheMat1 * m;
+      };
+      f(fct1);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
@@ -528,8 +524,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       // (in the case of integer. For other rings this is a different story)
       T eCanUnit = CanonicalizationUnit(H(TopPosition, iCol));
       if (eCanUnit != 1) {
-        U.row(TopPosition) = eCanUnit * U.row(TopPosition);
-        H.row(TopPosition) = eCanUnit * H.row(TopPosition);
+        auto fct2=[&](MyMatrix<T> & m) -> void {
+          m.row(TopPosition) = eCanUnit * m.row(TopPosition);
+        };
+        f(fct2);
       }
       //
       // Putting the coefficients over the pivot
@@ -538,8 +536,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
-          U.row(iRow) -= TheQ * U.row(TopPosition);
-          H.row(iRow) -= TheQ * H.row(TopPosition);
+          auto fct3=[&](MyMatrix<T> & m) -> void {
+            m.row(iRow) -= TheQ * m.row(TopPosition);
+          };
+          f(fct3);
         }
       }
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
@@ -555,19 +555,31 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
 #endif
+}
+
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> const& M)
+{
+  int nbRow=M.rows();
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMat<T>(nbRow);
+  auto f=[&](auto g) -> void {
+    g(H);
+    g(U);
+  };
+  ComputeRowHermiteNormalForm_Kernel(H, f);
   return {std::move(U), std::move(H)};
 }
 
 
-template<typename T>
-std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> const& M)
+
+template<typename T, typename F>
+void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
 {
-  int nbRow=M.rows();
-  int nbCol=M.cols();
+  int nbRow=H.rows();
+  int nbCol=H.cols();
   Face StatusRow(nbCol);
   //
-  MyMatrix<T> H = M;
-  MyMatrix<T> U = IdentityMat<T>(nbCol);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
@@ -594,8 +606,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(i,j);
-      U = U * TheMat1;
-      H = H * TheMat1;
+      auto fct1=[&](MyMatrix<T> & m) -> void {
+        m = m * TheMat1;
+      };
+      f(fct1);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
@@ -613,8 +627,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
       // (in the case of integer. For other rings this is a different story)
       T eCanUnit = CanonicalizationUnit(H(iRow, TopPosition));
       if (eCanUnit != 1) {
-        U.col(TopPosition) = eCanUnit * U.col(TopPosition);
-        H.col(TopPosition) = eCanUnit * H.col(TopPosition);
+        auto fct2=[&](MyMatrix<T> & m) -> void {
+          m.col(TopPosition) = eCanUnit * m.col(TopPosition);
+        };
+        f(fct2);
       }
       //
       // Putting the coefficients over the pivot
@@ -623,8 +639,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
-          U.col(iCol) -= TheQ * U.col(TopPosition);
-          H.col(iCol) -= TheQ * H.col(TopPosition);
+          auto fct3=[&](MyMatrix<T> & m) -> void {
+            m.col(iCol) -= TheQ * m.col(TopPosition);
+          };
+          f(fct3);
         }
       }
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
@@ -640,9 +658,23 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
 #endif
-  return {std::move(U), std::move(H)};
 }
 
+
+
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> const& M)
+{
+  int nbCol=M.cols();
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMat<T>(nbCol);
+  auto f=[&](auto g) -> void {
+    g(H);
+    g(U);
+  };
+  ComputeColHermiteNormalForm_Kernel(H, f);
+  return {std::move(U), std::move(H)};
+}
 
 
 
@@ -675,8 +707,7 @@ void INT_ClearColumn(MyMatrix<T> & eMat, int const& iCol, int const& MinAllowedR
 	if (nbFound == 0) {
 	  MinVal=AbsEVal;
 	  iRowFound=iRow;
-	}
-	else {
+	} else {
 	  if (AbsEVal < MinVal) {
 	    MinVal=AbsEVal;
 	    iRowFound=iRow;
@@ -739,8 +770,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       INT_ClearColumn(eMatW, iCol, eRank, iRowFound);
       SwitchRow(eMatW, eRank, iRowFound);
       eRank++;
-    }
-    else {
+    } else {
       ListNonIndex.push_back(iCol);
     }
   int dimSpace=ListNonIndex.size();
@@ -750,8 +780,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     for (int j=0; j<dimSpace; j++) {
       if (i == j) {
 	eVect.push_back(1);
-      }
-      else {
+      } else {
 	eVect.push_back(0);
       }
     }
@@ -862,8 +891,7 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 	  IsFirst=false;
 	  AbsVal=hVal;
 	  idxSelect=i;
-	}
-	else {
+	} else {
 	  if (hVal < AbsVal)
 	    {
 	      idxSelect=i;
@@ -974,8 +1002,7 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 	    IsFirst=false;
 	    AbsVal=hVal;
 	    idxSelect=j;
-	  }
-	  else {
+	  } else {
 	    if (hVal < AbsVal) {
 	      idxSelect=j;
 	      AbsVal=hVal;
@@ -1114,8 +1141,7 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
     MyVector<T> eSol;
     if (IsZeroVector(TheVect)) {
       return {true, std::move(eSol)};
-    }
-    else {
+    } else {
       return {false, {}};
     }
   }
@@ -1143,8 +1169,7 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
 	      IsFirst=false;
 	      MinValue=eNorm;
 	      iVectFound=iVect;
-	    }
-	    else {
+	    } else {
 	      if (eNorm < MinValue) {
 		MinValue=eNorm;
 		iVectFound=iVect;
@@ -1264,8 +1289,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
 	      IsFirst=false;
 	      MinValue=eNorm;
 	      iVectFound=iVect;
-	    }
-	    else {
+	    } else {
 	      if (eNorm < MinValue) {
 		MinValue=eNorm;
 		iVectFound=iVect;
@@ -1309,8 +1333,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
       }
 #endif
       VectStatus[iVectFound]=0;
-    }
-    else {
+    } else {
       eVal=-1;
     }
     ListRow[i]=eVal;
@@ -1435,8 +1458,7 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
 	  IsFirst=false;
 	  AbsVal=eNorm;
 	  iRowSearch=iRow;
-	}
-	else {
+	} else {
 	  if (eNorm < AbsVal) {
 	    AbsVal=eNorm;
 	    iRowSearch=iRow;
@@ -1814,8 +1836,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
       for (int i=0; i<n2; i++) {
 	if (eVect(i) == 0) {
 	  ListIdxZ.push_back(i);
-	}
-	else {
+	} else {
 	  ListIdxNZ.push_back(i);
 	}
       }
@@ -1831,8 +1852,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
 	if (IsFirst) {
 	  TheMin=eAbs;
 	  ThePivot=eVal;
-	}
-	else {
+	} else {
 	  if (eAbs < TheMin) {
 	    TheMin=eAbs;
 	    ThePivot=eVal;
@@ -1855,8 +1875,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     if (dimSpace == 0) {
       ListEqua=IdentityMat<T>(TheDim);
       eSet={};
-    }
-    else {
+    } else {
       /*      std::cerr << "TheBasis=\n";
 	      WriteMatrix(std::cerr, TheBasis);*/
       ListEqua=NullspaceTrMat(TheBasis);
@@ -1884,8 +1903,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     if (!test) {
       TheBasis=ConcatenateMatVec(TheBasis, eElt);
       fComputeSpeed();
-    }
-    else {
+    } else {
       if (TheBasis.rows() == 0)
 	return;
       MyVector<T> eEltRed=SelectColumnVector(eElt, eSet);
