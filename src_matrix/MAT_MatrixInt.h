@@ -977,7 +977,7 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 
 
 // We have two matrices M1 and M2 and we check if they define
-// the same subspace of T^n 
+// the same subspace of T^n
 template<typename T>
 bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
@@ -1156,14 +1156,12 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       return {false, {}};
     }
   }
-  //  std::cerr << "nbVect=" << nbVect << " nbCol=" << nbCol << "\n";
   MyVector<T> eSol=ZeroVector<T>(nbVect);
   MyMatrix<T> eEquivMat=IdentityMat<T>(nbVect);
   MyMatrix<T> TheMatWork=TheMat;
   MyVector<T> TheVectWork=TheVect;
   std::vector<int> VectStatus(nbVect,1);
   for (int i=0; i<nbCol; i++) {
-    //    std::cerr << "i=" << i << " nbCol=" << nbCol << "\n";
     int iVectFound=-1;
     while(true) {
       bool IsFirst=true;
@@ -1173,7 +1171,6 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
         if (VectStatus[iVect] == 1) {
           T prov1=TheMatWork(iVect, i);
           Treal eNorm=T_NormGen(prov1);
-	  //	  std::cerr << "iVect=" << iVect << " eNorm=" << eNorm << "\n";
 	  if (prov1 != 0) {
 	    nbDiff++;
 	    if (IsFirst) {
@@ -1196,25 +1193,16 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
 	throw TerminalException{1};
       }
 #endif
-      //      std::cerr << "i=" << i << " iVectFound=" << iVectFound << " nbDiff=" << nbDiff << " MinValue=" << MinValue << "\n";
       for (int iVect=0; iVect<nbVect; iVect++)
 	if (VectStatus[iVect] == 1 && iVect != iVectFound) {
 	  T prov1b=TheMatWork(iVectFound, i);
 	  T prov2=TheMatWork(iVect, i);
 	  T TheQ=QuoInt(prov2, prov1b);
           if (TheQ != 0) {
-            //	  std::cerr << "iVect=" << iVect << " prov1b=" << prov1b << " prov2=" << prov2 << " q=" << TheQ << "\n";
             TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
             eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
           }
 	}
-      /*      std::cerr << "Now TheMatWork=\n";
-	      WriteMatrix(std::cerr, TheMatWork);*/
-      /*      MyMatrix<T> eProdMat=eEquivMat*TheMat;
-      if (TheMatWork != eProdMat) {
-	std::cerr << "Matrix error in the construction of eEquivMat and TheMatWork\n";
-	throw TerminalException{1};
-	}*/
     }
     if (nbDiff == 1) {
 #ifdef DEBUG
@@ -1224,8 +1212,6 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       }
 #endif
       VectStatus[iVectFound]=0;
-      /*      std::cerr << "TheMatWork=\n";
-	      WriteMatrix(std::cerr, TheMatWork);*/
       T prov1=TheVectWork(i);
       T prov2=TheMatWork(iVectFound, i);
       T TheQ=QuoInt(prov1, prov2);
@@ -1239,17 +1225,6 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
     if (TheVectWork(i) != 0)
       return {false, {}};
   }
-  /*
-  MyVector<T> eProd=ProductVectorMatrix(eSol,TheMat);
-  for (int i=0; i<nbCol; i++)
-    if (eProd(i) != TheVect(i)) {
-      std::cerr << "eProd=\n";
-      WriteVector(std::cerr, eProd);
-      std::cerr << "TheVect=\n";
-      WriteVector(std::cerr, TheVect);
-      std::cerr << "SolutionIntMat: Error in the solutioning algorithm\n";
-      throw TerminalException{1};
-      }*/
   return {true, std::move(eSol)};
 }
 
@@ -1283,7 +1258,6 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
   std::vector<int> VectStatus(nbVect,1);
   std::vector<int> ListRow(nbCol);
   for (int i=0; i<nbCol; i++) {
-    //    std::cerr << "i=" << i << " nbCol=" << nbCol << "\n";
     int iVectFound=-1;
     while(true) {
       bool IsFirst=true;
@@ -1293,7 +1267,6 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
         if (VectStatus[iVect] == 1) {
           T prov1=TheMatWork(iVect, i);
           Treal eNorm=T_NormGen(prov1);
-	  //	  std::cerr << "iVect=" << iVect << " eNorm=" << eNorm << "\n";
 	  if (prov1 != 0) {
 	    nbDiff++;
 	    if (IsFirst) {
@@ -1326,17 +1299,10 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
             eEquivMat.row(iVect)  -= TheQ*eEquivMat.row(iVectFound);
           }
 	}
-      /*      MyMatrix<T> eProdMat=eEquivMat*TheMat;
-      if (TheMatWork != eProdMat) {
-	std::cerr << "Matrix error in the construction of eEquivMat and TheMatWork\n";
-	throw TerminalException{1};
-	}*/
     }
     int eVal;
     if (nbDiff == 1) {
       eVal=iVectFound;
-      //      ListRow.push_back(iVectFound);
-      //      ListCol.push_back(i);
 #ifdef DEBUG
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
@@ -1442,9 +1408,6 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
   MyMatrix<T> TheBasisReduced = TheBasis;
   MyMatrix<T> Pmat=IdentityMat<T>(nbCol);
   MyMatrix<T> TheBasisReord(nbRow, nbCol);
-  //  std::cerr << "Before writing TheBasis\n";
-  //  WriteMatrix(std::cerr, TheBasis);
-  //  std::cerr << " After writing TheBasis\n";
   std::vector<int> IdxVector;
   auto FindMinGCDrow=[&](int const& iRank) -> int {
     int iRowSearch=-1;
@@ -1453,17 +1416,11 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     for (int iRow=0; iRow<nbRow; iRow++)
       if (rowStat[iRow] == 1) {
 	std::vector<T> eRowRed(nbCol - iRank);
-	//	std::cerr << "eRowRed=";
 	for (int iCol=0; iCol<nbCol - iRank; iCol++) {
 	  T eVal=TheBasisReduced(iRow, iCol+iRank);
-	  //	  std::cerr << " " << eVal;
 	  eRowRed[iCol]=eVal;
 	}
-	//	std::cerr << "\n";
-	//	std::cerr << "Before GCD computation\n";
 	GCD_int<T> eGCD=ComputeGCD_information(eRowRed);
-	//	std::cerr << "After GCD computation\n";
-	//	WriteGCD_int(std::cerr, eGCD);
 	Treal eNorm=T_NormGen(eGCD.gcd);
 	if (IsFirst) {
 	  IsFirst=false;
@@ -1479,15 +1436,8 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     return iRowSearch;
   };
   auto SingleMultiplicationUpdate=[&](MyMatrix<T> const& PartMat) -> void {
-    //    std::cerr << "SingleMultiplicationUpdate\n";
-    //    std::cerr << "PartMat=\n";
-    //    WriteMatrix(std::cerr, PartMat);
     Pmat = Pmat*PartMat;
-    //    std::cerr << "Now Pmat=\n";
-    //    WriteMatrix(std::cerr, Pmat);
     TheBasisReduced = TheBasisReduced*PartMat;
-    //    std::cerr << "Now TheBasisReduced=\n";
-    //    WriteMatrix(std::cerr, TheBasisReduced);
   };
   auto UpdateMatrices=[&](int const& iRank, int const& iRowSearch) -> void {
     rowStat[iRowSearch]=0;
@@ -1495,20 +1445,11 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     std::vector<T> eRowRed(nbCol - iRank);
     for (int iCol=0; iCol<nbCol - iRank; iCol++)
       eRowRed[iCol]=TheBasisReduced(iRowSearch, iCol+iRank);
-    /*    std::cerr << "eRowRed=";
-    for (auto & eVal : eRowRed)
-      std::cerr << " " << eVal;
-      std::cerr << "\n";*/
     GCD_int<T> eGCD=ComputeGCD_information(eRowRed);
-    //    std::cerr << "eGCD.Pmat=\n";
-    //    WriteMatrix(std::cerr, eGCD.Pmat);
     MyMatrix<T> PartMat=IdentityMat<T>(nbCol);
-    //    std::cerr << "Before operations: iRank=" << iRank << "\n";
     for (int iCol=iRank; iCol<nbCol; iCol++)
       for (int iRow=iRank; iRow<nbCol; iRow++)
 	PartMat(iRow, iCol) = eGCD.Pmat(iRow-iRank, iCol-iRank);
-    //    std::cerr << "Expression of PartMat:\n";
-    //    WriteMatrix(std::cerr, PartMat);
 
     SingleMultiplicationUpdate(PartMat);
     for (int iCol=0; iCol<iRank; iCol++) {
@@ -1524,18 +1465,13 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
       PartMatC(iRank, iRank)=-1;
       SingleMultiplicationUpdate(PartMatC);
     }
-    //    std::cerr << "iRank=" << iRank << " DiagVal=" << TheBasisReduced(iRowSearch, iRank) << "\n";
     TheBasisReord.row(iRank)=TheBasisReduced.row(iRowSearch);
   };
   int TheRank=std::min(nbCol, nbRow);
   for (int iRank=0; iRank<TheRank; iRank++) {
-    //    std::cerr << "iRank=" << iRank << "\n";
     int iRowSearch=FindMinGCDrow(iRank);
-    //    std::cerr << "iRowSearch=" << iRowSearch << "\n";
     UpdateMatrices(iRank, iRowSearch);
   }
-  //  std::cerr << "Pmat=\n";
-  //  WriteMatrix(std::cerr, Pmat);
   BasisReduction<T> eRed{TheBasisReduced, Pmat, IdxVector, TheBasisReord};
   return eRed;
 }
@@ -1557,7 +1493,7 @@ struct AffineBasisResult {
 // Given a family of points EXT, find a subset (v1, ...., vN) of EXT
 // such that for every point of v of EXT there exist lambda1, ..., lambdaN in T
 // with v=lambda1 v1 + .... + lambdaN vN
-// This may not exist 
+// This may not exist
 template<typename T>
 AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 {
@@ -1592,7 +1528,6 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     V1=EXTwork.row(iVect);
     std::cerr << "V1 rows=" << V1.rows() << " cols=" << V1.cols() << "\n";
     ListExp(iVect, idx)=1;
-    //    std::cerr << "fInsertValue, step 1\n";
     for (int iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
 	V2=EXTwork.row(iRow);
@@ -1606,21 +1541,14 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 	}
       }
     ColumnStatus[eCol]=0;
-    //    std::cerr << "fInsertValue, step 2\n";
     RowStatus[iVect]=1;
     for (int iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
-	//	std::cerr << "iRow=" << iRow << "\n";
 	V2=EXTwork.row(iRow);
-	//	std::cerr << "V2 extracted\n";
 	T eQuot=V2(eCol)/V1(eCol);
-	//	std::cerr << "eQuot extracted\n";
 	ListExp.row(iRow)=ListExp.row(iRow) - eQuot*ListExp.row(iVect);
-	//	std::cerr << "After ListExp assignation\n";
 	EXTwork.row(iRow)=EXTwork.row(iRow) - eQuot*EXTwork.row(iVect);
-	//	std::cerr << "After EXTwork assignation\n";
 	V2=EXTwork.row(iRow);
-	//	std::cerr << "After eVect extraction\n";
 	bool IsZero=IsZeroVector(V2);
 	int iRowPrint=-2249;
 	if (iRow == iRowPrint) {
@@ -1629,7 +1557,6 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 	    std::cerr << " jCol=" << jCol << " stat=" << ColumnStatus[jCol] << " val=" << EXTwork(iRowPrint,jCol) << "\n";
 	  std::cerr << iRowPrint << ": IsZero=" << IsZero << "\n";
 	}
-	//	std::cerr << "After IsZero check\n";
 	if (IsZero)
 	  RowStatus[iRow]=1;
       }
@@ -1638,23 +1565,6 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
       if (RowStatus[iRow] == 1)
 	nbFinished++;
     std::cerr << "nbFinished=" << nbFinished << "\n";
-    /*
-    for (int iRow=0; iRow<nbRow; iRow++)
-      for (int iCol=0; iCol<nbCol; iCol++)
-	if (ColumnStatus[iCol] == 0 && RowStatus[iRow] == 0)
-	  if (EXTwork(iRow, iCol) != 0) {
-	    std::cerr << "Inconsistency error\n";
-	    std::cerr << "eCol=" << eCol << "\n";
-	    std::cerr << "idx=" << idx << "\n";
-	    std::cerr << "iVect=" << iVect << "\n";
-	    for (int jCol=0; jCol<nbCol; jCol++)
-	      std::cerr << " jCol=" << jCol << " stat=" << ColumnStatus[jCol] << " val=" << EXTwork(iRow,jCol) << "\n";
-	    std::cerr << "nbRow=" << nbRow << "\n";
-	    std::cerr << "nbCol=" << nbCol << "\n";
-	    throw TerminalException{1};
-	    }
-    */
-    //    std::cerr << "fInsertValue, step 3\n";
     return true;
   };
   int nbIter=1000;
@@ -1671,12 +1581,9 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   auto SetLocallyCorrectIndex=[&](int const& idx) -> int {
     for (int iter=0; iter<nbIter; iter++) {
       int eVal=GetRandomNumber();
-      //      std::cerr << "SetLocallyCorrectIndex eVal=" << eVal << "\n";
       if (eVal == -1)
 	return -1;
-      //      std::cerr << "Before fInsertValue eVal=" << eVal << "\n";
       bool res=fInsertValue(idx, eVal);
-      //      std::cerr << "After fInsertValue\n";
       UsedNumber[eVal]=1;
       if (res) {
 	ListIdx[idx]=eVal;
@@ -1687,12 +1594,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   };
   for (int i=0; i<n; i++) {
     std::cerr << "i=" << i << "\n";
-    //    std::cerr << "Before SetLocallyCorectIndex\n";
-    //    WriteMatrix(std::cerr, EXTwork);
     int eVal=SetLocallyCorrectIndex(i);
-    //    std::cerr << "i=" << i << "\n";
-    //    std::cerr << "Reduced Matrix form\n";
-    //    WriteMatrix(std::cerr, EXTwork);
     if (eVal == -1)
       return {false, {}};
   }
@@ -1718,7 +1620,7 @@ MyMatrix<T> RandomUnimodularMatrix(int const& n)
 }
 
 
-template<typename T> 
+template<typename T>
 AffineBasisResult ComputeAffineBasis(MyMatrix<T> const& EXT)
 {
   int nbIter=1000;
@@ -1784,8 +1686,6 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
       break;
   }
   return ListClasses;
-
-  
 }
 
 
@@ -2034,6 +1934,29 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const& M)
   return CompleteBasis;
 }
 
+
+MyMatrix<T> CanonicalizeOrderedMatrix_Kernel(const MyMatrix<T>& M)
+{
+  static_assert(is_ring_field<T>::value, "Requires T to have inverses in Kernel_ComputeAffineBasis");
+  MyMatrix<T> Basis = RowReduction(M);
+  MyMatrix<T> M1 = M * Inverse(Basis);
+  return RemoveFractionMatrix(M1);
+}
+
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value,MyMatrix<T>>::type CanonicalizeOrderedMatrix(MyMatrix<T> const& Input)
+{
+  return CanonicalizeOrderedMatrix_Kernel(Input);
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type CanonicalizeOrderedMatrix(MyMatrix<T> const& Input)
+{
+  using Tfield=typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> InputF = ConvertMatrixUniversal<Tfield,T>(Input);
+  MyMatrix<Tfield> OutputF = CanonicalizeOrderedMatrix_Kernel(InputF);
+  return ConvertMatrixUniversal<T,Tfield>(OutputF);
+}
 
 
 
