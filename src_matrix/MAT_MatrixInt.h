@@ -676,6 +676,17 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
   return {std::move(U), std::move(H)};
 }
 
+template<typename T>
+MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const& M)
+{
+  MyMatrix<T> H = M;
+  auto f=[&](auto g) -> void {
+    g(H);
+  };
+  ComputeColHermiteNormalForm_Kernel(H, f);
+  return H;
+}
+
 
 
 template<typename T>
