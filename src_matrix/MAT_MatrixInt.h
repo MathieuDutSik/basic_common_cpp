@@ -66,8 +66,7 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 		iRowF=iRow;
 		iColF=iCol;
 		MinPivot=eValA;
-	      }
-	      else {
+	      } else {
 		if (eValA < MinPivot) {
 		  iRowF=iRow;
 		  iColF=iCol;
@@ -153,14 +152,12 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   }
   if (0 <= m) {
     f=m; fm=1;
-  }
-  else {
+  } else {
     f=-m; fm=-1;
   }
   if (0 <= n) {
     g=n; gm=0;
-  }
-  else {
+  } else {
     g=-n; gm=0;
   }
   while (g != 0) {
@@ -173,8 +170,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   if (n == 0) {
     eCoeff1=fm;
     eCoeff2=0;
-  }
-  else {
+  } else {
     eCoeff1=fm;
     eCoeff2=(f - fm * m) / n;
   }
@@ -474,15 +470,13 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 // same Template structure as other codes in this library.
 // The output of the call of ComputeRowHermiteNormalForm ( M )
 // The return (U,H) is U an unimodular matrix with U M = H
-template<typename T>
-std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> const& M)
+template<typename T, typename F>
+void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
 {
-  int nbRow=M.rows();
-  int nbCol=M.cols();
+  int nbRow=H.rows();
+  int nbCol=H.cols();
   Face StatusRow(nbRow);
   //
-  MyMatrix<T> H = M;
-  MyMatrix<T> U = IdentityMat<T>(nbRow);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
@@ -509,8 +503,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
-      U = TheMat1 * U;
-      H = TheMat1 * H;
+      auto fct1=[&](MyMatrix<T> & m) -> void {
+        m = TheMat1 * m;
+      };
+      f(fct1);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
@@ -528,8 +524,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
       // (in the case of integer. For other rings this is a different story)
       T eCanUnit = CanonicalizationUnit(H(TopPosition, iCol));
       if (eCanUnit != 1) {
-        U.row(TopPosition) = eCanUnit * U.row(TopPosition);
-        H.row(TopPosition) = eCanUnit * H.row(TopPosition);
+        auto fct2=[&](MyMatrix<T> & m) -> void {
+          m.row(TopPosition) = eCanUnit * m.row(TopPosition);
+        };
+        f(fct2);
       }
       //
       // Putting the coefficients over the pivot
@@ -538,8 +536,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
-          U.row(iRow) -= TheQ * U.row(TopPosition);
-          H.row(iRow) -= TheQ * H.row(TopPosition);
+          auto fct3=[&](MyMatrix<T> & m) -> void {
+            m.row(iRow) -= TheQ * m.row(TopPosition);
+          };
+          f(fct3);
         }
       }
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
@@ -555,19 +555,31 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
 #endif
+}
+
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> const& M)
+{
+  int nbRow=M.rows();
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMat<T>(nbRow);
+  auto f=[&](auto g) -> void {
+    g(H);
+    g(U);
+  };
+  ComputeRowHermiteNormalForm_Kernel(H, f);
   return {std::move(U), std::move(H)};
 }
 
 
-template<typename T>
-std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> const& M)
+
+template<typename T, typename F>
+void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
 {
-  int nbRow=M.rows();
-  int nbCol=M.cols();
+  int nbRow=H.rows();
+  int nbCol=H.cols();
   Face StatusRow(nbCol);
   //
-  MyMatrix<T> H = M;
-  MyMatrix<T> U = IdentityMat<T>(nbCol);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
@@ -594,8 +606,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
       for (int i=0; i<siz; i++)
         for (int j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(i,j);
-      U = U * TheMat1;
-      H = H * TheMat1;
+      auto fct1=[&](MyMatrix<T> & m) -> void {
+        m = m * TheMat1;
+      };
+      f(fct1);
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
@@ -613,8 +627,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
       // (in the case of integer. For other rings this is a different story)
       T eCanUnit = CanonicalizationUnit(H(iRow, TopPosition));
       if (eCanUnit != 1) {
-        U.col(TopPosition) = eCanUnit * U.col(TopPosition);
-        H.col(TopPosition) = eCanUnit * H.col(TopPosition);
+        auto fct2=[&](MyMatrix<T> & m) -> void {
+          m.col(TopPosition) = eCanUnit * m.col(TopPosition);
+        };
+        f(fct2);
       }
       //
       // Putting the coefficients over the pivot
@@ -623,8 +639,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
-          U.col(iCol) -= TheQ * U.col(TopPosition);
-          H.col(iCol) -= TheQ * H.col(TopPosition);
+          auto fct3=[&](MyMatrix<T> & m) -> void {
+            m.col(iCol) -= TheQ * m.col(TopPosition);
+          };
+          f(fct3);
         }
       }
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
@@ -640,9 +658,34 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> cons
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
 #endif
+}
+
+
+
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> ComputeColHermiteNormalForm(MyMatrix<T> const& M)
+{
+  int nbCol=M.cols();
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMat<T>(nbCol);
+  auto f=[&](auto g) -> void {
+    g(H);
+    g(U);
+  };
+  ComputeColHermiteNormalForm_Kernel(H, f);
   return {std::move(U), std::move(H)};
 }
 
+template<typename T>
+MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const& M)
+{
+  MyMatrix<T> H = M;
+  auto f=[&](auto g) -> void {
+    g(H);
+  };
+  ComputeColHermiteNormalForm_Kernel(H, f);
+  return H;
+}
 
 
 
@@ -675,8 +718,7 @@ void INT_ClearColumn(MyMatrix<T> & eMat, int const& iCol, int const& MinAllowedR
 	if (nbFound == 0) {
 	  MinVal=AbsEVal;
 	  iRowFound=iRow;
-	}
-	else {
+	} else {
 	  if (AbsEVal < MinVal) {
 	    MinVal=AbsEVal;
 	    iRowFound=iRow;
@@ -739,8 +781,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       INT_ClearColumn(eMatW, iCol, eRank, iRowFound);
       SwitchRow(eMatW, eRank, iRowFound);
       eRank++;
-    }
-    else {
+    } else {
       ListNonIndex.push_back(iCol);
     }
   int dimSpace=ListNonIndex.size();
@@ -750,8 +791,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     for (int j=0; j<dimSpace; j++) {
       if (i == j) {
 	eVect.push_back(1);
-      }
-      else {
+      } else {
 	eVect.push_back(0);
       }
     }
@@ -862,8 +902,7 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 	  IsFirst=false;
 	  AbsVal=hVal;
 	  idxSelect=i;
-	}
-	else {
+	} else {
 	  if (hVal < AbsVal)
 	    {
 	      idxSelect=i;
@@ -938,7 +977,7 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 
 
 // We have two matrices M1 and M2 and we check if they define
-// the same subspace of T^n 
+// the same subspace of T^n
 template<typename T>
 bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
@@ -974,8 +1013,7 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 	    IsFirst=false;
 	    AbsVal=hVal;
 	    idxSelect=j;
-	  }
-	  else {
+	  } else {
 	    if (hVal < AbsVal) {
 	      idxSelect=j;
 	      AbsVal=hVal;
@@ -1114,19 +1152,16 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
     MyVector<T> eSol;
     if (IsZeroVector(TheVect)) {
       return {true, std::move(eSol)};
-    }
-    else {
+    } else {
       return {false, {}};
     }
   }
-  //  std::cerr << "nbVect=" << nbVect << " nbCol=" << nbCol << "\n";
   MyVector<T> eSol=ZeroVector<T>(nbVect);
   MyMatrix<T> eEquivMat=IdentityMat<T>(nbVect);
   MyMatrix<T> TheMatWork=TheMat;
   MyVector<T> TheVectWork=TheVect;
   std::vector<int> VectStatus(nbVect,1);
   for (int i=0; i<nbCol; i++) {
-    //    std::cerr << "i=" << i << " nbCol=" << nbCol << "\n";
     int iVectFound=-1;
     while(true) {
       bool IsFirst=true;
@@ -1136,15 +1171,13 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
         if (VectStatus[iVect] == 1) {
           T prov1=TheMatWork(iVect, i);
           Treal eNorm=T_NormGen(prov1);
-	  //	  std::cerr << "iVect=" << iVect << " eNorm=" << eNorm << "\n";
 	  if (prov1 != 0) {
 	    nbDiff++;
 	    if (IsFirst) {
 	      IsFirst=false;
 	      MinValue=eNorm;
 	      iVectFound=iVect;
-	    }
-	    else {
+	    } else {
 	      if (eNorm < MinValue) {
 		MinValue=eNorm;
 		iVectFound=iVect;
@@ -1160,25 +1193,16 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
 	throw TerminalException{1};
       }
 #endif
-      //      std::cerr << "i=" << i << " iVectFound=" << iVectFound << " nbDiff=" << nbDiff << " MinValue=" << MinValue << "\n";
       for (int iVect=0; iVect<nbVect; iVect++)
 	if (VectStatus[iVect] == 1 && iVect != iVectFound) {
 	  T prov1b=TheMatWork(iVectFound, i);
 	  T prov2=TheMatWork(iVect, i);
 	  T TheQ=QuoInt(prov2, prov1b);
           if (TheQ != 0) {
-            //	  std::cerr << "iVect=" << iVect << " prov1b=" << prov1b << " prov2=" << prov2 << " q=" << TheQ << "\n";
             TheMatWork.row(iVect) -= TheQ*TheMatWork.row(iVectFound);
             eEquivMat.row(iVect) -= TheQ*eEquivMat.row(iVectFound);
           }
 	}
-      /*      std::cerr << "Now TheMatWork=\n";
-	      WriteMatrix(std::cerr, TheMatWork);*/
-      /*      MyMatrix<T> eProdMat=eEquivMat*TheMat;
-      if (TheMatWork != eProdMat) {
-	std::cerr << "Matrix error in the construction of eEquivMat and TheMatWork\n";
-	throw TerminalException{1};
-	}*/
     }
     if (nbDiff == 1) {
 #ifdef DEBUG
@@ -1188,8 +1212,6 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       }
 #endif
       VectStatus[iVectFound]=0;
-      /*      std::cerr << "TheMatWork=\n";
-	      WriteMatrix(std::cerr, TheMatWork);*/
       T prov1=TheVectWork(i);
       T prov2=TheMatWork(iVectFound, i);
       T TheQ=QuoInt(prov1, prov2);
@@ -1203,17 +1225,6 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
     if (TheVectWork(i) != 0)
       return {false, {}};
   }
-  /*
-  MyVector<T> eProd=ProductVectorMatrix(eSol,TheMat);
-  for (int i=0; i<nbCol; i++)
-    if (eProd(i) != TheVect(i)) {
-      std::cerr << "eProd=\n";
-      WriteVector(std::cerr, eProd);
-      std::cerr << "TheVect=\n";
-      WriteVector(std::cerr, TheVect);
-      std::cerr << "SolutionIntMat: Error in the solutioning algorithm\n";
-      throw TerminalException{1};
-      }*/
   return {true, std::move(eSol)};
 }
 
@@ -1247,7 +1258,6 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
   std::vector<int> VectStatus(nbVect,1);
   std::vector<int> ListRow(nbCol);
   for (int i=0; i<nbCol; i++) {
-    //    std::cerr << "i=" << i << " nbCol=" << nbCol << "\n";
     int iVectFound=-1;
     while(true) {
       bool IsFirst=true;
@@ -1257,15 +1267,13 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
         if (VectStatus[iVect] == 1) {
           T prov1=TheMatWork(iVect, i);
           Treal eNorm=T_NormGen(prov1);
-	  //	  std::cerr << "iVect=" << iVect << " eNorm=" << eNorm << "\n";
 	  if (prov1 != 0) {
 	    nbDiff++;
 	    if (IsFirst) {
 	      IsFirst=false;
 	      MinValue=eNorm;
 	      iVectFound=iVect;
-	    }
-	    else {
+	    } else {
 	      if (eNorm < MinValue) {
 		MinValue=eNorm;
 		iVectFound=iVect;
@@ -1291,17 +1299,10 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
             eEquivMat.row(iVect)  -= TheQ*eEquivMat.row(iVectFound);
           }
 	}
-      /*      MyMatrix<T> eProdMat=eEquivMat*TheMat;
-      if (TheMatWork != eProdMat) {
-	std::cerr << "Matrix error in the construction of eEquivMat and TheMatWork\n";
-	throw TerminalException{1};
-	}*/
     }
     int eVal;
     if (nbDiff == 1) {
       eVal=iVectFound;
-      //      ListRow.push_back(iVectFound);
-      //      ListCol.push_back(i);
 #ifdef DEBUG
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
@@ -1309,8 +1310,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
       }
 #endif
       VectStatus[iVectFound]=0;
-    }
-    else {
+    } else {
       eVal=-1;
     }
     ListRow[i]=eVal;
@@ -1408,9 +1408,6 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
   MyMatrix<T> TheBasisReduced = TheBasis;
   MyMatrix<T> Pmat=IdentityMat<T>(nbCol);
   MyMatrix<T> TheBasisReord(nbRow, nbCol);
-  //  std::cerr << "Before writing TheBasis\n";
-  //  WriteMatrix(std::cerr, TheBasis);
-  //  std::cerr << " After writing TheBasis\n";
   std::vector<int> IdxVector;
   auto FindMinGCDrow=[&](int const& iRank) -> int {
     int iRowSearch=-1;
@@ -1419,24 +1416,17 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     for (int iRow=0; iRow<nbRow; iRow++)
       if (rowStat[iRow] == 1) {
 	std::vector<T> eRowRed(nbCol - iRank);
-	//	std::cerr << "eRowRed=";
 	for (int iCol=0; iCol<nbCol - iRank; iCol++) {
 	  T eVal=TheBasisReduced(iRow, iCol+iRank);
-	  //	  std::cerr << " " << eVal;
 	  eRowRed[iCol]=eVal;
 	}
-	//	std::cerr << "\n";
-	//	std::cerr << "Before GCD computation\n";
 	GCD_int<T> eGCD=ComputeGCD_information(eRowRed);
-	//	std::cerr << "After GCD computation\n";
-	//	WriteGCD_int(std::cerr, eGCD);
 	Treal eNorm=T_NormGen(eGCD.gcd);
 	if (IsFirst) {
 	  IsFirst=false;
 	  AbsVal=eNorm;
 	  iRowSearch=iRow;
-	}
-	else {
+	} else {
 	  if (eNorm < AbsVal) {
 	    AbsVal=eNorm;
 	    iRowSearch=iRow;
@@ -1446,15 +1436,8 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     return iRowSearch;
   };
   auto SingleMultiplicationUpdate=[&](MyMatrix<T> const& PartMat) -> void {
-    //    std::cerr << "SingleMultiplicationUpdate\n";
-    //    std::cerr << "PartMat=\n";
-    //    WriteMatrix(std::cerr, PartMat);
     Pmat = Pmat*PartMat;
-    //    std::cerr << "Now Pmat=\n";
-    //    WriteMatrix(std::cerr, Pmat);
     TheBasisReduced = TheBasisReduced*PartMat;
-    //    std::cerr << "Now TheBasisReduced=\n";
-    //    WriteMatrix(std::cerr, TheBasisReduced);
   };
   auto UpdateMatrices=[&](int const& iRank, int const& iRowSearch) -> void {
     rowStat[iRowSearch]=0;
@@ -1462,20 +1445,11 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     std::vector<T> eRowRed(nbCol - iRank);
     for (int iCol=0; iCol<nbCol - iRank; iCol++)
       eRowRed[iCol]=TheBasisReduced(iRowSearch, iCol+iRank);
-    /*    std::cerr << "eRowRed=";
-    for (auto & eVal : eRowRed)
-      std::cerr << " " << eVal;
-      std::cerr << "\n";*/
     GCD_int<T> eGCD=ComputeGCD_information(eRowRed);
-    //    std::cerr << "eGCD.Pmat=\n";
-    //    WriteMatrix(std::cerr, eGCD.Pmat);
     MyMatrix<T> PartMat=IdentityMat<T>(nbCol);
-    //    std::cerr << "Before operations: iRank=" << iRank << "\n";
     for (int iCol=iRank; iCol<nbCol; iCol++)
       for (int iRow=iRank; iRow<nbCol; iRow++)
 	PartMat(iRow, iCol) = eGCD.Pmat(iRow-iRank, iCol-iRank);
-    //    std::cerr << "Expression of PartMat:\n";
-    //    WriteMatrix(std::cerr, PartMat);
 
     SingleMultiplicationUpdate(PartMat);
     for (int iCol=0; iCol<iRank; iCol++) {
@@ -1491,18 +1465,13 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
       PartMatC(iRank, iRank)=-1;
       SingleMultiplicationUpdate(PartMatC);
     }
-    //    std::cerr << "iRank=" << iRank << " DiagVal=" << TheBasisReduced(iRowSearch, iRank) << "\n";
     TheBasisReord.row(iRank)=TheBasisReduced.row(iRowSearch);
   };
   int TheRank=std::min(nbCol, nbRow);
   for (int iRank=0; iRank<TheRank; iRank++) {
-    //    std::cerr << "iRank=" << iRank << "\n";
     int iRowSearch=FindMinGCDrow(iRank);
-    //    std::cerr << "iRowSearch=" << iRowSearch << "\n";
     UpdateMatrices(iRank, iRowSearch);
   }
-  //  std::cerr << "Pmat=\n";
-  //  WriteMatrix(std::cerr, Pmat);
   BasisReduction<T> eRed{TheBasisReduced, Pmat, IdxVector, TheBasisReord};
   return eRed;
 }
@@ -1524,7 +1493,7 @@ struct AffineBasisResult {
 // Given a family of points EXT, find a subset (v1, ...., vN) of EXT
 // such that for every point of v of EXT there exist lambda1, ..., lambdaN in T
 // with v=lambda1 v1 + .... + lambdaN vN
-// This may not exist 
+// This may not exist
 template<typename T>
 AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 {
@@ -1559,7 +1528,6 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     V1=EXTwork.row(iVect);
     std::cerr << "V1 rows=" << V1.rows() << " cols=" << V1.cols() << "\n";
     ListExp(iVect, idx)=1;
-    //    std::cerr << "fInsertValue, step 1\n";
     for (int iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
 	V2=EXTwork.row(iRow);
@@ -1573,21 +1541,14 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 	}
       }
     ColumnStatus[eCol]=0;
-    //    std::cerr << "fInsertValue, step 2\n";
     RowStatus[iVect]=1;
     for (int iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
-	//	std::cerr << "iRow=" << iRow << "\n";
 	V2=EXTwork.row(iRow);
-	//	std::cerr << "V2 extracted\n";
 	T eQuot=V2(eCol)/V1(eCol);
-	//	std::cerr << "eQuot extracted\n";
 	ListExp.row(iRow)=ListExp.row(iRow) - eQuot*ListExp.row(iVect);
-	//	std::cerr << "After ListExp assignation\n";
 	EXTwork.row(iRow)=EXTwork.row(iRow) - eQuot*EXTwork.row(iVect);
-	//	std::cerr << "After EXTwork assignation\n";
 	V2=EXTwork.row(iRow);
-	//	std::cerr << "After eVect extraction\n";
 	bool IsZero=IsZeroVector(V2);
 	int iRowPrint=-2249;
 	if (iRow == iRowPrint) {
@@ -1596,7 +1557,6 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 	    std::cerr << " jCol=" << jCol << " stat=" << ColumnStatus[jCol] << " val=" << EXTwork(iRowPrint,jCol) << "\n";
 	  std::cerr << iRowPrint << ": IsZero=" << IsZero << "\n";
 	}
-	//	std::cerr << "After IsZero check\n";
 	if (IsZero)
 	  RowStatus[iRow]=1;
       }
@@ -1605,23 +1565,6 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
       if (RowStatus[iRow] == 1)
 	nbFinished++;
     std::cerr << "nbFinished=" << nbFinished << "\n";
-    /*
-    for (int iRow=0; iRow<nbRow; iRow++)
-      for (int iCol=0; iCol<nbCol; iCol++)
-	if (ColumnStatus[iCol] == 0 && RowStatus[iRow] == 0)
-	  if (EXTwork(iRow, iCol) != 0) {
-	    std::cerr << "Inconsistency error\n";
-	    std::cerr << "eCol=" << eCol << "\n";
-	    std::cerr << "idx=" << idx << "\n";
-	    std::cerr << "iVect=" << iVect << "\n";
-	    for (int jCol=0; jCol<nbCol; jCol++)
-	      std::cerr << " jCol=" << jCol << " stat=" << ColumnStatus[jCol] << " val=" << EXTwork(iRow,jCol) << "\n";
-	    std::cerr << "nbRow=" << nbRow << "\n";
-	    std::cerr << "nbCol=" << nbCol << "\n";
-	    throw TerminalException{1};
-	    }
-    */
-    //    std::cerr << "fInsertValue, step 3\n";
     return true;
   };
   int nbIter=1000;
@@ -1638,12 +1581,9 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   auto SetLocallyCorrectIndex=[&](int const& idx) -> int {
     for (int iter=0; iter<nbIter; iter++) {
       int eVal=GetRandomNumber();
-      //      std::cerr << "SetLocallyCorrectIndex eVal=" << eVal << "\n";
       if (eVal == -1)
 	return -1;
-      //      std::cerr << "Before fInsertValue eVal=" << eVal << "\n";
       bool res=fInsertValue(idx, eVal);
-      //      std::cerr << "After fInsertValue\n";
       UsedNumber[eVal]=1;
       if (res) {
 	ListIdx[idx]=eVal;
@@ -1654,12 +1594,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   };
   for (int i=0; i<n; i++) {
     std::cerr << "i=" << i << "\n";
-    //    std::cerr << "Before SetLocallyCorectIndex\n";
-    //    WriteMatrix(std::cerr, EXTwork);
     int eVal=SetLocallyCorrectIndex(i);
-    //    std::cerr << "i=" << i << "\n";
-    //    std::cerr << "Reduced Matrix form\n";
-    //    WriteMatrix(std::cerr, EXTwork);
     if (eVal == -1)
       return {false, {}};
   }
@@ -1685,7 +1620,7 @@ MyMatrix<T> RandomUnimodularMatrix(int const& n)
 }
 
 
-template<typename T> 
+template<typename T>
 AffineBasisResult ComputeAffineBasis(MyMatrix<T> const& EXT)
 {
   int nbIter=1000;
@@ -1751,8 +1686,6 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
       break;
   }
   return ListClasses;
-
-  
 }
 
 
@@ -1814,8 +1747,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
       for (int i=0; i<n2; i++) {
 	if (eVect(i) == 0) {
 	  ListIdxZ.push_back(i);
-	}
-	else {
+	} else {
 	  ListIdxNZ.push_back(i);
 	}
       }
@@ -1831,8 +1763,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
 	if (IsFirst) {
 	  TheMin=eAbs;
 	  ThePivot=eVal;
-	}
-	else {
+	} else {
 	  if (eAbs < TheMin) {
 	    TheMin=eAbs;
 	    ThePivot=eVal;
@@ -1855,8 +1786,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     if (dimSpace == 0) {
       ListEqua=IdentityMat<T>(TheDim);
       eSet={};
-    }
-    else {
+    } else {
       /*      std::cerr << "TheBasis=\n";
 	      WriteMatrix(std::cerr, TheBasis);*/
       ListEqua=NullspaceTrMat(TheBasis);
@@ -1884,8 +1814,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     if (!test) {
       TheBasis=ConcatenateMatVec(TheBasis, eElt);
       fComputeSpeed();
-    }
-    else {
+    } else {
       if (TheBasis.rows() == 0)
 	return;
       MyVector<T> eEltRed=SelectColumnVector(eElt, eSet);
@@ -2005,6 +1934,30 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const& M)
   return CompleteBasis;
 }
 
+
+template<typename T>
+MyMatrix<T> CanonicalizeOrderedMatrix_Kernel(const MyMatrix<T>& M)
+{
+  static_assert(is_ring_field<T>::value, "Requires T to have inverses in Kernel_ComputeAffineBasis");
+  MyMatrix<T> Basis = RowReduction(M);
+  MyMatrix<T> M1 = M * Inverse(Basis);
+  return RemoveFractionMatrix(M1);
+}
+
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value,MyMatrix<T>>::type CanonicalizeOrderedMatrix(MyMatrix<T> const& Input)
+{
+  return CanonicalizeOrderedMatrix_Kernel(Input);
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type CanonicalizeOrderedMatrix(MyMatrix<T> const& Input)
+{
+  using Tfield=typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> InputF = ConvertMatrixUniversal<Tfield,T>(Input);
+  MyMatrix<Tfield> OutputF = CanonicalizeOrderedMatrix_Kernel(InputF);
+  return ConvertMatrixUniversal<T,Tfield>(OutputF);
+}
 
 
 
