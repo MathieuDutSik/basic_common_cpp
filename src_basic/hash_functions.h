@@ -333,18 +333,26 @@ namespace std {
   template <typename T>
   struct hash<std::vector<T>>
   {
-    std::size_t operator()(const std::vector<T>& Lval) const
+    std::size_t operator()(const std::vector<T>& V) const
     {
-      auto combine_hash=[](size_t & seed, size_t new_hash) -> void {
-        seed ^= new_hash + 0x9e3779b9 + (seed<<6) + (seed>>2);
-      };
-      int len = Lval.size();
-      size_t seed = 0;
-      for (int i=0; i<len; i++) {
-        size_t e_hash = std::hash<T>()(Lval[i]);
-        combine_hash(seed, e_hash);
+      if constexpr(not std::is_arithmetic<T>::value) {
+        auto combine_hash=[](size_t & seed, size_t new_hash) -> void {
+          seed ^= new_hash + 0x9e3779b9 + (seed<<6) + (seed>>2);
+        };
+        size_t seed = 0;
+        for (size_t i=0; i<V.size(); i++) {
+          size_t e_hash = std::hash<T>()(V[i]);
+          combine_hash(seed, e_hash);
+        }
+        return seed;
       }
-      return seed;
+      if constexpr(std::is_arithmetic<T>::value) {
+        const T* ptr_T = V.data();
+        const uint8_t* ptr_i = (uint8_t*)ptr_T;
+        size_t len = sizeof(T) * V.size();
+        uint32_t seed= 0x1b873540;
+        return murmur3_32(ptr_i, len, seed);
+      }
     }
   };
   template <typename T1, typename T2>
