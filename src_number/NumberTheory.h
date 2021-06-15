@@ -200,23 +200,40 @@ namespace std {
   template <>
   struct hash<mpz_class>
   {
-    std::size_t operator()(const mpz_class& e_val) const
+    std::size_t operator()(const mpz_class& val) const
     {
-      std::stringstream s;
-      s << e_val;
-      std::string converted(s.str());
-      return std::hash<std::string>()(converted);
+      const int method = 2;
+      if constexpr(method == 1) {
+        std::stringstream s;
+        s << val;
+        std::string converted(s.str());
+        return std::hash<std::string>()(converted);
+      }
+      if constexpr(method == 2) {
+        unsigned long int val_uli = mpz_get_ui(val.get_mpz_t());
+        return val_uli;
+      }
     }
   };
   template <>
   struct hash<mpq_class>
   {
-    std::size_t operator()(const mpq_class& e_val) const
+    std::size_t operator()(const mpq_class& val) const
     {
-      std::stringstream s;
-      s << e_val;
-      std::string converted(s.str());
-      return std::hash<std::string>()(converted);
+      const int method = 2;
+      if constexpr(method == 1) {
+        std::stringstream s;
+        s << val;
+        std::string converted(s.str());
+        return std::hash<std::string>()(converted);
+      }
+      if constexpr(method == 2) {
+        mpz_class val_den=val.get_den();
+        mpz_class val_num=val.get_num();
+        size_t hash1 = std::hash<mpz_class>()(val_den);
+        size_t hash2 = std::hash<mpz_class>()(val_num);
+        return hash1 + (hash2 << 6) + (hash2 >> 2);
+      }
     }
   };
 }
