@@ -11,7 +11,7 @@
 #include "gmpxx.h"
 
 
-// is an implementation of Z 
+// is an implementation of Z
 
 template<>
 struct is_implementation_of_Z<mpz_class> {
@@ -586,8 +586,8 @@ inline void TYPE_CONVERSION(mpq_class const& a1, double & a2)
 inline void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   a2=a1.get_num();
 }
@@ -595,8 +595,8 @@ inline void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
 inline void TYPE_CONVERSION(mpq_class const& a1, int & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
@@ -606,8 +606,8 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int & a2)
 inline void TYPE_CONVERSION(mpq_class const& a1, uint8_t & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
@@ -617,8 +617,8 @@ inline void TYPE_CONVERSION(mpq_class const& a1, uint8_t & a2)
 inline void TYPE_CONVERSION(mpq_class const& a1, int8_t & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
@@ -628,8 +628,8 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int8_t & a2)
 inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
@@ -639,8 +639,8 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
 inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1=" << a1 << " is not an integer\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   mpz_class a1_z=a1.get_num();
   a2=a1_z.get_si();

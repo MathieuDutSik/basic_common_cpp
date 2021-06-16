@@ -12,9 +12,9 @@ struct is_mpreal<mpfr::mpreal> {
 
 
 
-void TYPE_CONVERSION(mpq_class const& xI, mpfr::mpreal & xO)
+inline void TYPE_CONVERSION(mpq_class const& xI, mpfr::mpreal & xO)
 {
-  xO=mpfr::mpreal(xI.get_mpq_t());
+  xO = mpfr::mpreal(xI.get_mpq_t());
 }
 
 

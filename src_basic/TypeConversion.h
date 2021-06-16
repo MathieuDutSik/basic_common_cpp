@@ -9,6 +9,7 @@
 
 #include <math.h>
 #include <type_traits>
+#include "ExceptionEnding.h"
 
 // Trait definition for subset of integers
 template <typename T>
@@ -252,37 +253,37 @@ void NearestInteger_double_int(double const& xI, int & xO)
 }
 
 
-void TYPE_CONVERSION(double const& a1, double & a2)
+inline void TYPE_CONVERSION(double const& a1, double & a2)
 {
   a2 = a1;
 }
 
-void TYPE_CONVERSION(double const& a1, uint8_t & a2)
+inline void TYPE_CONVERSION(double const& a1, uint8_t & a2)
 {
   a2 = uint8_t(a1);
 }
 
-void TYPE_CONVERSION(double const& a1, int & a2)
+inline void TYPE_CONVERSION(double const& a1, int & a2)
 {
   a2 = int(a1);
 }
 
-void TYPE_CONVERSION(double const& a1, long & a2)
+inline void TYPE_CONVERSION(double const& a1, long & a2)
 {
   a2 = long(a1);
 }
 
-void TYPE_CONVERSION(int const& a1, double & a2)
+inline void TYPE_CONVERSION(int const& a1, double & a2)
 {
   a2 = double(a1);
 }
 
-void TYPE_CONVERSION(uint8_t const& a1, double & a2)
+inline void TYPE_CONVERSION(uint8_t const& a1, double & a2)
 {
   a2 = double(a1);
 }
 
-void TYPE_CONVERSION(long const& a1, double & a2)
+inline void TYPE_CONVERSION(long const& a1, double & a2)
 {
   a2 = double(a1);
 }
@@ -350,9 +351,33 @@ template<typename T1, typename T2>
 T1 UniversalTypeConversion(T2 const& a)
 {
   T1 ret;
-  TYPE_CONVERSION(a, ret);
+  try {
+    TYPE_CONVERSION(a, ret);
+  }
+  catch (ConversionException & e) {
+    std::cerr << "ConversionError e=" << e.val << "\n";
+    throw TerminalException{1};
+  }
   return ret;
 }
+
+
+
+template<typename T1, typename T2>
+std::pair<bool,T1> UniversalTypeConversionCheck(T2 const& a)
+{
+  T1 ret;
+  try {
+    TYPE_CONVERSION(a, ret);
+  }
+  catch (ConversionException & e) {
+    return {false,ret};
+  }
+  return {true,ret};
+}
+
+
+
 
 
 
