@@ -165,6 +165,11 @@ struct overlying_field<long> {
 };
 
 template<>
+struct overlying_field<int64_t> {
+  typedef mpq_class field_type;
+};
+
+template<>
 struct overlying_field<mpq_class> {
   typedef mpq_class field_type;
 };
@@ -191,6 +196,11 @@ struct underlying_totally_ordered_ring<int> {
 template<>
 struct underlying_totally_ordered_ring<long> {
   typedef long real_type;
+};
+
+template<>
+struct underlying_totally_ordered_ring<int64_t> {
+  typedef int64_t real_type;
 };
 
 
