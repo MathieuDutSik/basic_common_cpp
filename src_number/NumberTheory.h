@@ -646,6 +646,16 @@ inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
   a2=a1_z.get_si();
 }
 
+inline void TYPE_CONVERSION(mpq_class const& a1, int64_t & a2)
+{
+  if (!IsInteger(a1)) {
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
+  }
+  mpz_class a1_z=a1.get_num();
+  a2 = int64_t(a1_z.get_si());
+}
+
 // long as input
 
 inline void TYPE_CONVERSION(long const& a1, long & a2)
@@ -696,6 +706,12 @@ inline void TYPE_CONVERSION(mpz_class const& a1, int & a2)
 {
   long eVal_long=a1.get_si();
   a2=int(eVal_long);
+}
+
+inline void TYPE_CONVERSION(mpz_class const& a1, int64_t & a2)
+{
+  long eVal_long=a1.get_si();
+  a2=int64_t(eVal_long);
 }
 
 
