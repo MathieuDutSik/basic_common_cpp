@@ -164,10 +164,12 @@ struct overlying_field<long> {
   typedef mpq_class field_type;
 };
 
+/*
 template<>
 struct overlying_field<int64_t> {
   typedef mpq_class field_type;
 };
+*/
 
 template<>
 struct overlying_field<mpq_class> {
@@ -198,11 +200,12 @@ struct underlying_totally_ordered_ring<long> {
   typedef long real_type;
 };
 
+/*
 template<>
 struct underlying_totally_ordered_ring<int64_t> {
   typedef int64_t real_type;
 };
-
+*/
 
 // hash functionality
 
@@ -656,6 +659,7 @@ inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
   a2=a1_z.get_si();
 }
 
+/*
 inline void TYPE_CONVERSION(mpq_class const& a1, int64_t & a2)
 {
   if (!IsInteger(a1)) {
@@ -665,6 +669,7 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int64_t & a2)
   mpz_class a1_z=a1.get_num();
   a2 = int64_t(a1_z.get_si());
 }
+*/
 
 // long as input
 
@@ -718,12 +723,13 @@ inline void TYPE_CONVERSION(mpz_class const& a1, int & a2)
   a2=int(eVal_long);
 }
 
+/*
 inline void TYPE_CONVERSION(mpz_class const& a1, int64_t & a2)
 {
   long eVal_long=a1.get_si();
   a2=int64_t(eVal_long);
 }
-
+*/
 
 //
 // Nearest integer and similar stuff.

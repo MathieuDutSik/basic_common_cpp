@@ -273,10 +273,12 @@ inline void TYPE_CONVERSION(double const& a1, long & a2)
   a2 = long(a1);
 }
 
+/*
 inline void TYPE_CONVERSION(double const& a1, int64_t & a2)
 {
   a2 = int64_t(a1);
 }
+*/
 
 inline void TYPE_CONVERSION(int const& a1, double & a2)
 {
@@ -288,10 +290,12 @@ inline void TYPE_CONVERSION(uint8_t const& a1, double & a2)
   a2 = double(a1);
 }
 
+/*
 inline void TYPE_CONVERSION(int64_t const& a1, double & a2)
 {
   a2 = double(a1);
 }
+*/
 
 inline void TYPE_CONVERSION(long const& a1, double & a2)
 {
