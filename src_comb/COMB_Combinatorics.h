@@ -476,7 +476,7 @@ template<typename T>
 struct IteratorBinomial {
 public:
   IteratorBinomial() = delete;
-  
+
   IteratorBinomial(int const& eN, int const& eK) : n(eN), k(eK)
   {
     ListBinom.setZero(n+1,n+1);
@@ -519,8 +519,6 @@ public:
   }
   T GetIndexFromFace(Face const& eFace) const
   {
-    //    int eSize=eFace.size();
-    //    int eCnt=eFace.count();
     T pos=0;
     int sizRemain=k;
     for (int i=0; i<n; i++) {
@@ -551,6 +549,8 @@ public:
   }
   bool StdvectIncrement(std::vector<int> & Tvect) const
   {
+    if (k == 0) // Set is empty, no increment possible
+      return false;
     Tvect[0]++;
     int xy2=1;
     while ((xy2 < k) && (Tvect[xy2-1] >= Tvect[xy2])) {
