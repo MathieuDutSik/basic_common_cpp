@@ -498,7 +498,7 @@ public:
   }
   std::vector<int> first_stdvect() const
   {
-    std::vector<int> eVect(n);
+    std::vector<int> eVect(k);
     for (int i=0; i<k; i++)
       eVect[i]=i;
     return eVect;
