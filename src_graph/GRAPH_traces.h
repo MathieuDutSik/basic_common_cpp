@@ -20,7 +20,6 @@ public:
     lab1 = (int*)malloc(n * sizeof(int));
     ptn = (int*)malloc(n * sizeof(int));
     orbits = (int*)malloc(n * sizeof(int));
-    orbits = (int*)malloc(n * sizeof(int));
     // We allocate the arrays for Traces
     sg1.nv = n;
     sg1.nde = nbAdjacent;
