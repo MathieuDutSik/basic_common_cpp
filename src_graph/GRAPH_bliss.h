@@ -43,10 +43,15 @@ bliss::Graph* ReadGraphFromFile(FILE *f, unsigned int &nof_vertices)
   return g;
 }
 
+
+// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
+// So, pragma statement is needed to avoid a warning being thrown.
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 static inline void report_aut_void(void* param, const unsigned int n, const unsigned int* aut)
 {
 
 }
+#pragma GCC diagnostic pop
 
 
 template<typename Tgr>
@@ -157,6 +162,9 @@ struct RecParam {
 };
 
 
+// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
+// So, pragma statement is needed to avoid a warning being thrown.
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 static inline void report_aut_vectvectint(void* param, const unsigned int n, const unsigned int* aut)
 {
   RecParam* rec_param = (RecParam*)param;
@@ -166,6 +174,9 @@ static inline void report_aut_vectvectint(void* param, const unsigned int n, con
     eVect[i] = aut[i];
   rec_param->LGen.push_back(eVect);
 }
+#pragma GCC diagnostic pop
+
+
 
 template<typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, int n_last)
