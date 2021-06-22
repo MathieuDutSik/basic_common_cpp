@@ -529,20 +529,32 @@ inline mpq_class GetDenominator(mpq_class const& x)
   return eDen_q;
 }
 
+// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
+// So, pragma statement is needed to avoid a warning being thrown.
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 inline int GetDenominator(int const& x)
 {
   return 1;
 }
+#pragma GCC diagnostic pop
 
+// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
+// So, pragma statement is needed to avoid a warning being thrown.
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 inline long GetDenominator(long const& x)
 {
   return 1;
 }
+#pragma GCC diagnostic pop
 
+// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
+// So, pragma statement is needed to avoid a warning being thrown.
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 inline mpz_class GetDenominator(mpz_class const& x)
 {
   return 1;
 }
+#pragma GCC diagnostic pop
 
 
 inline mpz_class GetDenominator_z(mpq_class const& x)
