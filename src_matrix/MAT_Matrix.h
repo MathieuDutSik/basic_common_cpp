@@ -371,7 +371,17 @@ void WriteMatrixGAPfile(std::string const& eFile, MyMatrix<T> const&TheMat)
   os << ";\n";
 }
 
-
+template<typename T>
+std::ostream& operator<<(std::ostream &os, MyVector<T> const & TheVec)
+{
+  int n=TheVec.size();
+  if (n > 0) {
+    os << TheVec(0);
+    for (int i=1; i<n; i++)
+      os << " " << TheVec(i);
+  }
+  return os;
+}
 
 template<typename T>
 void WriteVector(std::ostream &os, MyVector<T> const & TheVec)
