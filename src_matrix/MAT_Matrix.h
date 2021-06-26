@@ -16,13 +16,13 @@
 //
 
 template<typename T2, typename T1>
-MyVector<T2> ConvertVectorUniversal(MyVector<T1> const& V)
+MyVector<T2> UniversalVectorConversion(MyVector<T1> const& V)
 {
   int n=V.size();
   MyVector<T2> eRet(n);
   for (int i=0; i<n; i++) {
     T1 eVal1=V(i);
-    T2 eVal2=UniversalTypeConversion<T2,T1>(eVal1);
+    T2 eVal2=UniversalScalarConversion<T2,T1>(eVal1);
     eRet(i)=eVal2;
   }
   return eRet;
@@ -34,14 +34,14 @@ MyVector<T2> ConvertVectorUniversal(MyVector<T1> const& V)
 
 
 template<typename T2, typename T1>
-MyMatrix<T2> ConvertMatrixUniversal(MyMatrix<T1> const& M)
+MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const& M)
 {
   int n_rows=M.rows();
   int n_cols=M.cols();
   MyMatrix<T2> eRet(n_rows, n_cols);
   for (int j=0; j<n_cols; j++)
     for (int i=0; i<n_rows; i++)
-      eRet(i,j)=UniversalTypeConversion<T2,T1>(M(i,j));
+      eRet(i,j)=UniversalScalarConversion<T2,T1>(M(i,j));
   return eRet;
 }
 
@@ -818,9 +818,9 @@ template<typename T>
 inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type Inverse(MyMatrix<T> const& Input)
 {
   using Tfield=typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF = ConvertMatrixUniversal<Tfield,T>(Input);
+  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield,T>(Input);
   MyMatrix<Tfield> OutputF=InverseKernel(InputF);
-  return ConvertMatrixUniversal<T,Tfield>(OutputF);
+  return UniversalMatrixConversion<T,Tfield>(OutputF);
 }
 
 
@@ -1158,7 +1158,7 @@ template<typename T>
 inline typename std::enable_if<(not is_ring_field<T>::value),int>::type RankMat(MyMatrix<T> const& Input)
 {
   using Tfield=typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF = ConvertMatrixUniversal<Tfield,T>(Input);
+  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield,T>(Input);
   return RankMatKernel(InputF);
 }
 
@@ -1264,9 +1264,9 @@ template<typename T>
 inline typename std::enable_if<(not is_ring_field<T>::value),T>::type DeterminantMat(MyMatrix<T> const& Input)
 {
   using Tfield=typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF=ConvertMatrixUniversal<Tfield,T>(Input);
+  MyMatrix<Tfield> InputF=UniversalMatrixConversion<Tfield,T>(Input);
   Tfield eDet_field=DeterminantMatKernel(InputF);
-  return UniversalTypeConversion<T,Tfield>(eDet_field);
+  return UniversalScalarConversion<T,Tfield>(eDet_field);
 }
 
 
@@ -1289,7 +1289,7 @@ std::pair<Tfloat,MyVector<Tint>> FindBestIntegerApproximation(MyVector<Tfloat> c
       Tfloat val= TheMult * V(i);
       Tint val_i = UniversalNearestInteger<Tint,Tfloat>(val);
       CandApprox(i) = val_i;
-      Tfloat valApprox_d = UniversalTypeConversion<Tfloat,Tint>(val_i) / TheMult;
+      Tfloat valApprox_d = UniversalScalarConversion<Tfloat,Tint>(val_i) / TheMult;
       SumErr += T_abs(valApprox_d - V(i));
     }
     //
@@ -1482,13 +1482,13 @@ template<typename T>
 inline typename std::enable_if<(not is_ring_field<T>::value),SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   using Tfield=typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> eMatF=ConvertMatrixUniversal<Tfield,T>(eMat);
-  MyVector<Tfield> eVectF=ConvertVectorUniversal<Tfield,T>(eVect);
+  MyMatrix<Tfield> eMatF=UniversalMatrixConversion<Tfield,T>(eMat);
+  MyVector<Tfield> eVectF=UniversalVectorConversion<Tfield,T>(eVect);
   SolMatResult<Tfield> Solu_F = SolutionMatKernel(eMatF, eVectF);
   if (!Solu_F.result || !IsIntegerVector(Solu_F.eSol)) {
     return {false, {}};
   }
-  MyVector<T> eSol = ConvertVectorUniversal<T,Tfield>(Solu_F.eSol);
+  MyVector<T> eSol = UniversalVectorConversion<T,Tfield>(Solu_F.eSol);
   return {true, std::move(eSol)};
 }
 

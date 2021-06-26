@@ -344,7 +344,7 @@ void NearestInteger_double_To(double const& xI, To & xO)
 
 
 template<typename To, typename Ti>
-inline typename std::enable_if<(not is_mpreal<Ti>::value) && (not is_double_type<Ti>::value),To>::type UniversalNearestInteger(Ti const& a)
+inline typename std::enable_if<(not is_mpreal<Ti>::value) && (not is_double_type<Ti>::value),To>::type UniversalNearestScalarInteger(Ti const& a)
 {
   To ret;
   NearestInteger(a, ret);
@@ -353,7 +353,7 @@ inline typename std::enable_if<(not is_mpreal<Ti>::value) && (not is_double_type
 
 
 template<typename To, typename Ti>
-inline typename std::enable_if<is_double_type<Ti>::value,To>::type UniversalNearestInteger(Ti const& a)
+inline typename std::enable_if<is_double_type<Ti>::value,To>::type UniversalNearestScalarInteger(Ti const& a)
 {
   To ret;
   NearestInteger_double_To<To>(a, ret);
@@ -362,7 +362,7 @@ inline typename std::enable_if<is_double_type<Ti>::value,To>::type UniversalNear
 
 
 template<typename T1, typename T2>
-T1 UniversalTypeConversion(T2 const& a)
+T1 UniversalScalarConversion(T2 const& a)
 {
   T1 ret;
   try {
@@ -378,7 +378,7 @@ T1 UniversalTypeConversion(T2 const& a)
 
 
 template<typename T1, typename T2>
-std::pair<bool,T1> UniversalTypeConversionCheck(T2 const& a)
+std::pair<bool,T1> UniversalScalarConversionCheck(T2 const& a)
 {
   T1 ret;
   try {
