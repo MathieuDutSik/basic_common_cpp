@@ -1287,7 +1287,7 @@ std::pair<Tfloat,MyVector<Tint>> FindBestIntegerApproximation(MyVector<Tfloat> c
     Tfloat TheMult = iter;
     for (int i=0; i<n; i++) {
       Tfloat val= TheMult * V(i);
-      Tint val_i = UniversalNearestInteger<Tint,Tfloat>(val);
+      Tint val_i = UniversalNearestScalarInteger<Tint,Tfloat>(val);
       CandApprox(i) = val_i;
       Tfloat valApprox_d = UniversalScalarConversion<Tfloat,Tint>(val_i) / TheMult;
       SumErr += T_abs(valApprox_d - V(i));

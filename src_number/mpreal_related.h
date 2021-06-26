@@ -79,7 +79,7 @@ void NearestInteger_mpreal(mpfr::mpreal const& xI, long & xO)
 // Reason is that compiler cannot distinguish between mpq_class and mpreal
 // for some reason.
 template<typename To, typename Ti>
-inline typename std::enable_if<is_mpreal<Ti>::value,To>::type UniversalNearestInteger(Ti const& a)
+inline typename std::enable_if<is_mpreal<Ti>::value,To>::type UniversalNearestScalarInteger(Ti const& a)
 {
   To ret;
   NearestInteger_mpreal(a, ret);
