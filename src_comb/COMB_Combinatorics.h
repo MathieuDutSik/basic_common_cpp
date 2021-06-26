@@ -9,6 +9,8 @@
 
 
 
+
+
 struct BlockIteration {
 public:
   // no copy
@@ -190,47 +192,111 @@ public:
   // no default constructor
   BlockIterationMultiple() = delete;
 
-  BlockIterationMultiple(std::vector<int> const& eListSize) : dim(eListSize.size()), ListSize(eListSize), eVect(dim,0)
+  BlockIterationMultiple(std::vector<int> const& VectSiz) : dim(VectSiz.size()), VectSiz(VectSiz)
   {
   }
-  int IncrementShow()
-  {
-    for (size_t i=0; i<dim; i++)
-      if (eVect[i] < ListSize[i]-1) {
-	eVect[i]++;
-	for (size_t j=0; j<i; j++)
-	  eVect[j]=0;
-	return i;
-      }
-    return -1;
-  }
-  void IncrementSilent()
-  {
-    for (size_t i=0; i<dim; i++)
-      if (eVect[i] < ListSize[i]-1) {
-	eVect[i]++;
-	for (size_t j=0; j<i; j++)
-	  eVect[j]=0;
-	return;
-      }
-    std::cerr << "Should not reach that stage\n";
-    throw TerminalException{1};
-  }
-  std::vector<int> GetVect() const
-  {
-    return eVect;
-  }
-  size_t GetNbPoss() const
+  //
+  // hand written loop functionality
+  //
+  size_t size() const
   {
     size_t eRet=1;
     for (size_t i=0; i<dim; i++)
-      eRet *= ListSize[i];
+      eRet *= VectSiz[i];
     return eRet;
+  }
+  //
+  // The iterator business
+  //
+  struct IteratorContain {
+  private:
+    size_t dim_iter;
+    std::vector<int> VectSiz;
+    std::vector<int> U;
+    void single_increase()
+    {
+      for (size_t i=0; i<dim_iter; i++)
+        if (U[i] < VectSiz[i] - 1) {
+          U[i]++;
+          for (size_t j=0; j<i; j++)
+            U[j]=0;
+          return;
+        }
+      U = {};
+    }
+  public:
+    IteratorContain(std::vector<int> const& VectSiz, std::vector<int> const& U) : dim_iter(VectSiz.size()), VectSiz(VectSiz), U(U)
+    {
+    }
+    std::vector<int> const& operator*()
+    {
+      return U;
+    }
+    IteratorContain & operator++()
+    {
+      single_increase();
+      return *this;
+    }
+    IteratorContain operator++(int)
+    {
+      IteratorContain tmp = *this;
+      single_increase();
+      return tmp;
+    }
+    bool operator!=(IteratorContain const& iter)
+    {
+      if (dim_iter != iter.dim_iter)
+        return true;
+      for (size_t i=0; i<dim_iter; i++)
+        if (VectSiz[i] != iter.VectSiz[i])
+          return true;
+      if (U.size() != iter.U.size())
+        return true;
+      for (size_t i=0; i<U.size(); i++)
+        if (U[i] != iter.U[i])
+          return true;
+      return false;
+    }
+    bool operator==(IteratorContain const& iter)
+    {
+      if (dim_iter != iter.dim_iter)
+        return false;
+      for (size_t i=0; i<dim_iter; i++)
+        if (VectSiz[i] != iter.VectSiz[i])
+          return false;
+      if (U.size() != iter.U.size())
+        return false;
+      for (size_t i=0; i<dim_iter; i++)
+        if (U[i] != iter.U[i])
+          return false;
+      return true;
+    }
+  };
+public:
+
+
+  // The iterator business
+  using iterator=IteratorContain;
+  using const_iterator=IteratorContain;
+  const_iterator cbegin() const
+  {
+    return IteratorContain(VectSiz, std::vector<int>(dim,0) );
+  }
+  const_iterator cend() const
+  {
+    return IteratorContain(VectSiz, {});
+  }
+  const_iterator begin() const
+  {
+    return IteratorContain(VectSiz, std::vector<int>(dim,0));
+  }
+  const_iterator end() const
+  {
+    return IteratorContain(VectSiz, {});
   }
 private:
   size_t dim;
-  std::vector<int> ListSize;
-  std::vector<int> eVect;
+  std::vector<int> VectSiz;
 };
 
 

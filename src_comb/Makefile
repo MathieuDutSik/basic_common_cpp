@@ -2,7 +2,8 @@
 #PROGRAM		= EnumerationCliques_special_subcliques
 #PROGRAM		= Block_CppIterator
 #PROGRAM		= Timing_HashMap
-PROGRAM		= Vector_Face_iterator
+#PROGRAM		= Vector_Face_iterator
+PROGRAM		= BlockMultiple_CppIterator
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -10,9 +11,9 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= clang++ -Weverything -std=c++17
 #CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
 #CC		= g++ -std=c++17 -Wall -g -O9 -ftemplate-backtrace-limit=0
-#CC		= g++ -std=c++17 -Wall -g -ftemplate-backtrace-limit=0 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
+CC		= g++ -std=c++17 -Wall -g -ftemplate-backtrace-limit=0 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
 # To set in CC_OPTION : -static-libgcc -static-libstdc++
-CC		= g++ -std=c++17 -Wall -O3
+#CC		= g++ -std=c++17 -Wall -O3
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
