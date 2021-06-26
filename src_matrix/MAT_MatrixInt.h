@@ -1954,9 +1954,9 @@ template<typename T>
 inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type CanonicalizeOrderedMatrix(MyMatrix<T> const& Input)
 {
   using Tfield=typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF = ConvertMatrixUniversal<Tfield,T>(Input);
+  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield,T>(Input);
   MyMatrix<Tfield> OutputF = CanonicalizeOrderedMatrix_Kernel(InputF);
-  return ConvertMatrixUniversal<T,Tfield>(OutputF);
+  return UniversalMatrixConversion<T,Tfield>(OutputF);
 }
 
 
