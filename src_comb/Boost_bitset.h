@@ -222,25 +222,51 @@ Face UnsignedLongToFace(int const& len, ulong const& eVal)
 
 void VectVectInt_Magma_Print(std::ostream &os, vectface const&ListOrbit)
 {
-  int nbOrbit=ListOrbit.size();
+  size_t nbOrbit=ListOrbit.size();
   os << "[";
-  for (int iOrbit=0; iOrbit<nbOrbit; iOrbit++) {
+  for (size_t iOrbit=0; iOrbit<nbOrbit; iOrbit++) {
     if (iOrbit>0)
       os << ",\n";
     Face eRepr=ListOrbit[iOrbit];
-    int siz=eRepr.count();
+    size_t siz=eRepr.count();
     os << "[";
-    int eVal=eRepr.find_first();
-    for (int i=0; i<siz; i++) {
+    boost::dynamic_bitset<>::size_type eVal=eRepr.find_first();
+    for (size_t i=0; i<siz; i++) {
       if (i>0)
 	os << ",";
-      os << eVal;
-      eVal=eRepr.find_next(eVal);
+      os << int(eVal);
+      eVal = eRepr.find_next(eVal);
     }
     os << "]";
   }
   os << "]\n";
 }
+
+
+
+void VectVectInt_Gap_Print(std::ostream &os, vectface const&ListOrbit)
+{
+  size_t nbOrbit=ListOrbit.size();
+  os << "[";
+  for (size_t iOrbit=0; iOrbit<nbOrbit; iOrbit++) {
+    if (iOrbit>0)
+      os << ",\n";
+    Face eRepr=ListOrbit[iOrbit];
+    size_t siz=eRepr.count();
+    os << "[";
+    boost::dynamic_bitset<>::size_type eVal=eRepr.find_first();
+    for (size_t i=0; i<siz; i++) {
+      if (i>0)
+	os << ",";
+      os << int(eVal+1);
+      eVal = eRepr.find_next(eVal);
+    }
+    os << "]";
+  }
+  os << "]\n";
+}
+
+
 
 
 
