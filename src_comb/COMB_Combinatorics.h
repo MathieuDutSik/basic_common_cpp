@@ -672,25 +672,25 @@ private:
 template<typename T>
 std::vector<T> MinimumDihedralOrbit(std::vector<T> const& eL)
 {
-  int len=eL.size();
+  size_t len=eL.size();
   T eMin=eL[0];
-  int posmin=0;
-  for (int pos=1; pos<len; pos++)
+  size_t posmin=0;
+  for (size_t pos=1; pos<len; pos++)
     if (eL[pos] < eMin) {
       posmin=pos;
       eMin = eL[pos];
     }
   std::vector<T> V1(len);
   std::vector<T> V2(len);
-  int pos1=posmin;
-  int pos2=posmin;
-  for (int u=0; u<len; u++) {
+  size_t pos1=posmin;
+  size_t pos2=posmin;
+  for (size_t u=0; u<len; u++) {
     V1[u] = eL[pos1];
     V2[u] = eL[pos2];
     pos1 = NextIdx(len, pos1);
     pos2 = PrevIdx(len, pos2);
   }
-  for (int u=0; u<len; u++) {
+  for (size_t u=0; u<len; u++) {
     if (V1[u] < V2[u])
       return V1;
     if (V2[u] < V1[u])

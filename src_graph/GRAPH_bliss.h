@@ -57,16 +57,17 @@ static inline void report_aut_void(void* param, const unsigned int n, const unsi
 template<typename Tgr>
 bliss::Graph GetBlissGraphFromGraph(Tgr const& eGR)
 {
-  int nbVert=eGR.GetNbVert();
+  using T_bliss = unsigned int;
+  T_bliss nbVert=T_bliss(eGR.GetNbVert());
   bliss::Graph g(nbVert);
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    int eColor = 0;
+  for (T_bliss iVert=0; iVert<nbVert; iVert++) {
+    T_bliss eColor = 0;
     if (eGR.GetHasVertexColor())
-      eColor = eGR.GetColor(iVert);
+      eColor = T_bliss(eGR.GetColor(iVert));
     g.change_color(iVert, eColor);
   }
-  for (int iVert=0; iVert<nbVert-1; iVert++)
-    for (int jVert=iVert+1; jVert<nbVert; jVert++)
+  for (T_bliss iVert=0; iVert<nbVert-1; iVert++)
+    for (T_bliss jVert=iVert+1; jVert<nbVert; jVert++)
       if (eGR.IsAdjacent(iVert,jVert))
 	g.add_edge(iVert,jVert);
   return g;
@@ -78,7 +79,7 @@ bool IsIsomorphicGraph(Tgr const& eGR1, Tgr const& eGR2)
 {
   if (eGR1.GetNbVert() != eGR2.GetNbVert())
     return false;
-  int nof_vertices = eGR1.GetNbVert();
+  size_t nof_vertices = eGR1.GetNbVert();
   //
   bliss::Graph g1 = GetBlissGraphFromGraph(eGR1);
   bliss::Graph g2 = GetBlissGraphFromGraph(eGR2);
@@ -88,21 +89,21 @@ bool IsIsomorphicGraph(Tgr const& eGR1, Tgr const& eGR2)
   cl1=g1.canonical_form(stats, &report_aut_void, stderr);
   const unsigned int* cl2;
   cl2=g2.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<int> clR2(nof_vertices);
-  for (int i=0; i<nof_vertices; i++)
+  std::vector<size_t> clR2(nof_vertices);
+  for (size_t i=0; i<nof_vertices; i++)
     clR2[cl2[i]]=i;
-  std::vector<int> TheEquivExp(nof_vertices);
-  for (int iVert=0; iVert<nof_vertices; iVert++)
+  std::vector<size_t> TheEquivExp(nof_vertices);
+  for (size_t iVert=0; iVert<nof_vertices; iVert++)
     TheEquivExp[iVert]=clR2[cl1[iVert]];
-  for (int iVert=0; iVert<nof_vertices; iVert++) {
-    int jVert=TheEquivExp[iVert];
+  for (size_t iVert=0; iVert<nof_vertices; iVert++) {
+    size_t jVert=TheEquivExp[iVert];
     if (eGR1.GetColor(iVert) != eGR2.GetColor(jVert))
       return false;
   }
-  for (int iVert1=0; iVert1<nof_vertices; iVert1++) {
-    int iVert2=TheEquivExp[iVert1];
-    for (int jVert1=0; jVert1<nof_vertices; jVert1++) {
-      int jVert2=TheEquivExp[jVert1];
+  for (size_t iVert1=0; iVert1<nof_vertices; iVert1++) {
+    size_t iVert2=TheEquivExp[iVert1];
+    for (size_t jVert1=0; jVert1<nof_vertices; jVert1++) {
+      size_t jVert2=TheEquivExp[jVert1];
       if (eGR1.IsAdjacent(iVert1,jVert1) != eGR2.IsAdjacent(iVert2,jVert2) )
         return false;
     }
@@ -113,26 +114,26 @@ bool IsIsomorphicGraph(Tgr const& eGR1, Tgr const& eGR2)
 template<typename Tgr>
 std::string GetCanonicalForm_string(Tgr const& eGR)
 {
-  int nof_vertices = eGR.GetNbVert();
+  size_t nof_vertices = eGR.GetNbVert();
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<int> clR(nof_vertices);
-  for (int i=0; i<nof_vertices; i++)
+  std::vector<size_t> clR(nof_vertices);
+  for (size_t i=0; i<nof_vertices; i++)
     clR[cl[i]]=i;
   //
   std::string strRet;
-  for (int iVert=0; iVert<nof_vertices; iVert++) {
-    int iVertCan = clR[iVert];
+  for (size_t iVert=0; iVert<nof_vertices; iVert++) {
+    size_t iVertCan = clR[iVert];
     if (eGR.GetHasVertexColor()) {
-      int eColor = eGR.GetColor(iVertCan);
+      size_t eColor = eGR.GetColor(iVertCan);
       strRet += " " + std::to_string(eColor);
     }
     //
-    for (int jVert=0; jVert<nof_vertices; jVert++) {
-      int jVertCan = clR[jVert];
+    for (size_t jVert=0; jVert<nof_vertices; jVert++) {
+      size_t jVertCan = clR[jVert];
       bool eVal_b = eGR.IsAdjacent(iVertCan, jVertCan);
       strRet += " " + std::to_string(eVal_b);
     }
@@ -142,22 +143,22 @@ std::string GetCanonicalForm_string(Tgr const& eGR)
 
 
 template<typename Tgr, typename Tidx>
-std::vector<unsigned int> BLISS_GetCanonicalOrdering(Tgr const& eGR)
+std::vector<Tidx> BLISS_GetCanonicalOrdering(Tgr const& eGR)
 {
-  int nof_vertices = eGR.GetNbVert();
+  size_t nof_vertices = eGR.GetNbVert();
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
   std::vector<Tidx> vectD(nof_vertices);
-  for (int i=0; i<nof_vertices; i++)
+  for (size_t i=0; i<nof_vertices; i++)
     vectD[i] = cl[i];
   return vectD;
 }
 
 struct RecParam {
-  int n_last;
+  size_t n_last;
   std::vector<std::vector<unsigned int>> LGen;
 };
 
@@ -168,9 +169,9 @@ struct RecParam {
 static inline void report_aut_vectvectint(void* param, const unsigned int n, const unsigned int* aut)
 {
   RecParam* rec_param = (RecParam*)param;
-  int n_last = rec_param->n_last;
+  size_t n_last = rec_param->n_last;
   std::vector<unsigned int> eVect(n_last);
-  for (int i=0; i<n_last; i++)
+  for (size_t i=0; i<n_last; i++)
     eVect[i] = aut[i];
   rec_param->LGen.push_back(eVect);
 }
@@ -179,7 +180,7 @@ static inline void report_aut_vectvectint(void* param, const unsigned int n, con
 
 
 template<typename Tgr, typename Tidx>
-std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, int n_last)
+std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, size_t const& n_last)
 {
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
@@ -190,7 +191,7 @@ std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, int n_las
   std::vector<std::vector<Tidx>> ListGen;
   for (auto & eList : rec_param.LGen) {
     std::vector<Tidx> V(n_last);
-    for (int i=0; i<n_last; i++)
+    for (size_t i=0; i<n_last; i++)
       V[i] = eList[i];
     ListGen.push_back(V);
   }
@@ -199,16 +200,16 @@ std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const& eGR, int n_las
 
 
 template<typename Tgr, typename Tidx>
-std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>>  BLISS_GetCanonicalOrdering_ListGenerators(Tgr const& eGR, int n_last)
+std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>>  BLISS_GetCanonicalOrdering_ListGenerators(Tgr const& eGR, size_t const& n_last)
 {
-  int nof_vertices = eGR.GetNbVert();
+  size_t nof_vertices = eGR.GetNbVert();
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
   //
   const unsigned int* cl;
   cl=g.canonical_form(stats, &report_aut_void, stderr);
   std::vector<Tidx> vectD(nof_vertices);
-  for (int i=0; i<nof_vertices; i++)
+  for (size_t i=0; i<nof_vertices; i++)
     vectD[i] = cl[i];
   //
   RecParam rec_param;
@@ -218,7 +219,7 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>>  BLISS_GetCanonical
   std::vector<std::vector<Tidx>> ListGen;
   for (auto & eList : rec_param.LGen) {
     std::vector<Tidx> V(n_last);
-    for (int i=0; i<n_last; i++)
+    for (size_t i=0; i<n_last; i++)
       V[i] = eList[i];
     ListGen.push_back(V);
   }

@@ -16,8 +16,8 @@ int main(int argc, char *argv[])
     std::ifstream GRAfs(argv[1]);
     GraphBitset eGR=GRAPH_Read<GraphBitset>(GRAfs);
     //
-    std::vector<std::vector<int>> ListCycles = GRAPH_FindAllCycles(eGR);
-    int nbCycle=ListCycles.size();
+    std::vector<std::vector<size_t>> ListCycles = GRAPH_FindAllCycles(eGR);
+    size_t nbCycle=ListCycles.size();
     std::cerr << "nbCycle=" << nbCycle << "\n";
   }
   catch (TerminalException const& e) {

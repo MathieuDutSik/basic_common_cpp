@@ -32,9 +32,9 @@ int main(int argc, char *argv[])
     //
     std::ofstream OUTfs(argv[4]);
     OUTfs << "return rec(iter:=" << iter << ", ListEmbedding:=[";
-    int nbEmbed=ListEmbedding.size();
+    size_t nbEmbed=ListEmbedding.size();
     std::cerr << "nbEmbed=" << nbEmbed << "\n";
-    for (int iEmbed=0; iEmbed<nbEmbed; iEmbed++) {
+    for (size_t iEmbed=0; iEmbed<nbEmbed; iEmbed++) {
       if (iEmbed>0)
 	OUTfs << ",\n";
       WriteMatrixGAP(OUTfs, ListEmbedding[iEmbed]);

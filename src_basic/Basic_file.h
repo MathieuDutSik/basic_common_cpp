@@ -521,7 +521,7 @@ std::vector<std::string> ls_operation(std::string const& ThePrefix)
     throw TerminalException{1};
   }
   std::ifstream iserr(ErrFile);
-  int nbCharErr=0;
+  size_t nbCharErr=0;
   while(!iserr.eof()) {
     std::string PreStr;
     std::getline(iserr, PreStr);

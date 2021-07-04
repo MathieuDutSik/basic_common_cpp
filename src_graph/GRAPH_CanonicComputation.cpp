@@ -37,9 +37,9 @@ int main(int argc, char *argv[])
       std::cerr << "Running BLISS GetCanonicalOrdering\n";
       V = BLISS_GetCanonicalOrdering<Tgr,Tidx>(eGR);
     }
-    int nbVert=V.size();
+    size_t nbVert=V.size();
     std::cout << "return [";
-    for (int i=0; i<nbVert; i++) {
+    for (size_t i=0; i<nbVert; i++) {
       if (i>0)
         std::cout << ",";
       std::cout << V[i];

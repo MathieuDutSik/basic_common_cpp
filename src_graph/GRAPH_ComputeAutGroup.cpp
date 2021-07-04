@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     sscanf(argv[2], "%d", &opt);
     std::cerr << "opt=" << opt << "\n";
     //
-    int nbRow = eGR.GetNbVert();
+    size_t nbRow = eGR.GetNbVert();
     std::vector<std::vector<Tidx>> ListGen;
     if (opt == 1) {
       std::cerr << "Running TRACES_GetListGenerators\n";
@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
       std::cerr << "Running BLISS_GetListGenerators\n";
       ListGen = BLISS_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
     }
-    int nbVert=eGR.GetNbVert();
+    size_t nbVert=eGR.GetNbVert();
     std::cout << "local ListGen;\n";
     std::cout << "ListGen:=[";
     bool IsFirst=true;
@@ -47,10 +47,10 @@ int main(int argc, char *argv[])
         std::cout << ",\n";
       IsFirst=false;
       std::cout << "[";
-      for (int i=0; i<nbVert; i++) {
+      for (size_t i=0; i<nbVert; i++) {
         if (i>0)
           std::cout << ",";
-        int eVal = 1 + eGen[i];
+        int eVal = 1 + int(eGen[i]);
         std::cout << eVal;
       }
       std::cout << "]";

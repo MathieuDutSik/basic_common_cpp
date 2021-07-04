@@ -381,17 +381,17 @@ std::vector<int> StdVectorFirstNentries(size_t const& N)
 {
   std::vector<int> eList(N);
   for (size_t i=0; i<N; i++)
-    eList[i]=i;
+    eList[i] = int(i);
   return eList;
 }
 
 template<typename T>
 int PositionVect(std::vector<T> const& V, T const& eVal)
 {
-  int len=V.size();
-  for (int i=0; i<len; i++)
+  size_t len=V.size();
+  for (size_t i=0; i<len; i++)
     if (V[i] == eVal)
-      return i;
+      return int(i);
   return -1;
 }
 
@@ -409,8 +409,8 @@ bool IsVectorConstant(std::vector<T> const& V)
 }
 
 
-
-void WriteVectorInt_GAP(std::ostream &os, std::vector<int> const& OneInc)
+template<typename T>
+void WriteVectorInt_GAP(std::ostream &os, std::vector<T> const& OneInc)
 {
   size_t siz=OneInc.size();
   os << "[";

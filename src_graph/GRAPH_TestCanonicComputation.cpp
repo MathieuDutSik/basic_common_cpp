@@ -38,21 +38,21 @@ int main(int argc, char *argv[])
         std::cerr << "Running Bliss canonicalization ordering\n";
         V = BLISS_GetCanonicalOrdering<Tgr,Tidx>(eGR);
       }
-      int nof_vertices = V.size();
+      size_t nof_vertices = V.size();
       std::vector<unsigned int> clR(nof_vertices);
-      for (int i=0; i<nof_vertices; i++)
+      for (size_t i=0; i<nof_vertices; i++)
         clR[V[i]]=i;
       std::string strRet;
-      for (int iVert=0; iVert<nof_vertices; iVert++) {
+      for (size_t iVert=0; iVert<nof_vertices; iVert++) {
         int iVertCan = clR[iVert];
         strRet += " (";
         if (eGR.GetHasVertexColor()) {
-          int eColor = eGR.GetColor(iVertCan);
+          size_t eColor = eGR.GetColor(iVertCan);
           strRet += std::to_string(eColor) + ":";
         }
         //
-        for (int jVert=0; jVert<nof_vertices; jVert++) {
-          int jVertCan = clR[jVert];
+        for (size_t jVert=0; jVert<nof_vertices; jVert++) {
+          size_t jVertCan = clR[jVert];
           bool eVal_b = eGR.IsAdjacent(iVertCan, jVertCan);
           strRet += " " + std::to_string(eVal_b);
         }
@@ -61,18 +61,18 @@ int main(int argc, char *argv[])
       return strRet;
     };
     auto random_perm_graph=[&](Tgr const& eGR, std::vector<int> const& ePerm) -> Tgr {
-      int nbVert = eGR.GetNbVert();
+      size_t nbVert = eGR.GetNbVert();
       Tgr eGR2(nbVert);
       bool HasVertexColor = eGR.GetHasVertexColor();
       if (HasVertexColor) {
         eGR2.SetHasColor(HasVertexColor);
-        for (int iVert=0; iVert<nbVert; iVert++) {
-          int eColor = eGR2.GetColor(iVert);
+        for (size_t iVert=0; iVert<nbVert; iVert++) {
+          size_t eColor = eGR2.GetColor(iVert);
           int iVert2 = ePerm[iVert];
           eGR2.SetColor(iVert2, eColor);
         }
       }
-      for (int iVert=0; iVert<nbVert; iVert++) {
+      for (size_t iVert=0; iVert<nbVert; iVert++) {
         int iVert2 = ePerm[iVert];
         for (auto& eAdj : eGR.Adjacency(iVert)) {
           int eAdj2 = ePerm[eAdj];
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
       return eGR2;
     };
     std::string str1 = get_string_expression(eGR);
-    int nbVert = eGR.GetNbVert();
+    size_t nbVert = eGR.GetNbVert();
     for (int i=0; i<5; i++) {
       std::vector<int> ePerm = RandomPermutation(nbVert);
       Tgr eGR2 = random_perm_graph(eGR, ePerm);

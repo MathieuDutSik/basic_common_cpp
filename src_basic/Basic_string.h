@@ -44,7 +44,7 @@ int STRING_GetCharPositionInString(std::string const& eStr, std::string const& e
   for (size_t i=0; i<len; i++) {
     std::string eSubChar=eStr.substr(i,1);
     if (eSubChar == eChar)
-      return i;
+      return int(i);
   }
   return -1;
 }

@@ -116,7 +116,7 @@ template<typename Tgr>
 void GRAPH_PrintOutputGAP_vertex_colored(std::string const& eFile, Tgr const& GR)
 {
   int nbVert=GR.GetNbVert();
-  std::vector<std::vector<int> > ListEdges;
+  std::vector<std::vector<int>> ListEdges;
   std::ofstream os(eFile);
   os << "local ListAdjacency, ThePartition;\n";
   os << "ListAdjacency:=[";
@@ -150,7 +150,7 @@ template<typename Tgr>
 void GRAPH_PrintOutputGAP(std::ostream &os, Tgr const& GR)
 {
   int nbVert=GR.GetNbVert();
-  std::vector<std::vector<int> > ListEdges;
+  std::vector<std::vector<int>> ListEdges;
   for (int iVert=0; iVert<nbVert; iVert++) {
     std::vector<int> LVert=GR.Adjacency(iVert);
     for (auto & eVert : LVert)
@@ -245,42 +245,42 @@ Tgr GRAPH_Read(std::istream& is)
 
 
 template<typename Tgr>
-MyMatrix<int> ShortestPathDistanceMatrix(Tgr const& GR)
+MyMatrix<size_t> ShortestPathDistanceMatrix(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  MyMatrix<int> StatusMat(nbVert,nbVert);
-  MyMatrix<int> DistMat(nbVert,nbVert);
-  for (int iVert=0; iVert<nbVert; iVert++)
-    for (int jVert=0; jVert<nbVert; jVert++)
-      StatusMat(iVert,jVert)=0;
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    StatusMat(iVert,iVert)=2;
-    DistMat(iVert,iVert)=0;
+  size_t nbVert=GR.GetNbVert();
+  MyMatrix<int> StatusMat(nbVert, nbVert);
+  MyMatrix<size_t> DistMat(nbVert, nbVert);
+  for (size_t iVert=0; iVert<nbVert; iVert++)
+    for (size_t jVert=0; jVert<nbVert; jVert++)
+      StatusMat(iVert, jVert)=0;
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    StatusMat(iVert, iVert)=2;
+    DistMat(iVert, iVert)=0;
   }
-  int UpperBoundDiam=nbVert+2;
-  int iter=0;
+  size_t UpperBoundDiam=nbVert+2;
+  size_t iter=0;
   while(true) {
     bool IsFinished=true;
     iter++;
-    for (int iVert=0; iVert<nbVert; iVert++)
-      for (int jVert=0; jVert<nbVert; jVert++)
-	if (StatusMat(iVert,jVert) == 2) {
+    for (size_t iVert=0; iVert<nbVert; iVert++)
+      for (size_t jVert=0; jVert<nbVert; jVert++)
+	if (StatusMat(iVert, jVert) == 2) {
 	  IsFinished=false;
 	  StatusMat(iVert,jVert)=1;
-	  std::vector<int> LLAdj=GR.Adjacency(jVert);
-	  for (int & eAdj : LLAdj)
-	    if (StatusMat(iVert,eAdj) == 0) {
+	  std::vector<size_t> LLAdj=GR.Adjacency(jVert);
+	  for (size_t & eAdj : LLAdj)
+	    if (StatusMat(iVert, eAdj) == 0) {
 	      StatusMat(iVert,eAdj)=-1;
 	      DistMat(iVert,eAdj)=DistMat(iVert,jVert) + 1;
 	    }
 	}
-    for (int iVert=0; iVert<nbVert; iVert++)
-      for (int jVert=0; jVert<nbVert; jVert++)
-	if (StatusMat(iVert,jVert) == -1)
+    for (size_t iVert=0; iVert<nbVert; iVert++)
+      for (size_t jVert=0; jVert<nbVert; jVert++)
+	if (StatusMat(iVert, jVert) == -1)
 	  StatusMat(iVert,jVert)=2;
     if (iter > UpperBoundDiam) {
-      for (int iVert=0; iVert<nbVert; iVert++)
-	DistMat(iVert,iVert)=-1;
+      for (size_t iVert=0; iVert<nbVert; iVert++)
+	DistMat(iVert,iVert)=std::numeric_limits<size_t>::max();
       break;
     }
     if (IsFinished)
@@ -291,21 +291,21 @@ MyMatrix<int> ShortestPathDistanceMatrix(Tgr const& GR)
 
 
 template<typename Tgr>
-std::vector<std::vector<int>> GRAPH_FindAllShortestPath(Tgr const& GR, int const& x, int const& y)
+std::vector<std::vector<size_t>> GRAPH_FindAllShortestPath(Tgr const& GR, size_t const& x, size_t const& y)
 {
-  MyMatrix<int> DistMat=ShortestPathDistanceMatrix(GR);
-  int eDist=DistMat(x,y);
-  if (eDist == -1)
+  MyMatrix<size_t> DistMat=ShortestPathDistanceMatrix(GR);
+  size_t eDist=DistMat(x,y);
+  if (eDist == std::numeric_limits<size_t>::max())
     return {};
-  std::vector<std::vector<int>> ListPath{{x}};
-  for (int i=1; i<=eDist; i++) {
-    std::vector<std::vector<int>> NewListPath;
+  std::vector<std::vector<size_t>> ListPath{{x}};
+  for (size_t i=1; i<=eDist; i++) {
+    std::vector<std::vector<size_t>> NewListPath;
     for (auto & ePath : ListPath) {
-      int CurrentVert=ePath[ePath.size() - 1];
-      std::vector<int> LAdj = GR.Adjacency(CurrentVert);
+      size_t CurrentVert=ePath[ePath.size() - 1];
+      std::vector<size_t> LAdj = GR.Adjacency(CurrentVert);
       for (auto & u : LAdj) {
 	if (DistMat(u, y) == eDist - i) {
-	  std::vector<int> fPath = ePath;
+	  std::vector<size_t> fPath = ePath;
 	  fPath.push_back(u);
 	  NewListPath.push_back(fPath);
 	}
@@ -319,16 +319,16 @@ std::vector<std::vector<int>> GRAPH_FindAllShortestPath(Tgr const& GR, int const
 
 
 template<typename Tgr>
-int Diameter(Tgr const& GR)
+size_t Diameter(Tgr const& GR)
 {
-  MyMatrix<int> DistMat = ShortestPathDistanceMatrix(GR);
-  if (DistMat(0,0) == -1)
+  MyMatrix<size_t> DistMat = ShortestPathDistanceMatrix(GR);
+  if (DistMat(0,0) == std::numeric_limits<size_t>::max())
     return 1;
-  int TheDiam=0;
-  int nbVert=GR.GetNbVert();
-  for (int iVert=0; iVert<nbVert; iVert++)
-    for (int jVert=0; jVert<nbVert; jVert++) {
-      int eDist=DistMat(iVert, jVert);
+  size_t TheDiam=0;
+  size_t nbVert=GR.GetNbVert();
+  for (size_t iVert=0; iVert<nbVert; iVert++)
+    for (size_t jVert=0; jVert<nbVert; jVert++) {
+      size_t eDist=DistMat(iVert, jVert);
       if (eDist > TheDiam)
 	TheDiam=eDist;
     }
@@ -338,17 +338,17 @@ int Diameter(Tgr const& GR)
 template<typename Tgr>
 bool IsSimpleGraph(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  for (int iVert=0; iVert<nbVert; iVert++)
+  size_t nbVert=GR.GetNbVert();
+  for (size_t iVert=0; iVert<nbVert; iVert++)
     if (GR.IsAdjacent(iVert, iVert))
       return false;
   return true;
 }
 
 template<typename Tgr>
-std::vector<std::vector<int>> GetEdgeSet(Tgr const& GR)
+std::vector<std::vector<size_t>> GetEdgeSet(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
+  size_t nbVert=GR.GetNbVert();
   /*
   int nbEdge=0;
   for (int iVert=0; iVert<nbVert-1; iVert++)
@@ -356,9 +356,9 @@ std::vector<std::vector<int>> GetEdgeSet(Tgr const& GR)
       if (GR.IsAdjacent(iVert,jVert) == 1)
       nbEdge++;
   MyMatrix<int> Edges(nbEdge,2);*/
-  std::vector<std::vector<int> > Edges;
-  for (int iVert=0; iVert<nbVert-1; iVert++)
-    for (int jVert=iVert+1; jVert<nbVert; jVert++)
+  std::vector<std::vector<size_t>> Edges;
+  for (size_t iVert=0; iVert<nbVert-1; iVert++)
+    for (size_t jVert=iVert+1; jVert<nbVert; jVert++)
       if (GR.IsAdjacent(iVert,jVert))
 	Edges.push_back({iVert, jVert});
   return Edges;
@@ -369,36 +369,35 @@ std::vector<std::vector<int>> GetEdgeSet(Tgr const& GR)
 
 
 template<typename Tgr>
-std::vector<std::vector<int>> GRAPH_FindAllCycles(Tgr const& GR)
+std::vector<std::vector<size_t>> GRAPH_FindAllCycles(Tgr const& GR)
 {
-  std::vector<std::vector<int>> Edges = GetEdgeSet(GR);
-  int nbEdge=Edges.size();
-  int nbVert=GR.GetNbVert();
-  std::unordered_set<std::vector<int>> ListCycle;
-  auto FuncInsertCycle=[&](std::vector<int> const& eL) -> void {
-    std::vector<int> eLcan = MinimumDihedralOrbit(eL);
+  std::vector<std::vector<size_t>> Edges = GetEdgeSet(GR);
+  size_t nbEdge=Edges.size();
+  size_t nbVert=GR.GetNbVert();
+  std::unordered_set<std::vector<size_t>> ListCycle;
+  auto FuncInsertCycle=[&](std::vector<size_t> const& eL) -> void {
+    std::vector<size_t> eLcan = MinimumDihedralOrbit(eL);
     ListCycle.insert(eLcan);
   };
-  for (int iEdge=0; iEdge<nbEdge; iEdge++) {
+  for (size_t iEdge=0; iEdge<nbEdge; iEdge++) {
     GraphBitset GRred(nbVert);
-    //    std::cerr << "nbVert=" << nbVert << "\n";
-    for (int jEdge=0; jEdge<nbEdge; jEdge++)
+    for (size_t jEdge=0; jEdge<nbEdge; jEdge++)
       if (iEdge != jEdge) {
-	int eVert=Edges[jEdge][0];
-	int fVert=Edges[jEdge][1];
+	size_t eVert=Edges[jEdge][0];
+	size_t fVert=Edges[jEdge][1];
 	GRred.AddAdjacent(eVert, fVert);
 	GRred.AddAdjacent(fVert, eVert);
 	//	std::cerr << "eVert=" << eVert << " fVert=" << fVert << "\n";
       }
-    int x=Edges[iEdge][0];
-    int y=Edges[iEdge][1];
+    size_t x=Edges[iEdge][0];
+    size_t y=Edges[iEdge][1];
     std::cerr << "iEdge=" << iEdge << " / " << nbEdge << " x=" << x << " y=" << y << "\n";
-    std::vector<std::vector<int>> ListPath = GRAPH_FindAllShortestPath(GRred, x, y);
+    std::vector<std::vector<size_t>> ListPath = GRAPH_FindAllShortestPath(GRred, x, y);
     std::cerr << "|ListPath|=" << ListPath.size() << "\n";
     for (auto & eCycle : ListPath)
       FuncInsertCycle(eCycle);
   }
-  std::vector<std::vector<int>> ListCycleR;
+  std::vector<std::vector<size_t>> ListCycleR;
   for (auto & eCycle : ListCycle)
     ListCycleR.push_back(eCycle);
   return ListCycleR;
@@ -415,11 +414,11 @@ std::vector<std::vector<int>> GRAPH_FindAllCycles(Tgr const& GR)
 
 
 template<typename Tgr>
-bool IsClique(Tgr const& GR, std::vector<int> const& eList)
+bool IsClique(Tgr const& GR, std::vector<size_t> const& eList)
 {
-  int len=eList.size();
-  for (int i=0; i<len-1; i++)
-    for (int j=i+1; j<len; j++)
+  size_t len=eList.size();
+  for (size_t i=0; i<len-1; i++)
+    for (size_t j=i+1; j<len; j++)
       if (!GR.IsAdjacent(eList[i],eList[j]))
 	return false;
   return true;
@@ -429,72 +428,59 @@ bool IsClique(Tgr const& GR, std::vector<int> const& eList)
 
 
 template<typename Tgr>
-std::vector<int> StartingCell(Tgr const& GR)
+std::vector<size_t> StartingCell(Tgr const& GR)
 {
-  int r;
-  std::vector<int> Adj;
+  std::vector<size_t> Adj;
   //
-  std::vector<int> A=GR.Adjacency(0);
-  int eC=A[0];
-  //  std::cerr << "eC=" << eC << "\n";
+  std::vector<size_t> A=GR.Adjacency(0);
+  size_t eC=A[0];
   Adj=IntersectionVect(GR.Adjacency(eC), A);
-  r=Adj.size();
-  std::vector<int> TT;
+  size_t r=Adj.size();
+  std::vector<size_t> TT;
   //  std::cerr << "r=" << r << "\n";
   //  std::cerr << "1 : Adj=";
   //  WriteVectorInt_GAP(std::cerr, Adj);
   //  std::cerr << "\n";
   if (r == 0) {
     return {0, eC};
-  }
-  else {
+  } else {
     if (r == 1) {
-      int Elt=Adj[0];
-      int h=IntersectionVect(GR.Adjacency(Elt), GR.Adjacency(0)).size();
-      int k=IntersectionVect(GR.Adjacency(Elt), GR.Adjacency(eC)).size();
+      size_t Elt=Adj[0];
+      size_t h=IntersectionVect(GR.Adjacency(Elt), GR.Adjacency(0)).size();
+      size_t k=IntersectionVect(GR.Adjacency(Elt), GR.Adjacency(eC)).size();
       if (h == 1 && k == 1) {
 	return {0, eC, Elt};
-      }
-      else {
+      } else {
 	if (h>1) {
 	  TT={Elt,0};
-	}
-	else {
+	} else {
 	  TT={Elt,eC};
 	}
       }
-    }
-    else {
+    } else {
       TT={0,eC};
-      //      std::cerr << "TT=";
-      //      WriteVectorInt_GAP(std::cerr, TT);
-      //      std::cerr << "\n";
     }
   }
-  
   Adj=IntersectionVect(GR.Adjacency(TT[0]), GR.Adjacency(TT[1]));
-  //  std::cerr << "2 : Adj=";
-  //  WriteVectorInt_GAP(std::cerr, Adj);
-  //  std::cerr << "\n";
   r=Adj.size();
-  std::vector<int> Lodd;
-  int nbVert=GR.GetNbVert();
-  for (int & i : Adj) {
+  std::vector<size_t> Lodd;
+  size_t nbVert=GR.GetNbVert();
+  for (size_t & i : Adj) {
     //    std::cerr << "i=" << i << "\n";
-    std::vector<int> VertSet(nbVert);
-    for (int iVert=0; iVert<nbVert; iVert++)
+    std::vector<size_t> VertSet(nbVert);
+    for (size_t iVert=0; iVert<nbVert; iVert++)
       VertSet[iVert]=iVert;
-    std::vector<int> hSet{i,TT[0],TT[1]};
+    std::vector<size_t> hSet{i,TT[0],TT[1]};
     //    std::cerr << "  hSet=";
     //    WriteVectorInt_GAP(std::cerr, hSet);
     //    std::cerr << "\n";
-    std::vector<int> SE=DifferenceVect(VertSet, hSet);
+    std::vector<size_t> SE=DifferenceVect(VertSet, hSet);
     //    std::cerr << "  SE=";
     //    WriteVectorInt_GAP(std::cerr, SE);
     //    std::cerr << "\n";
     bool test=true;
-    for (int & j : SE) {
-      int oddness=IntersectionVect<int>(GR.Adjacency(j), hSet).size();
+    for (size_t & j : SE) {
+      size_t oddness=IntersectionVect<size_t>(GR.Adjacency(j), hSet).size();
       //      std::cerr << " j=" << j << " oddness=" << oddness << "\n";
       if (oddness == 1 || oddness == 3)
 	test=false;
@@ -502,49 +488,47 @@ std::vector<int> StartingCell(Tgr const& GR)
     if (!test)
       Lodd.push_back(i);
   }
-  int s=Lodd.size();
+  size_t s=Lodd.size();
   //  std::cerr << "r=" << r << " s=" << s << "\n";
   if (r == 2 && s == 0) {
     return {Adj[0], TT[0], TT[1]};
-  }
-  else {
+  } else {
     if (s == r || s == r-1) {
       Lodd.push_back(TT[0]);
       Lodd.push_back(TT[1]);
       if (!IsClique(GR, Lodd))
-	return {-1};
+	return {};
       return Lodd;
-    }
-    else {
-      return {-1};
+    } else {
+      return {};
     }
   }
 }
 
 template<typename Tgr>
-std::vector<std::vector<int> > SpanningTree(Tgr const& GR)
+std::vector<std::vector<size_t>> SpanningTree(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
+  size_t nbVert=GR.GetNbVert();
   std::vector<int> ListStatus(nbVert,0);
   ListStatus[0]=1;
-  std::vector<int> ListActiveVert{0};
-  std::vector<std::vector<int> > TheSpann;
+  std::vector<size_t> ListActiveVert{0};
+  std::vector<std::vector<size_t>> TheSpann;
   while(true) {
-    std::vector<int> NewListActiveVert;
+    std::vector<size_t> NewListActiveVert;
     for (auto & eVert : ListActiveVert) {
       //      std::cerr << "Treating eVert=" << eVert << "\n";
-      std::vector<int> LLadj=GR.Adjacency(eVert);
+      std::vector<size_t> LLadj=GR.Adjacency(eVert);
       for (auto & fVert : LLadj) {
 	if (ListStatus[fVert] == 0) {
 	  ListStatus[fVert]=1;
-	  TheSpann.push_back(VectorAsSet<int>({eVert, fVert}));
+	  TheSpann.push_back(VectorAsSet<size_t>({eVert, fVert}));
 	  NewListActiveVert.push_back(fVert);
 	}
       }
     }
     if (NewListActiveVert.size() == 0)
       break;
-    ListActiveVert=NewListActiveVert;
+    ListActiveVert = NewListActiveVert;
   }
   return TheSpann;
 }
@@ -552,39 +536,43 @@ std::vector<std::vector<int> > SpanningTree(Tgr const& GR)
 
 
 template<typename Tgr>
-std::vector<std::vector<int> > InverseLineGraphConnected(Tgr const& GR)
+std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
+  size_t nbVert=GR.GetNbVert();
   if (nbVert == 1) {
     return {{0,1}};
   }
-  std::vector<int> eCell=StartingCell(GR);
+  std::vector<size_t> eCell=StartingCell(GR);
+  if (eCell.size() == 0) {
+    std::cerr << "Failed to find starting cell\n";
+    throw TerminalException{1};
+  }
   std::cerr << "eCell=";
   WriteVectorInt_GAP(std::cerr, eCell);
   std::cerr << "\n";
-  std::vector<int> eCellS=VectorAsSet(eCell);
+  std::vector<size_t> eCellS=VectorAsSet(eCell);
   if (eCell[0] == -1) {
     //    std::cerr << "Leaving InverseLineGraphConnected 1\n";
     return {{-1}};
   }
-  std::vector<std::vector<int> > P={eCell};
-  std::vector<std::vector<int> > TotalEdge(nbVert);
-  for (int iVert=0; iVert<nbVert; iVert++)
+  std::vector<std::vector<size_t>> P={eCell};
+  std::vector<std::vector<size_t>> TotalEdge(nbVert);
+  for (size_t iVert=0; iVert<nbVert; iVert++)
     TotalEdge[iVert]=GR.Adjacency(iVert);
   for (auto & eVert : eCell)
     TotalEdge[eVert]=DifferenceVect(TotalEdge[eVert], eCell);
-  int PreTot=0;
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    int eSize=TotalEdge[iVert].size();
+  size_t PreTot=0;
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    size_t eSize=TotalEdge[iVert].size();
     //    std::cerr << "iVert=" << iVert << " |Adj|=" << eSize << "  Adj=";
     //    WriteVectorInt_GAP(std::cerr, TotalEdge[iVert]);
     //    std::cerr << "\n";
     PreTot += eSize;
   }
-  int Tot=PreTot/2;
+  size_t Tot=PreTot/2;
   std::cerr << "Tot=" << Tot << "\n";
-  auto GetAdding=[&]() -> int {
-    for (int & iVert : eCellS)
+  auto GetAdding=[&]() -> size_t {
+    for (size_t & iVert : eCellS)
       if (TotalEdge[iVert].size() > 0)
 	return iVert;
     std::cerr << "Error in GetAdding\n";
@@ -594,7 +582,7 @@ std::vector<std::vector<int> > InverseLineGraphConnected(Tgr const& GR)
     std::cerr << "Tot=" << Tot << "\n";
     if (Tot == 0)
       break;
-    int Adding=GetAdding();
+    size_t Adding=GetAdding();
     std::cerr << "Adding=" << Adding << "\n";
     eCell=UnionVect(TotalEdge[Adding], {Adding});
     //    std::cerr << "eCell=";
@@ -616,15 +604,15 @@ std::vector<std::vector<int> > InverseLineGraphConnected(Tgr const& GR)
     //    std::cerr << "eCellS=";
     //    WriteVectorInt_GAP(std::cerr, eCellS);
     //    std::cerr << "\n";
-    for (int & iV : eCell)
+    for (size_t & iV : eCell)
       TotalEdge[iV]=DifferenceVect(TotalEdge[iV], eCell);
-    int Csiz=eCell.size();
-    int nbEdge=Csiz*(Csiz - 1)/2;
+    size_t Csiz=eCell.size();
+    size_t nbEdge=Csiz*(Csiz - 1)/2;
     std::cerr << "Before Csiz=" << Csiz << " nbEdge=" << nbEdge << " Tot=" << Tot << "\n";
     Tot -= nbEdge;
     std::cerr << "After Tot=" << Tot << "\n";
   }
-  for (int iVert=0; iVert<nbVert; iVert++) {
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
     int nb=0;
     for (auto & eP : P) {
       int pos=PositionVect(eP, iVert);
@@ -634,13 +622,13 @@ std::vector<std::vector<int> > InverseLineGraphConnected(Tgr const& GR)
     if (nb == 1)
       P.push_back({iVert});
   }
-  std::vector<std::vector<int> > Label(nbVert);
-  int Plen=P.size();
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    for (int iP=0; iP<Plen; iP++) {
+  std::vector<std::vector<int>> Label(nbVert);
+  size_t Plen=P.size();
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    for (size_t iP=0; iP<Plen; iP++) {
       int pos=PositionVect(P[iP], iVert);
       if (pos != -1)
-	Label[iVert].push_back(iP);
+	Label[iVert].push_back(int(iP));
     }
   }
   return Label;
@@ -648,7 +636,7 @@ std::vector<std::vector<int> > InverseLineGraphConnected(Tgr const& GR)
 
 
 template<typename T>
-void Print_VectorVector(std::ostream &os, std::vector<std::vector<T> > const& TheList)
+void Print_VectorVector(std::ostream &os, std::vector<std::vector<T>> const& TheList)
 {
   int siz=TheList.size();
   os << "|TheList|=" << siz << "\n";
@@ -664,12 +652,12 @@ void Print_VectorVector(std::ostream &os, std::vector<std::vector<T> > const& Th
 
 
 template<typename Tgr>
-std::vector<std::vector<int> > InverseLineGraph(Tgr const& GR)
+std::vector<std::vector<int>> InverseLineGraph(Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  std::vector<std::vector<int> > ListConn=ConnectedComponents_set(GR);
-  int nbConn=ListConn.size();
-  auto Hsize=[&](std::vector<std::vector<int> > const& ListListSet) -> int {
+  size_t nbVert=GR.GetNbVert();
+  std::vector<std::vector<size_t>> ListConn=ConnectedComponents_set(GR);
+  size_t nbConn=ListConn.size();
+  auto Hsize=[&](std::vector<std::vector<int>> const& ListListSet) -> int {
     int eMax=0;
     for (auto & eListSet : ListListSet)
       for (auto & eVal : eListSet)
@@ -677,25 +665,18 @@ std::vector<std::vector<int> > InverseLineGraph(Tgr const& GR)
 	  eMax=eVal;
     return eMax+1;
   };
-  std::vector<std::vector<int> > ListLabel(nbVert);
+  std::vector<std::vector<int>> ListLabel(nbVert);
   int TotShift=0;
-  for (int iConn=0; iConn<nbConn; iConn++) {
-    std::vector<int> eConn=ListConn[iConn];
-    int sizConn=eConn.size();
-    //    std::cerr << "iConn=" << iConn << " sizConn=" << sizConn << "\n";
+  for (size_t iConn=0; iConn<nbConn; iConn++) {
+    std::vector<size_t> eConn=ListConn[iConn];
+    size_t sizConn=eConn.size();
     GraphBitset GRind=InducedSubgraph<GraphBitset,Tgr>(GR, eConn);
-    //    std::cerr << "-----------------------------\n";
-    //    std::cerr << "GRind=";
-    //    GRAPH_PrintOutput(std::cerr, GRind);
-    //    GRAPH_PrintOutputGAP(std::cerr, GRind);
-    std::vector<std::vector<int> > PartLabel=InverseLineGraphConnected(GRind);
-    //    std::cerr << "GRind : PartLabel=\n";
-    //    Print_VectorVector(std::cerr, PartLabel);
+    std::vector<std::vector<int>> PartLabel=InverseLineGraphConnected(GRind);
     int eFirstFirst=PartLabel[0][0];
     if (eFirstFirst == -1)
       return {{-1}};
-    for (int iVertConn=0; iVertConn<sizConn; iVertConn++) {
-      int eVert=eConn[iVertConn];
+    for (size_t iVertConn=0; iVertConn<sizConn; iVertConn++) {
+      size_t eVert=eConn[iVertConn];
       std::vector<int> eLabel;
       for (int & eVal : PartLabel[iVertConn])
 	eLabel.push_back(eVal + TotShift);
@@ -707,11 +688,11 @@ std::vector<std::vector<int> > InverseLineGraph(Tgr const& GR)
   return ListLabel;
 }
 
-MyMatrix<int> CreateEmbedding(int const& StartPoint, std::vector<std::vector<int> > const& ListEdge, std::vector<std::vector<int> > const& ListLabel)
+MyMatrix<int> CreateEmbedding(int const& StartPoint, std::vector<std::vector<size_t>> const& ListEdge, std::vector<std::vector<int>> const& ListLabel)
 {
-  int nbEdge=ListEdge.size();
+  int nbEdge=int(ListEdge.size());
   //
-  int nbVert=0;
+  size_t nbVert=0;
   for (auto & eEdge : ListEdge)
     for (auto & eVal : eEdge)
       if (eVal > nbVert)
@@ -733,20 +714,20 @@ MyMatrix<int> CreateEmbedding(int const& StartPoint, std::vector<std::vector<int
   while(true) {
     bool IsFinished=true;
     for (int iEdge=0; iEdge<nbEdge; iEdge++) {
-      std::vector<int> eEdge=ListEdge[iEdge];
+      std::vector<size_t> eEdge=ListEdge[iEdge];
       int eStat1=ListStatus[eEdge[0]];
       int eStat2=ListStatus[eEdge[1]];
       int RelPos=-1;
       int eVert1=-1, eVert2=-1;
       if (eStat1 == 0 && eStat2 == 1) {
 	RelPos=0;
-	eVert1=eEdge[1];
-	eVert2=eEdge[0];
+	eVert1=int(eEdge[1]);
+	eVert2=int(eEdge[0]);
       }
       if (eStat2 == 0 && eStat1 == 1) {
 	RelPos=0;
-	eVert1=eEdge[0];
-	eVert2=eEdge[1];
+	eVert1=int(eEdge[0]);
+	eVert2=int(eEdge[1]);
       }
       if (RelPos != -1) {
 	IsFinished=false;
@@ -765,24 +746,23 @@ MyMatrix<int> CreateEmbedding(int const& StartPoint, std::vector<std::vector<int
 }
 
 template<typename Tgr>
-std::vector<std::vector<int> > EnumerationClique(Tgr const& GR, int const& kSiz)
+std::vector<std::vector<size_t>> EnumerationClique(Tgr const& GR, size_t const& kSiz)
 {
-  int nbVert=GR.GetNbVert();
-  std::vector<std::vector<int> > eList;
+  size_t nbVert=GR.GetNbVert();
+  std::vector<std::vector<size_t>> eList;
   if (kSiz == 1) {
-    for (int iVert=0; iVert<nbVert; iVert++)
+    for (size_t iVert=0; iVert<nbVert; iVert++)
       eList.push_back({iVert});
-  }
-  else {
+  } else {
     for (auto & eLowList : EnumerationClique(GR, kSiz-1) ) {
-      int eFirst=eLowList[kSiz-2]+1;
-      for (int i=eFirst; i<nbVert; i++) {
+      size_t eFirst=eLowList[kSiz-2] + 1;
+      for (size_t i=eFirst; i<nbVert; i++) {
 	bool test=true;
 	for (auto & eVal : eLowList)
-	  if (!GR.IsAdjacent(eVal,i))
+	  if (!GR.IsAdjacent(eVal, i))
 	    test=false;
 	if (test) {
-	  std::vector<int> NewList=UnionVect(eLowList, {i});
+	  std::vector<size_t> NewList=UnionVect(eLowList, {i});
 	  eList.push_back(NewList);
 	}
       }
@@ -805,14 +785,15 @@ int L1_distance(std::vector<int> const& V1, std::vector<int> const& V2)
 
 
 template<typename Tgr>
-std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long const& MaxIter, long& iter)
+std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const& GR, size_t const& s_sz, long const& MaxIter, long& iter)
 {
+  int s = int(s_sz);
   iter=0;
   if (!IsSimpleGraph(GR)) {
     std::cerr << "The graph should be simple\n";
     return {};
   }
-  MyMatrix<int> M=ShortestPathDistanceMatrix(GR);
+  MyMatrix<int> M=UniversalMatrixConversion<int,size_t>(ShortestPathDistanceMatrix(GR));
   std::cerr << "M=\n";
   WriteMatrix(std::cerr, M);
   if (M(0,0) == -1) {
@@ -823,14 +804,14 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
   std::vector<int> SetOne{1};
   std::vector<int> SetTwo{2};
   std::cerr << "****Start treating " << s << "-embedding\n";
-  int n=GR.GetNbVert();
-  std::vector<std::vector<int> > ListEdge=GetEdgeSet(GR);
-  int nbEdge=ListEdge.size();
+  size_t n=GR.GetNbVert();
+  std::vector<std::vector<size_t>> ListEdge=GetEdgeSet(GR);
+  size_t nbEdge=ListEdge.size();
   std::cerr << "nbEdge=" << nbEdge << "\n";
-  int DiamGraph=Diameter(GR);
+  size_t DiamGraph=Diameter(GR);
   std::cerr << "DiamGraph=" << DiamGraph << "\n";
-  auto EdgeDist=[&](int const& iEdge, int const& jEdge) -> int {
-    int a, b, c, d, swp;
+  auto EdgeDist=[&](size_t const& iEdge, size_t const& jEdge) -> int {
+    size_t a, b, c, d, swp;
     a=ListEdge[iEdge][0];
     b=ListEdge[iEdge][1];
     c=ListEdge[jEdge][0];
@@ -838,7 +819,7 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     if (M(a,c) > s || M(a,d) > s || M(b,c) > s || M(b,d) > s)
       return -400;
     std::vector<int> ListDist;
-    for (int u=0; u<n; u++)
+    for (size_t u=0; u<n; u++)
       if (T_abs(M(a,u) - M(b,u)) == 1 &&
 	  T_abs(M(c,u) - M(d,u)) == 1 &&
 	  M(a,u) <= s && M(b,u) <= s && 
@@ -876,26 +857,25 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
 	return eVal;
     return -400;
   };
-  std::vector<std::vector<int> > ConSet(nbEdge);
-  for (int iEdge=0; iEdge<nbEdge; iEdge++)
+  std::vector<std::vector<size_t>> ConSet(nbEdge);
+  for (size_t iEdge=0; iEdge<nbEdge; iEdge++)
     ConSet[iEdge]={iEdge};
-  for (int iEdge=0; iEdge<nbEdge; iEdge++) {
+  for (size_t iEdge=0; iEdge<nbEdge; iEdge++) {
     std::cerr << "iEdge=" << iEdge << " e=" << ListEdge[iEdge][0] << "," << ListEdge[iEdge][1] << "\n";
   }
-  MyMatrix<std::vector<int> > MCE(nbEdge,nbEdge);
+  MyMatrix<std::vector<int>> MCE(nbEdge,nbEdge);
   int NbPrev=0;
   int NbUnsolved=0;
-  std::vector<std::vector<int> > ListPairNegative;
-  for (int iEdge=0; iEdge<nbEdge-1; iEdge++)
-    for (int jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
+  std::vector<std::vector<size_t>> ListPairNegative;
+  for (size_t iEdge=0; iEdge<nbEdge-1; iEdge++)
+    for (size_t jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
       int val=EdgeDist(iEdge, jEdge);
       std::vector<int> LVal;
       std::cerr << "iEdge=" << iEdge << " jEdge=" << jEdge << " val=" << val << "\n";
       if (val == -400) {
 	LVal={0,1,2};
 	NbUnsolved++;
-      }
-      else {
+      } else {
 	LVal={val};
 	if (val > 2 || val < -2) {
 	  std::cerr << "Logical error for the distances\n";
@@ -912,18 +892,18 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
   std::cerr << "NbUnsolved=" << NbUnsolved << "\n";
   std::cerr << "NbPrev    =" << NbPrev << "\n";
   std::cerr << "DiamGraph=" << DiamGraph << "\n";
-  int nbNegative=ListPairNegative.size();
+  size_t nbNegative=ListPairNegative.size();
   if (nbNegative > 0) {
     std::cerr << "Found some pairs of edges with intersection of negative size\n";
     std::cerr << "|ListPairNegative|=" << nbNegative << "\n";
-    for (int iNeg=0; iNeg<nbNegative; iNeg++) {
-      int iEdge=ListPairNegative[iNeg][0];
-      int jEdge=ListPairNegative[iNeg][1];
+    for (size_t iNeg=0; iNeg<nbNegative; iNeg++) {
+      size_t iEdge=ListPairNegative[iNeg][0];
+      size_t jEdge=ListPairNegative[iNeg][1];
       int eDist=EdgeDist(iEdge,jEdge);
-      int a=ListEdge[iEdge][0];
-      int b=ListEdge[iEdge][1];
-      int c=ListEdge[jEdge][0];
-      int d=ListEdge[jEdge][1];
+      size_t a=ListEdge[iEdge][0];
+      size_t b=ListEdge[iEdge][1];
+      size_t c=ListEdge[jEdge][0];
+      size_t d=ListEdge[jEdge][1];
       std::cerr << "i=" << iNeg << " e={" << a << "," << b << "} f={" << c << "," << d << "} eDist=" << eDist << "\n";
     }
     throw TerminalException{1};
@@ -932,11 +912,11 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     std::cerr << "Nothing computable. Error actually\n";
     return {};
   }
-  auto GetGraphIdentityEdge=[&ListEdge](std::vector<std::vector<int> > const& LEdge, MyMatrix<std::vector<int> > const& MCEwork) -> GraphBitset {
-    int nbEdgeLoc=LEdge.size();
+  auto GetGraphIdentityEdge=[&ListEdge](std::vector<std::vector<size_t>> const& LEdge, MyMatrix<std::vector<int>> const& MCEwork) -> GraphBitset {
+    size_t nbEdgeLoc=LEdge.size();
     GraphBitset Aspec(nbEdgeLoc);
-    for (int iEdge=0; iEdge<nbEdgeLoc-1; iEdge++)
-      for (int jEdge=iEdge+1; jEdge<nbEdgeLoc; jEdge++) {
+    for (size_t iEdge=0; iEdge<nbEdgeLoc-1; iEdge++)
+      for (size_t jEdge=iEdge+1; jEdge<nbEdgeLoc; jEdge++) {
 	//	std::cerr << "iEdge=" << iEdge << " jEdge=" << jEdge << "\n";
 	int iPos=PositionVect(ListEdge, LEdge[iEdge]);
 	int jPos=PositionVect(ListEdge, LEdge[jEdge]);
@@ -949,20 +929,20 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       }
     return Aspec;
   };
-  auto IsCoherentEdgeValues=[&ListEdge](std::vector<std::vector<int> > const& Cspec, std::vector<std::vector<int> > const& LEdge, MyMatrix<std::vector<int> > const & MCEwork) ->bool {
-    int nbComp=Cspec.size();
-    for (int iComp=0; iComp<nbComp-1; iComp++)
-      for (int jComp=iComp+1; jComp<nbComp; jComp++) {
-	std::vector<int> eComp=Cspec[iComp];
-	std::vector<int> fComp=Cspec[jComp];
-	int siz1=eComp.size();
-	int siz2=fComp.size();
+  auto IsCoherentEdgeValues=[&ListEdge](std::vector<std::vector<size_t>> const& Cspec, std::vector<std::vector<size_t>> const& LEdge, MyMatrix<std::vector<int>> const & MCEwork) ->bool {
+    size_t nbComp=Cspec.size();
+    for (size_t iComp=0; iComp<nbComp-1; iComp++)
+      for (size_t jComp=iComp+1; jComp<nbComp; jComp++) {
+	std::vector<size_t> eComp=Cspec[iComp];
+	std::vector<size_t> fComp=Cspec[jComp];
+	size_t siz1=eComp.size();
+	size_t siz2=fComp.size();
 	bool IsFirst=true;
 	std::vector<int> CommonVal;
-	for (int iElt=0; iElt<siz1; iElt++)
-	  for (int jElt=0; jElt<siz2; jElt++) {
-	    std::vector<int> eEdge=LEdge[eComp[iElt]];
-	    std::vector<int> fEdge=LEdge[fComp[jElt]];
+	for (size_t iElt=0; iElt<siz1; iElt++)
+	  for (size_t jElt=0; jElt<siz2; jElt++) {
+	    std::vector<size_t> eEdge=LEdge[eComp[iElt]];
+	    std::vector<size_t> fEdge=LEdge[fComp[jElt]];
 	    int iPos=PositionVect(ListEdge, eEdge);
 	    int jPos=PositionVect(ListEdge, fEdge);
 	    std::vector<int> eVal=MCEwork(iPos,jPos);
@@ -979,15 +959,15 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       }
     return true;
   };
-  auto GraphIntersectionOne=[&ListEdge](std::vector<std::vector<int> > const& Cspec, std::vector<std::vector<int> > const& LEdge, MyMatrix<std::vector<int> > const & MCEwork) -> GraphBitset {
-    int nbComp=Cspec.size();
+  auto GraphIntersectionOne=[&ListEdge](std::vector<std::vector<size_t>> const& Cspec, std::vector<std::vector<size_t>> const& LEdge, MyMatrix<std::vector<int>> const & MCEwork) -> GraphBitset {
+    size_t nbComp=Cspec.size();
     GraphBitset eGR(nbComp);
-    for (int iComp=0; iComp<nbComp-1; iComp++)
-      for (int jComp=iComp+1; jComp<nbComp; jComp++) {
-	std::vector<int> eComp=Cspec[iComp];
-	std::vector<int> fComp=Cspec[jComp];
-	std::vector<int> eEdge=LEdge[eComp[0]];
-	std::vector<int> fEdge=LEdge[fComp[0]];
+    for (size_t iComp=0; iComp<nbComp-1; iComp++)
+      for (size_t jComp=iComp+1; jComp<nbComp; jComp++) {
+	std::vector<size_t> eComp=Cspec[iComp];
+	std::vector<size_t> fComp=Cspec[jComp];
+	std::vector<size_t> eEdge=LEdge[eComp[0]];
+	std::vector<size_t> fEdge=LEdge[fComp[0]];
 	int iPos=PositionVect(ListEdge, eEdge);
 	int jPos=PositionVect(ListEdge, fEdge);
 	std::vector<int> eVal=MCEwork(iPos,jPos);
@@ -998,27 +978,27 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       }
     return eGR;
   };
-  auto ExtendListLabel=[](std::vector<std::vector<int> > const& Cspec, std::vector<std::vector<int> > const& PartListLabel) -> std::vector<std::vector<int> > {
-    int nbVert=0;
+  auto ExtendListLabel=[](std::vector<std::vector<size_t>> const& Cspec, std::vector<std::vector<int>> const& PartListLabel) -> std::vector<std::vector<int>> {
+    size_t nbVert=0;
     for (auto & eList : Cspec)
       for (auto & eVal : eList)
 	if (eVal > nbVert)
 	  nbVert=eVal;
     nbVert++;
     //
-    std::vector<std::vector<int> > ListLabel(nbVert);
-    int nbComp=Cspec.size();
-    for (int iComp=0; iComp<nbComp; iComp++) {
+    std::vector<std::vector<int>> ListLabel(nbVert);
+    size_t nbComp=Cspec.size();
+    for (size_t iComp=0; iComp<nbComp; iComp++) {
       std::vector<int> eLabel=PartListLabel[iComp];
       for (auto& iVert : Cspec[iComp])
-	ListLabel[iVert]=eLabel;
+	ListLabel[iVert] = eLabel;
     }
     return ListLabel;
   };
   /*
-  auto GetMCEfromEmbedding=[&nbEdge, &ListEdge](MyMatrix<int> const& eEmbed) -> MyMatrix<std::vector<int> > {
+  auto GetMCEfromEmbedding=[&nbEdge, &ListEdge](MyMatrix<int> const& eEmbed) -> MyMatrix<std::vector<int>> {
     int nbLabel=eEmbed.cols();
-    MyMatrix<std::vector<int> > MCEret(nbEdge, nbEdge);
+    MyMatrix<std::vector<int>> MCEret(nbEdge, nbEdge);
     for (int iEdge=0; iEdge<nbEdge-1; iEdge++)
       for (int jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
 	std::vector<int> eEdge=ListEdge[iEdge];
@@ -1043,8 +1023,8 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     };*/
   auto CheckEmbedding=[&](MyMatrix<int> const& eEmbed) -> bool {
     int TheDim=eEmbed.cols();
-    for (int i=0; i<n; i++)
-      for (int j=0; j<n; j++) {
+    for (size_t i=0; i<n; i++)
+      for (size_t j=0; j<n; j++) {
 	std::vector<int> V1(TheDim);
 	std::vector<int> V2(TheDim);
 	for (int iC=0; iC<TheDim; iC++) {
@@ -1062,15 +1042,15 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       }
     return true;
   };
-  if (DiamGraph == s) {
+  if (DiamGraph == s_sz) {
     std::cerr << "Direct embed, step 0\n";
-    std::vector<std::vector<int> > ET=SpanningTree(GR);
+    std::vector<std::vector<size_t>> ET=SpanningTree(GR);
     std::cerr << "Direct embed, step 1\n";
     GraphBitset Aspec=GetGraphIdentityEdge(ET, MCE);
     std::cerr << "Direct embed, step 2\n";
-    std::vector<std::vector<int> > Cspec=ConnectedComponents_set(Aspec);
+    std::vector<std::vector<size_t>> Cspec=ConnectedComponents_set(Aspec);
     std::cerr << "Direct embed, step 3\n";
-    for (std::vector<int> & eList : Cspec)
+    for (std::vector<size_t> & eList : Cspec)
       if (!IsClique(Aspec, eList)) {
 	std::cerr << "Not a clique. So no embedding\n";
 	return {};
@@ -1083,14 +1063,14 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     std::cerr << "Direct embed, step 5\n";
     GraphBitset Dspec=GraphIntersectionOne(Cspec, ET, MCE);
     std::cerr << "Direct embed, step 6\n";
-    std::vector<std::vector<int> > PartListLabel=InverseLineGraph(Dspec);
+    std::vector<std::vector<int>> PartListLabel=InverseLineGraph(Dspec);
     std::cerr << "Direct embed, step 7\n";
     if (PartListLabel[0][0] == -1) {
       std::cerr << "Not a line graph\n";
       return {};
     }
     std::cerr << "Direct embed, step 8\n";
-    std::vector<std::vector<int> > ListLabel=ExtendListLabel(Cspec, PartListLabel);
+    std::vector<std::vector<int>> ListLabel=ExtendListLabel(Cspec, PartListLabel);
     std::cerr << "Direct embed, step 9\n";
     MyMatrix<int> Embedding=CreateEmbedding(0, ET, ListLabel);
     bool res=CheckEmbedding(Embedding);
@@ -1098,11 +1078,11 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       std::cerr << "Maybe some bug in the code\n";
       throw TerminalException{1};
     }
-    std::vector<MyMatrix<int> > ListEmbedding{Embedding};
+    std::vector<MyMatrix<int>> ListEmbedding{Embedding};
     std::cerr << "|ListEmbedding|=" << ListEmbedding.size() << "\n";
     return ListEmbedding;
   }
-  auto RefinementBlock1=[&ListEdge,&GetGraphIdentityEdge](MyMatrix<std::vector<int> > & MCEwork, int &nbOper) -> bool {
+  auto RefinementBlock1=[&ListEdge,&GetGraphIdentityEdge](MyMatrix<std::vector<int>> & MCEwork, int &nbOper) -> bool {
     /*
     std::cerr << "ListEdge=\n";
     int nbEdge=ListEdge.size();
@@ -1119,17 +1099,17 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     GraphBitset Aspec=GetGraphIdentityEdge(ListEdge, MCEwork);
     //    std::cerr << "Aspec=\n";
     //    GRAPH_PrintOutput(std::cerr, Aspec);
-    std::vector<std::vector<int> > Cspec=ConnectedComponents_set(Aspec);
+    std::vector<std::vector<size_t>> Cspec=ConnectedComponents_set(Aspec);
     //    std::cerr << "|Cspec|=" << Cspec.size() << "\n";
     //    std::cerr << "Cspec=\n";
     //    Print_VectorVector(std::cerr, Cspec);
     for (auto & eConn : Cspec) {
-      int lenConn=eConn.size();
+      size_t lenConn=eConn.size();
       //      std::cerr << "|eConn|=" << lenConn << "\n";
-      for (int i=0; i<lenConn-1; i++)
-	for (int j=i+1; j<lenConn; j++) {
-	  int iEdge=eConn[i];
-	  int jEdge=eConn[j];
+      for (size_t i=0; i<lenConn-1; i++)
+	for (size_t j=i+1; j<lenConn; j++) {
+	  size_t iEdge=eConn[i];
+	  size_t jEdge=eConn[j];
 	  std::vector<int> eVal=MCEwork(iEdge, jEdge);
 	  int pos=PositionVect(eVal,2);
 	  if (pos == -1) {
@@ -1144,31 +1124,31 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     }
     return true;
   };
-  auto RefinementBlock2=[&ListEdge,&GetGraphIdentityEdge](MyMatrix<std::vector<int> > & MCEwork, int & nbOper) -> bool {
+  auto RefinementBlock2=[&ListEdge,&GetGraphIdentityEdge](MyMatrix<std::vector<int>> & MCEwork, int & nbOper) -> bool {
     GraphBitset Aspec=GetGraphIdentityEdge(ListEdge, MCEwork);
-    std::vector<std::vector<int> > Cspec=ConnectedComponents_set(Aspec);
-    int nbConn=Cspec.size();
-    for (int iConn=0; iConn<nbConn-1; iConn++)
-      for (int jConn=iConn+1; jConn<nbConn; jConn++) {
+    std::vector<std::vector<size_t>> Cspec=ConnectedComponents_set(Aspec);
+    size_t nbConn=Cspec.size();
+    for (size_t iConn=0; iConn<nbConn-1; iConn++)
+      for (size_t jConn=iConn+1; jConn<nbConn; jConn++) {
 	std::vector<int> ListPoss{0,1,2};
-	std::vector<int> eConn=Cspec[iConn];
-	std::vector<int> fConn=Cspec[jConn];
-	int iSize=eConn.size();
-	int jSize=fConn.size();
-	for (int i=0; i<iSize; i++)
-	  for (int j=0; j<jSize; j++) {
-	    int iEdge=eConn[i];
-	    int jEdge=fConn[j];
+	std::vector<size_t> eConn=Cspec[iConn];
+	std::vector<size_t> fConn=Cspec[jConn];
+	size_t iSize=eConn.size();
+	size_t jSize=fConn.size();
+	for (size_t i=0; i<iSize; i++)
+	  for (size_t j=0; j<jSize; j++) {
+	    size_t iEdge=eConn[i];
+	    size_t jEdge=fConn[j];
 	    std::vector<int> eVal=MCEwork(iEdge,jEdge);
 	    ListPoss=IntersectionVect(ListPoss, eVal);
 	  }
 	if (ListPoss.size() == 0) {
 	  return false;
 	}
-	for (int i=0; i<iSize; i++)
-	  for (int j=0; j<jSize; j++) {
-	    int iEdge=eConn[i];
-	    int jEdge=fConn[j];
+	for (size_t i=0; i<iSize; i++)
+	  for (size_t j=0; j<jSize; j++) {
+	    size_t iEdge=eConn[i];
+	    size_t jEdge=fConn[j];
 	    std::vector<int> eVal=MCEwork(iEdge,jEdge);
 	    if (eVal != ListPoss) {
 	      MCEwork(iEdge,jEdge)=ListPoss;
@@ -1199,28 +1179,28 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
   //    TYPE 1: [1,1,0],                   [2,1,1], [0,0,0]
   //    TYPE 2: [1,1,1], [1,0,0], [1,1,0], [2,1,1], [0,0,0]
   //                    Pattern [1,1,0] can occur at most 3 times.
-  auto RefinementTriangles=[&ListEdge,&GetGraphIdentityEdge,&GraphIntersectionOne,&SetOne,&SetZero,&SetTwo](MyMatrix<std::vector<int> > & MCEwork, int & nbOper) -> bool {
+  auto RefinementTriangles=[&ListEdge,&GetGraphIdentityEdge,&GraphIntersectionOne,&SetOne,&SetZero,&SetTwo](MyMatrix<std::vector<int>> & MCEwork, int & nbOper) -> bool {
     GraphBitset Aspec=GetGraphIdentityEdge(ListEdge, MCEwork);
     //    std::cerr << "|Aspec|=" << Aspec.GetNbVert() << "\n";
     //    GRAPH_PrintOutput(std::cerr, Aspec);
-    std::vector<std::vector<int> > Cspec=ConnectedComponents_set(Aspec);
+    std::vector<std::vector<size_t>> Cspec=ConnectedComponents_set(Aspec);
     //    std::cerr << "|Cspec|=" << Cspec.size() << "\n";
     GraphBitset Dspec=GraphIntersectionOne(Cspec, ListEdge, MCEwork);
-    int nbVertD=Dspec.GetNbVert();
-    std::vector<int> VertSet(nbVertD);
-    for (int iVert=0; iVert<nbVertD; iVert++)
+    size_t nbVertD=Dspec.GetNbVert();
+    std::vector<size_t> VertSet(nbVertD);
+    for (size_t iVert=0; iVert<nbVertD; iVert++)
       VertSet[iVert]=iVert;
-    std::vector<std::vector<int> > ListTriple=EnumerationClique(Dspec, 3);
+    std::vector<std::vector<size_t>> ListTriple=EnumerationClique(Dspec, 3);
     for (auto & eTriple : ListTriple) {
       bool Type1feasible=true;
       bool Type2feasible=true;
       int nb110=0;
       for (auto & d : DifferenceVect(VertSet, eTriple) ) {
-	int dEdge=Cspec[d][0];
+	size_t dEdge=Cspec[d][0];
 	int nb1=0;
 	int nb0=0;
-	for (int i=0; i<3; i++) {
-	  int jEdge=Cspec[eTriple[i]][0];
+	for (size_t i=0; i<3; i++) {
+	  size_t jEdge=Cspec[eTriple[i]][0];
 	  if (MCEwork(dEdge, jEdge) == SetOne)
 	    nb1++;
 	  if (MCEwork(dEdge, jEdge) == SetZero)
@@ -1232,11 +1212,11 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       if (nb110 > 3)
 	Type2feasible=false;
       for (int i=0; i<3; i++) {
-	int iNext=NextIdx(3,i);
-	int iPrev=PrevIdx(3,i);
-	int iEdge=Cspec[eTriple[i]][0];
-	int iEdgeNext=Cspec[eTriple[iNext]][0];
-	int iEdgePrev=Cspec[eTriple[iPrev]][0];
+	size_t iNext=NextIdx(3,i);
+	size_t iPrev=PrevIdx(3,i);
+	size_t iEdge=Cspec[eTriple[i]][0];
+	size_t iEdgeNext=Cspec[eTriple[iNext]][0];
+	size_t iEdgePrev=Cspec[eTriple[iPrev]][0];
 	/*
 	std::cerr << "iEdge=" << iEdge << " iEdgeNext=" << iEdgeNext << " iEdgePrev=" << iEdgePrev << "\n";
 	std::cerr << "eEdge=" << ListEdge[iEdge][0] << " , " << ListEdge[iEdge][1] << "\n";
@@ -1252,7 +1232,7 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
 	std::cerr << "----------------------------------------------------------\n";
 	*/
 	for (auto & d : DifferenceVect(VertSet, eTriple) ) {
-	  int dEdge=Cspec[d][0];
+	  size_t dEdge=Cspec[d][0];
 	  /*
 	  std::cerr << "dEdge=" << dEdge << "\n";
 	  std::cerr << "dEdge=" << ListEdge[dEdge][0] << " , " << ListEdge[dEdge][1] << "\n";
@@ -1282,12 +1262,11 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
 	    }
 	  }
 	  for (int j=0; j<2; j++) {
-	    int iEdge1, iEdge2;
+	    size_t iEdge1, iEdge2;
 	    if (j == 0) {
 	      iEdge1=iEdgePrev;
 	      iEdge2=iEdgeNext;
-	    }
-	    else {
+	    } else {
 	      iEdge1=iEdgeNext;
 	      iEdge2=iEdgePrev;
 	    }
@@ -1334,16 +1313,16 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     }
     return true;
   };
-  auto IsAprioriFeasible=[&nbEdge](MyMatrix<std::vector<int> > const& eMat) -> bool {
-    for (int iEdge=0; iEdge<nbEdge-1; iEdge++)
-      for (int jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
-	int siz=eMat(iEdge,jEdge).size();
+  auto IsAprioriFeasible=[&nbEdge](MyMatrix<std::vector<int>> const& eMat) -> bool {
+    for (size_t iEdge=0; iEdge<nbEdge-1; iEdge++)
+      for (size_t jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
+        size_t siz=eMat(iEdge,jEdge).size();
 	if (siz == 0)
 	  return false;
       }
     return true;
   };
-  auto IterativeRefinementMCE=[&](MyMatrix<std::vector<int> > & MCEwork) -> bool {
+  auto IterativeRefinementMCE=[&](MyMatrix<std::vector<int>> & MCEwork) -> bool {
     bool test;
     while(true) {
       int nbOper=0;
@@ -1368,26 +1347,26 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     }
     return true;
   };
-  auto GetFirstNonZero=[&nbEdge](MyMatrix<std::vector<int> > const& MCEwork) -> std::vector<int> {
-    for (int iEdge=0; iEdge<nbEdge-1; iEdge++)
-      for (int jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
-	int siz=MCEwork(iEdge,jEdge).size();
+  auto GetFirstNonZero=[&nbEdge](MyMatrix<std::vector<int>> const& MCEwork) -> std::vector<size_t> {
+    for (size_t iEdge=0; iEdge<nbEdge-1; iEdge++)
+      for (size_t jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
+	size_t siz=MCEwork(iEdge,jEdge).size();
 	if (siz > 1)
 	  return {iEdge,jEdge};
       }
     std::cerr << "Fail to find an index\n";
     throw TerminalException{1};
   };
-  auto IsFinalState=[&nbEdge](MyMatrix<std::vector<int> > const& MCEwork) -> bool {
-    for (int iEdge=0; iEdge<nbEdge-1; iEdge++)
-      for (int jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
-	int siz=MCEwork(iEdge,jEdge).size();
+  auto IsFinalState=[&nbEdge](MyMatrix<std::vector<int>> const& MCEwork) -> bool {
+    for (size_t iEdge=0; iEdge<nbEdge-1; iEdge++)
+      for (size_t jEdge=iEdge+1; jEdge<nbEdge; jEdge++) {
+	size_t siz=MCEwork(iEdge,jEdge).size();
 	if (siz > 1)
 	  return false;
       }
     return true;
   };
-  auto GetEmbeddingMatrix=[&ListEdge,&GetGraphIdentityEdge,&GraphIntersectionOne,&ExtendListLabel,&CheckEmbedding](MyMatrix<std::vector<int> > const& MCEwork, MyMatrix<int> & FinalEmbed) -> bool {
+  auto GetEmbeddingMatrix=[&ListEdge,&GetGraphIdentityEdge,&GraphIntersectionOne,&ExtendListLabel,&CheckEmbedding](MyMatrix<std::vector<int>> const& MCEwork, MyMatrix<int> & FinalEmbed) -> bool {
     std::cerr << "GetEmbeddingMatrix, step 1\n";
     /*
     for (int iEdge=0; iEdge<nbEdge; iEdge++)
@@ -1402,7 +1381,7 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     std::cerr << "GetEmbeddingMatrix, step 3\n";
     //    std::cerr << "Aspec=";
     //    GRAPH_PrintOutput(std::cerr, Aspec);
-    std::vector<std::vector<int> > Cspec=ConnectedComponents_set(Aspec);
+    std::vector<std::vector<size_t>> Cspec=ConnectedComponents_set(Aspec);
     std::cerr << "GetEmbeddingMatrix, step 4 |Cspec|=" << Cspec.size() << "\n";
     //    std::cerr << "Cspec=\n";
     //    Print_VectorVector(std::cerr, Cspec);
@@ -1412,7 +1391,7 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     //    std::cerr << "Dspec=";
     //    GRAPH_PrintOutput(std::cerr, Dspec);
     //    GRAPH_PrintOutputGAP(std::cerr, Dspec);
-    std::vector<std::vector<int> > PartListLabel=InverseLineGraph(Dspec);
+    std::vector<std::vector<int>> PartListLabel=InverseLineGraph(Dspec);
     std::cerr << "GetEmbeddingMatrix, step 6\n";
     //    std::cerr << "PartListLabel=\n";
     //    Print_VectorVector(std::cerr, PartListLabel);
@@ -1421,7 +1400,7 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       std::cerr << "Embedding failure\n";
       return false;
     }
-    std::vector<std::vector<int> > ListLabel=ExtendListLabel(Cspec, PartListLabel);
+    std::vector<std::vector<int>> ListLabel=ExtendListLabel(Cspec, PartListLabel);
     std::cerr << "GetEmbeddingMatrix, step 7\n";
     //    std::cerr << "ListLabel=";
     //    Print_VectorVector(std::cerr, ListLabel);
@@ -1430,10 +1409,10 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     return res;
   };
   struct OneLevel {
-    std::vector<int> PairEdge;
+    std::vector<size_t> PairEdge;
     std::vector<int> ListPoss;
     int idx;
-    MyMatrix<std::vector<int> > MCE;
+    MyMatrix<std::vector<int>> MCE;
   };
   std::vector<OneLevel> TheTree;
   auto GoUpNextInTree=[&]() -> bool {
@@ -1441,9 +1420,9 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
     while(true) {
       if (TheTree.size() == 0)
 	return false;
-      int len=TheTree.size();
+      size_t len=TheTree.size();
       std::cerr << "TheTree len=" << len << "\n";
-      int lenPoss=TheTree[len-1].ListPoss.size();
+      size_t lenPoss=TheTree[len-1].ListPoss.size();
       std::cerr << "lenPoss=" << lenPoss << "\n";
       if (len == 1) {
 	std::cerr << "ListPoss=";
@@ -1455,13 +1434,12 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       std::cerr << "idx=" << idx << "\n";
       if (idx == lenPoss -1) {
 	TheTree.pop_back();
-      }
-      else {
+      } else {
 	idx++;
-	int iEdge=TheTree[len-1].PairEdge[0];
-	int jEdge=TheTree[len-1].PairEdge[1];
+	size_t iEdge=TheTree[len-1].PairEdge[0];
+	size_t jEdge=TheTree[len-1].PairEdge[1];
 	TheTree[len-1].idx=idx;
-	MyMatrix<std::vector<int> > MCEnew;
+	MyMatrix<std::vector<int>> MCEnew;
 	if (len == 1) {
 	  MCEnew=MCE;
 	}
@@ -1481,28 +1459,28 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
       }
     }
   };
-  auto GetLatestMCE=[&TheTree,&MCE]() -> MyMatrix<std::vector<int> > {
-    int len=TheTree.size();
+  auto GetLatestMCE=[&TheTree,&MCE]() -> MyMatrix<std::vector<int>> {
+    size_t len=TheTree.size();
     if (len == 0)
       return MCE;
     return TheTree[len-1].MCE;
   };
   auto NextInTree=[&]() -> bool {
-    MyMatrix<std::vector<int> > MCEstart=GetLatestMCE();
+    MyMatrix<std::vector<int>> MCEstart=GetLatestMCE();
     bool test=IsFinalState(MCEstart);
     //    std::cerr << "test=" << test << "\n";
     if (test)
       return GoUpNextInTree();
-    std::vector<int> ePairEdge=GetFirstNonZero(MCEstart);
-    int iEdge=ePairEdge[0];
-    int jEdge=ePairEdge[1];
+    std::vector<size_t> ePairEdge=GetFirstNonZero(MCEstart);
+    size_t iEdge=ePairEdge[0];
+    size_t jEdge=ePairEdge[1];
     std::cerr << "Assign iEdge=" << iEdge << " jEdge=" << jEdge << "\n";
     std::vector<int> ListPoss=MCEstart(iEdge,jEdge);
     int idx=0;
     MCEstart(iEdge,jEdge)={ListPoss[idx]};
     MCEstart(jEdge,iEdge)={ListPoss[idx]};
     TheTree.push_back({ePairEdge, ListPoss, idx, MCEstart});
-    int len=TheTree.size();
+    size_t len=TheTree.size();
     bool test2=IterativeRefinementMCE(TheTree[len-1].MCE);
     if (!test2)
       return GoUpNextInTree();
@@ -1512,10 +1490,10 @@ std::vector<MyMatrix<int> > GRAPH_S_Embedding(Tgr const& GR, int const& s, long 
   std::cerr << "IterativeRefinementMCE test=" << test << "\n";
   if (!test)
     return {};
-  std::vector<MyMatrix<int> > ListEmbedding;
-  int nbChoice=nbEdge*(nbEdge-1)/2;
+  std::vector<MyMatrix<int>> ListEmbedding;
+  size_t nbChoice=nbEdge * (nbEdge-1)/2;
   while(true) {
-    MyMatrix<std::vector<int> > MCEstart=GetLatestMCE();
+    MyMatrix<std::vector<int>> MCEstart=GetLatestMCE();
     bool testF=IsFinalState(MCEstart);
     std::cerr << "IsFinalState test=" << testF << "\n";
     if (testF) {
