@@ -11,7 +11,7 @@
 struct GraphFunctional {
 public:
   GraphFunctional() = delete;
-  GraphFunctional(int const& inpNbVert, std::function<bool(int const&,int const&)> const& eFct) : nbVert(inpNbVert), f(eFct)
+  GraphFunctional(size_t const& inpNbVert, std::function<bool(size_t const&,size_t const&)> const& eFct) : nbVert(inpNbVert), f(eFct)
   {
     HasVertexColor=false;
   }
@@ -34,11 +34,11 @@ public:
     return *this;
   }
   // lighter stuff
-  int GetNbVert() const
+  size_t GetNbVert() const
   {
     return nbVert;
   }
-  std::function<bool(int const&,int const&)> GetFCT() const
+  std::function<bool(size_t const&,size_t const&)> GetFCT() const
   {
     return f;
   }
@@ -46,37 +46,37 @@ public:
   {
     return HasVertexColor;
   }
-  std::function<int(int const&)> GetFColor() const
+  std::function<size_t(size_t const&)> GetFColor() const
   {
     return fColor;
   }
   //
-  void SetFColor(std::function<int(int const&)> const& inpFColor)
+  void SetFColor(std::function<size_t(size_t const&)> const& inpFColor)
   {
     HasVertexColor=true;
     fColor=inpFColor;
   }
-  std::vector<int> Adjacency(int const& iVert) const
+  std::vector<size_t> Adjacency(int const& iVert) const
   {
-    std::vector<int> retList;
-    for (int jVert=0; jVert<nbVert; jVert++)
+    std::vector<size_t> retList;
+    for (size_t jVert=0; jVert<nbVert; jVert++)
       if (f(iVert, jVert))
 	retList.push_back(jVert);
     return retList;
   }
-  bool IsAdjacent(int const& iVert, int const& jVert) const
+  bool IsAdjacent(size_t const& iVert, size_t const& jVert) const
   {
     return f(iVert, jVert);
   }
-  int GetColor(int const& iVert) const
+  size_t GetColor(size_t const& iVert) const
   {
     return fColor(iVert);
   }
 private:
-  int nbVert;
-  std::function<bool(int const&,int const&)> f;
+  size_t nbVert;
+  std::function<bool(size_t const&,size_t const&)> f;
   bool HasVertexColor;
-  std::function<int(int const&)> fColor;
+  std::function<size_t(size_t const&)> fColor;
 };
 
 
@@ -101,10 +101,10 @@ struct is_functional_graph_class<GraphFunctional> {
 template<typename Tgr>
 void GRAPH_PrintOutput(std::ostream &os, Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
+  size_t nbVert=GR.GetNbVert();
   os << "nbVert=" << nbVert << "\n";
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    std::vector<int> LVert=GR.Adjacency(iVert);
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    std::vector<size_t> LVert=GR.Adjacency(iVert);
     os << LVert.size();
     for (auto &eVert : LVert)
       os << " " << eVert;
@@ -115,27 +115,27 @@ void GRAPH_PrintOutput(std::ostream &os, Tgr const& GR)
 template<typename Tgr>
 void GRAPH_PrintOutputGAP_vertex_colored(std::string const& eFile, Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  std::vector<std::vector<int>> ListEdges;
+  size_t nbVert=GR.GetNbVert();
+  std::vector<std::vector<size_t>> ListEdges;
   std::ofstream os(eFile);
   os << "local ListAdjacency, ThePartition;\n";
   os << "ListAdjacency:=[";
-  for (int iVert=0; iVert<nbVert; iVert++) {
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
     if (iVert > 0)
       os << ",\n";
-    std::vector<int> LVert=GR.Adjacency(iVert);
+    std::vector<size_t> LVert=GR.Adjacency(iVert);
     WriteStdVectorGAP(os, LVert);
   }
   os << "];\n";
-  std::vector<int> ListColor=GR.GetListVertexColor();
-  int nbBlock=VectorMax(ListColor)+1;
-  std::vector<std::vector<int>> ListBlock(nbBlock);
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    int eColor=ListColor[iVert];
-    ListBlock[eColor].push_back(iVert+1);
+  std::vector<size_t> ListColor=GR.GetListVertexColor();
+  size_t nbBlock=VectorMax(ListColor)+1;
+  std::vector<std::vector<size_t>> ListBlock(nbBlock);
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    size_t eColor=ListColor[iVert];
+    ListBlock[eColor].push_back(iVert + 1);
   }
   os << "ThePartition:=[";
-  for (int iBlock=0; iBlock<nbBlock; iBlock++) {
+  for (size_t iBlock=0; iBlock<nbBlock; iBlock++) {
     if (iBlock>0)
       os << ",";
     WriteStdVectorGAP(os, ListBlock[iBlock]);
@@ -149,18 +149,18 @@ void GRAPH_PrintOutputGAP_vertex_colored(std::string const& eFile, Tgr const& GR
 template<typename Tgr>
 void GRAPH_PrintOutputGAP(std::ostream &os, Tgr const& GR)
 {
-  int nbVert=GR.GetNbVert();
-  std::vector<std::vector<int>> ListEdges;
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    std::vector<int> LVert=GR.Adjacency(iVert);
+  size_t nbVert=GR.GetNbVert();
+  std::vector<std::vector<size_t>> ListEdges;
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    std::vector<size_t> LVert=GR.Adjacency(iVert);
     for (auto & eVert : LVert)
       if (eVert > iVert)
 	ListEdges.push_back({iVert+1, eVert+1});
   }
-  int nbEdge=ListEdges.size();
+  size_t nbEdge=ListEdges.size();
   os << "local ListEdges, eEdge, GRA;\n";
   os << "ListEdges:=[";
-  for (int iEdge=0; iEdge<nbEdge; iEdge++) {
+  for (size_t iEdge=0; iEdge<nbEdge; iEdge++) {
     if (iEdge > 0)
       os << ",";
     os << "[" << ListEdges[iEdge][0] << "," << ListEdges[iEdge][1] << "]";
@@ -207,7 +207,7 @@ Tgr GRAPH_Read(std::istream& is)
     std::cerr << "GRAPH_Read operation failed because stream is not valied\n";
     throw TerminalException{1};
   }
-  int nbVert;
+  size_t nbVert;
   is >> nbVert;
   Tgr eGR(nbVert);
   int SetHasColor_i;;
@@ -215,19 +215,19 @@ Tgr GRAPH_Read(std::istream& is)
   bool SetHasColor = SetHasColor_i;
   eGR.SetHasColor(SetHasColor);
   if (SetHasColor) {
-    for (int iVert=0; iVert<nbVert; iVert++) {
-      int eColor;
+    for (size_t iVert=0; iVert<nbVert; iVert++) {
+      size_t eColor;
       is >> eColor;
       eGR.SetColor(iVert, eColor);
     }
   }
-  for (int iVert=0; iVert<nbVert; iVert++) {
-    int eDeg;
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    size_t eDeg;
     is >> eDeg;
-    for (int i=0; i<eDeg; i++) {
-      int eAdj;
+    for (size_t i=0; i<eDeg; i++) {
+      size_t eAdj;
       is >> eAdj;
-      if (eAdj < 0 || eAdj >= nbVert) {
+      if (eAdj >= nbVert) {
         std::cerr << "The vertex iVert=" << iVert << " of degree " << eDeg << "\n";
         std::cerr << "At index i=" << i << " the adjacent vertex is " << eAdj << "\n";
         std::cerr << "But this is not adequate as the total number of vertices is nbVert=" << nbVert << "\n";
@@ -254,8 +254,8 @@ MyMatrix<size_t> ShortestPathDistanceMatrix(Tgr const& GR)
     for (size_t jVert=0; jVert<nbVert; jVert++)
       StatusMat(iVert, jVert)=0;
   for (size_t iVert=0; iVert<nbVert; iVert++) {
-    StatusMat(iVert, iVert)=2;
-    DistMat(iVert, iVert)=0;
+    StatusMat(iVert, iVert) = 2;
+    DistMat(iVert, iVert) = 0;
   }
   size_t UpperBoundDiam=nbVert+2;
   size_t iter=0;
@@ -266,12 +266,12 @@ MyMatrix<size_t> ShortestPathDistanceMatrix(Tgr const& GR)
       for (size_t jVert=0; jVert<nbVert; jVert++)
 	if (StatusMat(iVert, jVert) == 2) {
 	  IsFinished=false;
-	  StatusMat(iVert,jVert)=1;
+	  StatusMat(iVert, jVert)=1;
 	  std::vector<size_t> LLAdj=GR.Adjacency(jVert);
 	  for (size_t & eAdj : LLAdj)
 	    if (StatusMat(iVert, eAdj) == 0) {
-	      StatusMat(iVert,eAdj)=-1;
-	      DistMat(iVert,eAdj)=DistMat(iVert,jVert) + 1;
+	      StatusMat(iVert, eAdj)=-1;
+	      DistMat(iVert,eAdj) = DistMat(iVert,jVert) + 1;
 	    }
 	}
     for (size_t iVert=0; iVert<nbVert; iVert++)
@@ -359,7 +359,7 @@ std::vector<std::vector<size_t>> GetEdgeSet(Tgr const& GR)
   std::vector<std::vector<size_t>> Edges;
   for (size_t iVert=0; iVert<nbVert-1; iVert++)
     for (size_t jVert=iVert+1; jVert<nbVert; jVert++)
-      if (GR.IsAdjacent(iVert,jVert))
+      if (GR.IsAdjacent(iVert, jVert))
 	Edges.push_back({iVert, jVert});
   return Edges;
 }
@@ -419,7 +419,7 @@ bool IsClique(Tgr const& GR, std::vector<size_t> const& eList)
   size_t len=eList.size();
   for (size_t i=0; i<len-1; i++)
     for (size_t j=i+1; j<len; j++)
-      if (!GR.IsAdjacent(eList[i],eList[j]))
+      if (!GR.IsAdjacent(eList[i], eList[j]))
 	return false;
   return true;
 }
@@ -516,7 +516,6 @@ std::vector<std::vector<size_t>> SpanningTree(Tgr const& GR)
   while(true) {
     std::vector<size_t> NewListActiveVert;
     for (auto & eVert : ListActiveVert) {
-      //      std::cerr << "Treating eVert=" << eVert << "\n";
       std::vector<size_t> LLadj=GR.Adjacency(eVert);
       for (auto & fVert : LLadj) {
 	if (ListStatus[fVert] == 0) {
@@ -638,9 +637,9 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const& GR)
 template<typename T>
 void Print_VectorVector(std::ostream &os, std::vector<std::vector<T>> const& TheList)
 {
-  int siz=TheList.size();
+  size_t siz=TheList.size();
   os << "|TheList|=" << siz << "\n";
-  for (int i=0; i<siz; i++) {
+  for (size_t i=0; i<siz; i++) {
     os << "i=" << i << " V=";
     for (auto & eVal : TheList[i])
       os << " " << eVal;

@@ -24,7 +24,7 @@ int ComputeDiameterEquivariant(Tgr const& GR, TheGroupFormat const& TheGRP)
       std::vector<int> NewListPoint;
       for (auto & zPt : ListPoint) {
 	nbDone++;
-	for (int hPt : GR.Adjacency(zPt)) {
+	for (const size_t& hPt : GR.Adjacency(zPt)) {
 	  if (eStatus[hPt] == 0) {
 	    eStatus[hPt]=1;
 	    NewListPoint.push_back(hPt);
