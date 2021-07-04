@@ -346,14 +346,16 @@ CollectedResult<T> Collected(std::vector<T> const& eVect)
   return {std::move(LVal), std::move(LMult)};
 }
 
-inline int NextIdx(int const& len,int const& i)
+template<typename T>
+inline T NextIdx(T const& len, T const& i)
 {
   if (i == len-1)
     return 0;
   return i+1;
 }
 
-inline int PrevIdx(int const& len,int const& i)
+template<typename T>
+inline T PrevIdx(T const& len, T const& i)
 {
   if (i == 0)
     return len-1;

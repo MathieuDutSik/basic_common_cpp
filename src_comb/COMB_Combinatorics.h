@@ -315,15 +315,18 @@ Tint ConvertVectorToNumber(std::vector<int> const& V, int const& N)
 }
 
 
-std::vector<int> RandomPermutation(int const& n)
+template<typename Tidx>
+std::vector<Tidx> RandomPermutation(size_t const& n_sz)
 {
-  std::vector<int> RetList(n,-1);
-  for (int i=0; i<n; i++) {
-    int rnd_pos = rand() % (n - i);
-    int idx=0;
+  Tidx n = Tidx(n_sz);
+  Tidx miss_val = std::numeric_limits<Tidx>::max();
+  std::vector<Tidx> RetList(n, miss_val);
+  for (Tidx i=0; i<n; i++) {
+    Tidx rnd_pos = Tidx(rand()) % (n - i);
+    Tidx idx=0;
     bool IsAssigned = false;
-    for (int j=0; j<n; j++) {
-      if (RetList[j] == -1 && !IsAssigned) {
+    for (Tidx j=0; j<n; j++) {
+      if (RetList[j] == miss_val && !IsAssigned) {
         if (rnd_pos == idx) {
           RetList[j] = i;
           IsAssigned = true;

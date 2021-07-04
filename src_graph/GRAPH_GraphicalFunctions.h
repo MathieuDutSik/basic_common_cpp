@@ -1422,7 +1422,7 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const& GR, size_t const& s_sz, 
 	return false;
       size_t len=TheTree.size();
       std::cerr << "TheTree len=" << len << "\n";
-      size_t lenPoss=TheTree[len-1].ListPoss.size();
+      int lenPoss=int(TheTree[len-1].ListPoss.size());
       std::cerr << "lenPoss=" << lenPoss << "\n";
       if (len == 1) {
 	std::cerr << "ListPoss=";

@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
       size_t nof_vertices = V.size();
       std::vector<unsigned int> clR(nof_vertices);
       for (size_t i=0; i<nof_vertices; i++)
-        clR[V[i]]=i;
+        clR[V[i]]=(unsigned int)i;
       std::string strRet;
       for (size_t iVert=0; iVert<nof_vertices; iVert++) {
         int iVertCan = clR[iVert];
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
       }
       return strRet;
     };
-    auto random_perm_graph=[&](Tgr const& eGR, std::vector<int> const& ePerm) -> Tgr {
+    auto random_perm_graph=[&](Tgr const& eGR, std::vector<Tidx> const& ePerm) -> Tgr {
       size_t nbVert = eGR.GetNbVert();
       Tgr eGR2(nbVert);
       bool HasVertexColor = eGR.GetHasVertexColor();
@@ -68,14 +68,14 @@ int main(int argc, char *argv[])
         eGR2.SetHasColor(HasVertexColor);
         for (size_t iVert=0; iVert<nbVert; iVert++) {
           size_t eColor = eGR2.GetColor(iVert);
-          int iVert2 = ePerm[iVert];
+          size_t iVert2 = size_t(ePerm[iVert]);
           eGR2.SetColor(iVert2, eColor);
         }
       }
       for (size_t iVert=0; iVert<nbVert; iVert++) {
-        int iVert2 = ePerm[iVert];
+        size_t iVert2 = size_t(ePerm[iVert]);
         for (auto& eAdj : eGR.Adjacency(iVert)) {
-          int eAdj2 = ePerm[eAdj];
+          size_t eAdj2 = size_t(ePerm[eAdj]);
           eGR2.AddAdjacent(iVert2, eAdj2);
         }
       }
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
     std::string str1 = get_string_expression(eGR);
     size_t nbVert = eGR.GetNbVert();
     for (int i=0; i<5; i++) {
-      std::vector<int> ePerm = RandomPermutation(nbVert);
+      std::vector<Tidx> ePerm = RandomPermutation<Tidx>(nbVert);
       Tgr eGR2 = random_perm_graph(eGR, ePerm);
       std::string str2 = get_string_expression(eGR2);
       if (str1 != str2) {

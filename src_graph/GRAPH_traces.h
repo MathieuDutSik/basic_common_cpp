@@ -153,7 +153,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     /* Select option for canonical labelling */
     options.getcanon = TRUE;
 
-    int m = SETWORDSNEEDED(n);
+    int m = SETWORDSNEEDED(int(n));
     nauty_check(WORDSIZE,m,int(n),NAUTYVERSIONID);
 
     DYNALLOC1(int,lab1,lab1_sz,n,"malloc");
@@ -289,7 +289,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, size_t c
 
     /* Declare and initialize sparse graph structures */
     SG_DECL(sg1);
-    int m = SETWORDSNEEDED(n);
+    int m = SETWORDSNEEDED(int(n));
     nauty_check(WORDSIZE,m,int(n),NAUTYVERSIONID);
 
     DYNALLOC1(int,lab1,lab1_sz,n,"malloc");
@@ -329,7 +329,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, size_t c
     /* Now make the graph */
     SG_ALLOC(sg1,n,nbAdjacent,"malloc");
     sg1.nv = int(n);              /* Number of vertices */
-    sg1.nde = nbAdjacent;           /* Number of directed edges */
+    sg1.nde = int(nbAdjacent);           /* Number of directed edges */
     size_t pos = 0;
     for (size_t i=0; i<n; i++) {
       std::vector<size_t> LAdj = eGR.Adjacency(i);
@@ -439,7 +439,7 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
     /* Select option for canonical labelling */
     options.getcanon = TRUE;
 
-    int m = SETWORDSNEEDED(n);
+    int m = SETWORDSNEEDED(int(n));
     nauty_check(WORDSIZE,m,n,NAUTYVERSIONID);
 
     DYNALLOC1(int,lab1,lab1_sz,n,"malloc");
