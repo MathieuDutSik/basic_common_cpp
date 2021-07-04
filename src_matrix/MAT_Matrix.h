@@ -983,6 +983,21 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 
 
 template<typename T>
+SelectionRowCol<T> TMat_SelectRowCol_subset(MyMatrix<T> const&Input, std::vector<size_t> const& Vsubset)
+{
+  size_t nbRow=Vsubset.size();
+  size_t nbCol=Input.cols();
+  auto f=[&](MyMatrix<T> & M, size_t eRank, size_t iRow) -> void {
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      M(eRank, iCol) = Input(Vsubset[iRow], iCol);
+  };
+  return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f);
+}
+
+
+
+
+template<typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type NullspaceTrMat(MyMatrix<T> const& Input)
 {
   size_t nbRow=Input.rows();
