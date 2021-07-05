@@ -44,32 +44,32 @@ template<typename T>
 T Int_IndexLattice(MyMatrix<T> const& eMat)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in Int_IndexLattice");
-  int iRowF=-1, iColF=-1;
+  size_t iRowF=0, iColF=0;
   MyMatrix<T> eMatW=eMat;
-  int nbCol=eMat.cols();
-  int nbRow=eMat.rows();
+  size_t nbCol=eMat.cols();
+  size_t nbRow=eMat.rows();
   std::vector<int> colStat(nbCol,1);
   std::vector<int> rowStat(nbRow,1);
-  int nbDone=0;
+  size_t nbDone=0;
   T TheIndex=1;
   while(true) {
     bool IsFirst=true;
     int MinPivot=0;
-    for (int iCol=0; iCol<nbCol; iCol++)
+    for (size_t iCol=0; iCol<nbCol; iCol++)
       if (colStat[iCol] == 1)
-	for (int iRow=0; iRow<nbRow; iRow++)
+	for (size_t iRow=0; iRow<nbRow; iRow++)
 	  if (rowStat[iRow] == 1) {
 	    T eVal=eMatW(iRow, iCol);
 	    if (eVal != 0) {
 	      int eValA=T_Norm(eVal);
 	      if (IsFirst) {
-		iRowF=iRow;
-		iColF=iCol;
+		iRowF = iRow;
+		iColF = iCol;
 		MinPivot=eValA;
 	      } else {
 		if (eValA < MinPivot) {
-		  iRowF=iRow;
-		  iColF=iCol;
+		  iRowF = iRow;
+		  iColF = iCol;
 		  MinPivot=eValA;
 		}
 	      }
@@ -78,7 +78,6 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 	  }
     if (IsFirst)
       return 0;
-    //    std::cerr << "MinPivot=" << MinPivot << " iRowF=" << iRowF << " iColF=" << iColF << "\n";
 #ifdef DEBUG
     if (MinPivot == 0) {
       std::cerr << "Clear error in the code of IndexLattice\n";
@@ -88,32 +87,25 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
     //    std::cerr << "Before row operations\n";
     T ThePivot=eMatW(iRowF, iColF);
     bool IsFinished=true;
-    for (int iRow=0; iRow<nbRow; iRow++) {
-      //      std::cerr << "iRow=" << iRow << " nbRow=" << nbRow << "\n";
+    for (size_t iRow=0; iRow<nbRow; iRow++) {
       if (rowStat[iRow] == 1 && iRow != iRowF) {
 	T eVal=eMatW(iRow, iColF);
-	//	std::cerr << "eVal=" << eVal << "\n";
 	if (eVal != 0) {
 	  IsFinished=false;
 	  T TheQ=QuoInt(eVal, ThePivot);
-          if (TheQ != 0) {
-            //	  std::cerr << "eVal=" << eVal << " ThePivot=" << ThePivot << " TheQ=" << TheQ << "\n";
+          if (TheQ != 0)
             eMatW.row(iRow) -= TheQ*eMatW.row(iRowF);
-          }
 	}
       }
     }
-    //    std::cerr << "After row operations IsFinished=" << IsFinished << "\n";
     if (IsFinished) {
       colStat[iColF]=0;
       rowStat[iRowF]=0;
       nbDone++;
       TheIndex=TheIndex*ThePivot;
     }
-    //    std::cerr << "Now updated index\n";
     if (nbDone == nbCol)
       return TheIndex;
-    //    std::cerr << "Continuing loop\n";
   }
 }
 
@@ -126,8 +118,8 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 //    V P = (gcd, 0, ....., 0)
 template<typename T>
 struct GCD_int {
-  T gcd;
   MyMatrix<T> Pmat;
+  T gcd;
 };
 
 
@@ -148,7 +140,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   if (n == 0 && m == 0) {
     f=0;
     MyMatrix<T> Pmat=IdentityMat<T>(2);
-    return {f, std::move(Pmat)};
+    return {std::move(Pmat), f};
   }
   if (0 <= m) {
     f=m; fm=1;
@@ -187,7 +179,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
     throw TerminalException{1};
   }
 #endif
-  return {f, std::move(Pmat)};
+  return {std::move(Pmat), f};
 }
 
 template<typename T>
@@ -197,7 +189,7 @@ inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputeP
   if (n == 0 && m == 0) {
     eGCD=0;
     MyMatrix<T> Pmat=IdentityMat<T>(2);
-    return {eGCD, std::move(Pmat)};
+    return {std::move(Pmat), eGCD};
   }
   mpz_class s, t;
   mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), m.get_mpz_t(), n.get_mpz_t());
@@ -217,7 +209,7 @@ inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputeP
     throw TerminalException{1};
   }
 #endif
-  return {eGCD, std::move(Pmat)};
+  return {std::move(Pmat), eGCD};
 }
 
 
@@ -430,7 +422,7 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
   if (siz == 1) {
     T gcd=ListX[0];
     MyMatrix<T> Pmat=IdentityMat<T>(1);
-    GCD_int<T> eGCD_int{gcd, std::move(Pmat)};
+    GCD_int<T> eGCD_int{std::move(Pmat), gcd};
     return eGCD_int;
   }
   if (siz == 2)
@@ -454,7 +446,7 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
     Pmat(i, siz-1) = eGCD2.Pmat(0,1) * eGCD_int.Pmat(i,0);
   Pmat(siz-1, siz-1) = eGCD2.Pmat(1,1);
   //
-  return {eGCD2.gcd, std::move(Pmat)};
+  return {std::move(Pmat), eGCD2.gcd};
 }
 
 
@@ -473,21 +465,21 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 template<typename T, typename F>
 void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
 {
-  int nbRow=H.rows();
-  int nbCol=H.cols();
+  size_t nbRow=H.rows();
+  size_t nbCol=H.cols();
   Face StatusRow(nbRow);
   //
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
 
-  int TopPosition=0;
+  size_t TopPosition=0;
   MyMatrix<T> TheMat1 = IdentityMat<T>(nbRow);
-  for (int iCol=0; iCol<nbCol; iCol++) {
+  for (size_t iCol=0; iCol<nbCol; iCol++) {
     std::vector<T> ListX;
-    std::vector<int> ListIdx;
+    std::vector<size_t> ListIdx;
     bool HasNonZero=false;
-    for (int iRow=0; iRow<nbRow; iRow++)
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       if (StatusRow[iRow] == 0) {
         ListIdx.push_back(iRow);
         T eVal = H(iRow,iCol);
@@ -498,10 +490,10 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
     if (HasNonZero) {
       //
       // Ensuring that the column has a pivot and that everything below is ZERO
-      int siz = ListIdx.size();
+      size_t siz = ListIdx.size();
       GCD_int<T> eGCD = ComputeGCD_information(ListX);
-      for (int i=0; i<siz; i++)
-        for (int j=0; j<siz; j++)
+      for (size_t i=0; i<siz; i++)
+        for (size_t j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(j,i);
       auto fct1=[&](MyMatrix<T> & m) -> void {
         m = TheMat1 * m;
@@ -512,8 +504,8 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
-      for (int i=0; i<siz; i++)
-        for (int j=0; j<siz; j++) {
+      for (size_t i=0; i<siz; i++)
+        for (size_t j=0; j<siz; j++) {
           if (i != j)
             TheMat1(ListIdx[i],ListIdx[j]) = 0;
           else
@@ -532,7 +524,7 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
       //
       // Putting the coefficients over the pivot
       T ThePivot = H(TopPosition, iCol);
-      for (int iRow=0; iRow<TopPosition; iRow++) {
+      for (size_t iRow=0; iRow<TopPosition; iRow++) {
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
@@ -576,21 +568,21 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
 template<typename T, typename F>
 void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
 {
-  int nbRow=H.rows();
-  int nbCol=H.cols();
+  size_t nbRow=H.rows();
+  size_t nbCol=H.cols();
   Face StatusRow(nbCol);
   //
 #ifdef TRACK_MAXIMUM_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
 
-  int TopPosition=0;
+  size_t TopPosition=0;
   MyMatrix<T> TheMat1 = IdentityMat<T>(nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++) {
+  for (size_t iRow=0; iRow<nbRow; iRow++) {
     std::vector<T> ListX;
-    std::vector<int> ListIdx;
+    std::vector<size_t> ListIdx;
     bool HasNonZero=false;
-    for (int iCol=0; iCol<nbCol; iCol++)
+    for (size_t iCol=0; iCol<nbCol; iCol++)
       if (StatusRow[iCol] == 0) {
         ListIdx.push_back(iCol);
         T eVal = H(iRow,iCol);
@@ -601,10 +593,10 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
     if (HasNonZero) {
       //
       // Ensuring that the column has a pivot and that everything below is ZERO
-      int siz = ListIdx.size();
+      size_t siz = ListIdx.size();
       GCD_int<T> eGCD = ComputeGCD_information(ListX);
-      for (int i=0; i<siz; i++)
-        for (int j=0; j<siz; j++)
+      for (size_t i=0; i<siz; i++)
+        for (size_t j=0; j<siz; j++)
           TheMat1(ListIdx[i],ListIdx[j]) = eGCD.Pmat(i,j);
       auto fct1=[&](MyMatrix<T> & m) -> void {
         m = m * TheMat1;
@@ -615,8 +607,8 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
-      for (int i=0; i<siz; i++)
-        for (int j=0; j<siz; j++) {
+      for (size_t i=0; i<siz; i++)
+        for (size_t j=0; j<siz; j++) {
           if (i != j)
             TheMat1(ListIdx[i],ListIdx[j]) = 0;
           else
@@ -635,7 +627,7 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
       //
       // Putting the coefficients over the pivot
       T ThePivot = H(iRow, TopPosition);
-      for (int iCol=0; iCol<TopPosition; iCol++) {
+      for (size_t iCol=0; iCol<TopPosition; iCol++) {
         T eVal = H(iRow, iCol);
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
@@ -704,14 +696,14 @@ void SwitchRow(MyMatrix<T> & eMat, int const& iRow, int const& jRow)
 }
 
 template<typename T>
-void INT_ClearColumn(MyMatrix<T> & eMat, int const& iCol, int const& MinAllowedRow, int & iRowFound)
+void INT_ClearColumn(MyMatrix<T> & eMat, size_t const& iCol, size_t const& MinAllowedRow, size_t & iRowFound)
 {
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
-  int nbRow=eMat.rows();
+  size_t nbRow=eMat.rows();
   while(true) {
     Treal MinVal=-1;
-    int nbFound=0;
-    for (int iRow=MinAllowedRow; iRow<nbRow; iRow++) {
+    size_t nbFound=0;
+    for (size_t iRow=MinAllowedRow; iRow<nbRow; iRow++) {
       T eVal=eMat(iRow, iCol);
       if (eVal != 0) {
 	Treal AbsEVal=T_NormGen(eVal);
@@ -734,7 +726,7 @@ void INT_ClearColumn(MyMatrix<T> & eMat, int const& iCol, int const& MinAllowedR
     }
 #endif
     T ThePivot=eMat(iRowFound, iCol);
-    for (int iRow=0; iRow<nbRow; iRow++)
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       if (iRow != iRowFound) {
 	T eVal=eMat(iRow, iCol);
 	T TheQ=QuoInt(eVal, ThePivot);
@@ -769,12 +761,11 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in NullspaceIntTrMat");
   MyMatrix<T> eMatW=eMat;
-  int nbCol=eMat.cols();
-  int nbRow=eMat.rows();
-  std::vector<int> ListIndex;
-  std::vector<int> ListNonIndex;
-  int eRank=0;
-  for (int iCol=0; iCol<nbCol; iCol++)
+  size_t nbCol=eMat.cols();
+  std::vector<size_t> ListIndex;
+  std::vector<size_t> ListNonIndex;
+  size_t eRank=0;
+  for (size_t iCol=0; iCol<nbCol; iCol++)
     if (IsColumnNonEmpty(eMatW, eRank, iCol)) {
       ListIndex.push_back(iCol);
       int iRowFound=444;
@@ -784,11 +775,11 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     } else {
       ListNonIndex.push_back(iCol);
     }
-  int dimSpace=ListNonIndex.size();
+  size_t dimSpace=ListNonIndex.size();
   std::vector<std::vector<T>> TheBasis;
-  for (int i=0; i<dimSpace; i++) {
+  for (size_t i=0; i<dimSpace; i++) {
     std::vector<T> eVect;
-    for (int j=0; j<dimSpace; j++) {
+    for (size_t j=0; j<dimSpace; j++) {
       if (i == j) {
 	eVect.push_back(1);
       } else {
@@ -797,26 +788,26 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     }
     TheBasis.push_back(eVect);
   }
-  for (int iRank=0; iRank<eRank; iRank++) {
-    int iRow=eRank-1-iRank;
-    int iCol=ListIndex[iRow];
+  for (size_t iRank=0; iRank<eRank; iRank++) {
+    size_t iRow=eRank-1-iRank;
+    size_t iCol=ListIndex[iRow];
     std::vector<T> ListX;
     T eVal=eMatW(iRow, iCol);
     ListX.push_back(eVal);
-    std::vector<int> ListRelIndex;
-    for (int jRow=iRow+1; jRow<eRank; jRow++) {
-      int jCol=ListIndex[jRow];
+    std::vector<size_t> ListRelIndex;
+    for (size_t jRow=iRow+1; jRow<eRank; jRow++) {
+      size_t jCol=ListIndex[jRow];
       ListRelIndex.push_back(jCol);
     }
     for (auto & jCol : ListNonIndex) {
       ListRelIndex.push_back(jCol);
     }
-    int sizRelIndex=ListRelIndex.size();
-    for (int iVect=0; iVect<dimSpace; iVect++) {
+    size_t sizRelIndex=ListRelIndex.size();
+    for (size_t iVect=0; iVect<dimSpace; iVect++) {
       std::vector<T> eVect=TheBasis[iVect];
       T eSum=0;
-      for (int iRel=0; iRel<sizRelIndex; iRel++) {
-	int jCol=ListRelIndex[iRel];
+      for (size_t iRel=0; iRel<sizRelIndex; iRel++) {
+	size_t jCol=ListRelIndex[iRel];
 	T fVal=eMatW(iRow, jCol);
 	eSum += eVect[iRel]*fVal;
       }
@@ -824,13 +815,13 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     }
     GCD_int<T> eGCD=ComputeGCD_information(ListX);
     std::vector<std::vector<T>> NewBasis;
-    for (int iVect=0; iVect<dimSpace; iVect++) {
+    for (size_t iVect=0; iVect<dimSpace; iVect++) {
       std::vector<T> eVectNew(sizRelIndex+1,0);
       eVectNew[0]=eGCD.Pmat(0,iVect+1);
-      for (int i=1; i<=dimSpace; i++) {
+      for (size_t i=1; i<=dimSpace; i++) {
 	T fVal=eGCD.Pmat(i,iVect+1);
 	std::vector<T> basVect=TheBasis[i-1];
-	for (int j=0; j<sizRelIndex; j++)
+	for (size_t j=0; j<sizRelIndex; j++)
 	  eVectNew[j+1] += fVal*basVect[j];
       }
       NewBasis.push_back(eVectNew);
@@ -838,32 +829,33 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     TheBasis=NewBasis;
   }
   MyMatrix<T> retNSP(dimSpace,nbCol);
-  for (int iVect=0; iVect<dimSpace; iVect++) {
+  for (size_t iVect=0; iVect<dimSpace; iVect++) {
     std::vector<T> eVect=TheBasis[iVect];
-    int idx=0;
-    for (int iRank=0; iRank<eRank; iRank++) {
-      int iCol=ListIndex[iRank];
+    size_t idx=0;
+    for (size_t iRank=0; iRank<eRank; iRank++) {
+      size_t iCol=ListIndex[iRank];
       retNSP(iVect, iCol)=eVect[idx];
       idx++;
     }
-    for (int iDim=0; iDim<dimSpace; iDim++) {
-      int iCol=ListNonIndex[iDim];
+    for (size_t iDim=0; iDim<dimSpace; iDim++) {
+      size_t iCol=ListNonIndex[iDim];
       retNSP(iVect, iCol)=eVect[idx];
       idx++;
     }
   }
-  for (int iVect=0; iVect<dimSpace; iVect++)
-    for (int iRow=0; iRow<nbRow; iRow++) {
-      T eSum=0;
-      for (int iCol=0; iCol<nbCol; iCol++)
-	eSum += eMat(iRow, iCol) * retNSP(iVect, iCol);
 #ifdef DEBUG
+  size_t nbRow=eMat.rows();
+  for (size_t iVect=0; iVect<dimSpace; iVect++)
+    for (size_t iRow=0; iRow<nbRow; iRow++) {
+      T eSum=0;
+      for (size_t iCol=0; iCol<nbCol; iCol++)
+	eSum += eMat(iRow, iCol) * retNSP(iVect, iCol);
       if (eSum != 0) {
 	std::cerr << "There are remaining errors in NullspaceIntTrMat\n";
 	throw TerminalException{1};
       }
-#endif
     }
+#endif
   return retNSP;
 }
 
