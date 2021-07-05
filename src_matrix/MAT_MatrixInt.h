@@ -397,9 +397,9 @@ inline typename std::enable_if<is_totally_ordered<T>::value,MyVector<T>>::type C
 
 int IsVectorPrimitive(MyVector<int> const& TheV)
 {
-  int n=TheV.size();
+  size_t n=TheV.size();
   int TheGCD=TheV(0);
-  for (int i=1; i<n; i++) {
+  for (size_t i=1; i<n; i++) {
     int eValI=TheV(i);
     GCD_int<int> eRec=ComputePairGcd(TheGCD, eValI);
     TheGCD=eRec.gcd;
@@ -418,7 +418,7 @@ template<typename T>
 GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputeGCD_information");
-  int siz=ListX.size();
+  size_t siz=ListX.size();
   if (siz == 1) {
     T gcd=ListX[0];
     MyMatrix<T> Pmat=IdentityMat<T>(1);
@@ -432,17 +432,17 @@ GCD_int<T> ComputeGCD_information(std::vector<T> const& ListX)
   GCD_int<T> eGCD2=ComputePairGcd(eGCD_int.gcd, ListX[siz-1]);
   MyMatrix<T> Pmat=MyMatrix<T>(siz,siz);
   // 1 : the column for the GCD
-  for (int i=0; i<siz-1; i++)
+  for (size_t i=0; i<siz-1; i++)
     Pmat(i,0) = eGCD2.Pmat(0,0) * eGCD_int.Pmat(i,0);
   Pmat(siz-1, 0) = eGCD2.Pmat(1,0);
   // 2 : The columns from the previous block
-  for (int i=0; i<siz-2; i++) {
-    for (int j=0; j<siz-1; j++)
+  for (size_t i=0; i<siz-2; i++) {
+    for (size_t j=0; j<siz-1; j++)
       Pmat(j, i+1) = eGCD_int.Pmat(j, i+1);
     Pmat(siz-1, i+1) = 0;
   }
   // 3 : The zero columns
-  for (int i=0; i<siz-1; i++)
+  for (size_t i=0; i<siz-1; i++)
     Pmat(i, siz-1) = eGCD2.Pmat(0,1) * eGCD_int.Pmat(i,0);
   Pmat(siz-1, siz-1) = eGCD2.Pmat(1,1);
   //
