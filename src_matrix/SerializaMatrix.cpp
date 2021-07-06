@@ -1,11 +1,12 @@
 #include "MAT_Matrix.h"
 #include "MAT_MatrixSerialization.h"
 #include "NumberTheory.h"
+#include "gmp_serialization.h"
 
 
-int main() {
-  //  using T = mpz_class;
-  using T = int;
+
+template<typename T>
+void test_type() {
   size_t n_row = 10;
   size_t n_col = 20;
   MyMatrix<T> M1(n_row, n_col);
@@ -44,5 +45,16 @@ int main() {
   // Checking the consistency of the data exchange
   size_t hash1 = std::hash<MyMatrix<T>>()(M1);
   size_t hash2 = std::hash<MyMatrix<T>>()(M2);
-  std::cerr << "hash1=" << hash1 << " hash2=" << hash2 << "\n";
+  std::cerr << " hash1=" << hash1 << "\n";
+  std::cerr << " hash2=" << hash2 << "\n";
+  if (hash1 != hash2) {
+    std::cerr << "Error in the serialization\n";
+    throw TerminalException{1};
+  }
+}
+
+
+int main() {
+  test_type<mpz_class>();
+  test_type<int>();
 }
