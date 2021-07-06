@@ -5,8 +5,9 @@
 #PROGRAM		= TestPerformanceHNF
 #PROGRAM		= TestQuoInt
 #PROGRAM		= NullspaceComputationLinbox
-PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
+#PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
 #PROGRAM		= Matrix_As_Set
+PROGRAM		= SerializaMatrix
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -15,9 +16,9 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= clang++ -g -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
 #CC		= clang++ -g -Weverything -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
 #CC		= g++ -std=c++17 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
-#CC		= g++ -std=c++17 -Wall -g -O3
+CC		= g++ -std=c++17 -Wall -g -O3
 #CC		= clang++ -std=c++17 -Wall -Wconversion -g -O3
-CC		= clang++ -std=c++17 -Weverything -g -O3
+#CC		= clang++ -std=c++17 -Weverything -g -O3
 #CC		= g++ -std=c++17 -Wall -g -O3 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
 #CC		= g++ -std=c++17 -Wall -g -O2 -static-libgcc -static-libstdc++
 
@@ -29,7 +30,7 @@ CLOCAL          = -I../src_basic -I../src_number -I../src_comb
 
 CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread
+LIBS		= -lm $(GMP_CXX_LINK) $(BOOST_LINK) -pthread
 
 %.o: %.cpp
 	@echo
