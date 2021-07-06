@@ -30,9 +30,8 @@ int main() {
     // archive and stream closed when destructors are called
   }
 
-    // ... some time later restore the class instance to its orginal state
   MyMatrix<T> M2;
-  // save data to archive
+  // load data from archive
   {
     // create and open an archive for input
     std::ifstream ifs(filename);
