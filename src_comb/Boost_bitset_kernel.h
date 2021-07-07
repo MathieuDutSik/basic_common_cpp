@@ -24,6 +24,10 @@ inline void setbit(std::vector<uint8_t> & V, size_t const& pos, bool val) {
   V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ V[pos / 8]) & kBitmask[pos % 8];
 }
 
+inline void setbit_ptr(uint8_t* arr, size_t const& pos, bool val) {
+  arr[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ arr[pos / 8]) & kBitmask[pos % 8];
+}
+
 /* Container of vector of faces */
 
 struct vectface {
