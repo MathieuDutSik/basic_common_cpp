@@ -1392,22 +1392,23 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputeBasisReduction");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
-  int nbCol=TheBasis.cols();
-  int nbRow=TheBasis.rows();
+  size_t nbCol=TheBasis.cols();
+  size_t nbRow=TheBasis.rows();
   std::vector<int> colStat(nbCol, 1);
   std::vector<int> rowStat(nbRow, 1);
   MyMatrix<T> TheBasisReduced = TheBasis;
   MyMatrix<T> Pmat=IdentityMat<T>(nbCol);
   MyMatrix<T> TheBasisReord(nbRow, nbCol);
   std::vector<int> IdxVector;
-  auto FindMinGCDrow=[&](int const& iRank) -> int {
-    int iRowSearch=-1;
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  auto FindMinGCDrow=[&](int const& iRank) -> size_t {
+    size_t iRowSearch = miss_val;
     bool IsFirst=true;
     Treal AbsVal=0;
-    for (int iRow=0; iRow<nbRow; iRow++)
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       if (rowStat[iRow] == 1) {
 	std::vector<T> eRowRed(nbCol - iRank);
-	for (int iCol=0; iCol<nbCol - iRank; iCol++) {
+	for (size_t iCol=0; iCol<nbCol - iRank; iCol++) {
 	  T eVal=TheBasisReduced(iRow, iCol+iRank);
 	  eRowRed[iCol]=eVal;
 	}
@@ -1430,20 +1431,20 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     Pmat = Pmat*PartMat;
     TheBasisReduced = TheBasisReduced*PartMat;
   };
-  auto UpdateMatrices=[&](int const& iRank, int const& iRowSearch) -> void {
+  auto UpdateMatrices=[&](size_t const& iRank, size_t const& iRowSearch) -> void {
     rowStat[iRowSearch]=0;
     IdxVector.push_back(iRowSearch);
     std::vector<T> eRowRed(nbCol - iRank);
-    for (int iCol=0; iCol<nbCol - iRank; iCol++)
+    for (size_t iCol=0; iCol<nbCol - iRank; iCol++)
       eRowRed[iCol]=TheBasisReduced(iRowSearch, iCol+iRank);
     GCD_int<T> eGCD=ComputeGCD_information(eRowRed);
     MyMatrix<T> PartMat=IdentityMat<T>(nbCol);
-    for (int iCol=iRank; iCol<nbCol; iCol++)
-      for (int iRow=iRank; iRow<nbCol; iRow++)
+    for (size_t iCol=iRank; iCol<nbCol; iCol++)
+      for (size_t iRow=iRank; iRow<nbCol; iRow++)
 	PartMat(iRow, iCol) = eGCD.Pmat(iRow-iRank, iCol-iRank);
 
     SingleMultiplicationUpdate(PartMat);
-    for (int iCol=0; iCol<iRank; iCol++) {
+    for (size_t iCol=0; iCol<iRank; iCol++) {
       T a=TheBasisReduced(iRowSearch, iCol);
       T b=TheBasisReduced(iRowSearch, iRank);
       T q=QuoInt(a, b);
@@ -1458,9 +1459,9 @@ BasisReduction<T> ComputeBasisReduction(MyMatrix<T> const& TheBasis)
     }
     TheBasisReord.row(iRank)=TheBasisReduced.row(iRowSearch);
   };
-  int TheRank=std::min(nbCol, nbRow);
-  for (int iRank=0; iRank<TheRank; iRank++) {
-    int iRowSearch=FindMinGCDrow(iRank);
+  size_t TheRank=std::min(nbCol, nbRow);
+  for (size_t iRank=0; iRank<TheRank; iRank++) {
+    size_t iRowSearch=FindMinGCDrow(iRank);
     UpdateMatrices(iRank, iRowSearch);
   }
   BasisReduction<T> eRed{TheBasisReduced, Pmat, IdxVector, TheBasisReord};
