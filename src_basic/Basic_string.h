@@ -56,7 +56,8 @@ std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<
   size_t len=FileIN.size();
   size_t pos=0;
   std::string CharDollar="$";
-  auto GetIPair=[&](size_t const& pos_inp) -> std::ptrdiff_t {
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  auto GetIPair=[&](size_t const& pos_inp) -> size_t {
     std::vector<size_t> ListMatch;
     for (size_t iPair=0; iPair<ListSubst.size(); iPair++) {
       std::string eStr=ListSubst[iPair].first;
@@ -72,10 +73,10 @@ std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<
       throw TerminalException{1};
     }
     if (ListMatch.size() == 0)
-      return -1;
+      return miss_val;
     if (ListMatch.size() == 1)
       return ListMatch[0];
-    return -400;
+    return miss_val;
   };
   while(true) {
     if (pos == len)
@@ -83,11 +84,10 @@ std::string StringSubstitution(std::string const& FileIN, std::vector<std::pair<
     std::string eChar=FileIN.substr(pos,1);
     if (eChar == CharDollar) {
       pos++;
-      std::ptrdiff_t iPair=GetIPair(pos);
-      if (iPair == -1) {
+      size_t iPair=GetIPair(pos);
+      if (iPair == miss_val) {
 	retStr += eChar;
-      }
-      else {
+      } else {
 	retStr += ListSubst[size_t(iPair)].second;
 	pos += ListSubst[size_t(iPair)].first.size();
       }
@@ -248,25 +248,25 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const& eStr)
     if (eChar == eSpace)
       ListIsSpace[i]=1;
   }
-  std::ptrdiff_t PosLow=-1;
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  size_t PosLow = miss_val;
   for (size_t i=0; i<len; i++)
-    if (PosLow == -1)
+    if (PosLow == miss_val)
       if (ListIsSpace[i] == 0)
 	PosLow=i;
-  std::ptrdiff_t PosUpp=-1;
+  size_t PosUpp = miss_val;
   for (size_t i=0; i<len; i++) {
     size_t j=len-1-i;
-    if (PosUpp == -1)
+    if (PosUpp == miss_val)
       if (ListIsSpace[j] == 0)
 	PosUpp=j;
   }
   std::string RetStr;
-  if (PosLow == -1) {
+  if (PosLow == miss_val) {
     return RetStr;
   }
-  for (size_t iPos=PosLow; iPos<=size_t(PosUpp); iPos++) {
+  for (size_t iPos=PosLow; iPos<=size_t(PosUpp); iPos++)
     RetStr += eStr.at(iPos);
-  }
   return RetStr;
 }
 
@@ -326,7 +326,8 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
   size_t pos=len1;
   size_t nbBlock=LStr.size()-1;
   std::vector<std::string> LRet(nbBlock);
-  auto GetInit=[&](std::string const& strSearch, size_t const& posStart) -> std::ptrdiff_t {
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  auto GetInit=[&](std::string const& strSearch, size_t const& posStart) -> size_t {
     size_t lenSearch=strSearch.size();
     for (size_t posi=posStart; posi<=lentot-lenSearch; posi++) {
       std::string strO = strin.substr(posi, lenSearch);
@@ -334,13 +335,13 @@ std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::v
         return posi;
       }
     }
-    return -1;
+    return miss_val;
   };
   for (size_t iBlock=0; iBlock<nbBlock; iBlock++) {
     std::string strSearch = LStr[iBlock+1];
     size_t lenS = strSearch.size();
-    std::ptrdiff_t posF = GetInit(strSearch, pos);
-    if (posF == -1) {
+    size_t posF = GetInit(strSearch, pos);
+    if (posF == miss_val) {
       return {};
     }
     size_t lenO = posF - pos;
@@ -396,12 +397,12 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
   }
   size_t nbEnt=idx+1;
   std::vector<std::string> RetList(nbEnt);
+  size_t miss_val = std::numeric_limits<size_t>::max();
   for (size_t iEnt=0; iEnt<nbEnt; iEnt++) {
-    std::ptrdiff_t posFirst=-1, posLast=-1;
+    size_t posFirst=miss_val, posLast=miss_val;
     if (iEnt == 0) {
       posFirst=0;
-    }
-    else {
+    } else {
       bool WeFound=false;
       for (size_t iA=0; iA<lenA; iA++)
 	if (!WeFound)
@@ -412,8 +413,7 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
     }
     if (iEnt == nbEnt-1) {
       posLast=lenA-1;
-    }
-    else {
+    } else {
       bool WeFound=false;
       for (size_t iA=0; iA<lenA; iA++)
 	if (!WeFound)
@@ -422,13 +422,13 @@ std::vector<std::string> STRING_Split_Strict(std::string const& eStrA, std::stri
 	    posLast=iA-1;
 	  }
     }
-    if (posFirst == -1 || posLast == -1) {
+    if (posFirst == miss_val || posLast == miss_val) {
       std::cerr << "posFirst = " << posFirst << "  posLast = " << posLast << "\n";
       std::cerr << "Positions have not been found\n";
       throw TerminalException{1};
     }
     std::string str;
-    for (size_t i=posFirst; i<=size_t(posLast); i++) {
+    for (size_t i=posFirst; i<=posLast; i++) {
       std::string eChar=eStrA.substr(i,1);
       str += eChar;
     }
