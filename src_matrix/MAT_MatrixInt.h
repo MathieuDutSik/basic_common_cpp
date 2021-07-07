@@ -918,18 +918,17 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
       break;
     }
     for (int j=0; j<n; j++)
-      if (TheVcopy(j) != 0 && idxSelect !=j)
-	{
-	  T eVal1=TheVcopy(idxSelect);
-	  T eVal2=TheVcopy(j);
-          std::pair<T,T> ePair = ResQuoInt(eVal2, eVal1);
-	  TheVcopy(j)=ePair.first;
-	  OperCol1.push_back(idxSelect);
-	  OperCol2.push_back(j);
-	  OperCoef.push_back(ePair.second);
-	}
+      if (TheVcopy(j) != 0 && idxSelect !=j) {
+        T eVal1=TheVcopy(idxSelect);
+        T eVal2=TheVcopy(j);
+        std::pair<T,T> ePair = ResQuoInt(eVal2, eVal1);
+        TheVcopy(j)=ePair.first;
+        OperCol1.push_back(idxSelect);
+        OperCol2.push_back(j);
+        OperCoef.push_back(ePair.second);
+      }
   }
-  int nbOper=OperCol1.size();
+  size_t nbOper=OperCol1.size();
   MyMatrix<T> TheReturn=MyMatrix<T>(n-1, n);
   int idx=0;
   for (int i=0; i<n; i++)
@@ -942,12 +941,12 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
       }
       idx++;
     }
-  for (int iOper=0; iOper<nbOper; iOper++) {
-    int jOper=nbOper-1-iOper;
+  for (size_t iOper=0; iOper<nbOper; iOper++) {
+    size_t jOper=nbOper-1-iOper;
     int i1=OperCol1[jOper];
     int i2=OperCol2[jOper];
     T eCoeff=OperCoef[jOper];
-    for (int iRow=0; iRow <n-1; iRow++) {
+    for (int iRow=0; iRow<n-1; iRow++) {
       T eVal=TheReturn(iRow, i2) + eCoeff*TheReturn(iRow, i1);
       TheReturn(iRow, i2)=eVal;
     }
@@ -1635,7 +1634,7 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
   int n=M.rows();
   MyMatrix<T> eInv=Inverse(M);
   std::vector<MyVector<int>> ListClasses;
-  std::vector<int> ListStatus;
+  std::vector<uint8_t> ListStatus;
   auto IsEquivalent=[&](MyVector<int> const& eV, MyVector<int> const& fV) -> bool {
     MyVector<int> diff=eV - fV;
     for (int i=0; i<n; i++) {
@@ -1655,14 +1654,12 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
     ListClasses.push_back(eV);
     ListStatus.push_back(1);
   };
-  MyVector<int> zerV(n);
-  for (int i=0; i<n; i++)
-    zerV(i)=0;
+  MyVector<int> zerV = ZeroVector<int>(n);
   FuncInsert(zerV);
   while(true) {
     bool IsFinished=true;
-    int nbClass=ListClasses.size();
-    for (int iClass=0; iClass<nbClass; iClass++) {
+    size_t nbClass=ListClasses.size();
+    for (size_t iClass=0; iClass<nbClass; iClass++) {
       if (ListStatus[iClass] == 1) {
 	ListStatus[iClass]=0;
 	IsFinished=false;
