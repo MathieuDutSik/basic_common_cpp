@@ -198,7 +198,7 @@ ulong FaceToUnsignedLong(Face const& f)
   return pos;
 }
 
-Face UnsignedLongToFace(int const& len, ulong const& eVal)
+Face UnsignedLongToFace(size_t const& len, ulong const& eVal)
 {
   if (len > 32) {
     std::cerr << "length error\n";
@@ -207,7 +207,7 @@ Face UnsignedLongToFace(int const& len, ulong const& eVal)
   ulong eWork = eVal;
   Face eFace(len);
   ulong pow=1;
-  for (int i=0; i<len; i++) {
+  for (size_t i=0; i<len; i++) {
     ulong Pow2=pow * 2;
     ulong res=eWork % Pow2;
     if (res == pow) {

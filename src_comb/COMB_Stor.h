@@ -31,31 +31,32 @@
 //
 
 struct IntegerSubsetStorage {
-  int MaxElement;
-  std::vector<int> ListNext;
-  std::vector<int> ListPrev;
+  size_t MaxElement;
+  std::vector<size_t> ListNext;
+  std::vector<size_t> ListPrev;
 };
 
 
 void VSLT_ZeroAssignment(IntegerSubsetStorage & VSLT)
 {
-  int MaxElement=VSLT.MaxElement;
-  int Maxp2=MaxElement+2;
-  for (int iVert=0; iVert<Maxp2; iVert++) {
-    VSLT.ListNext[iVert]=-1;
-    VSLT.ListPrev[iVert]=-1;
+  size_t MaxElement=VSLT.MaxElement;
+  size_t Maxp2=MaxElement+2;
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  for (size_t iVert=0; iVert<Maxp2; iVert++) {
+    VSLT.ListNext[iVert] = miss_val;
+    VSLT.ListPrev[iVert] = miss_val;
   }
   VSLT.ListNext[MaxElement  ] = MaxElement+1;
   VSLT.ListPrev[MaxElement+1] = MaxElement;
 }
 
 
-IntegerSubsetStorage VSLT_InitializeStorage(int const& MaxElement)
+IntegerSubsetStorage VSLT_InitializeStorage(size_t const& MaxElement)
 {
   IntegerSubsetStorage VSLT;
-  int Maxp2 = MaxElement+2;
-  std::vector<int> ListNext(Maxp2);
-  std::vector<int> ListPrev(Maxp2);
+  size_t Maxp2 = MaxElement+2;
+  std::vector<size_t> ListNext(Maxp2);
+  std::vector<size_t> ListPrev(Maxp2);
   VSLT.ListNext = ListNext;
   VSLT.ListPrev = ListPrev;
   VSLT.MaxElement = MaxElement;
@@ -66,14 +67,14 @@ IntegerSubsetStorage VSLT_InitializeStorage(int const& MaxElement)
 
 int VSLT_NrElement(IntegerSubsetStorage const& VSLT)
 {
-  int MaxElt=VSLT.MaxElement+1;
-  int pos=MaxElt-1;
-  int NbElt=0;
+  size_t MaxElt=VSLT.MaxElement+1;
+  size_t pos=MaxElt-1;
+  size_t NbElt=0;
   while(true) {
-    int posNext=VSLT.ListNext[pos];
+    size_t posNext=VSLT.ListNext[pos];
     if (posNext == MaxElt)
       return NbElt;
-    pos=posNext;
+    pos = posNext;
     NbElt++;
   }
 }
@@ -83,14 +84,15 @@ int VSLT_TheFirstPosition(IntegerSubsetStorage const& VSLT)
   return VSLT.ListNext[VSLT.MaxElement];
 }
 
-bool VSLT_IsItInSubset(IntegerSubsetStorage const& VSLT, int const& pos)
+bool VSLT_IsItInSubset(IntegerSubsetStorage const& VSLT, size_t const& pos)
 {
-  return VSLT.ListNext[pos] != -1;
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  return VSLT.ListNext[pos] != miss_val;
 }
 
-void VSLT_StoreValue(IntegerSubsetStorage & VSLT, int const& pos)
+void VSLT_StoreValue(IntegerSubsetStorage & VSLT, size_t const& pos)
 {
-  int posAfter=VSLT.ListNext[VSLT.MaxElement];
+  size_t posAfter=VSLT.ListNext[VSLT.MaxElement];
   VSLT.ListNext[VSLT.MaxElement] = pos;
   VSLT.ListNext[pos] = posAfter;
   VSLT.ListPrev[posAfter] = pos;
@@ -99,14 +101,15 @@ void VSLT_StoreValue(IntegerSubsetStorage & VSLT, int const& pos)
 
 
 
-void VSLT_RemoveValue(IntegerSubsetStorage & VSLT, int const& pos)
+void VSLT_RemoveValue(IntegerSubsetStorage & VSLT, size_t const& pos)
 {
-  int posNext=VSLT.ListNext[pos];
-  int posPrev=VSLT.ListPrev[pos];
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  size_t posNext=VSLT.ListNext[pos];
+  size_t posPrev=VSLT.ListPrev[pos];
   VSLT.ListNext[posPrev] = posNext;
   VSLT.ListPrev[posNext] = posPrev;
-  VSLT.ListNext[pos] = -1;
-  VSLT.ListPrev[pos] = -1;
+  VSLT.ListNext[pos] = miss_val;
+  VSLT.ListPrev[pos] = miss_val;
 }
 
 
@@ -141,9 +144,7 @@ public:
     Tint Maxp1=MaxElement+1;
     Tint pos=MaxElement;
     Tint NbElt=0;
-    //    std::cerr << "MaxElement=" << MaxElement << " Maxp1=" << Maxp1 << "\n";
     while(true) {
-      //      std::cerr <<  "   pos=" << pos << " ListNext[pos]=" << ListNext[pos] << "\n";
       pos=ListNext[pos];
       if (pos == Maxp1)
 	return NbElt;
@@ -175,8 +176,7 @@ public:
 	ListPrev[posAfter]=pos;
 	ListPrev[pos]=MaxElement;
       }
-    }
-    else {
+    } else {
       if (ListNext[pos] != Maxp2) {
 	Tint posNext=ListNext[pos];
 	Tint posPrev=ListPrev[pos];
