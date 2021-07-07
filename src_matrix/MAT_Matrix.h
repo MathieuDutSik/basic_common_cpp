@@ -918,6 +918,7 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
   std::vector<int> ListRowSelect;
   std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
+  size_t miss_val = std::numeric_limits<size_t>::max();
   for (size_t iRow=0; iRow<nbRow; iRow++) {
     f(provMat, eRank, iRow);
     for (size_t iRank=0; iRank<eRank; iRank++) {
@@ -928,14 +929,14 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
 	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
       }
     }
-    std::ptrdiff_t FirstNonZeroCol=-1;
+    size_t FirstNonZeroCol = miss_val;
     for (size_t iCol=0; iCol<nbCol; iCol++)
-      if (FirstNonZeroCol == -1) {
+      if (FirstNonZeroCol == miss_val) {
 	T eVal=provMat(eRank, iCol);
 	if (eVal != 0)
 	  FirstNonZeroCol=iCol;
       }
-    if (FirstNonZeroCol != -1) {
+    if (FirstNonZeroCol != miss_val) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListRowSelect.push_back(iRow);
       ListColSelect01[size_t(FirstNonZeroCol)]=1;
@@ -961,7 +962,7 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
       NSP(nbVect, iCol)=1;
       for (size_t iRank=0; iRank<eRank; iRank++) {
 	int eCol=ListColSelect[iRank];
-	NSP(nbVect, eCol)=-provMat(iRank, iCol);
+	NSP(nbVect, eCol) = -provMat(iRank, iCol);
       }
       nbVect++;
     }
@@ -1014,7 +1015,7 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
     for (size_t iCol=0; iCol<nbCol; iCol++)
       provMat(eRank, iCol)=Input(iRow, iCol);
     for (size_t iRank=0; iRank<eRank; iRank++) {
-      int eCol=ListColSelect[iRank];
+      size_t eCol=ListColSelect[iRank];
       T eVal1=provMat(eRank, eCol);
       if (eVal1 != 0) {
 	for (size_t iCol=eCol; iCol<nbCol; iCol++)
@@ -1051,7 +1052,7 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
     if (ListColSelect01[iCol] == 0) {
       NSP(nbVect, iCol)=1;
       for (size_t iRank=0; iRank<eRank; iRank++) {
-	int eCol=ListColSelect[iRank];
+	size_t eCol=ListColSelect[iRank];
 	NSP(nbVect, eCol) = -provMat(iRank, iCol);
       }
       nbVect++;
@@ -1072,9 +1073,10 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
     maxRank = nbCol;
   size_t sizMat=maxRank+1;
   MyMatrix<T> provMat(sizMat, nbCol);
-  std::vector<int> ListColSelect;
+  std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
+  size_t miss_val = std::numeric_limits<size_t>::max();
   for (size_t iRow=0; iRow<nbRow; iRow++) {
     for (size_t iCol=0; iCol<nbCol; iCol++)
       provMat(eRank, iCol)=Input(iRow, iCol);
@@ -1087,21 +1089,20 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
 	  provMat(eRank, iCol) = provMat(eRank,iCol) * eVal2 - provMat(iRank,iCol) * eVal1;
       }
     }
-    std::ptrdiff_t FirstNonZeroCol=-1;
+    size_t FirstNonZeroCol = miss_val;
     for (size_t iCol=0; iCol<nbCol; iCol++)
-      if (FirstNonZeroCol == -1) {
+      if (FirstNonZeroCol == miss_val) {
 	if (provMat(eRank, iCol) != 0)
 	  FirstNonZeroCol=iCol;
       }
-    if (FirstNonZeroCol != -1) {
+    if (FirstNonZeroCol != miss_val) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListColSelect01[size_t(FirstNonZeroCol)]=1;
       T eVal2=provMat(eRank, FirstNonZeroCol);
       for (size_t iRank=0; iRank<eRank; iRank++) {
 	T eVal1=provMat(iRank, FirstNonZeroCol);
 	if (eVal1 != 0) {
-          int StartCol = 0;
-	  for (size_t iCol=StartCol; iCol<nbCol; iCol++)
+	  for (size_t iCol=0; iCol<nbCol; iCol++)
 	    provMat(iRank, iCol) = provMat(iRank,iCol) * eVal2 - provMat(eRank, iCol) * eVal1;
 	}
       }
@@ -1121,7 +1122,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
       NSP(nbVect, iCol)=1;
       T prodVal = 1;
       for (size_t iRank=0; iRank<eRank; iRank++) {
-        int eCol=ListColSelect[iRank];
+        size_t eCol=ListColSelect[iRank];
         T pivotVal = provMat(iRank, iCol);
         if (pivotVal != 0) {
           for (size_t jRank=0; jRank<iRank; jRank++) {
