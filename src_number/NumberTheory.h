@@ -637,7 +637,7 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int & a2)
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
-  a2=a1_long;
+  a2 = int(a1_long);
 }
 
 inline void TYPE_CONVERSION(mpq_class const& a1, uint8_t & a2)
@@ -648,7 +648,7 @@ inline void TYPE_CONVERSION(mpq_class const& a1, uint8_t & a2)
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
-  a2=a1_long;
+  a2 = uint8_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(mpq_class const& a1, int8_t & a2)
@@ -659,7 +659,7 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int8_t & a2)
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
-  a2=a1_long;
+  a2 = int8_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
@@ -670,7 +670,7 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
   }
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
-  a2=a1_long;
+  a2 = int16_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
