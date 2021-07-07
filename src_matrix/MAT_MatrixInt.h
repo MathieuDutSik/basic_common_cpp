@@ -768,7 +768,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
   for (size_t iCol=0; iCol<nbCol; iCol++)
     if (IsColumnNonEmpty(eMatW, eRank, iCol)) {
       ListIndex.push_back(iCol);
-      int iRowFound=444;
+      size_t iRowFound=444;
       INT_ClearColumn(eMatW, iCol, eRank, iRowFound);
       SwitchRow(eMatW, eRank, iRowFound);
       eRank++;
@@ -1489,9 +1489,9 @@ template<typename T>
 AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 {
   static_assert(is_ring_field<T>::value, "Requires T to have inverses in Kernel_ComputeAffineBasis");
-  int nbRow=EXT.rows();
-  int nbCol=EXT.cols();
-  int n=nbCol;
+  size_t nbRow=EXT.rows();
+  size_t nbCol=EXT.cols();
+  size_t n=nbCol;
   MyMatrix<T> ListExp=ZeroMatrix<T>(nbRow, nbCol);
   MyMatrix<T> EXTwork=EXT;
   std::vector<int> RowStatus(nbRow, 0);
@@ -1500,14 +1500,15 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   MyVector<T> V1(nbCol);
   MyVector<T> V2(nbCol);
   MyVector<T> eExpr(nbCol);
+  size_t miss_val = std::numeric_limits<size_t>::max();
   auto fInsertValue=[&](int const& idx, int const& iVect) -> bool {
-    int eCol=-1;
-    for (int iCol=0; iCol<nbCol; iCol++)
-      if (eCol == -1 && EXTwork(iVect, iCol) != 0 && ColumnStatus[iCol] == 1)
-	eCol=iCol;
+    size_t eCol=miss_val;
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      if (eCol == miss_val && EXTwork(iVect, iCol) != 0 && ColumnStatus[iCol] == 1)
+	eCol = iCol;
 #ifdef DEBUG
     std::cerr << "eCol=" << eCol << "\n";
-    if (eCol == -1) {
+    if (eCol == miss_val) {
       std::cerr << "This should not be selected\n";
       std::cerr << "nbCol=" << nbCol << "\n";
       for (int iCol=0; iCol<nbCol; iCol++) {
@@ -1519,21 +1520,21 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     V1=EXTwork.row(iVect);
     std::cerr << "V1 rows=" << V1.rows() << " cols=" << V1.cols() << "\n";
     ListExp(iVect, idx)=1;
-    for (int iRow=0; iRow<nbRow; iRow++)
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
 	V2=EXTwork.row(iRow);
 	bool test=IsVectorMultiple(V1, V2);
 	if (test) {
 	  T eQuot=V2(eCol)/V1(eCol);
 	  eExpr=ListExp.row(iRow) - eQuot*ListExp.row(iVect);
-	  for (int iCol=0; iCol<nbCol; iCol++)
+	  for (size_t iCol=0; iCol<nbCol; iCol++)
 	    if (!IsInteger(eExpr(iCol)))
 	      return false;
 	}
       }
     ColumnStatus[eCol]=0;
     RowStatus[iVect]=1;
-    for (int iRow=0; iRow<nbRow; iRow++)
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
 	V2=EXTwork.row(iRow);
 	T eQuot=V2(eCol)/V1(eCol);
@@ -1541,18 +1542,11 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
 	EXTwork.row(iRow)=EXTwork.row(iRow) - eQuot*EXTwork.row(iVect);
 	V2=EXTwork.row(iRow);
 	bool IsZero=IsZeroVector(V2);
-	int iRowPrint=-2249;
-	if (iRow == iRowPrint) {
-	  std::cerr << iRowPrint << ": eVect\n";
-	  for (int jCol=0; jCol<nbCol; jCol++)
-	    std::cerr << " jCol=" << jCol << " stat=" << ColumnStatus[jCol] << " val=" << EXTwork(iRowPrint,jCol) << "\n";
-	  std::cerr << iRowPrint << ": IsZero=" << IsZero << "\n";
-	}
 	if (IsZero)
 	  RowStatus[iRow]=1;
       }
-    int nbFinished=0;
-    for (int iRow=0; iRow<nbRow; iRow++)
+    size_t nbFinished=0;
+    for (size_t iRow=0; iRow<nbRow; iRow++)
       if (RowStatus[iRow] == 1)
 	nbFinished++;
     std::cerr << "nbFinished=" << nbFinished << "\n";
