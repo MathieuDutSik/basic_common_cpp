@@ -974,16 +974,16 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   int idxSelect=-1;
-  int k=M1.rows();
-  int n=M1.cols();
+  size_t k=M1.rows();
+  size_t n=M1.cols();
   MyMatrix<T> M1copy=M1;
   MyMatrix<T> M2copy=M2;
   std::vector<int> StatusRow(k, 0);
   int idxSearch=0;
-  for (int iK=0; iK<k; iK++) {
+  for (size_t iK=0; iK<k; iK++) {
     while(true) {
       int nbDiff=0;
-      for (int j=0; j<k; j++)
+      for (size_t j=0; j<k; j++)
 	if (StatusRow[j] == 0)
 	  if (M1copy(j, idxSearch) != 0)
 	    nbDiff++;
@@ -995,7 +995,7 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
       int nbDiff=0;
       bool IsFirst=true;
       Treal AbsVal=0;
-      for (int j=0; j<k; j++) {
+      for (size_t j=0; j<k; j++) {
 	T eVal=M1copy(j,idxSearch);
 	if (eVal != 0 && StatusRow[j] == 0) {
 	  nbDiff++;
@@ -1014,7 +1014,7 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
       }
       if (nbDiff == 1)
 	break;
-      for (int j=0; j<k; j++)
+      for (size_t j=0; j<k; j++)
 	if (j != idxSelect) {
 	  T eVal1=M1copy(idxSelect, idxSearch);
 	  T eVal2=M1copy(j, idxSearch);
@@ -1025,7 +1025,7 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
     }
     StatusRow[idxSelect]=1;
     T eVal1=M1copy(idxSelect, idxSearch);
-    for (int j=0; j<k; j++) {
+    for (size_t j=0; j<k; j++) {
       T eVal2=M2copy(j, idxSearch);
       std::pair<T,T> ePair = ResQuoInt(eVal2, eVal1);
       if (ePair.first != 0)
@@ -1035,8 +1035,8 @@ bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
     }
     idxSearch++;
   }
-  for (int j=0; j<k; j++)
-    for (int i=0; i<n; i++)
+  for (size_t j=0; j<k; j++)
+    for (size_t i=0; i<n; i++)
       if (M2copy(j, i) != 0)
 	return false;
   return true;
