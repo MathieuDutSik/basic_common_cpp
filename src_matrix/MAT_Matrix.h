@@ -1587,6 +1587,7 @@ MyMatrix<T> Concatenate(MyMatrix<T> const& eMat1, MyMatrix<T> const& eMat2)
   return eMatRet;
 }
 
+
 template<typename T>
 MyMatrix<T> ConcatenateMatVec(MyMatrix<T> const& M, MyVector<T> const& V)
 {
@@ -1612,6 +1613,7 @@ MyMatrix<T> ConcatenateMatVec(MyMatrix<T> const& M, MyVector<T> const& V)
 }
 
 
+template<typename T>
 MyMatrix<T> ConcatenateMatVec_Tr(MyMatrix<T> const& M, MyVector<T> const& V)
 {
   int nbRow=M.rows();
