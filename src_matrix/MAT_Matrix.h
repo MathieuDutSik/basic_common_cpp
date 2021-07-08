@@ -1612,6 +1612,30 @@ MyMatrix<T> ConcatenateMatVec(MyMatrix<T> const& M, MyVector<T> const& V)
 }
 
 
+MyMatrix<T> ConcatenateMatVec_Tr(MyMatrix<T> const& M, MyVector<T> const& V)
+{
+  int nbRow=M.rows();
+  int nbCol=M.cols();
+  int n=V.size();
+  if (nbCol != 0) {
+    if (nbRow != n) {
+      std::cerr << "Error in ConcatenateMatVec_Tr\n";
+      std::cerr << "We have nbRow=" << nbRow << " n=" << n << "\n";
+      throw TerminalException{1};
+    }
+  }
+  MyMatrix<T> Mret(nbRow,nbCol+1);
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
+      Mret(iRow,iCol) = M(iRow,iCol);
+  for (int i=0; i<n; i++)
+    Mret(i,Col)=V(i);
+  return Mret;
+}
+
+
+
+
 
 
 
