@@ -1631,7 +1631,7 @@ MyMatrix<T> ConcatenateMatVec_Tr(MyMatrix<T> const& M, MyVector<T> const& V)
     for (int iRow=0; iRow<nbRow; iRow++)
       Mret(iRow,iCol) = M(iRow,iCol);
   for (int i=0; i<n; i++)
-    Mret(i,Col)=V(i);
+    Mret(i,nbCol)=V(i);
   return Mret;
 }
 
