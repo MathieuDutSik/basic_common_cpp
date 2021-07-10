@@ -36,11 +36,21 @@ private:
   size_t n_face;
   std::vector<uint8_t> V;
 public:
+  // Constructors, move operators and the like
   vectface() : n(0), n_face(0)
   {}
 
   vectface(size_t const& _n) : n(_n), n_face(0)
   {}
+
+  vectface(vectface&& vf) : n(vf.n), n_face(vf.n_face), V(std::move(vf.V))
+  {
+  }
+
+  vectface(const vectface&) = delete;
+  vectface& operator=(const vectface&) = delete;
+
+  // The actual API
 
   // vectface API similar to std::vector<Face>
   void push_back(Face f)
