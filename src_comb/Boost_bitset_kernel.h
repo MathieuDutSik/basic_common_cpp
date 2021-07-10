@@ -8,6 +8,8 @@
 
 typedef boost::dynamic_bitset<> Face;
 
+// Those are needed for the tsl::sparse_map
+#define IMPLEMENT_COPY_OPERATOR
 
 
 
@@ -31,11 +33,10 @@ inline void setbit_ptr(uint8_t* arr, size_t const& pos, bool val) {
 /* Container of vector of faces */
 
 struct vectface {
-private:
+public:
   size_t n;
   size_t n_face;
   std::vector<uint8_t> V;
-public:
   // Constructors, move operators and the like
   vectface() : n(0), n_face(0)
   {}
@@ -47,8 +48,20 @@ public:
   {
   }
 
+#ifdef IMPLEMENT_COPY_OPERATOR
+  vectface(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
+  {
+  }
+  vectface& operator=(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
+  {
+    return *this;
+  }
+#else
   vectface(const vectface&) = delete;
   vectface& operator=(const vectface&) = delete;
+#endif
+  
+  
 
   // The actual API
 
@@ -204,6 +217,9 @@ public:
     return IteratorContain(*this, n_face);
   }
 };
+
+
+
 
 
 
