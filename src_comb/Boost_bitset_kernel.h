@@ -9,7 +9,7 @@
 typedef boost::dynamic_bitset<> Face;
 
 // Those are needed for the tsl::sparse_map
-#define IMPLEMENT_COPY_OPERATOR
+//#define IMPLEMENT_COPY_OPERATOR_VECTFACE
 
 
 
@@ -48,7 +48,7 @@ public:
   {
   }
 
-#ifdef IMPLEMENT_COPY_OPERATOR
+#ifdef IMPLEMENT_COPY_OPERATOR_VECTFACE
   vectface(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
   {
   }
@@ -63,8 +63,6 @@ public:
   vectface(const vectface&) = delete;
   vectface& operator=(const vectface&) = delete;
 #endif
-  
-  
 
   // The actual API
 
