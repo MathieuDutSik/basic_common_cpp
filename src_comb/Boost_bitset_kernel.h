@@ -52,8 +52,11 @@ public:
   vectface(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
   {
   }
-  vectface& operator=(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
+  vectface& operator=(const vectface& vf)
   {
+    n = vf.n;
+    n_face = vf.n_face;
+    V = vf.V;
     return *this;
   }
 #else
