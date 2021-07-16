@@ -3,7 +3,8 @@
 #PROGRAM		= Block_CppIterator
 #PROGRAM		= Timing_HashMap
 #PROGRAM		= Vector_Face_iterator
-PROGRAM		= BlockMultiple_CppIterator
+#PROGRAM		= BlockMultiple_CppIterator
+PROGRAM		= SerializeVectface
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -24,7 +25,7 @@ CFLAGS 		= -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
 
 CTOTAL 		= $(CLOCAL) $(CHASHMAP) $(CFLAGS)
 
-LIBS		= -lm -pthread $(GMP_CXX_LINK)
+LIBS		= -lm -pthread $(GMP_CXX_LINK) $(BOOST_LINK)
 
 
 %.o: %.cpp

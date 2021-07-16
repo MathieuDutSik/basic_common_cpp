@@ -48,6 +48,19 @@ public:
   {
   }
 
+
+  // Serialization related stuff
+  const std::vector<uint8_t>& serial_get_std_vector_uint8_t() const
+  {
+    return V;
+  }
+  void build_vectface(const size_t& _n, const size_t& _n_face, std::vector<uint8_t> && _V)
+  {
+    n = _n;
+    n_face = _n_face;
+    V = std::move(_V);
+  }
+
 #ifdef IMPLEMENT_COPY_OPERATOR_VECTFACE
   vectface(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
   {
@@ -100,6 +113,11 @@ public:
     return n_face;
   }
 
+  size_t get_n() const
+  {
+    return n;
+  }
+
   void pop_back()
   {
     n_face--;
@@ -115,6 +133,30 @@ public:
       pos++;
     }
     return f;
+  }
+
+  bool operator==(vectface const& vf)
+  {
+    if (n != vf.n)
+      return false;
+    if (n_face != vf.n_face)
+      return false;
+    for (size_t u=0; u<V.size(); u++)
+      if (V[u] != vf.V[u])
+        return false;
+    return true;
+  }
+
+  bool operator!=(vectface const& vf)
+  {
+    if (n != vf.n)
+      return true;
+    if (n_face != vf.n_face)
+      return true;
+    for (size_t u=0; u<V.size(); u++)
+      if (V[u] != vf.V[u])
+        return true;
+    return false;
   }
 
   // non standard API
@@ -218,6 +260,47 @@ public:
     return IteratorContain(*this, n_face);
   }
 };
+
+
+
+namespace boost::serialization {
+
+  template<class Archive>
+  inline void load(Archive & ar, vectface & val, const unsigned int version)
+  {
+    size_t n, n_face, len_vect;
+    ar & make_nvp("n", n);
+    ar & make_nvp("n_face", n_face);
+    ar & make_nvp("len_vect", len_vect);
+    std::vector<uint8_t> V(len_vect);
+    for (size_t u=0; u<len_vect; u++)
+      ar & make_nvp("Vu", V[u]);
+    val.build_vectface(n, n_face, std::move(V));
+  }
+
+  template<class Archive>
+  inline void save(Archive & ar, vectface const& val, const unsigned int version)
+  {
+    size_t n = val.get_n();
+    size_t n_face = val.size();
+    ar & make_nvp("n", n);
+    ar & make_nvp("n_face", n_face);
+    const std::vector<uint8_t>& V = val.serial_get_std_vector_uint8_t();
+    size_t len_vect = V.size();
+    ar & make_nvp("len_vect", len_vect);
+    for (size_t u=0; u<len_vect; u++)
+      ar & make_nvp("Vu", V[u]);
+  }
+
+  template<class Archive>
+  inline void serialize(Archive & ar, vectface & val, const unsigned int version)
+  {
+    split_free(ar, val, version);
+  }
+
+}
+
+
 
 
 
