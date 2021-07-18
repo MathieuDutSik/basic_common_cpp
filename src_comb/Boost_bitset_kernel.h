@@ -5,6 +5,8 @@
 
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>
+#include <boost/serialization/nvp.hpp>
+
 
 typedef boost::dynamic_bitset<> Face;
 
