@@ -262,7 +262,7 @@ void VectVectInt_Gap_Print(std::ostream &os, vectface const&ListOrbit)
     }
     os << "]";
   }
-  os << "]\n";
+  os << "]";
 }
 
 
