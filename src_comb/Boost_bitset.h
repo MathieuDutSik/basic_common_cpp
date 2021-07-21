@@ -84,7 +84,7 @@ vectface ReadListFace(std::istream & is)
   Face f = ReadFace(is);
   vectface ListFace(f.size());
   ListFace.push_back(f);
-  for (size_t iFace=0; iFace<nbFace; iFace++) {
+  for (size_t iFace=1; iFace<nbFace; iFace++) {
     Face f2 = ReadFace(is);
     ListFace.push_back(f2);
   }
