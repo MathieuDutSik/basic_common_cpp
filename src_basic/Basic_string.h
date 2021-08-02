@@ -283,8 +283,13 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   if (lenA >= lenB) {
     for (size_t iA=0; iA<=lenA - lenB; iA++)
       if (ListStatus[iA] == 1) {
-        bool test_eq = eStrB == eStrA.substr(iA, lenB);
-        if (test_eq)
+        auto test=[&]() -> bool {
+          for (size_t iB=0; iB<lenB; iB++)
+            if (eStrB[iB] != eStrA[iA+iB])
+              return false;
+          return true;
+        };
+        if (test())
           for (size_t iB=0; iB<lenB; iB++)
             ListStatus[iA + iB]=0;
       }
