@@ -214,12 +214,10 @@ std::vector<std::string> NAMELIST_ConvertFortranListStringToCppListString(std::s
 	std::string eCppStr=NAMELIST_ConvertFortranStringToCppString(eFound);
 	eListStr.push_back(eCppStr);
 	eFound="";
-      }
-      else {
+      } else {
 	IsInString=1;
       }
-    }
-    else {
+    } else {
       if (IsInString == 1)
 	eFound += eChar;
     }
@@ -393,8 +391,7 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 	    throw TerminalException{1};
 	  }
 	  InBlock=true;
-	}
-	else {
+	} else {
 	  if (strRed != "END") {
 	    std::cerr << "Ampersand detected. We should leave with a END\n";
 	    std::cerr << "LINE=" << eStr << "\n";
@@ -402,8 +399,7 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 	  }
 	  InBlock=false;
 	}
-      }
-      else {
+      } else {
 	if (eStr != "/") {
 	  std::string eStr3=NAMELIST_ClearEndOfLine(eStr);
 	  std::string strEqual="=";
@@ -490,17 +486,14 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 		throw TerminalException{1};
 	      }
 	    }
-	  }
-	  else {
-	    int nbChar=eStr3.size();
-	    if (nbChar != 0) {
+	  } else {
+	    if (eStr3.size() != 0) {
 	      std::cerr << "If lines has no = sign then it should be empty\n";
 	      std::cerr << "str=" << PreStr << "\n";
 	      throw TerminalException{1};
 	    }
 	  }
-	}
-	else {
+	} else {
 	  InBlock=false;
 	}
       }
