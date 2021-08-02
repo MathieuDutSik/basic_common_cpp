@@ -1,5 +1,6 @@
 #PROGRAM		= Test_parse_split
-PROGRAM		= test_hash
+#PROGRAM		= test_hash
+PROGRAM		= Test_String_Split
 #PROGRAM		= Temp_PerfectMPI
 
 OBJECTS		= $(PROGRAM:%=%.o)

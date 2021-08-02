@@ -278,38 +278,41 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
 {
   size_t lenA=eStrA.length();
   size_t lenB=eStrB.length();
+  //  std::cerr << "lenA=" << lenA << " lenB=" << lenB << "\n";
   std::vector<int> ListStatus(lenA,1);
   if (lenA >= lenB) {
-    for (size_t iA=0; iA<lenA - lenB; iA++)
+    for (size_t iA=0; iA<=lenA - lenB; iA++)
       if (ListStatus[iA] == 1) {
-        bool IsMatch=true;
-        for (size_t iB=0; iB<lenB; iB++) {
-          std::string eCharA=eStrA.substr(iA+iB,1);
-          std::string eCharB=eStrB.substr(iB,1);
-          if (eCharA != eCharB)
-            IsMatch=false;
-        }
-        if (IsMatch)
+        bool test_eq = eStrB == eStrA.substr(iA, lenB);
+        if (test_eq)
           for (size_t iB=0; iB<lenB; iB++)
             ListStatus[iA + iB]=0;
       }
   }
+  /*
+  std::cerr << "ListStatus =";
+  for (size_t iA=0; iA<lenA; iA++)
+    std::cerr << " " << ListStatus[iA];
+    std::cerr << "\n";*/
   std::vector<std::string> RetList;
-  std::string eFound;
-  for (size_t iA=0; iA<lenA; iA++) {
-    std::string eChar=eStrA.substr(iA, 1);
-    if (ListStatus[iA] == 1)
-      eFound += eChar;
+  size_t prev_idx = 0;
+  size_t iA = 0;
+  while(true) {
     if (ListStatus[iA] == 0) {
-      size_t siz=eFound.length();
-      if (siz > 0)
-	RetList.push_back(eFound);
-      eFound = "";
+      if (iA > prev_idx) {
+        RetList.emplace_back(std::move(eStrA.substr(prev_idx,iA - prev_idx)));
+      }
+      iA += lenB;
+      prev_idx = iA;
+    } else {
+      iA++;
     }
+    if (iA == lenA)
+      break;
   }
-  size_t siz=eFound.size();
-  if (siz > 0)
-    RetList.push_back(eFound);
+  if (iA > prev_idx) {
+    RetList.emplace_back(std::move(eStrA.substr(prev_idx,iA - prev_idx)));
+  }
   return RetList;
 }
 
