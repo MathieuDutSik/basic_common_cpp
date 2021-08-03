@@ -89,9 +89,10 @@ public:
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
-    size_t delta = needed_len - curr_len;
-    if (delta > 0)
+    if (curr_len < needed_len) {
+      size_t delta = needed_len - curr_len;
       V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+    }
     //
     size_t pos = n_face * n;
     for (size_t i=0; i<n; i++) {
@@ -146,7 +147,7 @@ public:
       return false;
     if (n_face != vf.n_face)
       return false;
-    for (size_t u=0; u<V.size(); u++)
+    for (size_t u=0; u<V.size(); u++) // Buggy code! If the vectface has been popped, then the comparison is meaningless.
       if (V[u] != vf.V[u])
         return false;
     return true;
@@ -158,7 +159,7 @@ public:
       return true;
     if (n_face != vf.n_face)
       return true;
-    for (size_t u=0; u<V.size(); u++)
+    for (size_t u=0; u<V.size(); u++) // Buggy code! If the vectface has been popped, then the comparison is meaningless.
       if (V[u] != vf.V[u])
         return true;
     return false;
@@ -171,8 +172,10 @@ public:
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
-    for (size_t i=curr_len; i<needed_len; i++)
-      V.push_back(0);
+    if (curr_len < needed_len) {
+      size_t delta = needed_len - curr_len;
+      V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+    }
     //
     size_t pos = n_face * n;
     for (size_t i=0; i<n; i++) {
