@@ -90,7 +90,8 @@ public:
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
     size_t delta = needed_len - curr_len;
-    V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+    if (delta > 0)
+      V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
     //
     size_t pos = n_face * n;
     for (size_t i=0; i<n; i++) {
