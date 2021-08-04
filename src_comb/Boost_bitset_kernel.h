@@ -39,15 +39,16 @@ public:
   size_t n;
   size_t n_face;
   std::vector<uint8_t> V;
+  size_t append_len;
   std::vector<uint8_t> Vappend;
   // Constructors, move operators and the like
   vectface() : n(0), n_face(0)
   {}
 
-  vectface(size_t const& _n) : n(_n), n_face(0), Vappend(std::vector<uint8_t>((n+7) / 8, 0))
+  vectface(size_t const& _n) : n(_n), n_face(0), append_len((n+7)/8), Vappend(std::vector<uint8_t>(append_len, 0))
   {}
 
-  vectface(vectface&& vf) : n(vf.n), n_face(vf.n_face), V(std::move(vf.V)), Vappend(std::vector<uint8_t>((n+7) / 8, 0))
+  vectface(vectface&& vf) : n(vf.n), n_face(vf.n_face), V(std::move(vf.V)), append_len((n+7)/8), Vappend(std::vector<uint8_t>(append_len, 0))
   {
   }
 
@@ -62,7 +63,8 @@ public:
     n = _n;
     n_face = _n_face;
     V = std::move(_V);
-    Vappend = std::vector<uint8_t>((n+7)/8,0);
+    append_len = (n+7)/8;
+    Vappend = std::vector<uint8_t>(append_len,0);
   }
 
 #ifdef IMPLEMENT_COPY_OPERATOR_VECTFACE
@@ -200,8 +202,15 @@ public:
     size_t curr_len = V.size();
     size_t n_bits = ( n_face + w.n_face ) * n;
     size_t needed_len = (n_bits + 7) / 8;
-    for (size_t i=curr_len; i<needed_len; i++)
-      V.push_back(0);
+    if (curr_len < needed_len) {
+      size_t delta = needed_len - curr_len;
+      size_t n_iter = delta / append_len;
+      for (size_t i_iter=0; i_iter<n_iter; i_iter++)
+        V.insert(V.end(), Vappend.begin(), Vappend.begin() + append_len);
+      size_t res = delta % append_len;
+      if (res > 0)
+        V.insert(V.end(), Vappend.begin(), Vappend.begin() + res);
+    }
     // Now appending
     size_t pos = n_face * n;
     size_t depl = w.n_face * n;
