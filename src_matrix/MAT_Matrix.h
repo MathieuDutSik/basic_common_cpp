@@ -1104,10 +1104,10 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
       provMat(eRank, iCol)=Input(iRow, iCol);
     for (size_t iRank=0; iRank<eRank; iRank++) {
       size_t eCol=ListColSelect[iRank];
-      T eVal1=provMat(eRank, eCol);
+      T eVal1 = -provMat(eRank, eCol);
       if (eVal1 != 0) {
 	for (size_t iCol=eCol; iCol<nbCol; iCol++)
-	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
+	  provMat(eRank, iCol) += eVal1*provMat(iRank,iCol);
       }
     }
     size_t FirstNonZeroCol = std::numeric_limits<size_t>::max();
@@ -1123,11 +1123,11 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
       for (size_t iCol=0; iCol<nbCol; iCol++)
 	provMat(eRank, iCol) *= eVal2;
       for (size_t iRank=0; iRank<eRank; iRank++) {
-	T eVal1=provMat(iRank, FirstNonZeroCol);
+	T eVal1 = -provMat(iRank, FirstNonZeroCol);
 	if (eVal1 != 0) {
           size_t StartCol = ListColSelect[iRank];
 	  for (size_t iCol=StartCol; iCol<nbCol; iCol++)
-	    provMat(iRank, iCol) -= eVal1*provMat(eRank, iCol);
+	    provMat(iRank, iCol) += eVal1*provMat(eRank, iCol);
 	}
       }
       eRank++;
@@ -1138,10 +1138,10 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
   size_t nbVect=0;
   for (size_t iCol=0; iCol<nbCol; iCol++)
     if (ListColSelect01[iCol] == 0) {
-      NSP(nbVect, iCol)=1;
+      NSP(nbVect, iCol) = -1;
       for (size_t iRank=0; iRank<eRank; iRank++) {
 	size_t eCol=ListColSelect[iRank];
-	NSP(nbVect, eCol) = -provMat(iRank, iCol);
+	NSP(nbVect, eCol) = provMat(iRank, iCol);
       }
       nbVect++;
     }
