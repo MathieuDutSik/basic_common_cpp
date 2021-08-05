@@ -67,6 +67,14 @@ public:
     Vappend = std::vector<uint8_t>(append_len,0);
   }
 
+  vectface& operator=(const vectface&& vf) {
+    n = vf.n;
+    n_face = vf.n_face;
+    V = std::move(vf.V);
+    return *this;
+  }
+
+
 #ifdef IMPLEMENT_COPY_OPERATOR_VECTFACE
   vectface(const vectface& vf) : n(vf.n), n_face(vf.n_face), V(vf.V)
   {
