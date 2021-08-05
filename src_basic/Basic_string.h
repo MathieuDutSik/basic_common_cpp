@@ -321,6 +321,54 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   return RetList;
 }
 
+template<typename F>
+void STRING_Split_f(std::string const& eStrA, std::string const& eStrB, F & f)
+{
+  size_t lenA=eStrA.length();
+  size_t lenB=eStrB.length();
+  //  std::cerr << "lenA=" << lenA << " lenB=" << lenB << "\n";
+  std::vector<int> ListStatus(lenA,1);
+  if (lenA >= lenB) {
+    for (size_t iA=0; iA<=lenA - lenB; iA++)
+      if (ListStatus[iA] == 1) {
+        auto test=[&]() -> bool {
+          for (size_t iB=0; iB<lenB; iB++)
+            if (eStrB[iB] != eStrA[iA+iB])
+              return false;
+          return true;
+        };
+        if (test())
+          for (size_t iB=0; iB<lenB; iB++)
+            ListStatus[iA + iB]=0;
+      }
+  }
+  /*
+  std::cerr << "ListStatus =";
+  for (size_t iA=0; iA<lenA; iA++)
+    std::cerr << " " << ListStatus[iA];
+    std::cerr << "\n";*/
+  size_t prev_idx = 0;
+  size_t iA = 0;
+  while(true) {
+    if (ListStatus[iA] == 0) {
+      if (iA > prev_idx) {
+        f(eStrA.substr(prev_idx,iA - prev_idx));
+      }
+      iA += lenB;
+      prev_idx = iA;
+    } else {
+      iA++;
+    }
+    if (iA == lenA)
+      break;
+  }
+  if (iA > prev_idx) {
+    f(eStrA.substr(prev_idx,iA - prev_idx));
+  }
+}
+
+
+
 // The String is supposed to be "str0" + hs0 + "str1" + hs1 + "hs2"
 // and we return a standard vector of [hs0, hs1]
 std::vector<std::string> STRING_ParseSingleLine(std::string const& strin, std::vector<std::string> const& LStr)
