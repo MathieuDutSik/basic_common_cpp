@@ -299,6 +299,13 @@ T ParseScalar(std::string const& estr)
   return ret_val;
 }
 
+template<typename T>
+void ParseScalar_inplace(std::string const& estr, T & ret_val)
+{
+  std::istringstream is(estr);
+  is >> ret_val;
+}
+
 
 
 // The remainder and quotient of integers
