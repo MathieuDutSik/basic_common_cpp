@@ -188,6 +188,28 @@ public:
     n_face++;
   }
 
+  template<typename F>
+  void InsertFaceRef(F & fct)
+  {
+    size_t curr_len = V.size();
+    size_t n_bits = (n_face + 1) * n;
+    size_t needed_len = (n_bits + 7) / 8;
+    if (curr_len < needed_len) {
+      size_t delta = needed_len - curr_len;
+      V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+    }
+    //
+    size_t pos = n_face * n;
+    for (size_t i=0; i<n; i++) {
+      bool val = fct(i);
+      setbit(V, pos, val);
+      pos++;
+    }
+    n_face++;
+  }
+
+
+
   void SetFace(Face & f, size_t i_orb) const
   {
     size_t pos = i_orb * n;
