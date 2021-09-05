@@ -1502,7 +1502,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
   MyVector<T> V2(nbCol);
   MyVector<T> eExpr(nbCol);
   size_t miss_val = std::numeric_limits<size_t>::max();
-  auto fInsertValue=[&](int const& idx, int const& iVect) -> bool {
+  auto fInsertValue=[&](size_t const& idx, int const& iVect) -> bool {
     size_t eCol=miss_val;
     for (size_t iCol=0; iCol<nbCol; iCol++)
       if (eCol == miss_val && EXTwork(iVect, iCol) != 0 && ColumnStatus[iCol] == 1)
@@ -1564,7 +1564,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     }
     return -1;
   };
-  auto SetLocallyCorrectIndex=[&](int const& idx) -> int {
+  auto SetLocallyCorrectIndex=[&](size_t const& idx) -> int {
     for (int iter=0; iter<nbIter; iter++) {
       int eVal=GetRandomNumber();
       if (eVal == -1)
@@ -1578,7 +1578,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     }
     return -1;
   };
-  for (int i=0; i<n; i++) {
+  for (size_t i=0; i<n; i++) {
     std::cerr << "i=" << i << "\n";
     int eVal=SetLocallyCorrectIndex(i);
     if (eVal == -1)
