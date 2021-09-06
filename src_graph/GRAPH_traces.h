@@ -57,6 +57,10 @@ public:
     free(cg1.v);
     free(cg1.e);
   }
+  DataTraces() = delete;
+  DataTraces(const DataTraces&) = delete;
+  DataTraces(DataTraces&&) = delete;
+  DataTraces& operator=(const DataTraces&) = delete;
 };
 
 
@@ -79,7 +83,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces& DT)
 
 
 template<typename Tgr>
-DataTraces GetDataTraces_from_G(Tgr const& eGR)
+DataTraces* GetDataTraces_from_G(Tgr const& eGR)
 {
   size_t n = eGR.GetNbVert();
   size_t nbAdjacent = eGR.GetNbAdjacent();
@@ -89,7 +93,7 @@ DataTraces GetDataTraces_from_G(Tgr const& eGR)
     throw TerminalException{1};
   }
   // allocating the DataTraces
-  DataTraces DT(n, nbAdjacent);
+  DataTraces* DT=new DataTraces(n, nbAdjacent);
   // Determining the color symbolic information
   size_t numcells=0;
   for (size_t i=0; i<n; i++) {
@@ -106,22 +110,22 @@ DataTraces GetDataTraces_from_G(Tgr const& eGR)
   // lab1 construction
   for (size_t i=0; i<n; i++) {
     size_t icell = eGR.GetColor(i);
-    DT.lab1[ListShift[icell]] = int(i);
+    DT->lab1[ListShift[icell]] = int(i);
     ListShift[icell]++;
   }
   // ptn construction
-  for (size_t i=0; i<n; i++) DT.ptn[i] = NAUTY_INFINITY;
+  for (size_t i=0; i<n; i++) DT->ptn[i] = NAUTY_INFINITY;
   for (size_t icell=0; icell<numcells; icell++)
-    DT.ptn[ListShift[icell] - 1] = 0;
+    DT->ptn[ListShift[icell] - 1] = 0;
   // The adjacencies
   size_t pos = 0;
   for (size_t i=0; i<n; i++) {
     std::vector<size_t> LAdj = eGR.Adjacency(i);
     size_t len = LAdj.size();
-    DT.sg1.d[i] = int(len);
-    DT.sg1.v[i] = int(pos);
+    DT->sg1.d[i] = int(len);
+    DT->sg1.v[i] = int(pos);
     for (auto & eAdj : LAdj) {
-      DT.sg1.e[pos] = int(eAdj);
+      DT->sg1.e[pos] = int(eAdj);
       pos++;
     }
   }
@@ -220,8 +224,10 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
 template<typename Tgr, typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const& eGR)
 {
-  DataTraces DT = GetDataTraces_from_G(eGR);
-  return TRACES_GetCanonicalOrdering_Arr<Tidx>(DT);
+  DataTraces* DT = GetDataTraces_from_G(eGR);
+  std::vector<Tidx> V = TRACES_GetCanonicalOrdering_Arr<Tidx>(*DT);
+  delete DT;
+  return V;
 }
 
 
@@ -371,8 +377,10 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, size_t c
 template<typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr_Test(Tgr const& eGR, size_t const& n_last)
 {
-  DataTraces DT = GetDataTraces_from_G(eGR);
-  return TRACES_GetListGenerators_Arr<Tidx>(DT, n_last);
+  DataTraces* DT = GetDataTraces_from_G(eGR);
+  std::vector<std::vector<Tidx>> ret = TRACES_GetListGenerators_Arr<Tidx>(*DT, n_last);
+  delete DT;
+  return ret;
 }
 
 
