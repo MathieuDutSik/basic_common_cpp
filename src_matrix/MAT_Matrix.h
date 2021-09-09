@@ -1058,6 +1058,23 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
 }
 
 
+
+template<typename T>
+bool IsVectorInSpace(const SelectionRowCol<T>& eSelect, const MyVector<T>& V)
+{
+  size_t dim_nsp = eSelect.NSP.rows();
+  size_t n_cols=eSelect.NSP.cols();
+  for (size_t i_nsp=0; i_nsp<dim_nsp; i_nsp++) {
+    T scal=0;
+    for (size_t i_col=0; i_col<n_cols; i_col++)
+      scal += eSelect.NSP(i_nsp,i_col) * V(i_col);
+    if (scal != 0)
+      return false;
+  }
+  return true;
+}
+
+
 template<typename T>
 SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
 {
