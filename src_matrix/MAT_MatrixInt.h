@@ -1623,15 +1623,15 @@ AffineBasisResult ComputeAffineBasis(MyMatrix<T> const& EXT)
 // Two classes eV and fV are equivalent if there exists a vector w integer such that
 // eV - fV = w M
 // that is we need to compute (eV - fV) M^(-1)
-template<typename T>
-std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
+template<typename T, typename Tout>
+std::vector<MyVector<Tout>> Kernel_ComputeTranslationClasses(MyMatrix<T> const& M)
 {
   int n=M.rows();
   MyMatrix<T> eInv=Inverse(M);
-  std::vector<MyVector<int>> ListClasses;
+  std::vector<MyVector<Tout>> ListClasses;
   std::vector<uint8_t> ListStatus;
-  auto IsEquivalent=[&](MyVector<int> const& eV, MyVector<int> const& fV) -> bool {
-    MyVector<int> diff=eV - fV;
+  auto IsEquivalent=[&](MyVector<Tout> const& eV, MyVector<Tout> const& fV) -> bool {
+    MyVector<Tout> diff=eV - fV;
     for (int i=0; i<n; i++) {
       T eVal=0;
       for (int j=0; j<n; j++)
@@ -1649,7 +1649,7 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
     ListClasses.push_back(eV);
     ListStatus.push_back(1);
   };
-  MyVector<int> zerV = ZeroVector<int>(n);
+  MyVector<Tout> zerV = ZeroVector<Tout>(n);
   FuncInsert(zerV);
   while(true) {
     bool IsFinished=true;
@@ -1658,9 +1658,9 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
       if (ListStatus[iClass] == 1) {
 	ListStatus[iClass]=0;
 	IsFinished=false;
-	MyVector<int> eClass=ListClasses[iClass];
+	MyVector<Tout> eClass=ListClasses[iClass];
 	for (int i=0; i<n; i++) {
-	  MyVector<int> fClass=eClass;
+	  MyVector<Tout> fClass=eClass;
 	  fClass[i]++;
 	  FuncInsert(fClass);
 	}
@@ -1669,8 +1669,32 @@ std::vector<MyVector<int>> ComputeTranslationClasses(MyMatrix<T> const& M)
     if (IsFinished)
       break;
   }
+  T det = T_abs(DeterminantMat(M));
+  T n_class = ListClasses.size();
+  if (det != n_class) {
+    std::cerr << "The determinant det=" << det << " does not coincide with the number of classes =" << n_class << "\n";
+    std::cerr << "This ought to be considered a bug\n";
+    throw TerminalException{1};
+  }
   return ListClasses;
 }
+
+
+template<typename T, typename Tout>
+inline typename std::enable_if<is_ring_field<T>::value,T>::type ComputeTranslationClasses(MyMatrix<T> const& Input)
+{
+  return Kernel_ComputeTranslationClasses<T,Tout>(Input);
+}
+
+template<typename T, typename Tout>
+inline typename std::enable_if<(not is_ring_field<T>::value),T>::type ComputeTranslationClasses(MyMatrix<T> const& Input)
+{
+  using Tfield=typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> Input_field=UniversalMatrixConversion<Tfield,T>(Input);
+  return Kernel_ComputeTranslationClasses<T,Tout>(Input_field);
+}
+
+
 
 
 
