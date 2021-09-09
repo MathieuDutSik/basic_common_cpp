@@ -1681,13 +1681,13 @@ std::vector<MyVector<Tout>> Kernel_ComputeTranslationClasses(MyMatrix<T> const& 
 
 
 template<typename T, typename Tout>
-inline typename std::enable_if<is_ring_field<T>::value,T>::type ComputeTranslationClasses(MyMatrix<T> const& Input)
+inline typename std::enable_if<is_ring_field<T>::value,std::vector<MyVector<Tout>>>::type ComputeTranslationClasses(MyMatrix<T> const& Input)
 {
   return Kernel_ComputeTranslationClasses<T,Tout>(Input);
 }
 
 template<typename T, typename Tout>
-inline typename std::enable_if<(not is_ring_field<T>::value),T>::type ComputeTranslationClasses(MyMatrix<T> const& Input)
+inline typename std::enable_if<(not is_ring_field<T>::value),std::vector<MyVector<Tout>>>::type ComputeTranslationClasses(MyMatrix<T> const& Input)
 {
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> Input_field=UniversalMatrixConversion<Tfield,T>(Input);
