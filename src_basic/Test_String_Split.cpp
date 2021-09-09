@@ -53,4 +53,7 @@ int main()
   //
   eStrA=" ", eStrB="question";
   test(STRING_Split(eStrA, eStrB), {" "});
+  //
+  eStrA="", eStrB="question";
+  test(STRING_Split(eStrA, eStrB), {});
 }
