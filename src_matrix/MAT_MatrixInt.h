@@ -1691,7 +1691,7 @@ inline typename std::enable_if<(not is_ring_field<T>::value),std::vector<MyVecto
 {
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> Input_field=UniversalMatrixConversion<Tfield,T>(Input);
-  return Kernel_ComputeTranslationClasses<T,Tout>(Input_field);
+  return Kernel_ComputeTranslationClasses<Tfield,Tout>(Input_field);
 }
 
 
