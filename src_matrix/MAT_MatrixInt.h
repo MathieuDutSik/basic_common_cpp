@@ -1641,7 +1641,7 @@ std::vector<MyVector<Tout>> Kernel_ComputeTranslationClasses(MyMatrix<T> const& 
     }
     return true;
   };
-  auto FuncInsert=[&](MyVector<int> const& eV) -> void {
+  auto FuncInsert=[&](MyVector<Tout> const& eV) -> void {
     for (auto & fV : ListClasses) {
       if (IsEquivalent(eV, fV))
 	return;
