@@ -6,30 +6,27 @@ int main(int argc, char *argv[])
     if (argc != 3 && argc != 2) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
       fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "NullspaceIntTrMat [inputMat] [output]\n");
+      fprintf(stderr, "SolutionIntMat [inputMat] [output]\n");
       fprintf(stderr, "or\n");
-      fprintf(stderr, "NullspaceInttrMat [inputMat]\n");
+      fprintf(stderr, "SolutionIntMat [inputMat]\n");
       return -1;
     }
     using Tint=mpz_class;
     // reading the matrix
     std::ifstream INmat(argv[1]);
     MyMatrix<Tint> TheMat=ReadMatrix<Tint>(INmat);
-    // computing the kernel
-    MyMatrix<Tint> KerInt = NullspaceIntTrMat(TheMat);
-    //    MyMatrix<T> TheKer=NullspaceMat(TheMat);
-    //
-    auto Prt=[&](std::ostream & os) -> void {
-      os << "return ";
-      WriteMatrixGAP(os, KerInt);
-      os << ";\n";
+    MyVector<Tint> TheVec=ReadVector<Tint>(INmat);
+    ResultSolutionIntMat<Tint> result = SolutionIntMat(TheMat, TheVec);
+    // computing one solution (maybe)
+    auto Prt=[&](std::ostream& os) -> void {
+      os << "return " + ResultSolutionIntMat_to_GAP(result) + ";\n";
     };
     //
-    if (argc == 3) {
+    if (argc == 2) {
+      Prt(std::cerr);
+    } else {
       std::ofstream os(argv[2]);
       Prt(os);
-    } else {
-      Prt(std::cerr);
     }
   }
   catch (TerminalException const& e) {

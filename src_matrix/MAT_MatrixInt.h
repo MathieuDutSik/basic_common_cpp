@@ -1127,6 +1127,16 @@ struct ResultSolutionIntMat {
   MyVector<T> eSol;
 };
 
+template<typename T>
+std::string ResultSolutionIntMat_to_GAP(const ResultSolutionIntMat<T>& res)
+{
+  if (res.TheRes)
+    return "fail";
+  std::stringstream s;
+  WriteVectorGAP(s, res.eSol);
+  return s.str();
+}
+
 
 
 // Find an integral solution of the equation Y = X A
