@@ -279,7 +279,7 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   size_t lenA=eStrA.length();
   size_t lenB=eStrB.length();
   //  std::cerr << "lenA=" << lenA << " lenB=" << lenB << "\n";
-  std::vector<int> ListStatus(lenA,1);
+  std::vector<uint8_t> ListStatus(lenA,1);
   if (lenA >= lenB) {
     for (size_t iA=0; iA<=lenA - lenB; iA++)
       if (ListStatus[iA] == 1) {
@@ -302,7 +302,7 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   std::vector<std::string> RetList;
   size_t prev_idx = 0;
   size_t iA = 0;
-  while(true) {
+  while (iA != lenA) {
     if (ListStatus[iA] == 0) {
       if (iA > prev_idx) {
         RetList.emplace_back(std::move(eStrA.substr(prev_idx,iA - prev_idx)));
@@ -312,8 +312,6 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
     } else {
       iA++;
     }
-    if (iA == lenA)
-      break;
   }
   if (iA > prev_idx) {
     RetList.emplace_back(std::move(eStrA.substr(prev_idx,iA - prev_idx)));

@@ -74,6 +74,11 @@ public:
     x.ptn = NULL;
     x.orbits = NULL;
     //
+    sg1.nv = x.sg1.nv;
+    sg1.nde = x.sg1.nde;
+    sg1.vlen = x.sg1.vlen;
+    sg1.dlen = x.sg1.dlen;
+    sg1.elen = x.sg1.elen;
     sg1.d = x.sg1.d;
     sg1.v = x.sg1.v;
     sg1.e = x.sg1.e;
@@ -82,6 +87,11 @@ public:
     x.sg1.e = NULL;
     //
     //
+    cg1.nv = x.cg1.nv;
+    cg1.nde = x.cg1.nde;
+    cg1.vlen = x.cg1.vlen;
+    cg1.dlen = x.cg1.dlen;
+    cg1.elen = x.cg1.elen;
     cg1.d = x.cg1.d;
     cg1.v = x.cg1.v;
     cg1.e = x.cg1.e;

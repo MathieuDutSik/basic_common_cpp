@@ -17,8 +17,10 @@ add_library(nauty SHARED
 
 set_target_properties(nauty PROPERTIES VERSION ${PROJECT_VERSION})
 #add_definitions(-g)
-#set(CMAKE_C_FLAGS " -O3 -g")
+
 set(CMAKE_C_FLAGS " -O3")
+#set(CMAKE_C_FLAGS " -O3 -g")
+#set(CMAKE_C_FLAGS " -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing")
 
 
 # Install library
