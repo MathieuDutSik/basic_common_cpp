@@ -2233,7 +2233,7 @@ MyVector<T> GetMatrixRow(MyMatrix<T> const& M, int const& iRow)
 template<typename T>
 MyVector<T> GetMatrixColumn(MyMatrix<T> const& M, int const& iCol)
 {
-  int nbRow=M.cols();
+  int nbRow=M.rows();
   MyVector<T> V(nbRow);
   for (int iRow=0; iRow<nbRow; iRow++)
     V(iRow) = M(iRow,iCol);
