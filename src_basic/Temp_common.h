@@ -372,12 +372,6 @@ T MyPow(T const& eVal, int const& n)
   return eRet;
 }
 
-template<typename Tequiv>
-struct EquivTest {
-  bool TheReply;
-  Tequiv TheEquiv;
-};
-
 
 std::vector<int> StdVectorFirstNentries(size_t const& N)
 {
