@@ -80,6 +80,7 @@ TheHeuristic<T> ReadHeuristic(std::istream &is)
     int nbCond;
     is >> nbCond;
     if (nbCond <= 0) {
+      std::cerr << "iFullCond=" << iFullCond << " nbFullCond=" << nbFullCond << "\n";
       std::cerr << "Error, we must have nbCond > 0\n";
       std::cerr << "nbCond=" << nbCond << "\n";
       throw TerminalException{1};
