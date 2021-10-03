@@ -94,7 +94,7 @@ public:
   // The actual API
 
   // vectface API similar to std::vector<Face>
-  void push_back(Face f)
+  void push_back(const Face& f)
   {
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;

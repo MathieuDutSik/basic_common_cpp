@@ -1080,8 +1080,7 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const&Input)
   size_t nbRow=Input.rows();
   size_t nbCol=Input.cols();
   auto f=[&](MyMatrix<T> & M, size_t eRank, size_t iRow) -> void {
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      M(eRank, iCol)=Input(iRow, iCol);
+    M.row(eRank) = Input.row(iRow);
   };
   return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f);
 }
@@ -1093,8 +1092,7 @@ SelectionRowCol<T> TMat_SelectRowCol_subset(MyMatrix<T> const&Input, std::vector
   size_t nbRow=Vsubset.size();
   size_t nbCol=Input.cols();
   auto f=[&](MyMatrix<T> & M, size_t eRank, size_t iRow) -> void {
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      M(eRank, iCol) = Input(Vsubset[iRow], iCol);
+    M.row(eRank) = Input.row(Vsubset[iRow]);
   };
   return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f);
 }
@@ -1172,8 +1170,7 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
   size_t nbRow=Input.rows();
   size_t nbCol=Input.cols();
   auto f=[&](MyMatrix<T> & M, size_t eRank, size_t iRow) -> void {
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      M(eRank, iCol)=Input(iRow, iCol);
+    M.row(eRank) = Input.row(iRow);
   };
   return NullspaceTrMat_Kernel<T,decltype(f)>(nbRow, nbCol, f);
 }
