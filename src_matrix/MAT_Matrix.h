@@ -1028,8 +1028,7 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
       ListColSelect.push_back(FirstNonZeroCol);
       ListRowSelect.push_back(iRow);
       ListColSelect01[size_t(FirstNonZeroCol)]=1;
-      T eVal=provMat(eRank, FirstNonZeroCol);
-      T eVal2=1/eVal;
+      T eVal2 = 1 / provMat(eRank, FirstNonZeroCol);
       for (size_t iCol=0; iCol<nbCol; iCol++)
 	provMat(eRank, iCol) *= eVal2;
       for (size_t iRank=0; iRank<eRank; iRank++) {
@@ -1047,7 +1046,7 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
   size_t nbVect=0;
   for (size_t iCol=0; iCol<nbCol; iCol++)
     if (ListColSelect01[iCol] == 0) {
-      NSP(nbVect, iCol)=1;
+      NSP(nbVect, iCol) = 1;
       for (size_t iRank=0; iRank<eRank; iRank++) {
 	int eCol=ListColSelect[iRank];
 	NSP(nbVect, eCol) = -provMat(iRank, iCol);
@@ -1103,11 +1102,10 @@ SelectionRowCol<T> TMat_SelectRowCol_subset(MyMatrix<T> const&Input, std::vector
 
 
 
-template<typename T>
-inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type NullspaceTrMat(MyMatrix<T> const& Input)
+template<typename T, typename F>
+MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f)
 {
-  size_t nbRow=Input.rows();
-  size_t nbCol=Input.cols();
+  static_assert(is_ring_field<T>::value, "Requires T to be a field in NullspaceTrMat_Kernel");
   size_t maxRank=nbRow;
   if (nbCol < maxRank)
     maxRank = nbCol;
@@ -1117,15 +1115,13 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
   std::vector<uint8_t> ListColSelect01(nbCol,0);
   size_t eRank=0;
   for (size_t iRow=0; iRow<nbRow; iRow++) {
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      provMat(eRank, iCol)=Input(iRow, iCol);
+    f(provMat, eRank, iRow);
     for (size_t iRank=0; iRank<eRank; iRank++) {
       size_t eCol=ListColSelect[iRank];
-      T eVal1 = -provMat(eRank, eCol);
-      if (eVal1 != 0) {
+      T eVal1 = provMat(eRank, eCol);
+      if (eVal1 != 0)
 	for (size_t iCol=eCol; iCol<nbCol; iCol++)
-	  provMat(eRank, iCol) += eVal1*provMat(iRank,iCol);
-      }
+	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
     }
     auto get_firstnonzerocol_iife=[&]() -> size_t {
       for (size_t iCol=0; iCol<nbCol; iCol++)
@@ -1141,11 +1137,11 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
       for (size_t iCol=0; iCol<nbCol; iCol++)
 	provMat(eRank, iCol) *= eVal2;
       for (size_t iRank=0; iRank<eRank; iRank++) {
-	T eVal1 = -provMat(iRank, FirstNonZeroCol);
+	T eVal1 = provMat(iRank, FirstNonZeroCol);
 	if (eVal1 != 0) {
           size_t StartCol = ListColSelect[iRank];
 	  for (size_t iCol=StartCol; iCol<nbCol; iCol++)
-	    provMat(iRank, iCol) += eVal1*provMat(eRank, iCol);
+	    provMat(iRank, iCol) -= eVal1*provMat(eRank, iCol);
 	}
       }
       eRank++;
@@ -1164,6 +1160,22 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
       nbVect++;
     }
   return NSP;
+}
+
+
+
+
+
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type NullspaceTrMat(MyMatrix<T> const& Input)
+{
+  size_t nbRow=Input.rows();
+  size_t nbCol=Input.cols();
+  auto f=[&](MyMatrix<T> & M, size_t eRank, size_t iRow) -> void {
+    for (size_t iCol=0; iCol<nbCol; iCol++)
+      M(eRank, iCol)=Input(iRow, iCol);
+  };
+  return NullspaceTrMat_Kernel<T,decltype(f)>(nbRow, nbCol, f);
 }
 
 
