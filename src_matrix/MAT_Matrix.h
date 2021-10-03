@@ -1017,13 +1017,13 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f)
 	  provMat(eRank, iCol) -= eVal1*provMat(iRank,iCol);
       }
     }
-    size_t FirstNonZeroCol = miss_val;
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      if (FirstNonZeroCol == miss_val) {
-	T eVal=provMat(eRank, iCol);
-	if (eVal != 0)
-	  FirstNonZeroCol=iCol;
-      }
+    auto get_firstnonzerocol_iife=[&]() -> size_t {
+      for (size_t iCol=0; iCol<nbCol; iCol++)
+        if (provMat(eRank, iCol) != 0)
+          return iCol;
+      return miss_val;
+    };
+    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
     if (FirstNonZeroCol != miss_val) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListRowSelect.push_back(iRow);
@@ -1127,12 +1127,13 @@ inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type Nulls
 	  provMat(eRank, iCol) += eVal1*provMat(iRank,iCol);
       }
     }
-    size_t FirstNonZeroCol = std::numeric_limits<size_t>::max();
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      if (FirstNonZeroCol == std::numeric_limits<size_t>::max() ) {
-	if (provMat(eRank, iCol) != 0)
-	  FirstNonZeroCol=iCol;
-      }
+    auto get_firstnonzerocol_iife=[&]() -> size_t {
+      for (size_t iCol=0; iCol<nbCol; iCol++)
+        if (provMat(eRank, iCol) != 0)
+          return iCol;
+      return std::numeric_limits<size_t>::max();
+    };
+    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
     if (FirstNonZeroCol != std::numeric_limits<size_t>::max() ) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListColSelect01[FirstNonZeroCol]=1;
@@ -1194,12 +1195,13 @@ inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
 	  provMat(eRank, iCol) = provMat(eRank,iCol) * eVal2 - provMat(iRank,iCol) * eVal1;
       }
     }
-    size_t FirstNonZeroCol = miss_val;
-    for (size_t iCol=0; iCol<nbCol; iCol++)
-      if (FirstNonZeroCol == miss_val) {
-	if (provMat(eRank, iCol) != 0)
-	  FirstNonZeroCol=iCol;
-      }
+    auto get_firstnonzerocol_iife=[&]() -> size_t {
+      for (size_t iCol=0; iCol<nbCol; iCol++)
+        if (provMat(eRank, iCol) != 0)
+          return iCol;
+      return miss_val;
+    };
+    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
     if (FirstNonZeroCol != miss_val) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListColSelect01[size_t(FirstNonZeroCol)]=1;
