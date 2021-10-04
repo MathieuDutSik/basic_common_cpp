@@ -572,25 +572,25 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
   if (HasVertexColor) {
     options.defaultptn = FALSE;
     int numcells=0;
-    for (int i=0; i<n; i++) {
+    for (size_t i=0; i<n; i++) {
       int eVal = 1 + eGR.GetColor(i);
       if (eVal > numcells)
         numcells = eVal;
     }
     std::vector<int> ListPartSize(numcells,0);
-    for (int i=0; i<n; i++)
+    for (size_t i=0; i<n; i++)
       ListPartSize[eGR.GetColor(i)]++;
     std::vector<int> ListShift(numcells,0);
     for (int icell=1; icell<numcells; icell++)
       ListShift[icell] = ListShift[icell-1] + ListPartSize[icell-1];
     // lab1 construction
-    for (int i=0; i<n; i++) {
+    for (size_t i=0; i<n; i++) {
       int icell = eGR.GetColor(i);
       lab1[ListShift[icell]] = i;
       ListShift[icell]++;
     }
     // ptn construction
-    for (int i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
+    for (size_t i=0; i<n; i++) ptn[i] = NAUTY_INFINITY;
     for (int icell=0; icell<numcells; icell++)
       ptn[ListShift[icell] - 1] = 0;
   }
@@ -601,7 +601,7 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
   sg1.nde = nbAdjacent;           /* Number of directed edges */
 
   int pos = 0;
-  for (int i=0; i<n; i++) {
+  for (size_t i=0; i<n; i++) {
     std::vector<size_t> LAdj = eGR.Adjacency(i);
     int len = LAdj.size();
     sg1.d[i] = len;
@@ -615,7 +615,7 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
   Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
   // Extracting the canonical ordering
   std::vector<TidxC> V(n);
-  for (int i=0; i<n; i++)
+  for (size_t i=0; i<n; i++)
     V[lab1[i]] = i;
   // Extracting the list of generators
   std::vector<std::vector<TidxG>> ListGen;
@@ -623,7 +623,7 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
     permnode* pn = gens;
     do {
       std::vector<TidxG> V(n_last);
-      for (int i=0; i<n_last; i++)
+      for (size_t i=0; i<n_last; i++)
         V[i] = pn->p[i];
       ListGen.push_back(V);
       //
