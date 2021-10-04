@@ -124,11 +124,11 @@ MyVector<T2> UniversalVectorConversion(MyVector<T1> const& V)
 template<typename T2, typename T1>
 MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const& M)
 {
-  int n_rows=M.rows();
-  int n_cols=M.cols();
+  size_t n_rows=M.rows();
+  size_t n_cols=M.cols();
   MyMatrix<T2> eRet(n_rows, n_cols);
-  for (int j=0; j<n_cols; j++)
-    for (int i=0; i<n_rows; i++)
+  for (size_t j=0; j<n_cols; j++)
+    for (size_t i=0; i<n_rows; i++)
       eRet(i,j)=UniversalScalarConversion<T2,T1>(M(i,j));
   return eRet;
 }

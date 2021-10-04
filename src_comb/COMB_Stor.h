@@ -65,7 +65,7 @@ IntegerSubsetStorage VSLT_InitializeStorage(size_t const& MaxElement)
 }
 
 
-int VSLT_NrElement(IntegerSubsetStorage const& VSLT)
+size_t VSLT_NrElement(IntegerSubsetStorage const& VSLT)
 {
   size_t MaxElt=VSLT.MaxElement+1;
   size_t pos=MaxElt-1;
@@ -79,7 +79,7 @@ int VSLT_NrElement(IntegerSubsetStorage const& VSLT)
   }
 }
 
-int VSLT_TheFirstPosition(IntegerSubsetStorage const& VSLT)
+size_t VSLT_TheFirstPosition(IntegerSubsetStorage const& VSLT)
 {
   return VSLT.ListNext[VSLT.MaxElement];
 }
