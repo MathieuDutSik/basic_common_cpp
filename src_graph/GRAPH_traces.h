@@ -470,13 +470,18 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr_Test(Tgr const& eGR,
 }
 
 
-template<typename Tidx>
-std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces& DT, size_t const& n_last)
+template<typename TidxC, typename TidxG>
+std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces& DT, size_t const& n_last)
 {
   size_t n = size_t(DT.n);
-  if (n >= size_t(std::numeric_limits<Tidx>::max()) - 1) {
+  if (n >= size_t(std::numeric_limits<TidxC>::max()) - 1) {
     std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
-    std::cerr << "We have n=" << n << " std::numeric_limits<Tidx>::max()=" << std::numeric_limits<Tidx>::max() << "\n";
+    std::cerr << "We have n=" << n << " std::numeric_limits<TidxC>::max()=" << std::numeric_limits<TidxC>::max() << "\n";
+    throw TerminalException{1};
+  }
+  if (n_last >= size_t(std::numeric_limits<TidxG>::max()) - 1) {
+    std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
+    std::cerr << "We have n_last=" << n_last << " std::numeric_limits<TidxG>::max()=" << std::numeric_limits<TidxG>::max() << "\n";
     throw TerminalException{1};
   }
 #ifdef TIMINGS
@@ -493,13 +498,13 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
   options.defaultptn = FALSE;
 
   Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, &DT.cg1);
-  std::vector<Tidx> V(n);
+  std::vector<TidxC> V(n);
   for (size_t i=0; i<n; i++)
-    V[DT.lab1[i]] = Tidx(i);
-  std::vector<std::vector<Tidx>> ListGen;
+    V[DT.lab1[i]] = TidxC(i);
+  std::vector<std::vector<TidxG>> ListGen;
   if (gens) {
     permnode* pn = gens;
-    std::vector<Tidx> V(n_last);
+    std::vector<TidxG> V(n_last);
     do {
       for (size_t i=0; i<n_last; i++)
         V[i] = pn->p[i];
@@ -519,13 +524,18 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
 
 
 
-template<typename Tgr, typename Tidx>
-std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonicalOrdering_ListGenerators(Tgr const& eGR, int n_last)
+template<typename Tgr, typename TidxC, typename TidxG>
+std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonicalOrdering_ListGenerators(Tgr const& eGR, size_t n_last)
 {
   size_t n = eGR.GetNbVert();
-  if (n >= size_t(std::numeric_limits<Tidx>::max()) - 1) {
+  if (n >= size_t(std::numeric_limits<TidxC>::max()) - 1) {
     std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
-    std::cerr << "We have n=" << n << " std::numeric_limits<Tidx>::max()=" << std::numeric_limits<Tidx>::max() << "\n";
+    std::cerr << "We have n=" << n << " std::numeric_limits<TidxC>::max()=" << std::numeric_limits<TidxC>::max() << "\n";
+    throw TerminalException{1};
+  }
+  if (n_last >= size_t(std::numeric_limits<TidxG>::max()) - 1) {
+    std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
+    std::cerr << "We have n=" << n << " std::numeric_limits<TidxG>::max()=" << std::numeric_limits<TidxG>::max() << "\n";
     throw TerminalException{1};
   }
 #ifdef TIMINGS
@@ -604,15 +614,15 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>> TRACES_GetCanonical
 
   Traces(&sg1,lab1,ptn,orbits,&options,&stats,&cg1);
   // Extracting the canonical ordering
-  std::vector<Tidx> V(n);
+  std::vector<TidxC> V(n);
   for (int i=0; i<n; i++)
     V[lab1[i]] = i;
   // Extracting the list of generators
-  std::vector<std::vector<Tidx>> ListGen;
+  std::vector<std::vector<TidxG>> ListGen;
   if (gens) {
     permnode* pn = gens;
     do {
-      std::vector<Tidx> V(n_last);
+      std::vector<TidxG> V(n_last);
       for (int i=0; i<n_last; i++)
         V[i] = pn->p[i];
       ListGen.push_back(V);
