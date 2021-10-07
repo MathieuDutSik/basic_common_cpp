@@ -88,6 +88,34 @@ std::vector<T> IntersectionVect(std::vector<T> const& V1, std::vector<T> const& 
 
 
 
+template<typename T>
+struct popable_vector {
+private:
+  std::vector<T> V;
+  size_t pos;
+public:
+  popable_vector() : pos(0) {}
+  popable_vector(std::vector<T> const& _V) : V(_V), pos(_V.size()) {}
+  size_t size() const
+  {
+    return pos;
+  }
+  void push_back(T const& val)
+  {
+    if (V.size() == pos) {
+      V.push_back(val);
+      pos++;
+      return;
+    }
+    V[pos] = val;
+    pos++;
+  }
+  T pop()
+  {
+    pos--;
+    return V[pos];
+  }
+};
 
 
 
