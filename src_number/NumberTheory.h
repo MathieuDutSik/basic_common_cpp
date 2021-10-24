@@ -778,19 +778,74 @@ inline mpq_class FractionalPart(mpq_class const& x)
   return eRet;
 }
 
-inline mpq_class Floor(mpq_class const& x)
+inline mpq_class Floor_mpq(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   return x-eFrac;
 }
 
-inline mpq_class Ceil(mpq_class const& x)
+inline mpq_class Ceil_mpq(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   if (eFrac == 0)
     return x;
   return 1 + x - eFrac;
 }
+
+
+inline void FloorInteger(mpq_class const& xI, mpq_class & xO)
+{
+  xO = Floor_mpq(xI);
+}
+
+inline void FloorInteger(mpq_class const& xI, mpz_class & xO)
+{
+  mpq_class xO_q = Floor_mpq(xI);
+  xO = xO_q.get_num();
+}
+
+inline void FloorInteger(mpq_class const& xI, int & xO)
+{
+  mpq_class xO_q = Floor_mpq(xI);
+  xO = int(xO_q.get_num().get_si());
+}
+
+inline void FloorInteger(mpq_class const& xI, long & xO)
+{
+  mpq_class xO_q = Floor_mpq(xI);
+  xO = xO_q.get_num().get_si();
+}
+
+
+
+
+
+inline void CeilInteger(mpq_class const& xI, mpq_class & xO)
+{
+  xO = Ceil_mpq(xI);
+}
+
+inline void CeilInteger(mpq_class const& xI, mpz_class & xO)
+{
+  mpq_class xO_q = Ceil_mpq(xI);
+  xO = xO_q.get_num();
+}
+
+inline void CeilInteger(mpq_class const& xI, int & xO)
+{
+  mpq_class xO_q = Ceil_mpq(xI);
+  xO = int(xO_q.get_num().get_si());
+}
+
+inline void CeilInteger(mpq_class const& xI, long & xO)
+{
+  mpq_class xO_q = Ceil_mpq(xI);
+  xO = xO_q.get_num().get_si();
+}
+
+
+
+
 
 
 
@@ -873,7 +928,7 @@ inline mpq_class NearestInteger_rpi(mpq_class const& x)
   //  std::cerr << "We have eHalf\n";
   mpq_class x2=x + eHalf;
   //  std::cerr << "We have x=" << x << " eHalf=" << eHalf << " x2=" << x2 << "\n";
-  mpq_class x3=Floor(x2);
+  mpq_class x3=Floor_mpq(x2);
   //  std::cerr << "We have x2=" << x2 << " x3=" << x3 << "\n";
   return x3;
   /*
