@@ -3,7 +3,8 @@
 #PROGRAM		= Block_CppIterator
 #PROGRAM		= Timing_HashMap
 #PROGRAM		= Vector_Face_iterator SerializeVectface
-PROGRAM		= VectorFace_move
+#PROGRAM		= VectorFace_move
+PROGRAM		= Test_SetCppIterator
 #PROGRAM		= Vector_Face_iterator
 #PROGRAM		= BlockMultiple_CppIterator
 #PROGRAM		= SerializeVectface

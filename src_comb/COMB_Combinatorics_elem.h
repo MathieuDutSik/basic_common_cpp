@@ -41,19 +41,19 @@ private:
     Tidx dim_iter;
     Tidx size_iter;
     std::vector<Tidx> V;
-    bool single_increase()
+    void single_increase()
     {
       V[0]++;
       Tidx xy2=1;
-      while ((xy2 < k) && (V[xy2-1] >= V[xy2])) {
-        C[xy2]++;
+      while ((xy2 < size_iter) && (V[xy2-1] >= V[xy2])) {
+        V[xy2]++;
         xy2++;
       }
       if (xy2 != 1) {
         for (Tidx xy1=0; xy1<xy2-1; xy1++)
-          Tvect[xy1]=xy1;
+          V[xy1]=xy1;
       }
-      if (Tvect[k-1] == n)
+      if (V[size_iter-1] == dim_iter)
         V.clear();
     }
   public:
@@ -130,7 +130,10 @@ public:
   {
     if (size > dim)
       return {dim, size, {}};
-    return {dim, size, std::vector<Tidx>(size,0)};
+    std::vector<Tidx> V(size);
+    for (Tidx i=0; i<size; i++)
+      V[i] = i;
+    return {dim, size, V};
   }
   const_iterator cend() const
   {
@@ -140,7 +143,10 @@ public:
   {
     if (size > dim)
       return {dim, size, {}};
-    return {dim, size, std::vector<Tidx>(size,0)};
+    std::vector<Tidx> V(size);
+    for (Tidx i=0; i<size; i++)
+      V[i] = i;
+    return {dim, size, V};
   }
   const_iterator end() const
   {
