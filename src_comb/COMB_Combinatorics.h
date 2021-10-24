@@ -118,7 +118,7 @@ private:
       if (iter.U.size() != U.size())
         return true;
       for (size_t i=0; i<U.size(); i++)
-        if (iter.U[i] != U[1])
+        if (iter.U[i] != U[i])
           return true;
       return false;
     }
@@ -131,7 +131,7 @@ private:
       if (iter.U.size() != U.size())
         return false;
       for (size_t i=0; i<U.size(); i++)
-        if (iter.U[i] != U[1])
+        if (iter.U[i] != U[i])
           return false;
       return true;
     }
