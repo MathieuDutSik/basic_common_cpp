@@ -204,7 +204,6 @@ void srand_random_set()
 
 std::string random_string( size_t length )
 {
-  srand_random_set();
   auto randchar = []() -> char {
     const char charset[] =
     "0123456789"
@@ -222,7 +221,6 @@ std::string random_string( size_t length )
 
 std::string random_string_restricted( size_t length )
 {
-  srand ( time(NULL) );
   auto randchar = []() -> char {
     const char charset[] = "abcdefghijklmnopqrstuvwxyz";
     const size_t max_index = (sizeof(charset) - 1);
@@ -371,12 +369,6 @@ T MyPow(T const& eVal, int const& n)
     eRet *= eVal;
   return eRet;
 }
-
-template<typename Tequiv>
-struct EquivTest {
-  bool TheReply;
-  Tequiv TheEquiv;
-};
 
 
 std::vector<int> StdVectorFirstNentries(size_t const& N)

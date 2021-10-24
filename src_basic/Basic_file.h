@@ -31,7 +31,7 @@ bool IsExistingFile(std::string const& eFile)
   } else {
     f.close();
     return false;
-  }   
+  }
 }
 
 void IsExistingFileDie(std::string const& eFile)
@@ -394,7 +394,7 @@ int FILE_GetNumberLine(std::string const& eFile)
 #ifndef WINDOWS
 std::string GetCurrentDirectory()
 {
-  int size = pathconf(".", _PC_PATH_MAX);
+  long int size = pathconf(".", _PC_PATH_MAX);
   std::vector<char> buf(size);
   char* ptr=getcwd(buf.data(), (size_t)size);
   if (ptr == NULL && errno != ERANGE) {

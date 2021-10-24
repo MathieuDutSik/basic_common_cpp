@@ -98,7 +98,7 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const& eGR)
 
 
 template<typename Tgr>
-EquivTest<permlib::Permutation> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr const& eGR2)
+std::option<permlib::Permutation> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr const& eGR2)
 {
   std::string ePrefix=random_string(20);
   TempFile eFileIn ("/tmp/NAUTY_ISOM_" + ePrefix + ".inp");
@@ -107,7 +107,7 @@ EquivTest<permlib::Permutation> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr con
   TempFile eFileIso("/tmp/NAUTY_ISOM_" + ePrefix + ".iso");
   //
   if (eGR1.GetNbVert() != eGR2.GetNbVert() || GetNbColor(eGR1) != GetNbColor(eGR2))
-    return {false, {}};
+    return {};
   //
   bool test;
   std::ofstream os(eFileIn.string());
@@ -147,7 +147,7 @@ EquivTest<permlib::Permutation> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr con
     eList[iVert]=eVal;
   }
   permlib::Permutation ePerm(eList);
-  return {true, ePerm};
+  return ePerm;
 }
 
 

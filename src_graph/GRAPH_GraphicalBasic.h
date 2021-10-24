@@ -351,7 +351,7 @@ inline typename std::enable_if<is_graphsparseimmutable_class<Tret>::value,Tret>:
     for (size_t & jVert : LLadj) {
       size_t jVertRed=ListStat[jVert];
       if (jVertRed != miss_val && jVertRed > iVertRed) {
-	MyVector<int> eVect(2);
+	MyVector<size_t> eVect(2);
 	eVect(0) = iVertRed;
 	eVect(1) = jVertRed;
 	PreListEdge.push_back(eVect);

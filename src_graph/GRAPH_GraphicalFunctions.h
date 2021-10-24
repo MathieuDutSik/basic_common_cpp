@@ -1021,12 +1021,12 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const& GR, size_t const& s_sz, 
     return MCEret;
     };*/
   auto CheckEmbedding=[&](MyMatrix<int> const& eEmbed) -> bool {
-    int TheDim=eEmbed.cols();
+    size_t TheDim=eEmbed.cols();
     for (size_t i=0; i<n; i++)
       for (size_t j=0; j<n; j++) {
 	std::vector<int> V1(TheDim);
 	std::vector<int> V2(TheDim);
-	for (int iC=0; iC<TheDim; iC++) {
+	for (size_t iC=0; iC<TheDim; iC++) {
 	  V1[iC]=eEmbed(i,iC);
 	  V2[iC]=eEmbed(j,iC);
 	}
