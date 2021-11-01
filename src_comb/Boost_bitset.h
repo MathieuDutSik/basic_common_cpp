@@ -42,7 +42,7 @@ std::string StringFace(Face const& f)
   std::string str_ret;
   size_t len = f.size();
   for (size_t i=0; i<len; i++)
-    str_ret += std::to_string(int(f[i]);
+    str_ret += std::to_string(int(f[i]));
   return str_ret;
 }
 
