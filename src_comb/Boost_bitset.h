@@ -47,6 +47,13 @@ std::string StringFace(Face const& f)
 }
 
 
+std::string SignatureFace(Face const& f)
+{
+  std::string str_ret = std::to_string(f.count()) + "/" + std::to_string(f.size());
+  return str_ret;
+}
+
+
 void WriteFace(std::ostream & os, Face const& eList)
 {
   size_t len = eList.size();
