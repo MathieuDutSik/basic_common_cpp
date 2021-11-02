@@ -800,13 +800,6 @@ T DivideVector(MyVector<T> const& V1, MyVector<T> const& V2)
 }
 
 
-
-template<typename T>
-struct Inverse_exception {
-  std::string errmsg;
-  T pivot;
-};
-
 template<typename T>
 void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 {
@@ -844,10 +837,8 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       }
 #ifdef DEBUG
     if (prov1 == 0) {
-      Inverse_exception<T> eExcept;
-      eExcept.errmsg="Error in matrix inversion";
-      eExcept.pivot=0;
-      throw eExcept;
+      std::cerr << "Error during the computation of the matrix inverse\n";
+      throw TerminalException{1};
     }
 #endif
     for (iRowB=0; iRowB<nbRow; iRowB++)
