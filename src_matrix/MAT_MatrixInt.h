@@ -973,7 +973,7 @@ template<typename T>
 bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
-  int idxSelect=-1;
+  size_t idxSelect = std::numeric_limits<size_t>::max();
   size_t k=M1.rows();
   size_t n=M1.cols();
   MyMatrix<T> M1copy=M1;
