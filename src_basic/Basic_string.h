@@ -305,7 +305,7 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
   while (iA != lenA) {
     if (ListStatus[iA] == 0) {
       if (iA > prev_idx) {
-        RetList.emplace_back(std::move(eStrA.substr(prev_idx,iA - prev_idx)));
+        RetList.push_back(eStrA.substr(prev_idx,iA - prev_idx));
       }
       iA += lenB;
       prev_idx = iA;
@@ -314,7 +314,7 @@ std::vector<std::string> STRING_Split(std::string const& eStrA, std::string cons
     }
   }
   if (iA > prev_idx) {
-    RetList.emplace_back(std::move(eStrA.substr(prev_idx,iA - prev_idx)));
+    RetList.push_back(eStrA.substr(prev_idx,iA - prev_idx));
   }
   return RetList;
 }

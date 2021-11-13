@@ -430,11 +430,9 @@ bool IsClique(Tgr const& GR, std::vector<size_t> const& eList)
 template<typename Tgr>
 std::vector<size_t> StartingCell(Tgr const& GR)
 {
-  std::vector<size_t> Adj;
-  //
   std::vector<size_t> A=GR.Adjacency(0);
   size_t eC=A[0];
-  Adj=IntersectionVect(GR.Adjacency(eC), A);
+  std::vector<size_t> Adj=IntersectionVect(GR.Adjacency(eC), A);
   size_t r=Adj.size();
   std::vector<size_t> TT;
   //  std::cerr << "r=" << r << "\n";
@@ -550,7 +548,7 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const& GR)
   WriteVectorInt_GAP(std::cerr, eCell);
   std::cerr << "\n";
   std::vector<size_t> eCellS=VectorAsSet(eCell);
-  if (eCell[0] == -1) {
+  if (eCell[0] == std::numeric_limits<size_t>::max() ) {
     //    std::cerr << "Leaving InverseLineGraphConnected 1\n";
     return {{-1}};
   }
