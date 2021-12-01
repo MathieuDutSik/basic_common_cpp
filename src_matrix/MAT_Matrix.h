@@ -183,7 +183,6 @@ MyMatrix<T> ReadMatrix(std::istream &is)
   }
   T eVal;
   int nbRow, nbCol;
-  int iRow, iCol;
   is >> nbRow >> nbCol;
   //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   if (nbRow < 0 || nbCol < 0) {
@@ -193,13 +192,22 @@ MyMatrix<T> ReadMatrix(std::istream &is)
   }
   //std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   MyMatrix<T> TheMat(nbRow, nbCol);
-  for (iRow=0; iRow<nbRow; iRow++)
-    for (iCol=0; iCol<nbCol; iCol++) {
+  for (int iRow=0; iRow<nbRow; iRow++)
+    for (int iCol=0; iCol<nbCol; iCol++) {
       is >> eVal;
       TheMat(iRow, iCol)=eVal;
     }
   return TheMat;
 }
+
+
+template<typename T>
+MyMatrix<T> ReadMatrixFile(std::string const& file_name)
+{
+  std::ifstream is(file_name);
+  return ReadMatrix<T>(is);
+}
+
 
 template<typename T>
 std::pair<bool, T> ReadMatrixInfo(std::istream &is)
