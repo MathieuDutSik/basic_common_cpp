@@ -21,7 +21,7 @@ namespace boost::serialization {
   //
 
   template<class Archive, typename T>
-  inline void serialize(Archive & ar, MyMatrix<T> & matrix, const unsigned int version)
+  inline void serialize(Archive & ar, MyMatrix<T> & matrix, [[maybe_unused]] const unsigned int version)
   {
     int rows = matrix.rows();
     int cols = matrix.cols();
@@ -39,7 +39,7 @@ namespace boost::serialization {
   //
 
   template<class Archive, typename T>
-  inline void load(Archive & ar, MySparseMatrix<T> & val, const unsigned int version)
+  inline void load(Archive & ar, MySparseMatrix<T> & val, [[maybe_unused]] const unsigned int version)
   {
     //    std::cerr << "load(MySparseMatrix<T>), step 1\n";
     int nbRow, nbCol, nnz;
@@ -63,7 +63,7 @@ namespace boost::serialization {
   }
 
   template<class Archive, typename T>
-  inline void save(Archive & ar, MySparseMatrix<T> const& val, const unsigned int version)
+  inline void save(Archive & ar, MySparseMatrix<T> const& val, [[maybe_unused]] const unsigned int version)
   {
     //    std::cerr << "save(MySparseMatrix<T>), step 1\n";
     int nbRow=val.rows();
