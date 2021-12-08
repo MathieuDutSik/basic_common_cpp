@@ -538,30 +538,20 @@ inline mpq_class GetDenominator(mpq_class const& x)
 
 // We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
 // So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline int GetDenominator(int const& x)
+inline int GetDenominator([[maybe_unused]] int const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline long GetDenominator(long const& x)
+inline long GetDenominator([[maybe_unused]] long const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline mpz_class GetDenominator(mpz_class const& x)
+inline mpz_class GetDenominator([[maybe_unused]] mpz_class const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
 
 inline mpz_class GetDenominator_z(mpq_class const& x)
@@ -569,32 +559,20 @@ inline mpz_class GetDenominator_z(mpq_class const& x)
   return x.get_den();
 }
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline int GetDenominator_z(int const& x)
+inline int GetDenominator_z([[maybe_unused]] int const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline long GetDenominator_z(long const& x)
+inline long GetDenominator_z([[maybe_unused]] long const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline mpz_class GetDenominator_z(mpz_class const& x)
+inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
 
 
