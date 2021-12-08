@@ -313,7 +313,7 @@ public:
 namespace boost::serialization {
 
   template<class Archive>
-  inline void load(Archive & ar, vectface & val, const unsigned int version)
+  inline void load(Archive & ar, vectface & val, [[maybe_unused]] const unsigned int version)
   {
     size_t n, n_face, len_vect;
     ar & make_nvp("n", n);
@@ -326,7 +326,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void save(Archive & ar, vectface const& val, const unsigned int version)
+  inline void save(Archive & ar, vectface const& val, [[maybe_unused]] const unsigned int version)
   {
     size_t n = val.get_n();
     size_t n_face = val.size();
