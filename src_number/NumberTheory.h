@@ -932,7 +932,7 @@ namespace boost::serialization {
   // mpq_class
 
   template<class Archive>
-  inline void load(Archive & ar, mpq_class & val, const unsigned int version)
+  inline void load(Archive & ar, mpq_class & val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "load(mpq_class), step 1\n";
     std::string str;
@@ -943,7 +943,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void save(Archive & ar, mpq_class const& val, const unsigned int version)
+  inline void save(Archive & ar, mpq_class const& val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "save(mpq_class), step 1\n";
     std::ostringstream os;
@@ -954,7 +954,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void serialize(Archive & ar, mpq_class & val, const unsigned int version)
+  inline void serialize(Archive & ar, mpq_class & val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "split_free(mpq_class), step 1\n";
     split_free(ar, val, version);
@@ -964,7 +964,7 @@ namespace boost::serialization {
   // mpz_class
 
   template<class Archive>
-  inline void load(Archive & ar, mpz_class & val, const unsigned int version)
+  inline void load(Archive & ar, mpz_class & val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "load(mpz_class), step 1\n";
     std::string str;
@@ -975,7 +975,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void save(Archive & ar, mpz_class const& val, const unsigned int version)
+  inline void save(Archive & ar, mpz_class const& val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "save(mpz_class), step 1\n";
     std::ostringstream os;
