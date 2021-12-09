@@ -335,11 +335,11 @@ protected:
    * (assumes that they are 0 when called and
    *  quarantees that they are 0 when returned).
    */
-  virtual bool nucr_find_first_component(const unsigned int level) {assert(false); return true; }
-  virtual bool nucr_find_first_component(const unsigned int level,
-					 std::vector<unsigned int>& component,
-					 unsigned int& component_elements,
-					 Partition::Cell*& sh_return)
+  virtual bool nucr_find_first_component([[maybe_unused]] const unsigned int level) {assert(false); return true; }
+  virtual bool nucr_find_first_component([[maybe_unused]] const unsigned int level,
+					 [[maybe_unused]] std::vector<unsigned int>& component,
+					 [[maybe_unused]] unsigned int& component_elements,
+					 [[maybe_unused]] Partition::Cell*& sh_return)
   {assert(false); return true; }
   /** \internal
    * The non-uniformity component found by nucr_find_first_component()
