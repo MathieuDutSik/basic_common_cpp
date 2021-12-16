@@ -967,6 +967,8 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 }
 
 
+
+
 // We have two matrices M1 and M2 and we check if they define
 // the same subspace of T^n
 template<typename T>
@@ -1887,6 +1889,47 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
 #endif
   return TheBasis;
 }
+
+
+
+
+/*
+  M1 spans a lattice L1
+  M2 spans a lattice L2
+  We want to find a basis of the lattice L1 cap L2.
+  ---
+  We have the formula (L1 \cap L2)* = L1* + L2*
+  This allows to apply the GetZbasis function
+ */
+template<typename T>
+MyMatrix<T> Kernel_IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
+{
+  MyMatrix<T> M1_dual = TransposedMat(Inverse(M1));
+  MyMatrix<T> M2_dual = TransposedMat(Inverse(M2));
+  MyMatrix<T> M1_M2_dual =ConcatenateMat(M1_dual, M2_dual);
+  MyMatrix<T> M1_M2_basis = GetZbasis(M1_M2_dual);
+  return TransposedMat(Inverse(M1_M2_basis));
+}
+
+
+
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value,std::vector<MyMatrix<T>>>::type IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
+{
+  return Kernel_IntersectionLattice(M1, M2);
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_ring_field<T>::value),std::vector<MyMatrix<T>>>::type IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
+{
+  using Tfield=typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> M1_f=UniversalMatrixConversion<Tfield,T>(M1);
+  MyMatrix<Tfield> M2_f=UniversalMatrixConversion<Tfield,T>(M2);
+  MyMatrix<Tfield> M1_inter_M2_f = Kernel_IntersectionLattice(M1_f, M2_f);
+  return UniversalMatrixConversion<T,Tfield>(M1_inter_M2_f);
+}
+
+
 
 
 
