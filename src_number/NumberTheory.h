@@ -743,7 +743,6 @@ inline void TYPE_CONVERSION(mpz_class const& a1, int64_t & a2)
 
 bool universal_square_root(mpz_class & ret,  mpz_class const& val)
 {
-  mpz_class ret;
   mpz_sqrt(ret.get_mpz_t(), val.get_mpz_t());
   mpz_class eProd = ret * ret;
   return eProd == val;
@@ -753,8 +752,8 @@ bool universal_square_root(mpz_class & ret,  mpz_class const& val)
 
 bool universal_square_root(mpq_class & ret,  mpq_class const& val)
 {
-  mpz_class val_num=x.get_num();
-  mpz_class val_den=x.get_den();
+  mpz_class val_num=val.get_num();
+  mpz_class val_den=val.get_den();
   mpz_class ret_num, ret_den;
   if (!universal_square_root(ret_num, val_num))
     return false;
