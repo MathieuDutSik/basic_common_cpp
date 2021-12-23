@@ -2,6 +2,12 @@
 #define FACTORIZATIONS_INCLUDE
 
 #include <vector>
+#include <map>
+
+
+
+
+
 
 
 std::vector<mpz_class> FactorsInt(mpz_class const& x)
