@@ -1840,7 +1840,7 @@ MyMatrix<T> Kernel_IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const&
 {
   MyMatrix<T> M1_dual = TransposedMat(Inverse(M1));
   MyMatrix<T> M2_dual = TransposedMat(Inverse(M2));
-  MyMatrix<T> M1_M2_dual =ConcatenateMat(M1_dual, M2_dual);
+  MyMatrix<T> M1_M2_dual = Concatenate(M1_dual, M2_dual);
   MyMatrix<T> M1_M2_basis = GetZbasis(M1_M2_dual);
   return TransposedMat(Inverse(M1_M2_basis));
 }
@@ -1848,13 +1848,13 @@ MyMatrix<T> Kernel_IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const&
 
 
 template<typename T>
-inline typename std::enable_if<is_ring_field<T>::value,std::vector<MyMatrix<T>>>::type IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
+inline typename std::enable_if<is_ring_field<T>::value,MyMatrix<T>>::type IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
   return Kernel_IntersectionLattice(M1, M2);
 }
 
 template<typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value),std::vector<MyMatrix<T>>>::type IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
+inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> M1_f=UniversalMatrixConversion<Tfield,T>(M1);
