@@ -5,7 +5,7 @@ int main(int argc, char *argv[])
   //  using T=mpz_class;
   using T=mpq_class;
   try {
-    int n=2;
+    int n=4;
     auto get_fullrank=[&]() -> MyMatrix<T> {
       MyMatrix<T> M(n,n);
       while(true) {
@@ -21,12 +21,19 @@ int main(int argc, char *argv[])
       MyMatrix<T> M1 = get_fullrank();
       MyMatrix<T> M2 = get_fullrank();
       MyMatrix<T> M1_i_M2 = IntersectionLattice(M1, M2);
-      std::cerr << "   M1=\n";
-      WriteMatrix(std::cerr, M1);
-      std::cerr << "   M2=\n";
-      WriteMatrix(std::cerr, M2);
-      std::cerr << "   M1_i_M2=\n";
-      WriteMatrix(std::cerr, M1_i_M2);
+      for (int i=0; i<n; i++) {
+        MyVector<T> v = GetMatrixRow(M1_i_M2, i);
+        if (!(SolutionIntMat(M1, v).TheRes) || !(SolutionIntMat(M2, v).TheRes)) {
+          std::cerr << "   M1=\n";
+          WriteMatrix(std::cerr, M1);
+          std::cerr << "   M2=\n";
+          WriteMatrix(std::cerr, M2);
+          std::cerr << "v=";
+          WriteVector(std::cerr, v);
+          std::cerr << "Could not resolve v in M1 or M2\n";
+          throw TerminalException{1};
+        }
+      }
     }
   }
   catch (TerminalException const& e) {
