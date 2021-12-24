@@ -1,6 +1,5 @@
-#PROGRAM		= test_mpz_givaro
+PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
-PROGRAM		= Factorize
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -24,10 +23,10 @@ OUTPUTFLAG 	= -o
 
 
 CLOCAL          = -I../src_basic -I.
-CFLAGS 		= -I$(GMP_INCDIR)
+CFLAGS 		= $(LINBOX_INCLUDE)
 CTOTAL 		= $(CLOCAL) $(CFLAGS)
 
-LIBS		= -lm $(GMP_CXX_LINK)
+LIBS		= -lm -pthread $(LINBOX_LINK)
 
 
 %.o: %.cpp

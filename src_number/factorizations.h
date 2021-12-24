@@ -38,7 +38,7 @@ std::vector<T> successive_division_factorize(T const& N)
   while(true) {
     T res = ResInt(N, pos);
     if (res == 0) {
-      T quot = QuotInt(N, pos);
+      T quot = QuoInt(N, pos);
       if (quot > 1) {
         std::vector<T> eVect = successive_division_factorize(quot);
         eVect.push_back(pos);
@@ -92,8 +92,8 @@ std::vector<T> FactorsInt(T const& N)
   if (epair.first) {
     T fact1 = epair.second;
     T fact2 = QuoInt(N, fact1);
-    std::vector<T> ListPrime = factorize(fact1);
-    std::vector<T> V2 = factorize(fact2);
+    std::vector<T> ListPrime = FactorsInt(fact1);
+    std::vector<T> V2 = FactorsInt(fact2);
     ListPrime.insert(ListPrime.end(), V2.begin(), V2.end());
     return ListPrime;
   } else {
