@@ -18,7 +18,7 @@ std::pair<bool, T> rho_pollard_factorize(T const& number)
       diff = x - x_fixed;
       if (diff < 0)
         diff = -diff;
-      factor = gcd(diff, number);
+      factor = GcdPair(diff, number);
     } while (--count && (factor == 1));
     size *= 2;
     x_fixed = x;
@@ -88,6 +88,8 @@ bool IsPrime(const T& N)
 template<typename T>
 std::vector<T> FactorsInt(T const& N)
 {
+  if (N == 1)
+    return {};
   std::pair<bool, T> epair = rho_pollard_factorize(N);
   if (epair.first) {
     T fact1 = epair.second;

@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
   using T=mpz_class;
-  //  using T=mpq_class;
+  //using T=mpq_class;
   try {
     for (int n=1; n<500; n++) {
       T n_T = n;
