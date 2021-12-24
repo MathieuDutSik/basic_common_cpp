@@ -2,6 +2,7 @@
 #define INCLUDE_NUMBER_THEORY
 
 #include <iostream>
+#include <optional>
 #include <sstream>
 
 #include "Temp_common.h"
