@@ -278,11 +278,11 @@ MyMatrix<size_t> ShortestPathDistanceMatrix(Tgr const& GR)
 template<typename Tgr>
 std::vector<std::vector<size_t>> GRAPH_FindAllShortestPath(Tgr const& GR, size_t const& x, size_t const& y)
 {
-  std::cerr << "GRAPH_FindAllShortestPath x=" << x << " y=" << y << " GR=\n";
-  GRAPH_PrintOutput(std::cerr, GR);
+  //  std::cerr << "GRAPH_FindAllShortestPath x=" << x << " y=" << y << " GR=\n";
+  //  GRAPH_PrintOutput(std::cerr, GR);
   MyMatrix<size_t> DistMat=ShortestPathDistanceMatrix(GR);
-  std::cerr << "DistMat=\n";
-  WriteMatrix(std::cerr, DistMat);
+  //  std::cerr << "DistMat=\n";
+  //  WriteMatrix(std::cerr, DistMat);
   size_t eDist=DistMat(x,y);
   if (eDist == std::numeric_limits<size_t>::max())
     return {};
@@ -380,9 +380,9 @@ std::vector<std::vector<size_t>> GRAPH_FindAllCycles(Tgr const& GR)
       }
     size_t x=Edges[iEdge][0];
     size_t y=Edges[iEdge][1];
-    std::cerr << "iEdge=" << iEdge << " / " << nbEdge << " x=" << x << " y=" << y << "\n";
+    //    std::cerr << "iEdge=" << iEdge << " / " << nbEdge << " x=" << x << " y=" << y << "\n";
     std::vector<std::vector<size_t>> ListPath = GRAPH_FindAllShortestPath(GRred, x, y);
-    std::cerr << "|ListPath|=" << ListPath.size() << "\n";
+    //    std::cerr << "|ListPath|=" << ListPath.size() << "\n";
     for (auto & eCycle : ListPath)
       FuncInsertCycle(eCycle);
   }
