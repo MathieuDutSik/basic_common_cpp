@@ -1058,19 +1058,14 @@ MyMatrix<T> GetNoncontainedSubspace(std::vector<MyMatrix<T>> const& ListSubBig, 
 
 
 template<typename T>
-struct ResultSolutionIntMat {
-  bool TheRes;
-  MyVector<T> eSol;
-};
-
-template<typename T>
-std::string ResultSolutionIntMat_to_GAP(const ResultSolutionIntMat<T>& res)
+std::string ResultSolutionIntMat_to_GAP(const std::optional<MyVector<T>>& res)
 {
-  if (res.TheRes)
-    return "fail";
-  std::stringstream s;
-  WriteVectorGAP(s, res.eSol);
-  return s.str();
+  if (res) {
+    std::stringstream s;
+    WriteVectorGAP(s, *res);
+    return s.str();
+  }
+  return "fail";
 }
 
 
@@ -1078,7 +1073,7 @@ std::string ResultSolutionIntMat_to_GAP(const ResultSolutionIntMat<T>& res)
 // Find an integral solution of the equation Y = X A
 // if it exists.
 template<typename T>
-ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> const& TheVect)
+std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> const& TheVect)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in SolutionIntMat");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
@@ -1088,9 +1083,9 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
   if (nbVect == 0) {
     MyVector<T> eSol;
     if (IsZeroVector(TheVect)) {
-      return {true, std::move(eSol)};
+      return eSol;
     } else {
-      return {false, {}};
+      return {};
     }
   }
   MyVector<T> eSol=ZeroVector<T>(nbVect);
@@ -1160,9 +1155,9 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       }
     }
     if (TheVectWork(i) != 0)
-      return {false, {}};
+      return {};
   }
-  return {true, std::move(eSol)};
+  return eSol;
 }
 
 
@@ -1278,7 +1273,7 @@ bool CanTestSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVe
 }
 
 template<typename T>
-ResultSolutionIntMat<T> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVect)
+std::optional<MyVector<T>> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVect)
 {
   int nbVect=eCan.TheMatWork.rows();
   int nbCol=eCan.TheMatWork.cols();
@@ -1298,9 +1293,9 @@ ResultSolutionIntMat<T> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<
       }
     }
     if (TheVectWork(i) != 0)
-      return {false, {}};
+      return {};
   }
-  return {true, std::move(eSol)};
+  return eSol;
 }
 
 
@@ -1809,13 +1804,13 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
   for (int iElt=0; iElt<nbElt; iElt++) {
     MyVector<T> eElt=GetMatrixRow(ListElement, iElt);
     //      std::cerr << "Before SolutionIntMat, iElt=" << iElt << "\n";
-    ResultSolutionIntMat<T> eResIntMat=SolutionIntMat(TheBasis, eElt);
+    std::optional<MyVector<T>> opt=SolutionIntMat(TheBasis, eElt);
     /*      std::cerr << "TheBasis=\n";
 	    WriteMatrixGAP(std::cerr, TheBasis);
 	    std::cerr << "eElt=\n";
 	    WriteVectorGAP(std::cerr, eElt);
 	    std::cerr << "After SolutionIntMat 2 eResIntMat.TheRes=" << eResIntMat.TheRes << "\n";*/
-    if (!eResIntMat.TheRes) {
+    if (!opt) {
       std::cerr << "Error in GetZbasis 2\n";
       throw TerminalException{1};
     }

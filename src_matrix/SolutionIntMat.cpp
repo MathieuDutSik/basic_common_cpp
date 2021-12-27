@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
     std::ifstream INmat(argv[1]);
     MyMatrix<Tint> TheMat=ReadMatrix<Tint>(INmat);
     MyVector<Tint> TheVec=ReadVector<Tint>(INmat);
-    ResultSolutionIntMat<Tint> result = SolutionIntMat(TheMat, TheVec);
+    std::optional<MyVector<Tint>> result = SolutionIntMat(TheMat, TheVec);
     // computing one solution (maybe)
     auto Prt=[&](std::ostream& os) -> void {
       os << "return " + ResultSolutionIntMat_to_GAP(result) + ";\n";

@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
       MyMatrix<T> M1_i_M2 = IntersectionLattice(M1, M2);
       for (int i=0; i<n; i++) {
         MyVector<T> v = GetMatrixRow(M1_i_M2, i);
-        if (!(SolutionIntMat(M1, v).TheRes) || !(SolutionIntMat(M2, v).TheRes)) {
+        if (!SolutionIntMat(M1, v) || !SolutionIntMat(M2, v)) {
           std::cerr << "   M1=\n";
           WriteMatrix(std::cerr, M1);
           std::cerr << "   M2=\n";

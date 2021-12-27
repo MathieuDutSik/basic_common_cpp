@@ -1562,17 +1562,10 @@ MyMatrix<T> RowReduction(MyMatrix<T> const&eMatIn)
 }
 
 
-template<typename T>
-struct SolMatResult {
-  bool result;
-  MyVector<T> eSol;
-};
-
-
 // Given the equation Y = XA, we find one solution X if it exists.
 // 
 template<typename T>
-SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
   if (eMat.rows() == 0) {
@@ -1595,13 +1588,13 @@ SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eV
   MyVector<T> eProd=ProductVectorMatrix(eSol, eMat2);
   for (int iCol=0; iCol<nbCol; iCol++)
     if (eProd(iCol) != eVect(iCol))
-      return {false, {}};
+      return {};
   MyVector<T> eRetSol=ZeroVector<T>(nbRow);
   for (int iRank=0; iRank<eRank; iRank++) {
     int iRow=ListRowSelect[iRank];
     eRetSol(iRow)=eSol(iRank);
   }
-  return {true, std::move(eRetSol)};
+  return eRetSol;
 }
 
 template<typename T>
@@ -1618,23 +1611,25 @@ bool IsIntegerVector(MyVector<T> const& V)
 
 
 template<typename T>
-inline typename std::enable_if<is_ring_field<T>::value,SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+inline typename std::enable_if<is_ring_field<T>::value,std::optional<MyVector<T>>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   return SolutionMatKernel(eMat, eVect);
 }
 
 template<typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value),SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+inline typename std::enable_if<(not is_ring_field<T>::value),std::optional<MyVector<T>>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> eMatF=UniversalMatrixConversion<Tfield,T>(eMat);
   MyVector<Tfield> eVectF=UniversalVectorConversion<Tfield,T>(eVect);
-  SolMatResult<Tfield> Solu_F = SolutionMatKernel(eMatF, eVectF);
-  if (!Solu_F.result || !IsIntegerVector(Solu_F.eSol)) {
-    return {false, {}};
+  std::optional<MyVector<Tfield>> opt = SolutionMatKernel(eMatF, eVectF);
+  if (opt) {
+    const MyVector<Tfield>& V = *opt;
+    if (!IsIntegerVector(V))
+      return {};
+    return UniversalVectorConversion<T,Tfield>(V);
   }
-  MyVector<T> eSol = UniversalVectorConversion<T,Tfield>(Solu_F.eSol);
-  return {true, std::move(eSol)};
+  return {};
 }
 
 
@@ -1688,6 +1683,38 @@ MyMatrix<T> ColumnReduction(MyMatrix<T> const& eMatIn)
   SelectionRowCol<T> eSelect=TMat_SelectRowCol(eMatIn);
   return SelectColumn(eMatIn, eSelect.ListColSelect);
 }
+
+template<typename T>
+MyMatrix<T> ExtendToBasis(MyMatrix<T> const&M)
+{
+  int n_cols = M.cols();
+  int n_rows = M.rows();
+  std::vector<int> V = TMat_SelectRowCol(M).ListColSelect;
+  if (size_t(n_cols - n_rows) != V.size()) {
+    std::cerr << "The original matrix M does not appear to be linearly independent\n";
+    throw TerminalException{1};
+  }
+  MyMatrix<T> Mret(n_cols, n_cols);
+  for (int i_row=0; i_row<n_rows; i_row++)
+    Mret.row(i_row) = M.row(i_row);
+  std::vector<uint8_t> f(n_cols,0);
+  for (auto & val : V)
+    f[val] = 1;
+  size_t pos = n_rows;
+  for (int i_col=0; i_col<n_cols; i_col++) {
+    if (f[i_col] == 0) {
+      for (int j_col=0; j_col<n_cols; j_col++) {
+        if (i_col == j_col)
+          Mret(pos,j_col) = 1;
+        else
+          Mret(pos,j_col) = 0;
+      }
+      pos++;
+    }
+  }
+  return Mret;
+}
+
 
 
 
