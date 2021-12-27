@@ -1570,9 +1570,9 @@ std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T
   static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
   if (eMat.rows() == 0) {
     if (!IsZeroVector(eVect))
-      return {false, {}};
+      return {};
     MyVector<T> eSol(0);
-    return {true, std::move(eSol)};
+    return eSol;
   }
   int nbRow=eMat.rows();
   int nbCol=eMat.cols();
