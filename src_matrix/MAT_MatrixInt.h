@@ -342,7 +342,40 @@ bool IsVectorPrimitive(MyVector<T> const& TheV)
 
 
 
-
+template<typename T>
+void CheckGCD_information(GCD_int<T> const& gi, std::vector<T> const& ListX)
+{
+  auto print_inf=[&]() -> void {
+    WriteGCD_int(std::cerr, gi);
+    std::cerr << "ListX =";
+    for (auto & val : ListX)
+      std::cerr << " " << val;
+    std::cerr << "\n";
+  };
+  if (!IsIntegralMatrix(gi.Pmat)) {
+    std::cerr << "Matrix should be integral\n";
+    print_inf();
+  }
+  if (T_abs(DeterminantMat(gi.Pmat)) != 1) {
+    std::cerr << "The determinant should be 1\n";
+    print_inf();
+  }
+  size_t len = ListX.size();
+  MyVector<T> V(len);
+  for (size_t i=0; i<len; i++)
+    V(i) = ListX[i];
+  MyVector<T> eP = gi.Pmat.transpose() * V;
+  for (size_t i=0; i<len; i++) {
+    T val = 0;
+    if (i == 0) {
+      val = gi.gcd;
+    }
+    if (val != eP(i)) {
+      std::cerr << "We should have val=" << val << " but we have eP=" << eP(i) << "\n";
+      print_inf();
+    }
+  }
+}
 
 
 template<typename T>
@@ -612,63 +645,6 @@ MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const& M)
 
 
 
-template<typename T>
-void SwitchRow(MyMatrix<T> & eMat, int const& iRow, int const& jRow)
-{
-  int nbCol=eMat.cols();
-  if (iRow == jRow)
-    return;
-  for (int iCol=0; iCol<nbCol; iCol++) {
-    T eVal1=eMat(iRow, iCol);
-    T eVal2=eMat(jRow, iCol);
-    eMat(iRow, iCol)=eVal2;
-    eMat(jRow, iCol)=eVal1;
-  }
-}
-
-template<typename T>
-void INT_ClearColumn(MyMatrix<T> & eMat, size_t const& iCol, size_t const& MinAllowedRow, size_t & iRowFound)
-{
-  using Treal=typename underlying_totally_ordered_ring<T>::real_type;
-  size_t nbRow=eMat.rows();
-  while(true) {
-    Treal MinVal=-1;
-    size_t nbFound=0;
-    for (size_t iRow=MinAllowedRow; iRow<nbRow; iRow++) {
-      T eVal=eMat(iRow, iCol);
-      if (eVal != 0) {
-	Treal AbsEVal=T_NormGen(eVal);
-	if (nbFound == 0) {
-	  MinVal=AbsEVal;
-	  iRowFound=iRow;
-	} else {
-	  if (AbsEVal < MinVal) {
-	    MinVal=AbsEVal;
-	    iRowFound=iRow;
-	  }
-	}
-	nbFound++;
-      }
-    }
-#ifdef DEBUG
-    if (nbFound == 0) {
-      std::cerr << "The column is zero. No work possible\n";
-      throw TerminalException{1};
-    }
-#endif
-    T ThePivot=eMat(iRowFound, iCol);
-    for (size_t iRow=0; iRow<nbRow; iRow++)
-      if (iRow != iRowFound) {
-	T eVal=eMat(iRow, iCol);
-	T TheQ=QuoInt(eVal, ThePivot);
-        if (TheQ != 0)
-          eMat.row(iRow) -= TheQ*eMat.row(iRowFound);
-      }
-    if (nbFound == 1)
-      return;
-  }
-}
-
 
 template<typename T>
 bool IsColumnNonEmpty(MyMatrix<T> const& eMat, int const& minAllowed, int const& iCol)
@@ -691,6 +667,60 @@ template<typename T>
 MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in NullspaceIntTrMat");
+  std::cerr << "eMat=\n";
+  WriteMatrixNice(std::cerr, eMat);
+  auto INT_ClearColumn=[](MyMatrix<T> & eMat, size_t const& iCol, size_t const& MinAllowedRow, size_t & iRowFound) -> void {
+    using Treal=typename underlying_totally_ordered_ring<T>::real_type;
+    size_t nbRow=eMat.rows();
+    while(true) {
+      Treal MinVal=-1;
+      size_t nbFound=0;
+      for (size_t iRow=MinAllowedRow; iRow<nbRow; iRow++) {
+        T eVal=eMat(iRow, iCol);
+        if (eVal != 0) {
+          Treal AbsEVal=T_NormGen(eVal);
+          if (nbFound == 0) {
+            MinVal=AbsEVal;
+            iRowFound=iRow;
+          } else {
+            if (AbsEVal < MinVal) {
+              MinVal=AbsEVal;
+              iRowFound=iRow;
+            }
+          }
+          nbFound++;
+        }
+      }
+#ifdef DEBUG
+      if (nbFound == 0) {
+        std::cerr << "The column is zero. No work possible\n";
+        throw TerminalException{1};
+      }
+#endif
+      T ThePivot=eMat(iRowFound, iCol);
+      for (size_t iRow=0; iRow<nbRow; iRow++)
+        if (iRow != iRowFound) {
+          T eVal=eMat(iRow, iCol);
+          T TheQ=QuoInt(eVal, ThePivot);
+          //          std::cerr << "eVal=" << eVal << " ThePivot=" << ThePivot << " TheQ=" << TheQ << "\n";
+          if (TheQ != 0)
+            eMat.row(iRow) -= TheQ*eMat.row(iRowFound);
+        }
+      if (nbFound == 1)
+        return;
+    }
+  };
+  auto SwitchRow=[](MyMatrix<T> & eMat, int const& iRow, int const& jRow) -> void {
+    int nbCol=eMat.cols();
+    if (iRow == jRow)
+      return;
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      T eVal1=eMat(iRow, iCol);
+      T eVal2=eMat(jRow, iCol);
+      eMat(iRow, iCol)=eVal2;
+      eMat(jRow, iCol)=eVal1;
+    }
+  };
   MyMatrix<T> eMatW=eMat;
   size_t nbCol=eMat.cols();
   std::vector<size_t> ListIndex;
@@ -706,7 +736,10 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     } else {
       ListNonIndex.push_back(iCol);
     }
+  std::cerr << "eMatW=\n";
+  WriteMatrixNice(std::cerr, eMatW);
   size_t dimSpace=ListNonIndex.size();
+  std::cerr << "dimSpace=" << dimSpace << "\n";
   std::vector<std::vector<T>> TheBasis;
   for (size_t i=0; i<dimSpace; i++) {
     std::vector<T> eVect;
@@ -745,6 +778,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       ListX.push_back(eSum);
     }
     GCD_int<T> eGCD=ComputeGCD_information(ListX);
+    CheckGCD_information(eGCD, ListX);
     std::vector<std::vector<T>> NewBasis;
     for (size_t iVect=0; iVect<dimSpace; iVect++) {
       std::vector<T> eVectNew(sizRelIndex+1,0);

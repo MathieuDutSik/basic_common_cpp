@@ -364,7 +364,7 @@ std::vector<T> ReadStdVector(std::istream &is)
 
 
 template<typename T>
-void WriteMatrix(std::ostream &os, MyMatrix<T> const&TheMat)
+void WriteMatrix(std::ostream &os, MyMatrix<T> const& TheMat)
 {
   long nbRow=TheMat.rows();
   long nbCol=TheMat.cols();
@@ -376,6 +376,47 @@ void WriteMatrix(std::ostream &os, MyMatrix<T> const&TheMat)
     os << "\n";
   }
 }
+
+template<typename T>
+void WriteMatrixNice(std::ostream &os, MyMatrix<T> const& M)
+{
+  long nbRow=M.rows();
+  long nbCol=M.cols();
+  //  TerminalEnding();
+  os << nbRow << " " << nbCol << "\n";
+  std::vector<std::vector<std::string>> LLStr;
+  for (long iRow=0; iRow<nbRow; iRow++) {
+    std::vector<std::string> LStr;
+    for (long iCol=0; iCol<nbCol; iCol++) {
+      std::stringstream s;
+      s << M(iRow, iCol);
+      std::string converted(s.str());
+      LStr.push_back(converted);
+    }
+    LLStr.push_back(LStr);
+  }
+  std::vector<size_t> l_max_nchar(nbCol);
+  for (long iCol=0; iCol<nbCol; iCol++) {
+    size_t max_nchar = 0;
+    for (long iRow=0; iRow<nbRow; iRow++)
+      max_nchar = std::max(max_nchar, LLStr[iRow][iCol].size());
+    l_max_nchar[iCol] = max_nchar;
+  }
+  for (long iRow=0; iRow<nbRow; iRow++) {
+    for (long iCol=0; iCol<nbCol; iCol++) {
+      std::string str = LLStr[iRow][iCol];
+      size_t n_sp = l_max_nchar[iCol] - str.size();
+      os << " " << str;
+      for (size_t i=0; i<n_sp; i++)
+        os << " ";
+    }
+    os << "\n";
+  }
+}
+
+
+
+
 
 template<typename T>
 void WriteMatrixMatlab(std::ostream &os, MyMatrix<T> const&TheMat)

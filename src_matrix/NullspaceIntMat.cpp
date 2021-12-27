@@ -11,13 +11,18 @@ int main(int argc, char *argv[])
       fprintf(stderr, "NullspaceIntMat [inputMat]\n");
       return -1;
     }
-    using Tint=mpz_class;
+    //using T=mpz_class;
+    using T=mpq_class;
     // reading the matrix
     std::ifstream INmat(argv[1]);
-    MyMatrix<Tint> TheMat=ReadMatrix<Tint>(INmat);
+    MyMatrix<T> TheMat=ReadMatrix<T>(INmat);
     // computing the kernel
-    MyMatrix<Tint> KerInt = NullspaceIntMat(TheMat);
-    //    MyMatrix<T> TheKer=NullspaceMat(TheMat);
+    MyMatrix<T> KerInt = NullspaceIntMat(TheMat);
+    MyMatrix<T> TheKer = NullspaceMat(TheMat);
+    if (KerInt.cols() != TheKer.cols() || KerInt.rows() != TheKer.rows()) {
+      std::cerr << "Difference in dimension between NullspaceIntMat and NullspaceMat\n";
+      throw TerminalException{1};
+    }
     //
     auto Prt=[&](std::ostream & os) -> void {
       os << "return ";
