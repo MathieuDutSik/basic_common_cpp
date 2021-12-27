@@ -135,6 +135,7 @@ void WriteGCD_int(std::ostream & os, GCD_int<T> const& eGCD)
 template<typename T>
 inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
+  //  std::cerr << "m=" << m << " n=" << n << "\n";
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputePairGcd");
   T f, g, h, fm, gm, hm, q;
   if (n == 0 && m == 0) {
@@ -154,6 +155,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   }
   while (g != 0) {
     q = QuoInt( f, g );
+    //    std::cerr << "f=" << f << " g=" << g << " q=" << q << "\n";
     h = g;          hm = gm;
     g = f - q * g;  gm = fm - q * gm;
     f = h;          fm = hm;
@@ -166,11 +168,14 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
     eCoeff1=fm;
     eCoeff2=(f - fm * m) / n;
   }
+  //  std::cerr << "eCoeff1=" << eCoeff1 << " eCoeff2=" << eCoeff2 << " f=" << f << "\n";
   MyMatrix<T> Pmat(2,2);
   Pmat(0,0) = eCoeff1;
   Pmat(1,0) = eCoeff2;
   Pmat(0,1) = -n/f;
   Pmat(1,1) = m/f;
+  //  std::cerr << "Pmat=\n";
+  //  WriteMatrix(std::cerr, Pmat);
 #ifdef DEBUG
   T diff1 = f - Pmat(0,0) * m - Pmat(1,0) * n;
   T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
@@ -667,8 +672,8 @@ template<typename T>
 MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in NullspaceIntTrMat");
-  std::cerr << "eMat=\n";
-  WriteMatrixNice(std::cerr, eMat);
+  //  std::cerr << "eMat=\n";
+  //  WriteMatrixNice(std::cerr, eMat);
   auto INT_ClearColumn=[](MyMatrix<T> & eMat, size_t const& iCol, size_t const& MinAllowedRow, size_t & iRowFound) -> void {
     using Treal=typename underlying_totally_ordered_ring<T>::real_type;
     size_t nbRow=eMat.rows();
@@ -736,10 +741,10 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     } else {
       ListNonIndex.push_back(iCol);
     }
-  std::cerr << "eMatW=\n";
-  WriteMatrixNice(std::cerr, eMatW);
+  //  std::cerr << "eMatW=\n";
+  //  WriteMatrixNice(std::cerr, eMatW);
   size_t dimSpace=ListNonIndex.size();
-  std::cerr << "dimSpace=" << dimSpace << "\n";
+  //  std::cerr << "dimSpace=" << dimSpace << "\n";
   std::vector<std::vector<T>> TheBasis;
   for (size_t i=0; i<dimSpace; i++) {
     std::vector<T> eVect;

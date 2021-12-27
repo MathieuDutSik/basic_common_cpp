@@ -396,7 +396,7 @@ inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
     if (res_z >= b_num_pos)
       res_z -= b_num_pos;
   }
-  mpq_class res_q=res_z;
+  mpq_class res_q=mpq_class(res_z) / mpq_class(eLCM);
   return res_q;
 }
 
