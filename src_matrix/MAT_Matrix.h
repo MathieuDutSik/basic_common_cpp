@@ -1690,7 +1690,7 @@ MyMatrix<T> ExtendToBasis(MyMatrix<T> const&M)
   int n_cols = M.cols();
   int n_rows = M.rows();
   std::vector<int> V = TMat_SelectRowCol(M).ListColSelect;
-  if (size_t(n_cols - n_rows) != V.size()) {
+  if (size_t(n_rows) != V.size()) {
     std::cerr << "M=\n";
     WriteMatrix(std::cerr, M);
     std::cerr << "rank=" << RankMat(M) << " n_cols=" << n_cols << " n_row=" << n_rows << "\n";
