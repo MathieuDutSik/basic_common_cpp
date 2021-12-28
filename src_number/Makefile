@@ -1,6 +1,7 @@
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
-PROGRAM		= Factorize
+#PROGRAM		= Factorize
+PROGRAM		= PracticalInf
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

@@ -201,6 +201,10 @@ struct underlying_totally_ordered_ring<long> {
   typedef long real_type;
 };
 
+
+
+
+
 /*
 template<>
 struct underlying_totally_ordered_ring<int64_t> {
@@ -865,6 +869,34 @@ std::optional<T> UniversalSquareRoot(T const& val)
     return {};
   return ret;
 }
+
+
+
+inline void set_to_infinity(mpz_class & x)
+{
+  x = std::numeric_limits<size_t>::max();
+}
+
+inline void set_to_infinity(mpq_class & x)
+{
+  x = std::numeric_limits<size_t>::max();
+}
+
+template<typename T>
+inline typename std::enable_if<std::is_integral<T>::value,void>::type set_to_infinity(T & x)
+{
+  x = std::numeric_limits<T>::max();
+}
+
+template<typename T>
+T practical_infinity()
+{
+  T ret;
+  set_to_infinity(ret);
+  return ret;
+}
+
+
 
 
 
