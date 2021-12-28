@@ -256,23 +256,20 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
     for (int iRow=0; iRow<nbRow; iRow++)
       eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
   T eLCM = eLCM_ring;
-  MyMatrix<T> Mret = eLCM * M;
-  return {eLCM, std::move(Mret)};
+  MyMatrix<T> M1 = eLCM * M;
+  T eGCD = M(0,0);
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
+      eGCD = GcdPair(eGCD, M1(iRow, iCol));
+  MyMatrix<T> M2 = M1 / eGCD;
+  T TheMult = eLCM / eGCD;
+  return {TheMult, std::move(M2)};
 }
 
 template<typename T>
 MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const& M)
 {
-  int nbRow=M.rows();
-  int nbCol=M.cols();
-  using Tring = typename underlying_ring<T>::ring_type;
-  Tring eLCM_ring = 1;
-  // iRow is inner loop because of cache locality
-  for (int iCol=0; iCol<nbCol; iCol++)
-    for (int iRow=0; iRow<nbRow; iRow++)
-      eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
-  T eLCM = eLCM_ring;
-  return eLCM * M;
+  return RemoveFractionMatrixPlusCoeff(M).TheMat;
 }
 
 template<typename T>
