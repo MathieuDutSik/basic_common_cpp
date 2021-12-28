@@ -290,8 +290,13 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const& V)
   T eLCM=1;
   for (int i=0; i<n; i++)
     eLCM = LCMpair(eLCM, GetDenominator(V(i)));
-  MyVector<T> Vret = eLCM * V;
-  return {eLCM, std::move(Vret)};
+  MyVector<T> V1 = eLCM * V;
+  T eGCD = V1(1);
+  for (int i=0; i<n; i++)
+    eGCD = GcdPair(eGCD, V1(i));
+  MyVector<T> V2 = V1 / eGCD;
+  T TheMult = eLCM / eGCD;
+  return {TheMult, std::move(V2)};
 }
 
 template<typename T>
