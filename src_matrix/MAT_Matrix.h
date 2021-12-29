@@ -2709,6 +2709,27 @@ public:
 };
 
 
+/*
+  G has to be non-degenerate so that we can define the projector.
+  --- "G"         is a (n x n) matrix.
+  --- "Basis"     is a (p x n) basis of a matrix.
+  --- "Basis * G" is a (p x n) matrix representing the (x,u_i) scalar products
+  --- "Basis * G * Basis^T" is a matrix of the scalar products
+  --- The final matrix is likely to be
+      Basis^T (Basis * G * Basis^T) ^ (-1)  Basis G
+  If p = n the formula simplifies to Identitity so the formula ought to be correct.
+ */
+template<typename T>
+MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const& G, MyMatrix<T> const& Basis)
+{
+  MyMatrix<T> Gred = Basis * G * Basis.transpose();
+  if (DetrminantMat(Gred) == 0) {
+    std::cerr << "The matrix Gred should be invertible\n";
+    throw TerminalException{1};
+  }
+  MyMatrix<T> RetMat = Basis.transpose() * Inverse(Basis) * Basis * G;
+}
+
 
 
 #endif
