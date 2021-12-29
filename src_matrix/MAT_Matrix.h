@@ -557,6 +557,25 @@ void WriteVectorGAP(std::ostream &os, MyVector<T> const & TheVec)
 }
 
 
+template<typename T>
+std::string StringVector(MyVector<T> const & TheVec)
+{
+  std::ostringstream os;
+  WriteVector(os, TheVec);
+  return os.str();
+}
+
+
+template<typename T>
+std::string StringVectorGAP(MyVector<T> const & TheVec)
+{
+  std::ostringstream os;
+  WriteVectorGAP(os, TheVec);
+  return os.str();
+}
+
+
+
 
 
 template<typename T>
