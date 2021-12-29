@@ -785,7 +785,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       ListX.push_back(eSum);
     }
     GCD_int<T> eGCD=ComputeGCD_information(ListX);
-    CheckGCD_information(eGCD, ListX);
+    //    CheckGCD_information(eGCD, ListX);
     std::vector<std::vector<T>> NewBasis;
     for (size_t iVect=0; iVect<dimSpace; iVect++) {
       std::vector<T> eVectNew(sizRelIndex+1,0);
