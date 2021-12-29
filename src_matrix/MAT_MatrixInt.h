@@ -6,7 +6,7 @@
 #include "NumberTheory.h"
 
 #undef TRACK_MAXIMUM_SIZE_COEFF
-#undef DEBUG
+#undef DEBUG_MATRIX_INT
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction ring) of
@@ -78,7 +78,7 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 	  }
     if (IsFirst)
       return 0;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     if (MinPivot == 0) {
       std::cerr << "Clear error in the code of IndexLattice\n";
       throw TerminalException{1};
@@ -176,7 +176,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   Pmat(1,1) = m/f;
   //  std::cerr << "Pmat=\n";
   //  WriteMatrix(std::cerr, Pmat);
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   T diff1 = f - Pmat(0,0) * m - Pmat(1,0) * n;
   T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -204,7 +204,7 @@ inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputeP
   Pmat(1,0) = t;
   Pmat(0,1) = -n / eGCD;
   Pmat(1,1) =  m / eGCD;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   T diff1 = eGCD - Pmat(0,0) * m - Pmat(1,0) * n;
   T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -698,7 +698,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
           nbFound++;
         }
       }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (nbFound == 0) {
         std::cerr << "The column is zero. No work possible\n";
         throw TerminalException{1};
@@ -815,7 +815,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       idx++;
     }
   }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   size_t nbRow=eMat.rows();
   for (size_t iVect=0; iVect<dimSpace; iVect++)
     for (size_t iRow=0; iRow<nbRow; iRow++) {
@@ -874,14 +874,14 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 	    }
 	}
       }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     if (idxSelect == -1) {
       std::cerr << "Inconsistency in computation of value\n";
       throw TerminalException{1};
     }
 #endif
     if (nbDiffZero == 1) {
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (AbsVal != 1) {
 	std::cerr << "Wrong value for AbsVal\n";
 	throw TerminalException{1};
@@ -925,7 +925,7 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
     T eVal=TheVcopy(i2) + eCoeff*TheVcopy(i1);
     TheVcopy(i2)=eVal;
   }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   if (!TestEquality(TheVcopy, TheV)) {
     std::cerr << "TheVcopy =";
     WriteVector(std::cerr, TheVcopy);
@@ -1157,7 +1157,7 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T>
 	}
       if (nbDiff == 1 || nbDiff == 0)
 	break;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (MinValue == 0) {
 	std::cerr << "MinValue should not be zero\n";
 	throw TerminalException{1};
@@ -1175,7 +1175,7 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T>
 	}
     }
     if (nbDiff == 1) {
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
 	throw TerminalException{1};
@@ -1217,7 +1217,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
   int nbDiff;
   int nbVect=TheMat.rows();
   int nbCol=TheMat.cols();
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   if (nbVect == 0) {
     std::cerr << "Need to write the code here\n";
     throw TerminalException{1};
@@ -1253,7 +1253,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
 	}
       if (nbDiff == 1 || nbDiff == 0)
 	break;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (MinValue == 0) {
 	std::cerr << "MinValue should not be zero\n";
 	throw TerminalException{1};
@@ -1273,7 +1273,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
     int eVal;
     if (nbDiff == 1) {
       eVal=iVectFound;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
 	throw TerminalException{1};
@@ -1486,7 +1486,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     for (size_t iCol=0; iCol<nbCol; iCol++)
       if (eCol == miss_val && EXTwork(iVect, iCol) != 0 && ColumnStatus[iCol] == 1)
 	eCol = iCol;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     std::cerr << "eCol=" << eCol << "\n";
     if (eCol == miss_val) {
       std::cerr << "This should not be selected\n";
@@ -1712,7 +1712,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     //    std::cerr << "After TheRedMat construction\n";
     MyMatrix<T> NSP=NullspaceIntMat(TheRedMat);
     //    std::cerr << "We have NSP\n";
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     if (NSP.rows() != 1) {
       std::cerr << "|NSP|=" << NSP.rows() << " when it should be 1\n";
       std::cerr << "TheRedMat:\n";
@@ -1823,7 +1823,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     //    std::cerr << "After fInsert\n";
   }
 
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   int DimSpace=TheBasis.rows();
   for (int iBas=0; iBas<DimSpace; iBas++) {
     MyVector<T> eLine=GetMatrixRow(TheBasis, iBas);
@@ -1886,6 +1886,45 @@ MyMatrix<T> IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
   MyMatrix<T> NSPred = SelectColumn(NSP, L);
   return NSPred * M1;
 }
+
+
+template<typename T>
+MyMatrix<T> IntersectionLattice_VectorSpace(MyMatrix<T> const& Latt, MyMatrix<T> const& Space)
+{
+  int n = Latt.rows();
+  int n_spa = Space.rows();
+  MyMatrix<T> eBasis = ExtendToBasis(Space);
+  MyMatrix<T> Latt2 = Latt * Inverse(eBasis);
+  std::vector<int> V(n-n_spa);
+  for (int i=0; i<n-n_spa; i++)
+    V[i] = i + n_spa;
+  MyMatrix<T> Latt3 = SelectColumn(Latt2, V);
+  MyMatrix<T> NSP = NullspaceIntMat(Latt3);
+#ifdef DEBUG_MATRIX_INT
+  if (!IsIntegralMatrix(NSP)) {
+    std::cerr << "NSP should be integral\n";
+    throw TerminalException{1};
+  }
+#endif
+  MyMatrix<T> IntBasis = NSP * Latt;
+#ifdef DEBUG_MATRIX_INT
+  for (int i_s=0; i_s<n_spa; i_s++) {
+    MyVector<T> v = GetMatrixRow(IntBasis, i_s);
+    std::optional<MyVector<T>> opt1 = SolutionIntMat(Latt, v);
+    if (!opt1) {
+      std::cerr << "The vector should be expressed integrally in terms of the lattice\n";
+      throw TerminalException{1};
+    }
+    std::optional<MyVector<T>> opt2 = SolutionMat(Space, v);
+    if (!opt2) {
+      std::cerr << "The vector should be expressed integrally in terms of the spacen";
+      throw TerminalException{1};
+    }
+  }
+#endif
+  return IntBasis;
+}
+
 
 
 
