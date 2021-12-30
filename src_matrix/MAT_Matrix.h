@@ -1657,6 +1657,11 @@ std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T
   return eRetSol;
 }
 
+
+
+
+
+
 template<typename T>
 bool IsIntegerVector(MyVector<T> const& V)
 {
@@ -1692,7 +1697,23 @@ inline typename std::enable_if<(not is_ring_field<T>::value),std::optional<MyVec
   return {};
 }
 
-
+template<typename T>
+MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const& VF, MyMatrix<T> const& IVF)
+{
+  int n_vect = VF.rows();
+  int dim = IVF.rows();
+  MyMatrix<T> P(n_vect,dim);
+  for (int i=0; i<n_vect; i++) {
+    MyVector<T> eV = GetMatrixRow(VF,i);
+    std::optional<MyVector<T>> opt = SolutionMat(IVF, eV);
+    if (!opt) {
+      std::cerr << "VF : i=" << i << " not expressed in term of IVF\n";
+      throw TerminalException{1};
+    }
+    AssignMatrixRow(P, i, *opt);
+  }
+  return P;
+}
 
 
 
