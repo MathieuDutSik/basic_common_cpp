@@ -2728,6 +2728,7 @@ MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const& G, MyMatrix<T> const& Basis)
     throw TerminalException{1};
   }
   MyMatrix<T> RetMat = Basis.transpose() * Inverse(Basis) * Basis * G;
+  return RetMat;
 }
 
 
