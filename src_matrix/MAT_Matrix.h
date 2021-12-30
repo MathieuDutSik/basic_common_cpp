@@ -2727,7 +2727,9 @@ MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const& G, MyMatrix<T> const& Basis)
     std::cerr << "The matrix Gred should be invertible\n";
     throw TerminalException{1};
   }
-  MyMatrix<T> RetMat = Basis.transpose() * Inverse(Basis) * Basis * G;
+  std::cerr << "We have Gred\n";
+  MyMatrix<T> RetMat = Basis.transpose() * Inverse(Gred) * Basis * G;
+  std::cerr << "We have RetMat\n";
   return RetMat;
 }
 
