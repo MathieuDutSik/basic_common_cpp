@@ -6,6 +6,7 @@
 //
 
 #include "Temp_common.h"
+#include "Basic_file.h"
 #include "Basic_string.h"
 #include "hash_functions.h"
 
@@ -204,6 +205,11 @@ MyMatrix<T> ReadMatrix(std::istream &is)
 template<typename T>
 MyMatrix<T> ReadMatrixFile(std::string const& file_name)
 {
+  if (!IsExistingFile(file_name)) {
+    std::cerr << "Error in ReadMatrixFile\n";
+    std::cerr << "file_name=" << file_name << " does not appear to exist\n";
+    throw TerminalException{1};
+  }
   std::ifstream is(file_name);
   return ReadMatrix<T>(is);
 }
@@ -345,6 +351,11 @@ MyVector<T> ReadVector(std::istream &is)
 template<typename T>
 MyVector<T> ReadVectorFile(std::string const& file_name)
 {
+  if (!IsExistingFile(file_name)) {
+    std::cerr << "Error in ReadVectorFile\n";
+    std::cerr << "file_name=" << file_name << " does not appear to exist\n";
+    throw TerminalException{1};
+  }
   std::ifstream is(file_name);
   return ReadVector<T>(is);
 }
