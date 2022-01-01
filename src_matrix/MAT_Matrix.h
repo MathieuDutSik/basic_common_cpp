@@ -2752,6 +2752,12 @@ MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const& G, MyMatrix<T> const& Basis)
 {
   MyMatrix<T> Gred = Basis * G * Basis.transpose();
   if (DeterminantMat(Gred) == 0) {
+    std::cerr << "G=\n";
+    WriteMatrix(std::cerr, G);
+    std::cerr << "Basis=\n";
+    WriteMatrix(std::cerr, Basis);
+    std::cerr << "Gred=\n";
+    WriteMatrix(std::cerr, Gred);
     std::cerr << "The matrix Gred should be invertible\n";
     throw TerminalException{1};
   }
