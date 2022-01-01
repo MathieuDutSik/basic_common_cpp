@@ -208,6 +208,13 @@ MyMatrix<T> ReadMatrixFile(std::string const& file_name)
   return ReadMatrix<T>(is);
 }
 
+template<typename T>
+MyVector<T> ReadVectorFile(std::string const& file_name)
+{
+  std::ifstream is(file_name);
+  return ReadVector<T>(is);
+}
+
 
 template<typename T>
 std::pair<bool, T> ReadMatrixInfo(std::istream &is)
