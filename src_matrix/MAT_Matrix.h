@@ -568,8 +568,7 @@ template<typename T>
 MyVector<T> ZeroVector(int const& nbRow)
 {
   MyVector<T> retVect(nbRow);
-  T eZero;
-  eZero=0;
+  T eZero = 0;
   for (int iRow=0; iRow<nbRow; iRow++)
     retVect(iRow)=eZero;
   return retVect;
@@ -581,11 +580,9 @@ MyVector<T> ZeroVector(int const& nbRow)
 template<typename T>
 void TVec_ZeroAssignation(MyVector<T> &TheVect)
 {
-  int i;
-  T eZero;
-  eZero=0;
-  for (i=0; i<TheVect.n; i++)
-    TheVect(i)=eZero;
+  T eZero = 0;
+  for (int i=0; i<TheVect.size(); i++)
+    TheVect(i) = eZero;
 }
 
 
@@ -612,7 +609,7 @@ MyMatrix<T> TransposedMat(MyMatrix<T> const&TheMat)
   MyMatrix<T> TheTrans(nbCol, nbRow);
   for (int iCol=0; iCol<nbCol; iCol++)
     for (int iRow=0; iRow<nbRow; iRow++)
-      TheTrans(iCol, iRow)=TheMat(iRow, iCol);
+      TheTrans(iCol, iRow) = TheMat(iRow, iCol);
   return TheTrans;
 }
 
@@ -632,7 +629,7 @@ MyVector<T> ProductVectorMatrix(MyVector<T> const& X, MyMatrix<T> const& M)
     T sum=0;
     for (int iRow=0; iRow<nbRow; iRow++)
       sum += M(iRow,iCol) * X(iRow);
-    Vret(iCol)=sum;
+    Vret(iCol) = sum;
   }
   return Vret;
 }
@@ -697,7 +694,7 @@ void AssignMatrixRow(MyMatrix<T> &eMat, int const& iRow, MyVector<T> const& eVec
 {
   int nbCol=eMat.cols();
   for (int iCol=0; iCol<nbCol; iCol++)
-    eMat(iRow, iCol)=eVect(iCol);
+    eMat(iRow, iCol) = eVect(iCol);
 }
 
 
@@ -706,7 +703,7 @@ void AssignMatrixCol(MyMatrix<T> &eMat, int const& iCol, MyVector<T> const& eVec
 {
   int nbRow=eMat.rows();
   for (int iRow=0; iRow<nbRow; iRow++)
-    eMat(iRow, iCol)=eVect(iRow);
+    eMat(iRow, iCol) = eVect(iRow);
 }
 
 
@@ -2293,9 +2290,14 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const& ListVect)
   }
   int dim=ListVect[0].size();
   MyMatrix<T> M(nbVect,dim);
-  for (int iVect=0; iVect<nbVect; iVect++)
+  for (int iVect=0; iVect<nbVect; iVect++) {
+    if (int(ListVect[iVect].size()) != dim) {
+      std::cerr << "Vector lengths are not homogeneous\n";
+      throw TerminalException{1};
+    }
     for (int i=0; i<dim; i++)
       M(iVect,i) = ListVect[iVect](i);
+  }
   return M;
 }
 
@@ -2358,7 +2360,7 @@ T EvaluationQuadForm(MyMatrix<T> const& eMat, MyVector<Tint> const& eVect)
 // The matrix is supposed to describe a vector space. We want
 // to canonicalize it in order to get a better representation
 // of the space.
-// 
+//
 template<typename T>
 MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const& inputMat)
 {
