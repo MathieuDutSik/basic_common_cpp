@@ -37,7 +37,21 @@ std::vector<int> FaceTo01vector(Face const& eSet)
 
 
 
+std::string StringFace(Face const& f)
+{
+  std::string str_ret;
+  size_t len = f.size();
+  for (size_t i=0; i<len; i++)
+    str_ret += std::to_string(int(f[i]));
+  return str_ret;
+}
 
+
+std::string SignatureFace(Face const& f)
+{
+  std::string str_ret = std::to_string(f.count()) + "/" + std::to_string(f.size());
+  return str_ret;
+}
 
 
 void WriteFace(std::ostream & os, Face const& eList)

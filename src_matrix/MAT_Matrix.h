@@ -6,6 +6,7 @@
 //
 
 #include "Temp_common.h"
+#include "Basic_file.h"
 #include "Basic_string.h"
 #include "hash_functions.h"
 
@@ -21,7 +22,7 @@ namespace boost::serialization {
   //
 
   template<class Archive, typename T>
-  inline void serialize(Archive & ar, MyMatrix<T> & matrix, const unsigned int version)
+  inline void serialize(Archive & ar, MyMatrix<T> & matrix, [[maybe_unused]] const unsigned int version)
   {
     int rows = matrix.rows();
     int cols = matrix.cols();
@@ -39,7 +40,7 @@ namespace boost::serialization {
   //
 
   template<class Archive, typename T>
-  inline void load(Archive & ar, MySparseMatrix<T> & val, const unsigned int version)
+  inline void load(Archive & ar, MySparseMatrix<T> & val, [[maybe_unused]] const unsigned int version)
   {
     //    std::cerr << "load(MySparseMatrix<T>), step 1\n";
     int nbRow, nbCol, nnz;
@@ -63,7 +64,7 @@ namespace boost::serialization {
   }
 
   template<class Archive, typename T>
-  inline void save(Archive & ar, MySparseMatrix<T> const& val, const unsigned int version)
+  inline void save(Archive & ar, MySparseMatrix<T> const& val, [[maybe_unused]] const unsigned int version)
   {
     //    std::cerr << "save(MySparseMatrix<T>), step 1\n";
     int nbRow=val.rows();
@@ -183,7 +184,6 @@ MyMatrix<T> ReadMatrix(std::istream &is)
   }
   T eVal;
   int nbRow, nbCol;
-  int iRow, iCol;
   is >> nbRow >> nbCol;
   //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   if (nbRow < 0 || nbCol < 0) {
@@ -193,13 +193,27 @@ MyMatrix<T> ReadMatrix(std::istream &is)
   }
   //std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   MyMatrix<T> TheMat(nbRow, nbCol);
-  for (iRow=0; iRow<nbRow; iRow++)
-    for (iCol=0; iCol<nbCol; iCol++) {
+  for (int iRow=0; iRow<nbRow; iRow++)
+    for (int iCol=0; iCol<nbCol; iCol++) {
       is >> eVal;
       TheMat(iRow, iCol)=eVal;
     }
   return TheMat;
 }
+
+
+template<typename T>
+MyMatrix<T> ReadMatrixFile(std::string const& file_name)
+{
+  if (!IsExistingFile(file_name)) {
+    std::cerr << "Error in ReadMatrixFile\n";
+    std::cerr << "file_name=" << file_name << " does not appear to exist\n";
+    throw TerminalException{1};
+  }
+  std::ifstream is(file_name);
+  return ReadMatrix<T>(is);
+}
+
 
 template<typename T>
 std::pair<bool, T> ReadMatrixInfo(std::istream &is)
@@ -335,6 +349,18 @@ MyVector<T> ReadVector(std::istream &is)
 }
 
 template<typename T>
+MyVector<T> ReadVectorFile(std::string const& file_name)
+{
+  if (!IsExistingFile(file_name)) {
+    std::cerr << "Error in ReadVectorFile\n";
+    std::cerr << "file_name=" << file_name << " does not appear to exist\n";
+    throw TerminalException{1};
+  }
+  std::ifstream is(file_name);
+  return ReadVector<T>(is);
+}
+
+template<typename T>
 std::vector<T> ReadStdVector(std::istream &is)
 {
   if (!is.good()) {
@@ -356,7 +382,7 @@ std::vector<T> ReadStdVector(std::istream &is)
 
 
 template<typename T>
-void WriteMatrix(std::ostream &os, MyMatrix<T> const&TheMat)
+void WriteMatrix(std::ostream &os, MyMatrix<T> const& TheMat)
 {
   long nbRow=TheMat.rows();
   long nbCol=TheMat.cols();
@@ -368,6 +394,47 @@ void WriteMatrix(std::ostream &os, MyMatrix<T> const&TheMat)
     os << "\n";
   }
 }
+
+template<typename T>
+void WriteMatrixNice(std::ostream &os, MyMatrix<T> const& M)
+{
+  long nbRow=M.rows();
+  long nbCol=M.cols();
+  //  TerminalEnding();
+  os << nbRow << " " << nbCol << "\n";
+  std::vector<std::vector<std::string>> LLStr;
+  for (long iRow=0; iRow<nbRow; iRow++) {
+    std::vector<std::string> LStr;
+    for (long iCol=0; iCol<nbCol; iCol++) {
+      std::stringstream s;
+      s << M(iRow, iCol);
+      std::string converted(s.str());
+      LStr.push_back(converted);
+    }
+    LLStr.push_back(LStr);
+  }
+  std::vector<size_t> l_max_nchar(nbCol);
+  for (long iCol=0; iCol<nbCol; iCol++) {
+    size_t max_nchar = 0;
+    for (long iRow=0; iRow<nbRow; iRow++)
+      max_nchar = std::max(max_nchar, LLStr[iRow][iCol].size());
+    l_max_nchar[iCol] = max_nchar;
+  }
+  for (long iRow=0; iRow<nbRow; iRow++) {
+    for (long iCol=0; iCol<nbCol; iCol++) {
+      std::string str = LLStr[iRow][iCol];
+      size_t n_sp = l_max_nchar[iCol] - str.size();
+      os << " " << str;
+      for (size_t i=0; i<n_sp; i++)
+        os << " ";
+    }
+    os << "\n";
+  }
+}
+
+
+
+
 
 template<typename T>
 void WriteMatrixMatlab(std::ostream &os, MyMatrix<T> const&TheMat)
@@ -451,6 +518,20 @@ void WriteMatrixGAP(std::ostream &os, MyMatrix<T> const&TheMat)
 
 
 template<typename T>
+void WriteVectorMatrixGAP(std::ostream &os, std::vector<MyMatrix<T>> const& l_mat)
+{
+  os << "[";
+  for (size_t i=0; i<l_mat.size(); i++) {
+    if (i>0)
+      os << ",";
+    WriteMatrixGAP(os, l_mat[i]);
+  }
+  os << "]";
+}
+
+
+
+template<typename T>
 void WriteMatrixGAPfile(std::string const& eFile, MyMatrix<T> const&TheMat)
 {
   std::ofstream os(eFile);
@@ -492,6 +573,25 @@ void WriteVectorGAP(std::ostream &os, MyVector<T> const & TheVec)
   }
   os << "]";
 }
+
+
+template<typename T>
+std::string StringVector(MyVector<T> const & TheVec)
+{
+  std::ostringstream os;
+  WriteVector(os, TheVec);
+  return os.str();
+}
+
+
+template<typename T>
+std::string StringVectorGAP(MyVector<T> const & TheVec)
+{
+  std::ostringstream os;
+  WriteVectorGAP(os, TheVec);
+  return os.str();
+}
+
 
 
 
@@ -797,13 +897,6 @@ T DivideVector(MyVector<T> const& V1, MyVector<T> const& V2)
 }
 
 
-
-template<typename T>
-struct Inverse_exception {
-  std::string errmsg;
-  T pivot;
-};
-
 template<typename T>
 void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 {
@@ -841,10 +934,8 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
       }
 #ifdef DEBUG
     if (prov1 == 0) {
-      Inverse_exception<T> eExcept;
-      eExcept.errmsg="Error in matrix inversion";
-      eExcept.pivot=0;
-      throw eExcept;
+      std::cerr << "Error during the computation of the matrix inverse\n";
+      throw TerminalException{1};
     }
 #endif
     for (iRowB=0; iRowB<nbRow; iRowB++)
@@ -1546,24 +1637,17 @@ MyMatrix<T> RowReduction(MyMatrix<T> const&eMatIn)
 }
 
 
-template<typename T>
-struct SolMatResult {
-  bool result;
-  MyVector<T> eSol;
-};
-
-
 // Given the equation Y = XA, we find one solution X if it exists.
 // 
 template<typename T>
-SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   static_assert(is_ring_field<T>::value, "Requires T to be a field in SolutionMat");
   if (eMat.rows() == 0) {
     if (!IsZeroVector(eVect))
-      return {false, {}};
+      return {};
     MyVector<T> eSol(0);
-    return {true, std::move(eSol)};
+    return eSol;
   }
   int nbRow=eMat.rows();
   int nbCol=eMat.cols();
@@ -1579,14 +1663,19 @@ SolMatResult<T> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eV
   MyVector<T> eProd=ProductVectorMatrix(eSol, eMat2);
   for (int iCol=0; iCol<nbCol; iCol++)
     if (eProd(iCol) != eVect(iCol))
-      return {false, {}};
+      return {};
   MyVector<T> eRetSol=ZeroVector<T>(nbRow);
   for (int iRank=0; iRank<eRank; iRank++) {
     int iRow=ListRowSelect[iRank];
     eRetSol(iRow)=eSol(iRank);
   }
-  return {true, std::move(eRetSol)};
+  return eRetSol;
 }
+
+
+
+
+
 
 template<typename T>
 bool IsIntegerVector(MyVector<T> const& V)
@@ -1602,26 +1691,44 @@ bool IsIntegerVector(MyVector<T> const& V)
 
 
 template<typename T>
-inline typename std::enable_if<is_ring_field<T>::value,SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+inline typename std::enable_if<is_ring_field<T>::value,std::optional<MyVector<T>>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   return SolutionMatKernel(eMat, eVect);
 }
 
 template<typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value),SolMatResult<T>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
+inline typename std::enable_if<(not is_ring_field<T>::value),std::optional<MyVector<T>>>::type SolutionMat(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
   using Tfield=typename overlying_field<T>::field_type;
   MyMatrix<Tfield> eMatF=UniversalMatrixConversion<Tfield,T>(eMat);
   MyVector<Tfield> eVectF=UniversalVectorConversion<Tfield,T>(eVect);
-  SolMatResult<Tfield> Solu_F = SolutionMatKernel(eMatF, eVectF);
-  if (!Solu_F.result || !IsIntegerVector(Solu_F.eSol)) {
-    return {false, {}};
+  std::optional<MyVector<Tfield>> opt = SolutionMatKernel(eMatF, eVectF);
+  if (opt) {
+    const MyVector<Tfield>& V = *opt;
+    if (!IsIntegerVector(V))
+      return {};
+    return UniversalVectorConversion<T,Tfield>(V);
   }
-  MyVector<T> eSol = UniversalVectorConversion<T,Tfield>(Solu_F.eSol);
-  return {true, std::move(eSol)};
+  return {};
 }
 
-
+template<typename T>
+MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const& VF, MyMatrix<T> const& IVF)
+{
+  int n_vect = VF.rows();
+  int dim = IVF.rows();
+  MyMatrix<T> P(n_vect,dim);
+  for (int i=0; i<n_vect; i++) {
+    MyVector<T> eV = GetMatrixRow(VF,i);
+    std::optional<MyVector<T>> opt = SolutionMat(IVF, eV);
+    if (!opt) {
+      std::cerr << "VF : i=" << i << " not expressed in term of IVF\n";
+      throw TerminalException{1};
+    }
+    AssignMatrixRow(P, i, *opt);
+  }
+  return P;
+}
 
 
 
@@ -1672,6 +1779,45 @@ MyMatrix<T> ColumnReduction(MyMatrix<T> const& eMatIn)
   SelectionRowCol<T> eSelect=TMat_SelectRowCol(eMatIn);
   return SelectColumn(eMatIn, eSelect.ListColSelect);
 }
+
+template<typename T>
+MyMatrix<T> ExtendToBasis(MyMatrix<T> const&M)
+{
+  int n_cols = M.cols();
+  int n_rows = M.rows();
+  std::vector<int> V = TMat_SelectRowCol(M).ListColSelect;
+  if (size_t(n_rows) != V.size()) {
+    std::cerr << "M=\n";
+    WriteMatrix(std::cerr, M);
+    std::cerr << "rank=" << RankMat(M) << " n_cols=" << n_cols << " n_row=" << n_rows << "\n";
+    std::cerr << "V =";
+    for (auto & val : V)
+      std::cerr << " " << val;
+    std::cerr << "\n";
+    std::cerr << "The original matrix M does not appear to be linearly independent\n";
+    throw TerminalException{1};
+  }
+  MyMatrix<T> Mret(n_cols, n_cols);
+  for (int i_row=0; i_row<n_rows; i_row++)
+    Mret.row(i_row) = M.row(i_row);
+  std::vector<uint8_t> f(n_cols,0);
+  for (auto & val : V)
+    f[val] = 1;
+  size_t pos = n_rows;
+  for (int i_col=0; i_col<n_cols; i_col++) {
+    if (f[i_col] == 0) {
+      for (int j_col=0; j_col<n_cols; j_col++) {
+        if (i_col == j_col)
+          Mret(pos,j_col) = 1;
+        else
+          Mret(pos,j_col) = 0;
+      }
+      pos++;
+    }
+  }
+  return Mret;
+}
+
 
 
 
@@ -2603,6 +2749,36 @@ public:
   }
 };
 
+
+/*
+  G has to be non-degenerate so that we can define the projector.
+  --- "G"         is a (n x n) matrix.
+  --- "Basis"     is a (p x n) basis of a matrix.
+  --- "Basis * G" is a (p x n) matrix representing the (x,u_i) scalar products
+  --- "Basis * G * Basis^T" is a matrix of the scalar products
+  --- The final matrix is likely to be
+      Basis^T (Basis * G * Basis^T) ^ (-1)  Basis G
+  If p = n the formula simplifies to Identitity so the formula ought to be correct.
+ */
+template<typename T>
+MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const& G, MyMatrix<T> const& Basis)
+{
+  MyMatrix<T> Gred = Basis * G * Basis.transpose();
+  if (DeterminantMat(Gred) == 0) {
+    std::cerr << "G=\n";
+    WriteMatrix(std::cerr, G);
+    std::cerr << "Basis=\n";
+    WriteMatrix(std::cerr, Basis);
+    std::cerr << "Gred=\n";
+    WriteMatrix(std::cerr, Gred);
+    std::cerr << "The matrix Gred should be invertible\n";
+    throw TerminalException{1};
+  }
+  std::cerr << "We have Gred\n";
+  MyMatrix<T> RetMat = Basis.transpose() * Inverse(Gred) * Basis * G;
+  std::cerr << "We have RetMat\n";
+  return RetMat;
+}
 
 
 

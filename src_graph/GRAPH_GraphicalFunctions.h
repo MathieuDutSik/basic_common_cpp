@@ -105,7 +105,7 @@ void GRAPH_PrintOutput(std::ostream &os, Tgr const& GR)
   os << "nbVert=" << nbVert << "\n";
   for (size_t iVert=0; iVert<nbVert; iVert++) {
     std::vector<size_t> LVert=GR.Adjacency(iVert);
-    os << LVert.size();
+    os << "iVert=" << iVert << " |Adj|=" << LVert.size() << " Adj =";
     for (auto &eVert : LVert)
       os << " " << eVert;
     os << "\n";
@@ -247,53 +247,42 @@ Tgr GRAPH_Read(std::istream& is)
 template<typename Tgr>
 MyMatrix<size_t> ShortestPathDistanceMatrix(Tgr const& GR)
 {
+  size_t miss_val = std::numeric_limits<size_t>::max();
   size_t nbVert=GR.GetNbVert();
-  MyMatrix<int> StatusMat(nbVert, nbVert);
   MyMatrix<size_t> DistMat(nbVert, nbVert);
   for (size_t iVert=0; iVert<nbVert; iVert++)
     for (size_t jVert=0; jVert<nbVert; jVert++)
-      StatusMat(iVert, jVert)=0;
-  for (size_t iVert=0; iVert<nbVert; iVert++) {
-    StatusMat(iVert, iVert) = 2;
+      DistMat(iVert, jVert) = miss_val;
+  for (size_t iVert=0; iVert<nbVert; iVert++)
     DistMat(iVert, iVert) = 0;
-  }
-  size_t UpperBoundDiam=nbVert+2;
-  size_t iter=0;
   while(true) {
     bool IsFinished=true;
-    iter++;
     for (size_t iVert=0; iVert<nbVert; iVert++)
       for (size_t jVert=0; jVert<nbVert; jVert++)
-	if (StatusMat(iVert, jVert) == 2) {
-	  IsFinished=false;
-	  StatusMat(iVert, jVert)=1;
+	if (DistMat(iVert, jVert) != miss_val) {
 	  std::vector<size_t> LLAdj=GR.Adjacency(jVert);
-	  for (size_t & eAdj : LLAdj)
-	    if (StatusMat(iVert, eAdj) == 0) {
-	      StatusMat(iVert, eAdj)=-1;
-	      DistMat(iVert,eAdj) = DistMat(iVert,jVert) + 1;
-	    }
+	  for (size_t & eAdj : LLAdj) {
+            size_t CandDist = DistMat(iVert,jVert) + 1;
+            if (DistMat(iVert, eAdj) > CandDist) {
+              DistMat(iVert, eAdj) = CandDist;
+              IsFinished = false;
+            }
+          }
 	}
-    for (size_t iVert=0; iVert<nbVert; iVert++)
-      for (size_t jVert=0; jVert<nbVert; jVert++)
-	if (StatusMat(iVert, jVert) == -1)
-	  StatusMat(iVert,jVert)=2;
-    if (iter > UpperBoundDiam) {
-      for (size_t iVert=0; iVert<nbVert; iVert++)
-	DistMat(iVert,iVert)=std::numeric_limits<size_t>::max();
-      break;
-    }
     if (IsFinished)
       break;
   }
   return DistMat;
 }
 
-
 template<typename Tgr>
 std::vector<std::vector<size_t>> GRAPH_FindAllShortestPath(Tgr const& GR, size_t const& x, size_t const& y)
 {
+  //  std::cerr << "GRAPH_FindAllShortestPath x=" << x << " y=" << y << " GR=\n";
+  //  GRAPH_PrintOutput(std::cerr, GR);
   MyMatrix<size_t> DistMat=ShortestPathDistanceMatrix(GR);
+  //  std::cerr << "DistMat=\n";
+  //  WriteMatrix(std::cerr, DistMat);
   size_t eDist=DistMat(x,y);
   if (eDist == std::numeric_limits<size_t>::max())
     return {};
@@ -391,9 +380,9 @@ std::vector<std::vector<size_t>> GRAPH_FindAllCycles(Tgr const& GR)
       }
     size_t x=Edges[iEdge][0];
     size_t y=Edges[iEdge][1];
-    std::cerr << "iEdge=" << iEdge << " / " << nbEdge << " x=" << x << " y=" << y << "\n";
+    //    std::cerr << "iEdge=" << iEdge << " / " << nbEdge << " x=" << x << " y=" << y << "\n";
     std::vector<std::vector<size_t>> ListPath = GRAPH_FindAllShortestPath(GRred, x, y);
-    std::cerr << "|ListPath|=" << ListPath.size() << "\n";
+    //    std::cerr << "|ListPath|=" << ListPath.size() << "\n";
     for (auto & eCycle : ListPath)
       FuncInsertCycle(eCycle);
   }
@@ -430,11 +419,9 @@ bool IsClique(Tgr const& GR, std::vector<size_t> const& eList)
 template<typename Tgr>
 std::vector<size_t> StartingCell(Tgr const& GR)
 {
-  std::vector<size_t> Adj;
-  //
   std::vector<size_t> A=GR.Adjacency(0);
   size_t eC=A[0];
-  Adj=IntersectionVect(GR.Adjacency(eC), A);
+  std::vector<size_t> Adj=IntersectionVect(GR.Adjacency(eC), A);
   size_t r=Adj.size();
   std::vector<size_t> TT;
   //  std::cerr << "r=" << r << "\n";
@@ -550,7 +537,7 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const& GR)
   WriteVectorInt_GAP(std::cerr, eCell);
   std::cerr << "\n";
   std::vector<size_t> eCellS=VectorAsSet(eCell);
-  if (eCell[0] == -1) {
+  if (eCell[0] == std::numeric_limits<size_t>::max() ) {
     //    std::cerr << "Leaving InverseLineGraphConnected 1\n";
     return {{-1}};
   }

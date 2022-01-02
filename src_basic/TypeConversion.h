@@ -340,6 +340,21 @@ void NearestInteger_double_To(double const& xI, To & xO)
 }
 
 
+template<typename To, typename Ti>
+inline To UniversalFloorScalarInteger(Ti const& a)
+{
+  To ret;
+  FloorInteger(a, ret);
+  return ret;
+}
+
+template<typename To, typename Ti>
+inline To UniversalCeilScalarInteger(Ti const& a)
+{
+  To ret;
+  CeilInteger(a, ret);
+  return ret;
+}
 
 
 
@@ -359,6 +374,7 @@ inline typename std::enable_if<is_double_type<Ti>::value,To>::type UniversalNear
   NearestInteger_double_To<To>(a, ret);
   return ret;
 }
+
 
 
 template<typename T1, typename T2>

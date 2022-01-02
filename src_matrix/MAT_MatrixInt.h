@@ -6,7 +6,7 @@
 #include "NumberTheory.h"
 
 #undef TRACK_MAXIMUM_SIZE_COEFF
-#undef DEBUG
+#undef DEBUG_MATRIX_INT
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction ring) of
@@ -78,7 +78,7 @@ T Int_IndexLattice(MyMatrix<T> const& eMat)
 	  }
     if (IsFirst)
       return 0;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     if (MinPivot == 0) {
       std::cerr << "Clear error in the code of IndexLattice\n";
       throw TerminalException{1};
@@ -135,6 +135,7 @@ void WriteGCD_int(std::ostream & os, GCD_int<T> const& eGCD)
 template<typename T>
 inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
+  //  std::cerr << "m=" << m << " n=" << n << "\n";
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputePairGcd");
   T f, g, h, fm, gm, hm, q;
   if (n == 0 && m == 0) {
@@ -154,6 +155,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
   }
   while (g != 0) {
     q = QuoInt( f, g );
+    //    std::cerr << "f=" << f << " g=" << g << " q=" << q << "\n";
     h = g;          hm = gm;
     g = f - q * g;  gm = fm - q * gm;
     f = h;          fm = hm;
@@ -166,12 +168,15 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
     eCoeff1=fm;
     eCoeff2=(f - fm * m) / n;
   }
+  //  std::cerr << "eCoeff1=" << eCoeff1 << " eCoeff2=" << eCoeff2 << " f=" << f << "\n";
   MyMatrix<T> Pmat(2,2);
   Pmat(0,0) = eCoeff1;
   Pmat(1,0) = eCoeff2;
   Pmat(0,1) = -n/f;
   Pmat(1,1) = m/f;
-#ifdef DEBUG
+  //  std::cerr << "Pmat=\n";
+  //  WriteMatrix(std::cerr, Pmat);
+#ifdef DEBUG_MATRIX_INT
   T diff1 = f - Pmat(0,0) * m - Pmat(1,0) * n;
   T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -199,7 +204,7 @@ inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputeP
   Pmat(1,0) = t;
   Pmat(0,1) = -n / eGCD;
   Pmat(1,1) =  m / eGCD;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   T diff1 = eGCD - Pmat(0,0) * m - Pmat(1,0) * n;
   T diff2 = Pmat(0,1) * m + Pmat(1,1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -214,72 +219,6 @@ inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputeP
 
 
 
-template<typename T>
-inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelGcdPair(T const& a, T const& b)
-{
-  mpz_class eGCD;
-  mpz_gcd(eGCD.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  return eGCD;
-}
-
-template<typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelGcdPair(T const& a, T const& b)
-{
-  GCD_int<T> eGCD=ComputePairGcd(a, b);
-  return eGCD.gcd;
-}
-
-
-
-template<typename T>
-inline typename std::enable_if<is_totally_ordered<T>::value,T>::type GcdPair(T const& a, T const& b)
-{
-  T eGCD=KernelGcdPair(a,b);
-  if (eGCD > 0)
-    return eGCD;
-  return -eGCD;
-}
-
-template<typename T>
-inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type GcdPair(T const& a, T const& b)
-{
-  return KernelGcdPair(a,b);
-}
-
-
-template<typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelLCMpair(T const& a, T const& b)
-{
-  if (a == 0)
-    return b;
-  if (b == 0)
-    return a;
-  return a * b / KernelGcdPair(a,b);
-}
-
-template<typename T>
-inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelLCMpair(T const& a, T const& b)
-{
-  mpz_class eLCM;
-  mpz_lcm(eLCM.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  return eLCM;
-}
-
-
-template<typename T>
-inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type LCMpair(T const& a, T const& b)
-{
-  return KernelLCMpair(a, b);
-}
-
-template<typename T>
-inline typename std::enable_if<is_totally_ordered<T>::value,T>::type LCMpair(T const& a, T const& b)
-{
-  T eLCM = KernelLCMpair(a, b);
-  if (eLCM > 0)
-    return eLCM;
-  return -eLCM;
-}
 
 
 
@@ -317,23 +256,20 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
     for (int iRow=0; iRow<nbRow; iRow++)
       eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
   T eLCM = eLCM_ring;
-  MyMatrix<T> Mret = eLCM * M;
-  return {eLCM, std::move(Mret)};
+  MyMatrix<T> M1 = eLCM * M;
+  T eGCD = M(0,0);
+  for (int iCol=0; iCol<nbCol; iCol++)
+    for (int iRow=0; iRow<nbRow; iRow++)
+      eGCD = GcdPair(eGCD, M1(iRow, iCol));
+  MyMatrix<T> M2 = M1 / eGCD;
+  T TheMult = eLCM / eGCD;
+  return {TheMult, std::move(M2)};
 }
 
 template<typename T>
 MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const& M)
 {
-  int nbRow=M.rows();
-  int nbCol=M.cols();
-  using Tring = typename underlying_ring<T>::ring_type;
-  Tring eLCM_ring = 1;
-  // iRow is inner loop because of cache locality
-  for (int iCol=0; iCol<nbCol; iCol++)
-    for (int iRow=0; iRow<nbRow; iRow++)
-      eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
-  T eLCM = eLCM_ring;
-  return eLCM * M;
+  return RemoveFractionMatrixPlusCoeff(M).TheMat;
 }
 
 template<typename T>
@@ -351,8 +287,13 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const& V)
   T eLCM=1;
   for (int i=0; i<n; i++)
     eLCM = LCMpair(eLCM, GetDenominator(V(i)));
-  MyVector<T> Vret = eLCM * V;
-  return {eLCM, std::move(Vret)};
+  MyVector<T> V1 = eLCM * V;
+  T eGCD = V1(1);
+  for (int i=0; i<n; i++)
+    eGCD = GcdPair(eGCD, V1(i));
+  MyVector<T> V2 = V1 / eGCD;
+  T TheMult = eLCM / eGCD;
+  return {TheMult, std::move(V2)};
 }
 
 template<typename T>
@@ -394,24 +335,54 @@ inline typename std::enable_if<is_totally_ordered<T>::value,MyVector<T>>::type C
 
 
 
-
-int IsVectorPrimitive(MyVector<int> const& TheV)
+template<typename T>
+bool IsVectorPrimitive(MyVector<T> const& TheV)
 {
   size_t n=TheV.size();
-  int TheGCD=TheV(0);
+  T TheGCD=TheV(0);
   for (size_t i=1; i<n; i++) {
-    int eValI=TheV(i);
-    GCD_int<int> eRec=ComputePairGcd(TheGCD, eValI);
-    TheGCD=eRec.gcd;
+    T val=TheV(i);
+    TheGCD = PairGcd(TheGCD, val);
   }
-  if (abs(TheGCD) == 1)
-    return 1;
-  return 0;
+  return T_abs(TheGCD) == 1;
 }
 
 
 
-
+template<typename T>
+void CheckGCD_information(GCD_int<T> const& gi, std::vector<T> const& ListX)
+{
+  auto print_inf=[&]() -> void {
+    WriteGCD_int(std::cerr, gi);
+    std::cerr << "ListX =";
+    for (auto & val : ListX)
+      std::cerr << " " << val;
+    std::cerr << "\n";
+  };
+  if (!IsIntegralMatrix(gi.Pmat)) {
+    std::cerr << "Matrix should be integral\n";
+    print_inf();
+  }
+  if (T_abs(DeterminantMat(gi.Pmat)) != 1) {
+    std::cerr << "The determinant should be 1\n";
+    print_inf();
+  }
+  size_t len = ListX.size();
+  MyVector<T> V(len);
+  for (size_t i=0; i<len; i++)
+    V(i) = ListX[i];
+  MyVector<T> eP = gi.Pmat.transpose() * V;
+  for (size_t i=0; i<len; i++) {
+    T val = 0;
+    if (i == 0) {
+      val = gi.gcd;
+    }
+    if (val != eP(i)) {
+      std::cerr << "We should have val=" << val << " but we have eP=" << eP(i) << "\n";
+      print_inf();
+    }
+  }
+}
 
 
 template<typename T>
@@ -681,63 +652,6 @@ MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const& M)
 
 
 
-template<typename T>
-void SwitchRow(MyMatrix<T> & eMat, int const& iRow, int const& jRow)
-{
-  int nbCol=eMat.cols();
-  if (iRow == jRow)
-    return;
-  for (int iCol=0; iCol<nbCol; iCol++) {
-    T eVal1=eMat(iRow, iCol);
-    T eVal2=eMat(jRow, iCol);
-    eMat(iRow, iCol)=eVal2;
-    eMat(jRow, iCol)=eVal1;
-  }
-}
-
-template<typename T>
-void INT_ClearColumn(MyMatrix<T> & eMat, size_t const& iCol, size_t const& MinAllowedRow, size_t & iRowFound)
-{
-  using Treal=typename underlying_totally_ordered_ring<T>::real_type;
-  size_t nbRow=eMat.rows();
-  while(true) {
-    Treal MinVal=-1;
-    size_t nbFound=0;
-    for (size_t iRow=MinAllowedRow; iRow<nbRow; iRow++) {
-      T eVal=eMat(iRow, iCol);
-      if (eVal != 0) {
-	Treal AbsEVal=T_NormGen(eVal);
-	if (nbFound == 0) {
-	  MinVal=AbsEVal;
-	  iRowFound=iRow;
-	} else {
-	  if (AbsEVal < MinVal) {
-	    MinVal=AbsEVal;
-	    iRowFound=iRow;
-	  }
-	}
-	nbFound++;
-      }
-    }
-#ifdef DEBUG
-    if (nbFound == 0) {
-      std::cerr << "The column is zero. No work possible\n";
-      throw TerminalException{1};
-    }
-#endif
-    T ThePivot=eMat(iRowFound, iCol);
-    for (size_t iRow=0; iRow<nbRow; iRow++)
-      if (iRow != iRowFound) {
-	T eVal=eMat(iRow, iCol);
-	T TheQ=QuoInt(eVal, ThePivot);
-        if (TheQ != 0)
-          eMat.row(iRow) -= TheQ*eMat.row(iRowFound);
-      }
-    if (nbFound == 1)
-      return;
-  }
-}
-
 
 template<typename T>
 bool IsColumnNonEmpty(MyMatrix<T> const& eMat, int const& minAllowed, int const& iCol)
@@ -760,6 +674,60 @@ template<typename T>
 MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in NullspaceIntTrMat");
+  //  std::cerr << "eMat=\n";
+  //  WriteMatrixNice(std::cerr, eMat);
+  auto INT_ClearColumn=[](MyMatrix<T> & eMat, size_t const& iCol, size_t const& MinAllowedRow, size_t & iRowFound) -> void {
+    using Treal=typename underlying_totally_ordered_ring<T>::real_type;
+    size_t nbRow=eMat.rows();
+    while(true) {
+      Treal MinVal=-1;
+      size_t nbFound=0;
+      for (size_t iRow=MinAllowedRow; iRow<nbRow; iRow++) {
+        T eVal=eMat(iRow, iCol);
+        if (eVal != 0) {
+          Treal AbsEVal=T_NormGen(eVal);
+          if (nbFound == 0) {
+            MinVal=AbsEVal;
+            iRowFound=iRow;
+          } else {
+            if (AbsEVal < MinVal) {
+              MinVal=AbsEVal;
+              iRowFound=iRow;
+            }
+          }
+          nbFound++;
+        }
+      }
+#ifdef DEBUG_MATRIX_INT
+      if (nbFound == 0) {
+        std::cerr << "The column is zero. No work possible\n";
+        throw TerminalException{1};
+      }
+#endif
+      T ThePivot=eMat(iRowFound, iCol);
+      for (size_t iRow=0; iRow<nbRow; iRow++)
+        if (iRow != iRowFound) {
+          T eVal=eMat(iRow, iCol);
+          T TheQ=QuoInt(eVal, ThePivot);
+          //          std::cerr << "eVal=" << eVal << " ThePivot=" << ThePivot << " TheQ=" << TheQ << "\n";
+          if (TheQ != 0)
+            eMat.row(iRow) -= TheQ*eMat.row(iRowFound);
+        }
+      if (nbFound == 1)
+        return;
+    }
+  };
+  auto SwitchRow=[](MyMatrix<T> & eMat, int const& iRow, int const& jRow) -> void {
+    int nbCol=eMat.cols();
+    if (iRow == jRow)
+      return;
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      T eVal1=eMat(iRow, iCol);
+      T eVal2=eMat(jRow, iCol);
+      eMat(iRow, iCol)=eVal2;
+      eMat(jRow, iCol)=eVal1;
+    }
+  };
   MyMatrix<T> eMatW=eMat;
   size_t nbCol=eMat.cols();
   std::vector<size_t> ListIndex;
@@ -775,7 +743,10 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
     } else {
       ListNonIndex.push_back(iCol);
     }
+  //  std::cerr << "eMatW=\n";
+  //  WriteMatrixNice(std::cerr, eMatW);
   size_t dimSpace=ListNonIndex.size();
+  //  std::cerr << "dimSpace=" << dimSpace << "\n";
   std::vector<std::vector<T>> TheBasis;
   for (size_t i=0; i<dimSpace; i++) {
     std::vector<T> eVect;
@@ -814,6 +785,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       ListX.push_back(eSum);
     }
     GCD_int<T> eGCD=ComputeGCD_information(ListX);
+    //    CheckGCD_information(eGCD, ListX);
     std::vector<std::vector<T>> NewBasis;
     for (size_t iVect=0; iVect<dimSpace; iVect++) {
       std::vector<T> eVectNew(sizRelIndex+1,0);
@@ -843,7 +815,7 @@ MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const& eMat)
       idx++;
     }
   }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   size_t nbRow=eMat.rows();
   for (size_t iVect=0; iVect<dimSpace; iVect++)
     for (size_t iRow=0; iRow<nbRow; iRow++) {
@@ -902,14 +874,14 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 	    }
 	}
       }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     if (idxSelect == -1) {
       std::cerr << "Inconsistency in computation of value\n";
       throw TerminalException{1};
     }
 #endif
     if (nbDiffZero == 1) {
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (AbsVal != 1) {
 	std::cerr << "Wrong value for AbsVal\n";
 	throw TerminalException{1};
@@ -953,7 +925,7 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
     T eVal=TheVcopy(i2) + eCoeff*TheVcopy(i1);
     TheVcopy(i2)=eVal;
   }
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   if (!TestEquality(TheVcopy, TheV)) {
     std::cerr << "TheVcopy =";
     WriteVector(std::cerr, TheVcopy);
@@ -967,13 +939,15 @@ MyMatrix<T> ComplementToBasis(MyVector<T> const& TheV)
 }
 
 
+
+
 // We have two matrices M1 and M2 and we check if they define
 // the same subspace of T^n
 template<typename T>
 bool TestEqualitySpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
-  int idxSelect=-1;
+  size_t idxSelect = std::numeric_limits<size_t>::max();
   size_t k=M1.rows();
   size_t n=M1.cols();
   MyMatrix<T> M1copy=M1;
@@ -1122,19 +1096,14 @@ MyMatrix<T> GetNoncontainedSubspace(std::vector<MyMatrix<T>> const& ListSubBig, 
 
 
 template<typename T>
-struct ResultSolutionIntMat {
-  bool TheRes;
-  MyVector<T> eSol;
-};
-
-template<typename T>
-std::string ResultSolutionIntMat_to_GAP(const ResultSolutionIntMat<T>& res)
+std::string ResultSolutionIntMat_to_GAP(const std::optional<MyVector<T>>& res)
 {
-  if (res.TheRes)
-    return "fail";
-  std::stringstream s;
-  WriteVectorGAP(s, res.eSol);
-  return s.str();
+  if (res) {
+    std::stringstream s;
+    WriteVectorGAP(s, *res);
+    return s.str();
+  }
+  return "fail";
 }
 
 
@@ -1142,7 +1111,7 @@ std::string ResultSolutionIntMat_to_GAP(const ResultSolutionIntMat<T>& res)
 // Find an integral solution of the equation Y = X A
 // if it exists.
 template<typename T>
-ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> const& TheVect)
+std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> const& TheVect)
 {
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in SolutionIntMat");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
@@ -1152,9 +1121,9 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
   if (nbVect == 0) {
     MyVector<T> eSol;
     if (IsZeroVector(TheVect)) {
-      return {true, std::move(eSol)};
+      return eSol;
     } else {
-      return {false, {}};
+      return {};
     }
   }
   MyVector<T> eSol=ZeroVector<T>(nbVect);
@@ -1188,7 +1157,7 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
 	}
       if (nbDiff == 1 || nbDiff == 0)
 	break;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (MinValue == 0) {
 	std::cerr << "MinValue should not be zero\n";
 	throw TerminalException{1};
@@ -1206,7 +1175,7 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
 	}
     }
     if (nbDiff == 1) {
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
 	throw TerminalException{1};
@@ -1224,9 +1193,9 @@ ResultSolutionIntMat<T> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T> co
       }
     }
     if (TheVectWork(i) != 0)
-      return {false, {}};
+      return {};
   }
-  return {true, std::move(eSol)};
+  return eSol;
 }
 
 
@@ -1248,7 +1217,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
   int nbDiff;
   int nbVect=TheMat.rows();
   int nbCol=TheMat.cols();
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   if (nbVect == 0) {
     std::cerr << "Need to write the code here\n";
     throw TerminalException{1};
@@ -1284,7 +1253,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
 	}
       if (nbDiff == 1 || nbDiff == 0)
 	break;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (MinValue == 0) {
 	std::cerr << "MinValue should not be zero\n";
 	throw TerminalException{1};
@@ -1304,7 +1273,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const& TheMat)
     int eVal;
     if (nbDiff == 1) {
       eVal=iVectFound;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
 	throw TerminalException{1};
@@ -1342,7 +1311,7 @@ bool CanTestSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVe
 }
 
 template<typename T>
-ResultSolutionIntMat<T> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVect)
+std::optional<MyVector<T>> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<T> const& TheVect)
 {
   int nbVect=eCan.TheMatWork.rows();
   int nbCol=eCan.TheMatWork.cols();
@@ -1362,9 +1331,9 @@ ResultSolutionIntMat<T> CanSolutionIntMat(CanSolIntMat<T> const& eCan, MyVector<
       }
     }
     if (TheVectWork(i) != 0)
-      return {false, {}};
+      return {};
   }
-  return {true, std::move(eSol)};
+  return eSol;
 }
 
 
@@ -1517,7 +1486,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const& EXT)
     for (size_t iCol=0; iCol<nbCol; iCol++)
       if (eCol == miss_val && EXTwork(iVect, iCol) != 0 && ColumnStatus[iCol] == 1)
 	eCol = iCol;
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     std::cerr << "eCol=" << eCol << "\n";
     if (eCol == miss_val) {
       std::cerr << "This should not be selected\n";
@@ -1743,7 +1712,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     //    std::cerr << "After TheRedMat construction\n";
     MyMatrix<T> NSP=NullspaceIntMat(TheRedMat);
     //    std::cerr << "We have NSP\n";
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
     if (NSP.rows() != 1) {
       std::cerr << "|NSP|=" << NSP.rows() << " when it should be 1\n";
       std::cerr << "TheRedMat:\n";
@@ -1854,7 +1823,7 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
     //    std::cerr << "After fInsert\n";
   }
 
-#ifdef DEBUG
+#ifdef DEBUG_MATRIX_INT
   int DimSpace=TheBasis.rows();
   for (int iBas=0; iBas<DimSpace; iBas++) {
     MyVector<T> eLine=GetMatrixRow(TheBasis, iBas);
@@ -1873,13 +1842,13 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
   for (int iElt=0; iElt<nbElt; iElt++) {
     MyVector<T> eElt=GetMatrixRow(ListElement, iElt);
     //      std::cerr << "Before SolutionIntMat, iElt=" << iElt << "\n";
-    ResultSolutionIntMat<T> eResIntMat=SolutionIntMat(TheBasis, eElt);
+    std::optional<MyVector<T>> opt=SolutionIntMat(TheBasis, eElt);
     /*      std::cerr << "TheBasis=\n";
 	    WriteMatrixGAP(std::cerr, TheBasis);
 	    std::cerr << "eElt=\n";
 	    WriteVectorGAP(std::cerr, eElt);
 	    std::cerr << "After SolutionIntMat 2 eResIntMat.TheRes=" << eResIntMat.TheRes << "\n";*/
-    if (!eResIntMat.TheRes) {
+    if (!opt) {
       std::cerr << "Error in GetZbasis 2\n";
       throw TerminalException{1};
     }
@@ -1887,6 +1856,78 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
 #endif
   return TheBasis;
 }
+
+
+
+
+/*
+  WRONG IDEA:
+  M1 spans a lattice L1
+  M2 spans a lattice L2
+  We want to find a basis of the lattice L1 cap L2.
+  ---
+  We have the formula (L1 \cap L2)* = L1* + L2*
+  This allows to apply the GetZbasis function
+
+  CORRECT SOLUTION:
+  write the equation system:
+  sum_i lambda_i v^1_i = sum_j mu_j v^2_j
+  with lambda and mu integer and deduce from there.
+ */
+template<typename T>
+MyMatrix<T> IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
+{
+  int n=M1.rows();
+  MyMatrix<T> M1_M2 = Concatenate(M1, M2);
+  MyMatrix<T> NSP = NullspaceIntMat(M1_M2);
+  std::vector<int> L(n);
+  for (int i=0; i<n; i++)
+    L[i]=i;
+  MyMatrix<T> NSPred = SelectColumn(NSP, L);
+  return NSPred * M1;
+}
+
+
+template<typename T>
+MyMatrix<T> IntersectionLattice_VectorSpace(MyMatrix<T> const& Latt, MyMatrix<T> const& Space)
+{
+  int n = Latt.rows();
+  int n_spa = Space.rows();
+  MyMatrix<T> eBasis = ExtendToBasis(Space);
+  MyMatrix<T> Latt2 = Latt * Inverse(eBasis);
+  std::vector<int> V(n-n_spa);
+  for (int i=0; i<n-n_spa; i++)
+    V[i] = i + n_spa;
+  MyMatrix<T> Latt3 = SelectColumn(Latt2, V);
+  MyMatrix<T> NSP = NullspaceIntMat(Latt3);
+#ifdef DEBUG_MATRIX_INT
+  if (!IsIntegralMatrix(NSP)) {
+    std::cerr << "NSP should be integral\n";
+    throw TerminalException{1};
+  }
+#endif
+  MyMatrix<T> IntBasis = NSP * Latt;
+#ifdef DEBUG_MATRIX_INT
+  for (int i_s=0; i_s<n_spa; i_s++) {
+    MyVector<T> v = GetMatrixRow(IntBasis, i_s);
+    std::optional<MyVector<T>> opt1 = SolutionIntMat(Latt, v);
+    if (!opt1) {
+      std::cerr << "The vector should be expressed integrally in terms of the lattice\n";
+      throw TerminalException{1};
+    }
+    std::optional<MyVector<T>> opt2 = SolutionMat(Space, v);
+    if (!opt2) {
+      std::cerr << "The vector should be expressed integrally in terms of the spacen";
+      throw TerminalException{1};
+    }
+  }
+#endif
+  return IntBasis;
+}
+
+
+
+
 
 
 

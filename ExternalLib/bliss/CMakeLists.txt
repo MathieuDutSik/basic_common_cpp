@@ -20,6 +20,8 @@ set_target_properties(bliss PROPERTIES VERSION ${PROJECT_VERSION})
 
 set_target_properties(bliss PROPERTIES PUBLIC_HEADER defs.hh graph.hh partition.hh timer.hh utils.hh)
 
+target_compile_features(bliss PRIVATE cxx_std_17)
+
 # Install library
 install(TARGETS bliss DESTINATION lib)
 

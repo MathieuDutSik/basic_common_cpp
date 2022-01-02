@@ -2,6 +2,7 @@
 #define INCLUDE_NUMBER_THEORY
 
 #include <iostream>
+#include <optional>
 #include <sstream>
 
 #include "Temp_common.h"
@@ -200,6 +201,10 @@ struct underlying_totally_ordered_ring<long> {
   typedef long real_type;
 };
 
+
+
+
+
 /*
 template<>
 struct underlying_totally_ordered_ring<int64_t> {
@@ -272,23 +277,6 @@ namespace std {
 
 // Parsing strings (It takes a std::string because we would need a const char* with a null terminated string
 // and this we would not have with string_view
-
-
-
-/*
-template<>
-mpz_class ParseScalar(std::string const& estr)
-{
-  const char* str = estr.c_str();
-  mpz_class ret_val;
-  int ret = mpz_set_str(ret_val.get_mpz_t(), str, 10);
-  if (ret != 0) {
-    std::cerr << "The ParseScalar for mpz_class failed\n";
-    throw TerminalException{1};
-  }
-  return ret_val;
-}
-*/
 
 template<typename T>
 T ParseScalar(std::string const& estr)
@@ -395,7 +383,7 @@ inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
     if (res_z >= b_num_pos)
       res_z -= b_num_pos;
   }
-  mpq_class res_q=res_z;
+  mpq_class res_q=mpq_class(res_z) / mpq_class(eLCM);
   return res_q;
 }
 
@@ -515,12 +503,6 @@ inline int T_NormGen(int const& x)
   return abs(x);
 }
 
-
-
-
-
-
-
 inline bool IsInteger(mpq_class const& x)
 {
   mpz_class eDen=x.get_den();
@@ -538,30 +520,20 @@ inline mpq_class GetDenominator(mpq_class const& x)
 
 // We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
 // So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline int GetDenominator(int const& x)
+inline int GetDenominator([[maybe_unused]] int const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline long GetDenominator(long const& x)
+inline long GetDenominator([[maybe_unused]] long const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline mpz_class GetDenominator(mpz_class const& x)
+inline mpz_class GetDenominator([[maybe_unused]] mpz_class const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
 
 inline mpz_class GetDenominator_z(mpq_class const& x)
@@ -569,32 +541,114 @@ inline mpz_class GetDenominator_z(mpq_class const& x)
   return x.get_den();
 }
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline int GetDenominator_z(int const& x)
+inline int GetDenominator_z([[maybe_unused]] int const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline long GetDenominator_z(long const& x)
+inline long GetDenominator_z([[maybe_unused]] long const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
 
-// We need to have nbRow as input for template reasons. But it is unused in the symmetric case.
-// So, pragma statement is needed to avoid a warning being thrown.
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-inline mpz_class GetDenominator_z(mpz_class const& x)
+inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const& x)
 {
   return 1;
 }
-#pragma GCC diagnostic pop
+
+
+
+
+
+template<typename T>
+T GenericGcd(T const& m, T const& n)
+{
+  T h, q;
+  if (n == 0 && m == 0) {
+    return 0;
+  }
+  T f = T_abs(m);
+  T g = T_abs(n);
+  while (g != 0) {
+    q = QuoInt( f, g );
+    h = g;
+    g = f - q * g;
+    f = h;
+  }
+  return f;
+}
+
+
+
+template<typename T>
+inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelGcdPair(T const& a, T const& b)
+{
+  mpz_class eGCD;
+  mpz_gcd(eGCD.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  return eGCD;
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelGcdPair(T const& a, T const& b)
+{
+  return GenericGcd(a, b);
+}
+
+
+
+template<typename T>
+inline typename std::enable_if<is_totally_ordered<T>::value,T>::type GcdPair(T const& a, T const& b)
+{
+  T eGCD=KernelGcdPair(a,b);
+  if (eGCD > 0)
+    return eGCD;
+  return -eGCD;
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type GcdPair(T const& a, T const& b)
+{
+  return KernelGcdPair(a,b);
+}
+
+
+template<typename T>
+inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelLCMpair(T const& a, T const& b)
+{
+  if (a == 0)
+    return b;
+  if (b == 0)
+    return a;
+  return a * b / KernelGcdPair(a,b);
+}
+
+template<typename T>
+inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelLCMpair(T const& a, T const& b)
+{
+  mpz_class eLCM;
+  mpz_lcm(eLCM.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  return eLCM;
+}
+
+
+template<typename T>
+inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type LCMpair(T const& a, T const& b)
+{
+  return KernelLCMpair(a, b);
+}
+
+template<typename T>
+inline typename std::enable_if<is_totally_ordered<T>::value,T>::type LCMpair(T const& a, T const& b)
+{
+  T eLCM = KernelLCMpair(a, b);
+  if (eLCM > 0)
+    return eLCM;
+  return -eLCM;
+}
+
+
+
+
 
 
 
@@ -762,6 +816,74 @@ inline void TYPE_CONVERSION(mpz_class const& a1, int64_t & a2)
 }
 */
 
+
+bool universal_square_root(mpz_class & ret,  mpz_class const& val)
+{
+  mpz_sqrt(ret.get_mpz_t(), val.get_mpz_t());
+  mpz_class eProd = ret * ret;
+  return eProd == val;
+}
+
+
+
+bool universal_square_root(mpq_class & ret,  mpq_class const& val)
+{
+  mpz_class val_num=val.get_num();
+  mpz_class val_den=val.get_den();
+  mpz_class ret_num, ret_den;
+  if (!universal_square_root(ret_num, val_num))
+    return false;
+  if (!universal_square_root(ret_den, val_den))
+    return false;
+  ret = mpq_class(ret_num) / mpq_class(ret_den);
+  return true;
+}
+
+
+
+
+template<typename T>
+std::optional<T> UniversalSquareRoot(T const& val)
+{
+  if (val < 0)
+    return {};
+  T ret;
+  if (!universal_square_root(ret, val))
+    return {};
+  return ret;
+}
+
+
+
+inline void set_to_infinity(mpz_class & x)
+{
+  x = std::numeric_limits<size_t>::max();
+}
+
+inline void set_to_infinity(mpq_class & x)
+{
+  x = std::numeric_limits<size_t>::max();
+}
+
+template<typename T>
+inline typename std::enable_if<std::is_integral<T>::value,void>::type set_to_infinity(T & x)
+{
+  x = std::numeric_limits<T>::max();
+}
+
+template<typename T>
+T practical_infinity()
+{
+  T ret;
+  set_to_infinity(ret);
+  return ret;
+}
+
+
+
+
+
+
 //
 // Nearest integer and similar stuff.
 //
@@ -778,19 +900,74 @@ inline mpq_class FractionalPart(mpq_class const& x)
   return eRet;
 }
 
-inline mpq_class Floor(mpq_class const& x)
+inline mpq_class Floor_mpq(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   return x-eFrac;
 }
 
-inline mpq_class Ceil(mpq_class const& x)
+inline mpq_class Ceil_mpq(mpq_class const& x)
 {
   mpq_class eFrac=FractionalPart(x);
   if (eFrac == 0)
     return x;
   return 1 + x - eFrac;
 }
+
+
+inline void FloorInteger(mpq_class const& xI, mpq_class & xO)
+{
+  xO = Floor_mpq(xI);
+}
+
+inline void FloorInteger(mpq_class const& xI, mpz_class & xO)
+{
+  mpq_class xO_q = Floor_mpq(xI);
+  xO = xO_q.get_num();
+}
+
+inline void FloorInteger(mpq_class const& xI, int & xO)
+{
+  mpq_class xO_q = Floor_mpq(xI);
+  xO = int(xO_q.get_num().get_si());
+}
+
+inline void FloorInteger(mpq_class const& xI, long & xO)
+{
+  mpq_class xO_q = Floor_mpq(xI);
+  xO = xO_q.get_num().get_si();
+}
+
+
+
+
+
+inline void CeilInteger(mpq_class const& xI, mpq_class & xO)
+{
+  xO = Ceil_mpq(xI);
+}
+
+inline void CeilInteger(mpq_class const& xI, mpz_class & xO)
+{
+  mpq_class xO_q = Ceil_mpq(xI);
+  xO = xO_q.get_num();
+}
+
+inline void CeilInteger(mpq_class const& xI, int & xO)
+{
+  mpq_class xO_q = Ceil_mpq(xI);
+  xO = int(xO_q.get_num().get_si());
+}
+
+inline void CeilInteger(mpq_class const& xI, long & xO)
+{
+  mpq_class xO_q = Ceil_mpq(xI);
+  xO = xO_q.get_num().get_si();
+}
+
+
+
+
 
 
 
@@ -873,7 +1050,7 @@ inline mpq_class NearestInteger_rpi(mpq_class const& x)
   //  std::cerr << "We have eHalf\n";
   mpq_class x2=x + eHalf;
   //  std::cerr << "We have x=" << x << " eHalf=" << eHalf << " x2=" << x2 << "\n";
-  mpq_class x3=Floor(x2);
+  mpq_class x3=Floor_mpq(x2);
   //  std::cerr << "We have x2=" << x2 << " x3=" << x3 << "\n";
   return x3;
   /*
@@ -899,7 +1076,7 @@ namespace boost::serialization {
   // mpq_class
 
   template<class Archive>
-  inline void load(Archive & ar, mpq_class & val, const unsigned int version)
+  inline void load(Archive & ar, mpq_class & val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "load(mpq_class), step 1\n";
     std::string str;
@@ -910,7 +1087,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void save(Archive & ar, mpq_class const& val, const unsigned int version)
+  inline void save(Archive & ar, mpq_class const& val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "save(mpq_class), step 1\n";
     std::ostringstream os;
@@ -921,7 +1098,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void serialize(Archive & ar, mpq_class & val, const unsigned int version)
+  inline void serialize(Archive & ar, mpq_class & val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "split_free(mpq_class), step 1\n";
     split_free(ar, val, version);
@@ -931,7 +1108,7 @@ namespace boost::serialization {
   // mpz_class
 
   template<class Archive>
-  inline void load(Archive & ar, mpz_class & val, const unsigned int version)
+  inline void load(Archive & ar, mpz_class & val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "load(mpz_class), step 1\n";
     std::string str;
@@ -942,7 +1119,7 @@ namespace boost::serialization {
   }
 
   template<class Archive>
-  inline void save(Archive & ar, mpz_class const& val, const unsigned int version)
+  inline void save(Archive & ar, mpz_class const& val, [[maybe_unused]] const unsigned int version)
   {
     //      std::cerr << "save(mpz_class), step 1\n";
     std::ostringstream os;
