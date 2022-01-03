@@ -9,7 +9,6 @@
 #include "Basic_file.h"
 #include "Basic_string.h"
 #include "hash_functions.h"
-
 #include "MatrixTypes.h"
 
 
