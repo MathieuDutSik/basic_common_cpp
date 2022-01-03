@@ -1636,6 +1636,16 @@ MyMatrix<T> RowReduction(MyMatrix<T> const&eMatIn)
 }
 
 
+template<typename T>
+bool IsZeroVector(MyVector<T> const& V)
+{
+  int n=V.size();
+  for (int i=0; i<n; i++)
+    if (V(i) != 0)
+      return false;
+  return true;
+}
+
 // Given the equation Y = XA, we find one solution X if it exists.
 // 
 template<typename T>
@@ -2182,16 +2192,6 @@ bool IsZeroMatrix(MyMatrix<T> const& M)
     for (int iRow=0; iRow<nbRow; iRow++)
       if (M(iRow, iCol) != 0)
 	return false;
-  return true;
-}
-
-template<typename T>
-bool IsZeroVector(MyVector<T> const& V)
-{
-  int n=V.size();
-  for (int i=0; i<n; i++)
-    if (V(i) != 0)
-      return false;
   return true;
 }
 
