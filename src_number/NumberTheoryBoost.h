@@ -215,6 +215,10 @@ inline void TYPE_CONVERSION(int const& a1, boost::multiprecision::cpp_int & a2)
 {
   a2 = a1;
 }
+inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, boost::multiprecision::cpp_int & a2)
+{
+  a2 = a1;
+}
 
 
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, double & a2)
@@ -251,6 +255,10 @@ inline void TYPE_CONVERSION(long const& a1, boost::multiprecision::cpp_rational 
   a2 = a1;
 }
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, boost::multiprecision::cpp_rational & a2)
+{
+  a2 = a1;
+}
+inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, boost::multiprecision::cpp_rational & a2)
 {
   a2 = a1;
 }
