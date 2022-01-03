@@ -1,6 +1,8 @@
 #PROGRAM		= AnalysisSingMat
 #PROGRAM		= ZbasisComputation
 PROGRAM		= RowHermiteNormalForm
+#PROGRAM		= test
+#PROGRAM		= testB
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

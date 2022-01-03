@@ -1,13 +1,13 @@
 #include "MAT_MatrixInt.h"
-#include "NumberTheory.h"
-#include <boost/multiprecision/cpp_int.hpp>
+#include "NumberTheoryBoost.h"
 
 
 
 int main(int argc, char *argv[])
 {
   //  using T=mpq_class;
-  using T=mpz_class;
+  //  using T=mpz_class;
+  using T=boost::multiprecision::cpp_int;
   //  using T=int;
   //  using T=long;
   try {

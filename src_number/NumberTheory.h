@@ -400,7 +400,7 @@ T QuoInt_C_integer(T const& a, T const& b)
 template<typename T>
 T QuoInt_Generic(T const& a, T const& b)
 {
-  T res = ResInt(a, b);
+  T res = ResInt_Generic(a, b);
   return (a - res) / b;
 }
 
@@ -421,7 +421,8 @@ inline mpz_class QuoInt(mpz_class const& a, mpz_class const& b)
 
 inline mpq_class QuoInt(mpq_class const& a, mpq_class const& b)
 {
-  return QuoInt_Generic<mpq_class>(a, b);
+  mpq_class res = ResInt(a, b);
+  return (a - res) / b;
 }
 
 
@@ -458,7 +459,6 @@ inline mpq_class CanonicalizationUnit(mpq_class const& eVal)
     return -1;
   return 1;
 }
-
 
 
 // T_Norm should always return an integer, whatever the input type
