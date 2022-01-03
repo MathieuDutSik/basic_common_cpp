@@ -12,6 +12,7 @@ PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNorm
 #PROGRAM		= NullspaceIntTrMat
 #PROGRAM		= NullspaceIntMat
 #PROGRAM		= SolutionIntMat
+#PROGRAM		= test
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
