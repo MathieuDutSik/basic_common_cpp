@@ -1,9 +1,6 @@
 #include "MAT_Matrix.h"
 
 
-
-
-
 int main()
 {
   size_t n_rows = 10;

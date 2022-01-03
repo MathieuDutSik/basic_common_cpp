@@ -1,5 +1,5 @@
-#include "MAT_Matrix.h"
 #include "NumberTheory.h"
+#include "MAT_Matrix.h"
 int main(int argc, char *argv[])
 {
   using T=mpq_class;

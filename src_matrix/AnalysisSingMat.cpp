@@ -1,6 +1,6 @@
+#include "NumberTheory.h"
 #include "MAT_Matrix.h"
 #include "Namelist.h"
-#include "NumberTheory.h"
 
 FullNamelist NAMELIST_GetStandardAnalysis()
 {

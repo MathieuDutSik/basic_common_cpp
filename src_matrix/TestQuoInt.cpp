@@ -1,5 +1,5 @@
-#include "MAT_MatrixInt.h"
 #include "NumberTheoryBoost.h"
+#include "MAT_MatrixInt.h"
 
 int main(int argc, char *argv[])
 {
