@@ -12,22 +12,6 @@
 #include "ExceptionEnding.h"
 #include "TemplateTraits.h"
 
-// basic numeric code
-
-int IntFloor(double const& x)
-{
-  return int(floor(x));
-}
-
-template<typename T>
-T T_abs(T const& eVal)
-{
-  if (eVal > 0)
-    return eVal;
-  T fVal= - eVal;
-  return fVal;
-}
-
 void NearestInteger_double_int(double const& xI, int & xO)
 {
   //  std::cerr << "Temp_common : NearestInteger\n";

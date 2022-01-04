@@ -169,6 +169,17 @@ T T_max(T const& eVal1, T const& eVal2)
 }
 
 
+template<typename T>
+T T_abs(T const& eVal)
+{
+  if (eVal > 0)
+    return eVal;
+  T fVal= - eVal;
+  return fVal;
+}
+
+
+
 // use std::min for generic types (int, long, float, ...)
 template<typename T>
 T T_min(T const& eVal1, T const& eVal2)
