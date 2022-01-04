@@ -382,6 +382,30 @@ inline boost::multiprecision::cpp_int T_NormGen(boost::multiprecision::cpp_int c
 }
 
 
+bool universal_square_root(boost::multiprecision::cpp_int & ret, boost::multiprecision::cpp_int const& val)
+{
+  using T = boost::multiprecision::cpp_int;
+  ret = sqrt(val);
+  T eProd = ret * ret;
+  return eProd == val;
+}
+
+
+
+bool universal_square_root(boost::multiprecision::cpp_rational & ret, boost::multiprecision::cpp_rational const& val)
+{
+  using T = boost::multiprecision::cpp_int;
+  using Tf= boost::multiprecision::cpp_rational;
+  T val_n = numerator(val);
+  T val_d = denominator(val);
+  T ret_n, ret_d;
+  if (!universal_square_root(ret_n, val_n))
+    return false;
+  if (!universal_square_root(ret_d, val_d))
+    return false;
+  ret = Tf(ret_n) / Tf(ret_d);
+  return true;
+}
 
 
 #endif
