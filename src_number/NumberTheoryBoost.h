@@ -355,4 +355,24 @@ inline boost::multiprecision::cpp_int T_NormGen(boost::multiprecision::cpp_int c
 }
 
 
+namespace std {
+  std::string to_string(const boost::multiprecision::cpp_int& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+  std::string to_string(const boost::multiprecision::cpp_rational& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+}
+
+
+
+
 #endif
