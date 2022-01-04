@@ -9,6 +9,11 @@
 #include <Eigen/LU>
 #include <Eigen/Eigenvalues>
 
+#ifdef INCLUDE_NUMBER_THEORY_BOOST
+#include <boost/multiprecision/eigen.hpp>
+#endif
+
+
 template <typename T>
 using MyVector = Eigen::Matrix<T,Eigen::Dynamic,1>;
 

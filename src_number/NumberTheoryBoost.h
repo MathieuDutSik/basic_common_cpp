@@ -4,7 +4,6 @@
 
 
 #include <boost/multiprecision/cpp_int.hpp>
-#include <boost/multiprecision/eigen.hpp>
 #include "TemplateTraits.h"
 #include "ExceptionEnding.h"
 //#include "NumberTheory.h"
