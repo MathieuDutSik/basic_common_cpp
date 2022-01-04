@@ -351,10 +351,38 @@ inline void FloorInteger(boost::multiprecision::cpp_rational const& xI, boost::m
 {
   xO = Floor_cpp_rational(xI);
 }
+inline void FloorInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_int & xO)
+{
+  xO = numerator(Floor_cpp_rational(xI));
+}
+inline void FloorInteger(boost::multiprecision::cpp_rational const& xI, int & xO)
+{
+  boost::multiprecision::cpp_int val = numerator(Floor_cpp_rational(xI));
+  xO = val.template convert_to<int>();
+}
+inline void FloorInteger(boost::multiprecision::cpp_rational const& xI, long & xO)
+{
+  boost::multiprecision::cpp_int val = numerator(Floor_cpp_rational(xI));
+  xO = val.template convert_to<long>();
+}
 
 inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_rational & xO)
 {
   xO = Ceil_cpp_rational(xI);
+}
+inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_int & xO)
+{
+  xO = numerator(Ceil_cpp_rational(xI));
+}
+inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, int & xO)
+{
+  boost::multiprecision::cpp_int val = numerator(Ceil_cpp_rational(xI));
+  xO = val.template convert_to<int>();
+}
+inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, long & xO)
+{
+  boost::multiprecision::cpp_int val = numerator(Ceil_cpp_rational(xI));
+  xO = val.template convert_to<long>();
 }
 
 inline void set_to_infinity(boost::multiprecision::cpp_rational & x)
