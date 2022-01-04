@@ -340,6 +340,19 @@ inline void set_to_infinity(boost::multiprecision::cpp_int & x)
   x = std::numeric_limits<size_t>::max();
 }
 
+inline boost::multiprecision::cpp_rational T_NormGen(boost::multiprecision::cpp_rational const& x)
+{
+  if (x < 0)
+    return -x;
+  return x;
+}
+
+inline boost::multiprecision::cpp_int T_NormGen(boost::multiprecision::cpp_int const& x)
+{
+  if (x < 0)
+    return -x;
+  return x;
+}
 
 
 #endif
