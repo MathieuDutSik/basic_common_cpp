@@ -10,6 +10,24 @@
 //#include "NumberTheory.h"
 
 
+namespace std {
+  std::string to_string(const boost::multiprecision::cpp_int& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+  std::string to_string(const boost::multiprecision::cpp_rational& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+}
+
+
 
 template <>
 struct is_euclidean_domain<boost::multiprecision::cpp_int> {
@@ -242,8 +260,8 @@ inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, doubl
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, boost::multiprecision::cpp_int & a2)
 {
   if (!IsInteger(a1)) {
-    std::cerr << "a1 should be integral\n";
-    throw TerminalException{1};
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
   }
   a2 = numerator(a1);
 }
@@ -352,24 +370,6 @@ inline boost::multiprecision::cpp_int T_NormGen(boost::multiprecision::cpp_int c
   if (x < 0)
     return -x;
   return x;
-}
-
-
-namespace std {
-  std::string to_string(const boost::multiprecision::cpp_int& e_val)
-  {
-    std::stringstream s;
-    s << e_val;
-    std::string converted(s.str());
-    return converted;
-  };
-  std::string to_string(const boost::multiprecision::cpp_rational& e_val)
-  {
-    std::stringstream s;
-    s << e_val;
-    std::string converted(s.str());
-    return converted;
-  };
 }
 
 
