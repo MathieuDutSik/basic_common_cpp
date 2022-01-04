@@ -291,6 +291,46 @@ inline boost::multiprecision::cpp_int GetDenominator_z(boost::multiprecision::cp
 
 
 
+inline boost::multiprecision::cpp_rational FractionalPart(boost::multiprecision::cpp_rational const& x)
+{
+  using T = boost::multiprecision::cpp_int;
+  using Tf= boost::multiprecision::cpp_rational;
+  T x_n = numerator(x);
+  T x_d = denominator(x);
+  T res = ResInt(x_n, x_d);
+  Tf res_f = res;
+  Tf x_df = x_d;
+  Tf ret = res_f / x_df;
+  return ret;
+}
+
+inline boost::multiprecision::cpp_rational Floor_cpp_rational(boost::multiprecision::cpp_rational const& x)
+{
+  boost::multiprecision::cpp_rational eFrac=FractionalPart(x);
+  return x-eFrac;
+}
+
+inline boost::multiprecision::cpp_rational Ceil_cpp_rational(boost::multiprecision::cpp_rational const& x)
+{
+  boost::multiprecision::cpp_rational eFrac=FractionalPart(x);
+  if (eFrac == 0)
+    return x;
+  return 1 + x - eFrac;
+}
+
+
+
+inline void FloorInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_rational & xO)
+{
+  xO = Floor_cpp_rational(xI);
+}
+
+inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_rational & xO)
+{
+  xO = Ceil_cpp_rational(xI);
+}
+
+
 
 
 #endif
