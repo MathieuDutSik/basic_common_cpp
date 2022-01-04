@@ -330,6 +330,15 @@ inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, boost::mu
   xO = Ceil_cpp_rational(xI);
 }
 
+inline void set_to_infinity(boost::multiprecision::cpp_rational & x)
+{
+  x = std::numeric_limits<size_t>::max();
+}
+
+inline void set_to_infinity(boost::multiprecision::cpp_int & x)
+{
+  x = std::numeric_limits<size_t>::max();
+}
 
 
 
