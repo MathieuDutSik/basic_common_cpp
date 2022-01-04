@@ -1722,6 +1722,16 @@ inline typename std::enable_if<(not is_ring_field<T>::value),std::optional<MyVec
 }
 
 template<typename T>
+MyVector<T> GetMatrixRow(MyMatrix<T> const& M, int const& iRow)
+{
+  int nbCol=M.cols();
+  MyVector<T> V(nbCol);
+  for (int iCol=0; iCol<nbCol; iCol++)
+    V(iCol) = M(iRow,iCol);
+  return V;
+}
+
+template<typename T>
 MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const& VF, MyMatrix<T> const& IVF)
 {
   int n_vect = VF.rows();
@@ -2389,16 +2399,6 @@ MyMatrix<T> SortMatrix(MyMatrix<T> const& M)
 
 
 
-
-template<typename T>
-MyVector<T> GetMatrixRow(MyMatrix<T> const& M, int const& iRow)
-{
-  int nbCol=M.cols();
-  MyVector<T> V(nbCol);
-  for (int iCol=0; iCol<nbCol; iCol++)
-    V(iCol) = M(iRow,iCol);
-  return V;
-}
 
 template<typename T>
 MyVector<T> GetMatrixColumn(MyMatrix<T> const& M, int const& iCol)
