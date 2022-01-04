@@ -8,10 +8,6 @@ struct is_euclidean_domain {
 };
 
 template <typename T>
-struct is_implementation_of_Z {
-};
-
-template <typename T>
 struct is_mpreal {
   static const bool value = false;
 };
@@ -24,10 +20,6 @@ template<typename T>
 struct overlying_field {
 };
 
-template<typename T>
-struct underlying_ring {
-};
-
 template <typename T>
 struct is_ring_field {
 };
@@ -37,9 +29,30 @@ struct is_totally_ordered {
   static const bool value = false;
 };
 
-// Now definition for the basic types
+// underlying_ring
+
+template<typename T>
+struct underlying_ring {
+};
+
+template<>
+struct underlying_ring<int> {
+  typedef int ring_type;
+};
+
+template<>
+struct underlying_ring<long> {
+  typedef long ring_type;
+};
+
+
+
 
 // Trait definition for subset of integers
+
+template <typename T>
+struct is_implementation_of_Z {
+};
 
 template<>
 struct is_implementation_of_Z<double> {
