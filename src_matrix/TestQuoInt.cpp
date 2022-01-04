@@ -1,11 +1,15 @@
 #include "NumberTheoryBoost.h"
-#include "MAT_MatrixInt.h"
+#include "NumberTheory.h"
+#include "TypeConversion.h"
+//#include "MAT_MatrixInt.h"
 
 int main(int argc, char *argv[])
 {
   //  using T=int;
   //  using T=long;
-  using T=long;
+  //  using T=long;
+  using T=boost::multiprecision::cpp_int;
+  //  using T=mpq_class;
   using Tint=mpz_class;
   try {
     size_t n_error = 0;

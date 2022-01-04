@@ -5,10 +5,9 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/eigen.hpp>
-
-#include "NumberTheory.h"
-
-
+#include "TemplateTraits.h"
+#include "ExceptionEnding.h"
+//#include "NumberTheory.h"
 
 
 
@@ -200,8 +199,9 @@ inline boost::multiprecision::cpp_rational GetDenominator(boost::multiprecision:
 
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, double & a2)
 {
-  std::cerr << "Missing code, write here\n";
-  throw TerminalException{1};
+  a2 = a1.template convert_to<double>();
+  //  std::cerr << "Missing code, write here\n";
+  //  throw TerminalException{1};
 }
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, int & a2)
 {
@@ -223,8 +223,9 @@ inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, boost::mul
 
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, double & a2)
 {
-  std::cerr << "Missing code, write here\n";
-  throw TerminalException{1};
+  a2 = a1.template convert_to<double>();
+  //  std::cerr << "Missing code, write here\n";
+  //  throw TerminalException{1};
 }
 inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, boost::multiprecision::cpp_int & a2)
 {

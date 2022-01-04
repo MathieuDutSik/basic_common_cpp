@@ -3,7 +3,7 @@
 
 #include "Temp_common.h"
 #include "TypeConversion.h"
-#include "ExceptionEnding.h"
+//#include "ExceptionEnding.h"
 #include <cstdlib>
 #include "gmpxx.h"
 
@@ -25,10 +25,6 @@ struct is_implementation_of_Z<mpq_class> {
 
 // is_euclidean_domain property
 
-template <typename T>
-struct is_euclidean_domain {
-  static const bool value = false;
-};
 
 template <>
 struct is_euclidean_domain<short> {
@@ -173,9 +169,6 @@ struct overlying_field<mpq_class> {
   typedef mpq_class field_type;
 };
 
-template<typename T>
-struct underlying_totally_ordered_ring {
-};
 
 template<>
 struct underlying_totally_ordered_ring<mpq_class> {
@@ -186,17 +179,6 @@ template<>
 struct underlying_totally_ordered_ring<mpz_class> {
   typedef mpz_class real_type;
 };
-
-template<>
-struct underlying_totally_ordered_ring<int> {
-  typedef int real_type;
-};
-
-template<>
-struct underlying_totally_ordered_ring<long> {
-  typedef long real_type;
-};
-
 
 
 
