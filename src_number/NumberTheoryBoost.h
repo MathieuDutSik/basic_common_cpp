@@ -80,11 +80,21 @@ struct is_totally_ordered<boost::multiprecision::cpp_rational> {
 
 
 template<>
-struct underlying_ring<boost::multiprecision::cpp_rational> {
+struct underlying_ring<boost::multiprecision::cpp_int> {
   typedef boost::multiprecision::cpp_int ring_type;
 };
 template<>
+struct underlying_ring<boost::multiprecision::cpp_rational> {
+  typedef boost::multiprecision::cpp_int ring_type;
+};
+
+
+template<>
 struct overlying_field<boost::multiprecision::cpp_int> {
+  typedef boost::multiprecision::cpp_rational field_type;
+};
+template<>
+struct overlying_field<boost::multiprecision::cpp_rational> {
   typedef boost::multiprecision::cpp_rational field_type;
 };
 
