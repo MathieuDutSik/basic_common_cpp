@@ -104,6 +104,12 @@ inline boost::multiprecision::cpp_int ResInt(boost::multiprecision::cpp_int cons
 {
   using T = boost::multiprecision::cpp_int;
   T q = a / b;
+  if (a < 0 && b * q != a) {
+    if (b > 0)
+      q--;
+    else
+      q++;
+  }
   T res = a - q * b;
   return res;
 }
@@ -111,6 +117,12 @@ inline boost::multiprecision::cpp_int QuoInt(boost::multiprecision::cpp_int cons
 {
   using T = boost::multiprecision::cpp_int;
   T q = a / b;
+  if (a < 0 && b * q != a) {
+    if (b > 0)
+      q--;
+    else
+      q++;
+  }
   return q;
 }
 
