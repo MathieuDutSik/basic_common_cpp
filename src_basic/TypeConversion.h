@@ -20,7 +20,9 @@ void NearestInteger_double_int(double const& xI, int & xO)
   //  std::cerr << "xI=" << xI << "\n";
   auto GetErr=[&](int const& u) -> double {
     double diff = double(u) - xI;
-    return T_abs(diff);
+    if (diff < 0)
+      return -diff;
+    return diff;
   };
   double err=GetErr(xRnd_z);
   //  std::cerr << "err=" << err << "\n";
@@ -107,7 +109,9 @@ void NearestInteger_double_To(double const& xI, To & xO)
     double u_doubl;
     TYPE_CONVERSION(u, u_doubl);
     double diff = u_doubl - xI;
-    return T_abs(diff);
+    if (diff < 0)
+      return -diff;
+    return diff;
   };
   double err=GetErr(xRnd_To);
   //  std::cerr << "err=" << err << "\n";
