@@ -278,6 +278,17 @@ private:
       pos++;
       return tmp;
     }
+    IteratorContain& operator--()
+    {
+      pos--;
+      return *this;
+    }
+    IteratorContain operator--(int)
+    {
+      IteratorContain tmp = *this;
+      pos--;
+      return tmp;
+    }
     bool operator!=(IteratorContain const& iter)
     {
       return pos != iter.pos;
@@ -285,6 +296,9 @@ private:
     bool operator==(IteratorContain const& iter)
     {
       return pos == iter.pos;
+    }
+    friend std::ptrdiff_t operator-(IteratorContain const& x, IteratorContain const& y) {
+      return x.pos - y.pos;
     }
   };
 public:
@@ -307,6 +321,34 @@ public:
     return IteratorContain(*this, n_face);
   }
 };
+
+
+template<>
+struct std::iterator_traits<typename vectface::iterator> {
+  using value_type = Face;
+  using difference_type = std::ptrdiff_t;
+};
+
+/*
+template<>
+void std::swap(Face & x, Face & y)
+{
+  size_t siz = x.size();
+  if (siz != y.size()) {
+    Face tmp = x;
+    x = y;
+    y = tmp;
+  } else {
+    for (size_t i=0; i<siz; i++) {
+      int val = x[i];
+      x[i] = y[i];
+      y[i] = val;
+    }
+  }
+}
+*/
+
+
 
 
 

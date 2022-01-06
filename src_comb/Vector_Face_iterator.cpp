@@ -16,6 +16,8 @@ int main()
     }
     vf.push_back(f);
   }
+  //
+  //  std::sort(vf.begin(), vf.end());
 
   for (auto & f : vf) {
     std::cerr << " |f|=" << f.size() << " / " << f.count() << "\n";

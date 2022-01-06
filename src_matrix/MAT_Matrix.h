@@ -823,8 +823,7 @@ bool IsVectorPositiveMultiple(MyVector<T> const&eVec1, MyVector<T> const&eVec2)
 	val2save=eVal2;
 	val1save=eVal1;
 	IsAssign=true;
-      }
-      else {
+      } else {
 	if (eVal2 != 0)
 	  return false;
       }
