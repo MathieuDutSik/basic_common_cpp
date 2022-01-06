@@ -827,8 +827,7 @@ bool IsVectorPositiveMultiple(MyVector<T> const&eVec1, MyVector<T> const&eVec2)
 	if (eVal2 != 0)
 	  return false;
       }
-    }
-    else {
+    } else {
       T eDiff=val2save * eVal1 - val1save * eVal2;
       if (eDiff != 0)
 	return false;
@@ -862,13 +861,11 @@ bool IsVectorMultiple(MyVector<T> const&eVec1, MyVector<T> const&eVec2)
 	val2save=eVal2;
 	val1save=eVal1;
 	IsAssign=true;
-      }
-      else {
+      } else {
 	if (eVal2 != 0)
 	  return false;
       }
-    }
-    else {
+    } else {
       T eDiff=val2save*eVal1 - val1save*eVal2;
       if (eDiff != 0)
 	return false;
@@ -1416,7 +1413,7 @@ void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat, MyVector<T> &e
     throw TerminalException{1};
   }
   for (iCol=0; iCol<nbCol; iCol++) {
-    T t=0;
+    T t = 0;
     for (iRow=0; iRow<n; iRow++)
       t += TheMat(iRow, iCol) * eVect(iRow);
     eVectImg(iCol)=t;
@@ -1459,7 +1456,7 @@ T DeterminantMatKernel(MyMatrix<T> const&TheMat)
 	for (size_t k=0; k<n; k++)
 	  WorkMat(k, j) -= alpha*WorkMat(k, jSel);
       }
-    TheDet=TheDet*WorkMat(i, jSel);
+    TheDet = TheDet*WorkMat(i, jSel);
   }
   int nbchg = 0;
   for (size_t i=0; i<n-1; i++)
@@ -1646,7 +1643,7 @@ bool IsZeroVector(MyVector<T> const& V)
 }
 
 // Given the equation Y = XA, we find one solution X if it exists.
-// 
+//
 template<typename T>
 std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const& eMat, MyVector<T> const& eVect)
 {
