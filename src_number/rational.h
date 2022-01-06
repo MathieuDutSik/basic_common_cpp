@@ -1,11 +1,11 @@
 #ifndef DEFINE_RATIONAL_H
 #define DEFINE_RATIONAL_H
 
-
+#include "TemplateTraits.h"
 
 /*
   A rational class supposed to build integers.
-  
+  Typical use would be for example Rational<long> which should be pretty fast.
  */
 template<typename Tint>
 struct Rational {
@@ -130,13 +130,77 @@ private: // A few internal functions.
     else
       return os << v.num << "/" << v.den;
   }
-  friend std::istream& operator>>(std::istream &is, QuadField<T,d> &v) {
-    XXXXX
+  friend std::istream& operator>>(std::istream &is, Rational<Tint> &v) {
+    char c;
+    str::string s;
+    size_t miss_val = std::numeric_limits<size_t>::max();
+    size_t pos_slash = miss_val;
+    size_t pos = 0;
+    while(true) {
+      is >> c;
+      if (c != ' ' && c != '\n') {
+        s += c;
+        pos++; // First character cannot be a slash
+        break;
+      }
+    }
+    while(true) {
+      if (is;eof())
+        break;
+      is >> c;
+      if (c == ' ' || c == '\n')
+        break;
+      s += c;
+      if (c == '/')
+        pos_slash = pos;
+      pos++;
+    }
+    //
+    if (pos_slash == miss_val) {
+      std::istringstream isN(s);
+      isN >> v.num;
+      v.den = 1;
+    } else {
+      std::string sN = s.substr(0,pos_slash);
+      std::string sD = s.substr(pos_slash+1, s.size() - 1 - pos_slash);
+      std::istringstream isN(sN);
+      isN >> v.num;
+      std::istringstream isD(sD);
+      isD >> v.den;
+    }
     return is;
   }
-
-
-
-
-
+  friend bool operator==(Rational<Tint> const&x, Rational<Tint> const&y) {
+    return (x.num == y.num) && (x.den == y.den);
+  }
+  friend bool operator!=(Rational<Tint> const&x, Rational<Tint> const&y) {
+    return (x.num != y.num) || (x.den != y.den);
+  }
+  friend bool operator!=(Rational<Tint> const&x, int const&y) {
+    if (x.den > 1)
+      return true;
+    return x.num != y;
+  }
+  friend bool operator>=(Rational<Tint> const& x, Rational<Tint> const& y) {
+    // x >= y is equivalent to x_n * y_d >= y_n * x_d
+    return x.num * y.den >= y.num * x.den;
+  }
+  friend bool operator<=(Rational<Tint> const& x, Rational<Tint> const& y) {
+    return x.num * y.den <= y.num * x.den;
+  }
+  friend bool operator<=(QuadField<T,d> const& x, int const& y) {
+    return x.num <= y * x.den;
+  }
+  friend bool operator>(Rational<Tint> const& x, Rational<Tint> const& y) {
+    return x.num * y.den > y.num * x.den;
+  }
+  friend bool operator<(Rational<Tint> const& x, Rational<Tint> const& y) {
+    return x.num * y.den < y.num * x.den;
+  }
+  friend bool operator<(Rational<Tint> const& x, int const& y) {
+    return x.num < y * x.den;
+  }
 };
+
+
+
