@@ -564,13 +564,13 @@ template<typename T>
 void WriteVectorGAP(std::ostream &os, MyVector<T> const & TheVec)
 {
   int n=TheVec.size();
-  os << "[";
+  os << "[ ";
   for (int i=0; i<n; i++) {
     if (i>0)
       os << ", ";
     os << TheVec(i);
   }
-  os << "]";
+  os << " ]";
 }
 
 
