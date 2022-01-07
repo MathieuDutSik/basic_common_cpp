@@ -1,4 +1,5 @@
-#include "NumberTheoryBoost.h"
+//#include "NumberTheoryBoost.h"
+#include "NumberTheory.h"
 #include "MAT_MatrixInt.h"
 
 
@@ -6,8 +7,8 @@
 int main(int argc, char *argv[])
 {
   //  using T=mpq_class;
-  //  using T=mpz_class;
-  using T=boost::multiprecision::cpp_int;
+  using T=mpz_class;
+  //  using T=boost::multiprecision::cpp_int;
   //  using T=int;
   //  using T=long;
   try {

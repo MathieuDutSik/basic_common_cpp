@@ -515,6 +515,14 @@ void WriteMatrixGAP(std::ostream &os, MyMatrix<T> const&TheMat)
   os << " ]";
 }
 
+template<typename T>
+std::string StringMatrixGAP(MyMatrix<T> const&TheMat)
+{
+  std::ostringstream os;
+  WriteMatrixGAP(os, TheMat);
+  return os.str();
+}
+
 
 template<typename T>
 void WriteVectorMatrixGAP(std::ostream &os, std::vector<MyMatrix<T>> const& l_mat)
