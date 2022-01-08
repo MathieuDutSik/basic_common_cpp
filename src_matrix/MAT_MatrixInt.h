@@ -1872,18 +1872,34 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
   write the equation system:
   sum_i lambda_i v^1_i = sum_j mu_j v^2_j
   with lambda and mu integer and deduce from there.
+  ---
+  This solution works even if the lattices are not full
+  dimensional. But this requires a little bit of additional processing.
  */
 template<typename T>
 MyMatrix<T> IntersectionLattice(MyMatrix<T> const& M1, MyMatrix<T> const& M2)
 {
-  int n=M1.rows();
+  int dim1 = M1.rows();
+  int dim2 = M2.rows();
+  int n=M1.cols();
+  if (n != M2.cols()) {
+    std::cerr << "The dimension of M1 and M2 should be the same\n";
+    throw TerminalException{1};
+  }
   MyMatrix<T> M1_M2 = Concatenate(M1, M2);
   MyMatrix<T> NSP = NullspaceIntMat(M1_M2);
-  std::vector<int> L(n);
-  for (int i=0; i<n; i++)
+  std::vector<int> L(dim1);
+  for (int i=0; i<dim1; i++)
     L[i]=i;
   MyMatrix<T> NSPred = SelectColumn(NSP, L);
-  return NSPred * M1;
+  MyMatrix<T> SpannSet = NSPred * M1;
+  if (dim1 == n && dim2 == n) {
+    if (SpannSet.rows() != n) {
+      std::cerr << "The dimension should be exactl n. Bug to be solved\n";
+      throw TerminalException{1};
+    }
+  }
+  return SpannSet;
 }
 
 
