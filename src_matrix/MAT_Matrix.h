@@ -2405,7 +2405,7 @@ MyMatrix<T> SortMatrix(MyMatrix<T> const& M)
 
 
 template<typename T>
-MyVector<T> GetMatrixColumn(MyMatrix<T> const& M, int const& iCol)
+MyVector<T> GetMatrixCol(MyMatrix<T> const& M, int const& iCol)
 {
   int nbRow=M.rows();
   MyVector<T> V(nbRow);
