@@ -52,6 +52,7 @@ private: // A few internal functions.
     num = num / gcd;
     den = den / gcd;
   }
+public:
   void operator+=(Rational<Tint> const&x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
@@ -203,6 +204,54 @@ private: // A few internal functions.
   }
 };
 
+namespace std {
+  template<typename Tint>
+  std::string to_string(const Rational<Tint>& e_val)
+  {
+    std::stringstream s;
+    s << e_val;
+    std::string converted(s.str());
+    return converted;
+  };
+}
+
+
+template<typename Tint>
+struct is_euclidean_domain<Rational<Tint>> {
+  static const bool value = true;
+};
+
+template<typename Tint>
+struct is_exact_arithmetic<Rational<Tint>> {
+  static const bool value = is_exact_arithmetic<Tint>::value;
+};
+
+template<typename Tint>
+struct is_implementation_of_Z<Rational<Tint>> {
+  static const bool value = false;
+};
+
+template<typename Tint>
+struct is_ring_field<Rational<Tint>> {
+  static const bool value = true;
+};
+
+template<typename Tint>
+struct is_totally_ordered<Rational<Tint>> {
+  static const bool value = true;
+};
+
+template<typename Tint>
+struct underlying_ring<Rational<Tint>> {
+  typedef Tint ring_type;
+};
+
+/*
+template<typename Tint>
+struct overlying_field<Tint> {
+  typedef Rational<Tint> field_type;
+};
+*/
 
 
 #endif
