@@ -30,16 +30,14 @@ class QuadField {
     b=0;
   }
   QuadField<T,d> operator=(int const& u) { // assignment operator from int
-    QuadField<T,d> x;
-    x.a=u;
-    x.b=0;
-    return x;
+    a = u;
+    b = 0;
+    return *this;
   }
   QuadField<T,d> operator=(QuadField<T,d> const& x) { // assignment operator
-    QuadField<T,d> y;
-    y.a=x.a;
-    y.b=x.b;
-    return y;
+    a = x.a;
+    b = x.b;
+    return *this;
   }
   //
   // Arithmetic operators below:
