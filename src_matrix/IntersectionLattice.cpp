@@ -1,9 +1,11 @@
 #include "NumberTheory.h"
+#include "rational.h"
 #include "MAT_MatrixInt.h"
 int main(int argc, char *argv[])
 {
   //  using T=mpz_class;
-  using T=mpq_class;
+  //  using T=mpq_class;
+  using T=Rational<long long>;
   try {
     int n=4;
     auto get_fullrank=[&]() -> MyMatrix<T> {
@@ -35,8 +37,10 @@ int main(int argc, char *argv[])
         }
       }
     }
+    std::cerr << "Normal termination of the program\n";
   }
   catch (TerminalException const& e) {
     exit(e.eVal);
+    std::cerr << "Erroneous termination of the program\n";
   }
 }

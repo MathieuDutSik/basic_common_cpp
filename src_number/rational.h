@@ -31,6 +31,12 @@ public:
     den = x.den;
     return *this;
   }
+  const Tint& get_num() const {
+    return num;
+  }
+  const Tint& get_den() const {
+    return den;
+  }
 private: // A few internal functions.
   static Tint comp_gcd(Tint const& m, Tint const& n) {
     Tint f = m;
@@ -73,12 +79,30 @@ public:
     z.gcd_reduction();
     return z;
   }
+  friend Rational<Tint> operator+(Tint const&x, Rational<Tint> const&y) {
+    Rational<Tint> z;
+    z.num = x * y.den + y.num;
+    z.den = y.den;
+    return z;
+  }
+  friend Rational<Tint> operator+(Rational<Tint> const&x, Tint const&y) {
+    Rational<Tint> z;
+    z.num = x.num + y * x.den;
+    z.den = x.den;
+    return z;
+  }
   friend Rational<Tint> operator-(Rational<Tint> const&x, Rational<Tint> const&y) {
     Rational<Tint> z;
     Tint gcd = Rational<Tint>::comp_gcd(x.den, x.den);
     z.den = x.den * y.den / gcd;
     z.num = x.num * (y.den / gcd) - y.num * (x.den/gcd);
     z.gcd_reduction();
+    return z;
+  }
+  friend Rational<Tint> operator-(Rational<Tint> const& x) {
+    Rational<Tint> z;
+    z.num = -x.num;
+    z.den = x.den;
     return z;
   }
   friend Rational<Tint> operator/(int const&x, Rational<Tint> const&y) {
@@ -121,6 +145,20 @@ public:
     Rational<Tint> z;
     z.num = x * y.num;
     z.den = y.den;
+    z.gcd_reduction();
+    return z;
+  }
+  friend Rational<Tint> operator*(Tint const&x, Rational<Tint> const&y) {
+    Rational<Tint> z;
+    z.num = x * y.num;
+    z.den = y.den;
+    z.gcd_reduction();
+    return z;
+  }
+  friend Rational<Tint> operator*(Rational<Tint> const&x, Tint const&y) {
+    Rational<Tint> z;
+    z.num = x.num * y;
+    z.den = x.den;
     z.gcd_reduction();
     return z;
   }
@@ -243,6 +281,86 @@ template<typename Tint>
 struct underlying_ring<Rational<Tint>> {
   typedef Tint ring_type;
 };
+
+
+template<typename Tint>
+struct underlying_totally_ordered_ring<Rational<Tint>> {
+  typedef Rational<Tint> real_type;
+};
+
+template<typename Tint>
+inline Rational<Tint> T_NormGen(Rational<Tint> const& x)
+{
+  return T_abs(x);
+}
+
+template<typename Tint>
+inline std::pair<Rational<Tint>,Rational<Tint>> ResQuoInt_kernel(Rational<Tint> const& a, Rational<Tint> const& b)
+{
+  // a = a_n / a_d
+  // b = b_n / b_d
+  // a = res + q * b  with 0 <= res < |b|
+  // equivalent to
+  // a_n / a_d = res + q * (b_n / b_d)
+  // equivalent to
+  // a_n * b_d = res * a_d * b_d + (q * a_d) * b_n
+  using Tf= Rational<Tint>;
+  Tint a_n = a.get_num();
+  Tint b_n = b.get_num();
+  Tint a_d = a.get_den();
+  Tint b_d = b.get_den();
+  Tint a1 = a_n * b_d;
+  Tint b1 = a_d * b_n;
+  Tint q = a1 / b1;
+  Tf res = a - q * b;
+  int sign;
+  Tf b_abs;
+  if (b < 0) {
+    sign = -1;
+    b_abs = -b;
+  } else {
+    sign = 1;
+    b_abs = b;
+  }
+  while(true) {
+    if (res < 0) {
+      res += b_abs;
+      q -= sign;
+    } else {
+      if (res >= b_abs) {
+        res -= b_abs;
+        q += sign;
+      } else {
+        if (res + q * b != a) {
+          std::cerr << "Some error somewhere\n";
+          std::cerr << "a=" << a << " b=" << b << "\n";
+          std::cerr << "res=" << res << " q=" << q << "\n";
+          Tf val = res + q * b;
+          Tf val1 = q * b;
+          Tf val2 = res + val1;
+          std::cerr << "v=" << val << " val1=" << val1 << " val2=" << val2 << "\n";
+          throw TerminalException{1};
+        }
+        return {res,q};
+      }
+    }
+  }
+}
+
+template<typename Tint>
+inline Rational<Tint> ResInt(Rational<Tint> const& a, Rational<Tint> const& b)
+{
+  return ResQuoInt_kernel(a, b).first;
+}
+
+template<typename Tint>
+inline Rational<Tint> QuoInt(Rational<Tint> const& a, Rational<Tint> const& b)
+{
+  return ResQuoInt_kernel(a, b).second;
+}
+
+
+
 
 /*
 template<typename Tint>
