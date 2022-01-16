@@ -3,7 +3,7 @@
 int main(int argc, char *argv[])
 {
   //  using T=mpq_class;
-    using T=mpz_class;
+  using T=mpz_class;
   //  using T=int;
   //  using T=long;
   try {

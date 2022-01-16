@@ -32,7 +32,7 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number -I../src_comb
 
 
-CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
+CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
 
 LIBS		= -lm $(GMP_CXX_LINK) $(BOOST_LINK) -pthread
 

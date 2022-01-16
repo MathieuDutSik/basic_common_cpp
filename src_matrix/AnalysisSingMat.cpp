@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
     };
     for (int iRow=0; iRow<nbRow; iRow++) {
       double eEig=ListEig(iRow);
-      MyVector<double> eCol=GetMatrixColumn(ListVect, iRow);
+      MyVector<double> eCol=GetMatrixCol(ListVect, iRow);
       MyVector<double> TheDiff = eEig * eCol - eMat * eCol;
       //      double err=TheDiff.cwiseAbs().maxCoeff();
       //      std::cerr << "iRow=" << iRow << " eEig=" << eEig << " err=" << err << "\n";
