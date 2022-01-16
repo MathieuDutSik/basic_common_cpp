@@ -119,13 +119,6 @@ struct underlying_ring<mpq_class> {
   typedef mpz_class ring_type;
 };
 
-
-mpz_class GetRingElement(mpq_class const& eVal)
-{
-  return eVal.get_num();
-}
-
-
 //
 // Overlying field
 // For some operations, we do need divisions and we need

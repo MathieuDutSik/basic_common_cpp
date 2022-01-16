@@ -341,7 +341,7 @@ inline std::pair<Rational<Tint>,Rational<Tint>> ResQuoInt_kernel(Rational<Tint> 
           std::cerr << "v=" << val << " val1=" << val1 << " val2=" << val2 << "\n";
           throw TerminalException{1};
         }
-        return {res,q};
+        return {res,q}; // Conversion of q from Tint to Rational<Tint> occurring here.
       }
     }
   }
