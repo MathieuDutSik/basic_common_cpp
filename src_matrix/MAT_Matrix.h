@@ -11,7 +11,7 @@
 #include "hash_functions.h"
 #include "MatrixTypes.h"
 
-
+//#define DEBUG_MAT_MATRIX
 
 
 namespace boost::serialization {
@@ -909,7 +909,10 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
   int nbRow=Input.rows();
   int nbCol=Input.cols();
   T prov1;
-#ifdef DEBUG
+#ifdef DEBUG_MAT_MATRIX
+  std::cerr << "TMat_Inverse_destroy, step 1\n";
+#endif
+#ifdef DEBUG_MAT_MATRIX
   if (nbRow != nbCol) {
     std::cerr << "Error on nbRow, nbCol in TMat_Inverse_destroy";
     throw TerminalException{1};
@@ -923,8 +926,16 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 	prov1=0;
       Output(iRow,iCol)=prov1;
     }
+#ifdef DEBUG_MAT_MATRIX
+  std::cerr << "TMat_Inverse_destroy, step 2\n";
+#endif
   int iColFound;
   for (iRow=0; iRow<nbRow; iRow++) {
+#ifdef DEBUG_MAT_MATRIX
+    std::cerr << "iRow=" << iRow << "\n";
+    std::cerr << "Input=\n";
+    WriteMatrix(std::cerr, Input);
+#endif
     iColFound=-1;
     prov1=0;
     for (iCol=iRow; iCol<nbCol; iCol++)
@@ -935,7 +946,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
 	  prov1 = 1 / prov1;
 	}
       }
-#ifdef DEBUG
+#ifdef DEBUG_MAT_MATRIX
     if (prov1 == 0) {
       std::cerr << "Error during the computation of the matrix inverse\n";
       throw TerminalException{1};
@@ -962,6 +973,9 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output)
         std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
     }
   }
+#ifdef DEBUG_MAT_MATRIX
+  std::cerr << "TMat_Inverse_destroy, step 3\n";
+#endif
 }
 
 template<typename T>

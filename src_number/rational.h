@@ -22,16 +22,14 @@ public:
   Rational(Rational<Tint> const& x) : num(x.num), den(x.den) {
   }
   Rational<Tint> operator=(int const& u) { // assignment operator from int
-    Rational<Tint> x;
-    x.num = u;
-    x.den = 1;
-    return x;
+    num = u;
+    den = 1;
+    return *this;
   }
   Rational<Tint> operator=(Rational<Tint> const& x) { // assignment operator
-    Rational<Tint> y;
-    y.num = x.num;
-    y.den = x.den;
-    return y;
+    num = x.num;
+    den = x.den;
+    return *this;
   }
 private: // A few internal functions.
   static Tint comp_gcd(Tint const& m, Tint const& n) {

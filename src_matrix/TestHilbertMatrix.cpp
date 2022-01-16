@@ -22,6 +22,10 @@ int main(int argc, char *argv[])
         eMat(i,j) = 1 / val;
       }
     }
+    std::cerr << "eMat=\n";
+    WriteMatrix(std::cerr, eMat);
+
+    
     MyMatrix<T> eInv = Inverse(eMat);
     std::cerr << "eInv=\n";
     WriteMatrix(std::cerr, eInv);
