@@ -1,9 +1,10 @@
 #include "NumberTheory.h"
+#include "rational.h"
 #include "MAT_Matrix.h"
 int main(int argc, char *argv[])
 {
-  using T=mpq_class;
-  //  using T=mpz_class;
+  //  using T=mpq_class;
+  using T=Rational<long>;
   try {
     if (argc != 2) {
       fprintf(stderr, "TestHilbertMatrix is used as\n");
@@ -13,10 +14,10 @@ int main(int argc, char *argv[])
     // reading the matrix
     int n;
     sscanf(argv[1], "%d", &n);
-    int siz = 2;
-    MyMatrix<T> eMat(n,m);
+    //
+    MyMatrix<T> eMat(n,n);
     for (int i=0; i<n; i++) {
-      for (int j=0; j<m; j++) {
+      for (int j=0; j<n; j++) {
         T val = i + j + 1;
         eMat(i,j) = 1 / val;
       }

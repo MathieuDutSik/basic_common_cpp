@@ -34,7 +34,7 @@ public:
     return y;
   }
 private: // A few internal functions.
-  Tint comp_gcd(Tint const& m, Tint const& n) {
+  static Tint comp_gcd(Tint const& m, Tint const& n) {
     Tint f = m;
     if (m < 0) f = -m;
     Tint g = n;
@@ -68,17 +68,18 @@ private: // A few internal functions.
   }
   friend Rational<Tint> operator+(Rational<Tint> const&x, Rational<Tint> const&y) {
     Rational<Tint> z;
-    Tint gcd = comp_gcd(den, x.den);
+    Tint gcd = Rational<Tint>::comp_gcd(x.den, x.den);
     z.den = y.den * x.den / gcd;
     z.num = y.num * (x.den / gcd) + x.num * (y.den/gcd);
-    gcd_reduction();
+    z.gcd_reduction();
     return z;
   }
   friend Rational<Tint> operator-(Rational<Tint> const&x, Rational<Tint> const&y) {
-    Tint gcd = comp_gcd(den, x.den);
+    Rational<Tint> z;
+    Tint gcd = Rational<Tint>::comp_gcd(x.den, x.den);
     z.den = x.den * y.den / gcd;
     z.num = x.num * (y.den / gcd) - y.num * (x.den/gcd);
-    gcd_reduction();
+    z.gcd_reduction();
     return z;
   }
   friend Rational<Tint> operator/(int const&x, Rational<Tint> const&y) {
@@ -90,7 +91,7 @@ private: // A few internal functions.
       z.num = -x * y.den;
       z.den = -y.num;
     }
-    gcd_reduction();
+    z.gcd_reduction();
     return z;
   }
   friend Rational<Tint> operator/(Rational<Tint> const&x, Rational<Tint> const&y) {
@@ -102,7 +103,7 @@ private: // A few internal functions.
       z.num = -x.num * y.den;
       z.den = -x.den * y.num;
     }
-    gcd_reduction();
+    z.gcd_reduction();
     return z;
   }
   void operator*=(Rational<Tint> const& x) {
@@ -110,18 +111,18 @@ private: // A few internal functions.
     den = den * x.den;
     gcd_reduction();
   }
-  friend QuadField<T,d> operator*(QuadField<T,d> const&x, QuadField<T,d> const&y) {
+  friend Rational<Tint> operator*(Rational<Tint> const&x, Rational<Tint> const&y) {
     Rational<Tint> z;
     z.num = x.num * y.num;
     z.den = x.den * y.den;
-    gcd_reduction();
+    z.gcd_reduction();
     return z;
   }
   friend Rational<Tint> operator*(int const&x, Rational<Tint> const&y) {
     Rational<Tint> z;
     z.num = x * y.num;
     z.den = y.den;
-    gcd_reduction();
+    z.gcd_reduction();
     return z;
   }
   friend std::ostream& operator<<(std::ostream& os, Rational<Tint> const &v) {
@@ -132,7 +133,7 @@ private: // A few internal functions.
   }
   friend std::istream& operator>>(std::istream &is, Rational<Tint> &v) {
     char c;
-    str::string s;
+    std::string s;
     size_t miss_val = std::numeric_limits<size_t>::max();
     size_t pos_slash = miss_val;
     size_t pos = 0;
@@ -145,7 +146,7 @@ private: // A few internal functions.
       }
     }
     while(true) {
-      if (is;eof())
+      if (is.eof())
         break;
       is >> c;
       if (c == ' ' || c == '\n')
@@ -188,7 +189,7 @@ private: // A few internal functions.
   friend bool operator<=(Rational<Tint> const& x, Rational<Tint> const& y) {
     return x.num * y.den <= y.num * x.den;
   }
-  friend bool operator<=(QuadField<T,d> const& x, int const& y) {
+  friend bool operator<=(Rational<Tint> const& x, int const& y) {
     return x.num <= y * x.den;
   }
   friend bool operator>(Rational<Tint> const& x, Rational<Tint> const& y) {
@@ -204,3 +205,4 @@ private: // A few internal functions.
 
 
 
+#endif
