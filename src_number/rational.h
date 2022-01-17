@@ -490,7 +490,7 @@ inline void CeilInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
 {
   Rational<Tint> fr = FractionalPart(xI);
   if (fr == 0) {
-    xO = x;
+    xO = xI;
   } else {
     xO = 1 + xI - fr;
   }
