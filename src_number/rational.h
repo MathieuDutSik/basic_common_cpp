@@ -360,14 +360,22 @@ inline Rational<Tint> QuoInt(Rational<Tint> const& a, Rational<Tint> const& b)
 }
 
 
+// OVerlying fields, the original motivation
 
-
-/*
-template<typename Tint>
-struct overlying_field<Tint> {
-  typedef Rational<Tint> field_type;
+template<>
+struct overlying_field<int> {
+  typedef Rational<int> field_type;
 };
-*/
+
+template<>
+struct overlying_field<short> {
+  typedef Rational<short> field_type;
+};
+
+template<>
+struct overlying_field<long> {
+  typedef Rational<long> field_type;
+};
 
 
 #endif

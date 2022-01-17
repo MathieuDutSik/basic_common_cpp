@@ -41,6 +41,17 @@ template<typename T>
 struct overlying_field {
 };
 
+template<>
+struct overlying_field<double> {
+  typedef double field_type;
+};
+
+template<>
+struct overlying_field<float> {
+  typedef float field_type;
+};
+
+
 // underlying_ring
 
 template<typename T>

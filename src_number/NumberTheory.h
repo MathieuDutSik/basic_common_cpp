@@ -96,20 +96,7 @@ struct underlying_ring<mpq_class> {
 };
 
 //
-// Overlying field
-// For some operations, we do need divisions and we need
-// a canonical way to do the conversion
 //
-
-template<>
-struct overlying_field<double> {
-  typedef double field_type;
-};
-
-template<>
-struct overlying_field<float> {
-  typedef float field_type;
-};
 
 template<>
 struct overlying_field<mpz_class> {
@@ -117,27 +104,9 @@ struct overlying_field<mpz_class> {
 };
 
 template<>
-struct overlying_field<int> {
-  typedef mpq_class field_type;
-};
-
-template<>
-struct overlying_field<long> {
-  typedef mpq_class field_type;
-};
-
-/*
-template<>
-struct overlying_field<int64_t> {
-  typedef mpq_class field_type;
-};
-*/
-
-template<>
 struct overlying_field<mpq_class> {
   typedef mpq_class field_type;
 };
-
 
 template<>
 struct underlying_totally_ordered_ring<mpq_class> {
