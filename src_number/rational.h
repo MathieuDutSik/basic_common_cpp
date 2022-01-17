@@ -489,9 +489,11 @@ template<typename Tint>
 inline void CeilInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
 {
   Rational<Tint> fr = FractionalPart(xI);
-  if (fr == 0)
-    return x;
-  xO = 1 + xI - fr;
+  if (fr == 0) {
+    xO = x;
+  } else {
+    xO = 1 + xI - fr;
+  }
 }
 
 template<typename Tint>
