@@ -132,7 +132,7 @@ void WriteGCD_int(std::ostream & os, GCD_int<T> const& eGCD)
 
 
 template<typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
+inline typename std::enable_if<(not std::is_same_v<T,mpz_class>),GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
   //  std::cerr << "m=" << m << " n=" << n << "\n";
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in ComputePairGcd");
@@ -187,7 +187,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),GCD_int<T>>::type Co
 }
 
 template<typename T>
-inline typename std::enable_if<is_mpz_class<T>::value,GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
+inline typename std::enable_if<std::is_same_v<T,mpz_class>,GCD_int<T>>::type ComputePairGcd(T const& m, T const& n)
 {
   mpz_class eGCD;
   if (n == 0 && m == 0) {

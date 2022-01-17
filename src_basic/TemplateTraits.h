@@ -227,20 +227,7 @@ struct is_float_arithmetic<double> {
   static const bool value = true;
 };
 
-// Trait definition for is_mpq
-
-template <typename T>
-struct is_mpq_class {
-  static const bool value = false;
-};
-
-// Trait definition for is_mpz
-
-template <typename T>
-struct is_mpz_class {
-  static const bool value = false;
-};
-
+// Trait definition for underlying ring
 
 template<typename T>
 struct underlying_totally_ordered_ring {

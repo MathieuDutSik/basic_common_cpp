@@ -70,20 +70,6 @@ struct is_exact_arithmetic<mpq_class> {
   static const bool value = true;
 };
 
-// is_mpq_class
-
-template <>
-struct is_mpq_class<mpq_class> {
-  static const bool value = true;
-};
-
-// is_mpz_class
-
-template <>
-struct is_mpz_class<mpz_class> {
-  static const bool value = true;
-};
-
 //
 // Underlying ring
 // For some operations, we do not need divisions
@@ -496,7 +482,7 @@ T GenericGcd(T const& m, T const& n)
 
 
 template<typename T>
-inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelGcdPair(T const& a, T const& b)
+inline typename std::enable_if<std::is_same_v<T,mpz_class>,T>::type KernelGcdPair(T const& a, T const& b)
 {
   mpz_class eGCD;
   mpz_gcd(eGCD.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
@@ -504,7 +490,7 @@ inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelGcdPair(T c
 }
 
 template<typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelGcdPair(T const& a, T const& b)
+inline typename std::enable_if<(not std::is_same_v<T,mpz_class>),T>::type KernelGcdPair(T const& a, T const& b)
 {
   return GenericGcd(a, b);
 }
@@ -528,7 +514,7 @@ inline typename std::enable_if<(not is_totally_ordered<T>::value),T>::type GcdPa
 
 
 template<typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelLCMpair(T const& a, T const& b)
+inline typename std::enable_if<(not std::is_same_v<T,mpz_class>),T>::type KernelLCMpair(T const& a, T const& b)
 {
   if (a == 0)
     return b;
@@ -538,7 +524,7 @@ inline typename std::enable_if<(not is_mpz_class<T>::value),T>::type KernelLCMpa
 }
 
 template<typename T>
-inline typename std::enable_if<is_mpz_class<T>::value,T>::type KernelLCMpair(T const& a, T const& b)
+inline typename std::enable_if<std::is_same_v<T,mpz_class>,T>::type KernelLCMpair(T const& a, T const& b)
 {
   mpz_class eLCM;
   mpz_lcm(eLCM.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
