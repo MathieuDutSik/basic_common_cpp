@@ -23,9 +23,11 @@ public:
   }
   Rational(Tint const& x) : num(x), den(1) {
   }
+  Rational(Tint const& num, Tint const& den) : num(num), den(den) {
+  }
   Rational(Rational<Tint> const& x) : num(x.num), den(x.den) {
   }
-  Rational<Tint> operator=(int const& u) { // assignment operator from int
+  Rational<Tint> operator=(Tint const& u) { // assignment operator from int
     num = u;
     den = 1;
     return *this;
@@ -465,6 +467,60 @@ inline Tint GetDenominator_z(Rational<Tint> const& x)
 {
   return x.get_den();
 }
+
+// Fllor / Ceil / Nearest operations
+
+template<typename Tint>
+Rational<Tint> FractionalPart(Rational<Tint> const& x)
+{
+  Tint res = ResInt(x.num, x.den);
+  Rational<Tint> fr(res, x.den);
+  return fr;
+}
+
+template<typename Tint>
+inline void FloorInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
+{
+  Rational<Tint> fr = FractionalPart(x);
+  return x - fr;
+}
+
+template<typename Tint>
+inline void CeilInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
+{
+  Rational<Tint> fr = FractionalPart(x);
+  if (fr == 0)
+    return x;
+  return 1 + x - fr;
+}
+
+template<typename Tint>
+Rational<Tint> NearestInteger_rni(Rational<Tint> const& a)
+{
+  Rational<Tint> fr = FractionalPart(a);
+  Rational<Tint> eDiff1 = fr;
+  Rational<Tint> eDiff2 = 1 - fr;
+  Rational<Tint> RetVal = x - fr;
+  if (eDiff1 <= eDiff2) {
+    return RetVal;
+  } else {
+    return 1 + RetVal;
+  }
+}
+
+template<typename Tint>
+inline void NearestInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
+{
+  xO = NearestInteger_rni(xI);
+}
+
+inline void NearestInteger(Rational<Tint> const& xI, Tint & xO)
+{
+  Rational<Tint> xO_q = NearestInteger_rni(xI);
+  xO = xO_q.get_num();
+}
+
+
 
 
 #endif

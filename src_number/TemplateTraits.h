@@ -244,5 +244,4 @@ struct underlying_totally_ordered_ring<long> {
 };
 
 
-
 #endif
