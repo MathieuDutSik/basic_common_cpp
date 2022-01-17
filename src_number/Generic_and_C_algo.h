@@ -2,6 +2,7 @@
 #define INCLUDE_GENERIC_AND_C_ALGO_H
 
 
+#include <cstdlib>
 
 // The remainder and quotient of integers
 
