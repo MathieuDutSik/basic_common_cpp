@@ -502,7 +502,7 @@ Rational<Tint> NearestInteger_rni(Rational<Tint> const& a)
   Rational<Tint> fr = FractionalPart(a);
   Rational<Tint> eDiff1 = fr;
   Rational<Tint> eDiff2 = 1 - fr;
-  Rational<Tint> RetVal = x - fr;
+  Rational<Tint> RetVal = a - fr;
   if (eDiff1 <= eDiff2) {
     return RetVal;
   } else {
