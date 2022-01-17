@@ -61,6 +61,25 @@ private: // A few internal functions.
     den = den / gcd;
   }
 public:
+  void operator/=(Rational<Tint> const&x) {
+    if (x.num > 0) {
+      num *= x.den;
+      den *= x.num;
+    } else {
+      num *= -x.den;
+      den *= -x.num;
+    }
+    gcd_reduction();
+  }
+  void operator/=(Tint const&x) {
+    if (x > 0) {
+      den *= x;
+    } else {
+      num = - num;
+      den *= -x;
+    }
+    gcd_reduction();
+  }
   void operator+=(Rational<Tint> const&x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
