@@ -516,6 +516,7 @@ inline void NearestInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
   xO = NearestInteger_rni(xI);
 }
 
+template<typename Tint>
 inline void NearestInteger(Rational<Tint> const& xI, Tint & xO)
 {
   Rational<Tint> xO_q = NearestInteger_rni(xI);
