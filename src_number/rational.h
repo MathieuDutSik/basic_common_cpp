@@ -418,7 +418,19 @@ inline void TYPE_CONVERSION(long const& a1, Rational<long> & a2)
   a2 = a1;
 }
 
+// Obtention of denominators
 
+template<typename Tint>
+inline Rational<Tint> GetDenominator(Rational<Tint> const& x)
+{
+  return x.get_den();
+}
+
+template<typename Tint>
+inline Tint GetDenominator_z(Rational<Tint> const& x)
+{
+  return x.get_den();
+}
 
 
 #endif
