@@ -23,8 +23,6 @@ public:
   }
   Rational(Tint const& x) : num(x), den(1) {
   }
-  Rational(int const& x) : num(x), den(1) {
-  }
   Rational(Rational<Tint> const& x) : num(x.num), den(x.den) {
   }
   Rational<Tint> operator=(int const& u) { // assignment operator from int
@@ -111,7 +109,7 @@ public:
     z.den = x.den;
     return z;
   }
-  friend Rational<Tint> operator/(int const&x, Rational<Tint> const&y) {
+  friend Rational<Tint> operator/(Tint const&x, Rational<Tint> const&y) {
     Rational<Tint> z;
     if (y.num > 0) {
       z.num = x * y.den;
@@ -144,13 +142,6 @@ public:
     Rational<Tint> z;
     z.num = x.num * y.num;
     z.den = x.den * y.den;
-    z.gcd_reduction();
-    return z;
-  }
-  friend Rational<Tint> operator*(int const&x, Rational<Tint> const&y) {
-    Rational<Tint> z;
-    z.num = x * y.num;
-    z.den = y.den;
     z.gcd_reduction();
     return z;
   }
@@ -220,7 +211,7 @@ public:
   friend bool operator!=(Rational<Tint> const&x, Rational<Tint> const&y) {
     return (x.num != y.num) || (x.den != y.den);
   }
-  friend bool operator!=(Rational<Tint> const&x, int const&y) {
+  friend bool operator!=(Rational<Tint> const&x, Tint const&y) {
     if (x.den > 1)
       return true;
     return x.num != y;
@@ -232,7 +223,7 @@ public:
   friend bool operator<=(Rational<Tint> const& x, Rational<Tint> const& y) {
     return x.num * y.den <= y.num * x.den;
   }
-  friend bool operator<=(Rational<Tint> const& x, int const& y) {
+  friend bool operator<=(Rational<Tint> const& x, Tint const& y) {
     return x.num <= y * x.den;
   }
   friend bool operator>(Rational<Tint> const& x, Rational<Tint> const& y) {
@@ -241,7 +232,7 @@ public:
   friend bool operator<(Rational<Tint> const& x, Rational<Tint> const& y) {
     return x.num * y.den < y.num * x.den;
   }
-  friend bool operator<(Rational<Tint> const& x, int const& y) {
+  friend bool operator<(Rational<Tint> const& x, Tint const& y) {
     return x.num < y * x.den;
   }
 };
