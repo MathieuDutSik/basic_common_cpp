@@ -383,5 +383,51 @@ struct overlying_field<long> {
   typedef Rational<long> field_type;
 };
 
+// The conversion tools (int)
+
+inline void TYPE_CONVERSION(Rational<int> const& a1, Rational<int> & a2)
+{
+  a2 = a1;
+}
+
+inline void TYPE_CONVERSION(Rational<int> const& a1, int & a2)
+{
+  const int& den = a1.get_den();
+  if (den != 1) {
+    std::string str_err = "The denominator should be 1. It is den = " + std::to_string(den);
+    throw ConversionError{str_err};
+  }
+  a2 = a1.get_num();
+}
+
+inline void TYPE_CONVERSION(int const& a1, Rational<int> & a2)
+{
+  a2 = a1;
+}
+
+// The conversion tools (long)
+
+inline void TYPE_CONVERSION(Rational<long> const& a1, Rational<long> & a2)
+{
+  a2 = a1;
+}
+
+inline void TYPE_CONVERSION(Rational<long> const& a1, long & a2)
+{
+  const long& den = a1.get_den();
+  if (den != 1) {
+    std::string str_err = "The denominator should be 1. It is den = " + std::to_string(den);
+    throw ConversionError{str_err};
+  }
+  a2 = a1.get_num();
+}
+
+inline void TYPE_CONVERSION(long const& a1, Rational<long> & a2)
+{
+  a2 = a1;
+}
+
+
+
 
 #endif
