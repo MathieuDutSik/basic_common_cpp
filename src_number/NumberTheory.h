@@ -20,31 +20,7 @@ struct is_implementation_of_Z<mpq_class> {
   static const bool value = false;
 };
 
-
-
-
 // is_euclidean_domain property
-
-
-template <>
-struct is_euclidean_domain<short> {
-  static const bool value = true;
-};
-
-template <>
-struct is_euclidean_domain<long> {
-  static const bool value = true;
-};
-
-template <>
-struct is_euclidean_domain<int> {
-  static const bool value = true;
-};
-
-template <>
-struct is_euclidean_domain<long long> {
-  static const bool value = true;
-};
 
 template <>
 struct is_euclidean_domain<mpz_class> {
@@ -341,8 +317,7 @@ inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
   mpz_class b_num_pos;
   if (b_num < 0) {
     b_num_pos=-b_num;
-  }
-  else {
+  } else {
     b_num_pos=b_num;
   }
   mpz_class res_z=a_num % b_num_pos;
@@ -862,12 +837,9 @@ inline mpq_class FractionalPart(mpq_class const& x)
 {
   mpz_class eNum=x.get_num();
   mpz_class eDen=x.get_den();
-  //  std::cerr << "FRAC eNum=" << eNum << " eDen=" << eDen << "\n";
   mpz_class res;
   mpz_mod(res.get_mpz_t(), eNum.get_mpz_t(), eDen.get_mpz_t());
-  //  std::cerr << " res=" << res << "\n";
   mpq_class eRet=mpq_class(res, eDen);
-  //  std::cerr << "x=" << x << " eRet=" << eRet << "\n";
   return eRet;
 }
 
@@ -952,8 +924,7 @@ inline mpq_class NearestInteger_rni(mpq_class const& x)
   mpq_class RetVal=x-eFrac;
   if (eDiff1 <= eDiff2) {
     return RetVal;
-  }
-  else {
+  } else {
     return RetVal+1;
   }
 }
@@ -963,14 +934,12 @@ inline mpq_class NearestInteger_rni(mpq_class const& x)
 
 inline void NearestInteger(mpq_class const& xI, mpq_class & xO)
 {
-  //  std::cerr << "NearestInteger mpq -> mpq\n";
   xO=NearestInteger_rni(xI);
 }
 
 
 inline void NearestInteger(mpq_class const& xI, mpz_class & xO)
 {
-  //  std::cerr << "NearestInteger mpq -> mpz\n";
   mpq_class xO_q=NearestInteger_rni(xI);
   xO=xO_q.get_num();
 }
@@ -1049,31 +1018,25 @@ namespace boost::serialization {
   template<class Archive>
   inline void load(Archive & ar, mpq_class & val, [[maybe_unused]] const unsigned int version)
   {
-    //      std::cerr << "load(mpq_class), step 1\n";
     std::string str;
     ar & make_nvp("mpq", str);
     std::istringstream is(str);
     is >> val;
-    //      std::cerr << "load(mpq_class), step 2\n";
   }
 
   template<class Archive>
   inline void save(Archive & ar, mpq_class const& val, [[maybe_unused]] const unsigned int version)
   {
-    //      std::cerr << "save(mpq_class), step 1\n";
     std::ostringstream os;
     os << val;
     std::string str=os.str();
     ar & make_nvp("mpq", str);
-    //      std::cerr << "save(mpq_class), step 2\n";
   }
 
   template<class Archive>
   inline void serialize(Archive & ar, mpq_class & val, [[maybe_unused]] const unsigned int version)
   {
-    //      std::cerr << "split_free(mpq_class), step 1\n";
     split_free(ar, val, version);
-    //      std::cerr << "split_free(mpq_class), step 2\n";
   }
 
   // mpz_class
@@ -1081,37 +1044,28 @@ namespace boost::serialization {
   template<class Archive>
   inline void load(Archive & ar, mpz_class & val, [[maybe_unused]] const unsigned int version)
   {
-    //      std::cerr << "load(mpz_class), step 1\n";
     std::string str;
     ar & make_nvp("mpz", str);
     std::istringstream is(str);
     is >> val;
-    //      std::cerr << "load(mpz_class), step 2\n";
   }
 
   template<class Archive>
   inline void save(Archive & ar, mpz_class const& val, [[maybe_unused]] const unsigned int version)
   {
-    //      std::cerr << "save(mpz_class), step 1\n";
     std::ostringstream os;
     os << val;
     std::string str=os.str();
     ar & make_nvp("mpz", str);
-    //      std::cerr << "save(mpz_class), step 2\n";
   }
 
   template<class Archive>
   inline void serialize(Archive & ar, mpz_class & val, const unsigned int version)
   {
-    //      std::cerr << "split_free(mpz_class), step 1\n";
     split_free(ar, val, version);
-    //      std::cerr << "split_free(mpz_class), step 2\n";
   }
 
 }
-
-
-
 
 
 

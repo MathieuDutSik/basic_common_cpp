@@ -1,32 +1,44 @@
 #ifndef DEFINE_TEMPLATE_TRAITS_H
 #define DEFINE_TEMPLATE_TRAITS_H
 
+// is_euclidean_domain
 
 template <typename T>
 struct is_euclidean_domain {
   static const bool value = false;
 };
 
+template <>
+struct is_euclidean_domain<short> {
+  static const bool value = true;
+};
+
+template <>
+struct is_euclidean_domain<long> {
+  static const bool value = true;
+};
+
+template <>
+struct is_euclidean_domain<int> {
+  static const bool value = true;
+};
+
+template <>
+struct is_euclidean_domain<long long> {
+  static const bool value = true;
+};
+
+// is_mpreal
+
 template <typename T>
 struct is_mpreal {
   static const bool value = false;
 };
 
-template <typename T>
-struct is_exact_arithmetic {
-};
+// overlying_field block
 
 template<typename T>
 struct overlying_field {
-};
-
-template <typename T>
-struct is_ring_field {
-};
-
-template <typename T>
-struct is_totally_ordered {
-  static const bool value = false;
 };
 
 // underlying_ring
@@ -76,6 +88,10 @@ struct is_implementation_of_Z<long> {
 
 // Trait definition for exactness
 
+template <typename T>
+struct is_exact_arithmetic {
+};
+
 template<>
 struct is_exact_arithmetic<double> {
   static const bool value = false;
@@ -87,6 +103,10 @@ struct is_exact_arithmetic<float> {
 };
 
 // Trait definition for fields
+
+template <typename T>
+struct is_ring_field {
+};
 
 template <>
 struct is_ring_field<short> {
@@ -119,6 +139,11 @@ struct is_ring_field<float> {
 };
 
 // Trait of totally ordered set
+
+template <typename T>
+struct is_totally_ordered {
+  static const bool value = false;
+};
 
 template <>
 struct is_totally_ordered<short> {
