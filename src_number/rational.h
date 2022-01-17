@@ -2,6 +2,12 @@
 #define DEFINE_RATIONAL_H
 
 #include "TemplateTraits.h"
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <limits>
+
+
 
 /*
   A rational class supposed to build integers.
