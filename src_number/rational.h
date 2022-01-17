@@ -386,7 +386,7 @@ inline void TYPE_CONVERSION(Rational<int> const& a1, int & a2)
   const int& den = a1.get_den();
   if (den != 1) {
     std::string str_err = "The denominator should be 1. It is den = " + std::to_string(den);
-    throw ConversionError{str_err};
+    throw ConversionException{str_err};
   }
   a2 = a1.get_num();
 }
@@ -408,7 +408,7 @@ inline void TYPE_CONVERSION(Rational<long> const& a1, long & a2)
   const long& den = a1.get_den();
   if (den != 1) {
     std::string str_err = "The denominator should be 1. It is den = " + std::to_string(den);
-    throw ConversionError{str_err};
+    throw ConversionException{str_err};
   }
   a2 = a1.get_num();
 }
