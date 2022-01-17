@@ -374,6 +374,21 @@ struct overlying_field<long> {
   typedef Rational<long> field_type;
 };
 
+template<>
+struct overlying_field<Rational<int>> {
+  typedef Rational<int> field_type;
+};
+
+template<>
+struct overlying_field<Rational<short>> {
+  typedef Rational<short> field_type;
+};
+
+template<>
+struct overlying_field<Rational<long>> {
+  typedef Rational<long> field_type;
+};
+
 // The conversion tools (int)
 
 inline void TYPE_CONVERSION(Rational<int> const& a1, Rational<int> & a2)
