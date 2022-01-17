@@ -473,8 +473,8 @@ inline Tint GetDenominator_z(Rational<Tint> const& x)
 template<typename Tint>
 Rational<Tint> FractionalPart(Rational<Tint> const& x)
 {
-  Tint res = ResInt(x.num, x.den);
-  Rational<Tint> fr(res, x.den);
+  Tint res = ResInt(x.get_num(), x.get_den());
+  Rational<Tint> fr(res, x.get_den());
   return fr;
 }
 
