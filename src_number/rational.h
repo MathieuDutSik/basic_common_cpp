@@ -481,17 +481,17 @@ Rational<Tint> FractionalPart(Rational<Tint> const& x)
 template<typename Tint>
 inline void FloorInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
 {
-  Rational<Tint> fr = FractionalPart(x);
-  return x - fr;
+  Rational<Tint> fr = FractionalPart(xI);
+  xO = xI - fr;
 }
 
 template<typename Tint>
 inline void CeilInteger(Rational<Tint> const& xI, Rational<Tint> & xO)
 {
-  Rational<Tint> fr = FractionalPart(x);
+  Rational<Tint> fr = FractionalPart(xI);
   if (fr == 0)
     return x;
-  return 1 + x - fr;
+  xO = 1 + xI - fr;
 }
 
 template<typename Tint>
