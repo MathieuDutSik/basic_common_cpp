@@ -1115,8 +1115,14 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T>
   static_assert(is_euclidean_domain<T>::value, "Requires T to be an Euclidean domain in SolutionIntMat");
   using Treal=typename underlying_totally_ordered_ring<T>::real_type;
   int nbDiff;
+  int len = TheVect.size();
   int nbVect=TheMat.rows();
   int nbCol=TheMat.cols();
+  if (len != nbCol) {
+    std::cerr << "The number of column of TheMat should be equal to the size of TheVect\n";
+    std::cerr << "nbCol(TheMat)=" << TheMat.cols() << " |TheVect|=" << TheVect.size() << "\n";
+    throw TerminalException{1};
+  }
   if (nbVect == 0) {
     MyVector<T> eSol;
     if (IsZeroVector(TheVect)) {

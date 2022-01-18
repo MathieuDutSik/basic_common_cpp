@@ -1,10 +1,10 @@
-#PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix TestMatrixInverse TestPerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice TestHilbertMatrix
+PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix TestMatrixInverse TestPerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice TestHilbertMatrix
 #PROGRAM		= ComputePointer
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= TestMatrixInverse
 #PROGRAM		= TestHilbertMatrix
 #PROGRAM		= TestPerformanceHNF
-PROGRAM		= IntersectionLattice
+#PROGRAM		= IntersectionLattice
 #PROGRAM		= NullspaceComputationLinbox
 #PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
 #PROGRAM		= Matrix_As_Set
