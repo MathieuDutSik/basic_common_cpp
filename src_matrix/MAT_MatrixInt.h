@@ -1119,7 +1119,7 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const& TheMat, MyVector<T>
   int nbVect=TheMat.rows();
   int nbCol=TheMat.cols();
   if (len != nbCol) {
-    std::cerr << "The number of column of TheMat should be equal to the size of TheVect\n";
+    std::cerr << "Error in SolutionIntMat : The number of column of TheMat should be equal to the size of TheVect\n";
     std::cerr << "nbCol(TheMat)=" << TheMat.cols() << " |TheVect|=" << TheVect.size() << "\n";
     throw TerminalException{1};
   }
