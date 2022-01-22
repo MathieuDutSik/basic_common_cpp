@@ -1679,6 +1679,41 @@ inline typename std::enable_if<(not is_ring_field<T>::value),std::vector<MyVecto
 }
 
 
+template<typename T>
+std::vector<size_t> GetActionOnClasses(std::vector<MyVector<T>> const& l_v, MyMatrix<T> const& Transform, MyMatrix<T> const& M)
+{
+  MyMatrix<T> eInv=Inverse(M);
+  int n = M.rows();
+  auto IsEquivalent=[&](MyVector<T> const& eV, MyVector<T> const& fV) -> bool {
+    MyVector<T> diff=eV - fV;
+    for (int i=0; i<n; i++) {
+      T eVal=0;
+      for (int j=0; j<n; j++)
+	eVal += diff(j) * eInv(j,i);
+      if (!IsInteger(eVal))
+	return false;
+    }
+    return true;
+  };
+  size_t len = l_v.size();
+  auto get_position=[&](MyVector<T> const& eV) -> size_t {
+    for (size_t i=0; i<len; i++)
+      if (IsEquivalent(eV, l_v[i]))
+        return i;
+    std::cerr << "Failed to find\n";
+    throw TerminalException{1};
+  };
+  std::vector<size_t> V(len);
+  for (size_t i=0; i<len; i++) {
+    MyVector<T> eV_img = Transform.transpose() * l_v[i];
+    V[i] = get_position(eV_img);
+  }
+  return V;
+}
+
+
+
+
 
 
 
