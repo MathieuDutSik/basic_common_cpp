@@ -1790,10 +1790,27 @@ MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const& EXT)
 
 
 template<typename T>
-std::vector<int> ColumnReductionSet(MyMatrix<T> const& eMatIn)
+std::vector<int> ColumnReductionSet_Kernel(MyMatrix<T> const& eMatIn)
 {
   return TMat_SelectRowCol(eMatIn).ListColSelect;
 }
+
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value,std::vector<int>>::type ColumnReductionSet(MyMatrix<T> const& Input)
+{
+  return ColumnReductionSet_Kernel(Input);
+}
+
+template<typename T>
+inline typename std::enable_if<(not is_ring_field<T>::value),std::vector<int>>::type ColumnReductionSet(MyMatrix<T> const& Input)
+{
+  using Tfield=typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> InputF=UniversalMatrixConversion<Tfield,T>(Input);
+  return ColumnReductionSet_Kernel(InputF);
+}
+
+
+
 
 template<typename T>
 MyMatrix<T> ColRowSymmetricMatrix(MyMatrix<T> const& M, std::vector<int> const& LSel)
@@ -1813,8 +1830,8 @@ MyMatrix<T> ColRowSymmetricMatrix(MyMatrix<T> const& M, std::vector<int> const& 
 template<typename T>
 MyMatrix<T> ColumnReduction(MyMatrix<T> const& eMatIn)
 {
-  SelectionRowCol<T> eSelect=TMat_SelectRowCol(eMatIn);
-  return SelectColumn(eMatIn, eSelect.ListColSelect);
+  std::vector<int> l_cols = ColumnReductionSet(eMatIn);
+  return SelectColumn(eMatIn, l_cols);
 }
 
 template<typename T>
