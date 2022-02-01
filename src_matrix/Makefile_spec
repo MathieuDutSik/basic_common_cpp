@@ -1,6 +1,7 @@
 #PROGRAM		= AnalysisSingMat
 #PROGRAM		= ZbasisComputation
-PROGRAM		= RowHermiteNormalForm
+#PROGRAM		= RowHermiteNormalForm
+PROGRAM		= RemoveFractionMatrix
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

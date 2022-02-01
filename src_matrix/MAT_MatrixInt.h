@@ -256,7 +256,7 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const& M)
       eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow,iCol)));
   T eLCM = eLCM_ring;
   MyMatrix<T> M1 = eLCM * M;
-  T eGCD = M(0,0);
+  T eGCD = M1(0,0);
   for (int iCol=0; iCol<nbCol; iCol++)
     for (int iRow=0; iRow<nbRow; iRow++)
       eGCD = GcdPair(eGCD, M1(iRow, iCol));
@@ -287,8 +287,8 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const& V)
   for (int i=0; i<n; i++)
     eLCM = LCMpair(eLCM, GetDenominator(V(i)));
   MyVector<T> V1 = eLCM * V;
-  T eGCD = V1(1);
-  for (int i=0; i<n; i++)
+  T eGCD = V1(0);
+  for (int i=1; i<n; i++)
     eGCD = GcdPair(eGCD, V1(i));
   MyVector<T> V2 = V1 / eGCD;
   T TheMult = eLCM / eGCD;
