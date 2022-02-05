@@ -684,6 +684,16 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
   MyMatrix<T> H = M;
   MyMatrix<T> ROW = IdentityMat<T>(nbRow);
   MyMatrix<T> COL = IdentityMat<T>(nbCol);
+#ifdef DEBUG_MATRIX_INT
+  auto check_consistency=[&](std::string const& mesg) -> void {
+    MyMatrix<T> eProd = ROW * M * COL;
+    if (eProd != H) {
+      std::cerr << "Error at stage mesg=" << mesg << "\n";
+      throw TerminalException{1};
+    }
+  };
+  std::string mesg;
+#endif
   int posDone=0;
   while(true) {
     struct choice {
@@ -718,7 +728,11 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
         if (eVal != 0) {
           T TheQ=QuoInt(eVal, ThePivot);
           H.row(iRow)   -= TheQ * H.row(iRowF);
-          ROW.row(iRow) -= TheQ * ROW.row(iRowF);
+          ROW.row(iRow) += TheQ * ROW.row(iRowF);
+#ifdef DEBUG_MATRIX_INT
+          mesg = "1 : Error_at iRowF=" + std::to_string(iRowF) + " iColF=" + std::to_string(iColF) + " iRpw=" + std::to_string(iRow) + " TheQ=" + std::to_string(TheQ);
+          check_consistency(mesg);
+#endif
           if (H(iRow,iColF) != 0)
             NonZeroResidue = true;
         }
@@ -730,7 +744,11 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
         if (eVal != 0) {
           T TheQ=QuoInt(eVal, ThePivot);
           H.col(iCol)   -= TheQ * H.col(iColF);
-          COL.col(iCol) -= TheQ * COL.col(iColF);
+          COL.col(iCol) += TheQ * COL.col(iColF);
+#ifdef DEBUG_MATRIX_INT
+          mesg = "2 : Error_at iRowF=" + std::to_string(iRowF) + " iColF=" + std::to_string(iColF) + " iCol=" + std::to_string(iCol) + " TheQ=" + std::to_string(TheQ);
+          check_consistency(mesg);
+#endif
           if (H(iRowF,iCol) != 0)
             NonZeroResidue = true;
         }
@@ -741,11 +759,19 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
         MyMatrix<T> Trans = TranspositionMatrix<T>(nbRow, posDone, iRowF);
         ROW = ROW * Trans;
         H = Trans * H;
+#ifdef DEBUG_MATRIX_INT
+        mesg = "3 : Error_at iRowF=" + std::to_string(iRowF) + " posDone=" + std::to_string(posDone);
+        check_consistency(mesg);
+#endif
       }
       if (iColF != posDone) {
         MyMatrix<T> Trans = TranspositionMatrix<T>(nbCol, posDone, iColF);
         COL = Trans * COL;
         H = H * Trans;
+#ifdef DEBUG_MATRIX_INT
+        mesg = "4 : Error_at iColF=" + std::to_string(iColF) + " posDone=" + std::to_string(posDone);
+        check_consistency(mesg);
+#endif
       }
       T CanUnit = CanonicalizationUnit(H(posDone,posDone));
       if (CanUnit != 1) {
@@ -756,7 +782,10 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
     }
   }
 #ifdef DEBUG_MATRIX_INT
-  MyMatrix<T> Test = ROW * M * COL;
+  std::cerr << "H=\n";
+  WriteMatrix(std::cerr, H);
+  
+  MyMatrix<T> Test = Inverse(ROW) * M * Inverse(COL);
   auto show_res=[&]() -> void {
     std::cerr << "Test=\n";
     WriteMatrix(std::cerr, Test);
@@ -2035,13 +2064,13 @@ MyMatrix<T> GetZbasis(MyMatrix<T> const& ListElement)
   for (int iBas=0; iBas<DimSpace; iBas++) {
     MyVector<T> eLine=GetMatrixRow(TheBasis, iBas);
     //      std::cerr << "Before SolutionIntMat, iBas=" << iBas << "\n";
-    ResultSolutionIntMat<T> eResIntMat=SolutionIntMat(ListElement, eLine);
+    std::optional<MyVector<T>> opt = SolutionIntMat(ListElement, eLine);
     /*      std::cerr << "ListElement=\n";
 	    WriteMatrixGAP(std::cerr, ListElement);
 	    std::cerr << "eLine=\n";
 	    WriteVectorGAP(std::cerr, eLine);
 	    std::cerr << "After SolutionIntMat 1\n";*/
-    if (!eResIntMat.TheRes) {
+    if (!opt) {
       std::cerr << "Error in GetZbasis 1\n";
       throw TerminalException{1};
     }
