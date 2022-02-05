@@ -792,9 +792,6 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
     }
   }
 #ifdef DEBUG_MATRIX_INT
-  std::cerr << "H=\n";
-  WriteMatrix(std::cerr, H);
-  
   MyMatrix<T> Test = ROW * M * COL;
   auto show_res=[&]() -> void {
     std::cerr << "Test=\n";
@@ -831,7 +828,7 @@ MyMatrix<T> SubspaceCompletion(MyMatrix<T> const& M, int const& n)
   //  int nbCol = M.cols();
   if (nbRow == 0)
     return IdentityMat<T>(n);
-  std::pair<MyMatrix<T>,MyMatrix<T>> PairRed = SmithNormalFormIntegerMatTransforms(M);
+  std::pair<MyMatrix<T>,MyMatrix<T>> PairRed = SmithNormalForm(M);
   MyMatrix<T> const& A1 = PairRed.first;
   MyMatrix<T> const& A2 = PairRed.second;
   MyMatrix<T> TheProd = A1 * M * A2;

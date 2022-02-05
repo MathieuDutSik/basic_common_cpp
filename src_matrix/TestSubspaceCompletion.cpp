@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
       MyMatrix<T> Msub = SubspaceCompletion(M, n);
       MyMatrix<T> Mconcat = Concatenate(M, Msub);
       T eDet = DeterminantMat(Mconcat);
-      if (T_abs(eDet) == 1) {
+      if (T_abs(eDet) != 1) {
         std::cerr << "eDet = " << eDet << " while it should be 1 or -1\n";
         throw TerminalException{1};
       }
