@@ -688,6 +688,16 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
   auto check_consistency=[&](std::string const& mesg) -> void {
     MyMatrix<T> eProd = ROW * M * COL;
     if (eProd != H) {
+      std::cerr << "ROW=\n";
+      WriteMatrix(std::cerr, ROW);
+      std::cerr << "COL=\n";
+      WriteMatrix(std::cerr, COL);
+      std::cerr << "M=\n";
+      WriteMatrix(std::cerr, M);
+      std::cerr << "eProd=\n";
+      WriteMatrix(std::cerr, eProd);
+      std::cerr << "H=\n";
+      WriteMatrix(std::cerr, H);
       std::cerr << "Error at stage mesg=" << mesg << "\n";
       throw TerminalException{1};
     }
@@ -728,7 +738,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
         if (eVal != 0) {
           T TheQ=QuoInt(eVal, ThePivot);
           H.row(iRow)   -= TheQ * H.row(iRowF);
-          ROW.row(iRow) += TheQ * ROW.row(iRowF);
+          ROW.row(iRow) -= TheQ * ROW.row(iRowF);
 #ifdef DEBUG_MATRIX_INT
           mesg = "1 : Error_at iRowF=" + std::to_string(iRowF) + " iColF=" + std::to_string(iColF) + " iRpw=" + std::to_string(iRow) + " TheQ=" + std::to_string(TheQ);
           check_consistency(mesg);
@@ -744,7 +754,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
         if (eVal != 0) {
           T TheQ=QuoInt(eVal, ThePivot);
           H.col(iCol)   -= TheQ * H.col(iColF);
-          COL.col(iCol) += TheQ * COL.col(iColF);
+          COL.col(iCol) -= TheQ * COL.col(iColF);
 #ifdef DEBUG_MATRIX_INT
           mesg = "2 : Error_at iRowF=" + std::to_string(iRowF) + " iColF=" + std::to_string(iColF) + " iCol=" + std::to_string(iCol) + " TheQ=" + std::to_string(TheQ);
           check_consistency(mesg);
@@ -757,7 +767,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
     if (!NonZeroResidue) {
       if (iRowF != posDone) {
         MyMatrix<T> Trans = TranspositionMatrix<T>(nbRow, posDone, iRowF);
-        ROW = ROW * Trans;
+        ROW = Trans * ROW;
         H = Trans * H;
 #ifdef DEBUG_MATRIX_INT
         mesg = "3 : Error_at iRowF=" + std::to_string(iRowF) + " posDone=" + std::to_string(posDone);
@@ -766,7 +776,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
       }
       if (iColF != posDone) {
         MyMatrix<T> Trans = TranspositionMatrix<T>(nbCol, posDone, iColF);
-        COL = Trans * COL;
+        COL = COL * Trans;
         H = H * Trans;
 #ifdef DEBUG_MATRIX_INT
         mesg = "4 : Error_at iColF=" + std::to_string(iColF) + " posDone=" + std::to_string(posDone);
@@ -785,7 +795,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
   std::cerr << "H=\n";
   WriteMatrix(std::cerr, H);
   
-  MyMatrix<T> Test = Inverse(ROW) * M * Inverse(COL);
+  MyMatrix<T> Test = ROW * M * COL;
   auto show_res=[&]() -> void {
     std::cerr << "Test=\n";
     WriteMatrix(std::cerr, Test);
