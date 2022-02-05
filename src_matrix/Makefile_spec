@@ -1,7 +1,9 @@
 #PROGRAM		= AnalysisSingMat
 #PROGRAM		= ZbasisComputation
 #PROGRAM		= RowHermiteNormalForm
-PROGRAM		= RemoveFractionMatrix
+#PROGRAM		= RemoveFractionMatrix
+#PROGRAM		= TestSubspaceCompletion
+PROGRAM		= SmithNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

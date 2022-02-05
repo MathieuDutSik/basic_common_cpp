@@ -669,6 +669,23 @@ MyMatrix<T> ConstantMatrix(int const& nbRow, int const& nbCol, T const& eVal)
 }
 
 
+template<typename T>
+MyMatrix<T> TranspositionMatrix(int const& n, int const& i, int const& j)
+{
+  MyMatrix<T> M;
+  M.setConstant(n, n, 0);
+  for (int iCol=0; iCol<n; iCol++) {
+    int iRow = iCol;
+    if (iCol == i)
+      iRow = j;
+    if (iCol == j)
+      iRow = i;
+    M(iRow,iCol) = 1;
+  }
+  return M;
+}
+
+
 
 
 template<typename T>

@@ -4,8 +4,8 @@
 #include "MAT_Matrix.h"
 #include "Boost_bitset.h"
 
-#undef TRACK_MAXIMUM_SIZE_COEFF
-#undef DEBUG_MATRIX_INT
+//#undef TRACK_MAXIMUM_SIZE_COEFF
+//#undef DEBUG_MATRIX_INT
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction ring) of
@@ -534,6 +534,18 @@ std::pair<MyMatrix<T>, MyMatrix<T>> ComputeRowHermiteNormalForm(MyMatrix<T> cons
 }
 
 
+template<typename T>
+MyMatrix<T> ComputeRowHermiteNormalForm_second(MyMatrix<T> const& M)
+{
+  MyMatrix<T> H = M;
+  auto f=[&](auto g) -> void {
+    g(H);
+  };
+  ComputeRowHermiteNormalForm_Kernel(H, f);
+  return H;
+}
+
+
 
 template<typename T, typename F>
 void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> & H, F f)
@@ -650,6 +662,160 @@ MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const& M)
 }
 
 
+/*
+  Smith Normal form is needed for a number of applications.
+  We apply here a fairly naive algorithm by acting on rows and columns.
+  The result is a pair of matrices A and B such that A M B = Mred
+  With Mred a reduced matrix.
+  ---
+  Action on rows correspond to multiplying on the left (by A)
+  Action on columns correspond to multiplying on the right (by B)
+
+
+
+
+
+ */
+template<typename T>
+std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
+{
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  MyMatrix<T> H = M;
+  MyMatrix<T> ROW = IdentityMat<T>(nbRow);
+  MyMatrix<T> COL = IdentityMat<T>(nbCol);
+  int posDone=0;
+  while(true) {
+    struct choice {
+      int iRow;
+      int iCol;
+      T norm;
+    };
+    std::optional<choice> opt;
+    for (int iRow=posDone; iRow<nbRow; iRow++) {
+      for (int iCol=posDone; iCol<nbCol; iCol++) {
+        T eVal=T_abs(H(iRow, iCol));
+        if (eVal != 0) {
+          if (!opt) {
+            opt = {iRow, iCol, eVal};
+          } else {
+            if (eVal < opt->norm) {
+              opt = {iRow, iCol, eVal};
+            }
+          }
+        }
+      }
+    }
+    if (!opt)
+      break;
+    int iRowF = opt->iRow;
+    int iColF = opt->iCol;
+    T ThePivot=H(iRowF, iColF);
+    bool NonZeroResidue = false;
+    for (int iRow=posDone; iRow<nbRow; iRow++) {
+      if (iRow != iRowF) {
+        T eVal = H(iRow,iColF);
+        if (eVal != 0) {
+          T TheQ=QuoInt(eVal, ThePivot);
+          H.row(iRow)   -= TheQ * H.row(iRowF);
+          ROW.row(iRow) -= TheQ * ROW.row(iRowF);
+          if (H(iRow,iColF) != 0)
+            NonZeroResidue = true;
+        }
+      }
+    }
+    for (int iCol=posDone; iCol<nbCol; iCol++) {
+      if (iCol!= iColF) {
+        T eVal = H(iRowF,iCol);
+        if (eVal != 0) {
+          T TheQ=QuoInt(eVal, ThePivot);
+          H.col(iCol)   -= TheQ * H.col(iColF);
+          COL.col(iCol) -= TheQ * COL.col(iColF);
+          if (H(iRowF,iCol) != 0)
+            NonZeroResidue = true;
+        }
+      }
+    }
+    if (!NonZeroResidue) {
+      if (iRowF != posDone) {
+        MyMatrix<T> Trans = TranspositionMatrix<T>(nbRow, posDone, iRowF);
+        ROW = ROW * Trans;
+        H = Trans * H;
+      }
+      if (iColF != posDone) {
+        MyMatrix<T> Trans = TranspositionMatrix<T>(nbCol, posDone, iColF);
+        COL = Trans * COL;
+        H = H * Trans;
+      }
+      T CanUnit = CanonicalizationUnit(H(posDone,posDone));
+      if (CanUnit != 1) {
+        ROW.row(posDone) = CanUnit * ROW.row(posDone);
+        H.row(posDone) = CanUnit * H.row(posDone);
+      }
+      posDone++;
+    }
+  }
+#ifdef DEBUG_MATRIX_INT
+  MyMatrix<T> Test = ROW * M * COL;
+  auto show_res=[&]() -> void {
+    std::cerr << "Test=\n";
+    WriteMatrix(std::cerr, Test);
+    std::cerr << "ROW=\n";
+    WriteMatrix(std::cerr, ROW);
+    std::cerr << "COL=\n";
+    WriteMatrix(std::cerr, COL);
+    std::cerr << "M=\n";
+    WriteMatrix(std::cerr, M);
+    std::cerr << "Please debug\n";
+    throw TerminalException{1};
+  };
+  for (int iRow=0; iRow<nbRow; iRow++)
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      if (iRow != iCol && Test(iRow, iCol) != 0)
+        show_res();
+      if (iRow == iCol && Test(iRow,iCol) < 0)
+        show_res();
+    }
+#endif
+  return {ROW, COL};
+}
+
+/*
+  After thinking, it would seem that we need to use the
+  SmithNormalForm in order to do those SubspaceCompletion
+  operations.
+ */
+template<typename T>
+MyMatrix<T> SubspaceCompletion(MyMatrix<T> const& M, int const& n)
+{
+  int nbRow = M.rows();
+  //  int nbCol = M.cols();
+  if (nbRow == 0)
+    return IdentityMat<T>(n);
+  std::pair<MyMatrix<T>,MyMatrix<T>> PairRed = SmithNormalFormIntegerMatTransforms(M);
+  MyMatrix<T> const& A1 = PairRed.first;
+  MyMatrix<T> const& A2 = PairRed.second;
+  MyMatrix<T> TheProd = A1 * M * A2;
+  for (int iRow=0; iRow<nbRow; iRow++) {
+    if (TheProd(iRow,iRow) != 1) {
+      std::cerr << "The Smith normal form indicates that the matrix is not adequate\n";
+      std::cerr << "The subspace spanned is not saturated\n";
+      throw TerminalException{1};
+    }
+  }
+  MyMatrix<T> A1bis = ZeroMatrix<T>(n,n);
+  int d = nbRow;
+  for (int i=0; i<d; i++)
+    for (int j=0; j<d; j++)
+      A1bis(i,j) = A1(i,j);
+  for (int i=d; i<n; i++)
+    A1bis(i,i) = 1;
+  MyMatrix<T> FullBasis = Inverse(A1bis) * Inverse(A2);
+  MyMatrix<T> TheCompletion(n-d, n);
+  for (int i=d; i<n; i++)
+    TheCompletion.row(i-d) = FullBasis.row(i);
+  return TheCompletion;
+}
 
 
 template<typename T>
@@ -1576,7 +1742,8 @@ template<typename T>
 MyMatrix<T> RandomUnimodularMatrix(int const& n)
 {
   MyMatrix<T> RetMat = IdentityMat<T>(n);
-  for (int iter=0; iter<10; iter++) {
+  int n_iter = 3 * n;
+  for (int iter=0; iter<n_iter; iter++) {
     MyMatrix<T> eMat = IdentityMat<T>(n);
     int idx1 = rand() % n;
     int idx2 = rand() % n;
