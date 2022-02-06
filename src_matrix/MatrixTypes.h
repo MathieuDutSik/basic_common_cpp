@@ -9,7 +9,7 @@
 #include <Eigen/LU>
 #include <Eigen/Eigenvalues>
 
-#ifdef INCLUDE_NUMBER_THEORY_BOOST
+#if defined INCLUDE_NUMBER_THEORY_BOOST_GMP_INT || defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
 #include <boost/multiprecision/eigen.hpp>
 #endif
 
