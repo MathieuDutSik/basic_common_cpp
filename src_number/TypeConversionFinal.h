@@ -18,7 +18,6 @@ inline void TYPE_CONVERSION_STRING(Ti const& a1, To & a2)
 
 
 
-
 # if defined INCLUDE_NUMBER_THEORY_GMP && defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
 
 // Nothing clever for this combination
@@ -48,12 +47,12 @@ inline void TYPE_CONVERSION(mpz_class const& a1, boost::multiprecision::cpp_int 
 
 // Now the other direction
 
-inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, mpq_class const& a2)
+inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, mpq_class & a2)
 {
   TYPE_CONVERSION_STRING(a1, a2);
 }
 
-inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, mpz_class const& a2)
+inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, mpz_class & a2)
 {
   if (!IsInteger(a1)) {
     std::string str_ret = "a1=" + std::to_string(a1) + " is not an integer";
@@ -62,12 +61,12 @@ inline void TYPE_CONVERSION(boost::multiprecision::cpp_rational const& a1, mpz_c
   TYPE_CONVERSION_STRING(a1, a2);
 }
 
-inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, mpq_class const& a2)
+inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, mpq_class & a2)
 {
   TYPE_CONVERSION_STRING(a1, a2);
 }
 
-inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, mpz_class const& a2)
+inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, mpz_class & a2)
 {
   TYPE_CONVERSION_STRING(a1, a2);
 }
@@ -76,7 +75,6 @@ inline void TYPE_CONVERSION(boost::multiprecision::cpp_int const& a1, mpz_class 
 
 
 # endif
-
 
 
 

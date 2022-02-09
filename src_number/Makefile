@@ -3,7 +3,8 @@
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
 #PROGRAM		= PracticalInf
-PROGRAM		= TestQuoInt
+#PROGRAM		= TestQuoInt
+PROGRAM		= TestConversion
 #PROGRAM		= TestSquareRoot
 
 OBJECTS		= $(PROGRAM:%=%.o)
