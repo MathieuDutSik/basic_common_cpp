@@ -11,7 +11,7 @@ inline void TYPE_CONVERSION(mpq_class const& xI, mpfr::mpreal & xO)
 }
 
 
-void NearestInteger_mpreal(mpfr::mpreal const& x, mpz_class & xO)
+void NearestInteger(mpfr::mpreal const& x, mpz_class & xO)
 {
   mpfr::mpreal xRnd=round(x);
   long xRnd_ll=xRnd.toLong();
@@ -41,43 +41,32 @@ void NearestInteger_mpreal(mpfr::mpreal const& x, mpz_class & xO)
 
 
 
-void NearestInteger_mpreal(mpfr::mpreal const& x, mpq_class & x_q)
+void NearestInteger(mpfr::mpreal const& x, mpq_class & x_q)
 {
   mpz_class x_z;
-  NearestInteger_mpreal(x, x_z);
+  NearestInteger(x, x_z);
   x_q=mpq_class(x_z);
 }
 
 
-void NearestInteger_mpreal(mpfr::mpreal const& xI, int & xO)
+void NearestInteger(mpfr::mpreal const& xI, int & xO)
 {
   mpz_class x_z;
-  NearestInteger_mpreal(xI, x_z);
+  NearestInteger(xI, x_z);
   long eVal_long=x_z.get_si();
   xO=eVal_long;
 }
 
-void NearestInteger_mpreal(mpfr::mpreal const& xI, long & xO)
+void NearestInteger(mpfr::mpreal const& xI, long & xO)
 {
   mpz_class x_z;
-  NearestInteger_mpreal(xI, x_z);
+  NearestInteger(xI, x_z);
   xO = x_z.get_si();
 }
 
 
 
 
-
-// mpreal needs its own specific code in order to be compilable.
-// Reason is that compiler cannot distinguish between mpq_class and mpreal
-// for some reason.
-template<typename To, typename Ti>
-inline typename std::enable_if<std::is_same<Ti,mpfr::mpreal>,To>::type UniversalNearestScalarInteger(Ti const& a)
-{
-  To ret;
-  NearestInteger_mpreal(a, ret);
-  return ret;
-}
 
 
 

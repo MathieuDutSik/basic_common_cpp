@@ -153,7 +153,7 @@ inline To UniversalCeilScalarInteger(Ti const& a)
 
 
 template<typename To, typename Ti>
-inline typename std::enable_if<(not std::is_same<Ti,mpfr::mpreal>) && (not std::is_same<Ti,double>),To>::type UniversalNearestScalarInteger(Ti const& a)
+inline typename std::enable_if<(not std::is_same<Ti,double>),To>::type UniversalNearestScalarInteger(Ti const& a)
 {
   To ret;
   NearestInteger(a, ret);
