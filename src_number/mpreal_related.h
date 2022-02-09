@@ -2,7 +2,6 @@
 #define INCLUDE_MPREAL_RELATED
 
 #include "mpreal.h"
-#include "NumberTheory.h"
 
 
 inline void TYPE_CONVERSION(mpq_class const& xI, mpfr::mpreal & xO)
