@@ -28,13 +28,6 @@ struct is_euclidean_domain<long long> {
   static const bool value = true;
 };
 
-// is_mpreal
-
-template <typename T>
-struct is_mpreal {
-  static const bool value = false;
-};
-
 // overlying_field block
 
 template<typename T>
