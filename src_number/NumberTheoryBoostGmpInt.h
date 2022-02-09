@@ -403,7 +403,7 @@ inline void NearestInteger(boost::multiprecision::mpq_rational const& xI, boost:
 }
 inline void NearestInteger(boost::multiprecision::mpq_rational const& xI, boost::multiprecision::mpz_int & xO)
 {
-  boost::multiprecision::cpp_rational xO_q=NearestInteger_rni(xI);
+  boost::multiprecision::mpq_rational xO_q=NearestInteger_rni(xI);
   xO = numerator(xO_q);
 }
 
