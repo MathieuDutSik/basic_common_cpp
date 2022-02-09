@@ -11,12 +11,12 @@
 
 template <>
 struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
-  static const bool value = false;
+  static const bool value = true;
 };
 
 template <>
 struct is_boost_cpp_rational<boost::multiprecision::cpp_rational> {
-  static const bool value = false;
+  static const bool value = true;
 };
 
 
