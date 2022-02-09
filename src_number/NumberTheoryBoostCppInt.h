@@ -9,6 +9,19 @@
 //#include "NumberTheory.h"
 
 
+template <>
+struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
+  static const bool value = false;
+};
+
+template <>
+struct is_boost_cpp_rational<boost::multiprecision::cpp_rational> {
+  static const bool value = false;
+};
+
+
+
+
 namespace std {
   std::string to_string(const boost::multiprecision::cpp_int& e_val)
   {

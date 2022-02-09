@@ -9,6 +9,17 @@
 //#include "NumberTheory.h"
 
 
+template <>
+struct is_boost_mpz_int<boost::multiprecision::mpz_int> {
+  static const bool value = false;
+};
+
+template <>
+struct is_boost_mpq_rational<boost::multiprecision::mpq_rational> {
+  static const bool value = false;
+};
+
+
 namespace std {
   std::string to_string(const boost::multiprecision::mpz_int& e_val)
   {

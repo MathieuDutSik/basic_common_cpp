@@ -15,6 +15,30 @@ struct is_mpz_class {
   static const bool value = false;
 };
 
+template <typename T>
+struct is_boost_cpp_int {
+  static const bool value = false;
+};
+
+template <typename T>
+struct is_boost_cpp_rational {
+  static const bool value = false;
+};
+
+template <typename T>
+struct is_boost_mpz_int {
+  static const bool value = false;
+};
+
+template <typename T>
+struct is_boost_mpq_rational {
+  static const bool value = false;
+};
+
+
+
+
+
 
 
 // is_euclidean_domain
