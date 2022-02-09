@@ -182,18 +182,6 @@ struct is_totally_ordered<float> {
 // is double type
 
 template <typename T>
-struct is_double_type {
-  static const bool value = false;
-};
-
-template <>
-struct is_double_type<double> {
-  static const bool value = true;
-};
-
-// is double type
-
-template <typename T>
 struct is_int_type {
   static const bool value = false;
 };
