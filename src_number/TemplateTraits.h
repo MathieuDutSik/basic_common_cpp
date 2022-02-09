@@ -1,6 +1,22 @@
 #ifndef DEFINE_TEMPLATE_TRAITS_H
 #define DEFINE_TEMPLATE_TRAITS_H
 
+// Trait for specific types.
+// the std::is_same<T,mpz_class> is not adequate because it requires the type
+// mpz_class to be known in the scope.
+
+template <typename T>
+struct is_mpq_class {
+  static const bool value = false;
+};
+
+template <typename T>
+struct is_mpz_class {
+  static const bool value = false;
+};
+
+
+
 // is_euclidean_domain
 
 template <typename T>

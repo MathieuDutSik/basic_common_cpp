@@ -594,4 +594,11 @@ inline int T_NormGen(int const& x)
   return abs(x);
 }
 
+inline int CanonicalizationUnit(int const& eVal)
+{
+  if (eVal < 0)
+    return -1;
+  return 1;
+}
+
 #endif
