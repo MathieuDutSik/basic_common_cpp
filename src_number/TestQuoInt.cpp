@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
         Tint quo_cont = QuoInt(a_cont,b_cont);
         int quo2 = UniversalScalarConversion<int,Tint>(quo_cont);
         if (quo1 != quo2) {
-          std::cerr << "Inconsistency a=" << a << " b=" << b << " quo1=" << quo1 << " quo2=" << quo2 << "\n";
+          //          std::cerr << "Inconsistency a=" << a << " b=" << b << " quo1=" << quo1 << " quo2=" << quo2 << "\n";
           n_error++;
         }
       }

@@ -195,7 +195,7 @@ inline mpz_class ResInt(mpz_class const& a, mpz_class const& b)
 {
   mpz_class res2;
   mpz_cdiv_r(res2.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  if (a < 0 && res2 != 0) {
+  if (b > 0 && res2 != 0) {
     if (b<0)
       res2 -= b;
     else
@@ -240,7 +240,7 @@ inline mpz_class QuoInt(mpz_class const& a, mpz_class const& b)
 {
   mpz_class quo2;
   mpz_cdiv_q(quo2.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  if (a < 0 && b * quo2 != a) {
+  if (b > 0 && b * quo2 != a) {
     if (b > 0)
       quo2--;
     else
