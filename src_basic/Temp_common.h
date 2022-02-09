@@ -583,4 +583,15 @@ void ParseScalar_inplace(std::string const& estr, T & ret_val)
   is >> ret_val;
 }
 
+// T_Norm should always return an integer, whatever the input type
+inline int T_Norm(int const& eVal)
+{
+  return abs(eVal);
+}
+
+inline int T_NormGen(int const& x)
+{
+  return abs(x);
+}
+
 #endif

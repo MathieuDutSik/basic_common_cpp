@@ -264,12 +264,6 @@ inline mpq_class CanonicalizationUnit(mpq_class const& eVal)
 }
 
 
-// T_Norm should always return an integer, whatever the input type
-inline int T_Norm(int const& eVal)
-{
-  return abs(eVal);
-}
-
 
 inline int T_Norm(mpq_class const& x)
 {
@@ -295,11 +289,6 @@ inline mpq_class T_NormGen(mpq_class const& x)
 inline mpz_class T_NormGen(mpz_class const& x)
 {
   return T_abs(x);
-}
-
-inline int T_NormGen(int const& x)
-{
-  return abs(x);
 }
 
 inline bool IsInteger(mpq_class const& x)
