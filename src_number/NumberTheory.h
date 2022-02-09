@@ -178,26 +178,6 @@ namespace std {
   };
 }
 
-// Parsing strings (It takes a std::string because we would need a const char* with a null terminated string
-// and this we would not have with string_view
-
-template<typename T>
-T ParseScalar(std::string const& estr)
-{
-  T ret_val;
-  std::istringstream is(estr);
-  is >> ret_val;
-  return ret_val;
-}
-
-template<typename T>
-void ParseScalar_inplace(std::string const& estr, T & ret_val)
-{
-  std::istringstream is(estr);
-  is >> ret_val;
-}
-
-
 
 inline mpz_class ResInt(mpz_class const& a, mpz_class const& b)
 {
