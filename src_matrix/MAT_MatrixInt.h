@@ -284,10 +284,8 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const& V)
   int n=V.size();
   std::vector<T> eVect(n);
   T eLCM=1;
-  for (int i=0; i<n; i++) {
-    T val = GetDenominator(V(i));
-    eLCM = LCMpair(eLCM, val);
-  }
+  for (int i=0; i<n; i++)
+    eLCM = LCMpair(eLCM, GetDenominator(V(i)));
   MyVector<T> V1 = eLCM * V;
   T eGCD = V1(0);
   for (int i=1; i<n; i++)

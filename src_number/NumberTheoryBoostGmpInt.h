@@ -225,6 +225,12 @@ inline bool IsInteger(boost::multiprecision::mpq_rational const& x)
   boost::multiprecision::mpz_int eDen = denominator(x);
   return eDen == one;
 }
+
+inline boost::multiprecision::mpz_int GetDenominator([[maybe_unused]] boost::multiprecision::mpz_int const& x)
+{
+  return 1;
+}
+
 inline boost::multiprecision::mpq_rational GetDenominator(boost::multiprecision::mpq_rational const& x)
 {
   boost::multiprecision::mpz_int eDen = denominator(x);
