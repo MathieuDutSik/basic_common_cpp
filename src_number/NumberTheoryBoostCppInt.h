@@ -385,6 +385,31 @@ inline void CeilInteger(boost::multiprecision::cpp_rational const& xI, long & xO
   xO = val.template convert_to<long>();
 }
 
+inline boost::multiprecision::cpp_rational NearestInteger_rni(boost::multiprecision::cpp_rational const& x)
+{
+  boost::multiprecision::cpp_rational eFrac=FractionalPart(x);
+  boost::multiprecision::cpp_rational eDiff1=eFrac;
+  boost::multiprecision::cpp_rational eDiff2=1-eFrac;
+  boost::multiprecision::cpp_rational RetVal=x-eFrac;
+  if (eDiff1 <= eDiff2) {
+    return RetVal;
+  } else {
+    return RetVal+1;
+  }
+}
+inline void NearestInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_rational & xO)
+{
+  xO=NearestInteger_rni(xI);
+}
+inline void NearestInteger(boost::multiprecision::cpp_rational const& xI, boost::multiprecision::cpp_int & xO)
+{
+  boost::multiprecision::cpp_rational xO_q=NearestInteger_rni(xI);
+  xO = numerator(xO_q);
+}
+
+
+
+
 inline void set_to_infinity(boost::multiprecision::cpp_rational & x)
 {
   x = std::numeric_limits<size_t>::max();
@@ -434,6 +459,11 @@ bool universal_square_root(boost::multiprecision::cpp_rational & ret, boost::mul
   ret = Tf(ret_n) / Tf(ret_d);
   return true;
 }
+
+
+
+
+
 
 
 #endif
