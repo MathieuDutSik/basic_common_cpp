@@ -20,6 +20,35 @@ struct is_boost_mpq_rational<boost::multiprecision::mpq_rational> {
 };
 
 
+// hash
+
+namespace std {
+  template <>
+  struct hash<boost::multiprecision::mpz_int>
+  {
+    std::size_t operator()(const boost::multiprecision::mpz_int& val) const
+    {
+      std::stringstream s;
+      s << val;
+      std::string converted(s.str());
+      return std::hash<std::string>()(converted);
+    }
+  };
+  template <>
+  struct hash<boost::multiprecision::mpq_rational>
+  {
+    std::size_t operator()(const boost::multiprecision::mpq_rational& val) const
+    {
+      std::stringstream s;
+      s << val;
+      std::string converted(s.str());
+      return std::hash<std::string>()(converted);
+    }
+  };
+}
+
+// to_string
+
 namespace std {
   std::string to_string(const boost::multiprecision::mpz_int& e_val)
   {
@@ -35,6 +64,64 @@ namespace std {
     std::string converted(s.str());
     return converted;
   };
+}
+
+// boost serialization
+
+namespace boost::serialization {
+
+  // boost::multiprecision::mpq_rational
+
+  template<class Archive>
+  inline void load(Archive & ar, boost::multiprecision::mpq_rational & val, [[maybe_unused]] const unsigned int version)
+  {
+    std::string str;
+    ar & make_nvp("mpq_rational", str);
+    std::istringstream is(str);
+    is >> val;
+  }
+
+  template<class Archive>
+  inline void save(Archive & ar, boost::multiprecision::mpq_rational const& val, [[maybe_unused]] const unsigned int version)
+  {
+    std::ostringstream os;
+    os << val;
+    std::string str=os.str();
+    ar & make_nvp("mpq", str);
+  }
+
+  template<class Archive>
+  inline void serialize(Archive & ar, boost::multiprecision::mpq_rational & val, [[maybe_unused]] const unsigned int version)
+  {
+    split_free(ar, val, version);
+  }
+
+  // boost::multiprecision::mpz_int
+
+  template<class Archive>
+  inline void load(Archive & ar, boost::multiprecision::mpz_int & val, [[maybe_unused]] const unsigned int version)
+  {
+    std::string str;
+    ar & make_nvp("mpz_int", str);
+    std::istringstream is(str);
+    is >> val;
+  }
+
+  template<class Archive>
+  inline void save(Archive & ar, boost::multiprecision::mpz_int const& val, [[maybe_unused]] const unsigned int version)
+  {
+    std::ostringstream os;
+    os << val;
+    std::string str=os.str();
+    ar & make_nvp("mpz", str);
+  }
+
+  template<class Archive>
+  inline void serialize(Archive & ar, boost::multiprecision::mpz_int & val, const unsigned int version)
+  {
+    split_free(ar, val, version);
+  }
+
 }
 
 
@@ -133,7 +220,6 @@ inline boost::multiprecision::mpq_rational CanonicalizationUnit(boost::multiprec
     return -1;
   return 1;
 }
-
 
 
 

@@ -20,7 +20,34 @@ struct is_boost_cpp_rational<boost::multiprecision::cpp_rational> {
 };
 
 
+// hash
 
+namespace std {
+  template <>
+  struct hash<boost::multiprecision::cpp_int>
+  {
+    std::size_t operator()(const boost::multiprecision::cpp_int& val) const
+    {
+      std::stringstream s;
+      s << val;
+      std::string converted(s.str());
+      return std::hash<std::string>()(converted);
+    }
+  };
+  template <>
+  struct hash<boost::multiprecision::cpp_rational>
+  {
+    std::size_t operator()(const boost::multiprecision::cpp_rational& val) const
+    {
+      std::stringstream s;
+      s << val;
+      std::string converted(s.str());
+      return std::hash<std::string>()(converted);
+    }
+  };
+}
+
+// to_string
 
 namespace std {
   std::string to_string(const boost::multiprecision::cpp_int& e_val)
@@ -39,6 +66,63 @@ namespace std {
   };
 }
 
+// boost::serialization
+
+namespace boost::serialization {
+
+  // boost::multiprecision::cpp_rational
+
+  template<class Archive>
+  inline void load(Archive & ar, boost::multiprecision::cpp_rational & val, [[maybe_unused]] const unsigned int version)
+  {
+    std::string str;
+    ar & make_nvp("cpp_rational", str);
+    std::istringstream is(str);
+    is >> val;
+  }
+
+  template<class Archive>
+  inline void save(Archive & ar, boost::multiprecision::cpp_rational const& val, [[maybe_unused]] const unsigned int version)
+  {
+    std::ostringstream os;
+    os << val;
+    std::string str=os.str();
+    ar & make_nvp("cpp_rational", str);
+  }
+
+  template<class Archive>
+  inline void serialize(Archive & ar, boost::multiprecision::cpp_rational & val, [[maybe_unused]] const unsigned int version)
+  {
+    split_free(ar, val, version);
+  }
+
+  // boost::multiprecision::cpp_int
+
+  template<class Archive>
+  inline void load(Archive & ar, boost::multiprecision::cpp_int & val, [[maybe_unused]] const unsigned int version)
+  {
+    std::string str;
+    ar & make_nvp("cpp_int", str);
+    std::istringstream is(str);
+    is >> val;
+  }
+
+  template<class Archive>
+  inline void save(Archive & ar, boost::multiprecision::cpp_int const& val, [[maybe_unused]] const unsigned int version)
+  {
+    std::ostringstream os;
+    os << val;
+    std::string str=os.str();
+    ar & make_nvp("mpz", str);
+  }
+
+  template<class Archive>
+  inline void serialize(Archive & ar, boost::multiprecision::cpp_int & val, const unsigned int version)
+  {
+    split_free(ar, val, version);
+  }
+
+}
 
 
 template <>

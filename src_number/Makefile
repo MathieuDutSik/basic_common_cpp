@@ -1,10 +1,10 @@
-#PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt
+PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
 #PROGRAM		= PracticalInf
 #PROGRAM		= TestQuoInt
-PROGRAM		= TestConversion
+#PROGRAM		= TestConversion
 #PROGRAM		= TestSquareRoot
 
 OBJECTS		= $(PROGRAM:%=%.o)
