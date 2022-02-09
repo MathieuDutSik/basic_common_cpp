@@ -2,7 +2,9 @@
 #define INCLUDE_MPREAL_RELATED
 
 #include "mpreal.h"
-
+// If we are using mpreal, then somehow, we are forced to use mpq_class and mpz_class
+// Those are just too related. However we included only the strictly necessary.
+#include "gmpxx.h"
 
 inline void TYPE_CONVERSION(mpq_class const& xI, mpfr::mpreal & xO)
 {
