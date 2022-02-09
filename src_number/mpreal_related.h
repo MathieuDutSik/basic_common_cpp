@@ -20,7 +20,9 @@ void NearestInteger(mpfr::mpreal const& x, mpz_class & xO)
   auto GetErr=[&](mpz_class const& u) -> mpfr::mpreal {
     mpfr::mpreal uImg(u.get_mpz_t());
     mpfr::mpreal diff = mpfr::mpreal(uImg) - x;
-    return T_abs(diff);
+    if (diff < 0)
+      return -diff;
+    return diff;
   };
   mpfr::mpreal err=GetErr(xRnd_z);
   while(true) {
@@ -30,8 +32,8 @@ void NearestInteger(mpfr::mpreal const& x, mpz_class & xO)
       mpz_class xTest = xRnd_z + shift;
       mpfr::mpreal TheErr=GetErr(xRnd_z);
       if (TheErr < err) {
-	IsOK=false;
-	xRnd_z=xTest;
+        IsOK=false;
+        xRnd_z=xTest;
       }
     }
     if (IsOK)
