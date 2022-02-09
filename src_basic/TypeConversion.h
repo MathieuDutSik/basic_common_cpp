@@ -9,6 +9,8 @@
 
 #include <math.h>
 #include <type_traits>
+#include <cstdint>
+#include <iostream>
 #include "ExceptionEnding.h"
 #include "TemplateTraits.h"
 

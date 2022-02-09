@@ -2,7 +2,7 @@
 #define EXCEPTION_ENDING_INCLUDE
 
 #include <cassert>
-
+#include <string>
 
 // types for exception
 struct TerminalException {
