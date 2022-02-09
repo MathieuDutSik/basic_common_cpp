@@ -9,7 +9,7 @@ template<typename Ti, typename To>
 inline void TYPE_CONVERSION_STRING(Ti const& a1, To & a2)
 {
   std::stringstream s;
-  s << e_val;
+  s << a1;
   std::string converted(s.str());
   //
   std::istringstream is(converted);
