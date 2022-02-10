@@ -69,6 +69,12 @@ namespace std {
 // boost::serialization
 
 /*
+  That code is actually not needed.
+  For some strange reasons, for cpp_rational we do not need to put the serialization code
+  But for mpq_rational this is apparently needed.
+  The error appears quite unexpectedly in the Group operator.
+
+
 namespace boost::serialization {
 
   // boost::multiprecision::cpp_rational
