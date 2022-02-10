@@ -8,8 +8,6 @@
 #include "ExceptionEnding.h"
 #include "boost_serialization.h"
 
-//#include "NumberTheory.h"
-
 
 template <>
 struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
@@ -70,6 +68,7 @@ namespace std {
 
 // boost::serialization
 
+/*
 namespace boost::serialization {
 
   // boost::multiprecision::cpp_rational
@@ -125,7 +124,7 @@ namespace boost::serialization {
   }
 
 }
-
+*/
 
 template <>
 struct is_euclidean_domain<boost::multiprecision::cpp_int> {
