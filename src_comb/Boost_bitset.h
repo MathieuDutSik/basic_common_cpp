@@ -37,6 +37,11 @@ std::vector<int> FaceTo01vector(Face const& eSet)
 
 
 
+
+
+
+
+
 std::string StringFace(Face const& f)
 {
   std::string str_ret;
@@ -80,6 +85,46 @@ Face ReadFace(std::istream & is)
     eFace[i]=eVal;
   }
   return eFace;
+}
+
+
+Face RandomKFace(int n, int k)
+{
+  if (n < 0) {
+    std::cerr << "We should have n >= 0. We have n=" << n << "\n";
+    throw TerminalException{1};
+  }
+  if (k < 0 || k > n) {
+    std::cerr << "We should have 0 <= k <= n. We have n=" << n << " k=" << k << "\n";
+    throw TerminalException{1};
+  }
+  Face f(n);
+  if (2 * k < n) {
+    int n_done = 0;
+    while(true) {
+      int pos = rand() % n;
+      if (f[pos] == 0) {
+        f[pos] = 1;
+        n_done++;
+      }
+      if (n_done == k)
+        break;
+    }
+  } else {
+    for (int i=0; i<n; i++)
+      f[i] = 0;
+    int n_done = n;
+    while(true) {
+      int pos = rand() % n;
+      if (f[pos] == 1) {
+        f[pos] = 0;
+        n_done--;
+      }
+      if (n_done == k)
+        break;
+    }
+  }
+  return f;
 }
 
 
