@@ -7,7 +7,7 @@
 #include "TemplateTraits.h"
 #include "ExceptionEnding.h"
 #include "boost_serialization.h"
-
+#include <iostream>
 
 template <>
 struct is_boost_mpz_int<boost::multiprecision::mpz_int> {
