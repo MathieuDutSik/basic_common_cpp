@@ -87,6 +87,13 @@ Face ReadFace(std::istream & is)
   return eFace;
 }
 
+Face ReadFaceFile(std::string const& eFile)
+{
+  std::ifstream is(eFile);
+  return ReadFace(is);
+}
+
+
 
 Face RandomKFace(int n, int k)
 {

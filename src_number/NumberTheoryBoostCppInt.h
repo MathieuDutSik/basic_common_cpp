@@ -8,8 +8,6 @@
 #include "ExceptionEnding.h"
 #include "boost_serialization.h"
 
-//#include "NumberTheory.h"
-
 
 template <>
 struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
@@ -70,6 +68,13 @@ namespace std {
 
 // boost::serialization
 
+/*
+  That code is actually not needed.
+  For some strange reasons, for cpp_rational we do not need to put the serialization code
+  But for mpq_rational this is apparently needed.
+  The error appears quite unexpectedly in the Group operator.
+
+
 namespace boost::serialization {
 
   // boost::multiprecision::cpp_rational
@@ -125,7 +130,7 @@ namespace boost::serialization {
   }
 
 }
-
+*/
 
 template <>
 struct is_euclidean_domain<boost::multiprecision::cpp_int> {
