@@ -2832,5 +2832,14 @@ MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const& G, MyMatrix<T> const& Basis)
 }
 
 
+template<typename T>
+MyMatrix<T> SubspaceCompletionRational(MyMatrix<T> const& M, int const& n)
+{
+  if (M.rows() == 0)
+    return IdentityMat<T>(n);
+  return NullspaceTrMat(M);
+}
+
+
 
 #endif

@@ -818,11 +818,11 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const& M)
 
 /*
   After thinking, it would seem that we need to use the
-  SmithNormalForm in order to do those SubspaceCompletion
+  SmithNormalForm in order to do those SubspaceCompletionInt
   operations.
  */
 template<typename T>
-MyMatrix<T> SubspaceCompletion(MyMatrix<T> const& M, int const& n)
+MyMatrix<T> SubspaceCompletionInt(MyMatrix<T> const& M, int const& n)
 {
   int nbRow = M.rows();
   //  int nbCol = M.cols();
