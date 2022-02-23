@@ -2,6 +2,7 @@
 #define HEURISTIC_INCLUDE
 
 #include "Temp_common.h"
+#include "Basic_file.h"
 
 template<typename T>
 struct SingleCondition {
@@ -126,6 +127,26 @@ TheHeuristic<T> ReadHeuristic(std::istream &is)
   TheHeu.DefaultResult=DefaultResult;
   return TheHeu;
 }
+
+
+template<typename T>
+TheHeuristic<T> ReadHeuristicFileCond(std::string const& eFile, TheHeuristic<T> const& HeuIn)
+{
+  if (eFile != "unset.heu") {
+    std::cerr << "eFile=" << eFile << "\n";
+    IsExistingFileDie(eFile);
+    std::ifstream is(eFile);
+    try {
+      return ReadHeuristic<T>(is);
+    }
+    catch (TerminalException const& e) {
+      std::cerr << "Failed in reading the file eFile=" << eFile << "\n";
+      throw TerminalException{1};
+    }
+  }
+  return HeuIn;
+}
+
 
 template<typename T>
 std::string HeuristicEvaluation(std::map<std::string, T> const& TheCand, TheHeuristic<T> const& TheHeu)
