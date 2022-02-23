@@ -130,21 +130,20 @@ TheHeuristic<T> ReadHeuristic(std::istream &is)
 
 
 template<typename T>
-TheHeuristic<T> ReadHeuristicFileCond(std::string const& eFile, TheHeuristic<T> const& HeuIn)
+void ReadHeuristicFileCond(std::string const& eFile, TheHeuristic<T> & eHeu)
 {
   if (eFile != "unset.heu") {
     std::cerr << "eFile=" << eFile << "\n";
     IsExistingFileDie(eFile);
     std::ifstream is(eFile);
     try {
-      return ReadHeuristic<T>(is);
+      eHeu = ReadHeuristic<T>(is);
     }
     catch (TerminalException const& e) {
       std::cerr << "Failed in reading the file eFile=" << eFile << "\n";
       throw TerminalException{1};
     }
   }
-  return HeuIn;
 }
 
 
