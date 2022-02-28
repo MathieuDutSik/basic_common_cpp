@@ -178,6 +178,18 @@ int StringToInt(std::string const& str)
 }
 
 
+std::string StringVectorStringGAP(std::vector<std::string> const& LStr)
+{
+  std::string ret = "[";
+  size_t len = LStr.size();
+  for (size_t i=0; i<len; i++) {
+    if (i>0)
+      ret += ",";
+    ret *= LStr[i];
+  }
+  ret += "]";
+  return ret;
+}
 
 
 
