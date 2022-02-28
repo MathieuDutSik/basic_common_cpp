@@ -586,7 +586,9 @@ template<typename T>
 std::string StringVector(MyVector<T> const & TheVec)
 {
   std::ostringstream os;
-  WriteVector(os, TheVec);
+  int n=TheVec.size();
+  for (int i=0; i<n; i++)
+    os << " " << TheVec(i);
   return os.str();
 }
 
