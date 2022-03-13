@@ -495,14 +495,17 @@ void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const&TheMat)
 
 
 template<typename T>
-void WriteMatrixGAP(std::ostream &os, MyMatrix<T> const&TheMat)
+void WriteMatrixGAP_gen(std::ostream &os, MyMatrix<T> const&TheMat, bool const& as_line)
 {
   long nbRow=TheMat.rows();
   long nbCol=TheMat.cols();
   os << "[ ";
   for (long iRow=0; iRow<nbRow; iRow++) {
-    if (iRow > 0)
-      os << ",\n";
+    if (iRow > 0) {
+      os << ",";
+      if (!as_line)
+        os << "\n";
+    }
     os << "[";
     for (long iCol=0; iCol<nbCol; iCol++) {
       T eVal=TheMat(iRow, iCol);
@@ -516,12 +519,27 @@ void WriteMatrixGAP(std::ostream &os, MyMatrix<T> const&TheMat)
 }
 
 template<typename T>
+void WriteMatrixGAP(std::ostream &os, MyMatrix<T> const&TheMat)
+{
+  WriteMatrixGAP_gen(os, TheMat, false);
+}
+
+template<typename T>
 std::string StringMatrixGAP(MyMatrix<T> const&TheMat)
 {
   std::ostringstream os;
   WriteMatrixGAP(os, TheMat);
   return os.str();
 }
+
+template<typename T>
+std::string StringMatrixGAP_line(MyMatrix<T> const&TheMat)
+{
+  std::ostringstream os;
+  WriteMatrixGAP_gen(os, TheMat, true);
+  return os.str();
+}
+
 
 
 template<typename T>
@@ -586,7 +604,9 @@ template<typename T>
 std::string StringVector(MyVector<T> const & TheVec)
 {
   std::ostringstream os;
-  WriteVector(os, TheVec);
+  int n=TheVec.size();
+  for (int i=0; i<n; i++)
+    os << " " << TheVec(i);
   return os.str();
 }
 
