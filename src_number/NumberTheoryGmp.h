@@ -436,6 +436,17 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int8_t & a2)
   a2 = int8_t(a1_long);
 }
 
+inline void TYPE_CONVERSION(mpq_class const& a1, uint16_t & a2)
+{
+  if (!IsInteger(a1)) {
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
+  }
+  mpz_class a1_z=a1.get_num();
+  long a1_long=a1_z.get_si();
+  a2 = uint16_t(a1_long);
+}
+
 inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
 {
   if (!IsInteger(a1)) {
@@ -445,6 +456,17 @@ inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
   mpz_class a1_z=a1.get_num();
   long a1_long=a1_z.get_si();
   a2 = int16_t(a1_long);
+}
+
+inline void TYPE_CONVERSION(mpq_class const& a1, uint32_t & a2)
+{
+  if (!IsInteger(a1)) {
+    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+    throw ConversionException{str};
+  }
+  mpz_class a1_z=a1.get_num();
+  long a1_long=a1_z.get_si();
+  a2 = uint32_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
