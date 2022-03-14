@@ -5,15 +5,6 @@
 #include <cstdlib>
 
 
-template<typename T>
-T ResInt(T const& a, T const& b)
-{
-  T res;
-  ResInt_Kernel(a, b, res);
-  return res;
-}
-
-
 
 
 // The remainder and quotient of integers
@@ -146,6 +137,18 @@ inline long GetDenominator_z([[maybe_unused]] long const& x)
 {
   return 1;
 }
+
+
+
+
+template<typename T>
+T ResInt(T const& a, T const& b)
+{
+  T res;
+  ResInt_Kernel(a, b, res);
+  return res;
+}
+
 
 
 
