@@ -27,6 +27,14 @@ T ResInt_C_integer(T const& a, T const& b)
 }
 
 
+template<typename T>
+T ResInt_C_unsigned_integer(T const& a, T const& b)
+{
+  T res2 = a % b;
+  return res2;
+}
+
+
 
 
 // Specific functions for number type.
@@ -67,19 +75,18 @@ inline void ResInt_Kernel(int const& a, int const& b, int& res)
 
 inline void ResInt_Kernel(uint8_t const& a, uint8_t const& b, uint8_t & res)
 {
-  res = ResInt_C_integer<uint8_t>(a, b);
+  res = ResInt_C_unsigned_integer<uint8_t>(a, b);
 }
 
 inline void ResInt_Kernel(uint16_t const& a, uint16_t const& b, uint16_t & res)
 {
-  res = ResInt_C_integer<uint16_t>(a, b);
+  res = ResInt_C_unsigned_integer<uint16_t>(a, b);
 }
 
 inline void ResInt_Kernel(uint32_t const& a, uint32_t const& b, uint32_t & res)
 {
-  res = ResInt_C_integer<uint32_t>(a, b);
+  res = ResInt_C_unsigned_integer<uint32_t>(a, b);
 }
-
 
 inline void ResInt_Kernel(long const& a, long const& b, long& res)
 {
