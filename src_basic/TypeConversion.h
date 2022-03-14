@@ -47,22 +47,22 @@ void NearestInteger_double_int(double const& xI, int & xO)
 }
 
 
-inline void TYPE_CONVERSION(double const& a1, double & a2)
+inline void TYPE_CONVERSION(double & a1, double & a2)
 {
   a2 = a1;
 }
 
-inline void TYPE_CONVERSION(double const& a1, uint8_t & a2)
+inline void TYPE_CONVERSION(double & a1, uint8_t & a2)
 {
   a2 = uint8_t(a1);
 }
 
-inline void TYPE_CONVERSION(double const& a1, int & a2)
+inline void TYPE_CONVERSION(double & a1, int & a2)
 {
   a2 = int(a1);
 }
 
-inline void TYPE_CONVERSION(double const& a1, long & a2)
+inline void TYPE_CONVERSION(double & a1, long & a2)
 {
   a2 = long(a1);
 }
@@ -74,12 +74,12 @@ inline void TYPE_CONVERSION(double const& a1, int64_t & a2)
 }
 */
 
-inline void TYPE_CONVERSION(int const& a1, double & a2)
+inline void TYPE_CONVERSION(int & a1, double & a2)
 {
   a2 = double(a1);
 }
 
-inline void TYPE_CONVERSION(uint8_t const& a1, double & a2)
+inline void TYPE_CONVERSION(uint8_t & a1, double & a2)
 {
   a2 = double(a1);
 }
@@ -91,7 +91,7 @@ inline void TYPE_CONVERSION(int64_t const& a1, double & a2)
 }
 */
 
-inline void TYPE_CONVERSION(long const& a1, double & a2)
+inline void TYPE_CONVERSION(long & a1, double & a2)
 {
   a2 = double(a1);
 }
