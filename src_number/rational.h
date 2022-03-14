@@ -1,12 +1,14 @@
 #ifndef DEFINE_RATIONAL_H
 #define DEFINE_RATIONAL_H
 
-#include "TemplateTraits.h"
-#include "ResidueQuotient.h"
 #include <string>
 #include <iostream>
 #include <sstream>
 #include <limits>
+
+#include "TemplateTraits.h"
+#include "TypeConversion.h"
+#include "ResidueQuotient.h"
 #include "ExceptionEnding.h"
 
 
