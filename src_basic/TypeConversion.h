@@ -46,54 +46,60 @@ void NearestInteger_double_int(double const& xI, int & xO)
   xO=xRnd_z;
 }
 
+// Singleton Type Conversion
+template<typename T>
+struct stc {
+  T const& val;
+};
 
-inline void TYPE_CONVERSION(double const& a1, double & a2)
+
+inline void TYPE_CONVERSION(stc<double> const& a1, double & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
 
-inline void TYPE_CONVERSION(double const& a1, uint8_t & a2)
+inline void TYPE_CONVERSION(stc<double> const& a1, uint8_t & a2)
 {
-  a2 = uint8_t(a1);
+  a2 = uint8_t(a1.val);
 }
 
-inline void TYPE_CONVERSION(double const& a1, int & a2)
+inline void TYPE_CONVERSION(stc<double> const& a1, int & a2)
 {
-  a2 = int(a1);
+  a2 = int(a1.val);
 }
 
-inline void TYPE_CONVERSION(double const& a1, long & a2)
+inline void TYPE_CONVERSION(stc<double> const& a1, long & a2)
 {
-  a2 = long(a1);
-}
-
-/*
-inline void TYPE_CONVERSION(double const& a1, int64_t & a2)
-{
-  a2 = int64_t(a1);
-}
-*/
-
-inline void TYPE_CONVERSION(int const& a1, double & a2)
-{
-  a2 = double(a1);
-}
-
-inline void TYPE_CONVERSION(uint8_t const& a1, double & a2)
-{
-  a2 = double(a1);
+  a2 = long(a1.val);
 }
 
 /*
-inline void TYPE_CONVERSION(int64_t const& a1, double & a2)
+inline void TYPE_CONVERSION(stc<double> const& a1, int64_t & a2)
 {
-  a2 = double(a1);
+  a2 = int64_t(a1.val);
 }
 */
 
-inline void TYPE_CONVERSION(long const& a1, double & a2)
+inline void TYPE_CONVERSION(stc<int> const& a1, double & a2)
 {
-  a2 = double(a1);
+  a2 = double(a1.val);
+}
+
+inline void TYPE_CONVERSION(stc<uint8_t> const& a1, double & a2)
+{
+  a2 = double(a1.val);
+}
+
+/*
+inline void TYPE_CONVERSION(stc<int64_t> const& a1, double & a2)
+{
+  a2 = double(a1.val);
+}
+*/
+
+inline void TYPE_CONVERSION(stc<long> const& a1, double & a2)
+{
+  a2 = double(a1.val);
 }
 
 
@@ -178,7 +184,8 @@ T1 UniversalScalarConversion(T2 const& a)
 {
   T1 ret;
   try {
-    TYPE_CONVERSION(a, ret);
+    stc<T2> stc_a{a};
+    TYPE_CONVERSION(stc_a, ret);
   }
   catch (ConversionException & e) {
     std::cerr << "ConversionError e=" << e.val << "\n";
@@ -194,7 +201,8 @@ std::pair<bool,T1> UniversalScalarConversionCheck(T2 const& a)
 {
   T1 ret;
   try {
-    TYPE_CONVERSION(a, ret);
+    stc<T2> stc_a{a};
+    TYPE_CONVERSION(stc_a, ret);
   }
   catch (ConversionException & e) {
     return {false,ret};

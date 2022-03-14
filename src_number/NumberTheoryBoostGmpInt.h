@@ -338,71 +338,73 @@ inline boost::multiprecision::mpq_rational GetDenominator(boost::multiprecision:
 
 
 
-inline void TYPE_CONVERSION(boost::multiprecision::mpz_int const& a1, double & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const& a1, double & a2)
 {
-  a2 = a1.template convert_to<double>();
+  a2 = a1.val.template convert_to<double>();
   //  std::cerr << "Missing code, write here\n";
   //  throw TerminalException{1};
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpz_int const& a1, int & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const& a1, int & a2)
 {
-  a2 = a1.template convert_to<int>();
+  a2 = a1.val.template convert_to<int>();
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpz_int const& a1, long & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const& a1, long & a2)
 {
-  a2 = a1.template convert_to<long>();
+  a2 = a1.val.template convert_to<long>();
 }
-inline void TYPE_CONVERSION(int const& a1, boost::multiprecision::mpz_int & a2)
+inline void TYPE_CONVERSION(stc<int> const& a1, boost::multiprecision::mpz_int & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpz_int const& a1, boost::multiprecision::mpz_int & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const& a1, boost::multiprecision::mpz_int & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
 
 
-inline void TYPE_CONVERSION(boost::multiprecision::mpq_rational const& a1, double & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const& a1, double & a2)
 {
-  a2 = a1.template convert_to<double>();
+  a2 = a1.val.template convert_to<double>();
   //  std::cerr << "Missing code, write here\n";
   //  throw TerminalException{1};
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpq_rational const& a1, boost::multiprecision::mpz_int & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const& a1, boost::multiprecision::mpz_int & a2)
 {
-  if (!IsInteger(a1)) {
-    std::string str = "a1=" + std::to_string(a1) + " is not an integer";
+  if (!IsInteger(a1.val)) {
+    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
     throw ConversionException{str};
   }
-  a2 = numerator(a1);
+  a2 = numerator(a1.val);
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpq_rational const& a1, int & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const& a1, int & a2)
 {
   boost::multiprecision::mpz_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
-  TYPE_CONVERSION(a1_z, a2);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpq_rational const& a1, long & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const& a1, long & a2)
 {
   boost::multiprecision::mpz_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
-  TYPE_CONVERSION(a1_z, a2);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
 }
-inline void TYPE_CONVERSION(int const& a1, boost::multiprecision::mpq_rational & a2)
+inline void TYPE_CONVERSION(stc<int> const& a1, boost::multiprecision::mpq_rational & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
-inline void TYPE_CONVERSION(long const& a1, boost::multiprecision::mpq_rational & a2)
+inline void TYPE_CONVERSION(stc<long> const& a1, boost::multiprecision::mpq_rational & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpz_int const& a1, boost::multiprecision::mpq_rational & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const& a1, boost::multiprecision::mpq_rational & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
-inline void TYPE_CONVERSION(boost::multiprecision::mpq_rational const& a1, boost::multiprecision::mpq_rational & a2)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const& a1, boost::multiprecision::mpq_rational & a2)
 {
-  a2 = a1;
+  a2 = a1.val;
 }
 
 

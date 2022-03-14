@@ -235,9 +235,9 @@ class fmpq_class {
   }
 };
 
-inline void TYPE_CONVERSION(fmpq_class const& eQ, double & eD)
+inline void TYPE_CONVERSION(stc<fmpq_class> const& eQ, double & eD)
 {
-  eD=eQ.get_d();
+  eD=eQ.val.get_d();
 }
 
 

@@ -207,9 +207,9 @@ class QuadField {
 };
 
 template<typename T, int d>
-inline void TYPE_CONVERSION(QuadField<T, d> const& eQ, double & eD)
+inline void TYPE_CONVERSION(stc<QuadField<T, d>> const& eQ, double & eD)
 {
-  eD=eQ.get_d();
+  eD=eQ.val.get_d();
 }
 
 template<typename T, int d>
