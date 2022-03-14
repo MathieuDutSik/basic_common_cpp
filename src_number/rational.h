@@ -2,7 +2,7 @@
 #define DEFINE_RATIONAL_H
 
 #include "TemplateTraits.h"
-#include "Generic_and_C_algo.h"
+#include "ResidueQuotient.h"
 #include <string>
 #include <iostream>
 #include <sstream>
