@@ -367,9 +367,9 @@ inline std::pair<Rational<Tint>,Rational<Tint>> ResQuoInt_kernel(Rational<Tint> 
 }
 
 template<typename Tint>
-inline Rational<Tint> ResInt(Rational<Tint> const& a, Rational<Tint> const& b)
+inline void ResInt_Kernel(Rational<Tint> const& a, Rational<Tint> const& b, Rational<Tint> & res)
 {
-  return ResQuoInt_kernel(a, b).first;
+  res = ResQuoInt_kernel(a, b).first;
 }
 
 template<typename Tint>

@@ -4,6 +4,18 @@
 
 #include <cstdlib>
 
+
+template<typename T>
+T ResInt(T const& a, T const& b)
+{
+  T res;
+  ResInt_Kernel(a, b, res);
+  return res;
+}
+
+
+
+
 // The remainder and quotient of integers
 
 template<typename T>
@@ -48,14 +60,14 @@ T ResInt_Generic(T const& a, T const& b)
   return res;
 }
 
-inline int ResInt(int const& a, int const& b)
+inline void ResInt_Kernel(int const& a, int const& b, int& res)
 {
-  return ResInt_C_integer<int>(a, b);
+  res = ResInt_C_integer<int>(a, b);
 }
 
-inline long ResInt(long const& a, long const& b)
+inline void ResInt_Kernel(long const& a, long const& b, long& res)
 {
-  return ResInt_C_integer<long>(a, b);
+  res = ResInt_C_integer<long>(a, b);
 }
 
 

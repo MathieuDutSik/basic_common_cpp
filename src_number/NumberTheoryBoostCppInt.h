@@ -231,7 +231,7 @@ inline boost::multiprecision::cpp_rational CanonicalizationUnit(boost::multiprec
 
 
 
-inline boost::multiprecision::cpp_int ResInt(boost::multiprecision::cpp_int const& a, boost::multiprecision::cpp_int const& b)
+inline void ResInt_Kernel(boost::multiprecision::cpp_int const& a, boost::multiprecision::cpp_int const& b, boost::multiprecision::cpp_int & res)
 {
   using T = boost::multiprecision::cpp_int;
   T q = a / b;
@@ -241,8 +241,7 @@ inline boost::multiprecision::cpp_int ResInt(boost::multiprecision::cpp_int cons
     else
       q++;
   }
-  T res = a - q * b;
-  return res;
+  res = a - q * b;
 }
 inline boost::multiprecision::cpp_int QuoInt(boost::multiprecision::cpp_int const& a, boost::multiprecision::cpp_int const& b)
 {
@@ -306,9 +305,9 @@ inline std::pair<boost::multiprecision::cpp_rational,boost::multiprecision::cpp_
     }
   }
 }
-inline boost::multiprecision::cpp_rational ResInt(boost::multiprecision::cpp_rational const& a, boost::multiprecision::cpp_rational const& b)
+inline void ResInt_Kernel (boost::multiprecision::cpp_rational const& a, boost::multiprecision::cpp_rational const& b, boost::multiprecision::cpp_rational & res)
 {
-  return ResQuoInt_kernel(a, b).first;
+  res = ResQuoInt_kernel(a, b).first;
 }
 inline boost::multiprecision::cpp_rational QuoInt(boost::multiprecision::cpp_rational const& a, boost::multiprecision::cpp_rational const& b)
 {
@@ -434,7 +433,8 @@ inline boost::multiprecision::cpp_rational FractionalPart(boost::multiprecision:
   using Tf= boost::multiprecision::cpp_rational;
   T x_n = numerator(x);
   T x_d = denominator(x);
-  T res = ResInt(x_n, x_d);
+  T res;
+  ResInt_Kernel(x_n, x_d, res);
   Tf res_f = res;
   Tf x_df = x_d;
   Tf ret = res_f / x_df;

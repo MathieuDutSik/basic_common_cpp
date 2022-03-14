@@ -191,21 +191,19 @@ namespace std {
 }
 
 // As documented in section 5.6 this is done exactly as in C int
-inline mpz_class ResInt(mpz_class const& a, mpz_class const& b)
+inline void ResInt_Kernel(mpz_class const& a, mpz_class const& b, mpz_class & res)
 {
-  mpz_class res2;
-  mpz_cdiv_r(res2.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  if (b > 0 && res2 != 0) {
+  mpz_cdiv_r(res.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
+  if (b > 0 && res != 0) {
     if (b<0)
-      res2 -= b;
+      res -= b;
     else
-      res2 += b;
+      res += b;
   }
-  return res2;
 }
 
 
-inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
+inline void ResInt_Kernel(mpq_class const& a, mpq_class const& b, mpq_class & res)
 {
   mpz_class a_den=a.get_den();
   mpz_class b_den=b.get_den();
@@ -218,9 +216,9 @@ inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
   mpz_class b_num=bProd.get_num();
   mpz_class b_num_pos;
   if (b_num < 0) {
-    b_num_pos=-b_num;
+    b_num_pos = -b_num;
   } else {
-    b_num_pos=b_num;
+    b_num_pos = b_num;
   }
   mpz_class res_z=a_num % b_num_pos;
   while(true) {
@@ -231,8 +229,7 @@ inline mpq_class ResInt(mpq_class const& a, mpq_class const& b)
     if (res_z >= b_num_pos)
       res_z -= b_num_pos;
   }
-  mpq_class res_q=mpq_class(res_z) / mpq_class(eLCM);
-  return res_q;
+  res = mpq_class(res_z) / mpq_class(eLCM);
 }
 
 

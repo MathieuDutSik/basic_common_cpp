@@ -224,7 +224,7 @@ inline boost::multiprecision::mpq_rational CanonicalizationUnit(boost::multiprec
 
 
 
-inline boost::multiprecision::mpz_int ResInt(boost::multiprecision::mpz_int const& a, boost::multiprecision::mpz_int const& b)
+inline void ResInt_Kernel(boost::multiprecision::mpz_int const& a, boost::multiprecision::mpz_int const& b, boost::multiprecision::mpz_int & res)
 {
   using T = boost::multiprecision::mpz_int;
   T q = a / b;
@@ -234,8 +234,7 @@ inline boost::multiprecision::mpz_int ResInt(boost::multiprecision::mpz_int cons
     else
       q++;
   }
-  T res = a - q * b;
-  return res;
+  res = a - q * b;
 }
 inline boost::multiprecision::mpz_int QuoInt(boost::multiprecision::mpz_int const& a, boost::multiprecision::mpz_int const& b)
 {
@@ -299,9 +298,9 @@ inline std::pair<boost::multiprecision::mpq_rational,boost::multiprecision::mpq_
     }
   }
 }
-inline boost::multiprecision::mpq_rational ResInt(boost::multiprecision::mpq_rational const& a, boost::multiprecision::mpq_rational const& b)
+inline void ResInt_Kernel(boost::multiprecision::mpq_rational const& a, boost::multiprecision::mpq_rational const& b, boost::multiprecision::mpq_rational & res)
 {
-  return ResQuoInt_kernel(a, b).first;
+  res = ResQuoInt_kernel(a, b).first;
 }
 inline boost::multiprecision::mpq_rational QuoInt(boost::multiprecision::mpq_rational const& a, boost::multiprecision::mpq_rational const& b)
 {

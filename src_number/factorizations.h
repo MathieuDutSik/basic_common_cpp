@@ -14,7 +14,7 @@ std::pair<bool, T> rho_pollard_factorize(T const& number)
   do {
     count = size;
     do {
-      x = ResInt( x * x + 1, number);
+      ResInt_Kernel( x * x + 1, number, x);
       diff = x - x_fixed;
       if (diff < 0)
         diff = -diff;
