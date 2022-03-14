@@ -382,19 +382,19 @@ inline mpq_class GetFieldElement(long const& eVal)
 
 // mpq_class as input
 
-inline void TYPE_CONVERSION(mpq_class & a1, mpq_class & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
 
-inline void TYPE_CONVERSION(mpq_class & a1, double & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, double & a2)
 {
   a2=a1.get_d();
 }
 
 
-inline void TYPE_CONVERSION(mpq_class & a1, mpz_class & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, mpz_class & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -403,7 +403,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, mpz_class & a2)
   a2=a1.get_num();
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, int & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, int & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -414,7 +414,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, int & a2)
   a2 = int(a1_long);
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, uint8_t & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, uint8_t & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -425,7 +425,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, uint8_t & a2)
   a2 = uint8_t(a1_long);
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, int8_t & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, int8_t & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -436,7 +436,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, int8_t & a2)
   a2 = int8_t(a1_long);
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, uint16_t & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, uint16_t & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -447,7 +447,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, uint16_t & a2)
   a2 = uint16_t(a1_long);
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, int16_t & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, int16_t & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -458,7 +458,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, int16_t & a2)
   a2 = int16_t(a1_long);
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, uint32_t & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, uint32_t & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -469,7 +469,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, uint32_t & a2)
   a2 = uint32_t(a1_long);
 }
 
-inline void TYPE_CONVERSION(mpq_class & a1, long & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, long & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -480,7 +480,7 @@ inline void TYPE_CONVERSION(mpq_class & a1, long & a2)
 }
 
 /*
-inline void TYPE_CONVERSION(mpq_class & a1, int64_t & a2)
+inline void TYPE_CONVERSION(mpq_class const& a1, int64_t & a2)
 {
   if (!IsInteger(a1)) {
     std::string str = "a1=" + std::to_string(a1) + " is not an integer";
@@ -493,58 +493,58 @@ inline void TYPE_CONVERSION(mpq_class & a1, int64_t & a2)
 
 // long as input
 
-inline void TYPE_CONVERSION(long & a1, long & a2)
+inline void TYPE_CONVERSION(long const& a1, long & a2)
 {
   a2=a1;
 }
 
-inline void TYPE_CONVERSION(long & a1, mpq_class & a2)
+inline void TYPE_CONVERSION(long const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
-inline void TYPE_CONVERSION(long & a1, mpz_class & a2)
+inline void TYPE_CONVERSION(long const& a1, mpz_class & a2)
 {
   a2=a1;
 }
 
 // int as input
 
-inline void TYPE_CONVERSION(int & a1, int & a2)
+inline void TYPE_CONVERSION(int const& a1, int & a2)
 {
   a2=a1;
 }
 
-inline void TYPE_CONVERSION(int & a1, mpq_class & a2)
+inline void TYPE_CONVERSION(int const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
-inline void TYPE_CONVERSION(int & a1, mpz_class & a2)
+inline void TYPE_CONVERSION(int const& a1, mpz_class & a2)
 {
   a2=a1;
 }
 
 // mpz_class as input
 
-inline void TYPE_CONVERSION(mpz_class & a1, mpz_class & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, mpz_class & a2)
 {
   a2=a1;
 }
 
-inline void TYPE_CONVERSION(mpz_class & a1, mpq_class & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, mpq_class & a2)
 {
   a2=a1;
 }
 
-inline void TYPE_CONVERSION(mpz_class & a1, int & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, int & a2)
 {
   long eVal_long=a1.get_si();
   a2=int(eVal_long);
 }
 
 /*
-inline void TYPE_CONVERSION(mpz_class & a1, int64_t & a2)
+inline void TYPE_CONVERSION(mpz_class const& a1, int64_t & a2)
 {
   long eVal_long=a1.get_si();
   a2=int64_t(eVal_long);
