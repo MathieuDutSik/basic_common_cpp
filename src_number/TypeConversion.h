@@ -14,37 +14,9 @@
 #include "ExceptionEnding.h"
 #include "TemplateTraits.h"
 
-void NearestInteger_double_int(double const& xI, int & xO)
-{
-  //  std::cerr << "Temp_common : NearestInteger\n";
-  double xRnd_d=round(xI);
-  int xRnd_z=int(xRnd_d);
-  //  std::cerr << "xI=" << xI << "\n";
-  auto GetErr=[&](int const& u) -> double {
-    double diff = double(u) - xI;
-    if (diff < 0)
-      return -diff;
-    return diff;
-  };
-  double err=GetErr(xRnd_z);
-  //  std::cerr << "err=" << err << "\n";
-  while(true) {
-    bool IsOK=true;
-    for (int i=0; i<2; i++) {
-      int shift=2*i -1;
-      int xTest = xRnd_z + shift;
-      double TheErr=GetErr(xTest);
-      //      std::cerr << "i=" << i << " shift=" << shift << " xTest=" << xTest << " TheErr=" << TheErr << "\n";
-      if (TheErr < err) {
-	IsOK=false;
-	xRnd_z=xTest;
-      }
-    }
-    if (IsOK)
-      break;
-  }
-  xO=xRnd_z;
-}
+//
+// UniversalScalarConversion and TYPE_CONVERSION
+//
 
 // Singleton Type Conversion
 template<typename T>
@@ -103,6 +75,75 @@ inline void TYPE_CONVERSION(stc<long> const& a1, double & a2)
 }
 
 
+template<typename T1, typename T2>
+T1 UniversalScalarConversion(T2 const& a)
+{
+  T1 ret;
+  try {
+    stc<T2> stc_a{a};
+    TYPE_CONVERSION(stc_a, ret);
+  }
+  catch (ConversionException & e) {
+    std::cerr << "ConversionError e=" << e.val << "\n";
+    throw TerminalException{1};
+  }
+  return ret;
+}
+
+
+
+template<typename T1, typename T2>
+std::pair<bool,T1> UniversalScalarConversionCheck(T2 const& a)
+{
+  T1 ret;
+  try {
+    stc<T2> stc_a{a};
+    TYPE_CONVERSION(stc_a, ret);
+  }
+  catch (ConversionException & e) {
+    return {false,ret};
+  }
+  return {true,ret};
+}
+
+
+//
+// Nearest / Floor / Ceil operations
+//
+
+void NearestInteger_double_int(double const& xI, int & xO)
+{
+  //  std::cerr << "Temp_common : NearestInteger\n";
+  double xRnd_d=round(xI);
+  int xRnd_z=int(xRnd_d);
+  //  std::cerr << "xI=" << xI << "\n";
+  auto GetErr=[&](int const& u) -> double {
+    double diff = double(u) - xI;
+    if (diff < 0)
+      return -diff;
+    return diff;
+  };
+  double err=GetErr(xRnd_z);
+  //  std::cerr << "err=" << err << "\n";
+  while(true) {
+    bool IsOK=true;
+    for (int i=0; i<2; i++) {
+      int shift=2*i -1;
+      int xTest = xRnd_z + shift;
+      double TheErr=GetErr(xTest);
+      //      std::cerr << "i=" << i << " shift=" << shift << " xTest=" << xTest << " TheErr=" << TheErr << "\n";
+      if (TheErr < err) {
+	IsOK=false;
+	xRnd_z=xTest;
+      }
+    }
+    if (IsOK)
+      break;
+  }
+  xO=xRnd_z;
+}
+
+
 
 
 template<typename To>
@@ -114,8 +155,7 @@ void NearestInteger_double_To(double const& xI, To & xO)
   To xRnd_To=xRnd_i;
   //  std::cerr << "xI=" << xI << "\n";
   auto GetErr=[&](To const& u) -> double {
-    double u_doubl;
-    TYPE_CONVERSION(u, u_doubl);
+    double u_doubl = UniversalScalarConversion<double,To>(u);
     double diff = u_doubl - xI;
     if (diff < 0)
       return -diff;
@@ -175,39 +215,6 @@ inline typename std::enable_if<std::is_same_v<Ti,double>,To>::type UniversalNear
   To ret;
   NearestInteger_double_To<To>(a, ret);
   return ret;
-}
-
-
-
-template<typename T1, typename T2>
-T1 UniversalScalarConversion(T2 const& a)
-{
-  T1 ret;
-  try {
-    stc<T2> stc_a{a};
-    TYPE_CONVERSION(stc_a, ret);
-  }
-  catch (ConversionException & e) {
-    std::cerr << "ConversionError e=" << e.val << "\n";
-    throw TerminalException{1};
-  }
-  return ret;
-}
-
-
-
-template<typename T1, typename T2>
-std::pair<bool,T1> UniversalScalarConversionCheck(T2 const& a)
-{
-  T1 ret;
-  try {
-    stc<T2> stc_a{a};
-    TYPE_CONVERSION(stc_a, ret);
-  }
-  catch (ConversionException & e) {
-    return {false,ret};
-  }
-  return {true,ret};
 }
 
 

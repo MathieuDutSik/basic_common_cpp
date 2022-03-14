@@ -601,6 +601,11 @@ inline void TYPE_CONVERSION(stc<mpz_class> const& a1, int & a2)
   a2=int(eVal_long);
 }
 
+inline void TYPE_CONVERSION(stc<mpz_class> const& a1, double & a2)
+{
+  a2 = a1.val.get_d();
+}
+
 /*
 inline void TYPE_CONVERSION(stc<mpz_class> const& a1, int64_t & a2)
 {
