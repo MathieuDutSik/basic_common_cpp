@@ -5,6 +5,7 @@
 
 #include <boost/multiprecision/gmp.hpp>
 #include "TemplateTraits.h"
+#include "TypeConversion.h"
 #include "ExceptionEnding.h"
 #include "boost_serialization.h"
 #include <iostream>

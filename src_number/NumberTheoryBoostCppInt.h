@@ -5,6 +5,7 @@
 
 #include <boost/multiprecision/cpp_int.hpp>
 #include "TemplateTraits.h"
+#include "TypeConversion.h"
 #include "ExceptionEnding.h"
 #include "boost_serialization.h"
 
