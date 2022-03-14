@@ -65,6 +65,22 @@ inline void ResInt_Kernel(int const& a, int const& b, int& res)
   res = ResInt_C_integer<int>(a, b);
 }
 
+inline void ResInt_Kernel(uint8_t const& a, uint8_t const& b, uint8_t & res)
+{
+  res = ResInt_C_integer<uint8_t>(a, b);
+}
+
+inline void ResInt_Kernel(uint16_t const& a, uint16_t const& b, uint16_t & res)
+{
+  res = ResInt_C_integer<uint16_t>(a, b);
+}
+
+inline void ResInt_Kernel(uint32_t const& a, uint32_t const& b, uint32_t & res)
+{
+  res = ResInt_C_integer<uint32_t>(a, b);
+}
+
+
 inline void ResInt_Kernel(long const& a, long const& b, long& res)
 {
   res = ResInt_C_integer<long>(a, b);
