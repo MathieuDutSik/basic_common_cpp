@@ -426,7 +426,8 @@ inline boost::multiprecision::mpq_rational FractionalPart(boost::multiprecision:
   using Tf= boost::multiprecision::mpq_rational;
   T x_n = numerator(x);
   T x_d = denominator(x);
-  T res = ResInt(x_n, x_d);
+  T res;
+  ResInt_Kernel(x_n, x_d, res);
   Tf res_f = res;
   Tf x_df = x_d;
   Tf ret = res_f / x_df;
