@@ -57,6 +57,21 @@ inline void TYPE_CONVERSION(stc<int> const& a1, double & a2)
   a2 = double(a1.val);
 }
 
+inline void TYPE_CONVERSION(stc<int> const& a1, uint8_t & a2)
+{
+  a2 = uint8_t(a1.val);
+}
+
+inline void TYPE_CONVERSION(stc<int> const& a1, uint16_t & a2)
+{
+  a2 = uint16_t(a1.val);
+}
+
+inline void TYPE_CONVERSION(stc<int> const& a1, uint32_t & a2)
+{
+  a2 = uint32_t(a1.val);
+}
+
 inline void TYPE_CONVERSION(stc<uint8_t> const& a1, double & a2)
 {
   a2 = double(a1.val);
