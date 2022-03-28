@@ -97,9 +97,10 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const& eGR)
 
 
 
-template<typename Tgr>
-std::option<permlib::Permutation> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr const& eGR2)
+template<typename Tgr, typename Telt>
+std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr const& eGR2)
 {
+  using Tidx=typename Telt::Tidx;
   std::string ePrefix=random_string(20);
   TempFile eFileIn ("/tmp/NAUTY_ISOM_" + ePrefix + ".inp");
   TempFile eFileOut("/tmp/NAUTY_ISOM_" + ePrefix + ".out");
@@ -138,16 +139,15 @@ std::option<permlib::Permutation> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr c
   std::ifstream is(eFileIso.string());
   is >> test;
   if (test == 0) {
-    return {false, {}};
+    return {};
   }
-  std::vector<permlib::dom_int> eList(nbVert);
+  std::vector<Tidx> eList(nbVert);
   for (int iVert=0; iVert<nbVert; iVert++) {
     int eVal;
     is >> eVal;
     eList[iVert]=eVal;
   }
-  permlib::Permutation ePerm(eList);
-  return ePerm;
+  return Telt(eList);
 }
 
 
