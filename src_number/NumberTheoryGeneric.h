@@ -1,6 +1,8 @@
 #ifndef INCLUDE_NUMBER_THEORY_GENERIC
 #define INCLUDE_NUMBER_THEORY_GENERIC
 
+#include "Basic_functions.h"
+
 template<typename T>
 T GenericGcd(T const& m, T const& n)
 {
