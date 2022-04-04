@@ -5,7 +5,7 @@
 
 struct SingletonTime {
   std::chrono::time_point<std::chrono::system_clock> time;
-  SingleTime() {
+  SingletonTime() {
     time = std::chrono::system_clock::now();
   }
 };
