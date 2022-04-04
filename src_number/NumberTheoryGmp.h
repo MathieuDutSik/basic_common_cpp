@@ -4,7 +4,6 @@
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
 #include "TypeConversion.h"
-//#include "ExceptionEnding.h"
 #include "gmpxx.h"
 
 // We need to use is_mpq_class and is_mpz_class.
