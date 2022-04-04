@@ -2,6 +2,7 @@
 #define SRC_NUMBER_RESIDUEQUOTIENT_H_
 
 #include <cstdlib>
+#include <cstdint>
 
 // The remainder and quotient of integers
 
