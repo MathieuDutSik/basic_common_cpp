@@ -73,7 +73,40 @@ MyMatrix<T> ComputeBasisInvariantSpace(std::vector<MyMatrix<T>> const& ListMat, 
       NSP_red(i,j) = NSP(i,j);
   return NSP_red * TheSpace;
 }
-  
+
+/*
+Equation to solve is x1 M1 = x2 M2 + u MOD
+*/
+template <typename T>
+MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const& M1, MyMatrix<T> const& M2, T const& TheMod)
+{
+  int n_row1 = M1.rows();
+  int n_row2 = M2.rows();
+  int n = M1.cols();
+  MyMatrix<T> Equa(n_row1 + n_row2 + n, n);
+  for (int i1=0; i1<n_row1; i1++)
+    for (int j=0; j<n; j++)
+      Equa(i1, j) = M1(i1, j);
+  for (int i2=0; i2<n_row2; i2++)
+    for (int j=0; j<n; j++)
+      Equa(n_row1 + i2, j) = M1(i2, j);
+  for (int i=0; i<n; i++)
+    for (int j=0; j<n; j++) {
+      if (i == j) {
+        Equa(n_row1 + n_row2 + i, j) = TheMod;
+      } else {
+        Equa(n_row1 + n_row2 + i, j) = 0;
+      }
+    }
+  MyMatrix<T> NSP = NullspaceIntMat(Equa);
+  MyMatrix<T> NSP_red(NSP.rows(), n_row1);
+  for (int i=0; i<NSP.rows(); i++)
+    for (int j=0; j<n_row1; j++)
+      NSP_red(i,j) = NSP(i,j);
+  return NSP_red * M1;
+}
+
+
 
 
 #endif
