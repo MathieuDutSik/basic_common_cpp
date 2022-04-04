@@ -95,7 +95,18 @@ namespace boost::serialization {
 }
 
 
-
+template <typename T> bool IsIdentity(MyMatrix<T> const &M) {
+  int len = M.rows();
+  for (int i = 0; i < len; i++) {
+    for (int j = 0; j < len; j++) {
+      if (i == j && M(i, j) != 1)
+        return false;
+      if (i != j && M(i, j) != 0)
+        return false;
+    }
+  }
+  return true;
+}
 
 
 
