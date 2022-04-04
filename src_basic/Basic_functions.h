@@ -2,6 +2,9 @@
 #define SRC_BASIC_BASIC_FUNCTIONS_H_
 
 #include <vector>
+#include <map>
+#include <iostream>
+
 
 template<typename T>
 T VectorSum(std::vector<T> const& eVect)
