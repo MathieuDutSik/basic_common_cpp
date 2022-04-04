@@ -41,6 +41,16 @@ MyVector<Tmod> ModuloReductionVector(MyVector<T> const &V, T const &TheMod) {
   return retV;
 }
 
+template <typename T>
+MyVector<T> VectorMod(MyVector<T> const &V, T const &TheMod) {
+  int n = V.size();
+  MyVector<T> Vret(n);
+  for (int i = 0; i < n; i++)
+    Vret(i) = ResInt(V(i), TheMod);
+  return Vret;
+}
+
+
 /*
 We want to find the vectors x in Z^n such that
 x TheSpace P = x TheSpace + u MOD
