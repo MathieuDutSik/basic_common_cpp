@@ -75,7 +75,7 @@ MyMatrix<T> ComputeBasisInvariantSpace(std::vector<MyMatrix<T>> const& ListMat, 
       }
     }
   }
-  MyMatrix<T> NSP = SolutionIntMat(Equa);
+  MyMatrix<T> NSP = NullspaceIntMat(Equa);
   int n_row = NSP.rows();
   MyMatrix<T> NSP_red(n,n);
   for (int i=0; i<n_row; i++)
