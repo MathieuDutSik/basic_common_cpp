@@ -5,15 +5,32 @@
 
 struct SingletonTime {
   std::chrono::time_point<std::chrono::system_clock> time;
+  SingleTime() {
+    time = std::chrono::system_clock::now();
+  }
 };
 
 
-std::string ms(SingletonTime const& ms1, SingletonTime const& ms2)
+std::string ms(SingletonTime const& s1, SingletonTime const& s2)
 {
-  return std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(ms2.time - ms1.time).count());
+  return std::to_string(std::chrono::duration_cast<std::chrono::microseconds>(s2.time - s1.time).count());
 }
 
+std::string s(SingletonTime const& s1, SingletonTime const& s2)
+{
+  return std::to_string(std::chrono::duration_cast<std::chrono::seconds>(s2.time - s1.time).count());
+}
 
+int si(SingletonTime const& s1, SingletonTime const& s2)
+{
+  return std::chrono::duration_cast<std::chrono::microseconds>(s2.time - s1.time).count();
+}
+
+void runtime(SingletonTime const& start)
+{
+  SingletonTime end;
+  std::cerr << "runtime = " << s(start,end) << "\n";
+}
 
 
 
