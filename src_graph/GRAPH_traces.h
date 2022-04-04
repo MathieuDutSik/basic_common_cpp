@@ -6,6 +6,7 @@
 #include <limits>
 #include <iostream>
 #include <ExceptionEnding.h>
+#include "Timings.h"
 
 struct DataTraces {
 public:
@@ -114,7 +115,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces& DT)
     throw TerminalException{1};
   }
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+  SingletonTime time1;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
   TracesStats stats;
@@ -127,8 +128,8 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces& DT)
   for (size_t i=0; i<n; i++)
     V[DT.lab1[i]] = Tidx(i);
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-  std::cerr << "|TRACES_GetCanonicalOrdering_Arr|=" << std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count() << "\n";
+  SingletonTime time2;
+  std::cerr << "|TRACES_GetCanonicalOrdering_Arr|=" << ms(time1,time2) << "\n";
 #endif
   return V;
 }
@@ -199,7 +200,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
     throw TerminalException{1};
   }
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+  SingletonTime time1;
 #endif
   DYNALLSTAT(int,lab1,lab1_sz);
   DYNALLSTAT(int,ptn,ptn_sz);
@@ -277,8 +278,8 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const& eGR)
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-  std::cerr << "|TRACES_GetCanonicalOrdering|=" << std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count() << "\n";
+  SingletonTime time2;
+  std::cerr << "|TRACES_GetCanonicalOrdering|=" << ms(time1,time2) << "\n";
 #endif
   return V;
 }
@@ -306,7 +307,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces& DT, size
     throw TerminalException{1};
   }
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+  SingletonTime time1;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
   TracesStats stats;
@@ -341,8 +342,8 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators_Arr(DataTraces& DT, size
   freeschreier(NULL,&gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-  std::cerr << "|TRACES_GetListGenerators_Arr|=" << std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count() << "\n";
+  SingletonTime time2;
+  std::cerr << "|TRACES_GetListGenerators_Arr|=" << ms(time1,time2) << "\n";
 #endif
   return ListGen;
 }
@@ -357,7 +358,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, size_t c
     throw TerminalException{1};
   }
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+  SingletonTime time1;
 #endif
   DYNALLSTAT(int,lab1,lab1_sz);
   DYNALLSTAT(int,ptn,ptn_sz);
@@ -453,8 +454,8 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const& eGR, size_t c
   DYNFREE(orbits,orbits_sz);
   SG_FREE(sg1);
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-  std::cerr << "|TRACES_GetListGenerators|=" << std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count() << "\n";
+  SingletonTime time2;
+  std::cerr << "|TRACES_GetListGenerators|=" << ms(time1,time2) << "\n";
 #endif
   return ListGen;
 }
@@ -485,7 +486,7 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
     throw TerminalException{1};
   }
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+  SingletonTime time1;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
   TracesStats stats;
@@ -516,8 +517,8 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
   freeschreier(NULL,&gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count() << "\n";
+  SingletonTime time2;
+  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << ms(time1,time2) << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
@@ -539,7 +540,7 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
     throw TerminalException{1};
   }
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time1 = std::chrono::system_clock::now();
+  SingletonTime time1;
 #endif
   DYNALLSTAT(int,lab1,lab1_sz);
   DYNALLSTAT(int,ptn,ptn_sz);
@@ -639,8 +640,8 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  std::chrono::time_point<std::chrono::system_clock> time2 = std::chrono::system_clock::now();
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators|=" << std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1).count() << "\n";
+  SingletonTime time2;
+  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators|=" << ms(time1,time2) << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
