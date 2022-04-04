@@ -1,5 +1,5 @@
 #ifndef SRC_NUMBER_RATIONAL_H_
-#define 
+#define SRC_NUMBER_RATIONAL_H_
 
 #include <iostream>
 #include <limits>

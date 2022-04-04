@@ -391,8 +391,6 @@ inline void TYPE_CONVERSION(stc<mpq_class> const& a1, int64_t & a2)
 
 // uint8_t as input
 
-inline void TYPE_CONVERSION(stc<uint8_t> const &a1, long &a2) { a2 = a1.val; }
-
 inline void TYPE_CONVERSION(stc<uint8_t> const &a1, mpq_class &a2) {
   a2 = long(a1.val);
 }
@@ -402,8 +400,6 @@ inline void TYPE_CONVERSION(stc<uint8_t> const &a1, mpz_class &a2) {
 }
 
 // uint16_t as input
-
-inline void TYPE_CONVERSION(stc<uint16_t> const &a1, long &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<uint16_t> const &a1, mpq_class &a2) {
   a2 = long(a1.val);
@@ -415,8 +411,6 @@ inline void TYPE_CONVERSION(stc<uint16_t> const &a1, mpz_class &a2) {
 
 // uint32_t as input
 
-inline void TYPE_CONVERSION(stc<uint32_t> const &a1, long &a2) { a2 = a1.val; }
-
 inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpq_class &a2) {
   a2 = long(a1.val);
 }
@@ -427,15 +421,11 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpz_class &a2) {
 
 // long as input
 
-inline void TYPE_CONVERSION(stc<long> const &a1, long &a2) { a2 = a1.val; }
-
 inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) { a2 = a1.val; }
 
 // int as input
-
-inline void TYPE_CONVERSION(stc<int> const &a1, int &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<int> const &a1, mpq_class &a2) { a2 = a1.val; }
 
