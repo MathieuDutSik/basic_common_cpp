@@ -1,5 +1,5 @@
-#ifndef EXCEPTION_ENDING_INCLUDE
-#define EXCEPTION_ENDING_INCLUDE
+#ifndef SRC_BASIC_EXCEPTIONENDING_H_
+#define SRC_BASIC_EXCEPTIONENDING_H_
 
 #include <cassert>
 #include <string>
@@ -25,4 +25,4 @@ void TerminalEnding()
 
 
 
-#endif
+#endif // SRC_BASIC_EXCEPTIONENDING_H_

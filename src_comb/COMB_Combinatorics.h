@@ -1,5 +1,5 @@
-#ifndef COMBINATORICS_FUNCTIONALITIES_INCLUDE
-#define COMBINATORICS_FUNCTIONALITIES_INCLUDE
+#ifndef SRC_COMB_COMB_COMBINATORICS_H_
+#define SRC_COMB_COMB_COMBINATORICS_H_
 
 #include "COMB_Combinatorics_elem.h"
 #include "COMB_Vectors.h"
@@ -725,4 +725,4 @@ void SortParallel(std::vector<T1> & list1, std::vector<T2> & list2)
 
 
 
-#endif
+#endif // SRC_COMB_COMB_COMBINATORICS_H_

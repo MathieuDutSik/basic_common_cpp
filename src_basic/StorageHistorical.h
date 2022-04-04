@@ -1,5 +1,5 @@
-#ifndef STORAGEHISTORICAL_H
-#define STORAGEHISTORICAL_H
+#ifndef SRC_BASIC_STORAGEHISTORICAL_H_
+#define SRC_BASIC_STORAGEHISTORICAL_H_
 
 #include <vector>
 #include <utility>
@@ -76,4 +76,4 @@ private:
 };
 
 
-#endif
+#endif // SRC_BASIC_STORAGEHISTORICAL_H_

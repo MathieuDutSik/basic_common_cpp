@@ -1,5 +1,5 @@
-#ifndef BASIC_THREAD_INCLUDE
-#define BASIC_THREAD_INCLUDE
+#ifndef SRC_BASIC_BASICTHREADINCLUDE_H_
+#define SRC_BASIC_BASICTHREADINCLUDE_H_
 /*
   The basic inclusions for parallelism
 */
@@ -11,4 +11,4 @@
 #include <mutex>
 #include <condition_variable>
 
-#endif
+#endif // SRC_BASIC_BASICTHREADINCLUDE_H_

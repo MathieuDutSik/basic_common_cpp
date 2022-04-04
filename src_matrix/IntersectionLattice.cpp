@@ -1,29 +1,28 @@
+#include "MAT_MatrixInt.h"
 #include "NumberTheory.h"
 #include "rational.h"
-#include "MAT_MatrixInt.h"
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   //  using T=mpz_class;
   //  using T=mpq_class;
-  using T=Rational<long long>;
+  using T = Rational<long long>;
   try {
-    int n=4;
-    auto get_fullrank=[&]() -> MyMatrix<T> {
-      MyMatrix<T> M(n,n);
-      while(true) {
-        for (int i=0; i<n; i++)
-          for (int j=0; j<n; j++)
-            M(i,j) = rand() % 7;
+    int n = 4;
+    auto get_fullrank = [&]() -> MyMatrix<T> {
+      MyMatrix<T> M(n, n);
+      while (true) {
+        for (int i = 0; i < n; i++)
+          for (int j = 0; j < n; j++)
+            M(i, j) = rand() % 7;
         if (RankMat(M) == n)
           return M;
       }
     };
-    for (int iter=0; iter<10; iter++) {
+    for (int iter = 0; iter < 10; iter++) {
       std::cerr << "iter=" << iter << "\n";
       MyMatrix<T> M1 = get_fullrank();
       MyMatrix<T> M2 = get_fullrank();
       MyMatrix<T> M1_i_M2 = IntersectionLattice(M1, M2);
-      for (int i=0; i<n; i++) {
+      for (int i = 0; i < n; i++) {
         MyVector<T> v = GetMatrixRow(M1_i_M2, i);
         if (!SolutionIntMat(M1, v) || !SolutionIntMat(M2, v)) {
           std::cerr << "   M1=\n";
@@ -38,8 +37,7 @@ int main(int argc, char *argv[])
       }
     }
     std::cerr << "Normal termination of the program\n";
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
     std::cerr << "Erroneous termination of the program\n";
   }

@@ -1,8 +1,7 @@
-#include "NumberTheory.h"
 #include "MAT_MatrixInt.h"
-int main(int argc, char *argv[])
-{
-  using T=mpq_class;
+#include "NumberTheory.h"
+int main(int argc, char *argv[]) {
+  using T = mpq_class;
   try {
     if (argc != 2) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
@@ -12,7 +11,7 @@ int main(int argc, char *argv[])
     }
     // reading the matrix
     std::ifstream INmat(argv[1]);
-    MyMatrix<T> M=ReadMatrix<T>(INmat);
+    MyMatrix<T> M = ReadMatrix<T>(INmat);
     //
     std::cerr << "M=\n";
     WriteMatrix(std::cerr, M);
@@ -22,8 +21,7 @@ int main(int argc, char *argv[])
     std::cerr << "Mult=" << eRec.TheMult << "\n";
     std::cerr << "TheMat=\n";
     WriteMatrix(std::cerr, eRec.TheMat);
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

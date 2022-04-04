@@ -1,5 +1,5 @@
-#ifndef GRAPH_RAMDOM_EXPANDER_H
-#define GRAPH_RAMDOM_EXPANDER_H
+#ifndef SRC_GRAPH_GRAPH_RANDOMEXPANDER_H_
+#define SRC_GRAPH_GRAPH_RANDOMEXPANDER_H_
 
 
 
@@ -19,4 +19,4 @@ Tgr GetRandomExpander(int const& nbVert, int const& eDeg)
 
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_RANDOMEXPANDER_H_

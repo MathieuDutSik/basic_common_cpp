@@ -1,5 +1,5 @@
-#ifndef INCLUDE_MD5SUM
-#define INCLUDE_MD5SUM
+#ifndef SRC_BASIC_HASH_FUNCTIONS_H_
+#define SRC_BASIC_HASH_FUNCTIONS_H_
 
 #include <array>
 #include <iterator>
@@ -443,5 +443,4 @@ namespace std {
 
 
 
-#endif
-
+#endif // SRC_BASIC_HASH_FUNCTIONS_H_

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FACE_BITSET
-#define INCLUDE_FACE_BITSET
+#ifndef SRC_COMB_BOOST_BITSET_H_
+#define SRC_COMB_BOOST_BITSET_H_
 
 // Boost libraries
 
@@ -335,4 +335,4 @@ void VectVectInt_Gap_Print(std::ostream &os, vectface const&ListOrbit)
 
 
 
-#endif
+#endif // SRC_COMB_BOOST_BITSET_H_

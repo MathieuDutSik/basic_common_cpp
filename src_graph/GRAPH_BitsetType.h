@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GRAPH_BITSET
-#define INCLUDE_GRAPH_BITSET
+#ifndef SRC_GRAPH_GRAPH_BITSETTYPE_H_
+#define SRC_GRAPH_GRAPH_BITSETTYPE_H_
 
 
 #include "Boost_bitset.h"
@@ -152,4 +152,4 @@ inline typename std::enable_if<is_graphbitset_class<Tret>::value,Tret>::type Ind
 
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_BITSETTYPE_H_

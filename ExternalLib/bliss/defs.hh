@@ -7,29 +7,28 @@
 /*
   Copyright (c) 2006-2011 Tommi Junttila
   Released under the GNU General Public License version 3.
-  
+
   This file is part of bliss.
-  
+
   bliss is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 3
   as published by the Free Software Foundation.
-  
+
   bliss is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 namespace bliss {
 
 /**
  * The version number of bliss.
  */
-static const char * const version = "0.72";
+static const char *const version = "0.72";
 
 /*
  * If a fatal error (out of memory, internal error) is encountered,
@@ -37,20 +36,17 @@ static const char * const version = "0.72";
  * There should not be a return from this function but exit or
  * a jump to code that deallocates the AbstractGraph instance that called this.
  */
-void fatal_error(const char* fmt, ...);
-
+void fatal_error(const char *fmt, ...);
 
 #if defined(BLISS_DEBUG)
 #define BLISS_CONSISTENCY_CHECKS
 #define BLISS_EXPENSIVE_CONSISTENCY_CHECKS
 #endif
 
-
 #if defined(BLISS_CONSISTENCY_CHECKS)
 /* Force a check that the found automorphisms are valid */
 #define BLISS_VERIFY_AUTOMORPHISMS
 #endif
-
 
 #if defined(BLISS_CONSISTENCY_CHECKS)
 /* Force a check that the generated partitions are equitable */
@@ -58,8 +54,6 @@ void fatal_error(const char* fmt, ...);
 #endif
 
 } // namespace bliss
-
-
 
 /*! \mainpage Bliss
  *
@@ -111,6 +105,5 @@ void fatal_error(const char* fmt, ...);
  * It is currently more restricted than the C++ API so
  * consider using the C++ API whenever possible.
  */
-
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef TEMP_GRAPHICAL_FUNCTION
-#define TEMP_GRAPHICAL_FUNCTION
+#ifndef SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONS_H_
+#define SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONS_H_
 
 #include "COMB_Combinatorics.h"
 #include "GRAPH_GraphicalBasic.h"
@@ -1503,4 +1503,4 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const& GR, size_t const& s_sz, 
 }
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONS_H_

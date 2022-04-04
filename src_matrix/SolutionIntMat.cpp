@@ -1,7 +1,6 @@
-#include "NumberTheory.h"
 #include "MAT_MatrixInt.h"
-int main(int argc, char *argv[])
-{
+#include "NumberTheory.h"
+int main(int argc, char *argv[]) {
   try {
     if (argc != 3 && argc != 2) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
@@ -11,14 +10,14 @@ int main(int argc, char *argv[])
       fprintf(stderr, "SolutionIntMat [inputMat]\n");
       return -1;
     }
-    using Tint=mpz_class;
+    using Tint = mpz_class;
     // reading the matrix
     std::ifstream INmat(argv[1]);
-    MyMatrix<Tint> TheMat=ReadMatrix<Tint>(INmat);
-    MyVector<Tint> TheVec=ReadVector<Tint>(INmat);
+    MyMatrix<Tint> TheMat = ReadMatrix<Tint>(INmat);
+    MyVector<Tint> TheVec = ReadVector<Tint>(INmat);
     std::optional<MyVector<Tint>> result = SolutionIntMat(TheMat, TheVec);
     // computing one solution (maybe)
-    auto Prt=[&](std::ostream& os) -> void {
+    auto Prt = [&](std::ostream &os) -> void {
       os << "return " + ResultSolutionIntMat_to_GAP(result) + ";\n";
     };
     //
@@ -28,8 +27,7 @@ int main(int argc, char *argv[])
       std::ofstream os(argv[2]);
       Prt(os);
     }
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

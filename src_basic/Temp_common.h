@@ -1,5 +1,5 @@
-#ifndef TEMP_COMMON_TO_ALL
-#define TEMP_COMMON_TO_ALL
+#ifndef SRC_BASIC_TEMP_COMMON_H_
+#define SRC_BASIC_TEMP_COMMON_H_
 
 // Standard includes
 
@@ -328,4 +328,4 @@ inline int CanonicalizationUnit(int const& eVal)
   return 1;
 }
 
-#endif
+#endif // SRC_BASIC_TEMP_COMMON_H_

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GRAPH_BLISS
-#define INCLUDE_GRAPH_BLISS
+#ifndef SRC_GRAPH_GRAPH_BLISS_H_
+#define SRC_GRAPH_GRAPH_BLISS_H_
 
 #include <string>
 #include <iostream>
@@ -226,4 +226,4 @@ std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>>  BLISS_GetCanonical
 
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_BLISS_H_

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GRAPH_TRACES
-#define INCLUDE_GRAPH_TRACES
+#ifndef SRC_GRAPH_GRAPH_TRACES_H_
+#define SRC_GRAPH_GRAPH_TRACES_H_
 
 #include "traces.h"
 #include <vector>
@@ -647,4 +647,4 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>> TRACES_GetCanonic
 }
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_TRACES_H_

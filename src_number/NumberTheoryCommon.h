@@ -1,13 +1,10 @@
-#ifndef INCLUDE_NUMBER_THEORY_COMMON
-#define INCLUDE_NUMBER_THEORY_COMMON
+#ifndef SRC_NUMBER_NUMBERTHEORYCOMMON_H_
+#define SRC_NUMBER_NUMBERTHEORYCOMMON_H_
 
+#include "NumberTheoryGeneric.h"
+#include "ResidueQuotient.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
-#include "ResidueQuotient.h"
-#include "NumberTheoryGeneric.h"
 #include "TypeConversionFinal.h"
 
-
-
-
-#endif
+#endif // SRC_NUMBER_NUMBERTHEORYCOMMON_H_

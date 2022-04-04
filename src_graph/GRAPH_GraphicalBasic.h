@@ -1,5 +1,5 @@
-#ifndef GRAPHICAL_BASIC_INCLUDE
-#define GRAPHICAL_BASIC_INCLUDE
+#ifndef SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
+#define SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
 
 #include "Temp_common.h"
 #include "MAT_Matrix.h"
@@ -393,4 +393,4 @@ std::string GetCanonicalForm_string(Tgr const& eGR, std::vector<unsigned int> co
 
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_

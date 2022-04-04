@@ -1,5 +1,5 @@
-#ifndef TEMP_MATRIX_INTEGRAL_RING
-#define TEMP_MATRIX_INTEGRAL_RING
+#ifndef SRC_MATRIX_MAT_MATRIXINT_H_
+#define SRC_MATRIX_MAT_MATRIXINT_H_
 
 #include "MAT_Matrix.h"
 #include "Boost_bitset.h"
@@ -2280,4 +2280,4 @@ inline typename std::enable_if<(not is_ring_field<T>::value),MyMatrix<T>>::type 
 
 
 
-#endif
+#endif // SRC_MATRIX_MAT_MATRIXINT_H_

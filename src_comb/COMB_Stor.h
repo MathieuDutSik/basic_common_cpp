@@ -1,5 +1,5 @@
-#ifndef POLYTOPE_STOR
-#define POLYTOPE_STOR
+#ifndef SRC_COMB_COMB_STOR_H_
+#define SRC_COMB_COMB_STOR_H_
 
 #include "Temp_common.h"
 #include "Boost_bitset.h"
@@ -281,4 +281,4 @@ private:
 };
 
 
-#endif
+#endif // SRC_COMB_COMB_STOR_H_

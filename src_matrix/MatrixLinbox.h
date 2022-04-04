@@ -1,5 +1,5 @@
-#ifndef INCLUDE_MATRIX_LINBOX_H
-#define INCLUDE_MATRIX_LINBOX_H
+#ifndef SRC_MATRIX_MATRIXLINBOX_H_
+#define SRC_MATRIX_MATRIXLINBOX_H_
 
 #include "MAT_Matrix.h"
 #include "NumberGivaro.h"
@@ -54,19 +54,4 @@ MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const& M)
   return Ker;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif
+#endif // SRC_MATRIX_MATRIXLINBOX_H_

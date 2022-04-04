@@ -1,9 +1,8 @@
-#include "NumberTheory.h"
 #include "MAT_MatrixInt.h"
-int main(int argc, char *argv[])
-{
+#include "NumberTheory.h"
+int main(int argc, char *argv[]) {
   //  using T=mpq_class;
-  using T=mpz_class;
+  using T = mpz_class;
   //  using T=int;
   //  using T=long;
   try {
@@ -15,8 +14,9 @@ int main(int argc, char *argv[])
     }
     // reading the matrix
     std::ifstream INmat(argv[1]);
-    MyMatrix<T> TheMat=ReadMatrix<T>(INmat);
-    std::pair<MyMatrix<T>, MyMatrix<T>> ePair = ComputeColHermiteNormalForm(TheMat);
+    MyMatrix<T> TheMat = ReadMatrix<T>(INmat);
+    std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
+        ComputeColHermiteNormalForm(TheMat);
     //
     std::ofstream os(argv[2]);
     os << "return [";
@@ -24,8 +24,7 @@ int main(int argc, char *argv[])
     os << ",\n";
     WriteMatrixGAP(os, ePair.second);
     os << "];\n";
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

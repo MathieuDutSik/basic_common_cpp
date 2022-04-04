@@ -1,5 +1,5 @@
-#ifndef STORAGESPACE_H
-#define STORAGESPACE_H
+#ifndef SRC_BASIC_STORAGESPACE_H_
+#define SRC_BASIC_STORAGESPACE_H_
 
 #include <vector>
 #include <utility>
@@ -94,4 +94,4 @@ private:
 };
 
 
-#endif
+#endif // SRC_BASIC_STORAGESPACE_H_

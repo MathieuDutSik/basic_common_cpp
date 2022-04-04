@@ -45,21 +45,23 @@
 
 #include "naurng.h"
 
-#define KK 100                     /* the long lag */
-#define LL  37                     /* the short lag */
-#define MM (1L<<30)                 /* the modulus */
-#define mod_diff(x,y) (((x)-(y))&(MM-1)) /* subtraction mod MM */
+#define KK 100                                  /* the long lag */
+#define LL 37                                   /* the short lag */
+#define MM (1L << 30)                           /* the modulus */
+#define mod_diff(x, y) (((x) - (y)) & (MM - 1)) /* subtraction mod MM */
 
-static TLS_ATTR long ran_x[KK];                    /* the generator state */
+static TLS_ATTR long ran_x[KK]; /* the generator state */
 
-static void
-ran_array(long aa[],int n)
-{
-  int i,j;
-  for (j=0;j<KK;j++) aa[j]=ran_x[j];
-  for (;j<n;j++) aa[j]=mod_diff(aa[j-KK],aa[j-LL]);
-  for (i=0;i<LL;i++,j++) ran_x[i]=mod_diff(aa[j-KK],aa[j-LL]);
-  for (;i<KK;i++,j++) ran_x[i]=mod_diff(aa[j-KK],ran_x[i-LL]);
+static void ran_array(long aa[], int n) {
+  int i, j;
+  for (j = 0; j < KK; j++)
+    aa[j] = ran_x[j];
+  for (; j < n; j++)
+    aa[j] = mod_diff(aa[j - KK], aa[j - LL]);
+  for (i = 0; i < LL; i++, j++)
+    ran_x[i] = mod_diff(aa[j - KK], aa[j - LL]);
+  for (; i < KK; i++, j++)
+    ran_x[i] = mod_diff(aa[j - KK], ran_x[i - LL]);
 }
 
 /* the following routines are from exercise 3.6--15 */
@@ -67,67 +69,71 @@ ran_array(long aa[],int n)
 
 #define RNG_QUALITY 1009 /* recommended quality level for high-res use */
 static TLS_ATTR long ran_arr_buf[RNG_QUALITY];
-static long ran_arr_dummy=-1;
-static long ran_arr_started=-1;
+static long ran_arr_dummy = -1;
+static long ran_arr_started = -1;
 static TLS_ATTR long *ran_arr_ptr = &ran_arr_dummy;
 
-#define TT  70   /* guaranteed separation between streams */
-#define is_odd(x)  ((x)&1)          /* units bit of x */
+#define TT 70             /* guaranteed separation between streams */
+#define is_odd(x) ((x)&1) /* units bit of x */
 
-static void
-ran_start(long seed)
-{
-  int t,j;
-  long x[KK+KK-1];              /* the preparation buffer */
-  long ss=(seed+2)&(MM-2);
+static void ran_start(long seed) {
+  int t, j;
+  long x[KK + KK - 1]; /* the preparation buffer */
+  long ss = (seed + 2) & (MM - 2);
 
-  for (j=0;j<KK;j++) {
-    x[j]=ss;                      /* bootstrap the buffer */
-    ss<<=1; if (ss>=MM) ss-=MM-2; /* cyclic shift 29 bits */
+  for (j = 0; j < KK; j++) {
+    x[j] = ss; /* bootstrap the buffer */
+    ss <<= 1;
+    if (ss >= MM)
+      ss -= MM - 2; /* cyclic shift 29 bits */
   }
-  x[1]++;              /* make x[1] (and only x[1]) odd */
-  for (ss=seed&(MM-1),t=TT-1; t; ) {       
-    for (j=KK-1;j>0;j--) x[j+j]=x[j], x[j+j-1]=0; /* "square" */
-    for (j=KK+KK-2;j>=KK;j--)
-      x[j-(KK-LL)]=mod_diff(x[j-(KK-LL)],x[j]),
-      x[j-KK]=mod_diff(x[j-KK],x[j]);
-    if (is_odd(ss)) {              /* "multiply by z" */
-      for (j=KK;j>0;j--)  x[j]=x[j-1];
-      x[0]=x[KK];            /* shift the buffer cyclically */
-      x[LL]=mod_diff(x[LL],x[KK]);
+  x[1]++; /* make x[1] (and only x[1]) odd */
+  for (ss = seed & (MM - 1), t = TT - 1; t;) {
+    for (j = KK - 1; j > 0; j--)
+      x[j + j] = x[j], x[j + j - 1] = 0; /* "square" */
+    for (j = KK + KK - 2; j >= KK; j--)
+      x[j - (KK - LL)] = mod_diff(x[j - (KK - LL)], x[j]),
+                  x[j - KK] = mod_diff(x[j - KK], x[j]);
+    if (is_odd(ss)) { /* "multiply by z" */
+      for (j = KK; j > 0; j--)
+        x[j] = x[j - 1];
+      x[0] = x[KK]; /* shift the buffer cyclically */
+      x[LL] = mod_diff(x[LL], x[KK]);
     }
-    if (ss) ss>>=1; else t--;
+    if (ss)
+      ss >>= 1;
+    else
+      t--;
   }
-  for (j=0;j<LL;j++) ran_x[j+KK-LL]=x[j];
-  for (;j<KK;j++) ran_x[j-LL]=x[j];
-  for (j=0;j<10;j++) ran_array(x,KK+KK-1); /* warm things up */
-  ran_arr_ptr=&ran_arr_started;
+  for (j = 0; j < LL; j++)
+    ran_x[j + KK - LL] = x[j];
+  for (; j < KK; j++)
+    ran_x[j - LL] = x[j];
+  for (j = 0; j < 10; j++)
+    ran_array(x, KK + KK - 1); /* warm things up */
+  ran_arr_ptr = &ran_arr_started;
 }
 
-void
-ran_init(long seed)    /* Added by BDM: use instead of ran_start. */
-                       /*  But this is less important with this version */
+void ran_init(long seed) /* Added by BDM: use instead of ran_start. */
+                         /*  But this is less important with this version */
 {
-    ran_start((unsigned long)seed % (MM-2));
+  ran_start((unsigned long)seed % (MM - 2));
 }
 
-static long
-ran_arr_cycle(void)
-/* Modified by BDM to automatically initialise 
+static long ran_arr_cycle(void)
+/* Modified by BDM to automatically initialise
    if no explicit initialisation has been done */
 {
-   if (ran_arr_ptr==&ran_arr_dummy)
-       ran_start(314159L); /* the user forgot to initialize */
+  if (ran_arr_ptr == &ran_arr_dummy)
+    ran_start(314159L); /* the user forgot to initialize */
 
-  ran_array(ran_arr_buf,RNG_QUALITY);
+  ran_array(ran_arr_buf, RNG_QUALITY);
 
-  ran_arr_buf[KK]=-1;
-  ran_arr_ptr=ran_arr_buf+1;
+  ran_arr_buf[KK] = -1;
+  ran_arr_ptr = ran_arr_buf + 1;
   return ran_arr_buf[0];
 }
 
-long
-ran_nextran(void)
-{
-    return (*ran_arr_ptr>=0 ? *ran_arr_ptr++ : ran_arr_cycle()); 
+long ran_nextran(void) {
+  return (*ran_arr_ptr >= 0 ? *ran_arr_ptr++ : ran_arr_cycle());
 }

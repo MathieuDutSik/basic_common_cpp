@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FACET_FUNCTIONALITY
-#define INCLUDE_FACET_FUNCTIONALITY
+#ifndef SRC_BASIC_FACET_H_
+#define SRC_BASIC_FACET_H_
 
 #include <locale>
 #include <algorithm>
@@ -208,6 +208,4 @@ class LogFacet: public std::codecvt<char,char,std::mbstate_t>
 };
 
 
-
-
-#endif
+#endif // SRC_BASIC_FACET_H_

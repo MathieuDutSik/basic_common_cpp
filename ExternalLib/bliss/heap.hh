@@ -4,22 +4,21 @@
 /*
   Copyright (c) 2006-2011 Tommi Junttila
   Released under the GNU General Public License version 3.
-  
+
   This file is part of bliss.
-  
+
   bliss is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 3
   as published by the Free Software Foundation.
-  
+
   bliss is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 namespace bliss {
 
@@ -27,19 +26,23 @@ namespace bliss {
  * \brief A capacity bounded heap data structure.
  */
 
-class Heap
-{
+class Heap {
   unsigned int N;
   unsigned int n;
   unsigned int *array;
   void upheap(unsigned int k);
   void downheap(unsigned int k);
+
 public:
   /**
    * Create a new heap.
    * init() must be called after this.
    */
-  Heap() {array = 0; n = 0; N = 0; }
+  Heap() {
+    array = 0;
+    n = 0;
+    N = 0;
+  }
   ~Heap();
 
   /**
@@ -51,13 +54,13 @@ public:
    * Is the heap empty?
    * Time complexity is O(1).
    */
-  bool is_empty() const {return(n==0); }
+  bool is_empty() const { return (n == 0); }
 
   /**
    * Remove all the elements in the heap.
    * Time complexity is O(1).
    */
-  void clear() {n = 0;}
+  void clear() { n = 0; }
 
   /**
    * Insert the element \a e in the heap.
@@ -76,7 +79,7 @@ public:
   /**
    * Get the number of elements in the heap.
    */
-  unsigned int size() const {return n; }
+  unsigned int size() const { return n; }
 };
 
 } // namespace bliss

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_HYPERGRAPH_BASIC
-#define INCLUDE_HYPERGRAPH_BASIC
+#ifndef SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_
+#define SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_
 
 
 struct HypergraphBitset {
@@ -88,4 +88,4 @@ MyMatrix<T> GetLaplacianMatrix(std::vector<T> const& ListEdgeWeight, Tgr const& 
 }
 
 
-#endif
+#endif // SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_

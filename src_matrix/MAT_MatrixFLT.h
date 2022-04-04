@@ -1,5 +1,6 @@
-#ifndef TEMP_MATRIX_FLT
-#define TEMP_MATRIX_FLT
+#ifndef SRC_MATRIX_MAT_MATRIXFLT_H_
+#define SRC_MATRIX_MAT_MATRIXFLT_H_
+
 #include <vector>
 #include <stdio.h>
 #include <stdlib.h>
@@ -208,4 +209,4 @@ void PrintEigenvalues(std::ostream & os, MyMatrix<T> const& eMat)
 }
 
 
-#endif
+#endif // SRC_MATRIX_MAT_MATRIXFLT_H_

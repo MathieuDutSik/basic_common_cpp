@@ -1,5 +1,5 @@
-#ifndef HEURISTIC_INCLUDE
-#define HEURISTIC_INCLUDE
+#ifndef SRC_BASIC_HEURISTIC_FCT_H_
+#define SRC_BASIC_HEURISTIC_FCT_H_
 
 #include "Temp_common.h"
 #include "Basic_file.h"
@@ -210,8 +210,4 @@ TheHeuristic<T> HeuristicFromListString(std::vector<std::string> const& ListStri
 
 
 
-
-
-
-
-#endif
+#endif // SRC_BASIC_HEURISTIC_FCT_H_

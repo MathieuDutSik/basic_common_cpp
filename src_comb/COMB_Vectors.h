@@ -1,5 +1,5 @@
-#ifndef DEFINE_COMB_VECTORS_H
-#define DEFINE_COMB_VECTORS_H
+#ifndef SRC_COMB_COMB_VECTORS_H_
+#define SRC_COMB_COMB_VECTORS_H_
 
 
 #include <vector>
@@ -119,4 +119,4 @@ public:
 
 
 
-#endif
+#endif // SRC_COMB_COMB_VECTORS_H_

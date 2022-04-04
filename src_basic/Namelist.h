@@ -1,5 +1,5 @@
-#ifndef NAMELIST_INCLUDE
-#define NAMELIST_INCLUDE
+#ifndef SRC_BASIC_NAMELIST_H_
+#define SRC_BASIC_NAMELIST_H_
 
 #include "Temp_common.h"
 #include "Basic_file.h"
@@ -507,4 +507,4 @@ void NAMELIST_ReadNamelistFile(std::string const& eFileName, FullNamelist &eFull
 
 
 
-#endif
+#endif // SRC_BASIC_NAMELIST_H_

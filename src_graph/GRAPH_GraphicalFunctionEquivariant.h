@@ -1,5 +1,5 @@
-#ifndef TEMP_GRAPHICAL_FUNCTION_EQUIVARIANT
-#define TEMP_GRAPHICAL_FUNCTION_EQUIVARIANT
+#ifndef SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONEQUIVARIANT_H_
+#define SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONEQUIVARIANT_H_
 
 #include "GRAPH_GraphicalFunctions.h"
 #include "GRP_GroupFct.h"
@@ -54,4 +54,4 @@ int ComputeDiameterEquivariant(Tgr const& GR, TheGroupFormat const& TheGRP)
 
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONEQUIVARIANT_H_

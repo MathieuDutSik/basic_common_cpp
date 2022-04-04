@@ -1,20 +1,17 @@
-#ifndef FACTORIZATIONS_INCLUDE
-#define FACTORIZATIONS_INCLUDE
+#ifndef SRC_NUMBER_FACTORIZATIONS_H_
+#define SRC_NUMBER_FACTORIZATIONS_H_
 
-#include <vector>
 #include <map>
+#include <vector>
 
-
-
-template<typename T>
-std::pair<bool, T> rho_pollard_factorize(T const& number)
-{
+template <typename T>
+std::pair<bool, T> rho_pollard_factorize(T const &number) {
   T count;
   T x_fixed = 2, x = 2, size = 2, factor, diff;
   do {
     count = size;
     do {
-      ResInt_Kernel( x * x + 1, number, x);
+      ResInt_Kernel(x * x + 1, number, x);
       diff = x - x_fixed;
       if (diff < 0)
         diff = -diff;
@@ -30,12 +27,9 @@ std::pair<bool, T> rho_pollard_factorize(T const& number)
   }
 }
 
-
-template<typename T>
-std::vector<T> successive_division_factorize(T const& N)
-{
+template <typename T> std::vector<T> successive_division_factorize(T const &N) {
   T pos = 2;
-  while(true) {
+  while (true) {
     T res = ResInt(N, pos);
     if (res == 0) {
       T quot = QuoInt(N, pos);
@@ -53,15 +47,9 @@ std::vector<T> successive_division_factorize(T const& N)
   return {N};
 }
 
-
-
-
-
-template<typename T>
-bool successive_division_isprime(T const& N)
-{
+template <typename T> bool successive_division_isprime(T const &N) {
   T pos = 2;
-  while(true) {
+  while (true) {
     T res = ResInt(N, pos);
     if (res == 0)
       return false;
@@ -72,10 +60,7 @@ bool successive_division_isprime(T const& N)
   return true;
 }
 
-
-template<typename T>
-bool IsPrime(const T& N)
-{
+template <typename T> bool IsPrime(const T &N) {
   std::pair<bool, T> epair = rho_pollard_factorize(N);
   if (epair.first) {
     return false;
@@ -84,10 +69,7 @@ bool IsPrime(const T& N)
   }
 }
 
-
-template<typename T>
-std::vector<T> FactorsInt(T const& N)
-{
+template <typename T> std::vector<T> FactorsInt(T const &N) {
   if (N == 1)
     return {};
   std::pair<bool, T> epair = rho_pollard_factorize(N);
@@ -103,17 +85,15 @@ std::vector<T> FactorsInt(T const& N)
   }
 }
 
-
-template<typename T>
-std::vector<T> GetAllFactors(std::map<T,int> const& eMap)
-{
+template <typename T>
+std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
   std::vector<T> LVal = {1};
-  for (auto & kv : eMap) {
+  for (auto &kv : eMap) {
     std::vector<T> NewVal;
     T ePow = 1;
     T mult = kv.first;
-    for (int i=0; i<=kv.second; i++) {
-      for (auto & eVal : LVal)
+    for (int i = 0; i <= kv.second; i++) {
+      for (auto &eVal : LVal)
         NewVal.push_back(ePow * eVal);
       ePow *= mult;
     }
@@ -122,18 +102,12 @@ std::vector<T> GetAllFactors(std::map<T,int> const& eMap)
   return LVal;
 }
 
-
-template<typename T>
-std::vector<T> GetAllFactors(T const& N)
-{
+template <typename T> std::vector<T> GetAllFactors(T const &N) {
   std::vector<T> LFact = FactorsInt(N);
-  std::map<T,int> eMap;
-  for (auto & eVal : LFact)
+  std::map<T, int> eMap;
+  for (auto &eVal : LFact)
     eMap[eVal]++;
   return GetAllFactors(eMap);
 }
 
-
-
-
-#endif
+#endif // SRC_NUMBER_FACTORIZATIONS_H_

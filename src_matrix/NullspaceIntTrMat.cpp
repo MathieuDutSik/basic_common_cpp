@@ -1,7 +1,6 @@
-#include "NumberTheory.h"
 #include "MAT_MatrixInt.h"
-int main(int argc, char *argv[])
-{
+#include "NumberTheory.h"
+int main(int argc, char *argv[]) {
   try {
     if (argc != 3 && argc != 2) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
@@ -11,15 +10,15 @@ int main(int argc, char *argv[])
       fprintf(stderr, "NullspaceInttrMat [inputMat]\n");
       return -1;
     }
-    using Tint=mpz_class;
+    using Tint = mpz_class;
     // reading the matrix
     std::ifstream INmat(argv[1]);
-    MyMatrix<Tint> TheMat=ReadMatrix<Tint>(INmat);
+    MyMatrix<Tint> TheMat = ReadMatrix<Tint>(INmat);
     // computing the kernel
     MyMatrix<Tint> KerInt = NullspaceIntTrMat(TheMat);
     //    MyMatrix<T> TheKer=NullspaceMat(TheMat);
     //
-    auto Prt=[&](std::ostream & os) -> void {
+    auto Prt = [&](std::ostream &os) -> void {
       os << "return ";
       WriteMatrixGAP(os, KerInt);
       os << ";\n";
@@ -31,8 +30,7 @@ int main(int argc, char *argv[])
     } else {
       Prt(std::cerr);
     }
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

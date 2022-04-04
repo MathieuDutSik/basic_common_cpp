@@ -1,5 +1,5 @@
-#ifndef INCLUDE_MATRIX_TYPES_H
-#define INCLUDE_MATRIX_TYPES_H
+#ifndef SRC_MATRIX_MATRIXTYPES_H_
+#define SRC_MATRIX_MATRIXTYPES_H_
 
 
 
@@ -23,4 +23,4 @@ using MyMatrix = Eigen::Matrix<T,Eigen::Dynamic,Eigen::Dynamic>;
 template <typename T>
 using MySparseMatrix = Eigen::SparseMatrix<T,Eigen::ColMajor>;
 
-#endif
+#endif // SRC_MATRIX_MATRIXTYPES_H_

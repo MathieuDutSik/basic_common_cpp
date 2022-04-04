@@ -1,8 +1,7 @@
-#include "NumberTheory.h"
 #include "MAT_MatrixInt.h"
-int main(int argc, char *argv[])
-{
-  using T=mpq_class;
+#include "NumberTheory.h"
+int main(int argc, char *argv[]) {
+  using T = mpq_class;
   //  using T=mpz_class;
   //  using T=int;
   //  using T=long;
@@ -15,7 +14,7 @@ int main(int argc, char *argv[])
     int n;
     sscanf(argv[1], "%d", &n);
     int nb = 100;
-    for (int i=0; i<nb; i++) {
+    for (int i = 0; i < nb; i++) {
       std::cerr << "i=" << i << "/" << nb << "\n";
       MyMatrix<T> eMat = RandomUnimodularMatrix<T>(n);
       MyMatrix<T> eInv = Inverse(eMat);
@@ -26,14 +25,14 @@ int main(int argc, char *argv[])
         std::cerr << "eMat=\n";
         WriteMatrix(std::cerr, eMat);
         std::cerr << "eInv=\n";
-        WriteMatrix(std::cerr, eInv);;
+        WriteMatrix(std::cerr, eInv);
+        ;
         std::cerr << "eProd=\n";
         WriteMatrix(std::cerr, eProd);
         throw TerminalException{1};
       }
     }
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

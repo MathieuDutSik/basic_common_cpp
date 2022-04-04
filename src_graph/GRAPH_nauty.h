@@ -1,5 +1,5 @@
-#ifndef INCLUDE_GRAPH_NAUTY
-#define INCLUDE_GRAPH_NAUTY
+#ifndef SRC_GRAPH_GRAPH_NAUTY_H_
+#define SRC_GRAPH_GRAPH_NAUTY_H_
 
 
 template<typename Tgr>
@@ -153,4 +153,4 @@ std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const& eGR1, Tgr const& eGR2)
 
 
 
-#endif
+#endif // SRC_GRAPH_GRAPH_NAUTY_H_

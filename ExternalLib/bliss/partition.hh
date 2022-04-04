@@ -4,36 +4,34 @@
 /*
   Copyright (c) 2006-2011 Tommi Junttila
   Released under the GNU General Public License version 3.
-  
+
   This file is part of bliss.
-  
+
   bliss is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 3
   as published by the Free Software Foundation.
-  
+
   bliss is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
 namespace bliss {
-  class Partition;
+class Partition;
 }
 
-#include <cstdlib>
-#include <cstdio>
-#include <climits>
-#include "kstack.hh"
-#include "kqueue.hh"
-#include "heap.hh"
-#include "orbit.hh"
 #include "graph.hh"
-
+#include "heap.hh"
+#include "kqueue.hh"
+#include "kstack.hh"
+#include "orbit.hh"
+#include <climits>
+#include <cstdio>
+#include <cstdlib>
 
 namespace bliss {
 
@@ -47,15 +45,14 @@ namespace bliss {
  * Conversely, some methods of this class modify the fields of
  * bliss::AbstractGraph, too.
  */
-class Partition
-{
+class Partition {
 public:
   /**
    * \brief Data structure for holding information about a cell in a Partition.
    */
-  class Cell
-  {
+  class Cell {
     friend class Partition;
+
   public:
     unsigned int length;
     /* Index of the first element of the cell in
@@ -63,25 +60,25 @@ public:
     unsigned int first;
     unsigned int max_ival;
     unsigned int max_ival_count;
+
   private:
     bool in_splitting_queue;
+
   public:
     bool in_neighbour_heap;
     /* Pointer to the next cell, null if this is the last one. */
-    Cell* next;
-    Cell* prev;
-    Cell* next_nonsingleton;
-    Cell* prev_nonsingleton;
+    Cell *next;
+    Cell *prev;
+    Cell *next_nonsingleton;
+    Cell *prev_nonsingleton;
     unsigned int split_level;
     /** Is this a unit cell? */
-    bool is_unit() const {return(length == 1); }
+    bool is_unit() const { return (length == 1); }
     /** Is this cell in splitting queue? */
-    bool is_in_splitting_queue() const {return(in_splitting_queue); }
+    bool is_in_splitting_queue() const { return (in_splitting_queue); }
   };
 
-
 private:
-
   /** \internal
    * Data structure for remembering information about splits in order to
    * perform efficient backtracking over the splits.
@@ -109,15 +106,14 @@ private:
   std::vector<BacktrackInfo> bt_stack;
 
 public:
-  AbstractGraph* graph;
+  AbstractGraph *graph;
 
   /* Used during equitable partition refinement */
-  KQueue<Cell*> splitting_queue;
-  void  splitting_queue_add(Cell* const cell);
-  Cell* splitting_queue_pop();
-  bool  splitting_queue_is_empty() const;
-  void  splitting_queue_clear();
-
+  KQueue<Cell *> splitting_queue;
+  void splitting_queue_add(Cell *const cell);
+  Cell *splitting_queue_pop();
+  bool splitting_queue_is_empty() const;
+  void splitting_queue_clear();
 
   /** Type for backtracking points. */
   typedef unsigned int BacktrackPoint;
@@ -140,30 +136,26 @@ public:
    * @param element  an element in \a cell
    * @return         the new unit Cell \a newcell
    */
-  Cell* individualize(Cell* const cell,
-		      const unsigned int element);
+  Cell *individualize(Cell *const cell, const unsigned int element);
 
-  Cell* aux_split_in_two(Cell* const cell,
-			 const unsigned int first_half_size);
-
+  Cell *aux_split_in_two(Cell *const cell, const unsigned int first_half_size);
 
 private:
   unsigned int N;
-  Cell* cells;
-  Cell* free_cells;
+  Cell *cells;
+  Cell *free_cells;
   unsigned int discrete_cell_count;
+
 public:
-  Cell* first_cell;
-  Cell* first_nonsingleton_cell;
+  Cell *first_cell;
+  Cell *first_nonsingleton_cell;
   unsigned int *elements;
   /* invariant_values[e] gives the invariant value of the element e */
   unsigned int *invariant_values;
   /* element_to_cell_map[e] gives the cell of the element e */
   Cell **element_to_cell_map;
   /** Get the cell of the element \a e */
-  Cell* get_cell(const unsigned int e) const {
-    return element_to_cell_map[e];
-  }
+  Cell *get_cell(const unsigned int e) const { return element_to_cell_map[e]; }
   /* in_pos[e] points to the elements array s.t. *in_pos[e] = e  */
   unsigned int **in_pos;
 
@@ -180,19 +172,19 @@ public:
    * Returns true iff the partition is discrete, meaning that all
    * the elements are in their own cells.
    */
-  bool is_discrete() const {return(free_cells == 0); }
+  bool is_discrete() const { return (free_cells == 0); }
 
-  unsigned int nof_discrete_cells() const {return(discrete_cell_count); }
+  unsigned int nof_discrete_cells() const { return (discrete_cell_count); }
 
   /**
    * Print the partition into the file stream \a fp.
    */
-  size_t print(FILE* const fp, const bool add_newline = true) const;
+  size_t print(FILE *const fp, const bool add_newline = true) const;
 
   /**
    * Print the partition cell sizes into the file stream \a fp.
    */
-  size_t print_signature(FILE* const fp, const bool add_newline = true) const;
+  size_t print_signature(FILE *const fp, const bool add_newline = true) const;
 
   /*
    * Splits the Cell \a cell into [cell_1,...,cell_n]
@@ -206,7 +198,7 @@ public:
    * Clears the invariant values of elements in the Cell \a cell as well as
    * the max_ival and max_ival_count fields of the Cell \a cell.
    */
-  Cell *zplit_cell(Cell * const cell, const bool max_ival_info_ok);
+  Cell *zplit_cell(Cell *const cell, const bool max_ival_info_ok);
 
   /*
    * Routines for component recursion
@@ -215,10 +207,10 @@ public:
   void cr_free();
   unsigned int cr_get_level(const unsigned int cell_index) const;
   unsigned int cr_split_level(const unsigned int level,
-			      const std::vector<unsigned int>& cells);
+                              const std::vector<unsigned int> &cells);
 
   /** Clear the invariant_values of the elements in the Cell \a cell. */
-  void clear_ivs(Cell* const cell);
+  void clear_ivs(Cell *const cell);
 
 private:
   /*
@@ -231,19 +223,19 @@ private:
   class CRCell {
   public:
     unsigned int level;
-    CRCell* next;
-    CRCell** prev_next_ptr;
+    CRCell *next;
+    CRCell **prev_next_ptr;
     void detach() {
-      if(next)
-	next->prev_next_ptr = prev_next_ptr;
+      if (next)
+        next->prev_next_ptr = prev_next_ptr;
       *(prev_next_ptr) = next;
       level = UINT_MAX;
       next = 0;
       prev_next_ptr = 0;
     }
   };
-  CRCell* cr_cells;
-  CRCell** cr_levels;
+  CRCell *cr_cells;
+  CRCell **cr_levels;
   class CR_BTInfo {
   public:
     unsigned int created_trail_index;
@@ -254,20 +246,20 @@ private:
   std::vector<CR_BTInfo> cr_bt_info;
   unsigned int cr_max_level;
   void cr_create_at_level(const unsigned int cell_index, unsigned int level);
-  void cr_create_at_level_trailed(const unsigned int cell_index, unsigned int level);
+  void cr_create_at_level_trailed(const unsigned int cell_index,
+                                  unsigned int level);
   unsigned int cr_get_backtrack_point();
   void cr_goto_backtrack_point(const unsigned int btpoint);
-
 
   /*
    *
    * Auxiliary routines for sorting and splitting cells
    *
    */
-  Cell* sort_and_split_cell1(Cell* cell);
-  Cell* sort_and_split_cell255(Cell* const cell, const unsigned int max_ival);
-  bool shellsort_cell(Cell* cell);
-  Cell* split_cell(Cell* const cell);
+  Cell *sort_and_split_cell1(Cell *cell);
+  Cell *sort_and_split_cell255(Cell *const cell, const unsigned int max_ival);
+  bool shellsort_cell(Cell *cell);
+  Cell *split_cell(Cell *const cell);
 
   /*
    * Some auxiliary stuff needed for distribution count sorting.
@@ -280,29 +272,20 @@ private:
   void dcs_cumulate_count(const unsigned int max);
 };
 
-
-inline Partition::Cell*
-Partition::splitting_queue_pop()
-{
-  Cell* const cell = splitting_queue.pop_front();
+inline Partition::Cell *Partition::splitting_queue_pop() {
+  Cell *const cell = splitting_queue.pop_front();
   cell->in_splitting_queue = false;
   return cell;
 }
 
-inline bool
-Partition::splitting_queue_is_empty() const
-{
+inline bool Partition::splitting_queue_is_empty() const {
   return splitting_queue.is_empty();
 }
 
-
 inline unsigned int
-Partition::cr_get_level(const unsigned int cell_index) const
-{
-  return(cr_cells[cell_index].level);
+Partition::cr_get_level(const unsigned int cell_index) const {
+  return (cr_cells[cell_index].level);
 }
-
-
 
 } // namespace bliss
 

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_TEMP_EIGEN_TENSOR
-#define INCLUDE_TEMP_EIGEN_TENSOR
+#ifndef SRC_MATRIX_MAT_TENSOR_H_
+#define SRC_MATRIX_MAT_TENSOR_H_
 
 #include "MAT_Matrix.h"
 
@@ -88,9 +88,4 @@ Eigen::Tensor<T,3> ZeroTensor3(int const& a, int const& b, int const& c)
   return TheTens;
 }
 
-
-
-
-
-
-#endif
+#endif // SRC_MATRIX_MAT_TENSOR_H_

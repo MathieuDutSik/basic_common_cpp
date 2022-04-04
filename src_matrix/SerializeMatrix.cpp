@@ -1,15 +1,12 @@
-#include "NumberTheory.h"
 #include "MAT_Matrix.h"
+#include "NumberTheory.h"
 
-
-
-template<typename T>
-void test_type() {
+template <typename T> void test_type() {
   size_t n_row = 10;
   size_t n_col = 20;
   MyMatrix<T> M1(n_row, n_col);
-  for (size_t i_row=0; i_row<n_row; i_row++) {
-    for (size_t i_col=0; i_col<n_col; i_col++) {
+  for (size_t i_row = 0; i_row < n_row; i_row++) {
+    for (size_t i_col = 0; i_col < n_col; i_col++) {
       T val = rand() % 20;
       M1(i_row, i_col) = val;
     }
@@ -17,7 +14,7 @@ void test_type() {
   std::string filename = "/tmp/MAT_filename.boost_archive";
 
   //
-  // Writing the data 
+  // Writing the data
   //
 
   // save data to archive
@@ -50,7 +47,6 @@ void test_type() {
     throw TerminalException{1};
   }
 }
-
 
 int main() {
   test_type<mpz_class>();

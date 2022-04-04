@@ -1,5 +1,5 @@
-#ifndef INCLUDE_BASIC_FUNCTIONS_H_
-#define INCLUDE_BASIC_FUNCTIONS_H_
+#ifndef SRC_BASIC_BASIC_FUNCTIONS_H_
+#define SRC_BASIC_BASIC_FUNCTIONS_H_
 
 template<typename T>
 T VectorSum(std::vector<T> const& eVect)
@@ -259,4 +259,4 @@ void ParseScalar_inplace(std::string const& estr, T & ret_val)
 }
 
 
-#endif
+#endif // SRC_BASIC_BASIC_FUNCTIONS_H_

@@ -1,5 +1,5 @@
-#ifndef BASIC_STRING_INCLUDE
-#define BASIC_STRING_INCLUDE
+#ifndef SRC_BASIC_BASIC_STRING_H_
+#define SRC_BASIC_BASIC_STRING_H_
 
 #include "Temp_common.h"
 std::string STRING_GETENV(std::string const& eStr)
@@ -557,4 +557,4 @@ std::string FILE_GetExtension(std::string const& eFile)
 }
 
 
-#endif
+#endif // SRC_BASIC_BASIC_STRING_H_

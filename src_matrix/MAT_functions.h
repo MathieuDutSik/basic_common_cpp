@@ -1,5 +1,5 @@
-#ifndef MATRIX_FUNCTIONS
-#define MATRIX_FUNCTIONS
+#ifndef SRC_MATRIX_MAT_FUNCTIONS_H_
+#define SRC_MATRIX_MAT_FUNCTIONS_H_
 
 
 #include "MAT_Matrix.h"
@@ -42,4 +42,4 @@ MyMatrix<T> SortUnicizeMatrix(MyMatrix<T> const& M)
 
 
 
-#endif
+#endif // SRC_MATRIX_MAT_FUNCTIONS_H_

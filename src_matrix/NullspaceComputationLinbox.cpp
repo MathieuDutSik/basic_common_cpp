@@ -1,8 +1,7 @@
-#include "NumberTheory.h"
 #include "MatrixLinbox.h"
-int main(int argc, char *argv[])
-{
-  using T=mpq_class;
+#include "NumberTheory.h"
+int main(int argc, char *argv[]) {
+  using T = mpq_class;
   try {
     if (argc != 3) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
@@ -19,8 +18,7 @@ int main(int argc, char *argv[])
     os << "return ";
     WriteMatrixGAP(os, TheKer);
     os << ";\n";
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

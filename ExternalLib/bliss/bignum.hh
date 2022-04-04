@@ -4,18 +4,18 @@
 /*
   Copyright (c) 2006-2011 Tommi Junttila
   Released under the GNU General Public License version 3.
-  
+
   This file is part of bliss.
-  
+
   bliss is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 3
   as published by the Free Software Foundation.
-  
+
   bliss is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
@@ -24,9 +24,9 @@
 #include <gmp.h>
 #endif
 
-#include <cstdlib>
-#include <cstdio>
 #include "defs.hh"
+#include <cstdio>
+#include <cstdlib>
 
 namespace bliss {
 
@@ -41,65 +41,65 @@ namespace bliss {
 
 #if defined(BLISS_USE_GMP)
 
-class BigNum
-{
+class BigNum {
   mpz_t v;
+
 public:
   /**
    * Create a new big number and set it to zero.
    */
-  BigNum() {mpz_init(v); }
+  BigNum() { mpz_init(v); }
 
   /**
    * Destroy the number.
    */
-  ~BigNum() {mpz_clear(v); }
+  ~BigNum() { mpz_clear(v); }
 
   /**
    * Set the number to \a n.
    */
-  void assign(const int n) {mpz_set_si(v, n); }
+  void assign(const int n) { mpz_set_si(v, n); }
 
   /**
    * Multiply the number with \a n.
    */
-  void multiply(const int n) {mpz_mul_si(v, v, n); }
+  void multiply(const int n) { mpz_mul_si(v, v, n); }
 
   /**
    * Print the number in the file stream \a fp.
    */
-  size_t print(FILE* const fp) const {return mpz_out_str(fp, 10, v); }
+  size_t print(FILE *const fp) const { return mpz_out_str(fp, 10, v); }
 };
 
 #else
 
-class BigNum
-{
+class BigNum {
   long double v;
+
 public:
   /**
    * Create a new big number and set it to zero.
    */
-  BigNum(): v(0.0) {}
+  BigNum() : v(0.0) {}
 
   /**
    * Set the number to \a n.
    */
-  void assign(const int n) {v = (long double)n; }
+  void assign(const int n) { v = (long double)n; }
 
   /**
    * Multiply the number with \a n.
    */
-  void multiply(const int n) {v *= (long double)n; }
+  void multiply(const int n) { v *= (long double)n; }
 
   /**
    * Print the number in the file stream \a fp.
    */
-  size_t print(FILE* const fp) const {return fprintf(fp, "%Lg", v); }
+  size_t print(FILE *const fp) const { return fprintf(fp, "%Lg", v); }
 };
 
 #endif
 
-} //namespace bliss
+} // namespace bliss
 
 #endif

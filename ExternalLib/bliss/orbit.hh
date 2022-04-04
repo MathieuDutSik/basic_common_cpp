@@ -4,22 +4,21 @@
 /*
   Copyright (c) 2006-2011 Tommi Junttila
   Released under the GNU General Public License version 3.
-  
+
   This file is part of bliss.
-  
+
   bliss is free software: you can redistribute it and/or modify
   it under the terms of the GNU General Public License version 3
   as published by the Free Software Foundation.
-  
+
   bliss is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
 */
-
 
 namespace bliss {
 
@@ -34,10 +33,8 @@ namespace bliss {
  * Getting the smallest representative in a class (and thus testing
  * whether two elements belong to the same class) is a constant time operation.
  */
-class Orbit
-{
-  class OrbitEntry
-  {
+class Orbit {
+  class OrbitEntry {
   public:
     unsigned int element;
     OrbitEntry *next;
@@ -104,7 +101,7 @@ public:
    * Get the number of orbits.
    * Time complexity is O(1).
    */
-  unsigned int nof_orbits() const {return _nof_orbits; }
+  unsigned int nof_orbits() const { return _nof_orbits; }
 };
 
 } // namespace bliss

@@ -1,5 +1,5 @@
-#ifndef TEMP_MATRIX_INCLUDE
-#define TEMP_MATRIX_INCLUDE
+#ifndef SRC_MATRIX_MAT_MATRIX_H_
+#define SRC_MATRIX_MAT_MATRIX_H_
 
 // For reference over Eigen, see for example
 // http://eigen.tuxfamily.org/dox/AsciiQuickReference.txt
@@ -2873,4 +2873,4 @@ MyMatrix<T> SubspaceCompletionRational(MyMatrix<T> const& M, int const& n)
 
 
 
-#endif
+#endif // SRC_MATRIX_MAT_MATRIX_H_

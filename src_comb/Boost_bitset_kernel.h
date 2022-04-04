@@ -1,5 +1,5 @@
-#ifndef INCLUDE_FACE_BITSET_KERNEL
-#define INCLUDE_FACE_BITSET_KERNEL
+#ifndef SRC_COMB_BOOST_BITSET_KERNEL_H_
+#define SRC_COMB_BOOST_BITSET_KERNEL_H_
 
 // Boost libraries
 
@@ -412,4 +412,4 @@ T getsetasint(const Face& face)
 }
 
 
-#endif
+#endif // SRC_COMB_BOOST_BITSET_KERNEL_H_

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMBINATORICS_ELEM
-#define INCLUDE_COMBINATORICS_ELEM
+#ifndef SRC_COMB_COMB_COMBINATORICS_ELEM_H_
+#define SRC_COMB_COMB_COMBINATORICS_ELEM_H_
 
 #include "Temp_common.h"
 
@@ -158,6 +158,4 @@ public:
 
 
 
-#endif
-
-
+#endif // SRC_COMB_COMB_COMBINATORICS_ELEM_H_

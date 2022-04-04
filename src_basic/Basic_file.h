@@ -1,5 +1,5 @@
-#ifndef BASIC_FILE_INCLUDE
-#define BASIC_FILE_INCLUDE
+#ifndef SRC_BASIC_BASIC_FILE_H_
+#define SRC_BASIC_BASIC_FILE_H_
 
 #include "Temp_common.h"
 #include "Basic_string.h"

@@ -1,5 +1,5 @@
-#ifndef INCLUDE_COMBINATORICS_BUILDSET
-#define INCLUDE_COMBINATORICS_BUILDSET
+#ifndef SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
+#define SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
 
 #include "MAT_Matrix.h"
 
@@ -43,4 +43,4 @@ int PositionBuildSet(int const& n, int const& Nval, MyVector<int> const& V)
   }
   return pos;
 }
-#endif
+#endif // SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
