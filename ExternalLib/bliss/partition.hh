@@ -32,6 +32,7 @@ class Partition;
 #include <climits>
 #include <cstdio>
 #include <cstdlib>
+#include <vector>
 
 namespace bliss {
 
