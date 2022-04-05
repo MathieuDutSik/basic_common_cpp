@@ -59,6 +59,8 @@ template <typename T>
 MyMatrix<T> ComputeBasisInvariantSpace(std::vector<MyMatrix<T>> const& ListMat, MyMatrix<T> const& TheSpace, T const& TheMod)
 {
   int n = TheSpace.rows();
+  if (ListMat.size() == 0)
+    return IdentityMat<T>(n);
   int n_mat = ListMat.size();
   MyMatrix<T> Equa(2 * n, n_mat * n);
   for (int i_mat=0; i_mat<n_mat; i_mat++) {
