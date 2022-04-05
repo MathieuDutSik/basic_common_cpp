@@ -60,7 +60,7 @@ MyMatrix<T> ComputeBasisInvariantSpace(std::vector<MyMatrix<T>> const& ListMat, 
 {
   int n = TheSpace.rows();
   if (ListMat.size() == 0)
-    return IdentityMat<T>(n);
+    return TheSpace;
   int n_mat = ListMat.size();
   MyMatrix<T> Equa(2 * n, n_mat * n);
   for (int i_mat=0; i_mat<n_mat; i_mat++) {
