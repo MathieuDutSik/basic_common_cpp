@@ -1,5 +1,7 @@
-#include "partition.hh"
+// clang-format off
 #include "graph.hh"
+#include "partition.hh"
+// clang-format on
 #include <assert.h>
 #include <list>
 #include <vector>
