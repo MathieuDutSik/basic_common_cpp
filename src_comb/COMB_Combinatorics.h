@@ -111,11 +111,7 @@ private:
     }
     bool operator!=(IteratorContain const& iter)
     {
-      if (iter.dim_iter != dim_iter)
-        return true;
-      if (iter.size_iter != size_iter)
-        return true;
-      if (iter.U.size() != U.size())
+      if (iter.dim_iter != dim_iter || iter.size_iter != size_iter || iter.U.size() != U.size())
         return true;
       for (size_t i=0; i<U.size(); i++)
         if (iter.U[i] != U[i])
@@ -124,11 +120,7 @@ private:
     }
     bool operator==(IteratorContain const& iter)
     {
-      if (iter.dim_iter != dim_iter)
-        return false;
-      if (iter.size_iter != size_iter)
-        return false;
-      if (iter.U.size() != U.size())
+      if (iter.dim_iter != dim_iter || iter.size_iter != size_iter || iter.U.size() != U.size())
         return false;
       for (size_t i=0; i<U.size(); i++)
         if (iter.U[i] != U[i])
