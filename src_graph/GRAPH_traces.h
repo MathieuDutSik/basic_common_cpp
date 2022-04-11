@@ -19,7 +19,7 @@ public:
   sparsegraph cg1;
   DataTraces(size_t _n, size_t _nbAdjacent) : n(_n), nbAdjacent(_nbAdjacent)
   {
-    std::cerr << "Invoking DataTraces constructor\n";
+    //    std::cerr << "Invoking DataTraces constructor\n";
     lab1 = (int*)malloc(n * sizeof(int));
     ptn = (int*)malloc(n * sizeof(int));
     orbits = (int*)malloc(n * sizeof(int));
@@ -48,7 +48,7 @@ public:
   }
   ~DataTraces()
   {
-    std::cerr << "Invoking DataTraces destructor\n";
+    //    std::cerr << "Invoking DataTraces destructor\n";
     free(lab1);
     free(ptn);
     free(orbits);
@@ -65,7 +65,7 @@ public:
   DataTraces(const DataTraces&) = delete;
   DataTraces(DataTraces&& x)
   {
-    std::cerr << "Invoking DataTraces && constructor\n";
+    //    std::cerr << "Invoking DataTraces && constructor\n";
     n = x.n;
     nbAdjacent = x.nbAdjacent;
     //
