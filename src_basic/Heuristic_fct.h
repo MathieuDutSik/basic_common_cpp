@@ -1,37 +1,33 @@
 #ifndef SRC_BASIC_HEURISTIC_FCT_H_
 #define SRC_BASIC_HEURISTIC_FCT_H_
 
-#include "Temp_common.h"
 #include "Basic_file.h"
+#include "Temp_common.h"
 
-template<typename T>
-struct SingleCondition {
+template <typename T> struct SingleCondition {
   std::string eCond;
   std::string eType;
   T NumValue;
 };
 
-template<typename T>
-std::ostream& operator<<(std::ostream & os, SingleCondition<T> const& eSingCond)
-{
+template <typename T>
+std::ostream &operator<<(std::ostream &os,
+                         SingleCondition<T> const &eSingCond) {
   os << eSingCond.eCond << " " << eSingCond.eType << " " << eSingCond.NumValue;
   return os;
 }
 
-
-
-template<typename T>
-struct OneFullCondition {
+template <typename T> struct OneFullCondition {
   std::vector<SingleCondition<T>> TheConditions;
   std::string TheResult;
 };
 
-template<typename T>
-std::ostream& operator<<(std::ostream & os, OneFullCondition<T> const& eFullCond)
-{
-  size_t len=eFullCond.TheConditions.size();
-  for (size_t i=0; i<len; i++) {
-    if (i>0)
+template <typename T>
+std::ostream &operator<<(std::ostream &os,
+                         OneFullCondition<T> const &eFullCond) {
+  size_t len = eFullCond.TheConditions.size();
+  for (size_t i = 0; i < len; i++) {
+    if (i > 0)
       os << " && ";
     os << "(" << eFullCond.TheConditions[i] << ")";
   }
@@ -39,34 +35,25 @@ std::ostream& operator<<(std::ostream & os, OneFullCondition<T> const& eFullCond
   return os;
 }
 
-
-template<typename T>
-struct TheHeuristic {
+template <typename T> struct TheHeuristic {
   std::vector<OneFullCondition<T>> AllTests;
   std::string DefaultResult;
 };
 
-
-template<typename T>
-std::ostream& operator<<(std::ostream & os, TheHeuristic<T> const& Heu)
-{
+template <typename T>
+std::ostream &operator<<(std::ostream &os, TheHeuristic<T> const &Heu) {
   size_t len = Heu.AllTests.size();
-  for (size_t i=0; i<Heu.AllTests.size(); i++) {
+  for (size_t i = 0; i < Heu.AllTests.size(); i++) {
     os << "   i=" << i << "/" << len << " " << Heu.AllTests[i] << "\n";
   }
   os << "      Default=" << Heu.DefaultResult;
   return os;
 }
 
-
-
-
-
-template<typename T>
-TheHeuristic<T> ReadHeuristic(std::istream &is)
-{
+template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
   if (!is.good()) {
-    std::cerr << "ReadHeuristic operation failed because stream is not valied\n";
+    std::cerr
+        << "ReadHeuristic operation failed because stream is not valied\n";
     throw TerminalException{1};
   }
   TheHeuristic<T> TheHeu;
@@ -76,35 +63,38 @@ TheHeuristic<T> ReadHeuristic(std::istream &is)
     std::cerr << "We must have nbFullCond >= 0\n";
     throw TerminalException{1};
   }
-  for (int iFullCond=0; iFullCond<nbFullCond; iFullCond++) {
+  for (int iFullCond = 0; iFullCond < nbFullCond; iFullCond++) {
     std::vector<SingleCondition<T>> ListSingleCond;
     int nbCond;
     is >> nbCond;
     if (nbCond <= 0) {
-      std::cerr << "iFullCond=" << iFullCond << " nbFullCond=" << nbFullCond << "\n";
+      std::cerr << "iFullCond=" << iFullCond << " nbFullCond=" << nbFullCond
+                << "\n";
       std::cerr << "Error, we must have nbCond > 0\n";
       std::cerr << "nbCond=" << nbCond << "\n";
       throw TerminalException{1};
     }
-    for (int iCond=0; iCond<nbCond; iCond++) {
+    for (int iCond = 0; iCond < nbCond; iCond++) {
       std::string eType, eCond;
       T eNum;
       is >> eCond;
       is >> eType;
       is >> eNum;
       std::vector<std::string> ListType{">", "<", "=", "<=", ">="};
-      bool IsMatch=false;
-      for (auto & eTypePos : ListType) {
-	if (eTypePos == eType)
-	  IsMatch=true;
+      bool IsMatch = false;
+      for (auto &eTypePos : ListType) {
+        if (eTypePos == eType)
+          IsMatch = true;
       }
       if (!IsMatch) {
-	std::cerr << "Only allowed possibilities for eType are <, >, =, <= and >=\n";
-	throw TerminalException{1};
+        std::cerr
+            << "Only allowed possibilities for eType are <, >, =, <= and >=\n";
+        throw TerminalException{1};
       }
       if (eCond.size() == 0) {
-	std::cerr << "eCond must be nontrivial otherwise evaluation will be impossible\n";
-	throw TerminalException{1};
+        std::cerr << "eCond must be nontrivial otherwise evaluation will be "
+                     "impossible\n";
+        throw TerminalException{1};
       }
       SingleCondition<T> eSingCond{eCond, eType, eNum};
       ListSingleCond.push_back(eSingCond);
@@ -112,7 +102,8 @@ TheHeuristic<T> ReadHeuristic(std::istream &is)
     std::string eResult;
     is >> eResult;
     if (eResult.size() == 0) {
-      std::cerr << "eResult must be nontrivial otherwise evaluation will be impossible\n";
+      std::cerr << "eResult must be nontrivial otherwise evaluation will be "
+                   "impossible\n";
       throw TerminalException{1};
     }
     OneFullCondition<T> OneCond{ListSingleCond, eResult};
@@ -121,67 +112,64 @@ TheHeuristic<T> ReadHeuristic(std::istream &is)
   std::string DefaultResult;
   is >> DefaultResult;
   if (DefaultResult.size() == 0) {
-    std::cerr << "DefaultResult must be nontrivial otherwise evaluation will be impossible\n";
+    std::cerr << "DefaultResult must be nontrivial otherwise evaluation will "
+                 "be impossible\n";
     throw TerminalException{1};
   }
-  TheHeu.DefaultResult=DefaultResult;
+  TheHeu.DefaultResult = DefaultResult;
   return TheHeu;
 }
 
-
-template<typename T>
-void ReadHeuristicFileCond(std::string const& eFile, TheHeuristic<T> & eHeu)
-{
+template <typename T>
+void ReadHeuristicFileCond(std::string const &eFile, TheHeuristic<T> &eHeu) {
   if (eFile != "unset.heu") {
     std::cerr << "eFile=" << eFile << "\n";
     IsExistingFileDie(eFile);
     std::ifstream is(eFile);
     try {
       eHeu = ReadHeuristic<T>(is);
-    }
-    catch (TerminalException const& e) {
+    } catch (TerminalException const &e) {
       std::cerr << "Failed in reading the file eFile=" << eFile << "\n";
       throw TerminalException{1};
     }
   }
 }
 
-
-template<typename T>
-std::string HeuristicEvaluation(std::map<std::string, T> const& TheCand, TheHeuristic<T> const& TheHeu)
-{
-  for (auto const& eFullCond : TheHeu.AllTests) {
-    bool IsOK=true;
-    for (auto const& eSingCond : eFullCond.TheConditions) {
-      std::string eCond=eSingCond.eCond;
-      std::string eType=eSingCond.eType;
-      T eNum=eSingCond.NumValue;
-      auto search=TheCand.find(eCond);
-      T eValue=0;
+template <typename T>
+std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
+                                TheHeuristic<T> const &TheHeu) {
+  for (auto const &eFullCond : TheHeu.AllTests) {
+    bool IsOK = true;
+    for (auto const &eSingCond : eFullCond.TheConditions) {
+      std::string eCond = eSingCond.eCond;
+      std::string eType = eSingCond.eType;
+      T eNum = eSingCond.NumValue;
+      auto search = TheCand.find(eCond);
+      T eValue = 0;
       if (search != TheCand.end()) {
-	eValue=search->second;
+        eValue = search->second;
       } else {
-	std::cerr << "Entry " << eCond << " is required by heuristic\n";
-	std::cerr << "Yet it is missing in the Candidate. TheCand=\n";
-        for (auto& kv : TheCand) {
+        std::cerr << "Entry " << eCond << " is required by heuristic\n";
+        std::cerr << "Yet it is missing in the Candidate. TheCand=\n";
+        for (auto &kv : TheCand) {
           std::cerr << "  key=" << kv.first << " value=" << kv.second << "\n";
         }
-	std::cerr << "Please correct\n";
-	throw TerminalException{1};
+        std::cerr << "Please correct\n";
+        throw TerminalException{1};
       }
-      bool WeMatch=false;
+      bool WeMatch = false;
       if (eValue > eNum && eType == ">")
-	WeMatch=true;
+        WeMatch = true;
       if (eValue >= eNum && eType == ">=")
-	WeMatch=true;
+        WeMatch = true;
       if (eValue == eNum && eType == "=")
-	WeMatch=true;
+        WeMatch = true;
       if (eValue < eNum && eType == "<")
-	WeMatch=true;
+        WeMatch = true;
       if (eValue <= eNum && eType == "<=")
-	WeMatch=true;
+        WeMatch = true;
       if (!WeMatch)
-	IsOK=false;
+        IsOK = false;
     }
     if (IsOK)
       return eFullCond.TheResult;
@@ -189,25 +177,22 @@ std::string HeuristicEvaluation(std::map<std::string, T> const& TheCand, TheHeur
   return TheHeu.DefaultResult;
 }
 
-
-template<typename T>
-TheHeuristic<T> HeuristicFromListString(std::vector<std::string> const& ListString)
-{
+template <typename T>
+TheHeuristic<T>
+HeuristicFromListString(std::vector<std::string> const &ListString) {
   size_t lenString = 30;
   std::string eRandString = random_string(lenString);
   std::string ePrefix = "/tmp/Std_adm";
-  std::string TheFile=ePrefix + eRandString;
+  std::string TheFile = ePrefix + eRandString;
   std::ofstream OUTfs(TheFile);
-  for (auto const& eStr : ListString)
+  for (auto const &eStr : ListString)
     OUTfs << eStr << "\n";
   OUTfs.close();
   // Now reading it
   std::ifstream INfs(TheFile);
-  TheHeuristic<T> TheHeu=ReadHeuristic<T>(INfs);
+  TheHeuristic<T> TheHeu = ReadHeuristic<T>(INfs);
   std::remove(TheFile.c_str());
   return TheHeu;
 }
-
-
 
 #endif // SRC_BASIC_HEURISTIC_FCT_H_

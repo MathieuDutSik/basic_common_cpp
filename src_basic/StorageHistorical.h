@@ -1,67 +1,55 @@
 #ifndef SRC_BASIC_STORAGEHISTORICAL_H_
 #define SRC_BASIC_STORAGEHISTORICAL_H_
 
-#include <vector>
 #include <utility>
+#include <vector>
 
-
-
-
-template<typename T>
-struct StorageHistorical {
+template <typename T> struct StorageHistorical {
   struct FullRelInfo {
     bool status;
     unsigned long long eTime;
     T eVal;
   };
+
 public:
   // no copy
   StorageHistorical(const StorageSpaceLastN<T> &) = delete;
 
   // no assign
-  StorageHistorical& operator=(const StorageHistorical<T> &) = delete;
+  StorageHistorical &operator=(const StorageHistorical<T> &) = delete;
 
   // no move
   StorageHistorical(StorageHistorical<T> &&) = delete;
 
-  StorageHistorical()
-  {
+  StorageHistorical() {
     ThePeriod = -1;
     siz = 0;
   }
-  
-  StorageHistorical(int const& _ThePeriod)
-  {
-    ThePeriod = _ThePeriod;
-  }
-  
-  void SetPeriod(int const& _ThePeriod)
-  {
-    ThePeriod = _ThePeriod;
-  }
-  
-  std::vector<T> RetrieveLastRelevantValues() const
-  {
+
+  StorageHistorical(int const &_ThePeriod) { ThePeriod = _ThePeriod; }
+
+  void SetPeriod(int const &_ThePeriod) { ThePeriod = _ThePeriod; }
+
+  std::vector<T> RetrieveLastRelevantValues() const {
     std::vector<T> ListVal;
-    for (auto & eFull : ListFull)
+    for (auto &eFull : ListFull)
       if (eFull.status)
-	ListVal.push_back(eFull.eVal);
+        ListVal.push_back(eFull.eVal);
     return ListVal;
   }
-  
-  void InsertOneValue(unsigned long long const& eTime, T const& eVal)
-  {
+
+  void InsertOneValue(unsigned long long const &eTime, T const &eVal) {
     if (ThePeriod < 0) {
       return;
     }
-    bool HasFoundPlace=false;
-    for (int i=0; i<siz; i++) {
-      int deltaTime=int(eTime - ListFull[i].eTime);
+    bool HasFoundPlace = false;
+    for (int i = 0; i < siz; i++) {
+      int deltaTime = int(eTime - ListFull[i].eTime);
       if (deltaTime > ThePeriod)
-	ListFull[i].status = false;
+        ListFull[i].status = false;
       if (!HasFoundPlace && !ListFull[i].status) {
-	ListFull[i] = {true, eTime, eVal};
-	HasFoundPlace = true;
+        ListFull[i] = {true, eTime, eVal};
+        HasFoundPlace = true;
       }
     }
     if (!HasFoundPlace) {
@@ -69,11 +57,11 @@ public:
       siz++;
     }
   }
+
 private:
   std::vector<FullRelInfo> ListFull;
   int siz;
   int ThePeriod;
 };
-
 
 #endif // SRC_BASIC_STORAGEHISTORICAL_H_

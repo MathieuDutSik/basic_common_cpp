@@ -59,14 +59,15 @@ inline void TYPE_CONVERSION(stc<double> const &a1, T_uint64_t &a2) {
   a2 = a1.val;
 }
 
-
 inline void TYPE_CONVERSION(stc<double> const &a1, int64_t &a2) {
   a2 = int64_t(a1.val);
 }
 
 // Conversion from int8_t
 
-inline void TYPE_CONVERSION(stc<int8_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<int8_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -102,7 +103,9 @@ inline void TYPE_CONVERSION(stc<int8_t> const &a1, int64_t &a2) {
 
 // Conversion from uint8_t
 
-inline void TYPE_CONVERSION(stc<uint8_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<uint8_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<uint8_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -138,7 +141,9 @@ inline void TYPE_CONVERSION(stc<uint8_t> const &a1, int64_t &a2) {
 
 // Conversion from int16_t
 
-inline void TYPE_CONVERSION(stc<int16_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<int16_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -174,7 +179,9 @@ inline void TYPE_CONVERSION(stc<int16_t> const &a1, int64_t &a2) {
 
 // Conversion from uint16_t
 
-inline void TYPE_CONVERSION(stc<uint16_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<uint16_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<uint16_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -210,7 +217,9 @@ inline void TYPE_CONVERSION(stc<uint16_t> const &a1, int64_t &a2) {
 
 // Conversion from int32_t
 
-inline void TYPE_CONVERSION(stc<int32_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<int32_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -246,7 +255,9 @@ inline void TYPE_CONVERSION(stc<int32_t> const &a1, int64_t &a2) {
 
 // Conversion from uint32_t
 
-inline void TYPE_CONVERSION(stc<uint32_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<uint32_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<uint32_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -282,7 +293,9 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, int64_t &a2) {
 
 // Conversion from int64_t
 
-inline void TYPE_CONVERSION(stc<int64_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<int64_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -318,7 +331,9 @@ inline void TYPE_CONVERSION(stc<int64_t> const &a1, int64_t &a2) {
 
 // Conversion from uint64_t
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, double &a2) { a2 = double(a1.val); }
+inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, double &a2) {
+  a2 = double(a1.val);
+}
 
 inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, uint8_t &a2) {
   a2 = uint8_t(a1.val);
@@ -351,7 +366,6 @@ inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, T_uint64_t &a2) {
 inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, int64_t &a2) {
   a2 = int64_t(a1.val);
 }
-
 
 template <typename T1, typename T2> T1 UniversalScalarConversion(T2 const &a) {
   T1 ret;

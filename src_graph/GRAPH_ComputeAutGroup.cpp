@@ -1,11 +1,10 @@
-#include "GRAPH_traces.h"
-#include "GRAPH_bliss.h"
-#include "Temp_common.h"
 #include "GRAPH_BitsetType.h"
 #include "GRAPH_GraphicalFunctions.h"
+#include "GRAPH_bliss.h"
+#include "GRAPH_traces.h"
+#include "Temp_common.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   try {
     if (argc != 3) {
       std::cerr << "Number of argument is = " << argc << "\n";
@@ -17,7 +16,7 @@ int main(int argc, char *argv[])
     using Tidx = unsigned int;
     //
     std::ifstream GRAfs(argv[1]);
-    Tgr eGR=GRAPH_Read<GraphBitset>(GRAfs);
+    Tgr eGR = GRAPH_Read<GraphBitset>(GRAfs);
     GRAPH_Write(std::cerr, eGR);
     //
     int opt;
@@ -28,27 +27,27 @@ int main(int argc, char *argv[])
     std::vector<std::vector<Tidx>> ListGen;
     if (opt == 1) {
       std::cerr << "Running TRACES_GetListGenerators\n";
-      ListGen = TRACES_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
+      ListGen = TRACES_GetListGenerators<Tgr, Tidx>(eGR, nbRow);
     }
     if (opt == 2) {
       std::cerr << "Running TRACES_GetListGenerators\n";
-      ListGen = TRACES_GetListGenerators_Arr_Test<Tgr,Tidx>(eGR, nbRow);
+      ListGen = TRACES_GetListGenerators_Arr_Test<Tgr, Tidx>(eGR, nbRow);
     }
     if (opt == 3) {
       std::cerr << "Running BLISS_GetListGenerators\n";
-      ListGen = BLISS_GetListGenerators<Tgr,Tidx>(eGR, nbRow);
+      ListGen = BLISS_GetListGenerators<Tgr, Tidx>(eGR, nbRow);
     }
-    size_t nbVert=eGR.GetNbVert();
+    size_t nbVert = eGR.GetNbVert();
     std::cout << "local ListGen;\n";
     std::cout << "ListGen:=[";
-    bool IsFirst=true;
-    for (auto & eGen : ListGen) {
+    bool IsFirst = true;
+    for (auto &eGen : ListGen) {
       if (!IsFirst)
         std::cout << ",\n";
-      IsFirst=false;
+      IsFirst = false;
       std::cout << "[";
-      for (size_t i=0; i<nbVert; i++) {
-        if (i>0)
+      for (size_t i = 0; i < nbVert; i++) {
+        if (i > 0)
           std::cout << ",";
         int eVal = 1 + int(eGen[i]);
         std::cout << eVal;
@@ -57,8 +56,7 @@ int main(int argc, char *argv[])
     }
     std::cout << "];\n";
     std::cout << "return Group(List(ListGen,PermList));\n";
-  }
-  catch (TerminalException const& e) {
+  } catch (TerminalException const &e) {
     exit(e.eVal);
   }
 }

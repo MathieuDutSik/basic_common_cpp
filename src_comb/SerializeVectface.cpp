@@ -1,16 +1,13 @@
-#include "MAT_Matrix.h"
 #include "Boost_bitset_kernel.h"
+#include "MAT_Matrix.h"
 
-
-
-int main()
-{
+int main() {
   size_t n = 10;
   size_t n_face = 20;
   vectface vf1(n);
-  for (size_t i_face=0; i_face<n_face; i_face++) {
+  for (size_t i_face = 0; i_face < n_face; i_face++) {
     Face f(n);
-    for (size_t i=0; i<n; i++)
+    for (size_t i = 0; i < n; i++)
       f[i] = rand() % 2;
     vf1.push_back(f);
   }
@@ -29,8 +26,7 @@ int main()
     // archive and stream closed when destructors are called
   }
 
-
-  auto get_vf=[&]() -> vectface {
+  auto get_vf = [&]() -> vectface {
     vectface f;
     std::ifstream ifs(filename);
     boost::archive::text_iarchive ia(ifs);

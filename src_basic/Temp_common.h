@@ -10,21 +10,20 @@
 
 // C-style includes
 
-#include <ctype.h>
-#include <unistd.h>
-#include <getopt.h>
 #include <chrono>
 #include <ctime>
-
+#include <ctype.h>
+#include <getopt.h>
+#include <unistd.h>
 
 #include <math.h>
 
-#include <string>
-#include <cstdlib>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 // Basic C++
 
@@ -32,56 +31,49 @@
 
 // STL containers
 
-#include <vector>
 #include <list>
-#include <set>
 #include <map>
-#include <unordered_set>
-#include <unordered_map>
 #include <optional>
+#include <set>
+#include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 // Functional code
 
-#include <functional>
 #include <algorithm>
+#include <functional>
 
 // IO streams
 
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 
 // Boost serialization
 
 #include "boost_serialization.h"
 
 // Type conversion
-#include "TypeConversion.h"
-#include "ExceptionEnding.h"
 #include "Basic_functions.h"
+#include "ExceptionEnding.h"
+#include "TypeConversion.h"
 
 // synonyms
 
 typedef unsigned long ulong;
 typedef unsigned int uint;
 
-
-template<typename T>
-struct is_graphsparseimmutable_class {
+template <typename T> struct is_graphsparseimmutable_class {
   static const bool value = false;
 };
 
-template<typename T>
-struct is_graphbitset_class {
+template <typename T> struct is_graphbitset_class {
   static const bool value = false;
 };
 
-
-
-
-void srand_random_set()
-{
+void srand_random_set() {
 #ifdef USE_NANOSECOND_RAND
   std::timespec ts;
   std::timespec_get(&ts, TIME_UTC);
@@ -92,60 +84,49 @@ void srand_random_set()
 #endif
 }
 
-
-
-std::string random_string( size_t length )
-{
+std::string random_string(size_t length) {
   auto randchar = []() -> char {
-    const char charset[] =
-    "0123456789"
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    "abcdefghijklmnopqrstuvwxyz";
+    const char charset[] = "0123456789"
+                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                           "abcdefghijklmnopqrstuvwxyz";
     const size_t max_index = (sizeof(charset) - 1);
-    return charset[ size_t(rand()) % max_index ];
+    return charset[size_t(rand()) % max_index];
   };
-  std::string str(length,0);
-  std::generate_n( str.begin(), length, randchar );
+  std::string str(length, 0);
+  std::generate_n(str.begin(), length, randchar);
   return str;
 }
 
-
-
-std::string random_string_restricted( size_t length )
-{
+std::string random_string_restricted(size_t length) {
   auto randchar = []() -> char {
     const char charset[] = "abcdefghijklmnopqrstuvwxyz";
     const size_t max_index = (sizeof(charset) - 1);
-    return charset[ size_t(rand()) % max_index ];
+    return charset[size_t(rand()) % max_index];
   };
-  std::string str(length,0);
-  std::generate_n( str.begin(), length, randchar );
+  std::string str(length, 0);
+  std::generate_n(str.begin(), length, randchar);
   return str;
 }
 
-
-std::string GAP_logical(bool const& x)
-{
+std::string GAP_logical(bool const &x) {
   if (x)
     return "true";
   return "false";
 }
 
-
-
-template<typename T>
-void WriteStdVectorStdVectorGAP(std::ostream & os, std::vector<std::vector<T> > const& ListVect)
-{
+template <typename T>
+void WriteStdVectorStdVectorGAP(std::ostream &os,
+                                std::vector<std::vector<T>> const &ListVect) {
   os << "[";
-  int IsFirstVect=true;
-  for (std::vector<int> const& eVect : ListVect) {
+  int IsFirstVect = true;
+  for (std::vector<int> const &eVect : ListVect) {
     if (!IsFirstVect)
       os << ",\n";
-    IsFirstVect=false;
+    IsFirstVect = false;
     os << "[";
-    size_t siz=eVect.size();
-    for (size_t i=0; i<siz; i++) {
-      if (i>0)
+    size_t siz = eVect.size();
+    for (size_t i = 0; i < siz; i++) {
+      if (i > 0)
         os << ",";
       os << eVect[i];
     }
@@ -154,117 +135,100 @@ void WriteStdVectorStdVectorGAP(std::ostream & os, std::vector<std::vector<T> > 
   os << "]";
 }
 
-template<typename T>
-void WriteStdVector(std::ostream& os, std::vector<T> const& V)
-{
-  for (auto & eVal : V)
+template <typename T>
+void WriteStdVector(std::ostream &os, std::vector<T> const &V) {
+  for (auto &eVal : V)
     os << " " << eVal;
   os << "\n";
 }
 
-
-template<typename T>
-void WriteStdVectorGAP(std::ostream& os, std::vector<T> const& V)
-{
+template <typename T>
+void WriteStdVectorGAP(std::ostream &os, std::vector<T> const &V) {
   os << "[";
-  bool IsFirst=true;
-  for (auto & eVal : V) {
+  bool IsFirst = true;
+  for (auto &eVal : V) {
     if (!IsFirst)
       os << ",";
-    IsFirst=false;
+    IsFirst = false;
     os << eVal;
   }
   os << "]";
 }
 
-template<typename T>
-std::istream& operator>>(std::istream& is, std::vector<T>& obj)
-{
+template <typename T>
+std::istream &operator>>(std::istream &is, std::vector<T> &obj) {
   int n;
   is >> n;
   obj.resize(n);
-  for (int i=0; i<n; i++) {
+  for (int i = 0; i < n; i++) {
     T eVal;
     is >> eVal;
-    obj[i]=eVal;
+    obj[i] = eVal;
   }
   return is;
 }
 
-template<typename T>
-std::ostream& operator<<(std::ostream& os, std::vector<T> const& ListVal)
-{
-  int n=ListVal.size();
+template <typename T>
+std::ostream &operator<<(std::ostream &os, std::vector<T> const &ListVal) {
+  int n = ListVal.size();
   os << " " << n;
-  for (int i=0; i<n; i++)
+  for (int i = 0; i < n; i++)
     os << " " << ListVal[i];
   return os;
 }
 
-
-
-
-
-
-template<typename T>
-struct CollectedResult {
+template <typename T> struct CollectedResult {
   std::vector<T> LVal;
   std::vector<int> LMult;
 };
 
-template<typename T>
-CollectedResult<T> Collected(std::vector<T> const& eVect)
-{
+template <typename T>
+CollectedResult<T> Collected(std::vector<T> const &eVect) {
   std::set<T> SetVal;
-  for (auto & eVal : eVect)
+  for (auto &eVal : eVect)
     SetVal.insert(eVal);
   std::vector<T> LVal;
-  for (auto & eVal : SetVal)
+  for (auto &eVal : SetVal)
     LVal.push_back(eVal);
-  size_t eSize=LVal.size();
-  std::vector<int> LMult(eSize,0);
-  auto UpPosition=[&](T const& eVal) -> void {
-    for (size_t i=0; i<eSize; i++)
+  size_t eSize = LVal.size();
+  std::vector<int> LMult(eSize, 0);
+  auto UpPosition = [&](T const &eVal) -> void {
+    for (size_t i = 0; i < eSize; i++)
       if (LVal[i] == eVal) {
-	LMult[i] += 1;
-	return;
+        LMult[i] += 1;
+        return;
       }
     std::cerr << "Should never reach that stage\n";
     throw TerminalException{1};
   };
-  for (auto & eVal : eVect)
+  for (auto &eVal : eVect)
     UpPosition(eVal);
   return {std::move(LVal), std::move(LMult)};
 }
 
-std::vector<int> StdVectorFirstNentries(size_t const& N)
-{
+std::vector<int> StdVectorFirstNentries(size_t const &N) {
   std::vector<int> eList(N);
-  for (size_t i=0; i<N; i++)
+  for (size_t i = 0; i < N; i++)
     eList[i] = int(i);
   return eList;
 }
 
-
-template<typename T>
-void WriteVectorInt_GAP(std::ostream &os, std::vector<T> const& OneInc)
-{
-  size_t siz=OneInc.size();
+template <typename T>
+void WriteVectorInt_GAP(std::ostream &os, std::vector<T> const &OneInc) {
+  size_t siz = OneInc.size();
   os << "[";
-  for (size_t i=0; i<siz; i++) {
-    if (i>0)
+  for (size_t i = 0; i < siz; i++) {
+    if (i > 0)
       os << ",";
-    size_t eVal=OneInc[i]+1;
+    size_t eVal = OneInc[i] + 1;
     os << eVal;
   }
   os << "]";
 }
 
-
-std::vector<int> DivideListPosition(int const& len, int const& nbBlock)
-{
+std::vector<int> DivideListPosition(int const &len, int const &nbBlock) {
   std::vector<int> ListVal;
-  for (int i=0; i<=nbBlock; i++) {
+  for (int i = 0; i <= nbBlock; i++) {
     double pos_d = (double(i) / double(nbBlock)) * double(len);
     int pos_i;
     NearestInteger_double_int(pos_d, pos_i);
@@ -275,54 +239,46 @@ std::vector<int> DivideListPosition(int const& len, int const& nbBlock)
   return ListVal;
 }
 
-
 // Returned fields {v1,v2}
 // v1 is the field returning the sorted index to the original index
 // v2 is the field returning the original index to the sorted index
-template<typename T>
-std::pair<std::vector<int>,std::vector<int>> SortingLists(std::vector<T> const & ListV)
-{
+template <typename T>
+std::pair<std::vector<int>, std::vector<int>>
+SortingLists(std::vector<T> const &ListV) {
   struct PairData {
     size_t i;
     T x;
   };
-  std::size_t len=ListV.size();
+  std::size_t len = ListV.size();
   std::vector<PairData> ListPair(len);
-  for (std::size_t i=0; i<len; i++) {
+  for (std::size_t i = 0; i < len; i++) {
     PairData ePair{i, ListV[i]};
-    ListPair[i]=ePair;
+    ListPair[i] = ePair;
   }
   sort(ListPair.begin(), ListPair.end(),
-       [](PairData const & x1, PairData const& x2) -> bool {
+       [](PairData const &x1, PairData const &x2) -> bool {
          if (x1.x < x2.x)
            return true;
          if (x2.x < x1.x)
            return false;
-         return x1.i< x2.i;
+         return x1.i < x2.i;
        });
   std::vector<int> v1(len);
   std::vector<int> v2(len);
-  for (size_t i=0; i<len; i++) {
-    size_t eIdx=int(ListPair[i].i);
-    v1[i]=int(eIdx);
-    v2[eIdx]=int(i);
+  for (size_t i = 0; i < len; i++) {
+    size_t eIdx = int(ListPair[i].i);
+    v1[i] = int(eIdx);
+    v2[eIdx] = int(i);
   }
   return {std::move(v1), std::move(v2)};
 }
 
 // T_Norm should always return an integer, whatever the input type
-inline int T_Norm(int const& eVal)
-{
-  return abs(eVal);
-}
+inline int T_Norm(int const &eVal) { return abs(eVal); }
 
-inline int T_NormGen(int const& x)
-{
-  return abs(x);
-}
+inline int T_NormGen(int const &x) { return abs(x); }
 
-inline int CanonicalizationUnit(int const& eVal)
-{
+inline int CanonicalizationUnit(int const &eVal) {
   if (eVal < 0)
     return -1;
   return 1;

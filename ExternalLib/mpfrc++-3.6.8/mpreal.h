@@ -3185,7 +3185,8 @@ inline const mpreal pow(const unsigned long int a, const unsigned int b,
 inline const mpreal pow(const unsigned long int a, const long int b,
                         mp_rnd_t rnd_mode) {
   if (b > 0)
-    return pow(a, static_cast<unsigned long int>(b), rnd_mode); // mpfr_ui_pow_ui
+    return pow(a, static_cast<unsigned long int>(b),
+               rnd_mode); // mpfr_ui_pow_ui
   else
     return pow(a, mpreal(b), rnd_mode); // mpfr_ui_pow
 }
@@ -3193,7 +3194,8 @@ inline const mpreal pow(const unsigned long int a, const long int b,
 inline const mpreal pow(const unsigned long int a, const int b,
                         mp_rnd_t rnd_mode) {
   if (b > 0)
-    return pow(a, static_cast<unsigned long int>(b), rnd_mode); // mpfr_ui_pow_ui
+    return pow(a, static_cast<unsigned long int>(b),
+               rnd_mode); // mpfr_ui_pow_ui
   else
     return pow(a, mpreal(b), rnd_mode); // mpfr_ui_pow
 }
@@ -3255,7 +3257,8 @@ inline const mpreal pow(const unsigned int a, const double b,
 inline const mpreal pow(const long int a, const unsigned long int b,
                         mp_rnd_t rnd_mode) {
   if (a > 0)
-    return pow(static_cast<unsigned long int>(a), b, rnd_mode); // mpfr_ui_pow_ui
+    return pow(static_cast<unsigned long int>(a), b,
+               rnd_mode); // mpfr_ui_pow_ui
   else
     return pow(mpreal(a), b, rnd_mode); // mpfr_pow_ui
 }
@@ -3317,7 +3320,8 @@ inline const mpreal pow(const long int a, const double b, mp_rnd_t rnd_mode) {
 inline const mpreal pow(const int a, const unsigned long int b,
                         mp_rnd_t rnd_mode) {
   if (a > 0)
-    return pow(static_cast<unsigned long int>(a), b, rnd_mode); // mpfr_ui_pow_ui
+    return pow(static_cast<unsigned long int>(a), b,
+               rnd_mode); // mpfr_ui_pow_ui
   else
     return pow(mpreal(a), b, rnd_mode); // mpfr_pow_ui
 }

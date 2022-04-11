@@ -4,11 +4,10 @@
   The basic inclusions for parallelism
 */
 
-
 #include "Temp_common.h"
 #include <atomic>
-#include <thread>
-#include <mutex>
 #include <condition_variable>
+#include <mutex>
+#include <thread>
 
 #endif // SRC_BASIC_BASICTHREADINCLUDE_H_

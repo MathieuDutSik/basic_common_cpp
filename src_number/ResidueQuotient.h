@@ -1,8 +1,8 @@
 #ifndef SRC_NUMBER_RESIDUEQUOTIENT_H_
 #define SRC_NUMBER_RESIDUEQUOTIENT_H_
 
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
 
 // The remainder and quotient of integers
 

@@ -552,8 +552,9 @@ typedef unsigned long nauty_counter;
 #define SETWD(pos) ((pos) >> 4) /* number of setword containing bit pos */
 #define SETBT(pos) ((pos)&0xF)  /* position within setword of bit pos */
 #define TIMESWORDSIZE(w) ((w) << 4)
-#define SETWORDSNEEDED(n) ((((n)-1) >> 4) + 1) /* setwords needed for n bits   \
-                                                */
+#define SETWORDSNEEDED(n)                                                      \
+  ((((n)-1) >> 4) + 1) /* setwords needed for n bits                           \
+                        */
 #endif
 
 #if WORDSIZE == 32
@@ -641,13 +642,14 @@ typedef unsigned long nauty_counter;
 #endif
 
 #define NOTSUBSET(word1, word2)                                                \
-  ((word1) & ~(word2))                               /* test if the 1-bits     \
-                    in setword word1 do not form a subset of those in word2  */
-#define INTERSECT(word1, word2) ((word1) &= (word2)) /* AND word2 into word1   \
-                                                      */
-#define UNION(word1, word2) ((word1) |= (word2))     /* OR word2 into word1 */
-#define SETDIFF(word1, word2) ((word1) &= ~(word2))  /* - word2 into word1 */
-#define XOR(word1, word2) ((word1) ^= (word2))       /* XOR word2 into word1 */
+  ((word1) & ~(word2)) /* test if the 1-bits                                   \
+in setword word1 do not form a subset of those in word2  */
+#define INTERSECT(word1, word2)                                                \
+  ((word1) &= (word2))                              /* AND word2 into word1    \
+                                                     */
+#define UNION(word1, word2) ((word1) |= (word2))    /* OR word2 into word1 */
+#define SETDIFF(word1, word2) ((word1) &= ~(word2)) /* - word2 into word1 */
+#define XOR(word1, word2) ((word1) ^= (word2))      /* XOR word2 into word1 */
 #define ZAPBIT(word, x) ((word) &= ~BITT[x]) /* delete bit x in setword */
 #define TAKEBIT(iw, w)                                                         \
   {                                                                            \

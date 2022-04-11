@@ -15,14 +15,9 @@ struct ConversionException {
 
 // This is guaranteed to trigger an end.
 // Also it gives something that can be used for having the stacktrace via gdb.
-void TerminalEnding()
-{
+void TerminalEnding() {
   assert(false);
   exit(1);
 }
-
-
-
-
 
 #endif // SRC_BASIC_EXCEPTIONENDING_H_

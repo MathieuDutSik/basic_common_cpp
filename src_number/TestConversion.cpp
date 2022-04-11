@@ -1,14 +1,12 @@
+#include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryBoostGmpInt.h"
-#include "NumberTheory.h"
 #include "TypeConversion.h"
 #include "TypeConversionFinal.h"
 
-
-int main(int argc, char *argv[])
-{
-  using T1=boost::multiprecision::cpp_int;
-  using T2=mpz_class;
+int main(int argc, char *argv[]) {
+  using T1 = boost::multiprecision::cpp_int;
+  using T2 = mpz_class;
 
   T1 val1;
   T2 val2;
@@ -26,6 +24,6 @@ int main(int argc, char *argv[])
   */
 
   val1 = 43;
-  val2 = UniversalScalarConversion<T2,T1>(val1);
+  val2 = UniversalScalarConversion<T2, T1>(val1);
   std::cerr << "val1=" << val1 << " val2=" << val2 << "\n";
 }
