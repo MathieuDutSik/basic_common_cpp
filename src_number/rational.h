@@ -81,6 +81,7 @@ public:
     gcd_reduction();
   }
   void operator+=(Rational<Tint> const &x) {
+    //    std::cerr << "operator+ 1\n";
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
     num = num * (x.den / gcd) + x.num * (den / gcd);
@@ -96,8 +97,9 @@ public:
   }
   friend Rational<Tint> operator+(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
+    //    std::cerr << "operator+ 2\n";
     Rational<Tint> z;
-    Tint gcd = Rational<Tint>::comp_gcd(x.den, x.den);
+    Tint gcd = Rational<Tint>::comp_gcd(x.den, y.den);
     z.den = y.den * x.den / gcd;
     z.num = y.num * (x.den / gcd) + x.num * (y.den / gcd);
     z.gcd_reduction();
@@ -118,7 +120,7 @@ public:
   friend Rational<Tint> operator-(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
     Rational<Tint> z;
-    Tint gcd = Rational<Tint>::comp_gcd(x.den, x.den);
+    Tint gcd = Rational<Tint>::comp_gcd(x.den, y.den);
     z.den = x.den * y.den / gcd;
     z.num = x.num * (y.den / gcd) - y.num * (x.den / gcd);
     z.gcd_reduction();
@@ -191,6 +193,7 @@ public:
   friend std::istream &operator>>(std::istream &is, Rational<Tint> &v) {
     char c;
     std::string s;
+    std::cerr << "s=" << s << "\n";
     size_t miss_val = std::numeric_limits<size_t>::max();
     size_t pos_slash = miss_val;
     size_t pos = 0;
