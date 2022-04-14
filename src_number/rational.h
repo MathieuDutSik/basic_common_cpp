@@ -193,12 +193,13 @@ public:
   friend std::istream &operator>>(std::istream &is, Rational<Tint> &v) {
     char c;
     std::string s;
-    std::cerr << "s=" << s << "\n";
     size_t miss_val = std::numeric_limits<size_t>::max();
     size_t pos_slash = miss_val;
     size_t pos = 0;
     while (true) {
-      is >> c;
+      // is.get(c) will read characters but is >> c skip the spaces.
+      is.get(c);
+      //      is >> c;
       if (c != ' ' && c != '\n') {
         s += c;
         pos++; // First character cannot be a slash
@@ -206,11 +207,14 @@ public:
       }
     }
     while (true) {
-      if (is.eof())
+      if (is.eof()) {
         break;
-      is >> c;
-      if (c == ' ' || c == '\n')
+      }
+      is.get(c);
+      //      is >> c;
+      if (c == ' ' || c == '\n') {
         break;
+      }
       s += c;
       if (c == '/')
         pos_slash = pos;
