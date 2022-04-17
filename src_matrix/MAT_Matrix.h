@@ -2183,6 +2183,17 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   return M;
 }
 
+template <typename T>
+MyMatrix<T> MatrixFromVectorFamilyDim(int const& dim, std::vector<MyVector<T>> const &ListVect) {
+  int nbVect = ListVect.size();
+  MyMatrix<T> M(nbVect, dim);
+  for (int iVect = 0; iVect < nbVect; iVect++) {
+    for (int i = 0; i < dim; i++)
+      M(iVect, i) = ListVect[iVect](i);
+  }
+  return M;
+}
+
 template <typename T> MyVector<T> SumMatrix(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
