@@ -2503,4 +2503,17 @@ MyMatrix<T> SubspaceCompletionRational(MyMatrix<T> const &M, int const &n) {
   return NullspaceTrMat(M);
 }
 
+
+template <typename T> MyVector<T> SignCanonicalizeVector(const MyVector<T> &V) {
+  int len = V.size();
+  for (int u = 0; u < len; u++) {
+    if (V(u) > 0)
+      return V;
+    if (V(u) < 0)
+      return -V;
+  }
+  std::cerr << "Error in SignCanonicalizeVector\n";
+  throw TerminalException{1};
+}
+
 #endif // SRC_MATRIX_MAT_MATRIX_H_
