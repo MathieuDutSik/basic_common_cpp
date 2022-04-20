@@ -10,27 +10,33 @@ struct SATformulation {
   std::vector<std::vector<int>> ListExpr;
 };
 
+
+bool IsFeasibleExpression(std::vector<int> eList, Face const &eFace) {
+  bool IsMatching = false;
+  for (auto &x : eList) {
+    int pos;
+    bool val;
+    if (x > 0) {
+      pos = x - 1;
+      val = true;
+    } else {
+      pos = -1 - x;
+      val = false;
+    }
+    if (eFace[pos] == 0 && !val)
+      IsMatching = true;
+    if (eFace[pos] == 1 && val)
+      IsMatching = true;
+  }
+  return IsMatching;
+}
+
 void PrintFeasibilityInfo(SATformulation const &eExpr, Face const &eFace) {
   int nbCond = eExpr.ListExpr.size();
   bool IsFeasible = true;
   for (int iCond = 0; iCond < nbCond; iCond++) {
     std::vector<int> eList = eExpr.ListExpr[iCond];
-    bool IsMatching = false;
-    for (auto &x : eList) {
-      int pos;
-      bool val;
-      if (x > 0) {
-        pos = x - 1;
-        val = true;
-      } else {
-        pos = -1 - x;
-        val = false;
-      }
-      if (eFace[pos] == 0 && !val)
-        IsMatching = true;
-      if (eFace[pos] == 1 && val)
-        IsMatching = true;
-    }
+    bool IsMatching = IsFeasibleExpression(eList, eFace);
     if (!IsMatching) {
       std::cerr << "Condition iCond=" << iCond << " violated. eList=";
       WriteStdVector(std::cerr, eList);
@@ -42,22 +48,7 @@ void PrintFeasibilityInfo(SATformulation const &eExpr, Face const &eFace) {
 
 bool IsFeasible(SATformulation const &eExpr, Face const &eFace) {
   for (auto &eList : eExpr.ListExpr) {
-    bool IsMatching = false;
-    for (auto &x : eList) {
-      int pos;
-      bool val;
-      if (x > 0) {
-        pos = x - 1;
-        val = true;
-      } else {
-        pos = -1 - x;
-        val = false;
-      }
-      if (eFace[pos] == 0 && !val)
-        IsMatching = true;
-      if (eFace[pos] == 1 && val)
-        IsMatching = true;
-    }
+    bool IsMatching = IsFeasibleExpression(eList, eFace);
     if (!IsMatching) {
       return false;
     }
