@@ -334,6 +334,22 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
   return ListGen;
 }
 
+template <typename Tidx>
+void ReadListGen(permnode* gens, std::vector<std::vector<Tidx>> & ListGen, size_t const& n_last) {
+  if (gens) {
+    permnode *pn = gens;
+    do {
+      std::vector<Tidx> V(n_last);
+      for (size_t i = 0; i < n_last; i++)
+        V[i] = pn->p[i];
+      ListGen.push_back(V);
+      //
+      pn = pn->next;
+    } while (pn != gens);
+  }
+}
+
+
 template <typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
                                                         size_t const &n_last) {
@@ -423,17 +439,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
   Traces(&sg1, lab1, ptn, orbits, &options, &stats, NULL);
   /* Extracting the list of generators */
   std::vector<std::vector<Tidx>> ListGen;
-  if (gens) {
-    permnode *pn = gens;
-    do {
-      std::vector<Tidx> V(n_last);
-      for (size_t i = 0; i < n_last; i++)
-        V[i] = pn->p[i];
-      ListGen.push_back(V);
-      //
-      pn = pn->next;
-    } while (pn != gens);
-  }
+  ReadListGen(gens, ListGen, n_last);
   freeschreier(NULL, &gens);
   schreier_freedyn();
 
@@ -494,17 +500,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
   for (size_t i = 0; i < n; i++)
     V[DT.lab1[i]] = TidxC(i);
   std::vector<std::vector<TidxG>> ListGen;
-  if (gens) {
-    permnode *pn = gens;
-    std::vector<TidxG> V(n_last);
-    do {
-      for (size_t i = 0; i < n_last; i++)
-        V[i] = pn->p[i];
-      ListGen.push_back(V);
-      //
-      pn = pn->next;
-    } while (pn != gens);
-  }
+  ReadListGen(gens, ListGen, n_last);
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
