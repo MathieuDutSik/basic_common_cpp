@@ -24,13 +24,19 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1,
   TYPE_CONVERSION_STRING(a1.val, a2);
 }
 
-inline void TYPE_CONVERSION(stc<mpq_class> const &a1,
-                            boost::multiprecision::cpp_int &a2) {
+template<typename T1, typename T2>
+void TYPE_CONVERSION_IsInteger(stc<T1> const& a1, T2 & a2) {
   if (!IsInteger(a1.val)) {
     std::string str_ret = "a1=" + std::to_string(a1.val) + " is not an integer";
     throw ConversionException{str_ret};
   }
   TYPE_CONVERSION_STRING(a1.val, a2);
+}
+
+
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1,
+                            boost::multiprecision::cpp_int &a2) {
+  TYPE_CONVERSION_IsInteger(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1,
@@ -52,11 +58,7 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
 
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
                             mpz_class &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str_ret = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str_ret};
-  }
-  TYPE_CONVERSION_STRING(a1.val, a2);
+  TYPE_CONVERSION_IsInteger(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,

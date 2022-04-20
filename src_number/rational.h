@@ -405,14 +405,20 @@ inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, Rational<int> &a2) {
   a2 = a1.val;
 }
 
-inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, int &a2) {
-  const int &den = a1.val.get_den();
+template<typename T>
+void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
+  const T &den = a1.val.get_den();
   if (den != 1) {
     std::string str_err =
         "The denominator should be 1. It is den = " + std::to_string(den);
     throw ConversionException{str_err};
   }
   a2 = a1.val.get_num();
+}
+
+
+inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, int &a2) {
+  TYPE_CONVERSION_Rational_T<int>(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<int> const &a1, Rational<int> &a2) {
@@ -426,13 +432,7 @@ inline void TYPE_CONVERSION(stc<Rational<long>> const &a1, Rational<long> &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<Rational<long>> const &a1, long &a2) {
-  const long &den = a1.val.get_den();
-  if (den != 1) {
-    std::string str_err =
-        "The denominator should be 1. It is den = " + std::to_string(den);
-    throw ConversionException{str_err};
-  }
-  a2 = a1.val.get_num();
+  TYPE_CONVERSION_Rational_T<long>(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<long> const &a1, Rational<long> &a2) {
