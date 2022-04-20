@@ -1517,6 +1517,8 @@ std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const &eMat,
   return eRetSol;
 }
 
+
+
 template <typename T> bool IsIntegerVector(MyVector<T> const &V) {
   int n = V.size();
   for (int i = 0; i < n; i++)
@@ -1548,6 +1550,30 @@ SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   }
   return {};
 }
+
+
+/*
+  We can actually do a little bit better for the solution to avoid repeating
+  the preprocessing.
+ */
+template <typename T>
+std::optional<MyMatrix<T>> ListSolutionMat(MyMatrix<T> const &eMat, MyMatrix<T> const &LVect) {
+  int n_vect = LVect.rows();
+  int dim = eMat.rows();
+  MyMatrix<T> TheSol(n_vect,dim);
+  for (int i_vect=0; i_vect<n_vect; i_vect++) {
+    MyVector<T> V = GetMatrixRow(LVect, i_vect);
+    std::optional<MyVector<T>> opt = SolutionMat(eMat, V);
+    if (!opt)
+      return {};
+    MyVector<T> const& V2 = *opt;
+    AssignMatrixRow(TheSol, i_vect, V2);
+  }
+  return TheSol;
+}
+
+
+
 
 template <typename T>
 MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
