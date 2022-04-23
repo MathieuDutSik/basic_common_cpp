@@ -376,7 +376,7 @@ GetDenominator_z(boost::multiprecision::cpp_rational const &x) {
 }
 
 inline boost::multiprecision::cpp_int
-GetDenominator_z(boost::multiprecision::cpp_int const &x) {
+GetDenominator_z([[maybe_unused]] boost::multiprecision::cpp_int const &x) {
   return 1;
 }
 

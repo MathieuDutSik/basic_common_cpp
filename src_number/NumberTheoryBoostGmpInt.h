@@ -363,7 +363,7 @@ GetDenominator_z(boost::multiprecision::mpq_rational const &x) {
 }
 
 inline boost::multiprecision::mpz_int
-GetDenominator_z(boost::multiprecision::mpz_int const &x) {
+GetDenominator_z([[maybe_unused]] boost::multiprecision::mpz_int const &x) {
   return 1;
 }
 
