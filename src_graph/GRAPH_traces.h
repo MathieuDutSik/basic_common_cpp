@@ -610,17 +610,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
     V[lab1[i]] = i;
   // Extracting the list of generators
   std::vector<std::vector<TidxG>> ListGen;
-  if (gens) {
-    permnode *pn = gens;
-    do {
-      std::vector<TidxG> V(n_last);
-      for (size_t i = 0; i < n_last; i++)
-        V[i] = pn->p[i];
-      ListGen.push_back(V);
-      //
-      pn = pn->next;
-    } while (pn != gens);
-  }
+  ReadListGen(gens, ListGen, n_last);
   freeschreier(NULL, &gens);
   schreier_freedyn();
 
