@@ -10,8 +10,15 @@
 #include "MatrixTypes.h"
 #include "Temp_common.h"
 #include "hash_functions.h"
+#include <algorithm>
+#include <functional>
+#include <set>
+#include <limits>
+#include <string>
+#include <vector>
+#include <unordered_set>
+#include <utility>
 
-//#define DEBUG_MAT_MATRIX
 
 namespace boost::serialization {
 

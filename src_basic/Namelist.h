@@ -5,6 +5,11 @@
 #include "Basic_string.h"
 #include "Temp_common.h"
 #include "hash_functions.h"
+#include <map>
+#include <unordered_set>
+#include <utility>
+#include <string>
+#include <vector>
 
 struct SingleBlock {
   std::map<std::string, int> ListIntValues;

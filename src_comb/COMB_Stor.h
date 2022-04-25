@@ -3,6 +3,8 @@
 
 #include "Boost_bitset.h"
 #include "Temp_common.h"
+#include <limits>
+#include <vector>
 
 //
 // This is a set of functionality for storing bits

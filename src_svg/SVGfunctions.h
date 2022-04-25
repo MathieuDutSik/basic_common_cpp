@@ -1,6 +1,10 @@
 #ifndef SRC_SVG_SVGFUNCTIONS_H_
 #define SRC_SVG_SVGFUNCTIONS_H_
 
+#include <algorithm>
+#include <vector>
+#include <string>
+
 struct coor {
   double x;
   double y;

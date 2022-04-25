@@ -5,6 +5,8 @@
 
 #include "Boost_bitset_kernel.h"
 #include "Temp_common.h"
+#include <string>
+#include <vector>
 
 std::vector<int> FaceToVector(Face const &eSet) {
   size_t nbVert = eSet.count();

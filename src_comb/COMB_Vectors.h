@@ -3,6 +3,7 @@
 
 #include <set>
 #include <vector>
+#include <unordered_set>
 
 template <typename T>
 std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {

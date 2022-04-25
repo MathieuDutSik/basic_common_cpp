@@ -1,6 +1,8 @@
 #ifndef SRC_NUMBER_TYPECONVERSIONFINAL_H_
 #define SRC_NUMBER_TYPECONVERSIONFINAL_H_
 
+#include <string>
+
 // This is a block of type conversion after the types have been defined
 // It can be coded only if the preceding include statements have all been
 // clarified. Hence the moniker "final".

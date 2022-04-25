@@ -1,6 +1,9 @@
 #ifndef SRC_GRAPH_GRAPH_NAUTY_H_
 #define SRC_GRAPH_GRAPH_NAUTY_H_
 
+#include <string>
+#include <vector>
+
 template <typename Tgr> int GetNbColor(Tgr const &eGR) {
   int nbColor = 0;
   int nbVert = eGR.GetNbVert();

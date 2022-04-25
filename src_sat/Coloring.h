@@ -1,5 +1,10 @@
+#ifndef INCLUDE_COLORING_H_
+#define INCLUDE_COLORING_H_
+
 #include "SATsolver.h"
 #include "Temp_common.h"
+#include <vector>
+#include <utility>
 
 template <typename Tgr>
 std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
@@ -82,3 +87,5 @@ std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
   }
   return {true, std::move(V)};
 }
+
+#endif

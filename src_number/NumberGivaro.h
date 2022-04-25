@@ -8,9 +8,9 @@
 */
 
 #include "NumberTheory.h"
-
 #include <givaro/givinteger.h>
 #include <givaro/givrational.h>
+#include <vector>
 
 Givaro::Integer GetGivaroInteger(mpz_class const &val) {
   //  mpz_t val_z(val.get_mpz_t());

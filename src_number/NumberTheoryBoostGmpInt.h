@@ -7,6 +7,9 @@
 #include "boost_serialization.h"
 #include <boost/multiprecision/gmp.hpp>
 #include <iostream>
+#include <utility>
+#include <string>
+#include <limits>
 
 template <> struct is_boost_mpz_int<boost::multiprecision::mpz_int> {
   static const bool value = true;

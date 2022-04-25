@@ -2,6 +2,12 @@
 #define SRC_BASIC_BASIC_STRING_H_
 
 #include "Temp_common.h"
+#include <utility>
+#include <algorithm>
+#include <limits>
+#include <string>
+#include <vector>
+
 std::string STRING_GETENV(std::string const &eStr) {
   //  std::string ePrefixAlti;
   //  std::cerr << "STRING_GETENV, step 1\n";

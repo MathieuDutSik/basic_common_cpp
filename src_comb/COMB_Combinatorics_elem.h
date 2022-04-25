@@ -2,6 +2,7 @@
 #define SRC_COMB_COMB_COMBINATORICS_ELEM_H_
 
 #include "Temp_common.h"
+#include <vector>
 
 std::vector<int> BinomialStdvect_First(int const &k) {
   std::vector<int> eVect(k);

@@ -5,6 +5,9 @@
 #include "Temp_common.h"
 #include "TypeConversion.h"
 #include "gmpxx.h"
+#include <utility>
+#include <string>
+#include <limits>
 
 // We need to use is_mpq_class and is_mpz_class.
 // We cannot use the std::is_same_v<T,mpq_class>  or std::is_same_v<T,mpz_class>

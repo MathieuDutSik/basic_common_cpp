@@ -4,6 +4,7 @@
 #include "Boost_bitset.h"
 #include "Temp_common.h"
 #include "minisat/core/Solver.h"
+#include <vector>
 
 struct SATformulation {
   int nbVar;

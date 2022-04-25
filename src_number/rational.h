@@ -5,6 +5,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <utility>
 
 #include "ExceptionEnding.h"
 #include "ResidueQuotient.h"

@@ -3,6 +3,11 @@
 
 #include "Boost_bitset.h"
 #include "MAT_Matrix.h"
+#include <string>
+#include <limits>
+#include <vector>
+#include <utility>
+#include <algorithm>
 
 //#undef TRACK_MAXIMUM_SIZE_COEFF
 //#undef DEBUG_MATRIX_INT

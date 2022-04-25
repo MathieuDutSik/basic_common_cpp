@@ -1,6 +1,8 @@
 #ifndef SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_
 #define SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_
 
+#include <vector>
+
 struct HypergraphBitset {
   HypergraphBitset(int _nbVert, int _nbHyperedge,
                    std::vector<std::vector<int>> const &ListEdge)

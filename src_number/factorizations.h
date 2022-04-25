@@ -3,6 +3,7 @@
 
 #include <map>
 #include <vector>
+#include <utility>
 
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize(T const &number) {

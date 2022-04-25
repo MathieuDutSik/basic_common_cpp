@@ -2,6 +2,7 @@
 #define SRC_MATRIX_MAT_FUNCTIONS_H_
 
 #include "MAT_Matrix.h"
+#include <set>
 
 //
 // This routine is adequate for simplifying systems used

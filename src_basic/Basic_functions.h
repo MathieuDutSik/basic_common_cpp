@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <vector>
+#include <string>
 
 template <typename T> T VectorSum(std::vector<T> const &eVect) {
   T eSum = 0;

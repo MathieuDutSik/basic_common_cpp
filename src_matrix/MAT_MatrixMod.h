@@ -2,6 +2,7 @@
 #define INCLUDE_MAT_MATRIX_MOD_H
 
 #include "MAT_MatrixInt.h"
+#include <vector>
 
 template <typename T, typename Tmod>
 MyMatrix<Tmod> ModuloReductionMatrix(MyMatrix<T> const &M, T const &TheMod) {
