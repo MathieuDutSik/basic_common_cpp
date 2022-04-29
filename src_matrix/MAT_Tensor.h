@@ -38,36 +38,36 @@ MyMatrix<T> DimensionExtraction(Eigen::Tensor<T, 3> const &eT,
   throw TerminalException{1};
 }
 
-template <typename T> T maxCoeff(Eigen::Tensor<T, 3> const &X) {
+template <typename T, typename Foper>
+T operationFromCoeff(Eigen::Tensor<T, 3> const &X, Foper f_oper) {
   auto LDim = X.dimensions();
   int a = LDim[0];
   int b = LDim[1];
   int c = LDim[2];
-  T eMax = X(0, 0, 0);
+  T eRes = X(0, 0, 0);
   for (int i = 0; i < a; i++)
     for (int j = 0; j < b; j++)
       for (int k = 0; k < c; k++) {
         T eVal = X(i, j, k);
-        if (eVal > eMax)
-          eMax = eVal;
+        f_oper(eRes, eVal);
       }
-  return eMax;
+  return eRes;
+}
+
+template <typename T> T maxCoeff(Eigen::Tensor<T, 3> const &X) {
+  auto f_max=[](T const& val1, T & val2) -> void {
+    if (val1 > val2)
+      val2 = val1;
+  };
+  return operationFromCoeff(X, f_max);
 }
 
 template <typename T> T minCoeff(Eigen::Tensor<T, 3> const &X) {
-  auto LDim = X.dimensions();
-  int a = LDim[0];
-  int b = LDim[1];
-  int c = LDim[2];
-  T eMin = X(0, 0, 0);
-  for (int i = 0; i < a; i++)
-    for (int j = 0; j < b; j++)
-      for (int k = 0; k < c; k++) {
-        T eVal = X(i, j, k);
-        if (eVal < eMin)
-          eMin = eVal;
-      }
-  return eMin;
+  auto f_max=[](T const& val1, T & val2) -> void {
+    if (val1 < val2)
+      val2 = val1;
+  };
+  return operationFromCoeff(X, f_max);
 }
 
 template <typename T>

@@ -6,6 +6,10 @@
 #include "GRAPH_BitsetType.h"
 #include "GRAPH_GraphicalBasic.h"
 #include "MAT_Matrix.h"
+#include <string>
+#include <unordered_set>
+#include <vector>
+#include <limits>
 
 struct GraphFunctional {
 public:

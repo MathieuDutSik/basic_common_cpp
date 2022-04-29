@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include <algorithm>
 
 template <typename T> struct StorageSpaceLastN {
 public:

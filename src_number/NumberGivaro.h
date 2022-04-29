@@ -8,27 +8,25 @@
 */
 
 #include "NumberTheory.h"
-
 #include <givaro/givinteger.h>
 #include <givaro/givrational.h>
+#include <vector>
 
 Givaro::Integer GetGivaroInteger(mpz_class const &val) {
   //  mpz_t val_z(val.get_mpz_t());
-  if (val >= 0) {
+  auto f_convert=[&](mpz_class const& val) -> Givaro::Integer {
     size_t nchar = mpz_size(val.get_mpz_t());
     std::vector<mp_limb_t> vect_t(nchar);
     for (size_t i = 0; i < nchar; i++) {
       vect_t[i] = mpz_getlimbn(val.get_mpz_t(), i);
     }
     return Givaro::Integer(vect_t);
+  };
+  if (val >= 0) {
+    return f_convert(val);
   } else {
     mpz_class valb = -val;
-    size_t nchar = mpz_size(valb.get_mpz_t());
-    std::vector<mp_limb_t> vect_t(nchar);
-    for (size_t i = 0; i < nchar; i++) {
-      vect_t[i] = mpz_getlimbn(val.get_mpz_t(), i);
-    }
-    return -Givaro::Integer(vect_t);
+    return - f_convert(valb);
   }
 }
 

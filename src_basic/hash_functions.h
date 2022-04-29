@@ -6,6 +6,9 @@
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <string>
+#include <vector>
+#include <utility>
 
 // Code copy pasted from
 // https://codereview.stackexchange.com/questions/163872/md5-implementation-in-c11

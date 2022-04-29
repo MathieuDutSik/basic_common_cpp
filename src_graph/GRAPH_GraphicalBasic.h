@@ -3,6 +3,10 @@
 
 #include "MAT_Matrix.h"
 #include "Temp_common.h"
+#include <utility>
+#include <limits>
+#include <vector>
+#include <string>
 
 struct GraphListAdj {
 public:

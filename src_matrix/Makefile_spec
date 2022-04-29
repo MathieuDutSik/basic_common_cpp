@@ -2,7 +2,8 @@
 #PROGRAM		= ZbasisComputation
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= RemoveFractionMatrix
-PROGRAM		= TestSubspaceCompletion
+#PROGRAM		= TestSubspaceCompletion
+PROGRAM		= TestProdMat
 #PROGRAM		= SmithNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)

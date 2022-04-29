@@ -3,6 +3,7 @@
 
 #include "GRAPH_GraphicalFunctions.h"
 #include "GRP_GroupFct.h"
+#include <vector>
 
 template <typename Tgr>
 int ComputeDiameterEquivariant(Tgr const &GR, TheGroupFormat const &TheGRP) {

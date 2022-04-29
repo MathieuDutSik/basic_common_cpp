@@ -1,6 +1,8 @@
-#include "NumberTheory.h"
+// clang-format off
 #include "NumberTheoryBoostCppInt.h"
 #include "TypeConversion.h"
+#include "NumberTheory.h"
+// clang-format on
 
 int main(int argc, char *argv[]) {
   //  using T=int;

@@ -90,7 +90,7 @@ static void parse_options(const int argc, const char **argv) {
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-can") == 0)
       opt_canonize = true;
-    else if ((strncmp(argv[i], "-ocan=", 6) == 0) and (strlen(argv[i]) > 6)) {
+    else if ((strncmp(argv[i], "-ocan=", 6) == 0) && (strlen(argv[i]) > 6)) {
       opt_canonize = true;
       opt_output_can_file = argv[i] + 6;
     } else if (sscanf(argv[i], "-v=%u", &tmp) == 1)
@@ -105,7 +105,7 @@ static void parse_options(const int argc, const char **argv) {
       opt_use_component_recursion = false;
     else if (strcmp(argv[i], "-cr=y") == 0)
       opt_use_component_recursion = true;
-    else if ((strncmp(argv[i], "-sh=", 4) == 0) and (strlen(argv[i]) > 4)) {
+    else if ((strncmp(argv[i], "-sh=", 4) == 0) && (strlen(argv[i]) > 4)) {
       opt_splitting_heuristics = argv[i] + 4;
     } else if (strcmp(argv[i], "-version") == 0) {
       fprintf(stdout, "bliss version %s\n", bliss::version);

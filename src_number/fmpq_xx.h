@@ -3,6 +3,7 @@
 
 #include "fmpq.h"
 #include "fmpz.h"
+#include <string>
 
 double fmpq_get_d(fmpq_t const &a) {
   mpq_t eQ;

@@ -5,6 +5,9 @@
 #include "Temp_common.h"
 #include "TypeConversion.h"
 #include "gmpxx.h"
+#include <utility>
+#include <string>
+#include <limits>
 
 // We need to use is_mpq_class and is_mpz_class.
 // We cannot use the std::is_same_v<T,mpq_class>  or std::is_same_v<T,mpz_class>
@@ -299,79 +302,63 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, double &a2) {
   a2 = a1.val.get_d();
 }
 
-inline void TYPE_CONVERSION(stc<mpq_class> const &a1, mpz_class &a2) {
+void Termination_mpq_not_integer(stc<mpq_class> const &a1) {
   if (!IsInteger(a1.val)) {
     std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
     throw ConversionException{str};
   }
+}
+
+
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1, mpz_class &a2) {
+  Termination_mpq_not_integer(a1);
   a2 = a1.val.get_num();
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
   a2 = int(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint8_t &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
   a2 = uint8_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int8_t &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
   a2 = int8_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint16_t &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
   a2 = uint16_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int16_t &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
   a2 = int16_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint32_t &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
   a2 = uint32_t(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, long &a2) {
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
+  Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   a2 = a1_z.get_si();
 }

@@ -3,6 +3,9 @@
 
 #include "Basic_file.h"
 #include "Temp_common.h"
+#include <map>
+#include <vector>
+#include <string>
 
 template <typename T> struct SingleCondition {
   std::string eCond;

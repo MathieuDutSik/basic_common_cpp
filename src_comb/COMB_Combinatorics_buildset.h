@@ -2,6 +2,7 @@
 #define SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
 
 #include "MAT_Matrix.h"
+#include <vector>
 
 MyMatrix<int> BuildSet(int const &n, int const &Nval) {
   int TotalNb = MyPow<int>(Nval, n);

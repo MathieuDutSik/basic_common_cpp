@@ -1,5 +1,10 @@
+#ifndef INCLUDE_COLORING_H_
+#define INCLUDE_COLORING_H_
+
 #include "SATsolver.h"
 #include "Temp_common.h"
+#include <vector>
+#include <utility>
 
 template <typename Tgr>
 std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
@@ -25,30 +30,24 @@ std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
   //
   // For each vertex at most one color should be selected
   //
-  for (int iVert = 0; iVert < nbVert; iVert++) {
+  auto insert_clause=[&](int iVert, int jVert, int iColor, int jColor) -> void {
+    int pos1 = nbColor * iVert + iColor;
+    int pos2 = nbColor * jVert + jColor;
+    Minisat::Lit cond1 = Minisat::mkLit(ListVar[pos1], false);
+    Minisat::Lit cond2 = Minisat::mkLit(ListVar[pos2], false);
+    S.addClause(cond1, cond2);
+  };
+  for (int iVert = 0; iVert < nbVert; iVert++)
     for (int iC1 = 0; iC1 < nbColor; iC1++)
-      for (int iC2 = iC1 + 1; iC2 < nbColor; iC2++) {
-        int pos1 = nbColor * iVert + iC1;
-        int pos2 = nbColor * iVert + iC2;
-        Minisat::Lit cond1 = Minisat::mkLit(ListVar[pos1], false);
-        Minisat::Lit cond2 = Minisat::mkLit(ListVar[pos2], false);
-        S.addClause(cond1, cond2);
-      }
-  }
+      for (int iC2 = iC1 + 1; iC2 < nbColor; iC2++)
+        insert_clause(iVert, iVert, iC1, iC2);
   //
   // For each edge we should not have the same color on both
   //
-  for (int iVert = 0; iVert < nbVert; iVert++) {
-    for (auto &jVert : eGR.Adjacency(iVert)) {
-      for (int iColor = 0; iColor < nbColor; iColor++) {
-        int pos1 = nbColor * iVert + iColor;
-        int pos2 = nbColor * jVert + iColor;
-        Minisat::Lit cond1 = Minisat::mkLit(ListVar[pos1], false);
-        Minisat::Lit cond2 = Minisat::mkLit(ListVar[pos2], false);
-        S.addClause(cond1, cond2);
-      }
-    }
-  }
+  for (int iVert = 0; iVert < nbVert; iVert++)
+    for (auto &jVert : eGR.Adjacency(iVert))
+      for (int iColor = 0; iColor < nbColor; iColor++)
+        insert_clause(iVert, jVert, iColor, iColor);
   //
   // Solving the system
   //
@@ -88,3 +87,5 @@ std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
   }
   return {true, std::move(V)};
 }
+
+#endif

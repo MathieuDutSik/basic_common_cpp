@@ -10,8 +10,15 @@
 #include "MatrixTypes.h"
 #include "Temp_common.h"
 #include "hash_functions.h"
+#include <algorithm>
+#include <functional>
+#include <set>
+#include <limits>
+#include <string>
+#include <vector>
+#include <unordered_set>
+#include <utility>
 
-//#define DEBUG_MAT_MATRIX
 
 namespace boost::serialization {
 
@@ -1517,6 +1524,8 @@ std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const &eMat,
   return eRetSol;
 }
 
+
+
 template <typename T> bool IsIntegerVector(MyVector<T> const &V) {
   int n = V.size();
   for (int i = 0; i < n; i++)
@@ -1548,6 +1557,30 @@ SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   }
   return {};
 }
+
+
+/*
+  We can actually do a little bit better for the solution to avoid repeating
+  the preprocessing.
+ */
+template <typename T>
+std::optional<MyMatrix<T>> ListSolutionMat(MyMatrix<T> const &eMat, MyMatrix<T> const &LVect) {
+  int n_vect = LVect.rows();
+  int dim = eMat.rows();
+  MyMatrix<T> TheSol(n_vect,dim);
+  for (int i_vect=0; i_vect<n_vect; i_vect++) {
+    MyVector<T> V = GetMatrixRow(LVect, i_vect);
+    std::optional<MyVector<T>> opt = SolutionMat(eMat, V);
+    if (!opt)
+      return {};
+    MyVector<T> const& V2 = *opt;
+    AssignMatrixRow(TheSol, i_vect, V2);
+  }
+  return TheSol;
+}
+
+
+
 
 template <typename T>
 MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
@@ -2183,6 +2216,17 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   return M;
 }
 
+template <typename T>
+MyMatrix<T> MatrixFromVectorFamilyDim(int const& dim, std::vector<MyVector<T>> const &ListVect) {
+  int nbVect = ListVect.size();
+  MyMatrix<T> M(nbVect, dim);
+  for (int iVect = 0; iVect < nbVect; iVect++) {
+    for (int i = 0; i < dim; i++)
+      M(iVect, i) = ListVect[iVect](i);
+  }
+  return M;
+}
+
 template <typename T> MyVector<T> SumMatrix(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
@@ -2490,6 +2534,19 @@ MyMatrix<T> SubspaceCompletionRational(MyMatrix<T> const &M, int const &n) {
   if (M.rows() == 0)
     return IdentityMat<T>(n);
   return NullspaceTrMat(M);
+}
+
+
+template <typename T> MyVector<T> SignCanonicalizeVector(const MyVector<T> &V) {
+  int len = V.size();
+  for (int u = 0; u < len; u++) {
+    if (V(u) > 0)
+      return V;
+    if (V(u) < 0)
+      return -V;
+  }
+  std::cerr << "Error in SignCanonicalizeVector\n";
+  throw TerminalException{1};
 }
 
 #endif // SRC_MATRIX_MAT_MATRIX_H_

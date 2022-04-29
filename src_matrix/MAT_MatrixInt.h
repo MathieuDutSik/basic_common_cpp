@@ -3,6 +3,11 @@
 
 #include "Boost_bitset.h"
 #include "MAT_Matrix.h"
+#include <string>
+#include <limits>
+#include <vector>
+#include <utility>
+#include <algorithm>
 
 //#undef TRACK_MAXIMUM_SIZE_COEFF
 //#undef DEBUG_MATRIX_INT
@@ -1350,6 +1355,8 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
 }
 
 template <typename T> struct CanSolIntMat {
+  int nbVect;
+  int nbCol;
   std::vector<int> ListRow;
   MyMatrix<T> TheMatWork;
   MyMatrix<T> eEquivMat;
@@ -1432,7 +1439,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
     }
     ListRow[i] = eVal;
   }
-  return {std::move(ListRow), std::move(TheMatWork), std::move(eEquivMat)};
+  return {nbVect, nbCol, std::move(ListRow), std::move(TheMatWork), std::move(eEquivMat)};
 }
 
 template <typename T>
@@ -1482,6 +1489,23 @@ std::optional<MyVector<T>> CanSolutionIntMat(CanSolIntMat<T> const &eCan,
   }
   return eSol;
 }
+
+template <typename T>
+std::optional<MyMatrix<T>> CanSolutionIntMatMat(CanSolIntMat<T> const &eCan,
+                                                MyMatrix<T> const &TheMat) {
+  int n_row =TheMat.rows();
+  MyMatrix<T> RetMat(n_row,eCan.nbCol);
+  for (int i=0; i<n_row; i++) {
+    MyVector<T> V = GetMatrixRow(TheMat,i);
+    std::optional<MyVector<T>> opt = CanSolutionIntMat(eCan, V);
+    if (!opt)
+      return {};
+    AssignMatrixRow(RetMat, i, *opt);
+  }
+  return RetMat;
+}
+
+
 
 template <typename T> struct BasisReduction {
   MyMatrix<T> TheBasisReduced;

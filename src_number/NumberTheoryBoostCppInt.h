@@ -6,6 +6,9 @@
 #include "TypeConversion.h"
 #include "boost_serialization.h"
 #include <boost/multiprecision/cpp_int.hpp>
+#include <utility>
+#include <string>
+#include <limits>
 
 template <> struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
   static const bool value = true;
@@ -376,7 +379,7 @@ GetDenominator_z(boost::multiprecision::cpp_rational const &x) {
 }
 
 inline boost::multiprecision::cpp_int
-GetDenominator_z(boost::multiprecision::cpp_int const &x) {
+GetDenominator_z([[maybe_unused]] boost::multiprecision::cpp_int const &x) {
   return 1;
 }
 
