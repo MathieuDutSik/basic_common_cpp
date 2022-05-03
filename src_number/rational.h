@@ -406,7 +406,7 @@ inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, Rational<int> &a2) {
   a2 = a1.val;
 }
 
-template<typename T>
+template <typename T>
 void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
   const T &den = a1.val.get_den();
   if (den != 1) {
@@ -416,7 +416,6 @@ void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
   }
   a2 = a1.val.get_num();
 }
-
 
 inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, int &a2) {
   TYPE_CONVERSION_Rational_T<int>(a1, a2);

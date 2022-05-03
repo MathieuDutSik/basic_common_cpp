@@ -545,7 +545,6 @@ public:
       //      std::cerr << "  Destructor is really needed\n";
       //      std::cerr << "  DirName=" << DirName << "\n";
       if (IsExistingDirectory(DirName)) {
-        //	std::cerr << "    Directory really exist\n";
         if (!FILE_IsDirectoryEmpty(DirName)) {
           std::cerr << "Keeping " << DirName << " since it is not empty\n";
         } else {
@@ -592,7 +591,6 @@ public:
       //      std::cerr << "  Destructor is really needed\n";
       //      std::cerr << "  DirName=" << DirName << "\n";
       if (IsExistingDirectory(DirName)) {
-        //	std::cerr << "    Directory really exist\n";
         if (!FILE_IsDirectoryEmpty(DirName)) {
           std::cerr << "Keeping " << DirName << " since it is not empty\n";
         } else {
@@ -607,4 +605,4 @@ public:
   std::string str() const { return DirName; }
 };
 
-#endif
+#endif  // SRC_BASIC_BASIC_FILE_H_

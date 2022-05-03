@@ -12,13 +12,12 @@
 #include "hash_functions.h"
 #include <algorithm>
 #include <functional>
-#include <set>
 #include <limits>
+#include <set>
 #include <string>
-#include <vector>
 #include <unordered_set>
 #include <utility>
-
+#include <vector>
 
 namespace boost::serialization {
 
@@ -1524,8 +1523,6 @@ std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const &eMat,
   return eRetSol;
 }
 
-
-
 template <typename T> bool IsIntegerVector(MyVector<T> const &V) {
   int n = V.size();
   for (int i = 0; i < n; i++)
@@ -1558,29 +1555,26 @@ SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   return {};
 }
 
-
 /*
   We can actually do a little bit better for the solution to avoid repeating
   the preprocessing.
  */
 template <typename T>
-std::optional<MyMatrix<T>> ListSolutionMat(MyMatrix<T> const &eMat, MyMatrix<T> const &LVect) {
+std::optional<MyMatrix<T>> ListSolutionMat(MyMatrix<T> const &eMat,
+                                           MyMatrix<T> const &LVect) {
   int n_vect = LVect.rows();
   int dim = eMat.rows();
-  MyMatrix<T> TheSol(n_vect,dim);
-  for (int i_vect=0; i_vect<n_vect; i_vect++) {
+  MyMatrix<T> TheSol(n_vect, dim);
+  for (int i_vect = 0; i_vect < n_vect; i_vect++) {
     MyVector<T> V = GetMatrixRow(LVect, i_vect);
     std::optional<MyVector<T>> opt = SolutionMat(eMat, V);
     if (!opt)
       return {};
-    MyVector<T> const& V2 = *opt;
+    MyVector<T> const &V2 = *opt;
     AssignMatrixRow(TheSol, i_vect, V2);
   }
   return TheSol;
 }
-
-
-
 
 template <typename T>
 MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
@@ -2217,7 +2211,9 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
 }
 
 template <typename T>
-MyMatrix<T> MatrixFromVectorFamilyDim(int const& dim, std::vector<MyVector<T>> const &ListVect) {
+MyMatrix<T>
+MatrixFromVectorFamilyDim(int const &dim,
+                          std::vector<MyVector<T>> const &ListVect) {
   int nbVect = ListVect.size();
   MyMatrix<T> M(nbVect, dim);
   for (int iVect = 0; iVect < nbVect; iVect++) {
@@ -2535,7 +2531,6 @@ MyMatrix<T> SubspaceCompletionRational(MyMatrix<T> const &M, int const &n) {
     return IdentityMat<T>(n);
   return NullspaceTrMat(M);
 }
-
 
 template <typename T> MyVector<T> SignCanonicalizeVector(const MyVector<T> &V) {
   int len = V.size();

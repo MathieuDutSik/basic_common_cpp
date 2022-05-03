@@ -2,8 +2,8 @@
 #define SRC_SVG_SVGFUNCTIONS_H_
 
 #include <algorithm>
-#include <vector>
 #include <string>
+#include <vector>
 
 struct coor {
   double x;
@@ -316,31 +316,31 @@ void GeneralWriteSVGfile(std::string const &eFile,
     return "rgb(" + IntToString(eV[0]) + "," + IntToString(eV[1]) + "," +
            IntToString(eV[2]) + ")";
   };
-  auto f_marker=[&](std::string const& str) -> std::string {
+  auto f_marker = [&](std::string const &str) -> std::string {
     if (str == "")
       return "";
     return " marker-end=\"url(#" + str + ")\"";
   };
-  auto f_clip=[&](std::string const& str) -> std::string {
+  auto f_clip = [&](std::string const &str) -> std::string {
     if (str == "")
       return "";
     return " clip-path=\"url(#" + str + ")\"";
   };
   auto GetQualityString = [&](SVGqualInfo const &eQual) -> std::string {
     return "style=\"stroke:" + StringColor(eQual.color) +
-    ";stroke-width:" + DoubleToString(eQual.Size) + "\""
-    + f_marker(eQual.MarkerEnd) + f_clip(eQual.clip);
+           ";stroke-width:" + DoubleToString(eQual.Size) + "\"" +
+           f_marker(eQual.MarkerEnd) + f_clip(eQual.clip);
   };
   auto GetQualityStringPolyline =
       [&](SVGqualInfoPolyline const &eQual) -> std::string {
     return "style=\"fill:" + StringColor(eQual.colorfill) +
-    ";stroke:" + StringColor(eQual.colorstroke) +
-    ";stroke-width:" + DoubleToString(eQual.Size) + "\""
-    + f_marker(eQual.MarkerEnd) + f_clip(eQual.clip);
+           ";stroke:" + StringColor(eQual.colorstroke) +
+           ";stroke-width:" + DoubleToString(eQual.Size) + "\"" +
+           f_marker(eQual.MarkerEnd) + f_clip(eQual.clip);
   };
   auto GetQualityStringEllipse = [&](SVGqualInfo const &eQual) -> std::string {
-    return " style=\"fill:" + StringColor(eQual.color) + "\""
-    * f_clip(eQual.clip);
+    return " style=\"fill:" + StringColor(eQual.color) +
+           "\"" * f_clip(eQual.clip);
   };
   //
   // First the preamble

@@ -327,7 +327,6 @@ std::vector<std::vector<size_t>> GRAPH_FindAllCycles(Tgr const &GR) {
         size_t fVert = Edges[jEdge][1];
         GRred.AddAdjacent(eVert, fVert);
         GRred.AddAdjacent(fVert, eVert);
-        //	std::cerr << "eVert=" << eVert << " fVert=" << fVert << "\n";
       }
     size_t x = Edges[iEdge][0];
     size_t y = Edges[iEdge][1];
@@ -835,12 +834,8 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     GraphBitset Aspec(nbEdgeLoc);
     for (size_t iEdge = 0; iEdge < nbEdgeLoc - 1; iEdge++)
       for (size_t jEdge = iEdge + 1; jEdge < nbEdgeLoc; jEdge++) {
-        //	std::cerr << "iEdge=" << iEdge << " jEdge=" << jEdge << "\n";
         int iPos = PositionVect(ListEdge, LEdge[iEdge]);
         int jPos = PositionVect(ListEdge, LEdge[jEdge]);
-        //	std::cerr << "iPos=" << iPos << " jPos=" << jPos << "\n";
-        //	std::cerr << "nbRow=" << MCE.rows() << " nbCol=" << MCE.cols()
-        //<< "\n";
         if (MCEwork(iPos, jPos) == std::vector<int>({2})) {
           Aspec.AddAdjacent(iEdge, jEdge);
           Aspec.AddAdjacent(jEdge, iEdge);
@@ -1184,7 +1179,6 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
           WriteVectorInt_GAP(std::cerr, MCE(dEdge, iEdge));
           std::cerr << "\n";*/
           //
-          //	  int pos0=PositionVect(MCE(dEdge,iEdge), 0);
           int pos1 = PositionVect(MCEwork(dEdge, iEdge), 1);
           int pos2 = PositionVect(MCEwork(dEdge, iEdge), 2);
           if (MCEwork(dEdge, iEdgeNext) == SetOne &&
@@ -1196,9 +1190,8 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
               MCEwork(iEdge, dEdge) = NewVal;
               nbOper++;
             }
-            if (pos2 ==
-                -1) { // value is necessarily 1 or 0 and this forbids Type1
-              //	      std::cerr << "Now Type1feasible=false\n";
+            // value is necessarily 1 or 0 and this forbids Type1
+            if (pos2 == -1) {
               Type1feasible = false;
             }
           }
@@ -1248,7 +1241,6 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
               nbOper++;
             }
             if (MCEwork(dEdge, iEdge) == SetOne) {
-              //	      std::cerr << "Now Type1feasible=false\n";
               Type1feasible = false;
             }
           }
