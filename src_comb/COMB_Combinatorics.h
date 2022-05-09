@@ -262,7 +262,7 @@ std::vector<Tidx> RandomPermutation(size_t const &n_sz) {
   Tidx miss_val = std::numeric_limits<Tidx>::max();
   std::vector<Tidx> RetList(n, miss_val);
   for (Tidx i = 0; i < n; i++) {
-    Tidx rnd_pos = Tidx(rand()) % (n - i);
+    Tidx rnd_pos = Tidx(random()) % (n - i);
     Tidx idx = 0;
     bool IsAssigned = false;
     for (Tidx j = 0; j < n; j++) {
