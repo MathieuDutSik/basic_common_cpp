@@ -9,8 +9,8 @@
 #include "utils.hh"
 #include <iostream>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 bliss::Graph *ReadGraphFromFile(FILE *f, unsigned int &nof_vertices) {
   unsigned int nof_edges;

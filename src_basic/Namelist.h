@@ -427,8 +427,6 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
             std::string eVarNature = NAMELIST_FindPositionVariableInBlock(
                 eVarName, eFullNamelist.ListBlock[eBlockName]);
             if (eVarNature == "not found") {
-              //	      NAMELIST_WriteNamelistFile(std::cerr,
-              //eFullNamelist);
               NAMELIST_WriteBlock(std::cerr, eBlockName,
                                   eFullNamelist.ListBlock[eBlockName]);
               std::cerr << "Error in reading the NAMELIST file. See above "

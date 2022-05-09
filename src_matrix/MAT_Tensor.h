@@ -55,7 +55,7 @@ T operationFromCoeff(Eigen::Tensor<T, 3> const &X, Foper f_oper) {
 }
 
 template <typename T> T maxCoeff(Eigen::Tensor<T, 3> const &X) {
-  auto f_max=[](T const& val1, T & val2) -> void {
+  auto f_max = [](T const &val1, T &val2) -> void {
     if (val1 > val2)
       val2 = val1;
   };
@@ -63,7 +63,7 @@ template <typename T> T maxCoeff(Eigen::Tensor<T, 3> const &X) {
 }
 
 template <typename T> T minCoeff(Eigen::Tensor<T, 3> const &X) {
-  auto f_max=[](T const& val1, T & val2) -> void {
+  auto f_max = [](T const &val1, T &val2) -> void {
     if (val1 < val2)
       val2 = val1;
   };

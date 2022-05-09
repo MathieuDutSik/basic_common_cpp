@@ -6,8 +6,8 @@
 #include <ExceptionEnding.h>
 #include <iostream>
 #include <limits>
-#include <vector>
 #include <utility>
+#include <vector>
 
 struct DataTraces {
 public:
@@ -336,7 +336,8 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
 }
 
 template <typename Tidx>
-void ReadListGen(permnode* gens, std::vector<std::vector<Tidx>> & ListGen, size_t const& n_last) {
+void ReadListGen(permnode *gens, std::vector<std::vector<Tidx>> &ListGen,
+                 size_t const &n_last) {
   if (gens) {
     permnode *pn = gens;
     do {
@@ -349,7 +350,6 @@ void ReadListGen(permnode* gens, std::vector<std::vector<Tidx>> & ListGen, size_
     } while (pn != gens);
   }
 }
-
 
 template <typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,

@@ -2,8 +2,8 @@
 #define SRC_NUMBER_FACTORIZATIONS_H_
 
 #include <map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize(T const &number) {
