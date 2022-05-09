@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "COMB_Combinatorics.h"
 
 void PrintVector(std::vector<int> const &V) {

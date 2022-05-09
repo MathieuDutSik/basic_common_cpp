@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 //#include "NumberTheoryBoostCppInt.h"
 #include "MAT_MatrixInt.h"
 #include "NumberTheory.h"

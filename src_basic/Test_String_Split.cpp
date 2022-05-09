@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "Basic_string.h"
 
 void test(const std::vector<std::string> &LStr1,

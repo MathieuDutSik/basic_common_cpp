@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_BASIC_EXCEPTIONENDING_H_
 #define SRC_BASIC_EXCEPTIONENDING_H_
 

@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef INCLUDE_NUMBER_THEORY_RATIONAL_H_
 #define INCLUDE_NUMBER_THEORY_RATIONAL_H_
 

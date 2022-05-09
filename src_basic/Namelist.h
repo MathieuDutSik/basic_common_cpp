@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_BASIC_NAMELIST_H_
 #define SRC_BASIC_NAMELIST_H_
 

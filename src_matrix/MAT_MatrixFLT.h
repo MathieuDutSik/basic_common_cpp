@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_MATRIX_MAT_MATRIXFLT_H_
 #define SRC_MATRIX_MAT_MATRIXFLT_H_
 

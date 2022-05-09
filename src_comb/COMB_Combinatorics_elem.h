@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_COMB_COMB_COMBINATORICS_ELEM_H_
 #define SRC_COMB_COMB_COMBINATORICS_ELEM_H_
 

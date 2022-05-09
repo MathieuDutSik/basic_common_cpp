@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_SVG_SVGFUNCTIONS_H_
 #define SRC_SVG_SVGFUNCTIONS_H_
 

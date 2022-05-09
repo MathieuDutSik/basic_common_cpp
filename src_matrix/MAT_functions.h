@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_MATRIX_MAT_FUNCTIONS_H_
 #define SRC_MATRIX_MAT_FUNCTIONS_H_
 
