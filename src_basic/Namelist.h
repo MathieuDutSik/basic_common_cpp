@@ -353,6 +353,12 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
     std::cerr << "eFileName = " << eFileName << "\n";
     throw TerminalException{1};
   }
+  auto parsing_error_end=[&](std::string const& eBlockName, std::string const& eVarName, std::string const& TypeVar) -> void {
+    std::cerr << "Error reading in the block " << eBlockName << "\n";
+    std::cerr << "Variable eVarName=" << eVarName << " should be a " << TypeVar << "\n";
+    std::cerr << "Please correct your input file\n";
+    throw TerminalException{1};
+  };
   std::ifstream INfs(eFileName);
   bool InBlock = false;
   std::string eBlockName;
@@ -450,12 +456,7 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
                 eFullNamelist.ListBlock[eBlockName].ListBoolValues[eVarName] =
                     eVal;
               } catch (NamelistException &e) {
-                std::cerr << "Error reading in the block " << eBlockName
-                          << "\n";
-                std::cerr << "Variable eVarName=" << eVarName
-                          << " should be a list of strings\n";
-                std::cerr << "Please correct your input file\n";
-                throw TerminalException{1};
+                parsing_error_end(eBlockName, eVarName, "bool");
               }
             }
             if (eVarNature == "double") {
@@ -471,12 +472,7 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
                 eFullNamelist.ListBlock[eBlockName].ListStringValues[eVarName] =
                     eVal;
               } catch (NamelistException &e) {
-                std::cerr << "Error reading in the block " << eBlockName
-                          << "\n";
-                std::cerr << "Variable eVarName=" << eVarName
-                          << " should be a list of strings\n";
-                std::cerr << "Please correct your input file\n";
-                throw TerminalException{1};
+                parsing_error_end(eBlockName, eVarName, "string");
               }
             }
             if (eVarNature == "listdouble") {
@@ -499,12 +495,7 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
                 eFullNamelist.ListBlock[eBlockName]
                     .ListListStringValues[eVarName] = eVal;
               } catch (NamelistException &e) {
-                std::cerr << "Error reading in the block " << eBlockName
-                          << "\n";
-                std::cerr << "Variable eVarName=" << eVarName
-                          << " should be a list of strings\n";
-                std::cerr << "Please correct your input file\n";
-                throw TerminalException{1};
+                parsing_error_end(eBlockName, eVarName, "liststring");
               }
             }
           } else {
