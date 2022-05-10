@@ -371,6 +371,15 @@ inline size_t robin_hood_hash_bytes(void const *ptr, size_t len,
   return static_cast<size_t>(h);
 }
 
+template<typename T>
+std::size_t hash_from_stream(T const& val) {
+  std::stringstream s;
+  s << val;
+  std::string converted(s.str());
+  return std::hash<std::string>()(converted);
+}
+
+
 namespace std {
 template <typename T> struct hash<std::vector<T>> {
   std::size_t operator()(const std::vector<T> &V) const {
