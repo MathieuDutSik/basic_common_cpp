@@ -1355,7 +1355,7 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
 }
 
 template <typename T> struct CanSolIntMat {
-  int nbVect;
+  int nbRow;
   int nbCol;
   std::vector<int> ListRow;
   MyMatrix<T> TheMatWork;
@@ -1369,17 +1369,17 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
                 "ComputeCanonicalFormFastReduction");
   using Treal = typename underlying_totally_ordered_ring<T>::real_type;
   int nbDiff;
-  int nbVect = TheMat.rows();
+  int nbRow = TheMat.rows();
   int nbCol = TheMat.cols();
 #ifdef DEBUG_MATRIX_INT
-  if (nbVect == 0) {
+  if (nbRow == 0) {
     std::cerr << "Need to write the code here\n";
     throw TerminalException{1};
   }
 #endif
-  MyMatrix<T> eEquivMat = IdentityMat<T>(nbVect);
+  MyMatrix<T> eEquivMat = IdentityMat<T>(nbRow);
   MyMatrix<T> TheMatWork = TheMat;
-  std::vector<int> VectStatus(nbVect, 1);
+  std::vector<int> VectStatus(nbRow, 1);
   std::vector<int> ListRow(nbCol);
   for (int i = 0; i < nbCol; i++) {
     int iVectFound = -1;
@@ -1387,7 +1387,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
       bool IsFirst = true;
       Treal MinValue = 0;
       nbDiff = 0;
-      for (int iVect = 0; iVect < nbVect; iVect++)
+      for (int iVect = 0; iVect < nbRow; iVect++)
         if (VectStatus[iVect] == 1) {
           T prov1 = TheMatWork(iVect, i);
           Treal eNorm = T_NormGen(prov1);
@@ -1413,7 +1413,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
         throw TerminalException{1};
       }
 #endif
-      for (int iVect = 0; iVect < nbVect; iVect++)
+      for (int iVect = 0; iVect < nbRow; iVect++)
         if (VectStatus[iVect] == 1 && iVect != iVectFound) {
           T prov1b = TheMatWork(iVectFound, i);
           T prov2 = TheMatWork(iVect, i);
@@ -1439,7 +1439,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
     }
     ListRow[i] = eVal;
   }
-  return {nbVect, nbCol, std::move(ListRow), std::move(TheMatWork),
+  return {nbRow, nbCol, std::move(ListRow), std::move(TheMatWork),
           std::move(eEquivMat)};
 }
 
@@ -1495,7 +1495,7 @@ template <typename T>
 std::optional<MyMatrix<T>> CanSolutionIntMatMat(CanSolIntMat<T> const &eCan,
                                                 MyMatrix<T> const &TheMat) {
   int n_row = TheMat.rows();
-  MyMatrix<T> RetMat(n_row, eCan.nbCol);
+  MyMatrix<T> RetMat(n_row, eCan.nbRow);
   for (int i = 0; i < n_row; i++) {
     MyVector<T> V = GetMatrixRow(TheMat, i);
     std::optional<MyVector<T>> opt = CanSolutionIntMat(eCan, V);

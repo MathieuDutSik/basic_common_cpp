@@ -706,11 +706,13 @@ template <typename T>
 MyVector<T> VectorMatrix(MyVector<T> const &eVect, MyMatrix<T> const &eMat) {
   int nbCol = eMat.cols();
   int nbRow = eMat.rows();
+#ifdef SANITY_CHECK
   int n = eVect.size();
   if (n != nbRow) {
     std::cerr << "n should be equal to nbRow\n";
     throw TerminalException{1};
   }
+#endif
   MyVector<T> rVect(nbCol);
   for (int iCol = 0; iCol < nbCol; iCol++) {
     T eSum = 0;
@@ -725,6 +727,20 @@ template <typename T>
 void AssignMatrixRow(MyMatrix<T> &eMat, int const &iRow,
                      MyVector<T> const &eVect) {
   int nbCol = eMat.cols();
+#ifdef SANITY_CHECK
+  int n = eVect.size);
+  if (n != nbCol) {
+    std::cerr << "We should have eVect.size() = eMat.cols()\n";
+    std::cerr << "eVect.size()=" << n << " eMat.cols()=" << nbCol << "\n";
+    throw TerminalException{1};
+  }
+  int nbRow = eMat.rows();
+  if (iRow >= nbRow) {
+    std::cerr << "We should have iRow < nbRow\n";
+    std::cerr << "iRow=" << iRow << " nbRow=" << nbRow << "\n";
+    throw TerminalException{1};
+  }
+#endif
   for (int iCol = 0; iCol < nbCol; iCol++)
     eMat(iRow, iCol) = eVect(iCol);
 }
