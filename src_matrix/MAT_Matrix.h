@@ -729,7 +729,7 @@ void AssignMatrixRow(MyMatrix<T> &eMat, int const &iRow,
                      MyVector<T> const &eVect) {
   int nbCol = eMat.cols();
 #ifdef SANITY_CHECK
-  int n = eVect.size);
+  int n = eVect.size();
   if (n != nbCol) {
     std::cerr << "We should have eVect.size() = eMat.cols()\n";
     std::cerr << "eVect.size()=" << n << " eMat.cols()=" << nbCol << "\n";
