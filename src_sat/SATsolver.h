@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_SAT_SATSOLVER_H_
 #define SRC_SAT_SATSOLVER_H_
 

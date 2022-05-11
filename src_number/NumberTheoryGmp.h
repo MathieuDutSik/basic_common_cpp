@@ -1,9 +1,11 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERTHEORYGMP_H_
 #define SRC_NUMBER_NUMBERTHEORYGMP_H_
 
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
 #include "TypeConversion.h"
+#include "hash_functions.h"
 #include "gmpxx.h"
 #include <utility>
 #include <string>
@@ -104,10 +106,7 @@ template <> struct hash<mpz_class> {
   std::size_t operator()(const mpz_class &val) const {
     const int method = 2;
     if constexpr (method == 1) {
-      std::stringstream s;
-      s << val;
-      std::string converted(s.str());
-      return std::hash<std::string>()(converted);
+      return hash_from_stream(val);
     }
     if constexpr (method == 2) {
       unsigned long int val_uli = mpz_get_ui(val.get_mpz_t());
@@ -119,10 +118,7 @@ template <> struct hash<mpq_class> {
   std::size_t operator()(const mpq_class &val) const {
     const int method = 2;
     if constexpr (method == 1) {
-      std::stringstream s;
-      s << val;
-      std::string converted(s.str());
-      return std::hash<std::string>()(converted);
+      return hash_from_stream(val);
     }
     if constexpr (method == 2) {
       mpz_class val_den = val.get_den();
@@ -143,13 +139,13 @@ std::string to_string(const mpz_class &e_val) {
   s << e_val;
   std::string converted(s.str());
   return converted;
-};
+}
 std::string to_string(const mpq_class &e_val) {
   std::stringstream s;
   s << e_val;
   std::string converted(s.str());
   return converted;
-};
+}
 } // namespace std
 
 // As documented in section 5.6 this is done exactly as in C int

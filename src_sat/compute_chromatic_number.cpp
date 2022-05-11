@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "Coloring.h"
 #include "GRAPH_BitsetType.h"
 #include "GRAPH_GraphicalFunctions.h"

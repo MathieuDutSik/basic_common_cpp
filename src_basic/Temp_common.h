@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_BASIC_TEMP_COMMON_H_
 #define SRC_BASIC_TEMP_COMMON_H_
 
@@ -91,7 +92,7 @@ std::string random_string(size_t length) {
                            "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
                            "abcdefghijklmnopqrstuvwxyz";
     const size_t max_index = (sizeof(charset) - 1);
-    return charset[size_t(rand()) % max_index];
+    return charset[size_t(random()) % max_index];
   };
   std::string str(length, 0);
   std::generate_n(str.begin(), length, randchar);
@@ -102,7 +103,7 @@ std::string random_string_restricted(size_t length) {
   auto randchar = []() -> char {
     const char charset[] = "abcdefghijklmnopqrstuvwxyz";
     const size_t max_index = (sizeof(charset) - 1);
-    return charset[size_t(rand()) % max_index];
+    return charset[size_t(random()) % max_index];
   };
   std::string str(length, 0);
   std::generate_n(str.begin(), length, randchar);

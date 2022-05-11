@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef INCLUDE_COLORING_H_
 #define INCLUDE_COLORING_H_
 

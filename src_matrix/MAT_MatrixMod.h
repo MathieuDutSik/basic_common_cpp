@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef INCLUDE_MAT_MATRIX_MOD_H
 #define INCLUDE_MAT_MATRIX_MOD_H
 

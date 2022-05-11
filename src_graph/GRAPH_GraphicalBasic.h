@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
 #define SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
 

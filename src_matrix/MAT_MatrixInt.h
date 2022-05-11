@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_MATRIX_MAT_MATRIXINT_H_
 #define SRC_MATRIX_MAT_MATRIXINT_H_
 
@@ -1698,7 +1699,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
   std::vector<int> UsedNumber(nbRow, 0);
   auto GetRandomNumber = [&]() -> int {
     for (int iter = 0; iter < nbIter; iter++) {
-      int eVal = rand() % nbRow;
+      int eVal = random() % nbRow;
       if (UsedNumber[eVal] == 0 && RowStatus[eVal] == 0)
         return eVal;
     }
@@ -1732,10 +1733,10 @@ template <typename T> MyMatrix<T> RandomUnimodularMatrix(int const &n) {
   int n_iter = 3 * n;
   for (int iter = 0; iter < n_iter; iter++) {
     MyMatrix<T> eMat = IdentityMat<T>(n);
-    int idx1 = rand() % n;
-    int idx2 = rand() % n;
+    int idx1 = random() % n;
+    int idx2 = random() % n;
     if (idx1 != idx2) {
-      int pivot = (rand() % 21) - 10;
+      int pivot = (random() % 21) - 10;
       eMat(idx1, idx2) = pivot;
     }
     RetMat = eMat * RetMat;

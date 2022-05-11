@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_BASIC_HASH_FUNCTIONS_H_
 #define SRC_BASIC_HASH_FUNCTIONS_H_
 
@@ -369,6 +370,15 @@ inline size_t robin_hood_hash_bytes(void const *ptr, size_t len,
   // anyways h *= m; h ^= h >> r;
   return static_cast<size_t>(h);
 }
+
+template<typename T>
+std::size_t hash_from_stream(T const& val) {
+  std::stringstream s;
+  s << val;
+  std::string converted(s.str());
+  return std::hash<std::string>()(converted);
+}
+
 
 namespace std {
 template <typename T> struct hash<std::vector<T>> {

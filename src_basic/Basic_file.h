@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_BASIC_BASIC_FILE_H_
 #define SRC_BASIC_BASIC_FILE_H_
 

@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "COMB_Combinatorics_elem.h"
 
 template <typename Tidx> void PrintVector(std::vector<Tidx> const &V) {

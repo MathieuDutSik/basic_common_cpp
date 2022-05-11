@@ -1,3 +1,4 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_COMB_BOOST_BITSET_H_
 #define SRC_COMB_BOOST_BITSET_H_
 
@@ -90,7 +91,7 @@ Face RandomKFace(int n, int k) {
   if (2 * k < n) {
     int n_done = 0;
     while (true) {
-      int pos = rand() % n;
+      int pos = random() % n;
       if (f[pos] == 0) {
         f[pos] = 1;
         n_done++;
@@ -103,7 +104,7 @@ Face RandomKFace(int n, int k) {
       f[i] = 0;
     int n_done = n;
     while (true) {
-      int pos = rand() % n;
+      int pos = random() % n;
       if (f[pos] == 1) {
         f[pos] = 0;
         n_done--;
