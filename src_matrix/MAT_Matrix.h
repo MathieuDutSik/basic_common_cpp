@@ -1637,7 +1637,9 @@ template <typename T> MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const &EXT) {
 
 template <typename T>
 std::vector<int> ColumnReductionSet_Kernel(MyMatrix<T> const &eMatIn) {
-  return TMat_SelectRowCol(eMatIn).ListColSelect;
+  std::vector<int> ListCol = TMat_SelectRowCol(eMatIn).ListColSelect;
+  std::sort(ListCol.begin(), ListCol.end());
+  return ListCol;
 }
 
 template <typename T>
