@@ -52,9 +52,6 @@ jobs:
           pwd
           echo "After pwd"
 
-          ls basic_common_cpp
-          echo "After ls basic_common_cpp"
-
           mkdir ExternalLib/nauty/build
           cd ExternalLib/nauty/build && cmake -DCMAKE_INSTALL_PREFIX:PATH=$NAUTY_PATH .. && make all install && cd ../../..
           pwd
