@@ -40,7 +40,7 @@ jobs:
           sudo apt-get install -y g++-11 clang-12
           sudo apt-get install -y g++ gcc
           sudo apt-get install -y cmake
-          sudo apt-get install -y libgmp-dev
+          sudo apt-get install -y libgmp-dev minisat
           sudo apt-get install -y libboost-dev libboost-mpi-dev libboost-serialization-dev
           sudo apt-get install -y autoconf autotools-dev libtool
 
