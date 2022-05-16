@@ -213,4 +213,6 @@ BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
   return {std::move(vectD), std::move(ListGen)};
 }
 
-#endif // SRC_GRAPH_GRAPH_BLISS_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_BLISS_H_
+// clang-format on

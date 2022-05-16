@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef INCLUDE_COLORING_H_
-#define INCLUDE_COLORING_H_
+#ifndef SRC_SAT_COLORING_H_
+#define SRC_SAT_COLORING_H_
 
 #include "SATsolver.h"
 #include "Temp_common.h"
@@ -89,4 +89,6 @@ std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
   return {true, std::move(V)};
 }
 
-#endif
+// clang-format off
+#endif  // SRC_SAT_COLORING_H_
+// clang-format on

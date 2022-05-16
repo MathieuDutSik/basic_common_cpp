@@ -330,4 +330,6 @@ std::string GetCanonicalForm_string(Tgr const &eGR,
   return strRet;
 }
 
-#endif // SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
+// clang-format on

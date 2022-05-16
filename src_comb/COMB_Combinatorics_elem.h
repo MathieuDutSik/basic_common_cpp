@@ -138,4 +138,6 @@ public:
   const_iterator end() const { return {dim, size, {}}; }
 };
 
-#endif // SRC_COMB_COMB_COMBINATORICS_ELEM_H_
+// clang-format off
+#endif  // SRC_COMB_COMB_COMBINATORICS_ELEM_H_
+// clang-format on

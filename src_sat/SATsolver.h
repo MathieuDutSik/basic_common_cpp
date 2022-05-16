@@ -135,4 +135,6 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
   std::cerr << "iter=" << iter << "\n";
 }
 
-#endif
+// clang-format off
+#endif  // SRC_SAT_SATSOLVER_H_
+// clang-format on

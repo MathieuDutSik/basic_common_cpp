@@ -40,4 +40,7 @@ int PositionBuildSet(int const &n, int const &Nval, MyVector<int> const &V) {
   }
   return pos;
 }
-#endif // SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
+
+// clang-format off
+#endif  // SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
+// clang-format on

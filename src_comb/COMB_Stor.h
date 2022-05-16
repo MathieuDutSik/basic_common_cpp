@@ -232,4 +232,6 @@ private:
   size_t TheSize;
 };
 
-#endif // SRC_COMB_COMB_STOR_H_
+// clang-format off
+#endif  // SRC_COMB_COMB_STOR_H_
+// clang-format on

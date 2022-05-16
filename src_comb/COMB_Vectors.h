@@ -100,4 +100,6 @@ public:
   }
 };
 
-#endif // SRC_COMB_COMB_VECTORS_H_
+// clang-format off
+#endif  // SRC_COMB_COMB_VECTORS_H_
+// clang-format on

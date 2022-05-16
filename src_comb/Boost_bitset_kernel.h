@@ -352,4 +352,6 @@ template <typename T> T getsetasint(const Face &face) {
   return eSum;
 }
 
-#endif // SRC_COMB_BOOST_BITSET_KERNEL_H_
+// clang-format off
+#endif  // SRC_COMB_BOOST_BITSET_KERNEL_H_
+// clang-format on
