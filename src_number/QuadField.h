@@ -235,4 +235,6 @@ struct overlying_field<QuadField<T,d>> {
 };
 */
 
-#endif // SRC_NUMBER_QUADFIELD_H_
+// clang-format off
+#endif  // SRC_NUMBER_QUADFIELD_H_
+// clang-format on

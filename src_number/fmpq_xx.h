@@ -214,4 +214,6 @@ inline void TYPE_CONVERSION(stc<fmpq_class> const &eQ, double &eD) {
   eD = eQ.val.get_d();
 }
 
-#endif // SRC_NUMBER_FMPQ_XX_H_
+// clang-format off
+#endif  // SRC_NUMBER_FMPQ_XX_H_
+// clang-format on

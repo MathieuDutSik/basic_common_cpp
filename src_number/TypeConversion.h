@@ -493,4 +493,6 @@ UniversalNearestScalarInteger(Ti const &a) {
   return ret;
 }
 
-#endif // SRC_NUMBER_TYPECONVERSION_H_
+// clang-format off
+#endif  // SRC_NUMBER_TYPECONVERSION_H_
+// clang-format on

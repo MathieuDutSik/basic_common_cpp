@@ -206,4 +206,6 @@ void ParseScalar_inplace(std::string const &estr, T &ret_val) {
   is >> ret_val;
 }
 
+// clang-format off
 #endif // SRC_BASIC_BASIC_FUNCTIONS_H_
+// clang-format on

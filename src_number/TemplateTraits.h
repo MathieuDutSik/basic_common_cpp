@@ -164,4 +164,6 @@ template <> struct underlying_totally_ordered_ring<long> {
   typedef long real_type;
 };
 
-#endif // SRC_NUMBER_TEMPLATETRAITS_H_
+// clang-format off
+#endif  // SRC_NUMBER_TEMPLATETRAITS_H_
+// clang-format on

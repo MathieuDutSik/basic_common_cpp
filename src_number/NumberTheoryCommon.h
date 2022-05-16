@@ -10,4 +10,6 @@
 #include "TypeConversionFinal.h"
 // clang-format on
 
-#endif // SRC_NUMBER_NUMBERTHEORYCOMMON_H_
+// clang-format off
+#endif  // SRC_NUMBER_NUMBERTHEORYCOMMON_H_
+// clang-format on

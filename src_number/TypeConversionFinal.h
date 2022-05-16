@@ -76,4 +76,6 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
 
 #endif
 
-#endif // SRC_NUMBER_TYPECONVERSIONFINAL_H_
+// clang-format off
+#endif  // SRC_NUMBER_TYPECONVERSIONFINAL_H_
+// clang-format on

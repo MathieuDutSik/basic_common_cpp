@@ -286,4 +286,6 @@ inline int CanonicalizationUnit(int const &eVal) {
   return 1;
 }
 
-#endif // SRC_BASIC_TEMP_COMMON_H_
+// clang-format off
+#endif  // SRC_BASIC_TEMP_COMMON_H_
+// clang-format on

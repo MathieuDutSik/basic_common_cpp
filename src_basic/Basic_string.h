@@ -512,4 +512,6 @@ std::string FILE_GetExtension(std::string const &eFile) {
   return LBlck[LBlck.size() - 1];
 }
 
-#endif // SRC_BASIC_BASIC_STRING_H_
+// clang-format off
+#endif  // SRC_BASIC_BASIC_STRING_H_
+// clang-format on

@@ -112,4 +112,6 @@ template <typename T> std::vector<T> GetAllFactors(T const &N) {
   return GetAllFactors(eMap);
 }
 
-#endif // SRC_NUMBER_FACTORIZATIONS_H_
+// clang-format off
+#endif  // SRC_NUMBER_FACTORIZATIONS_H_
+// clang-format on

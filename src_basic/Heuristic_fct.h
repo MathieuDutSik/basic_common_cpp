@@ -199,4 +199,6 @@ HeuristicFromListString(std::vector<std::string> const &ListString) {
   return TheHeu;
 }
 
-#endif // SRC_BASIC_HEURISTIC_FCT_H_
+// clang-format off
+#endif  // SRC_BASIC_HEURISTIC_FCT_H_
+// clang-format on

@@ -500,4 +500,6 @@ inline void NearestInteger(Rational<Tint> const &xI, Tint &xO) {
   xO = xO_q.get_num();
 }
 
-#endif // SRC_NUMBER_RATIONAL_H_
+// clang-format off
+#endif  // SRC_NUMBER_RATIONAL_H_
+// clang-format on

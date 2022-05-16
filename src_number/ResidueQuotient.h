@@ -106,4 +106,6 @@ template <typename T> T ResInt(T const &a, T const &b) {
   return res;
 }
 
-#endif // SRC_NUMBER_RESIDUEQUOTIENT_H_
+// clang-format off
+#endif  // SRC_NUMBER_RESIDUEQUOTIENT_H_
+// clang-format on

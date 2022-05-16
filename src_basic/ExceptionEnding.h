@@ -21,4 +21,6 @@ void TerminalEnding() {
   exit(1);
 }
 
-#endif // SRC_BASIC_EXCEPTIONENDING_H_
+// clang-format off
+#endif  // SRC_BASIC_EXCEPTIONENDING_H_
+// clang-format on
