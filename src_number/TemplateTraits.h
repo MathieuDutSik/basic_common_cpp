@@ -32,17 +32,19 @@ template <typename T> struct is_euclidean_domain {
   static const bool value = false;
 };
 
-template <> struct is_euclidean_domain<short> {
+template <> struct is_euclidean_domain<int64_t> {
   static const bool value = true;
 };
 
-template <> struct is_euclidean_domain<long> {
+template <> struct is_euclidean_domain<int32_t> {
   static const bool value = true;
 };
 
-template <> struct is_euclidean_domain<int> { static const bool value = true; };
+template <> struct is_euclidean_domain<int16_t> {
+  static const bool value = true;
+};
 
-template <> struct is_euclidean_domain<long long> {
+template <> struct is_euclidean_domain<int8_t> {
   static const bool value = true;
 };
 
@@ -58,9 +60,13 @@ template <> struct overlying_field<float> { typedef float field_type; };
 
 template <typename T> struct underlying_ring {};
 
-template <> struct underlying_ring<int> { typedef int ring_type; };
+template <> struct underlying_ring<int64_t> { typedef int64_t ring_type; };
 
-template <> struct underlying_ring<long> { typedef long ring_type; };
+template <> struct underlying_ring<int32_t> { typedef int32_t ring_type; };
+
+template <> struct underlying_ring<int16_t> { typedef int16_t ring_type; };
+
+template <> struct underlying_ring<int8_t> { typedef int8_t ring_type; };
 
 // Trait definition for subset of integers
 
@@ -74,11 +80,19 @@ template <> struct is_implementation_of_Z<float> {
   static const bool value = false;
 };
 
-template <> struct is_implementation_of_Z<int> {
+template <> struct is_implementation_of_Z<int64_t> {
   static const bool value = true;
 };
 
-template <> struct is_implementation_of_Z<long> {
+template <> struct is_implementation_of_Z<int32_t> {
+  static const bool value = true;
+};
+
+template <> struct is_implementation_of_Z<int16_t> {
+  static const bool value = true;
+};
+
+template <> struct is_implementation_of_Z<int8_t> {
   static const bool value = true;
 };
 
@@ -98,15 +112,13 @@ template <> struct is_exact_arithmetic<float> {
 
 template <typename T> struct is_ring_field {};
 
-template <> struct is_ring_field<short> { static const bool value = false; };
+template <> struct is_ring_field<int64_t> { static const bool value = false; };
 
-template <> struct is_ring_field<long> { static const bool value = false; };
+template <> struct is_ring_field<int32_t> { static const bool value = false; };
 
-template <> struct is_ring_field<int> { static const bool value = false; };
+template <> struct is_ring_field<int16_t> { static const bool value = false; };
 
-template <> struct is_ring_field<long long> {
-  static const bool value = false;
-};
+template <> struct is_ring_field<int8_t> { static const bool value = false; };
 
 template <> struct is_ring_field<double> { static const bool value = true; };
 
@@ -118,15 +130,15 @@ template <typename T> struct is_totally_ordered {
   static const bool value = false;
 };
 
-template <> struct is_totally_ordered<short> {
+template <> struct is_totally_ordered<int64_t> {
   static const bool value = true;
 };
 
-template <> struct is_totally_ordered<long> { static const bool value = true; };
+template <> struct is_totally_ordered<int32_t> { static const bool value = true; };
 
-template <> struct is_totally_ordered<int> { static const bool value = true; };
+template <> struct is_totally_ordered<int16_t> { static const bool value = true; };
 
-template <> struct is_totally_ordered<long long> {
+template <> struct is_totally_ordered<int8_t> {
   static const bool value = true;
 };
 
@@ -156,12 +168,20 @@ template <> struct is_float_arithmetic<double> {
 
 template <typename T> struct underlying_totally_ordered_ring {};
 
-template <> struct underlying_totally_ordered_ring<int> {
-  typedef int real_type;
+template <> struct underlying_totally_ordered_ring<int64_t> {
+  typedef int64_t real_type;
 };
 
-template <> struct underlying_totally_ordered_ring<long> {
-  typedef long real_type;
+template <> struct underlying_totally_ordered_ring<int32_t> {
+  typedef int32_t real_type;
+};
+
+template <> struct underlying_totally_ordered_ring<int16_t> {
+  typedef int16_t real_type;
+};
+
+template <> struct underlying_totally_ordered_ring<int8_t> {
+  typedef int8_t real_type;
 };
 
 // clang-format off
