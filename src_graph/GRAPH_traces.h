@@ -134,34 +134,8 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
 
 
 template <typename Tgr>
-void Assign_lab1_ptn_sg(Tgr const &eGR, bool const& HasVertexColor, int* lab1, int* ptn, sparsegraph* sg) {
+void Assign_sg(Tgr const &eGR, sparsegraph* sg) {
   size_t n = eGR.GetNbVert();
-  if (HasVertexColor) {
-    size_t numcells = 0;
-    for (size_t i = 0; i < n; i++) {
-      size_t eVal = 1 + eGR.GetColor(i);
-      if (eVal > numcells)
-        numcells = eVal;
-    }
-    std::vector<int> ListPartSize(numcells, 0);
-    for (size_t i = 0; i < n; i++)
-      ListPartSize[eGR.GetColor(i)]++;
-    std::vector<size_t> ListShift(numcells, 0);
-    for (size_t icell = 1; icell < numcells; icell++)
-      ListShift[icell] = ListShift[icell - 1] + ListPartSize[icell - 1];
-    // lab1 construction
-    for (size_t i = 0; i < n; i++) {
-      size_t icell = eGR.GetColor(i);
-      lab1[ListShift[icell]] = static_cast<int>(i);
-      ListShift[icell]++;
-    }
-    // ptn construction
-    for (size_t i = 0; i < n; i++)
-      ptn[i] = NAUTY_INFINITY;
-    for (size_t icell = 0; icell < numcells; icell++)
-      ptn[ListShift[icell] - 1] = 0;
-  }
-
   size_t pos = 0;
   for (size_t i = 0; i < n; i++) {
     std::vector<size_t> LAdj = eGR.Adjacency(i);
@@ -173,6 +147,44 @@ void Assign_lab1_ptn_sg(Tgr const &eGR, bool const& HasVertexColor, int* lab1, i
       pos++;
     }
   }
+}
+
+template <typename Tgr>
+void Assign_lab1_ptn(Tgr const &eGR, int* lab1, int* ptn) {
+  size_t n = eGR.GetNbVert();
+  size_t numcells = 0;
+  for (size_t i = 0; i < n; i++) {
+    size_t eVal = 1 + eGR.GetColor(i);
+    if (eVal > numcells)
+      numcells = eVal;
+  }
+  std::vector<int> ListPartSize(numcells, 0);
+  for (size_t i = 0; i < n; i++)
+    ListPartSize[eGR.GetColor(i)]++;
+  std::vector<size_t> ListShift(numcells, 0);
+  for (size_t icell = 1; icell < numcells; icell++)
+    ListShift[icell] = ListShift[icell - 1] + ListPartSize[icell - 1];
+  // lab1 construction
+  for (size_t i = 0; i < n; i++) {
+    size_t icell = eGR.GetColor(i);
+    lab1[ListShift[icell]] = static_cast<int>(i);
+    ListShift[icell]++;
+  }
+  // ptn construction
+  for (size_t i = 0; i < n; i++)
+    ptn[i] = NAUTY_INFINITY;
+  for (size_t icell = 0; icell < numcells; icell++)
+    ptn[ListShift[icell] - 1] = 0;
+}
+
+
+
+template <typename Tgr>
+void Assign_lab1_ptn_sg(Tgr const &eGR, bool const& HasVertexColor, int* lab1, int* ptn, sparsegraph* sg) {
+  if (HasVertexColor) {
+    Assign_lab1_ptn(eGR, lab1, ptn);
+  }
+  Assign_sg(eGR, sg);
 }
 
 
@@ -370,46 +382,14 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
   */
   if (HasVertexColor) {
     options.defaultptn = FALSE;
-    size_t numcells = 0;
-    for (size_t i = 0; i < n; i++) {
-      size_t eVal = 1 + eGR.GetColor(i);
-      if (eVal > numcells)
-        numcells = eVal;
-    }
-    std::vector<int> ListPartSize(numcells, 0);
-    for (size_t i = 0; i < n; i++)
-      ListPartSize[eGR.GetColor(i)]++;
-    std::vector<size_t> ListShift(numcells, 0);
-    for (size_t icell = 1; icell < numcells; icell++)
-      ListShift[icell] = ListShift[icell - 1] + ListPartSize[icell - 1];
-    // lab1 construction
-    for (size_t i = 0; i < n; i++) {
-      size_t icell = eGR.GetColor(i);
-      lab1[ListShift[icell]] = int(i);
-      ListShift[icell]++;
-    }
-    // ptn construction
-    for (size_t i = 0; i < n; i++)
-      ptn[i] = NAUTY_INFINITY;
-    for (size_t icell = 0; icell < numcells; icell++)
-      ptn[ListShift[icell] - 1] = 0;
+    Assign_lab1_ptn(eGR, lab1, ptn);
   }
 
   /* Now make the graph */
   SG_ALLOC(sg1, n, nbAdjacent, "malloc");
   sg1.nv = int(n);           /* Number of vertices */
   sg1.nde = int(nbAdjacent); /* Number of directed edges */
-  size_t pos = 0;
-  for (size_t i = 0; i < n; i++) {
-    std::vector<size_t> LAdj = eGR.Adjacency(i);
-    size_t len = LAdj.size();
-    sg1.d[i] = int(len);
-    sg1.v[i] = int(pos);
-    for (auto &eAdj : LAdj) {
-      sg1.e[pos] = int(eAdj);
-      pos++;
-    }
-  }
+  Assign_sg(eGR, &sg1);
   /* Calling Traces */
   Traces(&sg1, lab1, ptn, orbits, &options, &stats, NULL);
   /* Extracting the list of generators */
@@ -564,19 +544,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   SG_ALLOC(sg1, n, nbAdjacent, "malloc");
   sg1.nv = n;           /* Number of vertices */
   sg1.nde = nbAdjacent; /* Number of directed edges */
-
-  int pos = 0;
-  for (size_t i = 0; i < n; i++) {
-    std::vector<size_t> LAdj = eGR.Adjacency(i);
-    int len = LAdj.size();
-    sg1.d[i] = len;
-    sg1.v[i] = pos;
-    for (auto &eAdj : LAdj) {
-      sg1.e[pos] = eAdj;
-      pos++;
-    }
-  }
-
+  Assign_sg(eGR, &sg1);
   Traces(&sg1, lab1, ptn, orbits, &options, &stats, &cg1);
   // Extracting the canonical ordering
   std::vector<TidxC> V(n);

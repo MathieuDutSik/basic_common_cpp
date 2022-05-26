@@ -341,9 +341,9 @@ int FILE_GetNumberLine(std::string const &eFile) {
 
 #ifndef WINDOWS
 std::string GetCurrentDirectory() {
-  long int size = pathconf(".", _PC_PATH_MAX);
+  size_t size = pathconf(".", _PC_PATH_MAX);
   std::vector<char> buf(size);
-  char *ptr = getcwd(buf.data(), (size_t)size);
+  char *ptr = getcwd(buf.data(), size);
   if (ptr == NULL && errno != ERANGE) {
     std::cerr << "Error while trying to use getcwd\n";
     throw TerminalException{1};

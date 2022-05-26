@@ -35,7 +35,7 @@ template <typename T> T VectorAvg(std::vector<T> const &eVect) {
   T eSum = 0;
   for (T eVal : eVect)
     eSum += eVal;
-  T eAvg = eSum / int(eVect.size());
+  T eAvg = eSum / static_cast<int>(eVect.size());
   return eAvg;
 }
 
@@ -106,7 +106,7 @@ template <typename T> int PositionVect(std::vector<T> const &V, T const &eVal) {
   size_t len = V.size();
   for (size_t i = 0; i < len; i++)
     if (V[i] == eVal)
-      return int(i);
+      return static_cast<int>(i);
   return -1;
 }
 
@@ -207,5 +207,5 @@ void ParseScalar_inplace(std::string const &estr, T &ret_val) {
 }
 
 // clang-format off
-#endif // SRC_BASIC_BASIC_FUNCTIONS_H_
+#endif  // SRC_BASIC_BASIC_FUNCTIONS_H_
 // clang-format on

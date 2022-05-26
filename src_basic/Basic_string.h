@@ -43,7 +43,7 @@ int STRING_GetCharPositionInString(std::string const &eStr,
   for (size_t i = 0; i < len; i++) {
     std::string eSubChar = eStr.substr(i, 1);
     if (eSubChar == eChar)
-      return int(i);
+      return static_cast<int>(i);
   }
   return -1;
 }
@@ -119,23 +119,21 @@ bool IsFullyNumeric(std::string const &eStr) {
 }
 
 std::string DoubleTo4dot2f(double const &x) {
-  char buffer[150];
-  int n = sprintf(buffer, "%4.2f", x);
-  if (n == 0) {
-    std::cerr << "Clear error in DoubleTo4dot2f\n";
-    throw TerminalException{1};
-  }
-  return std::string(buffer);
+  std::stringstream s;
+  s << std::fixed;
+  s << std::setprecision(2);
+  s << x;
+  std::string converted(s.str());
+  return converted;
 }
 
 std::string DoubleTo4dot1f(double const &x) {
-  char buffer[150];
-  int n = sprintf(buffer, "%4.1f", x);
-  if (n == 0) {
-    std::cerr << "Clear error in DoubleTo4dot2f\n";
-    throw TerminalException{1};
-  }
-  return std::string(buffer);
+  std::stringstream s;
+  s << std::fixed;
+  s << std::setprecision(1);
+  s << x;
+  std::string converted(s.str());
+  return converted;
 }
 
 std::string DoubleToString(double const &x) {
@@ -313,9 +311,11 @@ void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F &f) {
               return false;
           return true;
         };
-        if (test())
-          for (size_t iB = 0; iB < lenB; iB++)
+        if (test()) {
+          for (size_t iB = 0; iB < lenB; iB++) {
             ListStatus[iA + iB] = 0;
+          }
+        }
       }
   }
   /*
