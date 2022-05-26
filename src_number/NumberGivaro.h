@@ -15,7 +15,7 @@
 
 Givaro::Integer GetGivaroInteger(mpz_class const &val) {
   //  mpz_t val_z(val.get_mpz_t());
-  auto f_convert=[&](mpz_class const& val) -> Givaro::Integer {
+  auto f_convert = [&](mpz_class const &val) -> Givaro::Integer {
     size_t nchar = mpz_size(val.get_mpz_t());
     std::vector<mp_limb_t> vect_t(nchar);
     for (size_t i = 0; i < nchar; i++) {
@@ -27,7 +27,7 @@ Givaro::Integer GetGivaroInteger(mpz_class const &val) {
     return f_convert(val);
   } else {
     mpz_class valb = -val;
-    return - f_convert(valb);
+    return -f_convert(valb);
   }
 }
 

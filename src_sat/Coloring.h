@@ -4,8 +4,8 @@
 
 #include "SATsolver.h"
 #include "Temp_common.h"
-#include <vector>
 #include <utility>
+#include <vector>
 
 template <typename Tgr>
 std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
@@ -31,7 +31,8 @@ std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
   //
   // For each vertex at most one color should be selected
   //
-  auto insert_clause=[&](int iVert, int jVert, int iColor, int jColor) -> void {
+  auto insert_clause = [&](int iVert, int jVert, int iColor,
+                           int jColor) -> void {
     int pos1 = nbColor * iVert + iColor;
     int pos2 = nbColor * jVert + jColor;
     Minisat::Lit cond1 = Minisat::mkLit(ListVar[pos1], false);

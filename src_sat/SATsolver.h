@@ -12,7 +12,6 @@ struct SATformulation {
   std::vector<std::vector<int>> ListExpr;
 };
 
-
 bool IsFeasibleExpression(std::vector<int> eList, Face const &eFace) {
   bool IsMatching = false;
   for (auto &x : eList) {

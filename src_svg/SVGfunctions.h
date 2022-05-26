@@ -340,8 +340,8 @@ void GeneralWriteSVGfile(std::string const &eFile,
            f_marker(eQual.MarkerEnd) + f_clip(eQual.clip);
   };
   auto GetQualityStringEllipse = [&](SVGqualInfo const &eQual) -> std::string {
-    return " style=\"fill:" + StringColor(eQual.color) +
-           "\"" + f_clip(eQual.clip);
+    return " style=\"fill:" + StringColor(eQual.color) + "\"" +
+           f_clip(eQual.clip);
   };
   //
   // First the preamble

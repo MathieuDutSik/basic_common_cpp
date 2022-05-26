@@ -7,9 +7,9 @@
 #include "TypeConversion.h"
 #include "boost_serialization.h"
 #include <boost/multiprecision/cpp_int.hpp>
-#include <utility>
-#include <string>
 #include <limits>
+#include <string>
+#include <utility>
 
 template <> struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
   static const bool value = true;

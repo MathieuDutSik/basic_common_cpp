@@ -27,15 +27,14 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1,
   TYPE_CONVERSION_STRING(a1.val, a2);
 }
 
-template<typename T1, typename T2>
-void TYPE_CONVERSION_IsInteger(stc<T1> const& a1, T2 & a2) {
+template <typename T1, typename T2>
+void TYPE_CONVERSION_IsInteger(stc<T1> const &a1, T2 &a2) {
   if (!IsInteger(a1.val)) {
     std::string str_ret = "a1=" + std::to_string(a1.val) + " is not an integer";
     throw ConversionException{str_ret};
   }
   TYPE_CONVERSION_STRING(a1.val, a2);
 }
-
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1,
                             boost::multiprecision::cpp_int &a2) {

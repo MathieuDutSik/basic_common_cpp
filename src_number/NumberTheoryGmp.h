@@ -5,11 +5,11 @@
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
 #include "TypeConversion.h"
-#include "hash_functions.h"
 #include "gmpxx.h"
-#include <utility>
-#include <string>
+#include "hash_functions.h"
 #include <limits>
+#include <string>
+#include <utility>
 
 // We need to use is_mpq_class and is_mpz_class.
 // We cannot use the std::is_same_v<T,mpq_class>  or std::is_same_v<T,mpz_class>
@@ -304,7 +304,6 @@ void Termination_mpq_not_integer(stc<mpq_class> const &a1) {
     throw ConversionException{str};
   }
 }
-
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, mpz_class &a2) {
   Termination_mpq_not_integer(a1);
