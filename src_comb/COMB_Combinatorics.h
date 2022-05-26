@@ -616,4 +616,6 @@ void SortParallel(std::vector<T1> &list1, std::vector<T2> &list2) {
   }
 }
 
-#endif // SRC_COMB_COMB_COMBINATORICS_H_
+// clang-format off
+#endif  // SRC_COMB_COMB_COMBINATORICS_H_
+// clang-format on

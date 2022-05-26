@@ -60,4 +60,6 @@ void NearestInteger(mpfr::mpreal const &xI, long &xO) {
   xO = x_z.get_si();
 }
 
-#endif // SRC_NUMBER_MPREAL_RELATED_H_
+// clang-format off
+#endif  // SRC_NUMBER_MPREAL_RELATED_H_
+// clang-format on

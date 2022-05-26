@@ -78,4 +78,6 @@ private:
   int nbCorrect;
 };
 
-#endif // SRC_BASIC_STORAGESPACE_H_
+// clang-format off
+#endif  // SRC_BASIC_STORAGESPACE_H_
+// clang-format on

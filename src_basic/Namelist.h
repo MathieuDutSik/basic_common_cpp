@@ -518,4 +518,6 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
   }
 }
 
-#endif // SRC_BASIC_NAMELIST_H_
+// clang-format off
+#endif  // SRC_BASIC_NAMELIST_H_
+// clang-format on

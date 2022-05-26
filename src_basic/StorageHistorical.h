@@ -65,4 +65,6 @@ private:
   int ThePeriod;
 };
 
-#endif // SRC_BASIC_STORAGEHISTORICAL_H_
+// clang-format off
+#endif  // SRC_BASIC_STORAGEHISTORICAL_H_
+// clang-format on

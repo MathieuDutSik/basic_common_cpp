@@ -52,4 +52,6 @@ int ComputeDiameterEquivariant(Tgr const &GR, TheGroupFormat const &TheGRP) {
   return TheDiameter;
 }
 
-#endif // SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONEQUIVARIANT_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONEQUIVARIANT_H_
+// clang-format on

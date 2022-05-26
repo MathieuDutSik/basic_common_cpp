@@ -1469,4 +1469,6 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
   return ListEmbedding;
 }
 
-#endif // SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONS_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_GRAPHICALFUNCTIONS_H_
+// clang-format on

@@ -124,4 +124,6 @@ InducedSubgraph(Tgr const &GR, std::vector<size_t> const &eList) {
   return GRred;
 }
 
-#endif // SRC_GRAPH_GRAPH_BITSETTYPE_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_BITSETTYPE_H_
+// clang-format on

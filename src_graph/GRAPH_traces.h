@@ -601,4 +601,6 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   return {std::move(V), std::move(ListGen)};
 }
 
-#endif // SRC_GRAPH_GRAPH_TRACES_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_TRACES_H_
+// clang-format on

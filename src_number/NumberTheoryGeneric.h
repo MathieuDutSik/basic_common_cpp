@@ -66,4 +66,6 @@ LCMpair(T const &a, T const &b) {
   return -eLCM;
 }
 
-#endif // SRC_NUMBER_NUMBERTHEORYGENERIC_H_
+// clang-format off
+#endif  // SRC_NUMBER_NUMBERTHEORYGENERIC_H_
+// clang-format on

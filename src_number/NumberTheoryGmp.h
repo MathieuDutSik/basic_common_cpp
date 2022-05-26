@@ -672,4 +672,6 @@ inline void serialize(Archive &ar, mpz_class &val, const unsigned int version) {
 
 } // namespace boost::serialization
 
-#endif // SRC_NUMBER_NUMBERTHEORYGMP_H_
+// clang-format off
+#endif  // SRC_NUMBER_NUMBERTHEORYGMP_H_
+// clang-format on

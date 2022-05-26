@@ -282,4 +282,6 @@ void VectVectInt_Gap_Print(std::ostream &os, vectface const &ListOrbit) {
   os << "]";
 }
 
-#endif // SRC_COMB_BOOST_BITSET_H_
+// clang-format off
+#endif  // SRC_COMB_BOOST_BITSET_H_
+// clang-format on

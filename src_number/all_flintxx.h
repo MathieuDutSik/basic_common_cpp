@@ -19,4 +19,6 @@ flint::fmpqxx TheProductB(int const &x, flint::fmpqxx const &y) {
   return xb * y;
 }
 
-#endif // SRC_NUMBER_ALL_FLINTXX_H_
+// clang-format off
+#endif  // SRC_NUMBER_ALL_FLINTXX_H_
+// clang-format on

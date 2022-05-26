@@ -606,4 +606,6 @@ public:
   std::string str() const { return DirName; }
 };
 
+// clang-format off
 #endif  // SRC_BASIC_BASIC_FILE_H_
+// clang-format on

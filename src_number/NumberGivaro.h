@@ -47,4 +47,6 @@ mpq_class ConvertGivaroRational(Givaro::Rational const &val) {
   return mpq_class(e_num) / mpq_class(e_den);
 }
 
-#endif // SRC_NUMBER_NUMBERGIVARO_H_
+// clang-format off
+#endif  // SRC_NUMBER_NUMBERGIVARO_H_
+// clang-format on

@@ -144,4 +144,6 @@ std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const &eGR1, Tgr const &eGR2) {
   return Telt(eList);
 }
 
-#endif // SRC_GRAPH_GRAPH_NAUTY_H_
+// clang-format off
+#endif  // SRC_GRAPH_GRAPH_NAUTY_H_
+// clang-format on

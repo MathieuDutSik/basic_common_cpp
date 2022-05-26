@@ -195,4 +195,6 @@ protected:
   }
 };
 
-#endif // SRC_BASIC_FACET_H_
+// clang-format off
+#endif  // SRC_BASIC_FACET_H_
+// clang-format on

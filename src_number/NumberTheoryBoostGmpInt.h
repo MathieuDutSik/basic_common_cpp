@@ -504,4 +504,6 @@ bool universal_square_root(boost::multiprecision::mpq_rational &ret,
   return true;
 }
 
-#endif // SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
+// clang-format off
+#endif  // SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
+// clang-format on

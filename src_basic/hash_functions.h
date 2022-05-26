@@ -416,4 +416,6 @@ template <typename T1, typename T2> struct hash<std::pair<T1, T2>> {
 };
 } // namespace std
 
-#endif // SRC_BASIC_HASH_FUNCTIONS_H_
+// clang-format off
+#endif  // SRC_BASIC_HASH_FUNCTIONS_H_
+// clang-format on

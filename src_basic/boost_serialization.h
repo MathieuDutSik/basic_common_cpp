@@ -16,4 +16,6 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/utility.hpp>
 
-#endif
+// clang-format off
+#endif  // SRC_BASIC_BOOST_SERIALIZATION_H_
+// clang-format on

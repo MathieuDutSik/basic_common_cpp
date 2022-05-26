@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef INCLUDE_TIMINGS_H_
-#define INCLUDE_TIMINGS_H_
+#ifndef SRC_BASIC_TIMINGS_H_
+#define SRC_BASIC_TIMINGS_H_
 
 #include <chrono>
 #include <string>
@@ -34,4 +34,6 @@ void runtime(SingletonTime const &start) {
   std::cerr << "runtime = " << s(start, end) << "\n";
 }
 
-#endif
+// clang-format off
+#endif  // SRC_BASIC_TIMINGS_H_
+// clang-format on
