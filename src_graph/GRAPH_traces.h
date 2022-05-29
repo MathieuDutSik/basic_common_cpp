@@ -104,14 +104,21 @@ public:
 };
 
 template <typename Tidx>
-std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
-  size_t n = DT.n;
+void TRACES_LimitCheck(size_t n)
+{
   if (n >= size_t(std::numeric_limits<Tidx>::max())) {
-    std::cerr << "Error in TRACES_GetCanonicalOrdering_Arr\n";
+    std::cerr << "Error in TRACES_LimitCheck\n";
     std::cerr << "We have n=" << n << " std::numeric_limits<Tidx>::max()="
               << std::numeric_limits<Tidx>::max() << "\n";
     throw TerminalException{1};
   }
+}
+
+
+template <typename Tidx>
+std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
+  size_t n = DT.n;
+  TRACES_LimitCheck<Tidx>(n);
 #ifdef TIMINGS
   SingletonTime time1;
 #endif
@@ -209,12 +216,7 @@ template <typename Tgr> DataTraces *GetDataTraces_from_G(Tgr const &eGR) {
 template <typename Tgr, typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
   size_t n = eGR.GetNbVert();
-  if (n >= size_t(std::numeric_limits<Tidx>::max())) {
-    std::cerr << "Error in TRACES_GetCanonicalOrdering\n";
-    std::cerr << "We have n=" << n << " std::numeric_limits<Tidx>::max()="
-              << std::numeric_limits<Tidx>::max() << "\n";
-    throw TerminalException{1};
-  }
+  TRACES_LimitCheck<Tidx>(n);
 #ifdef TIMINGS
   SingletonTime time1;
 #endif
@@ -279,12 +281,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const &eGR) {
 template <typename Tidx>
 std::vector<std::vector<Tidx>>
 TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
-  if (n_last >= size_t(std::numeric_limits<Tidx>::max())) {
-    std::cerr << "Error in TRACES_GetListGenerators_Arr\n";
-    std::cerr << "We have n=" << n_last << " std::numeric_limits<Tidx>::max()="
-              << std::numeric_limits<Tidx>::max() << "\n";
-    throw TerminalException{1};
-  }
+  TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS
   SingletonTime time1;
 #endif
@@ -340,12 +337,7 @@ void ReadListGen(permnode *gens, std::vector<std::vector<Tidx>> &ListGen,
 template <typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
                                                         size_t const &n_last) {
-  if (n_last >= size_t(std::numeric_limits<Tidx>::max()) - 1) {
-    std::cerr << "Error in TRACES_GetListGenerators_Arr\n";
-    std::cerr << "We have n=" << n_last << " std::numeric_limits<Tidx>::max()="
-              << std::numeric_limits<Tidx>::max() << "\n";
-    throw TerminalException{1};
-  }
+  TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS
   SingletonTime time1;
 #endif
@@ -424,19 +416,8 @@ std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>>
 TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
                                                size_t const &n_last) {
   size_t n = size_t(DT.n);
-  if (n >= size_t(std::numeric_limits<TidxC>::max()) - 1) {
-    std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
-    std::cerr << "We have n=" << n << " std::numeric_limits<TidxC>::max()="
-              << std::numeric_limits<TidxC>::max() << "\n";
-    throw TerminalException{1};
-  }
-  if (n_last >= size_t(std::numeric_limits<TidxG>::max()) - 1) {
-    std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
-    std::cerr << "We have n_last=" << n_last
-              << " std::numeric_limits<TidxG>::max()="
-              << std::numeric_limits<TidxG>::max() << "\n";
-    throw TerminalException{1};
-  }
+  TRACES_LimitCheck<TidxC>(n);
+  TRACES_LimitCheck<TidxG>(n_last);
 #ifdef TIMINGS
   SingletonTime time1;
 #endif
@@ -470,18 +451,8 @@ template <typename Tgr, typename TidxC, typename TidxG>
 std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>>
 TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   size_t n = eGR.GetNbVert();
-  if (n >= size_t(std::numeric_limits<TidxC>::max()) - 1) {
-    std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
-    std::cerr << "We have n=" << n << " std::numeric_limits<TidxC>::max()="
-              << std::numeric_limits<TidxC>::max() << "\n";
-    throw TerminalException{1};
-  }
-  if (n_last >= size_t(std::numeric_limits<TidxG>::max()) - 1) {
-    std::cerr << "Error in TRACES_GetCanonicalOrdering_ListGenerators_Arr\n";
-    std::cerr << "We have n=" << n << " std::numeric_limits<TidxG>::max()="
-              << std::numeric_limits<TidxG>::max() << "\n";
-    throw TerminalException{1};
-  }
+  TRACES_LimitCheck<TidxC>(n);
+  TRACES_LimitCheck<TidxG>(n_last);
 #ifdef TIMINGS
   SingletonTime time1;
 #endif
