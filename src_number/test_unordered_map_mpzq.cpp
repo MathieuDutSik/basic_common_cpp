@@ -8,10 +8,10 @@ int main() {
   std::unordered_map<mpz_class, int> M1;
   std::unordered_map<mpq_class, int> M2;
   auto get_mpz = [&]() -> mpz_class {
-    int eval_i = rand() % 3 - 1;
+    int eval_i = random() % 3 - 1;
     mpz_class eval = eval_i;
     for (int k = 0; k < expo; k++)
-      eval *= (1 + rand() % 100);
+      eval *= (1 + random() % 100);
     return eval;
   };
   auto get_mpq = [&]() -> mpq_class {
@@ -25,12 +25,12 @@ int main() {
   std::set<mpq_class> S2;
   for (int i = 0; i < n; i++) {
     mpz_class val1 = get_mpz();
-    int int1 = rand() / 100;
+    int int1 = random() / 100;
     M1[val1] = int1;
     S1.insert(val1);
     //
     mpq_class val2 = get_mpq();
-    int int2 = rand() / 100;
+    int int2 = random() / 100;
     M2[val2] = int2;
     S2.insert(val2);
   }

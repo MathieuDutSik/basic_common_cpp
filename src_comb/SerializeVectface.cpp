@@ -9,7 +9,7 @@ int main() {
   for (size_t i_face = 0; i_face < n_face; i_face++) {
     Face f(n);
     for (size_t i = 0; i < n; i++)
-      f[i] = rand() % 2;
+      f[i] = random() % 2;
     vf1.push_back(f);
   }
   std::string filename = "/tmp/VF_filename.boost_archive";

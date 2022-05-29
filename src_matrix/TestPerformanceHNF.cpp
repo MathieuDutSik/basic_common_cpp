@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
       MyMatrix<T> eMat(n, m);
       for (int i = 0; i < n; i++)
         for (int j = 0; j < m; j++)
-          eMat(i, j) = rand() % (2 * siz + 1) - siz;
+          eMat(i, j) = random() % (2 * siz + 1) - siz;
       std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
           ComputeRowHermiteNormalForm(eMat);
     }

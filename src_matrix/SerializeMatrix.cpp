@@ -8,7 +8,7 @@ template <typename T> void test_type() {
   MyMatrix<T> M1(n_row, n_col);
   for (size_t i_row = 0; i_row < n_row; i_row++) {
     for (size_t i_col = 0; i_col < n_col; i_col++) {
-      T val = rand() % 20;
+      T val = random() % 20;
       M1(i_row, i_col) = val;
     }
   }

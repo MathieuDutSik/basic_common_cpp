@@ -9,7 +9,7 @@ int main() {
   for (size_t iter = 0; iter < n_iter; iter++) {
     Face f(n);
     for (size_t i = 0; i < n; i++) {
-      f[i] = rand() % 2;
+      f[i] = random() % 2;
     }
     vf.push_back(f);
   }

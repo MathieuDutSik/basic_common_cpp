@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
     int siz = 10000;
     for (int i = 0; i < nb; i++) {
       std::cerr << "i=" << i << "/" << nb << "\n";
-      int a = rand() % (2 * siz + 1) - siz;
-      int b = rand() % (2 * siz + 1) - siz;
+      int a = random() % (2 * siz + 1) - siz;
+      int b = random() % (2 * siz + 1) - siz;
       TestCons(a, b);
     }
     for (int a = -10; a < 10; a++)
