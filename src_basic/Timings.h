@@ -34,6 +34,11 @@ void runtime(SingletonTime const &start) {
   std::cerr << "runtime = " << s(start, end) << "\n";
 }
 
+void timing(std::string const& strTime, SingletonTime const &s1, SingletonTime const &s2) {
+  std::cerr << "Timing |" << strTime << "|=" << s(s1,s2) << "\n";
+}
+
+
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
 // clang-format on
