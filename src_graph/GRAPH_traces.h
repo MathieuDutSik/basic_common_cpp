@@ -103,9 +103,7 @@ public:
   DataTraces &operator=(const DataTraces &) = delete;
 };
 
-template <typename Tidx>
-void TRACES_LimitCheck(size_t n)
-{
+template <typename Tidx> void TRACES_LimitCheck(size_t n) {
   if (n >= size_t(std::numeric_limits<Tidx>::max())) {
     std::cerr << "Error in TRACES_LimitCheck\n";
     std::cerr << "We have n=" << n << " std::numeric_limits<Tidx>::max()="
@@ -113,7 +111,6 @@ void TRACES_LimitCheck(size_t n)
     throw TerminalException{1};
   }
 }
-
 
 template <typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
@@ -139,9 +136,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
   return V;
 }
 
-
-template <typename Tgr>
-void Assign_sg(Tgr const &eGR, sparsegraph* sg) {
+template <typename Tgr> void Assign_sg(Tgr const &eGR, sparsegraph *sg) {
   size_t n = eGR.GetNbVert();
   size_t pos = 0;
   for (size_t i = 0; i < n; i++) {
@@ -157,7 +152,7 @@ void Assign_sg(Tgr const &eGR, sparsegraph* sg) {
 }
 
 template <typename Tgr>
-void Assign_lab1_ptn(Tgr const &eGR, int* lab1, int* ptn) {
+void Assign_lab1_ptn(Tgr const &eGR, int *lab1, int *ptn) {
   size_t n = eGR.GetNbVert();
   size_t numcells = 0;
   for (size_t i = 0; i < n; i++) {
@@ -184,18 +179,14 @@ void Assign_lab1_ptn(Tgr const &eGR, int* lab1, int* ptn) {
     ptn[ListShift[icell] - 1] = 0;
 }
 
-
-
 template <typename Tgr>
-void Assign_lab1_ptn_sg(Tgr const &eGR, bool const& HasVertexColor, int* lab1, int* ptn, sparsegraph* sg) {
+void Assign_lab1_ptn_sg(Tgr const &eGR, bool const &HasVertexColor, int *lab1,
+                        int *ptn, sparsegraph *sg) {
   if (HasVertexColor) {
     Assign_lab1_ptn(eGR, lab1, ptn);
   }
   Assign_sg(eGR, sg);
 }
-
-
-
 
 template <typename Tgr> DataTraces *GetDataTraces_from_G(Tgr const &eGR) {
   size_t n = eGR.GetNbVert();
@@ -232,7 +223,6 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
   /* Reading key graph variables */
   size_t nbAdjacent = eGR.GetNbAdjacent();
   bool HasVertexColor = eGR.GetHasVertexColor();
-
 
   /* Now make the graph */
   SG_ALLOC(sg1, int(n), int(nbAdjacent), "malloc");
