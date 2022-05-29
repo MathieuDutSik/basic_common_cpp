@@ -19,6 +19,8 @@ std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {
   return eV;
 }
 
+
+
 // The difference V1 - V2
 template <typename T>
 std::vector<T> DifferenceVect(std::vector<T> const &V1,
@@ -28,8 +30,7 @@ std::vector<T> DifferenceVect(std::vector<T> const &V1,
     eSet2.insert(eVal);
   std::vector<T> eV;
   for (auto &eVal : V1) {
-    typename std::unordered_set<T>::iterator iter = eSet2.find(eVal);
-    if (iter == eSet2.end())
+    if (eSet2.count(eVal) == 0)
       eV.push_back(eVal);
   }
   return eV;
@@ -69,8 +70,7 @@ std::vector<T> IntersectionVect(std::vector<T> const &V1,
     eSet2.insert(eVal);
   std::vector<T> eV;
   for (auto &eVal : V1) {
-    typename std::unordered_set<T>::iterator iter = eSet2.find(eVal);
-    if (iter != eSet2.end())
+    if (eSet2.count(eVal) == 1)
       eV.push_back(eVal);
   }
   return eV;
