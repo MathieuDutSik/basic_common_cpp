@@ -250,52 +250,6 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
   return RetStr;
 }
 
-// Example of use eStrA="A B C D" and eStrB=" "
-std::vector<std::string> STRING_Split(std::string const &eStrA,
-                                      std::string const &eStrB) {
-  size_t lenA = eStrA.length();
-  size_t lenB = eStrB.length();
-  //  std::cerr << "lenA=" << lenA << " lenB=" << lenB << "\n";
-  std::vector<uint8_t> ListStatus(lenA, 1);
-  if (lenA >= lenB) {
-    for (size_t iA = 0; iA <= lenA - lenB; iA++)
-      if (ListStatus[iA] == 1) {
-        auto test = [&]() -> bool {
-          for (size_t iB = 0; iB < lenB; iB++)
-            if (eStrB[iB] != eStrA[iA + iB])
-              return false;
-          return true;
-        };
-        if (test())
-          for (size_t iB = 0; iB < lenB; iB++)
-            ListStatus[iA + iB] = 0;
-      }
-  }
-  /*
-  std::cerr << "ListStatus =";
-  for (size_t iA=0; iA<lenA; iA++)
-    std::cerr << " " << ListStatus[iA];
-    std::cerr << "\n";*/
-  std::vector<std::string> RetList;
-  size_t prev_idx = 0;
-  size_t iA = 0;
-  while (iA != lenA) {
-    if (ListStatus[iA] == 0) {
-      if (iA > prev_idx) {
-        RetList.push_back(eStrA.substr(prev_idx, iA - prev_idx));
-      }
-      iA += lenB;
-      prev_idx = iA;
-    } else {
-      iA++;
-    }
-  }
-  if (iA > prev_idx) {
-    RetList.push_back(eStrA.substr(prev_idx, iA - prev_idx));
-  }
-  return RetList;
-}
-
 template <typename F>
 void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F &f) {
   size_t lenA = eStrA.length();
@@ -318,11 +272,6 @@ void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F &f) {
         }
       }
   }
-  /*
-  std::cerr << "ListStatus =";
-  for (size_t iA=0; iA<lenA; iA++)
-    std::cerr << " " << ListStatus[iA];
-    std::cerr << "\n";*/
   size_t prev_idx = 0;
   size_t iA = 0;
   while (true) {
@@ -342,6 +291,20 @@ void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F &f) {
     f(eStrA.substr(prev_idx, iA - prev_idx));
   }
 }
+
+// Example of use eStrA="A B C D" and eStrB=" "
+std::vector<std::string> STRING_Split(std::string const &eStrA,
+                                      std::string const &eStrB) {
+  std::vector<std::string> RetList;
+  auto f=[&](std::string const& eStr) -> void {
+    RetList.push_back(eStr);
+  };
+  STRING_Split_f(eStrA, eStrB, f);
+  return RetList;
+}
+
+
+
 
 // The String is supposed to be "str0" + hs0 + "str1" + hs1 + "hs2"
 // and we return a standard vector of [hs0, hs1]
