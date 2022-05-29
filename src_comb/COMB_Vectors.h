@@ -3,8 +3,8 @@
 #define SRC_COMB_COMB_VECTORS_H_
 
 #include <set>
-#include <vector>
 #include <unordered_set>
+#include <vector>
 
 template <typename T>
 std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {

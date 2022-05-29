@@ -42,9 +42,9 @@
 
 // Functional code
 
-#include <utility>
 #include <algorithm>
 #include <functional>
+#include <utility>
 
 // IO streams
 

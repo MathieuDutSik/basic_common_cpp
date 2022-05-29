@@ -2,9 +2,9 @@
 #ifndef SRC_BASIC_STORAGESPACE_H_
 #define SRC_BASIC_STORAGESPACE_H_
 
+#include <algorithm>
 #include <utility>
 #include <vector>
-#include <algorithm>
 
 template <typename T> struct StorageSpaceLastN {
 public:

@@ -7,9 +7,9 @@
 #include "COMB_Stor.h"
 #include "COMB_Vectors.h"
 #include "MAT_Matrix.h"
+#include <algorithm>
 #include <limits>
 #include <vector>
-#include <algorithm>
 
 struct BlockIteration {
 public:

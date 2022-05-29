@@ -5,8 +5,8 @@
 #include <iostream>
 #include <map>
 #include <sstream>
-#include <vector>
 #include <string>
+#include <vector>
 
 template <typename T> T VectorSum(std::vector<T> const &eVect) {
   T eSum = 0;

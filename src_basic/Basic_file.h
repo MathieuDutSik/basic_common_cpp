@@ -6,10 +6,10 @@
 #include "Temp_common.h"
 #include <dirent.h>
 #include <errno.h>
+#include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <vector>
-#include <string>
 
 void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
   std::string eComm = "cp " + SrcFile + " " + DstFile;

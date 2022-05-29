@@ -3,8 +3,8 @@
 #define SRC_BASIC_TIMINGS_H_
 
 #include <chrono>
-#include <string>
 #include <iostream>
+#include <string>
 
 struct SingletonTime {
   std::chrono::time_point<std::chrono::system_clock> time;

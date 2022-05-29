@@ -3,10 +3,10 @@
 #define SRC_BASIC_BASIC_STRING_H_
 
 #include "Temp_common.h"
-#include <utility>
 #include <algorithm>
 #include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 
 std::string STRING_GETENV(std::string const &eStr) {

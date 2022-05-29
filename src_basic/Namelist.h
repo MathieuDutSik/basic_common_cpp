@@ -7,9 +7,9 @@
 #include "Temp_common.h"
 #include "hash_functions.h"
 #include <map>
+#include <string>
 #include <unordered_set>
 #include <utility>
-#include <string>
 #include <vector>
 
 struct SingleBlock {
@@ -353,9 +353,12 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
     std::cerr << "eFileName = " << eFileName << "\n";
     throw TerminalException{1};
   }
-  auto parsing_error_end=[&](std::string const& eBlockName, std::string const& eVarName, std::string const& TypeVar) -> void {
+  auto parsing_error_end = [&](std::string const &eBlockName,
+                               std::string const &eVarName,
+                               std::string const &TypeVar) -> void {
     std::cerr << "Error reading in the block " << eBlockName << "\n";
-    std::cerr << "Variable eVarName=" << eVarName << " should be a " << TypeVar << "\n";
+    std::cerr << "Variable eVarName=" << eVarName << " should be a " << TypeVar
+              << "\n";
     std::cerr << "Please correct your input file\n";
     throw TerminalException{1};
   };
