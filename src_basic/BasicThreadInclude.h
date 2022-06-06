@@ -12,5 +12,5 @@
 #include <thread>
 
 // clang-format off
-#endif // SRC_BASIC_BASICTHREADINCLUDE_H_
+#endif  // SRC_BASIC_BASICTHREADINCLUDE_H_
 // clang-format on
