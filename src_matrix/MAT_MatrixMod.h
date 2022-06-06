@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef INCLUDE_MAT_MATRIX_MOD_H
-#define INCLUDE_MAT_MATRIX_MOD_H
+#ifndef SRC_MATRIX_MAT_MATRIXMOD_H_
+#define SRC_MATRIX_MAT_MATRIXMOD_H_
 
 #include "MAT_MatrixInt.h"
 #include <vector>
@@ -117,4 +117,6 @@ MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const &M1, MyMatrix<T> const &M2,
   return NSP_red * M1;
 }
 
-#endif
+// clang-format off
+#endif  // SRC_MATRIX_MAT_MATRIXMOD_H_
+// clang-format on

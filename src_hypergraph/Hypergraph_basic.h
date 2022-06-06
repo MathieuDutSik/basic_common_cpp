@@ -81,4 +81,6 @@ MyMatrix<T> GetLaplacianMatrix(std::vector<T> const &ListEdgeWeight,
   return RetMat;
 }
 
-#endif // SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_
+// clang-format off
+#endif  // SRC_HYPERGRAPH_HYPERGRAPH_BASIC_H_
+// clang-format on

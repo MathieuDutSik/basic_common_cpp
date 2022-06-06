@@ -33,7 +33,8 @@ inline void serialize(Archive &ar, MyMatrix<T> &matrix,
   int cols = matrix.cols();
   ar &make_nvp("rows", rows);
   ar &make_nvp("cols", cols);
-  matrix.resize(rows, cols); // no-op if size does not change!
+  // matrix.resize is a no-op if size does not change!
+  matrix.resize(rows, cols);
   // always save/load row-major
   for (int r = 0; r < rows; ++r)
     for (int c = 0; c < cols; ++c)
@@ -81,8 +82,10 @@ inline void save(Archive &ar, MySparseMatrix<T> const &val,
   for (int k = 0; k < val.outerSize(); ++k)
     for (typename MySparseMatrix<T>::InnerIterator it(val, k); it; ++it) {
       T eVal = it.value();
-      int iRow = it.row(); // row index
-      int iCol = it.col(); // col index (here it is equal to k)
+       // row index
+      int iRow = it.row();
+      // col index (here it is equal to k)
+      int iCol = it.col();
       ar &make_nvp("iRow", iRow);
       ar &make_nvp("iCol", iCol);
       ar &make_nvp("eVal", eVal);
@@ -93,9 +96,7 @@ inline void save(Archive &ar, MySparseMatrix<T> const &val,
 template <class Archive, typename T>
 inline void serialize(Archive &ar, MySparseMatrix<T> &val,
                       const unsigned int version) {
-  //    std::cerr << "split_free(MySparseMatrix<T>), step 1\n";
   split_free(ar, val, version);
-  //    std::cerr << "split_free(MySparseMatrix<T>), step 2\n";
 }
 
 } // namespace boost::serialization
@@ -161,8 +162,10 @@ MySparseMatrix<T2> ConvertSparseMatrix(MySparseMatrix<T1> const &M,
     for (typename MySparseMatrix<T1>::InnerIterator it(M, k); it; ++it) {
       T1 eVal1 = it.value();
       T2 eVal2 = f(eVal1);
-      int iRow = it.row(); // row index
-      int iCol = it.col(); // col index (here it is equal to k)
+      // row index
+      int iRow = it.row();
+      // col index (here it is equal to k)
+      int iCol = it.col();
       tripletList[nb] = Ttrip(iRow, iCol, eVal2);
       nb++;
     }
@@ -935,7 +938,7 @@ Inverse(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
+inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
 Inverse(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
@@ -1178,7 +1181,7 @@ NullspaceTrMat(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
+inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
 NullspaceTrMat(MyMatrix<T> const &Input) {
   // No division allowed. Maybe faster if we can allow for it using mpz_class.
   size_t nbRow = Input.rows();
@@ -1274,7 +1277,7 @@ RankMat(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value), int>::type
+inline typename std::enable_if<!is_ring_field<T>::value, int>::type
 RankMat(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
@@ -1368,7 +1371,7 @@ DeterminantMat(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value), T>::type
+inline typename std::enable_if<!is_ring_field<T>::value, T>::type
 DeterminantMat(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
@@ -1556,7 +1559,7 @@ SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value),
+inline typename std::enable_if<!is_ring_field<T>::value,
                                std::optional<MyVector<T>>>::type
 SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   using Tfield = typename overlying_field<T>::field_type;
@@ -1649,7 +1652,7 @@ ColumnReductionSet(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value),
+inline typename std::enable_if<!is_ring_field<T>::value,
                                std::vector<int>>::type
 ColumnReductionSet(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
@@ -2382,7 +2385,7 @@ template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {
 
 template <typename T>
 inline
-    typename std::enable_if<(not std::is_arithmetic<T>::value), uint32_t>::type
+    typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
     Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
   std::stringstream s;
   int nbRow = M.rows();
@@ -2406,7 +2409,7 @@ Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
 
 template <typename T>
 inline
-    typename std::enable_if<(not std::is_arithmetic<T>::value), uint32_t>::type
+    typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
     Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
   std::stringstream s;
   int n = V.size();
@@ -2563,4 +2566,6 @@ template <typename T> MyVector<T> SignCanonicalizeVector(const MyVector<T> &V) {
   throw TerminalException{1};
 }
 
-#endif // SRC_MATRIX_MAT_MATRIX_H_
+// clang-format off
+#endif  // SRC_MATRIX_MAT_MATRIX_H_
+// clang-format on

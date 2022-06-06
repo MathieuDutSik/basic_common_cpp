@@ -52,4 +52,6 @@ MyMatrix<mpq_class> NullspaceTrMat_linbox(MyMatrix<mpq_class> const &M) {
   return Ker;
 }
 
-#endif // SRC_MATRIX_MATRIXLINBOX_H_
+// clang-format off
+#endif  // SRC_MATRIX_MATRIXLINBOX_H_
+// clang-format on

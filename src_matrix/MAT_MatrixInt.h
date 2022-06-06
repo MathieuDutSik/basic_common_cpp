@@ -125,7 +125,7 @@ void WriteGCD_int(std::ostream &os, GCD_int<T> const &eGCD) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not std::is_same_v<T, mpz_class>),
+inline typename std::enable_if<!std::is_same_v<T, mpz_class>,
                                GCD_int<T>>::type
 ComputePairGcd(T const &m, T const &n) {
   //  std::cerr << "m=" << m << " n=" << n << "\n";
@@ -287,7 +287,7 @@ inline
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_float_arithmetic<T>::value),
+inline typename std::enable_if<!is_float_arithmetic<T>::value,
                                MyVector<T>>::type
 RemoveFractionVector(MyVector<T> const &V) {
   return RemoveFractionVectorPlusCoeff(V).TheVect;
@@ -1825,7 +1825,7 @@ ComputeTranslationClasses(MyMatrix<T> const &Input) {
 }
 
 template <typename T, typename Tout>
-inline typename std::enable_if<(not is_ring_field<T>::value),
+inline typename std::enable_if<!is_ring_field<T>::value,
                                std::vector<MyVector<Tout>>>::type
 ComputeTranslationClasses(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
@@ -2204,7 +2204,7 @@ CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_ring_field<T>::value), MyMatrix<T>>::type
+inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
 CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
@@ -2212,4 +2212,6 @@ CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
   return UniversalMatrixConversion<T, Tfield>(OutputF);
 }
 
-#endif // SRC_MATRIX_MAT_MATRIXINT_H_
+// clang-format off
+#endif  // SRC_MATRIX_MAT_MATRIXINT_H_
+// clang-format on
