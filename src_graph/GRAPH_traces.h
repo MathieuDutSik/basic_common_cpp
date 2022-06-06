@@ -21,19 +21,19 @@ public:
   sparsegraph cg1;
   DataTraces(size_t _n, size_t _nbAdjacent) : n(_n), nbAdjacent(_nbAdjacent) {
     //    std::cerr << "Invoking DataTraces constructor\n";
-    lab1 = (int *)malloc(n * sizeof(int));
-    ptn = (int *)malloc(n * sizeof(int));
-    orbits = (int *)malloc(n * sizeof(int));
+    lab1 = reinterpret_cast<int*>(malloc(n * sizeof(int)));
+    ptn = reinterpret_cast<int*>(malloc(n * sizeof(int)));
+    orbits = reinterpret_cast<int*>(malloc(n * sizeof(int)));
     // We allocate the arrays for Traces
-    sg1.nv = int(n);
-    sg1.nde = int(nbAdjacent);
-    sg1.v = (size_t *)malloc(n * sizeof(size_t));
-    sg1.d = (int *)malloc(n * sizeof(int));
-    sg1.e = (int *)malloc(nbAdjacent * sizeof(int));
+    sg1.nv = static_cast<int>(n);
+    sg1.nde = static_cast<int>(nbAdjacent);
+    sg1.v = reinterpret_cast<size_t*>(malloc(n * sizeof(size_t)));
+    sg1.d = reinterpret_cast<int*>(malloc(n * sizeof(int)));
+    sg1.e = reinterpret_cast<int*>(malloc(nbAdjacent * sizeof(int)));
     sg1.w = NULL;
-    sg1.vlen = int(n);
-    sg1.dlen = int(n);
-    sg1.elen = int(nbAdjacent);
+    sg1.vlen = static_cast<int>(n);
+    sg1.dlen = static_cast<int>(n);
+    sg1.elen = static_cast<int>(nbAdjacent);
     sg1.wlen = 0;
     // We imitate SG_DECL here
     cg1.nv = 0;
