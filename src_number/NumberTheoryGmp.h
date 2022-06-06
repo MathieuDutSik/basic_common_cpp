@@ -424,7 +424,7 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, mpq_class &a2) {
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int &a2) {
   long eVal_long = a1.val.get_si();
-  a2 = int(eVal_long);
+  a2 = static_cast<int>(eVal_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
@@ -521,7 +521,7 @@ inline void FloorInteger(mpq_class const &xI, mpz_class &xO) {
 
 inline void FloorInteger(mpq_class const &xI, int &xO) {
   mpq_class xO_q = Floor_mpq(xI);
-  xO = int(xO_q.get_num().get_si());
+  xO = static_cast<int>(xO_q.get_num().get_si());
 }
 
 inline void FloorInteger(mpq_class const &xI, long &xO) {
@@ -540,7 +540,7 @@ inline void CeilInteger(mpq_class const &xI, mpz_class &xO) {
 
 inline void CeilInteger(mpq_class const &xI, int &xO) {
   mpq_class xO_q = Ceil_mpq(xI);
-  xO = int(xO_q.get_num().get_si());
+  xO = static_cast<int>(xO_q.get_num().get_si());
 }
 
 inline void CeilInteger(mpq_class const &xI, long &xO) {
@@ -670,7 +670,9 @@ inline void serialize(Archive &ar, mpz_class &val, const unsigned int version) {
   split_free(ar, val, version);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYGMP_H_

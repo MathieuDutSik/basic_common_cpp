@@ -21,7 +21,7 @@ template <typename T> T GenericGcd(T const &m, T const &n) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value), T>::type
+inline typename std::enable_if<!is_mpz_class<T>::value, T>::type
 KernelGcdPair(T const &a, T const &b) {
   return GenericGcd(a, b);
 }
@@ -36,13 +36,13 @@ GcdPair(T const &a, T const &b) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_totally_ordered<T>::value), T>::type
+inline typename std::enable_if<!is_totally_ordered<T>::value, T>::type
 GcdPair(T const &a, T const &b) {
   return KernelGcdPair(a, b);
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_mpz_class<T>::value), T>::type
+inline typename std::enable_if<!is_mpz_class<T>::value, T>::type
 KernelLCMpair(T const &a, T const &b) {
   if (a == 0)
     return b;
@@ -52,7 +52,7 @@ KernelLCMpair(T const &a, T const &b) {
 }
 
 template <typename T>
-inline typename std::enable_if<(not is_totally_ordered<T>::value), T>::type
+inline typename std::enable_if<!is_totally_ordered<T>::value, T>::type
 LCMpair(T const &a, T const &b) {
   return KernelLCMpair(a, b);
 }
