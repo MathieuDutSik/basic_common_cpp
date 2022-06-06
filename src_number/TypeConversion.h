@@ -400,10 +400,10 @@ std::pair<bool, T1> UniversalScalarConversionCheck(T2 const &a) {
 void NearestInteger_double_int(double const &xI, int &xO) {
   //  std::cerr << "Temp_common : NearestInteger\n";
   double xRnd_d = round(xI);
-  int xRnd_z = int(xRnd_d);
+  int xRnd_z = static_cast<int>(xRnd_d);
   //  std::cerr << "xI=" << xI << "\n";
   auto GetErr = [&](int const &u) -> double {
-    double diff = double(u) - xI;
+    double diff = static_cast<double>(u) - xI;
     if (diff < 0)
       return -diff;
     return diff;
@@ -432,7 +432,7 @@ void NearestInteger_double_int(double const &xI, int &xO) {
 template <typename To> void NearestInteger_double_To(double const &xI, To &xO) {
   //  std::cerr << "Temp_common : NearestInteger\n";
   double xRnd_d = round(xI);
-  int xRnd_i = int(xRnd_d);
+  int xRnd_i = static_cast<int>(xRnd_d);
   To xRnd_To = xRnd_i;
   //  std::cerr << "xI=" << xI << "\n";
   auto GetErr = [&](To const &u) -> double {
@@ -478,7 +478,7 @@ inline To UniversalCeilScalarInteger(Ti const &a) {
 }
 
 template <typename To, typename Ti>
-inline typename std::enable_if<(not std::is_same_v<Ti, double>), To>::type
+inline typename std::enable_if<!std::is_same_v<Ti, double>, To>::type
 UniversalNearestScalarInteger(Ti const &a) {
   To ret;
   NearestInteger(a, ret);
