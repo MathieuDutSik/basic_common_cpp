@@ -230,7 +230,7 @@ void WriteVectorInt_GAP(std::ostream &os, std::vector<T> const &OneInc) {
 
 std::vector<int> DivideListPosition(int const &len, int const &nbBlock) {
   std::vector<int> ListVal;
-  double fact = static<double>(len) / static_cast<double>(nbBlock);
+  double fact = static_cast<double>(len) / static_cast<double>(nbBlock);
   for (int i = 0; i <= nbBlock; i++) {
     double pos_d = fact * static_cast<double>(i);
     int pos_i;

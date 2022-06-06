@@ -394,7 +394,7 @@ template <typename T> struct hash<std::vector<T>> {
     }
     if constexpr (std::is_arithmetic<T>::value) {
       const T *ptr_T = V.data();
-      const uint8_t *ptr_i = reinterpret_cast<uint8_t*>(ptr_T);
+      const uint8_t *ptr_i = reinterpret_cast<const uint8_t*>(ptr_T);
       size_t len = sizeof(T) * V.size();
       uint32_t seed = 0x1b873540;
       return murmur3_32(ptr_i, len, seed);

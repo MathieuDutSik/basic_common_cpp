@@ -121,19 +121,28 @@ bool IsMinimal(GroupType const &eGroup, ArrMinimal &eArr,
     // red is less than blue
     // we search for the lexicographically minimal element
     for (int idx = 0; idx < lenBRW; idx++) {
-      if (eVectBRW.eVect[idx] == 1) {  // node is red
-        if (eArr.VectCompar[idx] == 2) // white, permutation may be useful
+      if (eVectBRW.eVect[idx] == 1) {
+        // node is red
+        if (eArr.VectCompar[idx] == 2) {
+          // white, permutation may be useful
           return 1;
-        if (eArr.VectCompar[idx] == 0) // blue, permutation cannot help
+        }
+        if (eArr.VectCompar[idx] == 0) {
+          // blue, permutation cannot help
           return 0;
+        }
         // last case is neutral, going forward
       }
-      if (eVectBRW.eVect[idx] == 0) {  // node is blue
-        if (eArr.VectCompar[idx] == 2) // white, permutation may be useful
+      if (eVectBRW.eVect[idx] == 0) {
+        // node is blue
+        if (eArr.VectCompar[idx] == 2) {
+          // white, permutation may be useful
           return 1;
-        if (eArr.VectCompar[idx] ==
-            1) // red, permutation allows to conclude non-minimality
+        }
+        if (eArr.VectCompar[idx] == 1) {
+          // red, permutation allows to conclude non-minimality
           return 2;
+        }
       }
     }
     return 1;

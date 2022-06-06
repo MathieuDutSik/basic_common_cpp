@@ -515,8 +515,10 @@ public:
     return eFace;
   }
   bool StdvectIncrement(std::vector<int> &Tvect) const {
-    if (k == 0) // Set is empty, no increment possible
+    if (k == 0) {
+      // Set is empty, no increment possible
       return false;
+    }
     Tvect[0]++;
     int xy2 = 1;
     while ((xy2 < k) && (Tvect[xy2 - 1] >= Tvect[xy2])) {
@@ -594,7 +596,7 @@ std::vector<T> MinimumDihedralOrbit(std::vector<T> const &eL) {
       return V2;
   }
   return V1;
-};
+}
 
 template <typename T1, typename T2>
 void SortParallel(std::vector<T1> &list1, std::vector<T2> &list2) {

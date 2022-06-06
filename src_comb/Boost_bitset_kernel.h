@@ -13,7 +13,6 @@
 typedef boost::dynamic_bitset<> Face;
 
 // Those are needed for the tsl::sparse_map
-//#define IMPLEMENT_COPY_OPERATOR_VECTFACE
 
 /* Basic bit operations */
 
@@ -74,18 +73,8 @@ public:
     return *this;
   }
 
-#ifdef IMPLEMENT_COPY_OPERATOR_VECTFACE
-  vectface(const vectface &vf) : n(vf.n), n_face(vf.n_face), V(vf.V) {}
-  vectface &operator=(const vectface &vf) {
-    n = vf.n;
-    n_face = vf.n_face;
-    V = vf.V;
-    return *this;
-  }
-#else
   vectface(const vectface &) = delete;
   vectface &operator=(const vectface &) = delete;
-#endif
 
   // The actual API
 
@@ -140,10 +129,14 @@ public:
       return false;
     if (n_face != vf.n_face)
       return false;
-    for (size_t u = 0; u < V.size();
-         u++) // Buggy code! If the vectface has been popped, then the
-              // comparison is meaningless.
+    size_t n_elt = n * n_face;
+    size_t q   = n_elt / 8;
+    size_t q8  = q * 8;
+    for (size_t u = 0; u < q; u++)
       if (V[u] != vf.V[u])
+        return false;
+    for (size_t i = q8; i<n_elt; i++)
+      if (getbit(V, i) != getbit(vf.V, i))
         return false;
     return true;
   }
@@ -153,10 +146,14 @@ public:
       return true;
     if (n_face != vf.n_face)
       return true;
-    for (size_t u = 0; u < V.size();
-         u++) // Buggy code! If the vectface has been popped, then the
-              // comparison is meaningless.
+    size_t n_elt = n * n_face;
+    size_t q   = n_elt / 8;
+    size_t q8  = q * 8;
+    for (size_t u = 0; u < q; u++)
       if (V[u] != vf.V[u])
+        return true;
+    for (size_t i = q8; i<n_elt; i++)
+      if (getbit(V, i) != getbit(vf.V, i))
         return true;
     return false;
   }
