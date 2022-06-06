@@ -136,9 +136,13 @@ template <> struct is_totally_ordered<int64_t> {
   static const bool value = true;
 };
 
-template <> struct is_totally_ordered<int32_t> { static const bool value = true; };
+template <> struct is_totally_ordered<int32_t> {
+  static const bool value = true;
+};
 
-template <> struct is_totally_ordered<int16_t> { static const bool value = true; };
+template <> struct is_totally_ordered<int16_t> {
+  static const bool value = true;
+};
 
 template <> struct is_totally_ordered<int8_t> {
   static const bool value = true;

@@ -19,8 +19,6 @@ std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {
   return eV;
 }
 
-
-
 // The difference V1 - V2
 template <typename T>
 std::vector<T> DifferenceVect(std::vector<T> const &V1,

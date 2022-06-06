@@ -296,15 +296,10 @@ void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F &f) {
 std::vector<std::string> STRING_Split(std::string const &eStrA,
                                       std::string const &eStrB) {
   std::vector<std::string> RetList;
-  auto f=[&](std::string const& eStr) -> void {
-    RetList.push_back(eStr);
-  };
+  auto f = [&](std::string const &eStr) -> void { RetList.push_back(eStr); };
   STRING_Split_f(eStrA, eStrB, f);
   return RetList;
 }
-
-
-
 
 // The String is supposed to be "str0" + hs0 + "str1" + hs1 + "hs2"
 // and we return a standard vector of [hs0, hs1]
