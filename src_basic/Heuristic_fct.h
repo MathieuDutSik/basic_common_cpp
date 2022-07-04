@@ -148,11 +148,10 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
       std::string eCond = eSingCond.eCond;
       std::string eType = eSingCond.eType;
       T eNum = eSingCond.NumValue;
-      auto search = TheCand.find(eCond);
-      T eValue = 0;
-      if (search != TheCand.end()) {
-        eValue = search->second;
-      } else {
+      auto get_value[&]() -> T {
+        auto search = TheCand.find(eCond);
+        if (search != TheCand.end())
+          return search->second;
         std::cerr << "Entry " << eCond << " is required by heuristic\n";
         std::cerr << "Yet it is missing in the Candidate. TheCand=\n";
         for (auto &kv : TheCand) {
@@ -161,6 +160,7 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
         std::cerr << "Please correct\n";
         throw TerminalException{1};
       }
+      T eValue = get_value();
       bool WeMatch = false;
       if (eValue > eNum && eType == ">")
         WeMatch = true;
@@ -198,6 +198,132 @@ HeuristicFromListString(std::vector<std::string> const &ListString) {
   std::remove(TheFile.c_str());
   return TheHeu;
 }
+
+
+// Standing for TCS = "Timing Computation Result"
+template <typename T>
+struct TimingComputationAttempt {
+  std::vector<std::pair<std::string,T>> keys;
+  std::string choice;
+};
+
+
+
+template <typename T>
+struct TimingComputationResult {
+  TimingComputationAttempt<T> input;
+  size_t result;
+};
+
+std::vector<std::pair<std::string,std::string>> ParseLineSeparator(std::string const& line)
+{
+  
+}
+
+
+std::optional<TimingComputationResult> ReadTimingComputationResult(std::string const& line, std::string const& name)
+{
+  
+}
+
+void PrintTimingComputationResult(std::ostream& os, TimingComputationResult const& eTCS, std::string const& name)
+{
+  os << "name=" << name << " ";
+  os << "keys=(";
+  bool IsFirst = true;
+  for (auto & eEnt : eTCS.input.keys) {
+    if (!IsFirst) {
+      os << ", ";
+    }
+    IsFirst = false;
+    os << eEnt.first << ":" << eEnt.second;
+  }
+  os << ") ";
+  os << " choice=" << eTCS.input.choice << " ";
+  os << "result=" << eTCS.result;
+  os << "\n";
+}
+
+
+
+//
+// We want to improve the heuristic stuff so that it is handled
+// directly by the code
+//
+// Design:
+// --- Things are done in two steps:
+//    --- First submitting the query and getting the result
+//    --- Then getting the result (and printing it)
+// --- For queries like "split", we have multiple queries going on
+//   where we need to wait for the result to be obtained.
+//   Therefore, this forces on us a recursive designs where we accumulate
+//   the queries one by one and then update later on.
+// --- Would it be better to have one data structure for "split", one for
+//   "DualDesc", one for XXX instead of just one bg data structure?
+//   Separate data structures are probably the better approach here.
+//   This is forced on us for the reading of information from file.
+// --- Actually a better design is to have a "name" for the heuristic so
+//   that it knows where to read the data.
+template <typename T>
+struct SelfCorrectingHeuristic {
+  std::string name;
+  std::ostream& os;
+  bool DoPrint;
+  TheHeuristic<T> heu;
+  std::vector<TimingComputationResult<T>> l_completed_info;
+  std::vector<TimingComputationAttempt<T>> l_submission;
+  
+  
+  SelfCorrectingHeuristic(std::string const& name, std::ostream& os, bool DoPrint) : name(name), os(_os), DoPrint(DoPrint) {
+  }
+  void InsertCompletedInfo(std::string const& file) {
+    if (!IsExistingFile(file)) {
+      std::cerr << "The file=" << file << " is missing.\n";
+      std::cerr << "Cannot parse it in SelfCorrectingHeuristic with name=" << name << "\n";
+      throw TerminalException{1};
+    }
+    std::istream is(file);
+    while (std::getline(is, line)) {
+      std::optional<TimingComputationResult<T>> opt = ReadTimingComputationResult<T>(line, name);
+      if (opt) {
+        l_completed_info.push_back(*opt);
+      }
+    }
+  }
+  std::string Kernel_GetEvaluation(std::map<std::string,T> const& TheCand) {
+    // Need to add the stuff
+    return HeuristicEvaluation(TheCand,heu);
+  }
+  std::string GetEvaluation(std::map<std::string,T> const& TheCand) {
+    std::string choice = Kernel_GetEvaluation(TheCand);
+    std::vector<std::pair<std::string,T>> keys;
+    for (auto & kv : TheCand) {
+      std::pair<std::string,T> ep{kv.first, kv.second};
+      keys.push_back(ep);
+    }
+    TimingComputationAttempt<T> tca{keys, choice};
+    l_submission.push_back(tca);
+  }
+  void SubmitResult(size_t result) {
+    Tinput einput = l_submission.front();
+    TimingComputationResult eTCS{einput, result};
+    l_completed_info.push_back(eTCS);
+    l_submission.pop();
+    if (DoPrint) {
+      PrintTimingComputationResult(os, eTCS, name);
+    }
+  }
+  ~SelfCorrectingHeuristic() {
+    if (l_submission.size() > 0) {
+      std::cerr << "The SelfCorrectingHeuristic terminates with some submission being uncompleted\n";
+      std::cerr << "Just so you know. Most likely, premature termination, otherwise a bug\n";
+    }
+  }
+}
+
+
+
+
 
 // clang-format off
 #endif  // SRC_BASIC_HEURISTIC_FCT_H_
