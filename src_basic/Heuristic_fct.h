@@ -215,23 +215,49 @@ struct TimingComputationResult {
   size_t result;
 };
 
-std::vector<std::pair<std::string,std::string>> ParseLineSeparator(std::string const& line)
+
+template <typename T>
+std::optional<TimingComputationResult<T>> ReadTimingComputationResult(std::string const& line, std::string const& name)
 {
-  
+  std::optional<std::vector<std::string>> opt;
+  opt = STRING_ParseSingleLine(line, {"name=", " keys=(", ") choice=", " result=", " END"});
+  if (!opt)
+    return {};
+  std::vector<std::string> LStr = *opt;
+  if (LStr[0] != name)
+    return {};
+  //
+  std::string str_keys = LStr[1];
+  std::vector<std::string> LStrKey = STRING_Split(str_keys, ", ");
+  std::vector<std::pair<std::string,T>> keys;
+  for (auto& eStr : LStr) {
+    std::vector<std::string> LStrB = STRING_Split(str_keys, ":");
+    if (LStrB.size() != 2)
+      return {};
+    std::string key = LStrB[0];
+    std::string str_val = LStrB[1];
+    T val = ParseScalar<T>(str_val);
+    std::pair<std::string,T> ep{key,val};
+    keys.push_back(ep);
+  }
+  //
+  std::string choice = LStr[2];
+  //
+  std::string str_result = LStr[3];
+  size_t result = ParseScalar<size_t>(str_result);
+  //
+  TimingComputationAttempt<T> tca{keys, choice};
+  TimingComputationResult<T> tcr{tca,result};
+  return tcr;
 }
 
-
-std::optional<TimingComputationResult> ReadTimingComputationResult(std::string const& line, std::string const& name)
+template <typename T>
+void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> const& eTCR, std::string const& name)
 {
-  
-}
-
-void PrintTimingComputationResult(std::ostream& os, TimingComputationResult const& eTCS, std::string const& name)
-{
-  os << "name=" << name << " ";
-  os << "keys=(";
+  os << "name=" << name;
+  os << " keys=(";
   bool IsFirst = true;
-  for (auto & eEnt : eTCS.input.keys) {
+  for (auto & eEnt : eTCR.input.keys) {
     if (!IsFirst) {
       os << ", ";
     }
@@ -239,9 +265,9 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult cons
     os << eEnt.first << ":" << eEnt.second;
   }
   os << ") ";
-  os << " choice=" << eTCS.input.choice << " ";
-  os << "result=" << eTCS.result;
-  os << "\n";
+  os << " choice=" << eTCR.input.choice;
+  os << " result=" << eTCR.result;
+  os << " END\n";
 }
 
 
@@ -272,8 +298,6 @@ struct SelfCorrectingHeuristic {
   TheHeuristic<T> heu;
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
-  
-  
   SelfCorrectingHeuristic(std::string const& name, std::ostream& os, bool DoPrint) : name(name), os(_os), DoPrint(DoPrint) {
   }
   void InsertCompletedInfo(std::string const& file) {
@@ -305,12 +329,12 @@ struct SelfCorrectingHeuristic {
     l_submission.push_back(tca);
   }
   void SubmitResult(size_t result) {
-    Tinput einput = l_submission.front();
-    TimingComputationResult eTCS{einput, result};
-    l_completed_info.push_back(eTCS);
+    TimingComputationAttempt<T> einput = l_submission.front();
+    TimingComputationResult<T> eTCR{einput, result};
+    l_completed_info.push_back(eTCR);
     l_submission.pop();
     if (DoPrint) {
-      PrintTimingComputationResult(os, eTCS, name);
+      PrintTimingComputationResult(os, eTCR, name);
     }
   }
   ~SelfCorrectingHeuristic() {
