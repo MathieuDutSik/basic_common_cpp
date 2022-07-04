@@ -14,7 +14,7 @@ std::vector<int> FaceToVector(Face const &eSet) {
   std::vector<int> eList(nbVert);
   boost::dynamic_bitset<>::size_type aRow = eSet.find_first();
   for (size_t i = 0; i < nbVert; i++) {
-    eList[i] = int(aRow);
+    eList[i] = static_cast<int>(aRow);
     aRow = eSet.find_next(aRow);
   }
   return eList;
@@ -36,7 +36,7 @@ std::string StringFace(Face const &f) {
   std::string str_ret;
   size_t len = f.size();
   for (size_t i = 0; i < len; i++)
-    str_ret += std::to_string(int(f[i]));
+    str_ret += std::to_string(static_cast<int>(f[i]));
   return str_ret;
 }
 
@@ -152,7 +152,7 @@ void WriteFaceGAP(std::ostream &os, Face const &f) {
   for (size_t i = 0; i < nb; i++) {
     if (i > 0)
       os << ",";
-    int eVal = int(aPos) + 1;
+    int eVal = static_cast<int>(aPos) + 1;
     os << eVal;
     aPos = f.find_next(aPos);
   }

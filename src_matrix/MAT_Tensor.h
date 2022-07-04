@@ -81,4 +81,6 @@ Eigen::Tensor<T, 3> ZeroTensor3(int const &a, int const &b, int const &c) {
   return TheTens;
 }
 
-#endif // SRC_MATRIX_MAT_TENSOR_H_
+// clang-format off
+#endif  // SRC_MATRIX_MAT_TENSOR_H_
+// clang-format on

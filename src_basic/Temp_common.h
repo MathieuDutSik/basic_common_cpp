@@ -211,7 +211,7 @@ CollectedResult<T> Collected(std::vector<T> const &eVect) {
 std::vector<int> StdVectorFirstNentries(size_t const &N) {
   std::vector<int> eList(N);
   for (size_t i = 0; i < N; i++)
-    eList[i] = int(i);
+    eList[i] = static_cast<int>(i);
   return eList;
 }
 
@@ -230,8 +230,9 @@ void WriteVectorInt_GAP(std::ostream &os, std::vector<T> const &OneInc) {
 
 std::vector<int> DivideListPosition(int const &len, int const &nbBlock) {
   std::vector<int> ListVal;
+  double fact = static_cast<double>(len) / static_cast<double>(nbBlock);
   for (int i = 0; i <= nbBlock; i++) {
-    double pos_d = (double(i) / double(nbBlock)) * double(len);
+    double pos_d = fact * static_cast<double>(i);
     int pos_i;
     NearestInteger_double_int(pos_d, pos_i);
     pos_i = std::max(0, pos_i);
@@ -268,9 +269,9 @@ SortingLists(std::vector<T> const &ListV) {
   std::vector<int> v1(len);
   std::vector<int> v2(len);
   for (size_t i = 0; i < len; i++) {
-    size_t eIdx = int(ListPair[i].i);
-    v1[i] = int(eIdx);
-    v2[eIdx] = int(i);
+    size_t eIdx = static_cast<int>(ListPair[i].i);
+    v1[i] = static_cast<int>(eIdx);
+    v2[eIdx] = static_cast<int>(i);
   }
   return {std::move(v1), std::move(v2)};
 }

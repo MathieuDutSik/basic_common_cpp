@@ -7,10 +7,10 @@
 #include "GRAPH_BitsetType.h"
 #include "GRAPH_GraphicalBasic.h"
 #include "MAT_Matrix.h"
+#include <limits>
 #include <string>
 #include <unordered_set>
 #include <vector>
-#include <limits>
 
 struct GraphFunctional {
 public:
@@ -548,7 +548,7 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
     for (size_t iP = 0; iP < Plen; iP++) {
       int pos = PositionVect(P[iP], iVert);
       if (pos != -1)
-        Label[iVert].push_back(int(iP));
+        Label[iVert].push_back(static_cast<int>(iP));
     }
   }
   return Label;
@@ -606,7 +606,7 @@ std::vector<std::vector<int>> InverseLineGraph(Tgr const &GR) {
 MyMatrix<int> CreateEmbedding(int const &StartPoint,
                               std::vector<std::vector<size_t>> const &ListEdge,
                               std::vector<std::vector<int>> const &ListLabel) {
-  int nbEdge = int(ListEdge.size());
+  int nbEdge = static_cast<int>(ListEdge.size());
   //
   size_t nbVert = 0;
   for (auto &eEdge : ListEdge)
@@ -637,13 +637,13 @@ MyMatrix<int> CreateEmbedding(int const &StartPoint,
       int eVert1 = -1, eVert2 = -1;
       if (eStat1 == 0 && eStat2 == 1) {
         RelPos = 0;
-        eVert1 = int(eEdge[1]);
-        eVert2 = int(eEdge[0]);
+        eVert1 = static_cast<int>(eEdge[1]);
+        eVert2 = static_cast<int>(eEdge[0]);
       }
       if (eStat2 == 0 && eStat1 == 1) {
         RelPos = 0;
-        eVert1 = int(eEdge[0]);
-        eVert2 = int(eEdge[1]);
+        eVert1 = static_cast<int>(eEdge[0]);
+        eVert2 = static_cast<int>(eEdge[1]);
       }
       if (RelPos != -1) {
         IsFinished = false;
@@ -700,7 +700,7 @@ int L1_distance(std::vector<int> const &V1, std::vector<int> const &V2) {
 template <typename Tgr>
 std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
                                              long const &MaxIter, long &iter) {
-  int s = int(s_sz);
+  int s = static_cast<int>(s_sz);
   iter = 0;
   if (!IsSimpleGraph(GR)) {
     std::cerr << "The graph should be simple\n";
@@ -893,7 +893,7 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
         if (eVal == std::vector<int>({1})) {
           eGR.AddAdjacent(iComp, jComp);
           eGR.AddAdjacent(jComp, iComp);
-        };
+        }
       }
     return eGR;
   };
@@ -1374,7 +1374,7 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
         return false;
       size_t len = TheTree.size();
       std::cerr << "TheTree len=" << len << "\n";
-      int lenPoss = int(TheTree[len - 1].ListPoss.size());
+      int lenPoss = static_cast<int>(TheTree[len - 1].ListPoss.size());
       std::cerr << "lenPoss=" << lenPoss << "\n";
       if (len == 1) {
         std::cerr << "ListPoss=";

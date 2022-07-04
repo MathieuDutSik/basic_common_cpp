@@ -3,8 +3,8 @@
 #define SRC_GRAPH_GRAPH_BITSETTYPE_H_
 
 #include "Boost_bitset.h"
-#include <vector>
 #include <limits>
+#include <vector>
 
 struct GraphBitset {
 public:

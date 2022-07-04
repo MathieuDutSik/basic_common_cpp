@@ -38,4 +38,6 @@ template <typename T> MyMatrix<T> SortUnicizeMatrix(MyMatrix<T> const &M) {
   return Mret;
 }
 
-#endif // SRC_MATRIX_MAT_FUNCTIONS_H_
+// clang-format off
+#endif  // SRC_MATRIX_MAT_FUNCTIONS_H_
+// clang-format on

@@ -119,9 +119,11 @@ bool IsMinimal(GroupType const &eGroup, VectRec const &eVect) {
     for (int i = 0; i < eVect.len; i++) {
       if (uVect[i] < eVectOrd[i])
         return true;
-      if (uVect[i] > eVectOrd[i]) // for the next item to be counterexample, it
-                                  // has to be equal
+      if (uVect[i] > eVectOrd[i]) {
+        // for the next item to be counterexample, it
+        // has to be equal
         return false;
+      }
     }
     return false;
   };

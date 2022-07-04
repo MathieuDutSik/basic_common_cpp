@@ -11,31 +11,37 @@ private:
   T b;
 
 public:
-  QuadField(QuadField<T, d> const &x) { // copy constructor
+  // copy constructor
+  QuadField(QuadField<T, d> const &x) {
     a = x.a;
     b = x.b;
   }
   //  QuadField<T,d>& operator=(QuadField<T,d> const&); // assignment operator
   //  QuadField<T,d>& operator=(T const&); // assignment operator from T
   //  QuadField<T,d>& operator=(int const&); // assignment operator from T
-  QuadField() { // constructor from nothing
+  // default constructor
+  QuadField() {
     a = 0;
     b = 0;
   }
-  QuadField(int const &u) { // constructor from integer
+  // constructor from integer
+  QuadField(int const &u) {
     a = u;
     b = 0;
   }
-  QuadField(T const &u) { // constructor from T
+  // constructor from T
+  QuadField(T const &u) {
     a = u;
     b = 0;
   }
-  QuadField<T, d> operator=(int const &u) { // assignment operator from int
+  // assignment operator from int
+  QuadField<T, d> operator=(int const &u) {
     a = u;
     b = 0;
     return *this;
   }
-  QuadField<T, d> operator=(QuadField<T, d> const &x) { // assignment operator
+  // assignment operator
+  QuadField<T, d> operator=(QuadField<T, d> const &x) {
     a = x.a;
     b = x.b;
     return *this;
@@ -97,7 +103,7 @@ public:
     double hA_d, hB_d, doubl_d;
     hA_d = a.get_d();
     hB_d = b.get_d();
-    doubl_d = (double)d;
+    doubl_d = static_cast<double>(d);
     return hA_d + sqrt(doubl_d) * hB_d;
   }
   void operator*=(QuadField<T, d> const &x) {

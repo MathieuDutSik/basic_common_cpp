@@ -208,4 +208,6 @@ void PrintEigenvalues(std::ostream &os, MyMatrix<T> const &eMat) {
   }
 }
 
-#endif // SRC_MATRIX_MAT_MATRIXFLT_H_
+// clang-format off
+#endif  // SRC_MATRIX_MAT_MATRIXFLT_H_
+// clang-format on

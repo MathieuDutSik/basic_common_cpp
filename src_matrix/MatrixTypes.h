@@ -20,4 +20,6 @@ using MyMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 template <typename T>
 using MySparseMatrix = Eigen::SparseMatrix<T, Eigen::ColMajor>;
 
-#endif // SRC_MATRIX_MATRIXTYPES_H_
+// clang-format off
+#endif  // SRC_MATRIX_MATRIXTYPES_H_
+// clang-format on

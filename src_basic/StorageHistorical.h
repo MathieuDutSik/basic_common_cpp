@@ -45,7 +45,7 @@ public:
     }
     bool HasFoundPlace = false;
     for (int i = 0; i < siz; i++) {
-      int deltaTime = int(eTime - ListFull[i].eTime);
+      int deltaTime = static_cast<int>(eTime - ListFull[i].eTime);
       if (deltaTime > ThePeriod)
         ListFull[i].status = false;
       if (!HasFoundPlace && !ListFull[i].status) {

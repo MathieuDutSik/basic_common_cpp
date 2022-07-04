@@ -381,7 +381,7 @@ template <typename T> std::size_t hash_from_stream(T const &val) {
 namespace std {
 template <typename T> struct hash<std::vector<T>> {
   std::size_t operator()(const std::vector<T> &V) const {
-    if constexpr (not std::is_arithmetic<T>::value) {
+    if constexpr (!std::is_arithmetic<T>::value) {
       auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
         seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
       };
@@ -394,7 +394,7 @@ template <typename T> struct hash<std::vector<T>> {
     }
     if constexpr (std::is_arithmetic<T>::value) {
       const T *ptr_T = V.data();
-      const uint8_t *ptr_i = (uint8_t *)ptr_T;
+      const uint8_t *ptr_i = reinterpret_cast<const uint8_t*>(ptr_T);
       size_t len = sizeof(T) * V.size();
       uint32_t seed = 0x1b873540;
       return murmur3_32(ptr_i, len, seed);
@@ -412,7 +412,9 @@ template <typename T1, typename T2> struct hash<std::pair<T1, T2>> {
     return seed;
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // clang-format off
 #endif  // SRC_BASIC_HASH_FUNCTIONS_H_

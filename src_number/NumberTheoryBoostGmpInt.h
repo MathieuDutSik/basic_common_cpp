@@ -49,13 +49,13 @@ std::string to_string(const boost::multiprecision::mpz_int &e_val) {
   s << e_val;
   std::string converted(s.str());
   return converted;
-};
+}
 std::string to_string(const boost::multiprecision::mpq_rational &e_val) {
   std::stringstream s;
   s << e_val;
   std::string converted(s.str());
   return converted;
-};
+}
 } // namespace std
 
 // boost serialization

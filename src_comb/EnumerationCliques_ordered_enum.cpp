@@ -139,8 +139,8 @@ void SetListPoss(GraphType const &eGraph, FullChain &eChain,
     }
   }
   int nbComplement = 0;
-  if (nbPossibility ==
-      0) { // no need to compute if there is already one reular extension
+  if (nbPossibility == 0) {
+    // no need to compute if there is already one reular extension
     auto IsNotMaximal = [&]() -> int {
       for (int iPoint = 0; iPoint < iPointStart; iPoint++)
         if (IsCorrect(iPoint))
