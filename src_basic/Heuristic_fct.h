@@ -148,7 +148,7 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
       std::string eCond = eSingCond.eCond;
       std::string eType = eSingCond.eType;
       T eNum = eSingCond.NumValue;
-      auto get_value[&]() -> T {
+      auto get_value=[&]() -> T {
         auto search = TheCand.find(eCond);
         if (search != TheCand.end())
           return search->second;
@@ -159,7 +159,7 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
         }
         std::cerr << "Please correct\n";
         throw TerminalException{1};
-      }
+      };
       T eValue = get_value();
       bool WeMatch = false;
       if (eValue > eNum && eType == ">")
@@ -231,7 +231,7 @@ std::optional<TimingComputationResult<T>> ReadTimingComputationResult(std::strin
   std::vector<std::string> LStrKey = STRING_Split(str_keys, ", ");
   std::vector<std::pair<std::string,T>> keys;
   for (auto& eStr : LStr) {
-    std::vector<std::string> LStrB = STRING_Split(str_keys, ":");
+    std::vector<std::string> LStrB = STRING_Split(eStr, ":");
     if (LStrB.size() != 2)
       return {};
     std::string key = LStrB[0];
@@ -298,7 +298,7 @@ struct SelfCorrectingHeuristic {
   TheHeuristic<T> heu;
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
-  SelfCorrectingHeuristic(std::string const& name, std::ostream& os, bool DoPrint) : name(name), os(_os), DoPrint(DoPrint) {
+  SelfCorrectingHeuristic(std::string const& name, std::ostream& os, bool DoPrint) : name(name), os(os), DoPrint(DoPrint) {
   }
   void InsertCompletedInfo(std::string const& file) {
     if (!IsExistingFile(file)) {
@@ -306,7 +306,8 @@ struct SelfCorrectingHeuristic {
       std::cerr << "Cannot parse it in SelfCorrectingHeuristic with name=" << name << "\n";
       throw TerminalException{1};
     }
-    std::istream is(file);
+    std::ifstream is(file);
+    std::string line;
     while (std::getline(is, line)) {
       std::optional<TimingComputationResult<T>> opt = ReadTimingComputationResult<T>(line, name);
       if (opt) {
@@ -343,7 +344,7 @@ struct SelfCorrectingHeuristic {
       std::cerr << "Just so you know. Most likely, premature termination, otherwise a bug\n";
     }
   }
-}
+};
 
 
 

@@ -304,7 +304,7 @@ std::vector<std::string> STRING_Split(std::string const &eStrA,
 // The String is supposed to be "str0" + hs0 + "str1" + hs1 + "hs2"
 // and we return a standard vector of [hs0, hs1]
 std::optional<std::vector<std::string>>
-STRING_ParseSingleLine_opt(std::string const &strin,
+STRING_ParseSingleLine(std::string const &strin,
                        std::vector<std::string> const &LStr) {
   size_t len1 = LStr[0].size();
   size_t lentot = strin.size();
