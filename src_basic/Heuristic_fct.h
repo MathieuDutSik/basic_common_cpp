@@ -290,6 +290,24 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> c
 //   This is forced on us for the reading of information from file.
 // --- Actually a better design is to have a "name" for the heuristic so
 //   that it knows where to read the data.
+//
+// Now the algorithm itself.
+// --- We need to keep the possibility of bypassing the Thompson sampling
+//   when we so want.
+//   This can be done by having an attribute FORC to some of the rules.
+// --- From the initial heuristic we can get many information:
+//    --- Which variables to consider.
+//    --- What are the allowed outputs.
+//    --- The maximal effective range of variables. It is true that for
+//      things like group size, an exponential profile may be better.
+//      but for the decision, that should actually be neutral. Since group
+//      size that triggers are typically small (say 100) in contrast to smaller
+// --- We can store the measurements and from that do some interpolation.
+// --- We can decrease the number of measurements used if it gets to wild.
+//   This can be done by merging points.
+// --- For interpolation, taking the inverse sqare distance is probably the
+//   best.
+//
 template <typename T>
 struct SelfCorrectingHeuristic {
   std::string name;
