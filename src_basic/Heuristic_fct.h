@@ -308,6 +308,16 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> c
 // --- For interpolation, taking the inverse sqare distance is probably the
 //   best.
 //
+// The Thompson sampling goes that way:
+// ---We have a number of measurements (or probability distribution) for each
+//    methods and inputs.
+// ---For each we compute the expected outcome of a choice by sampling the
+//    probability distribution.
+// ---We insert the result into the list of measurement (or update the probability
+//    distribution).
+// If we are using probability distributions, then it should have nice probability
+// distributions, see https://en.wikipedia.org/wiki/Conjugate_prior
+//
 template <typename T>
 struct SelfCorrectingHeuristic {
   std::string name;
