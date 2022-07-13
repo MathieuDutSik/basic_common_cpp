@@ -271,6 +271,66 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> c
 }
 
 
+struct LimitedEmpiricalDistributionFunction {
+  size_t n_max;
+  size_t n_ins;
+  std::map<double,size_t> ListValWei;
+  LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {
+    ListValWei.reserve(n_max);
+  }
+  void clear_entry() {
+    auto iter = ListValWei.begin();
+    double min_delta = std::numeric_limits<double>::max();
+    size_t pos = 0;
+    size_t pos_found = 0;
+    // Determine the smallest delta
+    while(true) {
+      auto iterN = iter++;
+      if (iterN == ListValWei.end())
+        break;
+      double delta = iterN->first - iter->first;
+      if (delta < min_delta) {
+        pos_found = pos;
+        min_delta = delta;
+      }
+      pos++;
+      iter++;
+    }
+    // Now clearing the entries
+    auto iter1 = ListValWei.begin() + pos_found;
+    auto iter2 = iter1++;
+    double val1 = iter1->first;
+    double val2 = iter2->first;
+    double w1 = iter1->second;
+    double w2 = iter2->second;
+    double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
+    double new_w = w1 + w2;
+    ListValWei.erase(val1);
+    ListValWei.erase(val2);
+    ListValWei[new_val] = new_w;
+  }
+  void insert_value(double new_val) {
+    ListValWei[new_val] += 1;
+    n_ins++;
+    if (ListValWei.size() > n_max) {
+      clear_entry();
+    }
+  }
+  double get_percentile(double const& alpha) const {
+    size_t sum_w = 0;
+    auto iter = ListValWei.begin();
+    size_t crit_w = round(alpha * n_ins);
+    while(true) {
+      sum_w += iter->second;
+      if (sum_w > crit_w)
+        return iter->first;
+      iter++;
+    }
+    std::cerr << "Failed to find an entry in the map\n";
+    throw TerminalException{1};
+  }
+};
+
 
 //
 // We want to improve the heuristic stuff so that it is handled
@@ -297,6 +357,8 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> c
 //   This can be done by having an attribute FORC to some of the rules.
 // --- From the initial heuristic we can get many information:
 //    --- Which variables to consider.
+//    --- The relative importance of the variable. First the number of
+//     vertices, then the size of the group.
 //    --- What are the allowed outputs.
 //    --- The maximal effective range of variables. It is true that for
 //      things like group size, an exponential profile may be better.
