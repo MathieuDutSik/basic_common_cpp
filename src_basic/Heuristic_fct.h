@@ -276,7 +276,6 @@ struct LimitedEmpiricalDistributionFunction {
   size_t n_ins;
   std::map<double,size_t> ListValWei;
   LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {
-    ListValWei.reserve(n_max);
   }
   void clear_entry() {
     auto iter = ListValWei.begin();
@@ -297,7 +296,9 @@ struct LimitedEmpiricalDistributionFunction {
       iter++;
     }
     // Now clearing the entries
-    auto iter1 = ListValWei.begin() + pos_found;
+    auto iter1 = ListValWei.begin();
+    for (size_t u=0; u<pos_found; u++)
+      iter1++;
     auto iter2 = iter1++;
     double val1 = iter1->first;
     double val2 = iter2->first;
@@ -334,10 +335,8 @@ struct LimitedEmpiricalDistributionFunction {
   std::string string() const {
     std::string str_ret;
     bool IsFirst = true;
+    auto iter = ListValWei.begin();
     while(true) {
-      sum_w += iter->second;
-      if (sum_w > crit_w)
-        return iter->first;
       if (!IsFirst)
         str_ret += ", ";
       if (IsFirst)
