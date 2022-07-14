@@ -278,16 +278,20 @@ struct LimitedEmpiricalDistributionFunction {
   LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {
   }
   void clear_entry() {
+    //    std::cerr << "|ListValWei|=" << ListValWei.size() << "\n";
     auto iter = ListValWei.begin();
     double min_delta = std::numeric_limits<double>::max();
     size_t pos = 0;
     size_t pos_found = 0;
     // Determine the smallest delta
     while(true) {
-      auto iterN = iter++;
+      auto iterN = iter;
+      iterN++;
       if (iterN == ListValWei.end())
         break;
+      //      std::cerr << "pos=" << pos << "  val=" << iter->first << " mult=" << iter->second << "\n";
       double delta = iterN->first - iter->first;
+      //      std::cerr << "   delta=" << delta << "\n";
       if (delta < min_delta) {
         pos_found = pos;
         min_delta = delta;
@@ -295,11 +299,13 @@ struct LimitedEmpiricalDistributionFunction {
       pos++;
       iter++;
     }
+    //    std::cerr << "NEXT : pos_found=" << pos_found << " |ListValWei|=" << ListValWei.size() << "\n";
     // Now clearing the entries
     auto iter1 = ListValWei.begin();
     for (size_t u=0; u<pos_found; u++)
       iter1++;
-    auto iter2 = iter1++;
+    auto iter2 = iter1;
+    iter2++;
     double val1 = iter1->first;
     double val2 = iter2->first;
     double w1 = iter1->second;
