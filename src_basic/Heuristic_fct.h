@@ -325,9 +325,30 @@ struct LimitedEmpiricalDistributionFunction {
       if (sum_w > crit_w)
         return iter->first;
       iter++;
+      if (iter == ListValWei.end()) {
+        std::cerr << "Failed to find an entry in the map\n";
+        throw TerminalException{1};
+      }
     }
-    std::cerr << "Failed to find an entry in the map\n";
-    throw TerminalException{1};
+  }
+  std::string string() const {
+    std::string str_ret;
+    bool IsFirst = true;
+    while(true) {
+      sum_w += iter->second;
+      if (sum_w > crit_w)
+        return iter->first;
+      if (!IsFirst)
+        str_ret += ", ";
+      if (IsFirst)
+        IsFirst = false;
+      str_ret += "(" + std::to_string(iter->first) + "," + std::to_string(iter->second) + ")";
+      iter++;
+      if (iter == ListValWei.end()) {
+        break;
+      }
+    }
+    return str_ret;
   }
 };
 
