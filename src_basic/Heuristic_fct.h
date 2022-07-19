@@ -210,11 +210,11 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
                       std::vector<std::string> const &ListFullCond,
                       std::vector<std::string> const &ListConclusion) {
   std::vector<OneFullCondition<T>> AllTests;
-  if (ListCond.size() != ListConclusion.size()) {
+  if (ListFullCond.size() != ListConclusion.size()) {
     std::cerr << "ListCond length different from ListConclusion length\n";
     throw TerminalException{1};
   }
-  for (size_t i=0; i<ListCond.size(); i++) {
+  for (size_t i=0; i<ListFullCond.size(); i++) {
     std::string const& eFullCond = ListFullCond[i];
     size_t len = eFullCond.size();
     std::string char1 = "(";
@@ -269,7 +269,7 @@ void CheckHeuristicOutput(TheHeuristic<T> const& heu, std::vector<std::string> c
 {
   auto check=[&](std::string const& output) -> void {
     if (PositionVect(ListAllowedOutput, output) == -1) {
-      std::cerr << "The possible output=" << eCond << " is not allowed\n";
+      std::cerr << "The possible output=" << output << " is not allowed\n";
       std::cerr << "ListAlowedOutput =";
       for (auto & eStr : ListAllowedOutput)
         std::cerr << " " << eStr;
@@ -280,7 +280,7 @@ void CheckHeuristicOutput(TheHeuristic<T> const& heu, std::vector<std::string> c
   for (auto & eFullCond : heu.AllTests) {
     check(eFullCond.TheResult);
   }
-  check(eFullCond.DefaultResult);
+  check(heu.DefaultResult);
 }
 
 
