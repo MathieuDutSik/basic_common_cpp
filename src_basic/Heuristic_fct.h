@@ -4,6 +4,7 @@
 
 #include "Basic_file.h"
 #include "Temp_common.h"
+#include "Namelist.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -13,6 +14,20 @@ template <typename T> struct SingleCondition {
   std::string eType;
   T NumValue;
 };
+
+void CheckEType(std::string const& eType)
+{
+  std::vector<std::string> LTypes{">", ">=", "=", "<", "<="};
+  if (PositionVect(LTypes, eType) == -1) {
+    std::cerr << "We found eType=" << eType << "\n";
+    std::cerr << "But the allowed types are";
+    for (auto & eStr : LTypes)
+      std::cerr << " " << eStr;
+    std::cerr << "\n";
+    throw TerminalException{1};
+  }
+}
+
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os,
@@ -84,17 +99,7 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
       is >> eCond;
       is >> eType;
       is >> eNum;
-      std::vector<std::string> ListType{">", "<", "=", "<=", ">="};
-      bool IsMatch = false;
-      for (auto &eTypePos : ListType) {
-        if (eTypePos == eType)
-          IsMatch = true;
-      }
-      if (!IsMatch) {
-        std::cerr
-            << "Only allowed possibilities for eType are <, >, =, <= and >=\n";
-        throw TerminalException{1};
-      }
+      CheckEType(eType);
       if (eCond.size() == 0) {
         std::cerr << "eCond must be nontrivial otherwise evaluation will be "
                      "impossible\n";
@@ -198,6 +203,90 @@ HeuristicFromListString(std::vector<std::string> const &ListString) {
   std::remove(TheFile.c_str());
   return TheHeu;
 }
+
+template <typename T>
+TheHeuristic<T>
+HeuristicFrom_LS_LS_S(std::string const &Default,
+                      std::vector<std::string> const &ListFullCond,
+                      std::vector<std::string> const &ListConclusion) {
+  std::vector<OneFullCondition<T>> AllTests;
+  if (ListCond.size() != ListConclusion.size()) {
+    std::cerr << "ListCond length different from ListConclusion length\n";
+    throw TerminalException{1};
+  }
+  for (size_t i=0; i<ListCond.size(); i++) {
+    std::string const& eFullCond = ListFullCond[i];
+    size_t len = eFullCond.size();
+    std::string char1 = "(";
+    std::string char1 = ")";
+    for (size_t iC=0; iC<len; iC++) {
+      std::string eC = eFullCond.substr(iC,1);
+      if (eC == char1 || eC == char2) {
+        std::cerr << "Use of forbidden character eC=" << eC << " in the condition\n";
+        throw TerminalException{1};
+      }
+    }
+    std::vector<SingleCondition<T>> TheConditions;
+    std::vector<std::string> LStr = STRING_Split(eFullCond, "&&");
+    for (auto & eStr : LStr) {
+      std::vector<std::string> LStrB = STRING_Split(eStr, " ");
+      if (LStrB.size() != 3) {
+        std::cerr << "|LStrB|=" << LStrB.size() << "\n";
+        throw TerminalException{1};
+      }
+      std::string eCond = LStrB[0];
+      std::string eType = LStrB[1];
+      CheckEType(eType);
+      T eNum = ParseScalar<T>(LStrB[2]);
+      SingleCondition<T> eSingCond{eCond, eType, eNum};
+      TheCondition.push_back(eSingCond);
+    }
+    std::string TheResult = ListConclusion[i];
+    AllTests.push_back({TheConditions, eConcl});
+  }
+  return {std::move(AllTests), Default};
+}
+
+template <typename T>
+void CheckHeuristicInput(TheHeuristic<T> const& heu, std::vector<std::string> const& ListAllowedInput)
+{
+  for (auto & eFullCond : heu.AllTests) {
+    for (auto & eCond : eFullCond.TheConditions) {
+      if (PositionVect(ListAllowedInput, eCond) == -1) {
+        std::cerr << "The variable eCond=" << eCond << " is not allowed on input\n";
+        std::cerr << "ListAlowedInput =";
+        for (auto & eStr : ListAllowedInput)
+          std::cerr << " " << eStr;
+        std::cerr << "\n";
+        throw TerminalException{1};
+      }
+    }
+  }
+}
+
+template <typename T>
+void CheckHeuristicOutput(TheHeuristic<T> const& heu, std::vector<std::string> const& ListAllowedOutput)
+{
+  auto check=[&](std::string const& output) -> void {
+    if (PositionVect(ListAllowedOutput, output) == -1) {
+      std::cerr << "The possible output=" << eCond << " is not allowed\n";
+      std::cerr << "ListAlowedOutput =";
+      for (auto & eStr : ListAllowedOutput)
+        std::cerr << " " << eStr;
+      std::cerr << "\n";
+      throw TerminalException{1};
+    }
+  };
+  for (auto & eFullCond : heu.AllTests) {
+    check(eFullCond.TheResult);
+  }
+  check(eFullCond.DefaultResult);
+}
+
+
+
+
+
 
 
 // Standing for TCS = "Timing Computation Result"
@@ -358,6 +447,73 @@ struct LimitedEmpiricalDistributionFunction {
 };
 
 
+FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
+  std::map<std::string, SingleBlock> ListBlock;
+  // PROBABILITY DISTRIBUTIONS
+  {
+    std::map<std::string, std::vector<std::string>> ListListStringValues;
+    std::map<std::string, std::vector<int>> ListListIntValues;
+    ListListStringValues["ListName"] = {"distri1", "distri2", "distri3", "distri4"};
+    ListListIntValues["ListN"] = {100, 100, -1, -1};
+    ListListStringValues["ListNature"] = {"dirac", "sampled", "file_select", "file"};
+    ListListStringValues["ListDescription"] = {"145", "130:50 145:30 150:20", "InputA_key1_val1_key2_val2", "InputB"};
+    SingleBlock BlockPROBA;
+    BlockPROBA.ListListStringValues = ListListStringValues;
+    BlockPROBA.ListListIntValues = ListListIntValues;
+    ListBlock["PROBABILITY_DISTRIBUTIONS"] = BlockPROBA;
+  }
+  // SINGLE THOMPSON STATE
+  {
+    std::map<std::string, std::vector<std::string>> ListListStringValues;
+    ListListStringValues["ListAnswer"] = {"cdd", "lrs"};
+    ListListStringValues["ListName"] = {"state1", "state2"};
+    ListListStringValues["ListDescription"] = {"cdd:distri1 lrs:distri2", "cdd:distri1 lrs:distri3"};
+    SingleBlock BlockTHOMPSON;
+    BlockTHOMPSON.ListListStringValues = ListListStringValues;
+    ListBlock["THOMPSON_STATE"] = BlockTHOMPSON;
+  }
+  // GROUPING
+  {
+    std::map<std::string, std::vector<std::string>> ListListStringValues;
+    ListListStringValues["ListKey"] = {"incidence", "groupsize"};
+    ListListStringValues["ListDescription"] = {"superfine", "1-10,11-20,21-infinit"};
+    SingleBlock BlockGROUP;
+    BlockGROUP.ListListStringValues = ListListStringValues;
+    ListBlock["GROUPINGS"] = BlockGROUP;
+  }
+  // PRIOR
+  {
+    std::map<std::string, std::string> ListStringValues;
+    std::map<std::string, bool> ListBoolValues;
+    std::map<std::string, std::vector<std::string>> ListListStringValues;
+    ListStringValues["DefaultPrior"] = "noprior";
+    ListListStringValues["ListCond"] = {"incidence > 15 && groupsize > 10", "incidence GroupEXT"};
+    ListListStringValues["ListConclusion"] = {"state1", "state2"};
+    SingleBlock BlockPRIOR;
+    BlockPRIOR.ListBoolValues = ListBoolValues;
+    BlockPRIOR.ListStringValues = ListStringValues;
+    BlockPRIOR.ListListStringValues = ListListStringValues;
+    ListBlock["PRIORS"] = BlockPRIOR;
+  }
+  // IO
+  {
+    std::map<std::string, std::string> ListStringValues;
+    std::map<std::string, bool> ListBoolValues;
+    ListStringValues["name"] = "split";
+    ListBoolValues["ProcessExistingDataIfExist"] = false;
+    ListBoolValues["WriteLog"] = false;
+    ListStringValues["LogFileProcessing"] = "irrelevant";
+    SingleBlock BlockIO;
+    BlockIO.ListBoolValues = ListBoolValues;
+    BlockIO.ListStringValues = ListStringValues;
+    BlockIO.ListListStringValues = ListListStringValues;
+    ListBlock["IO"] = BlockIO;
+  }
+  // Merging all data
+  return {std::move(ListBlock), "undefined"};
+}
+
+
 //
 // We want to improve the heuristic stuff so that it is handled
 // directly by the code
@@ -406,15 +562,41 @@ struct LimitedEmpiricalDistributionFunction {
 // If we are using probability distributions, then it should have nice probability
 // distributions, see https://en.wikipedia.org/wiki/Conjugate_prior
 //
+// Further thinking:
+// ---We can think of the initial heuristic as a kind of prior put for the heuristic.
+// ---This solves following problem:
+//    ---If we want to force the decision in some case, we simply put the distribution
+//       appropriately.
+//    ---It allows to integrate the heuristics with the Thompson sampling.
+//    ---
+// ---This cause many major problems:
+//    ---It forces us to put numbers for the runtime.
+//    ---We have to set up some probability distributions for each case and that
+//       can be intensive in term of text files and thinking about the input.
+//    ---We need to choose the sampling size at the beginning.
+//    ---We need to be able to start on no-prior, all methods equally acceptable at the start.
+//    ---We can write a
+//    ---We can two many categories
+// ---The problem is that this force us to give runtimes in advance. And this can
+//    be an issue since we have to effectively measure by ourselves
+// ---We can have heuristic grouped by 
+//
 template <typename T>
-struct SelfCorrectingHeuristic {
-  std::string name;
+struct ThompsonSamplingHeuristic {
   std::ostream& os;
-  bool DoPrint;
+  std::string name;
+  bool WriteLog;
   TheHeuristic<T> heu;
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
-  SelfCorrectingHeuristic(std::string const& name, std::ostream& os, bool DoPrint) : name(name), os(os), DoPrint(DoPrint) {
+  ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
+    SingleBlock const& BlockPROBA = TS.ListBlock["PROBABILITY_DISTRIBUTIONS"];
+    SingleBlock const& BlockTHOMPSON = TS.ListBlock["THOMPSON_STATE"];
+    SingleBlock const& BlockPRIOR = TS.ListBlock["PRIORS"];
+    SingleBlock const& BlockIO = TS.ListBlock["IO"];
+    name = BlockIO.ListStringValues["name"];
+    WriteLog = BlockIO.ListBoolValues["WriteLog"];
+    
   }
   void InsertCompletedInfo(std::string const& file) {
     if (!IsExistingFile(file)) {
