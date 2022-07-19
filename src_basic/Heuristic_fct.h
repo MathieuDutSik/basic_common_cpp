@@ -218,7 +218,7 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
     std::string const& eFullCond = ListFullCond[i];
     size_t len = eFullCond.size();
     std::string char1 = "(";
-    std::string char1 = ")";
+    std::string char2 = ")";
     for (size_t iC=0; iC<len; iC++) {
       std::string eC = eFullCond.substr(iC,1);
       if (eC == char1 || eC == char2) {
@@ -239,10 +239,10 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
       CheckEType(eType);
       T eNum = ParseScalar<T>(LStrB[2]);
       SingleCondition<T> eSingCond{eCond, eType, eNum};
-      TheCondition.push_back(eSingCond);
+      TheConditions.push_back(eSingCond);
     }
     std::string TheResult = ListConclusion[i];
-    AllTests.push_back({TheConditions, eConcl});
+    AllTests.push_back({TheConditions, TheResult});
   }
   return {std::move(AllTests), Default};
 }
@@ -487,7 +487,7 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
     std::map<std::string, bool> ListBoolValues;
     std::map<std::string, std::vector<std::string>> ListListStringValues;
     ListStringValues["DefaultPrior"] = "noprior";
-    ListListStringValues["ListCond"] = {"incidence > 15 && groupsize > 10", "incidence GroupEXT"};
+    ListListStringValues["ListFullCond"] = {"incidence > 15 && groupsize > 10", "incidence GroupEXT"};
     ListListStringValues["ListConclusion"] = {"state1", "state2"};
     SingleBlock BlockPRIOR;
     BlockPRIOR.ListBoolValues = ListBoolValues;
@@ -506,7 +506,6 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
     SingleBlock BlockIO;
     BlockIO.ListBoolValues = ListBoolValues;
     BlockIO.ListStringValues = ListStringValues;
-    BlockIO.ListListStringValues = ListListStringValues;
     ListBlock["IO"] = BlockIO;
   }
   // Merging all data
@@ -590,13 +589,18 @@ struct ThompsonSamplingHeuristic {
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
   ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
-    SingleBlock const& BlockPROBA = TS.ListBlock["PROBABILITY_DISTRIBUTIONS"];
-    SingleBlock const& BlockTHOMPSON = TS.ListBlock["THOMPSON_STATE"];
-    SingleBlock const& BlockPRIOR = TS.ListBlock["PRIORS"];
-    SingleBlock const& BlockIO = TS.ListBlock["IO"];
-    name = BlockIO.ListStringValues["name"];
-    WriteLog = BlockIO.ListBoolValues["WriteLog"];
-    
+    SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
+    SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_STATE");
+    SingleBlock const& BlockPRIOR = TS.ListBlock.at("PRIORS");
+    SingleBlock const& BlockIO = TS.ListBlock.at("IO");
+    name = BlockIO.ListStringValues.at("name");
+    WriteLog = BlockIO.ListBoolValues.at("WriteLog");
+    //
+    std::string const& DefaultPrior = BlockPRIOR.ListStringValues.at("DefaultPrior");
+    std::vector<std::string> const& ListFullCond = BlockPRIOR.ListListStringValues.at("ListFullCond");
+    std::vector<std::string> const& ListConclusion = BlockPRIOR.ListListStringValues.at("ListConclusion");
+    heu = HeuristicFrom_LS_LS_S<T>(DefaultPrior, ListFullCond, ListConclusion);
+
   }
   void InsertCompletedInfo(std::string const& file) {
     if (!IsExistingFile(file)) {
@@ -632,11 +636,11 @@ struct ThompsonSamplingHeuristic {
     TimingComputationResult<T> eTCR{einput, result};
     l_completed_info.push_back(eTCR);
     l_submission.pop();
-    if (DoPrint) {
+    if (WriteLog) {
       PrintTimingComputationResult(os, eTCR, name);
     }
   }
-  ~SelfCorrectingHeuristic() {
+  ~ThompsonSamplingHeuristic() {
     if (l_submission.size() > 0) {
       std::cerr << "The SelfCorrectingHeuristic terminates with some submission being uncompleted\n";
       std::cerr << "Just so you know. Most likely, premature termination, otherwise a bug\n";
