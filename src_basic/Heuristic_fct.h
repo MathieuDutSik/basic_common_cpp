@@ -289,10 +289,9 @@ void CheckHeuristicOutput(TheHeuristic<T> const& heu, std::vector<std::string> c
 
 
 
-// Standing for TCS = "Timing Computation Result"
 template <typename T>
 struct TimingComputationAttempt {
-  std::vector<std::pair<std::string,T>> keys;
+  std::map<std::pair<std::string,T>> keys;
   std::string choice;
 };
 
@@ -567,6 +566,71 @@ struct SingleThompsonSamplingState {
 
 
 
+template<typename T>
+struct KeyCompression {
+  std::vector<std::string> ListKey;
+  std::vector<std::vector<std::pair<size_t,size_t>>> ll_interval;
+  KeyCompression(std::vector<std::string> const& ListKey, std::vector<std::string> const& Listdescription) : ListKey(ListKey) {
+    if (ListKey.size() != ListDescription.size()) {
+      std::cerr << "KeyCompression: ListKey and ListDescription should have the same length\n";
+      throw TerminalException{1};
+    }
+    for (auto & eDesc : ListDescription) {
+      std::vector<std::pair<size_t,size_t>> l_interval;
+      if (eDesc != "superfine") {
+        std::vector<std::string> LStr = STRING_Split(eDesc, ",");
+        for (auto & eStr : LStr) {
+          std::vector<std::string> LStrB = STRING_Split(eStr, "-");
+          if (LStrB.size() != 1 && LStrB.size() != 2) {
+            std::cerr << "The possible format are XX or XX-YY not XX-YY-ZZ\n";
+            throw TerminalExcepton{1};
+          }
+          auto get_value=[](std::string const& inp) -> size_t {
+            if (inp == "infinity") {
+              return std::numeric_limits<size_t>::max();
+            }
+            return ParseScalar<size_t>(inp);
+          };
+          if (LStrB.size() == 1) {
+            size_t val = get_value(LStrB[0]);
+            l_interval.push_back({val,val});
+          }
+          if (LStrB.size() == 2) {
+            size_t val1 = get_value(LStrB[0]);
+            size_t val2 = get_value(LStrB[1]);
+            l_interval.push_back({val1,val2});
+          }
+        }
+      }
+      ll_interval.push_back(l_interval);
+    }
+  }
+  size_t get_index(std::vector<std::pair<size_t,size_t>> const& l_interval, T const& val) {
+    size_t val_sz = std::numeric_limits<size_t>::max();
+    T val_sz2 = UniversalScalarConversion<T,size_t>(val_sz);
+    if (val < val_sz2)
+      val_sz = UniversalScalarConversion<size_t,T>(val);
+    if (l_interval.size() == 0) { // It is superfine case
+      return val_sz;
+    }
+    for (size_t u=0; u<l_interval.size(); u++) {
+      if (l_interval[u].first <= val_sz && val_sz <= l_interval[u].second)
+        return u;
+    }
+    std::cerr << "Failed to find a matching index\n";
+    throw TerminalException{1};
+  }
+  std::vector<size_t> get_key_compression(std::map<std::string,T> const& map_key) const {
+    size_t len = ListKey.size();
+    std::vector<size_t> l_idx(len);
+    for (size_t u=0; u<List; u++) {
+      T val = map_key[ListKey[u]];
+      l_idx[u] = get_index(ll_interval[u], val);
+    }
+    return l_idx;
+  }
+};
+
 
 
 
@@ -596,18 +660,18 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
     ListListStringValues["ListDescription"] = {"cdd:distri1 lrs:distri2", "cdd:distri1 lrs:distri3"};
     SingleBlock BlockTHOMPSON;
     BlockTHOMPSON.ListListStringValues = ListListStringValues;
-    ListBlock["THOMPSON_STATE"] = BlockTHOMPSON;
+    ListBlock["THOMPSON_PRIOR"] = BlockTHOMPSON;
   }
-  // GROUPING
+  // KEY_COMPRESSION
   {
     std::map<std::string, std::vector<std::string>> ListListStringValues;
     ListListStringValues["ListKey"] = {"incidence", "groupsize"};
     ListListStringValues["ListDescription"] = {"superfine", "1-10,11-20,21-infinit"};
-    SingleBlock BlockGROUP;
-    BlockGROUP.ListListStringValues = ListListStringValues;
-    ListBlock["GROUPINGS"] = BlockGROUP;
+    SingleBlock BlockCOMPRESSION;
+    BlockCOMPRESSION.ListListStringValues = ListListStringValues;
+    ListBlock["KEY_COMPRESSION"] = BlockCOMPRESSION;
   }
-  // PRIOR
+  // HEURISTIC PRIOR
   {
     std::map<std::string, std::string> ListStringValues;
     std::map<std::string, bool> ListBoolValues;
@@ -615,11 +679,11 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
     ListStringValues["DefaultPrior"] = "noprior";
     ListListStringValues["ListFullCond"] = {"incidence > 15 && groupsize > 10", "incidence GroupEXT"};
     ListListStringValues["ListConclusion"] = {"state1", "state2"};
-    SingleBlock BlockPRIOR;
-    BlockPRIOR.ListBoolValues = ListBoolValues;
-    BlockPRIOR.ListStringValues = ListStringValues;
-    BlockPRIOR.ListListStringValues = ListListStringValues;
-    ListBlock["PRIORS"] = BlockPRIOR;
+    SingleBlock BlockHEU;
+    BlockHEU.ListBoolValues = ListBoolValues;
+    BlockHEU.ListStringValues = ListStringValues;
+    BlockHEU.ListListStringValues = ListListStringValues;
+    ListBlock["HEURISTIC_PRIOR"] = BlockHEU;
   }
   // IO
   {
@@ -637,7 +701,6 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
   // Merging all data
   return {std::move(ListBlock), "undefined"};
 }
-
 
 //
 // We want to improve the heuristic stuff so that it is handled
@@ -715,29 +778,32 @@ struct ThompsonSamplingHeuristic {
   TheHeuristic<T> heu;
   // The map from the name to distributions
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
+  KeyCompression<T> kc;
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
+  std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_grp_ts;
   ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
     SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
-    SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_STATE");
-    SingleBlock const& BlockPRIOR = TS.ListBlock.at("PRIORS");
+    SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
+    SingleBlock const& BlockCOMPRESSION = TS.ListBlock.at("KEY_COMPRESSION");
+    SingleBlock const& BlockHEU = TS.ListBlock.at("HEURISTIC_PRIOR");
     SingleBlock const& BlockIO = TS.ListBlock.at("IO");
     name = BlockIO.ListStringValues.at("name");
     WriteLog = BlockIO.ListBoolValues.at("WriteLog");
     // Reading the basic heuristic (that gives the prior from the parameters)
     {
-      std::string const& DefaultPrior = BlockPRIOR.ListStringValues.at("DefaultPrior");
-      std::vector<std::string> const& ListFullCond = BlockPRIOR.ListListStringValues.at("ListFullCond");
-      std::vector<std::string> const& ListConclusion = BlockPRIOR.ListListStringValues.at("ListConclusion");
+      std::string const& DefaultPrior = BlockHEU.ListStringValues.at("DefaultPrior");
+      std::vector<std::string> const& ListFullCond = BlockHEU.ListListStringValues.at("ListFullCond");
+      std::vector<std::string> const& ListConclusion = BlockHEU.ListListStringValues.at("ListConclusion");
       heu = HeuristicFrom_LS_LS_S<T>(DefaultPrior, ListFullCond, ListConclusion);
     }
     // Reading the initial distributions used in the prior
     {
-      std::vector<std::string> const& ListName = BlockPRIOR.ListListStringValues.at("ListName");
-      std::vector<int> const& ListNmax = BlockPRIOR.ListListIntValues.at("ListNmax");
-      std::vector<int> const& ListNstart = BlockPRIOR.ListListIntValues.at("ListNstart");
-      std::vector<std::string> const& ListNature = BlockPRIOR.ListListStringValues.at("ListNature");
-      std::vector<std::string> const& ListDescription = BlockPRIOR.ListListStringValues.at("ListDescription");
+      std::vector<std::string> const& ListName = BlockPROBA.ListListStringValues.at("ListName");
+      std::vector<int> const& ListNmax = BlockPROBA.ListListIntValues.at("ListNmax");
+      std::vector<int> const& ListNstart = BlockPRROBA.ListListIntValues.at("ListNstart");
+      std::vector<std::string> const& ListNature = BlockPROBA.ListListStringValues.at("ListNature");
+      std::vector<std::string> const& ListDescription = BlockPROBA.ListListStringValues.at("ListDescription");
       for (size_t i=0; i<ListName.size(); i++) {
         std::string name = ListName[i];
         size_t n_max = ListNmax[i];
@@ -747,13 +813,23 @@ struct ThompsonSamplingHeuristic {
         map_name_ledf[name] = LimitedEmpiricalDistributionFunction(n_max, n_start, nature, desc);
       }
     }
-    // 
+    // Reading and assigning the key_compression
+    {
+      std::vector<std::string> const& ListKey = BlockCOMPRESSION.ListListStringValues.at("ListKey");
+      std::vector<std::string> const& ListDescription = BlockCOMPRESSION.ListListStringValues.at("ListKey");
+      kc = KeyCompression<T>(ListKey, ListDescription);
+      CheckHeuristicInput(heu, ListKey);
+    }
+    // Reading the initial thompson samplings
+    {
+      
+    }
 
     // Reading existing data from log if present
     bool ProcessExistingDataIfExist = BlockIO.ListBoolValues.at("ProcessExistingDataIfExist");
     if (ProcessExistingDataIfExist) {
-      std::string LogFileToProcess = BlockIO.ListStringValues.at("LogFileToProcess");
-      
+      std::string const& LogFileToProcess = BlockIO.ListStringValues.at("LogFileToProcess");
+      InsertCompletedInfo(LogFileToProcess);
     }
   }
   void InsertCompletedInfo(std::string const& file) {
