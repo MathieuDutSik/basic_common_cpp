@@ -313,7 +313,7 @@ std::optional<TimingComputationResult<T>> ReadTimingComputationResult(std::strin
   if (!opt)
     return {};
   std::vector<std::string> LStr = *opt;
-  if (LStr[0] != name)
+  if (LStr[0] != name && name != "unset")
     return {};
   //
   std::string str_keys = LStr[1];
@@ -365,6 +365,47 @@ struct LimitedEmpiricalDistributionFunction {
   size_t n_ins;
   std::map<double,size_t> ListValWei;
   LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {
+  }
+  LimitedEmpiricalDistributionFunction(size_t n_max, size_t n_start, std::string const& nature, std::string const& desc) : n_max(n_max) {
+    if (nature == "empty") {
+      n_ins = 0;
+      return;
+    }
+    if (nature == "dirac") {
+      double val = ParseScalar<double>(desc);
+      ListValWei[val] = n_start;
+      n_ins = n_start;
+      return;
+    }
+    if (nature == "sampled") {
+      std::vector<std::string> LStr = STRING_Split(desc, " ");
+      size_t totsum = 0;
+      for (auto & eStr : LStr) {
+        std::vector<std::string> LStrB = STRING_Split(eStr, ":");
+        if (LStrB.size() != 2) {
+          std::cerr << "The string should be of the form val:mult\n";
+          throw TerminalException{1};
+        }
+        double val = ParseScalar<double>(LStrB[0]);
+        size_t mult = ParseScalar<size_t>(LStrB[1]);
+        ListValWei[val] = mult;
+        totsum += mult;
+      }
+      if (totsum != n_start) {
+        std::cerr << "Inconsistencies in the reading of the multiplicities\n";
+        std::cerr << "totsum=" << totsum << " n_start=" << n_start << "\n";
+        throw TerminalException{1};
+      }
+      n_ins = n_start;
+      return;
+    }
+    if (nature == "file_select" || nature == "file") {
+      std::cerr << "That option makes very little sense\n";
+      throw TerminalException{1};
+    }
+    std::cerr << "Failed to find a matching entry\n";
+    std::cerr << "Authorized values are dirac, sampled, file_select and file\n";
+    throw TerminalException{1};
   }
   void clear_entry() {
     //    std::cerr << "|ListValWei|=" << ListValWei.size() << "\n";
@@ -433,10 +474,9 @@ struct LimitedEmpiricalDistributionFunction {
     auto iter = ListValWei.begin();
     while(true) {
       if (!IsFirst)
-        str_ret += ", ";
-      if (IsFirst)
-        IsFirst = false;
-      str_ret += "(" + std::to_string(iter->first) + "," + std::to_string(iter->second) + ")";
+        str_ret += " ";
+      IsFirst = false;
+      str_ret += std::to_string(iter->first) + ":" + std::to_string(iter->second);
       iter++;
       if (iter == ListValWei.end()) {
         break;
@@ -447,6 +487,91 @@ struct LimitedEmpiricalDistributionFunction {
 };
 
 
+
+struct SingleThompsonSamplingState {
+  std::vector<std::string> ListAllowedOut;
+  std::map<std::string, LimitedEmpiricalDistributionFunction> map_ans_ledf;
+  size_t n_insert;
+  std::optional<size_t> opt_noprior;
+  SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf) {
+    n_insert = 0;
+    if (desc.size() > 7) {
+      if (desc.substr(0,7) == "noprior") {
+        std::vector<std::string> LStr = STRING_Split(desc, ":");
+        if (LStr.size() != 2) {
+          std::cerr << "The desc should be of the form noprior:XX\n";
+          std::cerr << "XX being the number of entries used first\n";
+          std::cerr << "We have desc=" << desc << "\n";
+          throw TerminalException{1};
+        }
+        size_t siz_limit = ParseScalar<size_t>(LStr[1]);
+        opt_noprior = siz_limit:
+      }
+    }
+    if (limit_noprior) {
+      for (auto & ans : ListAnswer)
+        map_ans_ledf[ans] = map_name_ledf["empty"];
+    } else {
+      std::vector<std::string> LStr = STRING_Split(desc, " ");
+      for (auto & eStr : LStr) {
+        std::vector<std::string> LStrB = STRING_Split(eStr, ":");
+        if (LStrB.size() != 2) {
+          std::cerr << "LStrB should have length 2 because allowed formulation is choice:distri\n";
+          throw TerminalException{1};
+        }
+        std::string ans = LStrB[0];
+        std::string distri = LStrB[1];
+        map_ans_ledf[ans] = map_name_ledf[distri];
+      }
+    }
+  }
+  void insert_meas(std::string const& key, double const& meas) {
+    map_ans_ledf[key].insert_value(meas);
+    n_insert++;
+  }
+  //
+  double get_random() {
+    size_t N = 1000000000;
+    size_t val = random() % N;
+    return double(val) / double(N);
+  }
+  std::string get_lowest_sampling_raw() {
+    double best_val = std::numeric_limits<double>::max();
+    std::string ret = "unset";
+    for (auto & kv : map_ans_ledf) {
+      double alpha = get_random();
+      double val = kv->second.get_percentile(alpha);
+      if (val < best_val) {
+        ret = kv->first;
+        best_val = val;
+      }
+    }
+    if (ret == "unset") {
+      std::cerr << "We failed to assign ret\n";
+      throw TerminalException{1};
+    }
+    return ret;
+  }
+  std::string get_lowest_sampling() {
+    if (!opt_noprior)
+      return get_lowest_sampling_raw();
+    if (n_insert > *opt_noprior)
+      return get_lowest_sampling_raw();
+    size_t res = n_insert % map_ans_ledf.size();
+    auto iter = map_ans_ledf.begin();
+    for (size_t u=0; u<res; u++)
+      iter++;
+    return iter.begin();
+  }
+};
+
+
+
+
+
+
+
+
 FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
   std::map<std::string, SingleBlock> ListBlock;
   // PROBABILITY DISTRIBUTIONS
@@ -454,9 +579,10 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
     std::map<std::string, std::vector<std::string>> ListListStringValues;
     std::map<std::string, std::vector<int>> ListListIntValues;
     ListListStringValues["ListName"] = {"distri1", "distri2", "distri3", "distri4"};
-    ListListIntValues["ListN"] = {100, 100, -1, -1};
+    ListListIntValues["ListNmax"] = {100, 100, -1, -1};
+    ListListIntValues["ListNstart"] = {100, 100, -1, -1};
     ListListStringValues["ListNature"] = {"dirac", "sampled", "file_select", "file"};
-    ListListStringValues["ListDescription"] = {"145", "130:50 145:30 150:20", "InputA_key1_val1_key2_val2", "InputB"};
+    ListListStringValues["ListDescription"] = {"145.3", "130.2:50 145.87:30 150.34:20", "InputA_key1_val1_key2_val2", "InputB"};
     SingleBlock BlockPROBA;
     BlockPROBA.ListListStringValues = ListListStringValues;
     BlockPROBA.ListListIntValues = ListListIntValues;
@@ -500,9 +626,9 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
     std::map<std::string, std::string> ListStringValues;
     std::map<std::string, bool> ListBoolValues;
     ListStringValues["name"] = "split";
-    ListBoolValues["ProcessExistingDataIfExist"] = false;
     ListBoolValues["WriteLog"] = false;
-    ListStringValues["LogFileProcessing"] = "irrelevant";
+    ListBoolValues["ProcessExistingDataIfExist"] = false;
+    ListStringValues["LogFileToProcess"] = "irrelevant";
     SingleBlock BlockIO;
     BlockIO.ListBoolValues = ListBoolValues;
     BlockIO.ListStringValues = ListStringValues;
@@ -578,14 +704,17 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
 //    ---We can two many categories
 // ---The problem is that this force us to give runtimes in advance. And this can
 //    be an issue since we have to effectively measure by ourselves
-// ---We can have heuristic grouped by 
+// ---We can have heuristic grouped by
 //
 template <typename T>
 struct ThompsonSamplingHeuristic {
   std::ostream& os;
   std::string name;
   bool WriteLog;
+  // The heuristic that gives the priors
   TheHeuristic<T> heu;
+  // The map from the name to distributions
+  std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
   ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
@@ -595,12 +724,37 @@ struct ThompsonSamplingHeuristic {
     SingleBlock const& BlockIO = TS.ListBlock.at("IO");
     name = BlockIO.ListStringValues.at("name");
     WriteLog = BlockIO.ListBoolValues.at("WriteLog");
-    //
-    std::string const& DefaultPrior = BlockPRIOR.ListStringValues.at("DefaultPrior");
-    std::vector<std::string> const& ListFullCond = BlockPRIOR.ListListStringValues.at("ListFullCond");
-    std::vector<std::string> const& ListConclusion = BlockPRIOR.ListListStringValues.at("ListConclusion");
-    heu = HeuristicFrom_LS_LS_S<T>(DefaultPrior, ListFullCond, ListConclusion);
+    // Reading the basic heuristic (that gives the prior from the parameters)
+    {
+      std::string const& DefaultPrior = BlockPRIOR.ListStringValues.at("DefaultPrior");
+      std::vector<std::string> const& ListFullCond = BlockPRIOR.ListListStringValues.at("ListFullCond");
+      std::vector<std::string> const& ListConclusion = BlockPRIOR.ListListStringValues.at("ListConclusion");
+      heu = HeuristicFrom_LS_LS_S<T>(DefaultPrior, ListFullCond, ListConclusion);
+    }
+    // Reading the initial distributions used in the prior
+    {
+      std::vector<std::string> const& ListName = BlockPRIOR.ListListStringValues.at("ListName");
+      std::vector<int> const& ListNmax = BlockPRIOR.ListListIntValues.at("ListNmax");
+      std::vector<int> const& ListNstart = BlockPRIOR.ListListIntValues.at("ListNstart");
+      std::vector<std::string> const& ListNature = BlockPRIOR.ListListStringValues.at("ListNature");
+      std::vector<std::string> const& ListDescription = BlockPRIOR.ListListStringValues.at("ListDescription");
+      for (size_t i=0; i<ListName.size(); i++) {
+        std::string name = ListName[i];
+        size_t n_max = ListNmax[i];
+        size_t n_start = ListNstart[i];
+        std::string nature = ListNature[i];
+        std::string desc = ListDescription[i];
+        map_name_ledf[name] = LimitedEmpiricalDistributionFunction(n_max, n_start, nature, desc);
+      }
+    }
+    // 
 
+    // Reading existing data from log if present
+    bool ProcessExistingDataIfExist = BlockIO.ListBoolValues.at("ProcessExistingDataIfExist");
+    if (ProcessExistingDataIfExist) {
+      std::string LogFileToProcess = BlockIO.ListStringValues.at("LogFileToProcess");
+      
+    }
   }
   void InsertCompletedInfo(std::string const& file) {
     if (!IsExistingFile(file)) {
