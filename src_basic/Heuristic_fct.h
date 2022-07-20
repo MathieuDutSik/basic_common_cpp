@@ -283,7 +283,15 @@ void CheckHeuristicOutput(TheHeuristic<T> const& heu, std::vector<std::string> c
   check(heu.DefaultResult);
 }
 
-
+template <typename T>
+std::vector<std::string> GetSetOutput(TheHeuristic<T> const& heu) {
+  std::set<std::string> s_out;
+  for (auto & eFullCond : heu.AllTests) {
+    s_out.insert(eFullCond.TheResult);
+  }
+  s_out.insert(heu.DefaultResult);
+  return std::vector<std::string>(s_out.begin(), s_out.end());
+}
 
 
 
@@ -300,7 +308,7 @@ struct TimingComputationAttempt {
 template <typename T>
 struct TimingComputationResult {
   TimingComputationAttempt<T> input;
-  size_t result;
+  double result;
 };
 
 
@@ -781,7 +789,8 @@ struct ThompsonSamplingHeuristic {
   KeyCompression<T> kc;
   std::vector<TimingComputationResult<T>> l_completed_info;
   std::vector<TimingComputationAttempt<T>> l_submission;
-  std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_grp_ts;
+  std::map<std::string, SingleThompsonSamplingState> m_name_ts;
+  std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
   ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
     SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
     SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
@@ -822,7 +831,20 @@ struct ThompsonSamplingHeuristic {
     }
     // Reading the initial thompson samplings
     {
-      
+      std::vector<std::string> const& ListAnswer = BlockTHOMPSON.ListListStringValues.at("ListAnswer");
+      std::vector<std::string> const& ListName = BlockTHOMPSON.ListListStringValues.at("ListName");
+      std::vector<std::string> const& ListDescription = BlockTHOMPSON.ListListStringValues.at("ListDescription");
+      for (size_t u=0; u<ListName.size(); u++) {
+        std::string const& name = ListName[u];
+        std::string const& desc = ListDescription[u];
+        m_name_ts[name] = SingleThompsonSamplingState(ListAnswer, desc, map_name_ledf);
+      }
+      // The terms like "noprior:70" will not show up in the description but may occur
+      // in the output of heuristic and so have to be taken into account separately.
+      for (auto& eOutput : GetSetOutput(heu)) {
+        if (m_name_ts.find(eOutput) == m_name_ts.end())
+          m_name_ts[eOutput] = SingleThompsonSamplingState(ListAnswer, desc, map_name_ledf);
+      }
     }
 
     // Reading existing data from log if present
@@ -830,6 +852,19 @@ struct ThompsonSamplingHeuristic {
     if (ProcessExistingDataIfExist) {
       std::string const& LogFileToProcess = BlockIO.ListStringValues.at("LogFileToProcess");
       InsertCompletedInfo(LogFileToProcess);
+    }
+  }
+  void push_complete_result(TimingComputationResult<T> const& eTCR) {
+    std::map<std::string,T> const& TheCand = eTCR.input.keys;
+    std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
+    auto iter = um_grp_ts.find(vect_key);
+    if (iter != um_grp_ts.end()) {
+      iter->second.insert_meas(eTCR.input.choice, eTCR.result);
+    } else {
+      std::string name = HeuristicEvaluation(TheCand, heu);
+      SingleThompsonSamplingState ts = m_name_ts[name];
+      ts.insert_meas(eTCR.input.choice, eTCR.result);
+      um_grp_ts[vect_key] = ts;
     }
   }
   void InsertCompletedInfo(std::string const& file) {
@@ -843,28 +878,31 @@ struct ThompsonSamplingHeuristic {
     while (std::getline(is, line)) {
       std::optional<TimingComputationResult<T>> opt = ReadTimingComputationResult<T>(line, name);
       if (opt) {
-        l_completed_info.push_back(*opt);
+        push_complete_result(*opt);
       }
     }
   }
   std::string Kernel_GetEvaluation(std::map<std::string,T> const& TheCand) {
-    // Need to add the stuff
-    return HeuristicEvaluation(TheCand,heu);
+    std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
+    auto iter = um_grp_ts.find(vect_key);
+    if (iter != um_grp_ts.end()) {
+      return iter->second.get_lowest_sampling();
+    }
+    std::string name = HeuristicEvaluation(TheCand, heu);
+    SingleThompsonSamplingState ts = m_name_ts[name];
+    double ret = ts.get_lowest_sampling();
+    um_grp_ts[vect_key] = ts;
+    return ret;
   }
   std::string GetEvaluation(std::map<std::string,T> const& TheCand) {
     std::string choice = Kernel_GetEvaluation(TheCand);
-    std::vector<std::pair<std::string,T>> keys;
-    for (auto & kv : TheCand) {
-      std::pair<std::string,T> ep{kv.first, kv.second};
-      keys.push_back(ep);
-    }
-    TimingComputationAttempt<T> tca{keys, choice};
+    TimingComputationAttempt<T> tca{TheCand, choice};
     l_submission.push_back(tca);
   }
-  void SubmitResult(size_t result) {
+  void SubmitResult(double result) {
     TimingComputationAttempt<T> einput = l_submission.front();
     TimingComputationResult<T> eTCR{einput, result};
-    l_completed_info.push_back(eTCR);
+    push_complete_result(eTCR);
     l_submission.pop();
     if (WriteLog) {
       PrintTimingComputationResult(os, eTCR, name);
