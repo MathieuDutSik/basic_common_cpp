@@ -299,7 +299,7 @@ std::vector<std::string> GetSetOutput(TheHeuristic<T> const& heu) {
 
 template <typename T>
 struct TimingComputationAttempt {
-  std::map<std::pair<std::string,T>> keys;
+  std::map<std::string,T> keys;
   std::string choice;
 };
 
@@ -371,6 +371,8 @@ struct LimitedEmpiricalDistributionFunction {
   size_t n_max;
   size_t n_ins;
   std::map<double,size_t> ListValWei;
+  LimitedEmpiricalDistributionFunction() : n_max(0), n_ins(0) {
+  }
   LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {
   }
   LimitedEmpiricalDistributionFunction(size_t n_max, size_t n_start, std::string const& nature, std::string const& desc) : n_max(n_max) {
@@ -512,12 +514,12 @@ struct SingleThompsonSamplingState {
           throw TerminalException{1};
         }
         size_t siz_limit = ParseScalar<size_t>(LStr[1]);
-        opt_noprior = siz_limit:
+        opt_noprior = siz_limit;
       }
     }
-    if (limit_noprior) {
+    if (opt_noprior) {
       for (auto & ans : ListAnswer)
-        map_ans_ledf[ans] = map_name_ledf["empty"];
+        map_ans_ledf[ans] = map_name_ledf.at("empty");
     } else {
       std::vector<std::string> LStr = STRING_Split(desc, " ");
       for (auto & eStr : LStr) {
@@ -528,7 +530,7 @@ struct SingleThompsonSamplingState {
         }
         std::string ans = LStrB[0];
         std::string distri = LStrB[1];
-        map_ans_ledf[ans] = map_name_ledf[distri];
+        map_ans_ledf[ans] = map_name_ledf.at(distri);
       }
     }
   }
@@ -547,9 +549,9 @@ struct SingleThompsonSamplingState {
     std::string ret = "unset";
     for (auto & kv : map_ans_ledf) {
       double alpha = get_random();
-      double val = kv->second.get_percentile(alpha);
+      double val = kv.second.get_percentile(alpha);
       if (val < best_val) {
-        ret = kv->first;
+        ret = kv.first;
         best_val = val;
       }
     }
@@ -568,7 +570,7 @@ struct SingleThompsonSamplingState {
     auto iter = map_ans_ledf.begin();
     for (size_t u=0; u<res; u++)
       iter++;
-    return iter.begin();
+    return iter->first;
   }
 };
 
@@ -578,7 +580,7 @@ template<typename T>
 struct KeyCompression {
   std::vector<std::string> ListKey;
   std::vector<std::vector<std::pair<size_t,size_t>>> ll_interval;
-  KeyCompression(std::vector<std::string> const& ListKey, std::vector<std::string> const& Listdescription) : ListKey(ListKey) {
+  KeyCompression(std::vector<std::string> const& ListKey, std::vector<std::string> const& ListDescription) : ListKey(ListKey) {
     if (ListKey.size() != ListDescription.size()) {
       std::cerr << "KeyCompression: ListKey and ListDescription should have the same length\n";
       throw TerminalException{1};
@@ -591,7 +593,7 @@ struct KeyCompression {
           std::vector<std::string> LStrB = STRING_Split(eStr, "-");
           if (LStrB.size() != 1 && LStrB.size() != 2) {
             std::cerr << "The possible format are XX or XX-YY not XX-YY-ZZ\n";
-            throw TerminalExcepton{1};
+            throw TerminalException{1};
           }
           auto get_value=[](std::string const& inp) -> size_t {
             if (inp == "infinity") {
@@ -631,7 +633,7 @@ struct KeyCompression {
   std::vector<size_t> get_key_compression(std::map<std::string,T> const& map_key) const {
     size_t len = ListKey.size();
     std::vector<size_t> l_idx(len);
-    for (size_t u=0; u<List; u++) {
+    for (size_t u=0; u<len; u++) {
       T val = map_key[ListKey[u]];
       l_idx[u] = get_index(ll_interval[u], val);
     }
@@ -810,7 +812,7 @@ struct ThompsonSamplingHeuristic {
     {
       std::vector<std::string> const& ListName = BlockPROBA.ListListStringValues.at("ListName");
       std::vector<int> const& ListNmax = BlockPROBA.ListListIntValues.at("ListNmax");
-      std::vector<int> const& ListNstart = BlockPRROBA.ListListIntValues.at("ListNstart");
+      std::vector<int> const& ListNstart = BlockPROBA.ListListIntValues.at("ListNstart");
       std::vector<std::string> const& ListNature = BlockPROBA.ListListStringValues.at("ListNature");
       std::vector<std::string> const& ListDescription = BlockPROBA.ListListStringValues.at("ListDescription");
       for (size_t i=0; i<ListName.size(); i++) {
@@ -843,7 +845,7 @@ struct ThompsonSamplingHeuristic {
       // in the output of heuristic and so have to be taken into account separately.
       for (auto& eOutput : GetSetOutput(heu)) {
         if (m_name_ts.find(eOutput) == m_name_ts.end())
-          m_name_ts[eOutput] = SingleThompsonSamplingState(ListAnswer, desc, map_name_ledf);
+          m_name_ts[eOutput] = SingleThompsonSamplingState(ListAnswer, eOutput, map_name_ledf);
       }
     }
 
@@ -857,14 +859,14 @@ struct ThompsonSamplingHeuristic {
   void push_complete_result(TimingComputationResult<T> const& eTCR) {
     std::map<std::string,T> const& TheCand = eTCR.input.keys;
     std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
-    auto iter = um_grp_ts.find(vect_key);
-    if (iter != um_grp_ts.end()) {
+    auto iter = um_compress_ts.find(vect_key);
+    if (iter != um_compress_ts.end()) {
       iter->second.insert_meas(eTCR.input.choice, eTCR.result);
     } else {
       std::string name = HeuristicEvaluation(TheCand, heu);
       SingleThompsonSamplingState ts = m_name_ts[name];
       ts.insert_meas(eTCR.input.choice, eTCR.result);
-      um_grp_ts[vect_key] = ts;
+      um_compress_ts[vect_key] = ts;
     }
   }
   void InsertCompletedInfo(std::string const& file) {
@@ -884,14 +886,14 @@ struct ThompsonSamplingHeuristic {
   }
   std::string Kernel_GetEvaluation(std::map<std::string,T> const& TheCand) {
     std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
-    auto iter = um_grp_ts.find(vect_key);
-    if (iter != um_grp_ts.end()) {
+    auto iter = um_compress_ts.find(vect_key);
+    if (iter != um_compress_ts.end()) {
       return iter->second.get_lowest_sampling();
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
     SingleThompsonSamplingState ts = m_name_ts[name];
-    double ret = ts.get_lowest_sampling();
-    um_grp_ts[vect_key] = ts;
+    std::string ret = ts.get_lowest_sampling();
+    um_compress_ts[vect_key] = ts;
     return ret;
   }
   std::string GetEvaluation(std::map<std::string,T> const& TheCand) {
@@ -923,3 +925,4 @@ struct ThompsonSamplingHeuristic {
 // clang-format off
 #endif  // SRC_BASIC_HEURISTIC_FCT_H_
 // clang-format on
+
