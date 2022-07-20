@@ -21,16 +21,27 @@
 //
 
 // STC: Singleton Type Conversion
+// We absolutely want to avoid a function with a signature "long"
+// matching an int. That is why we introduce the stc<T> data type
+// since C++ will never convert a stc<long> to a stc<int> and
+// vice versa under the hood.
+// The overhead is eliminated at the compilation. The stc<T> does
+// not show up outside of internal conversion code.
 template <typename T> struct stc { T const &val; };
 
-// Conversion from double
 
+// The problem we face is that we have
+// --- std::is_same_v<size_t,uint64_t> = T on the Linux X86
+// --- std::is_same_v<size_t,uint64_t> = F on the Macintosh X86
+// By introducing that type we guarantee that we have always
+// std::is_same_v<size_t,T_uint64_t> = T on both platforms
 #ifdef __APPLE__
 using T_uint64_t = unsigned long;
 #else
 using T_uint64_t = uint64_t;
 #endif
 
+// Conversion from double
 inline void TYPE_CONVERSION(stc<double> const &a1, double &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<double> const &a1, uint8_t &a2) {
