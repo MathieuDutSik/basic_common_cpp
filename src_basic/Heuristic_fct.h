@@ -251,9 +251,9 @@ template <typename T>
 void CheckHeuristicInput(TheHeuristic<T> const& heu, std::vector<std::string> const& ListAllowedInput)
 {
   for (auto & eFullCond : heu.AllTests) {
-    for (auto & eCond : eFullCond.TheConditions) {
-      if (PositionVect(ListAllowedInput, eCond) == -1) {
-        std::cerr << "The variable eCond=" << eCond << " is not allowed on input\n";
+    for (auto & eSingCond : eFullCond.TheConditions) {
+      if (PositionVect(ListAllowedInput, eSingCond.eCond) == -1) {
+        std::cerr << "The variable eCond=" << eSingCond.eCond << " is not allowed on input\n";
         std::cerr << "ListAlowedInput =";
         for (auto & eStr : ListAllowedInput)
           std::cerr << " " << eStr;
@@ -325,7 +325,7 @@ std::optional<TimingComputationResult<T>> ReadTimingComputationResult(std::strin
   //
   std::string str_keys = LStr[1];
   std::vector<std::string> LStrKey = STRING_Split(str_keys, ", ");
-  std::vector<std::pair<std::string,T>> keys;
+  std::map<std::string,T> keys;
   for (auto& eStr : LStr) {
     std::vector<std::string> LStrB = STRING_Split(eStr, ":");
     if (LStrB.size() != 2)
@@ -333,17 +333,16 @@ std::optional<TimingComputationResult<T>> ReadTimingComputationResult(std::strin
     std::string key = LStrB[0];
     std::string str_val = LStrB[1];
     T val = ParseScalar<T>(str_val);
-    std::pair<std::string,T> ep{key,val};
-    keys.push_back(ep);
+    keys[key] = val;
   }
   //
   std::string choice = LStr[2];
   //
   std::string str_result = LStr[3];
-  size_t result = ParseScalar<size_t>(str_result);
+  double result = ParseScalar<double>(str_result);
   //
   TimingComputationAttempt<T> tca{keys, choice};
-  TimingComputationResult<T> tcr{tca,result};
+  TimingComputationResult<T> tcr{tca, result};
   return tcr;
 }
 
@@ -371,8 +370,6 @@ struct LimitedEmpiricalDistributionFunction {
   size_t n_max;
   size_t n_ins;
   std::map<double,size_t> ListValWei;
-  LimitedEmpiricalDistributionFunction() : n_max(0), n_ins(0) {
-  }
   LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {
   }
   LimitedEmpiricalDistributionFunction(size_t n_max, size_t n_start, std::string const& nature, std::string const& desc) : n_max(n_max) {
@@ -519,7 +516,7 @@ struct SingleThompsonSamplingState {
     }
     if (opt_noprior) {
       for (auto & ans : ListAnswer)
-        map_ans_ledf[ans] = map_name_ledf.at("empty");
+        map_ans_ledf.try_emplace(ans, map_name_ledf.at("empty"));
     } else {
       std::vector<std::string> LStr = STRING_Split(desc, " ");
       for (auto & eStr : LStr) {
@@ -530,12 +527,12 @@ struct SingleThompsonSamplingState {
         }
         std::string ans = LStrB[0];
         std::string distri = LStrB[1];
-        map_ans_ledf[ans] = map_name_ledf.at(distri);
+        map_ans_ledf.try_emplace(ans, map_name_ledf.at(distri));
       }
     }
   }
   void insert_meas(std::string const& key, double const& meas) {
-    map_ans_ledf[key].insert_value(meas);
+    map_ans_ledf.at(key).insert_value(meas);
     n_insert++;
   }
   //
@@ -615,7 +612,7 @@ struct KeyCompression {
       ll_interval.push_back(l_interval);
     }
   }
-  size_t get_index(std::vector<std::pair<size_t,size_t>> const& l_interval, T const& val) {
+  size_t get_index(std::vector<std::pair<size_t,size_t>> const& l_interval, T const& val) const {
     size_t val_sz = std::numeric_limits<size_t>::max();
     T val_sz2 = UniversalScalarConversion<T,size_t>(val_sz);
     if (val < val_sz2)
@@ -634,7 +631,7 @@ struct KeyCompression {
     size_t len = ListKey.size();
     std::vector<size_t> l_idx(len);
     for (size_t u=0; u<len; u++) {
-      T val = map_key[ListKey[u]];
+      T val = map_key.at(ListKey[u]);
       l_idx[u] = get_index(ll_interval[u], val);
     }
     return l_idx;
@@ -781,6 +778,7 @@ FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
 //
 template <typename T>
 struct ThompsonSamplingHeuristic {
+private:
   std::ostream& os;
   std::string name;
   bool WriteLog;
@@ -788,11 +786,11 @@ struct ThompsonSamplingHeuristic {
   TheHeuristic<T> heu;
   // The map from the name to distributions
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
-  KeyCompression<T> kc;
-  std::vector<TimingComputationResult<T>> l_completed_info;
+  std::unique_ptr<KeyCompression<T>> kc;
   std::vector<TimingComputationAttempt<T>> l_submission;
   std::map<std::string, SingleThompsonSamplingState> m_name_ts;
   std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
+public:
   ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
     SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
     SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
@@ -821,14 +819,14 @@ struct ThompsonSamplingHeuristic {
         size_t n_start = ListNstart[i];
         std::string nature = ListNature[i];
         std::string desc = ListDescription[i];
-        map_name_ledf[name] = LimitedEmpiricalDistributionFunction(n_max, n_start, nature, desc);
+        map_name_ledf.try_emplace(name, n_max, n_start, nature, desc);
       }
     }
     // Reading and assigning the key_compression
     {
       std::vector<std::string> const& ListKey = BlockCOMPRESSION.ListListStringValues.at("ListKey");
       std::vector<std::string> const& ListDescription = BlockCOMPRESSION.ListListStringValues.at("ListKey");
-      kc = KeyCompression<T>(ListKey, ListDescription);
+      kc = std::make_unique<KeyCompression<T>>(ListKey, ListDescription);
       CheckHeuristicInput(heu, ListKey);
     }
     // Reading the initial thompson samplings
@@ -839,13 +837,13 @@ struct ThompsonSamplingHeuristic {
       for (size_t u=0; u<ListName.size(); u++) {
         std::string const& name = ListName[u];
         std::string const& desc = ListDescription[u];
-        m_name_ts[name] = SingleThompsonSamplingState(ListAnswer, desc, map_name_ledf);
+        m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf);
       }
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
       for (auto& eOutput : GetSetOutput(heu)) {
         if (m_name_ts.find(eOutput) == m_name_ts.end())
-          m_name_ts[eOutput] = SingleThompsonSamplingState(ListAnswer, eOutput, map_name_ledf);
+          m_name_ts.try_emplace(eOutput,ListAnswer, eOutput, map_name_ledf);
       }
     }
 
@@ -856,17 +854,24 @@ struct ThompsonSamplingHeuristic {
       InsertCompletedInfo(LogFileToProcess);
     }
   }
+  ~ThompsonSamplingHeuristic() {
+    if (l_submission.size() > 0) {
+      std::cerr << "The SelfCorrectingHeuristic terminates with some submission being uncompleted\n";
+      std::cerr << "Just so you know. Most likely, premature termination, otherwise a bug\n";
+    }
+  }
+private:
   void push_complete_result(TimingComputationResult<T> const& eTCR) {
     std::map<std::string,T> const& TheCand = eTCR.input.keys;
-    std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
+    std::vector<size_t> vect_key = kc->get_key_compression(TheCand);
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
       iter->second.insert_meas(eTCR.input.choice, eTCR.result);
     } else {
       std::string name = HeuristicEvaluation(TheCand, heu);
-      SingleThompsonSamplingState ts = m_name_ts[name];
+      SingleThompsonSamplingState ts = m_name_ts.at(name);
       ts.insert_meas(eTCR.input.choice, eTCR.result);
-      um_compress_ts[vect_key] = ts;
+      um_compress_ts.try_emplace(vect_key, ts);
     }
   }
   void InsertCompletedInfo(std::string const& file) {
@@ -885,35 +890,30 @@ struct ThompsonSamplingHeuristic {
     }
   }
   std::string Kernel_GetEvaluation(std::map<std::string,T> const& TheCand) {
-    std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
+    std::vector<size_t> vect_key = kc->get_key_compression(TheCand);
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
       return iter->second.get_lowest_sampling();
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
-    SingleThompsonSamplingState ts = m_name_ts[name];
+    SingleThompsonSamplingState ts = m_name_ts.at(name);
     std::string ret = ts.get_lowest_sampling();
-    um_compress_ts[vect_key] = ts;
+    um_compress_ts.try_emplace(vect_key, ts);
     return ret;
   }
+public:
   std::string GetEvaluation(std::map<std::string,T> const& TheCand) {
     std::string choice = Kernel_GetEvaluation(TheCand);
     TimingComputationAttempt<T> tca{TheCand, choice};
     l_submission.push_back(tca);
   }
   void SubmitResult(double result) {
-    TimingComputationAttempt<T> einput = l_submission.front();
-    TimingComputationResult<T> eTCR{einput, result};
+    TimingComputationAttempt<T> einput = l_submission.back();
+    TimingComputationResult<T> eTCR{std::move(einput), result};
     push_complete_result(eTCR);
-    l_submission.pop();
+    l_submission.pop_back();
     if (WriteLog) {
       PrintTimingComputationResult(os, eTCR, name);
-    }
-  }
-  ~ThompsonSamplingHeuristic() {
-    if (l_submission.size() > 0) {
-      std::cerr << "The SelfCorrectingHeuristic terminates with some submission being uncompleted\n";
-      std::cerr << "Just so you know. Most likely, premature termination, otherwise a bug\n";
     }
   }
 };

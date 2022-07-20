@@ -1,8 +1,8 @@
 #PROGRAM		= Test_parse_split
 #PROGRAM		= test_hash
 #PROGRAM		= Test_String_Split
-#PROGRAM		= Test_Thompson_sampling
-PROGRAM		= Test_EmpiricalDistridution
+PROGRAM		= Test_Thompson_sampling
+#PROGRAM		= Test_EmpiricalDistridution
 #PROGRAM		= Temp_PerfectMPI
 
 OBJECTS		= $(PROGRAM:%=%.o)
