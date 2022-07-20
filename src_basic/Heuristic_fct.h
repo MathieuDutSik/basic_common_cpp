@@ -906,6 +906,7 @@ public:
     std::string choice = Kernel_GetEvaluation(TheCand);
     TimingComputationAttempt<T> tca{TheCand, choice};
     l_submission.push_back(tca);
+    return choice;
   }
   void SubmitResult(double result) {
     TimingComputationAttempt<T> einput = l_submission.back();

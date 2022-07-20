@@ -3,7 +3,7 @@
 
 int main() {
   //  using T = mpq_class;
-  using T = uint64_t;
+  using T = T_uint64_t;
   FullNamelist eFull = NAMELIST_GetStandard_RecursiveDualDescription();
   ThompsonSamplingHeuristic<T> TSH(std::cerr, eFull);
 
