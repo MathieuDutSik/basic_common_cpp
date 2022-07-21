@@ -29,6 +29,12 @@ int si(SingletonTime const &s1, SingletonTime const &s2) {
       .count();
 }
 
+double sd(SingletonTime const &s1, SingletonTime const &s2) {
+  int n_microsecs = std::chrono::duration_cast<std::chrono::microseconds>(s2.time - s1.time).count();
+  int n_in_second = 1000 * 1000;
+  return double(n_microsecs) / double(n_in_second);
+}
+
 void runtime(SingletonTime const &start) {
   SingletonTime end;
   std::cerr << "runtime = " << s(start, end) << "\n";
