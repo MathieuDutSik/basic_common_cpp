@@ -521,6 +521,21 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
   }
 }
 
+void NAMELIST_ReadListString(FullNamelist &eFullNamelist, std::vector<std::string> const &ListString) {
+  size_t lenString = 30;
+  std::string eRandString = random_string(lenString);
+  std::string ePrefix = "/tmp/Std_adm";
+  std::string TheFile = ePrefix + eRandString;
+  {
+    std::ofstream OUTfs(TheFile);
+    for (auto const &eStr : ListString)
+      OUTfs << eStr << "\n";
+  }
+  NAMELIST_ReadNamelistFile(TheFile, eFullNamelist);
+}
+
+
+
 // clang-format off
 #endif  // SRC_BASIC_NAMELIST_H_
 // clang-format on

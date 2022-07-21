@@ -9,6 +9,5 @@ int main() {
 
   std::map<std::string,T> TheCand;
   std::string choice = TSH.GetEvaluation(TheCand);
-  double result = 2.3;
-  TSH.SubmitResult(result);
+  TSH.SubmitResult();
 }

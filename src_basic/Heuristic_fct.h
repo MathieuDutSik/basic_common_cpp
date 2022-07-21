@@ -2,6 +2,7 @@
 #ifndef SRC_BASIC_HEURISTIC_FCT_H_
 #define SRC_BASIC_HEURISTIC_FCT_H_
 
+#include "Timings.h"
 #include "Basic_file.h"
 #include "Temp_common.h"
 #include "Namelist.h"
@@ -787,7 +788,7 @@ private:
   // The map from the name to distributions
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
   std::unique_ptr<KeyCompression<T>> kc;
-  std::vector<TimingComputationAttempt<T>> l_submission;
+  std::vector<std::pair<TimingComputationAttempt<T>,SingletonTime>> l_submission;
   std::map<std::string, SingleThompsonSamplingState> m_name_ts;
   std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
 public:
@@ -905,12 +906,13 @@ public:
   std::string GetEvaluation(std::map<std::string,T> const& TheCand) {
     std::string choice = Kernel_GetEvaluation(TheCand);
     TimingComputationAttempt<T> tca{TheCand, choice};
-    l_submission.push_back(tca);
+    l_submission.push_back({tca, SingletonTime()});
     return choice;
   }
-  void SubmitResult(double result) {
-    TimingComputationAttempt<T> einput = l_submission.back();
-    TimingComputationResult<T> eTCR{std::move(einput), result};
+  void SubmitResult() {
+    std::pair<TimingComputationAttempt<T>,SingletonTime> eback = l_submission.back();
+    double result = sd(eback.second);
+    TimingComputationResult<T> eTCR{std::move(eback.first), result};
     push_complete_result(eTCR);
     l_submission.pop_back();
     if (WriteLog) {

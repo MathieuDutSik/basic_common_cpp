@@ -35,6 +35,13 @@ double sd(SingletonTime const &s1, SingletonTime const &s2) {
   return double(n_microsecs) / double(n_in_second);
 }
 
+double sd(SingletonTime const &s1) {
+  std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
+  int n_microsecs = std::chrono::duration_cast<std::chrono::microseconds>(time - s1.time).count();
+  int n_in_second = 1000 * 1000;
+  return double(n_microsecs) / double(n_in_second);
+}
+
 void runtime(SingletonTime const &start) {
   SingletonTime end;
   std::cerr << "runtime = " << s(start, end) << "\n";
