@@ -4,10 +4,10 @@
 int main() {
   //  using T = mpq_class;
   using T = T_uint64_t;
-  FullNamelist eFull = NAMELIST_GetStandard_RecursiveDualDescription();
+  FullNamelist eFull = NAMELIST_ThompsonSamplingRuntime();
   ThompsonSamplingHeuristic<T> TSH(std::cerr, eFull);
 
   std::map<std::string,T> TheCand;
-  std::string choice = TSH.GetEvaluation(TheCand);
-  TSH.SubmitResult();
+  std::string choice = TSH.get_eval(TheCand);
+  TSH.pop();
 }

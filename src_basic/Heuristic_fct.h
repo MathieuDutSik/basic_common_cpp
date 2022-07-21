@@ -644,7 +644,7 @@ struct KeyCompression {
 
 
 
-FullNamelist NAMELIST_GetStandard_RecursiveDualDescription() {
+FullNamelist NAMELIST_ThompsonSamplingRuntime() {
   std::map<std::string, SingleBlock> ListBlock;
   // PROBABILITY DISTRIBUTIONS
   {
@@ -903,13 +903,13 @@ private:
     return ret;
   }
 public:
-  std::string GetEvaluation(std::map<std::string,T> const& TheCand) {
+  std::string get_eval(std::map<std::string,T> const& TheCand) {
     std::string choice = Kernel_GetEvaluation(TheCand);
     TimingComputationAttempt<T> tca{TheCand, choice};
     l_submission.push_back({tca, SingletonTime()});
     return choice;
   }
-  void SubmitResult() {
+  void pop() {
     std::pair<TimingComputationAttempt<T>,SingletonTime> eback = l_submission.back();
     double result = sd(eback.second);
     TimingComputationResult<T> eTCR{std::move(eback.first), result};
