@@ -53,6 +53,28 @@ public:
       : n(vf.n), n_face(vf.n_face), V(std::move(vf.V)), append_len((n + 7) / 8),
         Vappend(std::vector<uint8_t>(append_len, 0)) {}
 
+  vectface(const size_t &_n, const std::vector<size_t> &l_n_face,
+           std::vector<std::vector<uint8_t>> const& l_V) {
+    n = _n;
+    n_face = 0;
+    for (auto & e_n : l_n_face)
+      n_face += e_n;
+    //
+    size_t n_tot = (n_face * n + 7) / 8;
+    V = std::vector<uint8_t>(n_tot);
+    size_t pos = 0;
+    for (size_t u=0; u<l_n_face.size(); u++) {
+      size_t const& e_n_face = l_n_face[u];
+      std::vector<uint8_t> const& eV = l_V[u];
+      for (size_t v=0; v<e_n_face * n; v++) {
+        bool val = getbit(eV, v);
+        setbit(V, pos, val);
+        pos++;
+      }
+    }
+    append_len = (n + 7) / 8;
+    Vappend = std::vector<uint8_t>(append_len, 0);
+  }
   // Serialization related stuff
   const std::vector<uint8_t> &serial_get_std_vector_uint8_t() const {
     return V;
