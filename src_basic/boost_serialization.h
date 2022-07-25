@@ -27,7 +27,6 @@ inline void load(Archive &ar, std::vector<uint8_t> &val,
   val.resize(len);
   for (size_t u = 0; u < len; u++)
     ar &make_nvp("Vu", val[u]);
-  val.build_vectface(n, n_face, std::move(V));
 }
 
 template <class Archive>
