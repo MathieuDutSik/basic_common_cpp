@@ -137,6 +137,8 @@ public:
 
   // vectface API similar to std::vector<Face>
   void push_back(const Face &f) {
+    // We have to handle the fact that vectface was built with default constructor. And so we assign n
+    n = f.size();
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
@@ -169,6 +171,8 @@ public:
   size_t get_n() const { return n; }
 
   void pop_back() { n_face--; }
+
+  void clear() { n_face = 0; }
 
   Face pop() {
     n_face--;
