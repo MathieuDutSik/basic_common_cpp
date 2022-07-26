@@ -19,28 +19,15 @@
 
 namespace boost::serialization {
 
-template <class Archive>
-inline void load(Archive &ar, std::vector<uint8_t> &val,
-                 [[maybe_unused]] const unsigned int version) {
+template <class Archive, typename T>
+inline void serialize(Archive &ar, std::vector<T> &val,
+                      [[maybe_unused]] const unsigned int version) {
   size_t len;
   ar &make_nvp("len", len);
   val.resize(len);
+  // always save/load row-major
   for (size_t u = 0; u < len; u++)
     ar &make_nvp("Vu", val[u]);
-}
-
-template <class Archive>
-inline void save(Archive &ar, std::vector<uint8_t> &val,
-                 [[maybe_unused]] const unsigned int version) {
-  size_t len = val.size();
-  ar &make_nvp("len", len);
-  for (size_t u = 0; u < len; u++)
-    ar &make_nvp("Vu", val[u]);
-}
-
-template <class Archive>
-inline void serialize(Archive &ar, std::vector<uint8_t> &val, const unsigned int version) {
-  split_free(ar, val, version);
 }
 
 } // namespace boost::serialization

@@ -1,9 +1,10 @@
 #PROGRAM		= Test_parse_split
 #PROGRAM		= test_hash
 #PROGRAM		= Test_String_Split
-PROGRAM		= Test_Thompson_sampling
+#PROGRAM		= Test_Thompson_sampling
 #PROGRAM		= Test_EmpiricalDistridution
 #PROGRAM		= Temp_PerfectMPI
+PROGRAM		= Test_serialization
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
