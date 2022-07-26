@@ -12,6 +12,41 @@
 
 typedef boost::dynamic_bitset<> Face;
 
+namespace boost::serialization {
+
+template <class Archive>
+inline void load(Archive &ar, Face &val,
+                 [[maybe_unused]] const unsigned int version) {
+  size_t n;
+  ar &make_nvp("n", n);
+  val = Face(n);
+  for (size_t u = 0; u < n; u++) {
+    int scal;
+    ar &make_nvp("Vu", scal);
+    val[u] = scal;
+  }
+}
+
+template <class Archive>
+inline void save(Archive &ar, Face const &val,
+                 [[maybe_unused]] const unsigned int version) {
+  size_t n = val.size();
+  ar &make_nvp("n", n);
+  for (size_t u = 0; u < n; u++) {
+    int scal = val[u];
+    ar &make_nvp("Vu", scal);
+  }
+}
+
+template <class Archive>
+inline void serialize(Archive &ar, Face &val, const unsigned int version) {
+  split_free(ar, val, version);
+}
+
+} // namespace boost::serialization
+
+
+
 // Those are needed for the tsl::sparse_map
 
 /* Basic bit operations */

@@ -5,9 +5,10 @@
 #PROGRAM		= Vector_Face_iterator SerializeVectface
 #PROGRAM		= VectorFace_move
 #PROGRAM		= Test_SetCppIterator
-PROGRAM		= Vector_Face_iterator
+#PROGRAM		= Vector_Face_iterator
 #PROGRAM		= BlockMultiple_CppIterator
 #PROGRAM		= SerializeVectface
+PROGRAM		= SerializeFace
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
