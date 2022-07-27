@@ -22,7 +22,7 @@ namespace boost::serialization {
 template <class Archive, typename T>
 inline void serialize(Archive &ar, std::vector<T> &val,
                       [[maybe_unused]] const unsigned int version) {
-  size_t len;
+  size_t len = val.size();
   ar &make_nvp("len", len);
   val.resize(len);
   // always save/load row-major
