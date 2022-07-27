@@ -4,9 +4,9 @@
 
 // Boost libraries
 
+#include "boost_serialization.h"
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>
-#include <boost/serialization/nvp.hpp>
 #include <utility>
 #include <vector>
 
