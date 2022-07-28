@@ -615,7 +615,14 @@ struct KeyCompression {
             if (inp == "infinity") {
               return std::numeric_limits<size_t>::max();
             }
-            return ParseScalar<size_t>(inp);
+            size_t val_ret = ParseScalar<size_t>(inp);
+            std::string inp2 = std::to_string(val_ret);
+            if (inp2 != inp) {
+              std::cerr << "Parsing failed\n";
+              std::cerr << "inp=" << inp << " inp2=" << inp2 << "\n";
+              throw TerminalException{1};
+            }
+            return val_ret;
           };
           if (LStrB.size() == 1) {
             size_t val = get_value(LStrB[0]);
@@ -696,7 +703,7 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
   {
     std::map<std::string, std::vector<std::string>> ListListStringValues;
     ListListStringValues["ListKey"] = {"incidence", "groupsize"};
-    ListListStringValues["ListDescription"] = {"superfine", "1-10,11-20,21-infinit"};
+    ListListStringValues["ListDescription"] = {"superfine", "1-10,11-20,21-infinity"};
     SingleBlock BlockCOMPRESSION;
     BlockCOMPRESSION.ListListStringValues = ListListStringValues;
     ListBlock["KEY_COMPRESSION"] = BlockCOMPRESSION;
@@ -861,7 +868,7 @@ public:
     // Reading and assigning the key_compression
     {
       std::vector<std::string> const& ListKey = BlockCOMPRESSION.ListListStringValues.at("ListKey");
-      std::vector<std::string> const& ListDescription = BlockCOMPRESSION.ListListStringValues.at("ListKey");
+      std::vector<std::string> const& ListDescription = BlockCOMPRESSION.ListListStringValues.at("ListDescription");
       kc = std::make_unique<KeyCompression<T>>(ListKey, ListDescription);
       CheckHeuristicInput(heu, ListKey);
     }
