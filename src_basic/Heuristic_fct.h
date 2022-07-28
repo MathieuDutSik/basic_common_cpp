@@ -501,6 +501,7 @@ struct SingleThompsonSamplingState {
   size_t n_insert;
   std::optional<size_t> opt_noprior;
   SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf) {
+    std::cerr << "SingleThompsonSamplingState, step 1\n";
     n_insert = 0;
     if (desc.size() > 7) {
       if (desc.substr(0,7) == "noprior") {
@@ -515,11 +516,16 @@ struct SingleThompsonSamplingState {
         opt_noprior = siz_limit;
       }
     }
+    std::cerr << "SingleThompsonSamplingState, step 2\n";
     if (opt_noprior) {
+      std::cerr << "SingleThompsonSamplingState, step 2.1\n";
       for (auto & ans : ListAnswer)
         map_ans_ledf.try_emplace(ans, map_name_ledf.at("empty"));
+      std::cerr << "SingleThompsonSamplingState, step 2.2\n";
     } else {
+      std::cerr << "SingleThompsonSamplingState, step 2.3\n";
       std::vector<std::string> LStr = STRING_Split(desc, " ");
+      std::cerr << "SingleThompsonSamplingState, step 2.4\n";
       for (auto & eStr : LStr) {
         std::vector<std::string> LStrB = STRING_Split(eStr, ":");
         if (LStrB.size() != 2) {
@@ -530,7 +536,9 @@ struct SingleThompsonSamplingState {
         std::string distri = LStrB[1];
         map_ans_ledf.try_emplace(ans, map_name_ledf.at(distri));
       }
+      std::cerr << "SingleThompsonSamplingState, step 2.5\n";
     }
+    std::cerr << "SingleThompsonSamplingState, step 3\n";
   }
   void insert_meas(std::string const& key, double const& meas) {
     map_ans_ledf.at(key).insert_value(meas);
@@ -853,7 +861,7 @@ public:
       // in the output of heuristic and so have to be taken into account separately.
       for (auto& eOutput : GetSetOutput(heu)) {
         if (m_name_ts.find(eOutput) == m_name_ts.end())
-          m_name_ts.try_emplace(eOutput,ListAnswer, eOutput, map_name_ledf);
+          m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf);
       }
       std::cerr << "ThompsonSamplingHeuristic, step 5.5\n";
     }
