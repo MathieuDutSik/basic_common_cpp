@@ -502,6 +502,8 @@ struct SingleThompsonSamplingState {
   std::optional<size_t> opt_noprior;
   SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf) {
     std::cerr << "SingleThompsonSamplingState, step 1\n";
+    for (auto & kv : map_name_ledf)
+      std::cerr << "map_name_ledf key=" << kv.first << "\n";
     n_insert = 0;
     if (desc.size() > 7) {
       if (desc.substr(0,7) == "noprior") {
@@ -519,8 +521,10 @@ struct SingleThompsonSamplingState {
     std::cerr << "SingleThompsonSamplingState, step 2\n";
     if (opt_noprior) {
       std::cerr << "SingleThompsonSamplingState, step 2.1\n";
-      for (auto & ans : ListAnswer)
+      for (auto & ans : ListAnswer) {
+        std::cerr << "ans=" << ans << "\n";
         map_ans_ledf.try_emplace(ans, map_name_ledf.at("empty"));
+      }
       std::cerr << "SingleThompsonSamplingState, step 2.2\n";
     } else {
       std::cerr << "SingleThompsonSamplingState, step 2.3\n";
@@ -833,6 +837,15 @@ public:
         std::string desc = ListDescription[i];
         map_name_ledf.try_emplace(name, n_max, n_start, nature, desc);
       }
+      size_t n_max = 0;
+      for (auto & e_max : ListNmax) {
+        size_t e_max_sz = e_max;
+        if (e_max_sz > n_max)
+          n_max = e_max_sz;
+      }
+      if (n_max == 0)
+        n_max = 1000;
+      map_name_ledf.try_emplace("empty", n_max, 0, "empty", "unset");
     }
     std::cerr << "ThompsonSamplingHeuristic, step 4\n";
     // Reading and assigning the key_compression
@@ -860,6 +873,7 @@ public:
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
       for (auto& eOutput : GetSetOutput(heu)) {
+        std::cerr << "eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
           m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf);
       }
