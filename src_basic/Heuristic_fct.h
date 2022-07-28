@@ -410,7 +410,7 @@ struct LimitedEmpiricalDistributionFunction {
       std::cerr << "That option makes very little sense\n";
       throw TerminalException{1};
     }
-    std::cerr << "Failed to find a matching entry\n";
+    std::cerr << "Failed to find a matching entry for nature=" << nature << "\n";
     std::cerr << "Authorized values are dirac, sampled, file_select and file\n";
     throw TerminalException{1};
   }
@@ -633,10 +633,14 @@ struct KeyCompression {
     if (l_interval.size() == 0) { // It is superfine case
       return val_sz;
     }
-    for (size_t u=0; u<l_interval.size(); u++) {
+    size_t len = l_interval.size();
+    for (size_t u=0; u<len; u++) {
       if (l_interval[u].first <= val_sz && val_sz <= l_interval[u].second)
         return u;
     }
+    for (size_t u=0; u<len; u++)
+      std::cerr << "u=" << u << " interval=" << l_interval[u].first << " / " << l_interval[u].second << "\n";
+    std::cerr << "val=" << val << "\n";
     std::cerr << "Failed to find a matching index\n";
     throw TerminalException{1};
   }
