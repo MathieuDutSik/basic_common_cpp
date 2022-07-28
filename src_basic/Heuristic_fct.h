@@ -304,6 +304,23 @@ std::vector<std::string> GetHeuristicInput(TheHeuristic<T> const& heu) {
   return std::vector<std::string>(s_in.begin(), s_in.end());
 }
 
+template <typename T>
+std::vector<T> GetHeuristicPivots(TheHeuristic<T> const& heu, std::string const& eKey) {
+  std::set<T> s_in;
+  for (auto & eFullCond : heu.AllTests)
+    for (auto & eSingCond : eFullCond.TheConditions)
+      if (eSingCond.eCond == eKey) {
+        T val1 = eSingCond.NumValue;
+        T val2 = val1 - 1;
+        T val3 = val1 + 1;
+        s_in.insert(val1);
+        s_in.insert(val2);
+        s_in.insert(val3);
+      }
+  return std::vector<T>(s_in.begin(), s_in.end());
+}
+
+
 
 
 
@@ -923,9 +940,10 @@ private:
   std::ostream& os;
   std::string name;
   bool WriteLog;
+public:
   // The heuristic that gives the priors
   TheHeuristic<T> heu;
-  // The map from the name to distributions
+private:
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
   std::unique_ptr<KeyCompression<T>> kc;
   std::vector<std::pair<TimingComputationAttempt<T>,SingletonTime>> l_submission;
