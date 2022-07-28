@@ -285,7 +285,7 @@ void CheckHeuristicOutput(TheHeuristic<T> const& heu, std::vector<std::string> c
 }
 
 template <typename T>
-std::vector<std::string> GetSetOutput(TheHeuristic<T> const& heu) {
+std::vector<std::string> GetHeuristicOutput(TheHeuristic<T> const& heu) {
   std::set<std::string> s_out;
   for (auto & eFullCond : heu.AllTests) {
     s_out.insert(eFullCond.TheResult);
@@ -293,6 +293,17 @@ std::vector<std::string> GetSetOutput(TheHeuristic<T> const& heu) {
   s_out.insert(heu.DefaultResult);
   return std::vector<std::string>(s_out.begin(), s_out.end());
 }
+
+
+template <typename T>
+std::vector<std::string> GetHeuristicInput(TheHeuristic<T> const& heu) {
+  std::set<std::string> s_in;
+  for (auto & eFullCond : heu.AllTests)
+    for (auto & eSingCond : eFullCond.TheConditions)
+      s_in.insert(eSingCond.eCond);
+  return std::vector<std::string>(s_in.begin(), s_in.end());
+}
+
 
 
 
@@ -360,11 +371,21 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> c
     IsFirst = false;
     os << eEnt.first << ":" << eEnt.second;
   }
-  os << ") ";
+  os << ")";
   os << " choice=" << eTCR.input.choice;
   os << " result=" << eTCR.result;
   os << " END\n";
 }
+
+
+
+
+
+
+
+
+
+
 
 
 struct LimitedEmpiricalDistributionFunction {
@@ -677,6 +698,10 @@ struct KeyCompression {
 
 
 
+
+
+
+
 FullNamelist NAMELIST_ThompsonSamplingRuntime() {
   std::map<std::string, SingleBlock> ListBlock;
   // PROBABILITY DISTRIBUTIONS
@@ -742,6 +767,88 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
   // Merging all data
   return {std::move(ListBlock), "undefined"};
 }
+
+
+template<typename T>
+FullNamelist ConvertStandardHeuristicToFullNamelist(TheHeuristic<T> const& heu) {
+  FullNamelist eFull = NAMELIST_ThompsonSamplingRuntime();
+  // PROBAS
+  {
+    SingleBlock & BlockPROBA = eFull.ListBlock["PROBABILITY_DISTRIBUTIONS"];
+    std::map<std::string, std::vector<std::string>> & ListListStringValues = BlockPROBA.ListListStringValues;
+    std::map<std::string, std::vector<int>> & ListListIntValues = BlockPROBA.ListListIntValues;
+    //
+    ListListStringValues["ListName"] = {"distri1"};
+    ListListStringValues["ListNature"] = {"dirac"};
+    ListListStringValues["ListDescription"] = {"145.3"};
+    ListListIntValues["ListNmax"] = {100};
+    ListListIntValues["ListNstart"] = {100};
+  }
+  // SINGLE THOMPSON STATE
+  {
+    SingleBlock & BlockTHOMPSON = eFull.ListBlock["THOMPSON_PRIOR"];
+    std::map<std::string, std::vector<std::string>> & ListListStringValues = BlockTHOMPSON.ListListStringValues;
+    std::vector<std::string> l_output = GetHeuristicOutput(heu);
+    std::vector<std::string> l_name;
+    std::vector<std::string> l_desc;
+    for (auto & e_out : l_output) {
+      std::string e_name = "state_" + e_out;
+      std::string e_desc = e_out + ":distri1";
+      l_name.push_back(e_name);
+      l_desc.push_back(e_desc);
+    }
+    ListListStringValues["ListAnswer"] = l_output;
+    ListListStringValues["ListName"] = l_name;
+    ListListStringValues["ListDescription"] = l_desc;
+  }
+  // KEY COMPRESSION
+  {
+    SingleBlock & BlockCOMPRESSION = eFull.ListBlock["KEY_COMPRESSION"];
+    std::map<std::string, std::vector<std::string>> & ListListStringValues = BlockCOMPRESSION.ListListStringValues;
+    std::vector<std::string> l_input = GetHeuristicInput(heu);
+    std::vector<std::string> l_desc;
+    for (size_t i=0; i<l_input.size(); i++)
+      l_desc.push_back("superfine");
+    ListListStringValues["ListKey"] = l_input;
+    ListListStringValues["ListDescription"] = l_desc;
+  }
+  // HEURISTIC PRIOR
+  {
+    SingleBlock & BlockHEU = eFull.ListBlock["HEURISTIC_PRIOR"];
+    std::map<std::string, std::vector<std::string>> & ListListStringValues = BlockHEU.ListListStringValues;
+    std::map<std::string, std::string> & ListStringValues = BlockHEU.ListStringValues;
+    std::vector<std::string> l_fullcond, l_conclusion;
+    for (auto & eFullCond : heu.AllTests) {
+      std::string fullcond;
+      bool IsFirst = true;
+      for (auto & eSingCond : eFullCond.TheConditions) {
+        if (!IsFirst)
+          fullcond += " && ";
+        IsFirst = false;
+        fullcond += eSingCond.eCond + " " + eSingCond.eType + " " + std::to_string(eSingCond.NumValue);
+      }
+      l_fullcond.push_back(fullcond);
+      l_conclusion.push_back(eFullCond.TheRsult);
+    }
+    ListStringValues["DefaultPrior"] = heu.DefaultResult;
+    ListListStringValues["ListFullCond"] = l_fullcond;
+    ListListStringValues["ListConclusion"] = l_conclusion;
+  }
+  // IO (nothing set)
+  {
+    SingleBlock & BlockIO = eFull.ListBlock["IO"];
+    std::map<std::string, std::string> & ListStringValues = BlockIO.ListStringValues;
+    std::map<std::string, bool> & ListBoolValues = BlockIO.ListBoolValues;
+    ListStringValues["name"] = "unset";
+    ListBoolValues["WriteLog"] = false;
+    ListBoolValues["ProcessExistingDataIfExist"] = false;
+    ListStringValues["LogFileToProcess"] = "irrelevant";
+  }
+  return eFull;
+}
+
+
+
 
 //
 // We want to improve the heuristic stuff so that it is handled
@@ -893,7 +1000,7 @@ public:
       std::cerr << "ThompsonSamplingHeuristic, step 5.4\n";
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
-      for (auto& eOutput : GetSetOutput(heu)) {
+      for (auto& eOutput : GetHeuristicOutput(heu)) {
         std::cerr << "eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
           m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf);
