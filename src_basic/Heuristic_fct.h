@@ -770,7 +770,7 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
 
 
 template<typename T>
-FullNamelist ConvertStandardHeuristicToFullNamelist(TheHeuristic<T> const& heu) {
+FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const& heu) {
   FullNamelist eFull = NAMELIST_ThompsonSamplingRuntime();
   // PROBAS
   {
@@ -828,7 +828,7 @@ FullNamelist ConvertStandardHeuristicToFullNamelist(TheHeuristic<T> const& heu) 
         fullcond += eSingCond.eCond + " " + eSingCond.eType + " " + std::to_string(eSingCond.NumValue);
       }
       l_fullcond.push_back(fullcond);
-      l_conclusion.push_back(eFullCond.TheRsult);
+      l_conclusion.push_back(eFullCond.TheResult);
     }
     ListStringValues["DefaultPrior"] = heu.DefaultResult;
     ListListStringValues["ListFullCond"] = l_fullcond;

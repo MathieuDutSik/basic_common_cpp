@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
     std::string FileO = argv[2];
     //
     std::ifstream is(FileI);
-    TheHeuristic<T> heu = ReadHeuristic(is);
+    TheHeuristic<T> heu = ReadHeuristic<T>(is);
     FullNamelist eFull = ConvertHeuristicToFullNamelist(heu);
     //
     std::ofstream os(FileO);
