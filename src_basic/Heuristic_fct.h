@@ -838,19 +838,24 @@ public:
     // Reading the initial thompson samplings
     {
       std::vector<std::string> const& ListAnswer = BlockTHOMPSON.ListListStringValues.at("ListAnswer");
+      std::cerr << "ThompsonSamplingHeuristic, step 5.1\n";
       std::vector<std::string> const& ListName = BlockTHOMPSON.ListListStringValues.at("ListName");
+      std::cerr << "ThompsonSamplingHeuristic, step 5.2\n";
       std::vector<std::string> const& ListDescription = BlockTHOMPSON.ListListStringValues.at("ListDescription");
+      std::cerr << "ThompsonSamplingHeuristic, step 5.3\n";
       for (size_t u=0; u<ListName.size(); u++) {
         std::string const& name = ListName[u];
         std::string const& desc = ListDescription[u];
         m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf);
       }
+      std::cerr << "ThompsonSamplingHeuristic, step 5.4\n";
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
       for (auto& eOutput : GetSetOutput(heu)) {
         if (m_name_ts.find(eOutput) == m_name_ts.end())
           m_name_ts.try_emplace(eOutput,ListAnswer, eOutput, map_name_ledf);
       }
+      std::cerr << "ThompsonSamplingHeuristic, step 5.5\n";
     }
     std::cerr << "ThompsonSamplingHeuristic, step 6\n";
 
