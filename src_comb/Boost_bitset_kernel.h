@@ -143,8 +143,7 @@ public:
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
     if (curr_len < needed_len) {
-      size_t delta = needed_len - curr_len;
-      V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+      V.resize(needed_len, uint8_t(0));
     }
     //
     size_t pos = n_face * n;
@@ -225,8 +224,7 @@ public:
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
     if (curr_len < needed_len) {
-      size_t delta = needed_len - curr_len;
-      V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+      V.resize(needed_len, uint8_t(0));
     }
     //
     size_t pos = n_face * n;
@@ -243,8 +241,7 @@ public:
     size_t n_bits = (n_face + 1) * n;
     size_t needed_len = (n_bits + 7) / 8;
     if (curr_len < needed_len) {
-      size_t delta = needed_len - curr_len;
-      V.insert(V.end(), Vappend.begin(), Vappend.begin() + delta);
+      V.resize(needed_len, uint8_t(0));
     }
     //
     size_t pos = n_face * n;
@@ -269,13 +266,7 @@ public:
     size_t n_bits = (n_face + w.n_face) * n;
     size_t needed_len = (n_bits + 7) / 8;
     if (curr_len < needed_len) {
-      size_t delta = needed_len - curr_len;
-      size_t n_iter = delta / append_len;
-      for (size_t i_iter = 0; i_iter < n_iter; i_iter++)
-        V.insert(V.end(), Vappend.begin(), Vappend.begin() + append_len);
-      size_t res = delta % append_len;
-      if (res > 0)
-        V.insert(V.end(), Vappend.begin(), Vappend.begin() + res);
+      V.resize(needed_len, uint8_t(0));
     }
     // Now appending
     size_t pos = n_face * n;
