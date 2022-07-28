@@ -470,6 +470,10 @@ struct LimitedEmpiricalDistributionFunction {
         return iter->first;
       iter++;
       if (iter == ListValWei.end()) {
+        for (auto & kv : ListValWei)
+          std::cerr << "kv : val=" << kv.first << " weight=" << kv.second << "\n";
+        std::cerr << "alpha=" << alpha << " n_ins=" << n_ins << "\n";
+        std::cerr << "crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
         std::cerr << "Failed to find an entry in the map\n";
         throw TerminalException{1};
       }
