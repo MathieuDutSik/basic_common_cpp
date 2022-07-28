@@ -466,7 +466,7 @@ struct LimitedEmpiricalDistributionFunction {
     size_t crit_w = round(alpha * n_ins);
     while(true) {
       sum_w += iter->second;
-      if (sum_w > crit_w)
+      if (sum_w >= crit_w)
         return iter->first;
       iter++;
       if (iter == ListValWei.end()) {
