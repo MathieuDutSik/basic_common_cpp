@@ -596,15 +596,21 @@ struct KeyCompression {
       throw TerminalException{1};
     }
     for (auto & eDesc : ListDescription) {
+      std::cerr << "eDesc=" << eDesc << "\n";
       std::vector<std::pair<size_t,size_t>> l_interval;
       if (eDesc != "superfine") {
         std::vector<std::string> LStr = STRING_Split(eDesc, ",");
         for (auto & eStr : LStr) {
+          std::cerr << "eStr=" << eStr << "\n";
           std::vector<std::string> LStrB = STRING_Split(eStr, "-");
           if (LStrB.size() != 1 && LStrB.size() != 2) {
             std::cerr << "The possible format are XX or XX-YY not XX-YY-ZZ\n";
             throw TerminalException{1};
           }
+          if (LStrB.size() == 1)
+            std::cerr << "LStrB=" << LStrB[0] << "\n";
+          else
+            std::cerr << "LStrB=" << LStrB[0] << " / " << LStrB[1] << "\n";
           auto get_value=[](std::string const& inp) -> size_t {
             if (inp == "infinity") {
               return std::numeric_limits<size_t>::max();
