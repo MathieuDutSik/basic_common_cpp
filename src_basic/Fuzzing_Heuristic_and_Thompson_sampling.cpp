@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     std::ifstream is(FileI);
     TheHeuristic<T> heu = ReadHeuristic<T>(is);
     FullNamelist eFull = ConvertHeuristicToFullNamelist(heu);
-    std::cerr << "heu=" << heu << "\n";
+    std::cerr << "heu=\n" << heu << "\n";
     std::cerr << "eFull=\n";
     NAMELIST_WriteNamelistFile(std::cerr, eFull);
     //

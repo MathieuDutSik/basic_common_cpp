@@ -397,7 +397,21 @@ void PrintTimingComputationResult(std::ostream& os, TimingComputationResult<T> c
 
 
 
-
+std::pair<std::string,std::string> SplitByLastSep(std::string const& full_str, std::string const& sep)
+{
+  std::vector<std::string> LStrB = STRING_Split(full_str, sep);
+  if (LStrB.size() < 2) {
+    std::cerr << "The LStrB should have length at least 2\n";
+    throw TerminalException{1};
+  }
+  std::string ret_str = LStrB[0];
+  size_t last_len = LStrB.size() -1;
+  for (size_t i=1; i<last_len; i++) {
+    ret_str += sep;
+    ret_str += LStrB[i];
+  }
+  return {ret_str, LStrB[last_len]};
+}
 
 
 
@@ -556,6 +570,11 @@ struct SingleThompsonSamplingState {
           std::cerr << "We have desc=" << desc << "\n";
           throw TerminalException{1};
         }
+        if (LStr[0] != "noprior") {
+          std::cerr << "LStr[0]=" << LStr[0] << "\n";
+          std::cerr << "while it should be a noprior\n";
+          throw TerminalException{1};
+        }
         size_t siz_limit = ParseScalar<size_t>(LStr[1]);
         opt_noprior = siz_limit;
       }
@@ -573,15 +592,9 @@ struct SingleThompsonSamplingState {
       std::vector<std::string> LStr = STRING_Split(desc, " ");
       std::cerr << "SingleThompsonSamplingState, step 2.4\n";
       for (auto & eStr : LStr) {
-        std::vector<std::string> LStrB = STRING_Split(eStr, ":");
-        if (LStrB.size() != 2) {
-          std::cerr << "desc=" << desc << "\n";
-          std::cerr << "eStr=" << eStr << "\n";
-          std::cerr << "LStrB should have length 2 because allowed formulation is choice:distri\n";
-          throw TerminalException{1};
-        }
-        std::string ans = LStrB[0];
-        std::string distri = LStrB[1];
+        std::pair<std::string,std::string> ep = SplitByLastSep(eStr, ":");
+        std::string const& ans = ep.first;
+        std::string const& distri = ep.second;
         map_ans_ledf.try_emplace(ans, map_name_ledf.at(distri));
       }
       std::cerr << "SingleThompsonSamplingState, step 2.5\n";
