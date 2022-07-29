@@ -960,6 +960,7 @@ private:
 public:
   // The heuristic that gives the priors
   TheHeuristic<T> heu;
+  FullNamelist TS;
 private:
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
   std::unique_ptr<KeyCompression<T>> kc;
@@ -967,7 +968,7 @@ private:
   std::map<std::string, SingleThompsonSamplingState> m_name_ts;
   std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
 public:
-  ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os) {
+  ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os), TS(TS) {
     std::cerr << "ThompsonSamplingHeuristic, step 1\n";
     SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
     SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
@@ -1041,7 +1042,6 @@ public:
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
       std::cerr << "Heu=\n" << heu << "\n";
-      
       for (auto& eOutput : GetHeuristicOutput(heu)) {
         std::cerr << "eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
@@ -1125,6 +1125,12 @@ public:
   }
 };
 
+template <typename T>
+std::ostream &operator<<(std::ostream &os,
+                         ThompsonSamplingHeuristic<T> const &eTS) {
+  NAMELIST_WriteNamelistFile(os, eTS.TS);
+  return os;
+}
 
 
 

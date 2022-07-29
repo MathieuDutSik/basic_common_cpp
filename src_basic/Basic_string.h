@@ -245,7 +245,7 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
   if (PosLow == miss_val) {
     return RetStr;
   }
-  for (size_t iPos = PosLow; iPos <= size_t(PosUpp); iPos++)
+  for (size_t iPos = PosLow; iPos <= PosUpp; iPos++)
     RetStr += eStr.at(iPos);
   return RetStr;
 }
