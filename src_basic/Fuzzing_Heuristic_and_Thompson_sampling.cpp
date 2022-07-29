@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "eFull=\n";
     NAMELIST_WriteNamelistFile(std::cerr, eFull);
     //
-    ThompsonSamplingHeuristic<T> TSH(std::cerr, eFull);
+    ThompsonSamplingHeuristic<T> TSH(eFull);
     std::cerr << "The TSH object has been BUILD\n";
     std::vector<std::string> l_input = GetHeuristicInput(TSH.heu);
     std::map<std::string, std::vector<T>> l_poss;
@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
         TheCand[eKey] = val;
       }
       std::string choice_TS = TSH.get_eval(TheCand);
-      TSH.pop();
+      TSH.pop(std::cerr);
       std::string choice_Heu = HeuristicEvaluation(TheCand, heu);
       if (choice_TS != choice_Heu) {
         std::cerr << "The heuristic returned different values from the heuristic and TS. Bug to resolve\n";

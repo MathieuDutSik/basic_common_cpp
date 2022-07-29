@@ -955,7 +955,6 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const& heu) {
 template <typename T>
 struct ThompsonSamplingHeuristic {
 private:
-  std::ostream& os;
   std::string name;
   bool WriteLog;
 public:
@@ -969,7 +968,7 @@ private:
   std::map<std::string, SingleThompsonSamplingState> m_name_ts;
   std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
 public:
-  ThompsonSamplingHeuristic(std::ostream& os, FullNamelist const& TS) : os(os), TS(TS) {
+  ThompsonSamplingHeuristic(FullNamelist const& TS) : TS(TS) {
     std::cerr << "ThompsonSamplingHeuristic, step 1\n";
     SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
     SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
@@ -1114,7 +1113,7 @@ public:
     l_submission.push_back({tca, SingletonTime()});
     return choice;
   }
-  void pop() {
+  void pop(std::ostream & os) {
     std::pair<TimingComputationAttempt<T>,SingletonTime> eback = l_submission.back();
     double result = sd(eback.second);
     TimingComputationResult<T> eTCR{std::move(eback.first), result};
