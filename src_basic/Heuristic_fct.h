@@ -647,6 +647,7 @@ template<typename T>
 struct KeyCompression {
   std::vector<std::string> ListKey;
   std::vector<std::vector<std::pair<size_t,size_t>>> ll_interval;
+  KeyCompression() {}
   KeyCompression(std::vector<std::string> const& ListKey, std::vector<std::string> const& ListDescription) : ListKey(ListKey) {
     if (ListKey.size() != ListDescription.size()) {
       std::cerr << "KeyCompression: ListKey and ListDescription should have the same length\n";
@@ -963,7 +964,7 @@ public:
   FullNamelist TS;
 private:
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_name_ledf;
-  std::unique_ptr<KeyCompression<T>> kc;
+  KeyCompression<T> kc;
   std::vector<std::pair<TimingComputationAttempt<T>,SingletonTime>> l_submission;
   std::map<std::string, SingleThompsonSamplingState> m_name_ts;
   std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
@@ -1016,7 +1017,7 @@ public:
     {
       std::vector<std::string> const& ListKey = BlockCOMPRESSION.ListListStringValues.at("ListKey");
       std::vector<std::string> const& ListDescription = BlockCOMPRESSION.ListListStringValues.at("ListDescription");
-      kc = std::make_unique<KeyCompression<T>>(ListKey, ListDescription);
+      kc = KeyCompression<T>(ListKey, ListDescription);
       CheckHeuristicInput(heu, ListKey);
     }
     std::cerr << "ThompsonSamplingHeuristic, step 5\n";
@@ -1068,7 +1069,7 @@ public:
 private:
   void push_complete_result(TimingComputationResult<T> const& eTCR) {
     std::map<std::string,T> const& TheCand = eTCR.input.keys;
-    std::vector<size_t> vect_key = kc->get_key_compression(TheCand);
+    std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
       iter->second.insert_meas(eTCR.input.choice, eTCR.result);
@@ -1095,7 +1096,7 @@ private:
     }
   }
   std::string Kernel_GetEvaluation(std::map<std::string,T> const& TheCand) {
-    std::vector<size_t> vect_key = kc->get_key_compression(TheCand);
+    std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
       return iter->second.get_lowest_sampling();
