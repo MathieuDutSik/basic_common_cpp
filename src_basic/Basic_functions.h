@@ -195,15 +195,13 @@ std::vector<T> Filtered(std::vector<T> const &V, UnaryPredicate const &f) {
 
 template <typename T> T ParseScalar(std::string const &estr) {
   T ret_val;
-  std::istringstream is(estr);
-  is >> ret_val;
+  std::istringstream(estr) >> ret_val;
   return ret_val;
 }
 
 template <typename T>
 void ParseScalar_inplace(std::string const &estr, T &ret_val) {
-  std::istringstream is(estr);
-  is >> ret_val;
+  std::istringstream(estr) >> ret_val;
 }
 
 // clang-format off

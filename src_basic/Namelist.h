@@ -86,10 +86,7 @@ std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
   }
   if (iPos == -1)
     return eStr;
-  std::string RetStr;
-  for (int i = 0; i < iPos; i++)
-    RetStr += eStr.at(i);
-  return RetStr;
+  return eStr.substr(0, iPos);
 }
 
 std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
@@ -225,8 +222,7 @@ std::vector<double> NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(
   for (int i = 0; i < siz; i++) {
     std::string eStr1 = ListStr[i];
     std::string eStr2 = STRING_RemoveSpacesBeginningEnd(eStr1);
-    double eVal;
-    std::istringstream(eStr2) >> eVal;
+    double eVal = ParseScalar<double>(eStr2);
     eListRetDouble.push_back(eVal);
   }
   return eListRetDouble;
@@ -241,8 +237,7 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
   for (int i = 0; i < siz; i++) {
     std::string eStr1 = ListStr[i];
     std::string eStr2 = STRING_RemoveSpacesBeginningEnd(eStr1);
-    int eVal;
-    std::istringstream(eStr2) >> eVal;
+    int eVal = ParseScalar<int>(eStr2);
     eListRetInt.push_back(eVal);
   }
   return eListRetInt;
@@ -428,10 +423,8 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
               throw TerminalException{1};
             }
             if (eVarNature == "int") {
-              int eVal;
-              std::istringstream(eVarValue) >> eVal;
-              eFull.ListBlock[eBlockName].ListIntValues[eVarName] =
-                  eVal;
+              int eVal = ParseScalar<int>(eVarValue);
+              eFull.ListBlock[eBlockName].ListIntValues[eVarName] = eVal;
             }
             if (eVarNature == "bool") {
               try {
@@ -443,17 +436,14 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
               }
             }
             if (eVarNature == "double") {
-              double eVal;
-              std::istringstream(eVarValue) >> eVal;
-              eFull.ListBlock[eBlockName].ListDoubleValues[eVarName] =
-                  eVal;
+              double eVal = ParseScalar<double>(eVarValue);
+              eFull.ListBlock[eBlockName].ListDoubleValues[eVarName] = eVal;
             }
             if (eVarNature == "string") {
               try {
                 std::string eVal =
                     NAMELIST_ConvertFortranStringToCppString(eVarValue);
-                eFull.ListBlock[eBlockName].ListStringValues[eVarName] =
-                    eVal;
+                eFull.ListBlock[eBlockName].ListStringValues[eVarName] = eVal;
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "string");
               }
