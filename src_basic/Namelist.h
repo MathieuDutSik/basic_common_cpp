@@ -255,64 +255,50 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
 void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
                          SingleBlock const &eBlock) {
   os << "&" << eBlockName << "\n";
-  for (std::map<std::string, int>::const_iterator it =
-           eBlock.ListIntValues.begin();
-       it != eBlock.ListIntValues.end(); ++it)
-    os << "  " << it->first << " = " << it->second << "\n";
-  for (std::map<std::string, bool>::const_iterator it =
-           eBlock.ListBoolValues.begin();
-       it != eBlock.ListBoolValues.end(); ++it) {
-    bool eVal = it->second;
+  for (auto & kv : eBlock.ListIntValues)
+    os << "  " << kv.first << " = " << kv.second << "\n";
+  for (auto & kv : eBlock.ListBoolValues) {
+    bool eVal = kv.second;
     std::string eValStr;
     if (!eVal)
       eValStr = "F";
     else
       eValStr = "T";
-    os << "  " << it->first << " = " << eValStr << "\n";
+    os << "  " << kv.first << " = " << eValStr << "\n";
   }
-  for (std::map<std::string, double>::const_iterator it =
-           eBlock.ListDoubleValues.begin();
-       it != eBlock.ListDoubleValues.end(); ++it)
-    os << "  " << it->first << " = " << it->second << "\n";
-  for (std::map<std::string, std::vector<double>>::const_iterator it =
-           eBlock.ListListDoubleValues.begin();
-       it != eBlock.ListListDoubleValues.end(); ++it) {
-    os << "  " << it->first << " = ";
-    std::vector<double> eListDoubl = it->second;
+  for (auto & kv : eBlock.ListDoubleValues)
+    os << "  " << kv.first << " = " << kv.second << "\n";
+  for (auto & kv : eBlock.ListListDoubleValues) {
+    os << "  " << kv.first << " = ";
+    std::vector<double> const& eListDoubl = kv.second;
     int nbDoubl = eListDoubl.size();
     for (int iDoubl = 0; iDoubl < nbDoubl; iDoubl++) {
       if (iDoubl > 0)
-        os << ",";
+        os << ", ";
       os << eListDoubl[iDoubl];
     }
     os << "\n";
   }
-  for (std::map<std::string, std::vector<int>>::const_iterator it =
-           eBlock.ListListIntValues.begin();
-       it != eBlock.ListListIntValues.end(); ++it) {
-    os << "  " << it->first << " = ";
-    std::vector<int> eListInt = it->second;
+  for (auto & kv : eBlock.ListListIntValues) {
+    os << "  " << kv.first << " = ";
+    std::vector<int> const& eListInt = kv.second;
     int nbInt = eListInt.size();
     for (int iInt = 0; iInt < nbInt; iInt++) {
       if (iInt > 0)
-        os << ",";
+        os << ", ";
       os << eListInt[iInt];
     }
     os << "\n";
   }
-  for (std::map<std::string, std::string>::const_iterator it =
-           eBlock.ListStringValues.begin();
-       it != eBlock.ListStringValues.end(); ++it)
-    os << "  " << it->first << " = \"" << it->second << "\"\n";
-  for (std::map<std::string, std::vector<std::string>>::const_iterator it =
-           eBlock.ListListStringValues.begin();
-       it != eBlock.ListListStringValues.end(); ++it) {
-    os << "  " << it->first << " = ";
-    std::vector<std::string> eListStr = it->second;
+  for (auto & kv : eBlock.ListStringValues)
+    os << "  " << kv.first << " = \"" << kv.second << "\"\n";
+  for (auto & kv : eBlock.ListListStringValues) {
+    os << "  " << kv.first << " = ";
+    std::vector<std::string> const& eListStr = kv.second;
     int nbString = eListStr.size();
     for (int iString = 0; iString < nbString; iString++) {
       if (iString > 0)
-        os << ",";
+        os << ", ";
       os << "\"" << eListStr[iString] << "\"";
     }
     os << "\n";
