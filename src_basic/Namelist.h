@@ -303,9 +303,9 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
 }
 
 void NAMELIST_WriteNamelistFile(std::ostream &os,
-                                FullNamelist const &eFullNamelist) {
+                                FullNamelist const &eFull) {
   int iBlock = 0;
-  for (auto & kv : eFullNamelist.ListBlock) {
+  for (auto & kv : eFull.ListBlock) {
     std::string const& eBlockName = kv.first;
     SingleBlock const& eBlock = kv.second;
     if (iBlock > 0)
@@ -326,7 +326,7 @@ NAMELIST_ListTrueEntryBool(FullNamelist const &eFull,
 }
 
 void NAMELIST_ReadNamelistFile(std::string const &eFileName,
-                               FullNamelist &eFullNamelist) {
+                               FullNamelist &eFull) {
   std::unordered_set<std::pair<std::string, std::string>> ListInsertValues;
   if (!IsExistingFile(eFileName)) {
     std::cerr << "The following namelist file is missing\n";
@@ -373,12 +373,12 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
         std::string strRed = eStr.substr(1, len - 1);
         if (!InBlock) {
           eBlockName = strRed;
-          if (eFullNamelist.ListBlock.count(eBlockName) == 0) {
+          if (eFull.ListBlock.count(eBlockName) == 0) {
             std::cerr << "Find BlockName = " << eBlockName << "\n";
             std::cerr << "which is not in the authorized list\n";
             std::cerr << "LINE=" << eStr << "\n";
             std::cerr << "List of authorized block names:\n";
-            for (auto &eBlock : eFullNamelist.ListBlock)
+            for (auto &eBlock : eFull.ListBlock)
               std::cerr << "Block name=" << eBlock.first << "\n";
             throw TerminalException{1};
           }
@@ -415,10 +415,10 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
             std::string eVarValue =
                 STRING_RemoveSpacesBeginningEnd(eStrPosterior);
             std::string eVarNature = NAMELIST_FindPositionVariableInBlock(
-                eVarName, eFullNamelist.ListBlock[eBlockName]);
+                eVarName, eFull.ListBlock[eBlockName]);
             if (eVarNature == "not found") {
               NAMELIST_WriteBlock(std::cerr, eBlockName,
-                                  eFullNamelist.ListBlock[eBlockName]);
+                                  eFull.ListBlock[eBlockName]);
               std::cerr << "Error in reading the NAMELIST file. See above "
                            "allowed entries\n";
               std::cerr << "The variable " << eVarName << "\n";
@@ -430,13 +430,13 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
             if (eVarNature == "int") {
               int eVal;
               std::istringstream(eVarValue) >> eVal;
-              eFullNamelist.ListBlock[eBlockName].ListIntValues[eVarName] =
+              eFull.ListBlock[eBlockName].ListIntValues[eVarName] =
                   eVal;
             }
             if (eVarNature == "bool") {
               try {
                 bool eVal = NAMELIST_ReadBoolValue(eVarValue);
-                eFullNamelist.ListBlock[eBlockName].ListBoolValues[eVarName] =
+                eFull.ListBlock[eBlockName].ListBoolValues[eVarName] =
                     eVal;
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "bool");
@@ -445,14 +445,14 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
             if (eVarNature == "double") {
               double eVal;
               std::istringstream(eVarValue) >> eVal;
-              eFullNamelist.ListBlock[eBlockName].ListDoubleValues[eVarName] =
+              eFull.ListBlock[eBlockName].ListDoubleValues[eVarName] =
                   eVal;
             }
             if (eVarNature == "string") {
               try {
                 std::string eVal =
                     NAMELIST_ConvertFortranStringToCppString(eVarValue);
-                eFullNamelist.ListBlock[eBlockName].ListStringValues[eVarName] =
+                eFull.ListBlock[eBlockName].ListStringValues[eVarName] =
                     eVal;
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "string");
@@ -462,20 +462,20 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
               std::vector<double> eVal =
                   NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(
                       eVarValue);
-              eFullNamelist.ListBlock[eBlockName]
+              eFull.ListBlock[eBlockName]
                   .ListListDoubleValues[eVarName] = eVal;
             }
             if (eVarNature == "listint") {
               std::vector<int> eVal =
                   NAMELIST_ConvertFortranStringListIntToCppVectorInt(eVarValue);
-              eFullNamelist.ListBlock[eBlockName].ListListIntValues[eVarName] =
+              eFull.ListBlock[eBlockName].ListListIntValues[eVarName] =
                   eVal;
             }
             if (eVarNature == "liststring") {
               try {
                 std::vector<std::string> eVal =
                     NAMELIST_ConvertFortranListStringToCppListString(eVarValue);
-                eFullNamelist.ListBlock[eBlockName]
+                eFull.ListBlock[eBlockName]
                     .ListListStringValues[eVarName] = eVal;
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "liststring");
@@ -501,7 +501,7 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
   }
 }
 
-void NAMELIST_ReadListString(FullNamelist &eFullNamelist, std::vector<std::string> const &ListString) {
+void NAMELIST_ReadListString(FullNamelist &eFull, std::vector<std::string> const &ListString) {
   size_t lenString = 30;
   std::string eRandString = random_string(lenString);
   std::string ePrefix = "/tmp/Std_adm";
@@ -511,7 +511,7 @@ void NAMELIST_ReadListString(FullNamelist &eFullNamelist, std::vector<std::strin
     for (auto const &eStr : ListString)
       OUTfs << eStr << "\n";
   }
-  NAMELIST_ReadNamelistFile(TheFile, eFullNamelist);
+  NAMELIST_ReadNamelistFile(TheFile, eFull);
 }
 
 

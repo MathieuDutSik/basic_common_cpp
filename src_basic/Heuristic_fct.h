@@ -543,7 +543,7 @@ struct SingleThompsonSamplingState {
   size_t n_insert;
   std::optional<size_t> opt_noprior;
   SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf) {
-    std::cerr << "SingleThompsonSamplingState, step 1\n";
+    std::cerr << "SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
     for (auto & kv : map_name_ledf)
       std::cerr << "map_name_ledf key=" << kv.first << "\n";
     n_insert = 0;
@@ -575,6 +575,8 @@ struct SingleThompsonSamplingState {
       for (auto & eStr : LStr) {
         std::vector<std::string> LStrB = STRING_Split(eStr, ":");
         if (LStrB.size() != 2) {
+          std::cerr << "desc=" << desc << "\n";
+          std::cerr << "eStr=" << eStr << "\n";
           std::cerr << "LStrB should have length 2 because allowed formulation is choice:distri\n";
           throw TerminalException{1};
         }
@@ -845,9 +847,11 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const& heu) {
         fullcond += eSingCond.eCond + " " + eSingCond.eType + " " + std::to_string(eSingCond.NumValue);
       }
       l_fullcond.push_back(fullcond);
-      l_conclusion.push_back(eFullCond.TheResult);
+      std::string e_conclusion = "state_" + eFullCond.TheResult;
+      l_conclusion.push_back(e_conclusion);
     }
-    ListStringValues["DefaultPrior"] = heu.DefaultResult;
+    std::string new_default = "state_" + heu.DefaultResult;
+    ListStringValues["DefaultPrior"] = new_default;
     ListListStringValues["ListFullCond"] = l_fullcond;
     ListListStringValues["ListConclusion"] = l_conclusion;
   }
@@ -1013,11 +1017,18 @@ public:
       for (size_t u=0; u<ListName.size(); u++) {
         std::string const& name = ListName[u];
         std::string const& desc = ListDescription[u];
+        std::cerr << "name=" << name << " desc=" << desc <<"\n";
         m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf);
       }
       std::cerr << "ThompsonSamplingHeuristic, step 5.4\n";
+      std::cerr << "m_name_ts =";
+      for (auto & kv : m_name_ts)
+        std::cerr << " " << kv.first;
+      std::cerr << "\n";
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
+      std::cerr << "Heu=\n" << heu << "\n";
+      
       for (auto& eOutput : GetHeuristicOutput(heu)) {
         std::cerr << "eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
@@ -1050,7 +1061,7 @@ private:
       iter->second.insert_meas(eTCR.input.choice, eTCR.result);
     } else {
       std::string name = HeuristicEvaluation(TheCand, heu);
-      SingleThompsonSamplingState ts = m_name_ts.at(name);
+      SingleThompsonSamplingState ts = m_name_ts.at(name); // Copy is needed
       ts.insert_meas(eTCR.input.choice, eTCR.result);
       um_compress_ts.try_emplace(vect_key, ts);
     }
@@ -1077,7 +1088,7 @@ private:
       return iter->second.get_lowest_sampling();
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
-    SingleThompsonSamplingState ts = m_name_ts.at(name);
+    SingleThompsonSamplingState ts = m_name_ts.at(name); // Copy is needed
     std::string ret = ts.get_lowest_sampling();
     um_compress_ts.try_emplace(vect_key, ts);
     return ret;
