@@ -431,13 +431,33 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
   a2 = a1.val.get_d();
 }
 
-/*
-inline void TYPE_CONVERSION(stc<mpz_class> const& a1, int64_t & a2)
+inline void TYPE_CONVERSION(stc<mpz_class> const& a1, T_uint64_t & a2)
 {
   long eVal_long=a1.val.get_si();
-  a2=int64_t(eVal_long);
+  a2=T_uint64_t(eVal_long);
 }
-*/
+
+inline void TYPE_CONVERSION(stc<T_uint64_t> const& a1, mpz_class & a2)
+{
+  T_uint64_t const& eVal = a1.val;
+  a2 = eVal;
+}
+
+inline void TYPE_CONVERSION(stc<mpq_class> const& a1, T_uint64_t & a2)
+{
+  Termination_mpq_not_integer(a1);
+  mpz_class a1_z = a1.val.get_num();
+  a2 = a1_z.get_si();
+}
+
+inline void TYPE_CONVERSION(stc<T_uint64_t> const& a1, mpq_class & a2)
+{
+  T_uint64_t const& eVal = a1.val;
+  a2 = eVal;
+}
+
+
+
 
 bool universal_square_root(mpz_class &ret, mpz_class const &val) {
   mpz_sqrt(ret.get_mpz_t(), val.get_mpz_t());
@@ -485,6 +505,8 @@ template <typename T> T practical_infinity() {
   set_to_infinity(ret);
   return ret;
 }
+
+
 
 //
 // Nearest integer and similar stuff.
