@@ -28,14 +28,10 @@ struct FullNamelist {
 };
 
 std::vector<std::string> ExtractMatchingBool(SingleBlock const &eBlock) {
-  std::map<std::string, bool>::const_iterator iter =
-      eBlock.ListBoolValues.begin();
   std::vector<std::string> ListMatch;
-  while (iter != eBlock.ListBoolValues.end()) {
-    if (iter->second)
-      ListMatch.push_back(iter->first);
-    iter++;
-  }
+  for (auto & kv : eBlock.ListBoolValues)
+    if (kv.second)
+      ListMatch.push_back(kv.first);
   return ListMatch;
 }
 
@@ -309,11 +305,9 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
 void NAMELIST_WriteNamelistFile(std::ostream &os,
                                 FullNamelist const &eFullNamelist) {
   int iBlock = 0;
-  for (std::map<std::string, SingleBlock>::const_iterator itB =
-           eFullNamelist.ListBlock.begin();
-       itB != eFullNamelist.ListBlock.end(); ++itB) {
-    std::string eBlockName = itB->first;
-    SingleBlock eBlock = itB->second;
+  for (auto & kv : eFullNamelist.ListBlock) {
+    std::string const& eBlockName = kv.first;
+    SingleBlock const& eBlock = kv.second;
     if (iBlock > 0)
       os << "\n\n";
     NAMELIST_WriteBlock(os, eBlockName, eBlock);
