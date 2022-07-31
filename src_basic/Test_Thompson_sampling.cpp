@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
     NAMELIST_ReadNamelistFile(filename, eFull);
 
 
-    ThompsonSamplingHeuristic<T> TSH(eFull);
+    ThompsonSamplingHeuristic<T> TSH(eFull, std::cerr);
 
     std::vector<std::string> l_input = GetHeuristicInput(TSH.heu);
     std::map<std::string, std::vector<T>> l_poss;

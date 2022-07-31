@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     std::cerr << "eFull=\n";
     NAMELIST_WriteNamelistFile(std::cerr, eFull);
     //
-    ThompsonSamplingHeuristic<T> TSH(eFull);
+    ThompsonSamplingHeuristic<T> TSH(eFull, std::cerr);
     std::cerr << "The TSH object has been BUILD\n";
     std::vector<std::string> l_input = GetHeuristicInput(TSH.heu);
     std::map<std::string, std::vector<T>> l_poss;

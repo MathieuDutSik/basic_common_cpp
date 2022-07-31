@@ -968,8 +968,8 @@ private:
   std::map<std::string, SingleThompsonSamplingState> m_name_ts;
   std::unordered_map<std::vector<size_t>, SingleThompsonSamplingState> um_compress_ts;
 public:
-  ThompsonSamplingHeuristic(FullNamelist const& TS) : TS(TS) {
-    std::cerr << "ThompsonSamplingHeuristic, step 1\n";
+  ThompsonSamplingHeuristic(FullNamelist const& TS, std::ostream & os) : TS(TS) {
+    os << "ThompsonSamplingHeuristic, step 1\n";
     SingleBlock const& BlockPROBA = TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
     SingleBlock const& BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
     SingleBlock const& BlockCOMPRESSION = TS.ListBlock.at("KEY_COMPRESSION");
@@ -977,7 +977,7 @@ public:
     SingleBlock const& BlockIO = TS.ListBlock.at("IO");
     name = BlockIO.ListStringValues.at("name");
     WriteLog = BlockIO.ListBoolValues.at("WriteLog");
-    std::cerr << "ThompsonSamplingHeuristic, step 2\n";
+    os << "ThompsonSamplingHeuristic, step 2\n";
     // Reading the basic heuristic (that gives the prior from the parameters)
     {
       std::string const& DefaultPrior = BlockHEU.ListStringValues.at("DefaultPrior");
@@ -985,7 +985,7 @@ public:
       std::vector<std::string> const& ListConclusion = BlockHEU.ListListStringValues.at("ListConclusion");
       heu = HeuristicFrom_LS_LS_S<T>(DefaultPrior, ListFullCond, ListConclusion);
     }
-    std::cerr << "ThompsonSamplingHeuristic, step 3\n";
+    os << "ThompsonSamplingHeuristic, step 3\n";
     // Reading the initial distributions used in the prior
     {
       std::vector<std::string> const& ListName = BlockPROBA.ListListStringValues.at("ListName");
@@ -1011,7 +1011,7 @@ public:
         n_max = 1000;
       map_name_ledf.try_emplace("empty", n_max, 0, "empty", "unset");
     }
-    std::cerr << "ThompsonSamplingHeuristic, step 4\n";
+    os << "ThompsonSamplingHeuristic, step 4\n";
     // Reading and assigning the key_compression
     {
       std::vector<std::string> const& ListKey = BlockCOMPRESSION.ListListStringValues.at("ListKey");
@@ -1019,37 +1019,37 @@ public:
       kc = KeyCompression<T>(ListKey, ListDescription);
       CheckHeuristicInput(heu, ListKey);
     }
-    std::cerr << "ThompsonSamplingHeuristic, step 5\n";
+    os << "ThompsonSamplingHeuristic, step 5\n";
     // Reading the initial thompson samplings
     {
       std::vector<std::string> const& ListAnswer = BlockTHOMPSON.ListListStringValues.at("ListAnswer");
-      std::cerr << "ThompsonSamplingHeuristic, step 5.1\n";
+      os << "ThompsonSamplingHeuristic, step 5.1\n";
       std::vector<std::string> const& ListName = BlockTHOMPSON.ListListStringValues.at("ListName");
-      std::cerr << "ThompsonSamplingHeuristic, step 5.2\n";
+      os << "ThompsonSamplingHeuristic, step 5.2\n";
       std::vector<std::string> const& ListDescription = BlockTHOMPSON.ListListStringValues.at("ListDescription");
-      std::cerr << "ThompsonSamplingHeuristic, step 5.3\n";
+      os << "ThompsonSamplingHeuristic, step 5.3\n";
       for (size_t u=0; u<ListName.size(); u++) {
         std::string const& name = ListName[u];
         std::string const& desc = ListDescription[u];
-        std::cerr << "name=" << name << " desc=" << desc <<"\n";
+        os << "name=" << name << " desc=" << desc <<"\n";
         m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf);
       }
-      std::cerr << "ThompsonSamplingHeuristic, step 5.4\n";
-      std::cerr << "m_name_ts =";
+      os << "ThompsonSamplingHeuristic, step 5.4\n";
+      os << "m_name_ts =";
       for (auto & kv : m_name_ts)
-        std::cerr << " " << kv.first;
-      std::cerr << "\n";
+        os << " " << kv.first;
+      os << "\n";
       // The terms like "noprior:70" will not show up in the description but may occur
       // in the output of heuristic and so have to be taken into account separately.
-      std::cerr << "Heu=\n" << heu << "\n";
+      os << "Heu=\n" << heu << "\n";
       for (auto& eOutput : GetHeuristicOutput(heu)) {
-        std::cerr << "eOutput=" << eOutput << "\n";
+        os << "eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
           m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf);
       }
-      std::cerr << "ThompsonSamplingHeuristic, step 5.5\n";
+      os << "ThompsonSamplingHeuristic, step 5.5\n";
     }
-    std::cerr << "ThompsonSamplingHeuristic, step 6\n";
+    os << "ThompsonSamplingHeuristic, step 6\n";
 
     // Reading existing data from log if present
     bool ProcessExistingDataIfExist = BlockIO.ListBoolValues.at("ProcessExistingDataIfExist");
@@ -1057,7 +1057,7 @@ public:
       std::string const& LogFileToProcess = BlockIO.ListStringValues.at("LogFileToProcess");
       InsertCompletedInfo(LogFileToProcess);
     }
-    std::cerr << "ThompsonSamplingHeuristic, step 7\n";
+    os << "ThompsonSamplingHeuristic, step 7\n";
   }
   ~ThompsonSamplingHeuristic() {
     if (l_submission.size() > 0) {
