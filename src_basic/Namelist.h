@@ -320,14 +320,9 @@ NAMELIST_ListTrueEntryBool(FullNamelist const &eFull,
   return ListString;
 }
 
-void NAMELIST_ReadNamelistFile(std::string const &eFileName,
-                               FullNamelist &eFull) {
+void NAMELIST_ReadNamelistStream(std::istream & is,
+                                 FullNamelist &eFull) {
   std::unordered_set<std::pair<std::string, std::string>> ListInsertValues;
-  if (!IsExistingFile(eFileName)) {
-    std::cerr << "The following namelist file is missing\n";
-    std::cerr << "eFileName = " << eFileName << "\n";
-    throw TerminalException{1};
-  }
   auto parsing_error_end = [&](std::string const &eBlockName,
                                std::string const &eVarName,
                                std::string const &TypeVar) -> void {
@@ -337,14 +332,13 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
     std::cerr << "Please correct your input file\n";
     throw TerminalException{1};
   };
-  std::ifstream INfs(eFileName);
   bool InBlock = false;
   std::string eBlockName;
-  while (!INfs.eof()) {
+  while (!is.eof()) {
     std::string Ampersand = "&";
     std::string strTab = "\t";
     std::string PreStr;
-    std::getline(INfs, PreStr);
+    std::getline(is, PreStr);
     std::string eCharComment = "!";
     std::string PreStrB = NAMELIST_RemoveAfterCommentChar(PreStr, eCharComment);
     std::string eStr = STRING_RemoveSpacesBeginningEnd(PreStrB);
@@ -358,8 +352,7 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
       if (eStr.find(Ampersand) != std::string::npos) {
         std::string eFirstChar = eStr.substr(0, 1);
         if (eFirstChar != "&") {
-          std::cerr << "Error while reading namelist file = " << eFileName
-                    << "\n";
+          std::cerr << "Error while processing stream\n";
           std::cerr
               << "Error, Ampersand (&) should be only in the first character\n";
           std::cerr << "LINE=" << eStr << "\n";
@@ -399,7 +392,6 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
             std::string eVarName = STRING_RemoveSpacesBeginningEnd(eStrPrior);
             std::pair<std::string, std::string> ePair{eBlockName, eVarName};
             if (ListInsertValues.count(ePair) > 0) {
-              std::cerr << "eFileName = " << eFileName << "\n";
               std::cerr << "In the block " << eBlockName << "\n";
               std::cerr << "the entry " << eVarName << "\n";
               std::cerr << "is defined two times\n";
@@ -418,7 +410,6 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
                            "allowed entries\n";
               std::cerr << "The variable " << eVarName << "\n";
               std::cerr << "is in block " << eBlockName << "\n";
-              std::cerr << "of the file " << eFileName << "\n";
               std::cerr << "but it is not allowed for the chosen application\n";
               throw TerminalException{1};
             }
@@ -491,17 +482,27 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
   }
 }
 
-void NAMELIST_ReadListString(FullNamelist &eFull, std::vector<std::string> const &ListString) {
-  size_t lenString = 30;
-  std::string eRandString = random_string(lenString);
-  std::string ePrefix = "/tmp/Std_adm";
-  std::string TheFile = ePrefix + eRandString;
-  {
-    std::ofstream OUTfs(TheFile);
-    for (auto const &eStr : ListString)
-      OUTfs << eStr << "\n";
+void NAMELIST_ReadNamelistFile(std::string const &eFileName,
+                               FullNamelist &eFull) {
+  if (!IsExistingFile(eFileName)) {
+    std::cerr << "The following namelist file is missing\n";
+    std::cerr << "eFileName = " << eFileName << "\n";
+    throw TerminalException{1};
   }
-  NAMELIST_ReadNamelistFile(TheFile, eFull);
+  std::ifstream INfs(eFileName);
+  NAMELIST_ReadNamelistStream(INfs, eFull);
+}
+
+
+
+void NAMELIST_ReadListString(FullNamelist &eFull, std::vector<std::string> const &ListString) {
+  std::string str_tot;
+  for (auto const &eStr : ListString) {
+    str_tot += eStr;
+    str_tot += "\n";
+  }
+  std::istringstream is(str_tot);
+  NAMELIST_ReadNamelistStream(is, eFull);
 }
 
 

@@ -190,18 +190,13 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
 template <typename T>
 TheHeuristic<T>
 HeuristicFromListString(std::vector<std::string> const &ListString) {
-  size_t lenString = 30;
-  std::string eRandString = random_string(lenString);
-  std::string ePrefix = "/tmp/Std_adm";
-  std::string TheFile = ePrefix + eRandString;
-  std::ofstream OUTfs(TheFile);
-  for (auto const &eStr : ListString)
-    OUTfs << eStr << "\n";
-  OUTfs.close();
-  // Now reading it
-  std::ifstream INfs(TheFile);
-  TheHeuristic<T> TheHeu = ReadHeuristic<T>(INfs);
-  std::remove(TheFile.c_str());
+  std::string str_tot;
+  for (auto const &eStr : ListString) {
+    str_tot += eStr;
+    str_tot += "\n";
+  }
+  std::istringstream is(str_tot);
+  TheHeuristic<T> TheHeu = ReadHeuristic<T>(is);
   return TheHeu;
 }
 
