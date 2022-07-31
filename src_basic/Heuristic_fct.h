@@ -551,10 +551,10 @@ struct SingleThompsonSamplingState {
   std::map<std::string, LimitedEmpiricalDistributionFunction> map_ans_ledf;
   size_t n_insert;
   std::optional<size_t> opt_noprior;
-  SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf) {
-    std::cerr << "SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
+  SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf, std::ostream & os) {
+    os << "SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
     for (auto & kv : map_name_ledf)
-      std::cerr << "map_name_ledf key=" << kv.first << "\n";
+      os << "map_name_ledf key=" << kv.first << "\n";
     n_insert = 0;
     if (desc.size() > 7) {
       if (desc.substr(0,7) == "noprior") {
@@ -574,27 +574,27 @@ struct SingleThompsonSamplingState {
         opt_noprior = siz_limit;
       }
     }
-    std::cerr << "SingleThompsonSamplingState, step 2\n";
+    os << "SingleThompsonSamplingState, step 2\n";
     if (opt_noprior) {
-      std::cerr << "SingleThompsonSamplingState, step 2.1\n";
+      os << "SingleThompsonSamplingState, step 2.1\n";
       for (auto & ans : ListAnswer) {
-        std::cerr << "ans=" << ans << "\n";
+        os << "ans=" << ans << "\n";
         map_ans_ledf.try_emplace(ans, map_name_ledf.at("empty"));
       }
-      std::cerr << "SingleThompsonSamplingState, step 2.2\n";
+      os << "SingleThompsonSamplingState, step 2.2\n";
     } else {
-      std::cerr << "SingleThompsonSamplingState, step 2.3\n";
+      os << "SingleThompsonSamplingState, step 2.3\n";
       std::vector<std::string> LStr = STRING_Split(desc, " ");
-      std::cerr << "SingleThompsonSamplingState, step 2.4\n";
+      os << "SingleThompsonSamplingState, step 2.4\n";
       for (auto & eStr : LStr) {
         std::pair<std::string,std::string> ep = SplitByLastSep(eStr, ":");
         std::string const& ans = ep.first;
         std::string const& distri = ep.second;
         map_ans_ledf.try_emplace(ans, map_name_ledf.at(distri));
       }
-      std::cerr << "SingleThompsonSamplingState, step 2.5\n";
+      os << "SingleThompsonSamplingState, step 2.5\n";
     }
-    std::cerr << "SingleThompsonSamplingState, step 3\n";
+    os << "SingleThompsonSamplingState, step 3\n";
   }
   void insert_meas(std::string const& key, double const& meas) {
     map_ans_ledf.at(key).insert_value(meas);
@@ -1027,7 +1027,7 @@ public:
         std::string const& name = ListName[u];
         std::string const& desc = ListDescription[u];
         os << "name=" << name << " desc=" << desc <<"\n";
-        m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf);
+        m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf, os);
       }
       os << "ThompsonSamplingHeuristic, step 5.4\n";
       os << "m_name_ts =";
@@ -1040,7 +1040,7 @@ public:
       for (auto& eOutput : GetHeuristicOutput(heu)) {
         os << "eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
-          m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf);
+          m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf, os);
       }
       os << "ThompsonSamplingHeuristic, step 5.5\n";
     }
