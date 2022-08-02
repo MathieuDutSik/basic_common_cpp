@@ -6,6 +6,19 @@
 #include <iostream>
 #include <string>
 
+
+std::chrono::time_point<std::chrono::system_clock> get_cpp_time(int day, int month, int year) {
+  std::tm start{};
+  start.tm_sec = 0;
+  start.tm_min = 0;
+  start.tm_hour = 0;
+  start.tm_mday = day;
+  start.tm_mon = month - 1;
+  start.tm_year = year - 1900;
+  return std::chrono::system_clock::from_time_t(std::mktime(&start));
+}
+
+
 struct SingletonTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   SingletonTime() { time = std::chrono::system_clock::now(); }
