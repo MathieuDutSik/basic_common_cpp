@@ -8,7 +8,7 @@
 //  All GMP are in NumberTheory.h
 //  All mpreal are in mpreal_related.h
 
-#include "ExceptionEnding.h"
+#include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include <cstdint>
 #include <iostream>

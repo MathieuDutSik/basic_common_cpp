@@ -10,6 +10,10 @@ struct TerminalException {
   int eVal;
 };
 
+struct RuntimeException {
+  int eVal;
+};
+
 struct ConversionException {
   std::string val;
 };

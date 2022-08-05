@@ -8,7 +8,7 @@
 #include <string>
 #include <utility>
 
-#include "ExceptionEnding.h"
+#include "ExceptionsFunc.h"
 #include "ResidueQuotient.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"

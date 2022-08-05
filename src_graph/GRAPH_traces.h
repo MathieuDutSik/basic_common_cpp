@@ -4,7 +4,7 @@
 
 #include "Timings.h"
 #include "traces.h"
-#include <ExceptionEnding.h>
+#include "ExceptionsFunc.h"
 #include <iostream>
 #include <limits>
 #include <utility>

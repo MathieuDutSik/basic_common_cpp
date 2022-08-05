@@ -2,7 +2,7 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
 #define SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
 
-#include "ExceptionEnding.h"
+#include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
 #include "boost_serialization.h"

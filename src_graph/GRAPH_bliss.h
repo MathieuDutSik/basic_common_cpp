@@ -2,7 +2,7 @@
 #ifndef SRC_GRAPH_GRAPH_BLISS_H_
 #define SRC_GRAPH_GRAPH_BLISS_H_
 
-#include "ExceptionEnding.h"
+#include "ExceptionsFunc.h"
 #include "defs.hh"
 #include "graph.hh"
 #include "partition.hh"

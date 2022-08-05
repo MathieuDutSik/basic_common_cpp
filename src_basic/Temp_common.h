@@ -59,7 +59,7 @@
 
 // Type conversion
 #include "Basic_functions.h"
-#include "ExceptionEnding.h"
+#include "ExceptionsFunc.h"
 #include "TypeConversion.h"
 
 // synonyms
