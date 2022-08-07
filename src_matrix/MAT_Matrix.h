@@ -20,6 +20,12 @@
 #include <utility>
 #include <vector>
 
+
+template<typename T>
+struct is_mymatrix<MyMatrix<T>> {
+  static const bool value = true;
+};
+
 namespace boost::serialization {
 
 //

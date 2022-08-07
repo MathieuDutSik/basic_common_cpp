@@ -75,6 +75,10 @@ template <typename T> struct is_graphbitset_class {
   static const bool value = false;
 };
 
+template <typename T> struct is_mymatrix {
+  static const bool value = false;
+};
+
 void srand_random_set() {
 #ifdef USE_NANOSECOND_RAND
   std::timespec ts;
