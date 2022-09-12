@@ -3,7 +3,6 @@
 #define SRC_BASIC_HASH_FUNCTIONS_H_
 
 #include "Temp_common.h"
-#include "gmpxx.h"
 #include <array>
 #include <cstdint>
 #include <iterator>
