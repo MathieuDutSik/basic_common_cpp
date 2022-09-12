@@ -261,7 +261,7 @@ T ConvertHex_to_T(std::string const &data) {
 template<typename T>
 T MD5_hash_T(std::string const &data) {
   std::string data_out = MD5_hash_string(data);
-  return ConvertHex_to_T(data_out);
+  return ConvertHex_to_T<T>(data_out);
 }
 
 // Murmurhash function
