@@ -237,7 +237,8 @@ std::string MD5_hash_string(std::string const &data) {
   return converted;
 }
 
-mpz_class ConvertHex_to_mpz(std::string const &data) {
+template<typename T>
+T ConvertHex_to_T(std::string const &data) {
   std::vector<std::string> LChar{"0", "1", "2", "3", "4", "5", "6", "7",
                                  "8", "9", "a", "b", "c", "d", "e", "f"};
   auto GetPosition = [&](std::string const &eChar) -> int {
@@ -247,8 +248,8 @@ mpz_class ConvertHex_to_mpz(std::string const &data) {
     std::cerr << "Wrong character\n";
     throw TerminalException{1};
   };
-  mpz_class sum = 0;
-  mpz_class epow = 1;
+  T sum = 0;
+  T epow = 1;
   for (size_t u = 0; u < data.size(); u++) {
     int pos = GetPosition(data.substr(u, 1));
     sum += pos * epow;
@@ -257,9 +258,10 @@ mpz_class ConvertHex_to_mpz(std::string const &data) {
   return sum;
 }
 
-mpz_class MD5_hash_mpz(std::string const &data) {
+template<typename T>
+T MD5_hash_T(std::string const &data) {
   std::string data_out = MD5_hash_string(data);
-  return ConvertHex_to_mpz(data_out);
+  return ConvertHex_to_T(data_out);
 }
 
 // Murmurhash function
