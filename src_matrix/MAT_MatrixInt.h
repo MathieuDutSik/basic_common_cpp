@@ -125,7 +125,7 @@ void WriteGCD_int(std::ostream &os, GCD_int<T> const &eGCD) {
 }
 
 template <typename T>
-inline typename std::enable_if<!std::is_same_v<T, mpz_class>,
+inline typename std::enable_if<!is_mpz_class<T>::value,
                                GCD_int<T>>::type
 ComputePairGcd(T const &m, T const &n) {
   //  std::cerr << "m=" << m << " n=" << n << "\n";
@@ -189,8 +189,10 @@ ComputePairGcd(T const &m, T const &n) {
   return {std::move(Pmat), f};
 }
 
+#ifdef SRC_NUMBER_NUMBERTHEORYGMP_H_
+
 template <typename T>
-inline typename std::enable_if<std::is_same_v<T, mpz_class>, GCD_int<T>>::type
+inline typename std::enable_if<is_mpz_class<T>::value, GCD_int<T>>::type
 ComputePairGcd(T const &m, T const &n) {
   mpz_class eGCD;
   if (n == 0 && m == 0) {
@@ -207,7 +209,7 @@ ComputePairGcd(T const &m, T const &n) {
   Pmat(1, 0) = t;
   Pmat(0, 1) = -n / eGCD;
   Pmat(1, 1) = m / eGCD;
-#ifdef DEBUG_MATRIX_INT
+# ifdef DEBUG_MATRIX_INT
   T diff1 = eGCD - Pmat(0, 0) * m - Pmat(1, 0) * n;
   T diff2 = Pmat(0, 1) * m + Pmat(1, 1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -216,9 +218,12 @@ ComputePairGcd(T const &m, T const &n) {
     std::cerr << "B: diff1=" << diff1 << " diff2=" << diff2 << "\n";
     throw TerminalException{1};
   }
-#endif
+# endif
   return {std::move(Pmat), eGCD};
 }
+
+#endif
+
 
 template <typename T> T ComputeLCM(std::vector<T> const &eVect) {
   int siz = eVect.size();
