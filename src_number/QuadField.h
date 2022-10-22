@@ -13,6 +13,13 @@ private:
   T b;
 
 public:
+  const T& get_a() const {
+    return a;
+  }
+  const T& get_b() const {
+    return b;
+  }
+
   // copy constructor
   QuadField(QuadField<T, d> const &x) {
     a = x.a;
@@ -249,8 +256,8 @@ namespace std {
       	seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
       };
       size_t seed = std::hash<int>()(d);
-      size_t e_hash1 = std::hash<T>()(x.a);
-      size_t e_hash2 = std::hash<T>()(x.b);
+      size_t e_hash1 = std::hash<T>()(x.get_a());
+      size_t e_hash2 = std::hash<T>()(x.get_b());
       combine_hash(seed, e_hash1);
       combine_hash(seed, e_hash2);
       return seed;
