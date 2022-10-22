@@ -239,6 +239,8 @@ public:
 template<typename T, int d>
 struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> field_type; };
 
+// Note that the underlying ring is not unique, there are many possibiliies actually
+// but we can represent only one in our scheme.
 template<typename T, int d>
 struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> ring_type; };
 
