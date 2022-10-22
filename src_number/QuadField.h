@@ -239,6 +239,9 @@ public:
 template<typename T, int d>
 struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> field_type; };
 
+template<typename T, int d>
+struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> ring_type; };
+
 
 template <typename T, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &eQ, double &eD) {
