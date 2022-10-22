@@ -401,6 +401,22 @@ template <> struct overlying_field<Rational<long>> {
   typedef Rational<long> field_type;
 };
 
+// hashing function
+
+namespace std {
+  template <typename T> struct hash<Rational<T>> {
+    std::size_t operator()(const Rational<T> &x) const {
+      auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+        seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      };
+      size_t seed = std::hash<T>()(x.get_num());
+      size_t e_hash = std::hash<T>()(x.get_den());
+      combine_hash(seed, e_hash);
+      return seed;
+    }
+  };
+}
+
 // The conversion tools (int)
 
 inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, Rational<int> &a2) {

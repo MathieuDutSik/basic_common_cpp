@@ -240,6 +240,25 @@ template <typename T, int d> struct is_exact_arithmetic<QuadField<T, d>> {
   static const bool value = true;
 };
 
+// Hashing function
+
+namespace std {
+  template <typename T,int d> struct hash<QuadField<T,d>> {
+    std::size_t operator()(const QuadField<T,d> &x) const {
+      auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+      	seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+      };
+      size_t seed = std::hash<int>()(d);
+      size_t e_hash1 = std::hash<T>()(x.a);
+      size_t e_hash2 = std::hash<T>()(x.b);
+      combine_hash(seed, e_hash1);
+      combine_hash(seed, e_hash2);
+      return seed;
+    }
+  };
+}
+
+
 // Local typing info
 
 template<typename T> struct is_quad_field {};

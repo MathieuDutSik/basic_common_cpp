@@ -8,6 +8,7 @@
 #PROGRAM		= TestSquareRoot
 #PROGRAM		= TestTypeConversion
 PROGRAM		= QuadFieldTest
+#PROGRAM		= RationalTest
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
