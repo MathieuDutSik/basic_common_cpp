@@ -71,6 +71,12 @@ public:
     a -= x.a;
     b -= x.b;
   }
+  void operator/=(QuadField<T, d> const &x) {
+    disc = x.a * x.a - d * x.b * x.b;
+    T a_new = (a * x.a - d * b * x.b) / disc;
+    b       = (b * x.a -     a * x.b) / disc;
+    a = a_new;
+  }
   friend QuadField<T, d> operator+(QuadField<T, d> const &x,
                                    QuadField<T, d> const &y) {
     QuadField<T, d> z;
@@ -122,9 +128,8 @@ public:
     return hA_d + sqrt(doubl_d) * hB_d;
   }
   void operator*=(QuadField<T, d> const &x) {
-    T hA;
-    hA = a * x.a + d * b * x.b;
-    b = a * x.b + b * x.a;
+    T hA = a * x.a + d * b * x.b;
+    b    = a * x.b + b * x.a;
     a = hA;
   }
   friend QuadField<T, d> operator*(QuadField<T, d> const &x,
