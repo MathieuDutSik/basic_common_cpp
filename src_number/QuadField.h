@@ -276,9 +276,9 @@ template<typename T, int d> struct is_quad_field<QuadField<T,d>> { static const 
 
 template<typename T, int d>
 bool IsInteger(QuadField<T,d> const& x) {
-  if (x.b != 0)
+  if (x.get_b() != 0)
     return false;
-  return IsInteger(x.a);
+  return IsInteger(x.get_a());
 }
 
 
@@ -287,16 +287,16 @@ bool IsInteger(QuadField<T,d> const& x) {
 
 template<typename T1, typename T2, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2) {
-  stc<T1> a1 { x1.val.a };
-  stc<T1> b1 { x1.val.b };
-  TYPE_CONVERSION(a1, x2.a);
-  TYPE_CONVERSION(b1, x2.b);
+  stc<T1> a1 { x1.val.get_a() };
+  stc<T1> b1 { x1.val.get_b() };
+  TYPE_CONVERSION(a1, x2.get_a());
+  TYPE_CONVERSION(b1, x2.get_b());
 }
 
 template<typename T1, typename T2, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, double &x2) {
-  stc<T1> a1 { x1.val.a };
-  stc<T1> b1 { x1.val.b };
+  stc<T1> a1 { x1.val.get_a() };
+  stc<T1> b1 { x1.val.get_b() };
   double a2, b2;
   TYPE_CONVERSION(a1, a2);
   TYPE_CONVERSION(b1, b2);
@@ -309,7 +309,7 @@ inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CO
     std::string str = "Conversion error for quadratic field";
     throw ConversionException{str};
   }
-  stc<T1> a1 { x1.val.a };
+  stc<T1> a1 { x1.val.get_a() };
   TYPE_CONVERSION(a1, x2);
 }
 
