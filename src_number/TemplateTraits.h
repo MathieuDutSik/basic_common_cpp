@@ -98,6 +98,34 @@ template <> struct is_implementation_of_Z<int8_t> {
   static const bool value = true;
 };
 
+// Trait definition for subset of rationals
+
+template <typename T> struct is_implementation_of_Q {};
+
+template <> struct is_implementation_of_Q<double> {
+  static const bool value = false;
+};
+
+template <> struct is_implementation_of_Q<float> {
+  static const bool value = false;
+};
+
+template <> struct is_implementation_of_Q<int64_t> {
+  static const bool value = true;
+};
+
+template <> struct is_implementation_of_Q<int32_t> {
+  static const bool value = true;
+};
+
+template <> struct is_implementation_of_Q<int16_t> {
+  static const bool value = true;
+};
+
+template <> struct is_implementation_of_Q<int8_t> {
+  static const bool value = true;
+};
+
 // Trait definition for exactness
 
 template <typename T> struct is_exact_arithmetic {};

@@ -290,6 +290,10 @@ template <typename Tint> struct is_implementation_of_Z<Rational<Tint>> {
   static const bool value = false;
 };
 
+template <typename Tint> struct is_implementation_of_Q<Rational<Tint>> {
+  static const bool value = true;
+};
+
 template <typename Tint> struct is_ring_field<Rational<Tint>> {
   static const bool value = true;
 };

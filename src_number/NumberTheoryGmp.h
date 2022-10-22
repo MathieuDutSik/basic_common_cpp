@@ -29,6 +29,16 @@ template <> struct is_implementation_of_Z<mpq_class> {
   static const bool value = false;
 };
 
+// is an implementation of Q
+
+template <> struct is_implementation_of_Q<mpz_class> {
+  static const bool value = false;
+};
+
+template <> struct is_implementation_of_Q<mpq_class> {
+  static const bool value = true;
+};
+
 // is_euclidean_domain property
 
 template <> struct is_euclidean_domain<mpz_class> {

@@ -255,6 +255,18 @@ template <typename T, int d> struct is_exact_arithmetic<QuadField<T, d>> {
 
 // Hashing function
 
+template <typename T, int d>
+struct is_implementation_of_Z<QuadField<T,d>> {
+  static const bool value = false;
+};
+
+template <typename T, int d>
+struct is_implementation_of_Q<QuadField<T,d>> {
+  static const bool value = false;
+};
+
+// Hashing function
+
 namespace std {
   template <typename T,int d> struct hash<QuadField<T,d>> {
     std::size_t operator()(const QuadField<T,d> &x) const {

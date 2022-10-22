@@ -137,6 +137,13 @@ template <> struct is_implementation_of_Z<boost::multiprecision::mpq_rational> {
   static const bool value = false;
 };
 
+template <> struct is_implementation_of_Q<boost::multiprecision::mpz_int> {
+  static const bool value = false;
+};
+template <> struct is_implementation_of_Q<boost::multiprecision::mpq_rational> {
+  static const bool value = true;
+};
+
 template <> struct is_ring_field<boost::multiprecision::mpz_int> {
   static const bool value = false;
 };
