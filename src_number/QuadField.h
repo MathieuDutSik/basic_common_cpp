@@ -220,7 +220,7 @@ public:
 };
 
 template<typename T, int d>
-struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::field_type,d> field_type; };
+struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> field_type; };
 
 
 template <typename T, int d>
