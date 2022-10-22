@@ -5,7 +5,9 @@
 #include "NumberTheory.h"
 #include "Temp_common.h"
 
-template <typename T, int d> class QuadField {
+template <typename Tinp, int d> class QuadField {
+public:
+  using T = Tinp;
 private:
   T a;
   T b;
@@ -217,6 +219,10 @@ public:
   }
 };
 
+template<typename T, int d>
+struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::field_type,d> field_type; };
+
+
 template <typename T, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
@@ -234,12 +240,53 @@ template <typename T, int d> struct is_exact_arithmetic<QuadField<T, d>> {
   static const bool value = true;
 };
 
-/*
+// Local typing info
+
+template<typename T> struct is_quad_field {};
+
+template<typename T, int d> struct is_quad_field<QuadField<T,d>> { static const bool value = false; };
+
+// Some functionality
+
 template<typename T, int d>
-struct overlying_field<QuadField<T,d>> {
-  typedef QuadField<overlying_field<T>::field_type,d> field_type;
-};
-*/
+bool IsInteger(QuadField<T,d> const& x) {
+  if (x.b != 0)
+    return false;
+  return IsInteger(x.a);
+}
+
+
+// The conversion tools (int)
+
+
+template<typename T1, typename T2, int d>
+inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2) {
+  stc<T1> a1 { x1.val.a };
+  stc<T1> b1 { x1.val.b };
+  TYPE_CONVERSION(a1, x2.a);
+  TYPE_CONVERSION(b1, x2.b);
+}
+
+template<typename T1, typename T2, int d>
+inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, double &x2) {
+  stc<T1> a1 { x1.val.a };
+  stc<T1> b1 { x1.val.b };
+  double a2, b2;
+  TYPE_CONVERSION(a1, a2);
+  TYPE_CONVERSION(b1, b2);
+  x2 = a2 + sqrt(d) * b2;
+}
+
+template<typename T1, typename T2, int d>
+inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, T2 &x2) {
+  if (x1.val.b != 0) {
+    std::string str = "Conversion error for quadratic field";
+    throw ConversionException{str};
+  }
+  stc<T1> a1 { x1.val.a };
+  TYPE_CONVERSION(a1, x2);
+}
+
 
 // clang-format off
 #endif  // SRC_NUMBER_QUADFIELD_H_

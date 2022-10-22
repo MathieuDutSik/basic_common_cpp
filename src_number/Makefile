@@ -1,4 +1,4 @@
-PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion
+#PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
@@ -7,6 +7,7 @@ PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuo
 #PROGRAM		= TestConversion
 #PROGRAM		= TestSquareRoot
 #PROGRAM		= TestTypeConversion
+PROGRAM		= QuadFieldTest
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
