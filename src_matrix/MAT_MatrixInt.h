@@ -263,6 +263,47 @@ template <typename T> MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const &M) {
   return RemoveFractionMatrixPlusCoeff(M).TheMat;
 }
 
+template <typename T>
+FractionMatrix<T> CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
+  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  auto get_abs=[](T const& val) -> T {
+    if (val < 0)
+      return -val;
+    return val;
+  };
+  T the_sma = 1;
+  for (int iCol = 0; iCol < nbCol; iCol++)
+    for (int iRow = 0; iRow < nbRow; iRow++) {
+      T val = get_abs(M(iRow,iCol));
+      if (val < the_sma && val > 0)
+        the_sma = val;
+    }
+  MyMatrix<T> M2 = M / the_sma;
+  T TheMult = 1 / the_sma;
+  return {TheMult, std::move(M2)};
+}
+
+template <typename T>
+FractionMatrix<T> ScalarCanonicalizationMatrixPlusCoeff(MyMatrix<T> const &M) {
+  using Tfield = typename overlying_field<T>::field_type;
+  if constexpr(is_implementation_of_Q<Tfield>::value) {
+    return RemoveFractionMatrixPlusCoeff(M);
+  } else {
+    return CanonicalizationSmallestCoefficientMatrixPlusCoeff(M);
+  }
+}
+
+template <typename T> MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
+  return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
+}
+
+
+
+
+
+
 template <typename T> struct FractionVector {
   T TheMult;
   MyVector<T> TheVect;
@@ -2193,13 +2234,17 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const &M) {
   return CompleteBasis;
 }
 
+
+
+
+
 template <typename T>
 MyMatrix<T> CanonicalizeOrderedMatrix_Kernel(const MyMatrix<T> &M) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to have inverses in Kernel_ComputeAffineBasis");
   MyMatrix<T> Basis = RowReduction(M);
   MyMatrix<T> M1 = M * Inverse(Basis);
-  return RemoveFractionMatrix(M1);
+  return ScalarCanonicalizationMatrix(M1);
 }
 
 template <typename T>
