@@ -8,7 +8,8 @@ int main(int argc, char *argv[]) {
   using T = QuadField<mpq_class,5>;
   try {
     T x;
-    std::cerr << "x=" << x << "\n";
+    T y = UniversalScalarConversion<T,T>(x);
+    std::cerr << "x=" << x << " y=" << y << "\n";
 
   } catch (TerminalException const &e) {
     exit(e.eVal);

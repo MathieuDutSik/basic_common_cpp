@@ -13,10 +13,16 @@ private:
   T b;
 
 public:
-  const T& get_a() const {
+  T& get_a() {
     return a;
   }
-  const T& get_b() const {
+  T& get_b() {
+    return b;
+  }
+  const T& get_const_a() const{
+    return a;
+  }
+  const T& get_const_b() const {
     return b;
   }
 
@@ -256,8 +262,8 @@ namespace std {
       	seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
       };
       size_t seed = std::hash<int>()(d);
-      size_t e_hash1 = std::hash<T>()(x.get_a());
-      size_t e_hash2 = std::hash<T>()(x.get_b());
+      size_t e_hash1 = std::hash<T>()(x.get_const_a());
+      size_t e_hash2 = std::hash<T>()(x.get_const_b());
       combine_hash(seed, e_hash1);
       combine_hash(seed, e_hash2);
       return seed;
@@ -278,7 +284,7 @@ template<typename T, int d>
 bool IsInteger(QuadField<T,d> const& x) {
   if (x.get_b() != 0)
     return false;
-  return IsInteger(x.get_a());
+  return IsInteger(x.get_const_a());
 }
 
 
@@ -287,16 +293,16 @@ bool IsInteger(QuadField<T,d> const& x) {
 
 template<typename T1, typename T2, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2) {
-  stc<T1> a1 { x1.val.get_a() };
-  stc<T1> b1 { x1.val.get_b() };
+  stc<T1> a1 { x1.val.get_const_a() };
+  stc<T1> b1 { x1.val.get_const_b() };
   TYPE_CONVERSION(a1, x2.get_a());
   TYPE_CONVERSION(b1, x2.get_b());
 }
 
 template<typename T1, typename T2, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, double &x2) {
-  stc<T1> a1 { x1.val.get_a() };
-  stc<T1> b1 { x1.val.get_b() };
+  stc<T1> a1 { x1.val.get_const_a() };
+  stc<T1> b1 { x1.val.get_const_b() };
   double a2, b2;
   TYPE_CONVERSION(a1, a2);
   TYPE_CONVERSION(b1, b2);
@@ -309,7 +315,7 @@ inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CO
     std::string str = "Conversion error for quadratic field";
     throw ConversionException{str};
   }
-  stc<T1> a1 { x1.val.get_a() };
+  stc<T1> a1 { x1.val.get_const_a() };
   TYPE_CONVERSION(a1, x2);
 }
 
