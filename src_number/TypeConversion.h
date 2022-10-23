@@ -15,31 +15,11 @@
 #include <math.h>
 #include <type_traits>
 #include <utility>
+#include "BasicNumberTypes.h"
 
 //
 // UniversalScalarConversion and TYPE_CONVERSION
 //
-
-// STC: Singleton Type Conversion
-// We absolutely want to avoid a function with a signature "long"
-// matching an int. That is why we introduce the stc<T> data type
-// since C++ will never convert a stc<long> to a stc<int> and
-// vice versa under the hood.
-// The overhead is eliminated at the compilation. The stc<T> does
-// not show up outside of internal conversion code.
-template <typename T> struct stc { T const &val; };
-
-
-// The problem we face is that we have
-// --- std::is_same_v<size_t,uint64_t> = T on the Linux X86
-// --- std::is_same_v<size_t,uint64_t> = F on the Macintosh X86
-// By introducing that type we guarantee that we have always
-// std::is_same_v<size_t,T_uint64_t> = T on both platforms
-#ifdef __APPLE__
-using T_uint64_t = unsigned long;
-#else
-using T_uint64_t = uint64_t;
-#endif
 
 // Conversion from double
 inline void TYPE_CONVERSION(stc<double> const &a1, double &a2) { a2 = a1.val; }
@@ -402,6 +382,23 @@ std::pair<bool, T1> UniversalScalarConversionCheck(T2 const &a) {
     return {false, ret};
   }
   return {true, ret};
+}
+
+//
+// ScalingInteger that is find a positive number an integer number q = ScalingInteger(x) such that q x belongs to an integer ring.
+// ---For x a rational this is the denominator
+// ---For x in a quadratic number field, q x should belong to something like Z[sqrt(d)]
+//
+
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<int> const &x, int & x_ret) { x_ret = 1; }
+
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<long> const &x, long & x_ret) { x_ret = 1; }
+
+template <typename T1, typename T2> T1 ScalingInteger(T2 const &a) {
+  T1 ret;
+  stc<T2> stc_a{a};
+  ScalingInteger_Kernel(stc_a, ret);
+  return ret;
 }
 
 //

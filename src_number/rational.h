@@ -473,6 +473,11 @@ template <typename Tint> inline Tint GetDenominator_z(Rational<Tint> const &x) {
   return x.get_const_den();
 }
 
+template <typename Tint>
+void ScalingInteger_Kernel(stc<Rational<Tint>> const &x, Tint & x_ret) {
+  x_ret = x.val.get_const_den();
+}
+
 // Floor / Ceil / Nearest operations
 
 template <typename Tint>

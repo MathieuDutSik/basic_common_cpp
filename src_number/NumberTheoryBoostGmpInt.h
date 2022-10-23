@@ -378,6 +378,14 @@ GetDenominator_z([[maybe_unused]] boost::multiprecision::mpz_int const &x) {
   return 1;
 }
 
+inline void ScalingInteger_Kernel(stc<boost::multiprecision::mpq_rational> const &x, boost::multiprecision::mpz_int & x_ret) {
+  x_ret = denominator(x.val);
+}
+
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<boost::multiprecision::mpz_int> const &x, boost::multiprecision::mpz_int & x_ret) {
+  x_ret = 1;
+}
+
 inline boost::multiprecision::mpq_rational
 FractionalPart(boost::multiprecision::mpq_rational const &x) {
   using T = boost::multiprecision::mpz_int;

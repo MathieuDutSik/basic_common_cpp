@@ -278,6 +278,14 @@ inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const &x) {
   return 1;
 }
 
+inline void ScalingInteger_Kernel(stc<mpq_class> const &x, mpz_class & x_ret) {
+  x_ret =  x.val.get_den();
+}
+
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<mpz_class> const &x, mpz_class & x_ret) {
+  x_ret = 1;
+}
+
 template <typename T>
 inline typename std::enable_if<is_mpz_class<T>::value, T>::type
 KernelGcdPair(T const &a, T const &b) {

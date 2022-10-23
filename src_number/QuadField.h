@@ -356,12 +356,12 @@ inline void serialize(Archive &ar, QuadField<T,d> &val,
 
 // Turning into something rational
 
-template<typename Tring, typename Tfield, int d>
-Tring ScalingInteger(QuadField<Tfield,d> const& x) {
-  Tfield const& a = x.get_a();
-  Tfield const& b = x.get_b();
-  Tring eLCM = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
-  return eLCM;
+template<typename Tring, typename Tquad>
+void ScalingInteger_Kernel(stc<Tquad> const& x, Tring& x_res) {
+  using Tfield = typename Tquad::Tresidual;
+  Tfield const& a = x.val.get_a();
+  Tfield const& b = x.val.get_b();
+  x_res = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
 }
 
 
