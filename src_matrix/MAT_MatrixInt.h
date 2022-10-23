@@ -299,11 +299,6 @@ template <typename T> MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const
   return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
 }
 
-
-
-
-
-
 template <typename T> struct FractionVector {
   T TheMult;
   MyVector<T> TheVect;
@@ -320,10 +315,41 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   T eGCD = V1(0);
   for (int i = 1; i < n; i++)
     eGCD = GcdPair(eGCD, V1(i));
-  MyVector<T> V2 = V1 / eGCD;
+  MyVector<T> Vret = V1 / eGCD;
   T TheMult = eLCM / eGCD;
-  return {TheMult, std::move(V2)};
+  return {TheMult, std::move(Vret)};
 }
+
+template<typename T>
+FractionVector<T> NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(MyVector<T> const& V) {
+  using Tresidual = typename T::Tresidual;
+  using Tring = typename underlying_ring<Tresidual>::ring_type;
+  int siz = V.size();
+  Tring eLCM_ring = ScalingInteger(V(0));
+  for (int i=1; i<siz; i++)
+    eLCM_ring = LCMpair(eLCM_ring, ScalingInteger(V(i)));
+  Tresidual eLCM_res = UniversalScalarConversion<Tresidual,Tring>(eLCM_ring);
+  T eLCM(eLCM_res);
+  MyVector<T> Vret = V * eLCM;
+  return {eLCM, std::move(Vret)};
+}
+
+template<typename T>
+FractionVector<T> NonUniqueScaleToIntegerVectorPlusCoeff(MyVector<T> const& V) {
+  if constexpr(is_implementation_of_Q<T>::value) {
+    return RemoveFractionVectorPlusCoeff(V);
+  } else {
+    return NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(V);
+  }
+}
+
+
+template<typename T>
+MyVector<T> NonUniqueScaleToIntegerVector(MyVector<T> const& V) {
+  return NonUniqueScaleToIntegerVectorPlusCoeff(V).TheVect;
+}
+
+
 
 template <typename T>
 inline

@@ -7,8 +7,9 @@
 
 template <typename Tinp, int d> class QuadField {
 public:
-  using T = Tinp;
+  using Tresidual = Tinp;
 private:
+  using T = Tinp;
   T a;
   T b;
 
@@ -237,12 +238,12 @@ public:
 };
 
 template<typename T, int d>
-struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> field_type; };
+struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> field_type; };
 
 // Note that the underlying ring is not unique, there are many possibiliies actually
 // but we can represent only one in our scheme.
 template<typename T, int d>
-struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::T,d> ring_type; };
+struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> ring_type; };
 
 
 template <typename T, int d>
@@ -352,6 +353,18 @@ inline void serialize(Archive &ar, QuadField<T,d> &val,
 }
 
 }
+
+// Turning into something rational
+
+template<typename Tring, typename Tfield, int d>
+Tring ScalingInteger(QuadField<Tfield,d> const& x) {
+  Tfield const& a = x.get_a();
+  Tfield const& b = x.get_b();
+  Tring eLCM = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
+  return eLCM;
+}
+
+
 // clang-format off
 #endif  // SRC_NUMBER_QUADFIELD_H_
 // clang-format on
