@@ -359,8 +359,8 @@ inline void serialize(Archive &ar, QuadField<T,d> &val,
 template<typename Tring, typename Tquad>
 void ScalingInteger_Kernel(stc<Tquad> const& x, Tring& x_res) {
   using Tfield = typename Tquad::Tresidual;
-  Tfield const& a = x.val.get_a();
-  Tfield const& b = x.val.get_b();
+  Tfield const& a = x.val.get_const_a();
+  Tfield const& b = x.val.get_const_b();
   x_res = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
 }
 
