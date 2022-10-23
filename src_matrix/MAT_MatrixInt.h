@@ -325,9 +325,9 @@ FractionVector<T> NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(MyVector<T> cons
   using Tresidual = typename T::Tresidual;
   using Tring = typename underlying_ring<Tresidual>::ring_type;
   int siz = V.size();
-  Tring eLCM_ring = ScalingInteger(V(0));
+  Tring eLCM_ring = ScalingInteger<Tring,T>(V(0));
   for (int i=1; i<siz; i++)
-    eLCM_ring = LCMpair(eLCM_ring, ScalingInteger(V(i)));
+    eLCM_ring = LCMpair(eLCM_ring, ScalingInteger<Tring,T>(V(i)));
   Tresidual eLCM_res = UniversalScalarConversion<Tresidual,Tring>(eLCM_ring);
   T eLCM(eLCM_res);
   MyVector<T> Vret = V * eLCM;
