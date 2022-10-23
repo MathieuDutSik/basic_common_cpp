@@ -340,7 +340,18 @@ inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CO
   TYPE_CONVERSION(a1, x2);
 }
 
+// Serialization stuff
 
+namespace boost::serialization {
+
+template <class Archive, typename T, int d>
+inline void serialize(Archive &ar, QuadField<T,d> &val,
+                      [[maybe_unused]] const unsigned int version) {
+  ar &make_nvp("quadfield_a", val.get_a());
+  ar &make_nvp("quadfield_b", val.get_b());
+}
+
+}
 // clang-format off
 #endif  // SRC_NUMBER_QUADFIELD_H_
 // clang-format on

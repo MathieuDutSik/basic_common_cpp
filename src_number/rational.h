@@ -37,8 +37,10 @@ public:
     den = x.den;
     return *this;
   }
-  const Tint &get_num() const { return num; }
-  const Tint &get_den() const { return den; }
+  Tint &get_num() { return num; }
+  Tint &get_den() { return den; }
+  const Tint &get_const_num() const { return num; }
+  const Tint &get_const_den() const { return den; }
 
 private: // A few internal functions.
   static Tint comp_gcd(Tint const &m, Tint const &n) {
@@ -327,10 +329,10 @@ ResQuoInt_kernel(Rational<Tint> const &a, Rational<Tint> const &b) {
   // equivalent to
   // a_n * b_d = res * a_d * b_d + (q * a_d) * b_n
   using Tf = Rational<Tint>;
-  Tint a_n = a.get_num();
-  Tint b_n = b.get_num();
-  Tint a_d = a.get_den();
-  Tint b_d = b.get_den();
+  Tint a_n = a.get_const_num();
+  Tint b_n = b.get_const_num();
+  Tint a_d = a.get_const_den();
+  Tint b_d = b.get_const_den();
   Tint a1 = a_n * b_d;
   Tint b1 = a_d * b_n;
   Tint q = a1 / b1;
@@ -413,8 +415,8 @@ namespace std {
       auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
         seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
       };
-      size_t seed = std::hash<T>()(x.get_num());
-      size_t e_hash = std::hash<T>()(x.get_den());
+      size_t seed = std::hash<T>()(x.get_const_num());
+      size_t e_hash = std::hash<T>()(x.get_const_den());
       combine_hash(seed, e_hash);
       return seed;
     }
@@ -429,13 +431,13 @@ inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, Rational<int> &a2) {
 
 template <typename T>
 void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
-  const T &den = a1.val.get_den();
+  const T &den = a1.val.get_const_den();
   if (den != 1) {
     std::string str_err =
         "The denominator should be 1. It is den = " + std::to_string(den);
     throw ConversionException{str_err};
   }
-  a2 = a1.val.get_num();
+  a2 = a1.val.get_const_num();
 }
 
 inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, int &a2) {
@@ -464,19 +466,19 @@ inline void TYPE_CONVERSION(stc<long> const &a1, Rational<long> &a2) {
 
 template <typename Tint>
 inline Rational<Tint> GetDenominator(Rational<Tint> const &x) {
-  return x.get_den();
+  return x.get_const_den();
 }
 
 template <typename Tint> inline Tint GetDenominator_z(Rational<Tint> const &x) {
-  return x.get_den();
+  return x.get_const_den();
 }
 
-// Fllor / Ceil / Nearest operations
+// Floor / Ceil / Nearest operations
 
 template <typename Tint>
 Rational<Tint> FractionalPart(Rational<Tint> const &x) {
-  Tint res = ResInt(x.get_num(), x.get_den());
-  Rational<Tint> fr(res, x.get_den());
+  Tint res = ResInt(x.get_const_num(), x.get_const_den());
+  Rational<Tint> fr(res, x.get_const_den());
   return fr;
 }
 
@@ -518,6 +520,19 @@ template <typename Tint>
 inline void NearestInteger(Rational<Tint> const &xI, Tint &xO) {
   Rational<Tint> xO_q = NearestInteger_rni(xI);
   xO = xO_q.get_num();
+}
+
+// Serialization stuff
+
+namespace boost::serialization {
+
+template <class Archive, typename T>
+inline void serialize(Archive &ar, Rational<T> &val,
+                      [[maybe_unused]] const unsigned int version) {
+  ar &make_nvp("rational_num", val.get_num());
+  ar &make_nvp("rational_den", val.get_den());
+}
+
 }
 
 // clang-format off
