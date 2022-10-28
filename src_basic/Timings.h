@@ -105,13 +105,16 @@ struct SingletonTimeInc {
 struct MicrosecondTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   MicrosecondTime() { time = std::chrono::system_clock::now(); }
+  int eval() {
+    std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
+    int delta = std::chrono::duration_cast<std::chrono::microseconds>(timeNew - time).count();
+    time = timeNew;
+    return delta;
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, MicrosecondTime & x) {
-  std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
-  int n_ms = std::chrono::duration_cast<std::chrono::microseconds>(timeNew - x.time).count();
-  x.time = timeNew;
-  os << n_ms;
+  os << x.eval();
   return os;
 }
 
@@ -120,13 +123,16 @@ std::ostream& operator<<(std::ostream& os, MicrosecondTime & x) {
 struct SecondTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   SecondTime() { time = std::chrono::system_clock::now(); }
+  int eval() {
+    std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
+    int delta = std::chrono::duration_cast<std::chrono::seconds>(timeNew - time).count();
+    time = timeNew;
+    return delta;
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, SecondTime & x) {
-  std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
-  int n_ms = std::chrono::duration_cast<std::chrono::seconds>(timeNew - x.time).count();
-  x.time = timeNew;
-  os << n_ms;
+  os << x.eval();
   return os;
 }
 
@@ -135,13 +141,16 @@ std::ostream& operator<<(std::ostream& os, SecondTime & x) {
 struct MillisecondTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   MillisecondTime() { time = std::chrono::system_clock::now(); }
+  int eval() {
+    std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
+    int delta = std::chrono::duration_cast<std::chrono::milliseconds>(timeNew - time).count();
+    time = timeNew;
+    return delta;
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, MillisecondTime & x) {
-  std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
-  int n_ms = std::chrono::duration_cast<std::chrono::milliseconds>(timeNew - x.time).count();
-  x.time = timeNew;
-  os << n_ms;
+  os << x.eval();
   return os;
 }
 
@@ -150,13 +159,16 @@ std::ostream& operator<<(std::ostream& os, MillisecondTime & x) {
 struct NanosecondTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   NanosecondTime() { time = std::chrono::system_clock::now(); }
+  int eval() {
+    std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
+    int delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time).count();
+    time = timeNew;
+    return delta;
+  }
 };
 
 std::ostream& operator<<(std::ostream& os, NanosecondTime & x) {
-  std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
-  int n_ms = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - x.time).count();
-  x.time = timeNew;
-  os << n_ms;
+  os << x.eval();
   return os;
 }
 
