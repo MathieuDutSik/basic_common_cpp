@@ -18,6 +18,7 @@ std::chrono::time_point<std::chrono::system_clock> get_cpp_time(int day, int mon
   return std::chrono::system_clock::from_time_t(std::mktime(&start));
 }
 
+// The SingletonTime
 
 struct SingletonTime {
   std::chrono::time_point<std::chrono::system_clock> time;
@@ -89,6 +90,26 @@ struct SingletonTimeInc {
     return val;
   }
 };
+
+// The MsTime
+
+struct MilisecondTime {
+  std::chrono::time_point<std::chrono::system_clock> time;
+  MilisecondTime() { time = std::chrono::system_clock::now(); }
+};
+
+std::ostream& operator<<(std::ostream& os, MilisecondTime & x) {
+  std::chrono::time_point<std::chrono::system_clock> timeNew = std::chrono::system_clock::now();
+  int n_ms = std::chrono::duration_cast<std::chrono::microseconds>(timeNew - x.time).count();
+  x.time = timeNew;
+  os << n_ms;
+  return os;
+}
+
+
+
+
+
 
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
