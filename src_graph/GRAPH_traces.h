@@ -117,7 +117,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
   size_t n = DT.n;
   TRACES_LimitCheck<Tidx>(n);
 #ifdef TIMINGS
-  SingletonTime time1;
+  MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
   TracesStats stats;
@@ -130,8 +130,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
   for (size_t i = 0; i < n; i++)
     V[DT.lab1[i]] = Tidx(i);
 #ifdef TIMINGS
-  SingletonTime time2;
-  std::cerr << "|TRACES_GetCanonicalOrdering_Arr|=" << ms(time1, time2) << "\n";
+  std::cerr << "|TRACES_GetCanonicalOrdering_Arr|=" << time << "\n";
 #endif
   return V;
 }
@@ -209,7 +208,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
   size_t n = eGR.GetNbVert();
   TRACES_LimitCheck<Tidx>(n);
 #ifdef TIMINGS
-  SingletonTime time1;
+  MicrosecondTime time;
 #endif
   DYNALLSTAT(int, lab1, lab1_sz);
   DYNALLSTAT(int, ptn, ptn_sz);
@@ -254,8 +253,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  SingletonTime time2;
-  std::cerr << "|TRACES_GetCanonicalOrdering|=" << ms(time1, time2) << "\n";
+  std::cerr << "|TRACES_GetCanonicalOrdering|=" << time << "\n";
 #endif
   return V;
 }
@@ -273,7 +271,7 @@ std::vector<std::vector<Tidx>>
 TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
   TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS
-  SingletonTime time1;
+  MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
   TracesStats stats;
@@ -302,8 +300,7 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  SingletonTime time2;
-  std::cerr << "|TRACES_GetListGenerators_Arr|=" << ms(time1, time2) << "\n";
+  std::cerr << "|TRACES_GetListGenerators_Arr|=" << time << "\n";
 #endif
   return ListGen;
 }
@@ -329,7 +326,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
                                                         size_t const &n_last) {
   TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS
-  SingletonTime time1;
+  MicrosecondTime time;
 #endif
   DYNALLSTAT(int, lab1, lab1_sz);
   DYNALLSTAT(int, ptn, ptn_sz);
@@ -385,8 +382,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
   DYNFREE(orbits, orbits_sz);
   SG_FREE(sg1);
 #ifdef TIMINGS
-  SingletonTime time2;
-  std::cerr << "|TRACES_GetListGenerators|=" << ms(time1, time2) << "\n";
+  std::cerr << "|TRACES_GetListGenerators|=" << time << "\n";
 #endif
   return ListGen;
 }
@@ -409,7 +405,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
   TRACES_LimitCheck<TidxC>(n);
   TRACES_LimitCheck<TidxG>(n_last);
 #ifdef TIMINGS
-  SingletonTime time1;
+  MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
   TracesStats stats;
@@ -430,9 +426,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  SingletonTime time2;
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|="
-            << ms(time1, time2) << "\n";
+  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
@@ -444,7 +438,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   TRACES_LimitCheck<TidxC>(n);
   TRACES_LimitCheck<TidxG>(n_last);
 #ifdef TIMINGS
-  SingletonTime time1;
+  MicrosecondTime time;
 #endif
   DYNALLSTAT(int, lab1, lab1_sz);
   DYNALLSTAT(int, ptn, ptn_sz);
@@ -523,9 +517,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  SingletonTime time2;
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators|="
-            << ms(time1, time2) << "\n";
+  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }

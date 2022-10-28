@@ -162,9 +162,6 @@ std::ostream& operator<<(std::ostream& os, NanosecondTime & x) {
 
 
 
-
-
-
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
 // clang-format on

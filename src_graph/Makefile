@@ -16,7 +16,7 @@ NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
 CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src_comb -I../src_xml -I.
-
+CADDI           = -DTIMINGS
 
 CFLAGS 		= -I$(GMP_INCDIR) -I$(LIBBLISS_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(NAUTY_INCLUDE)
 
@@ -26,7 +26,7 @@ LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LIBBLISS_LINK) $(NAUTY_LINK)
 %.o: %.cpp
 	@echo
 	@echo compile $<
-	$(CC) $(OUTPUTFLAG) $@ $(CLOCAL) $(CFLAGS) $(NOLINKFLAG) $<
+	$(CC) $(OUTPUTFLAG) $@ $(CLOCAL) $(CADDI) $(CFLAGS) $(NOLINKFLAG) $<
 
 all:	$(PROGRAM)
 
