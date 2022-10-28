@@ -5,6 +5,7 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <thread>
 
 
 std::chrono::time_point<std::chrono::system_clock> get_cpp_time(int day, int month, int year) {
@@ -17,6 +18,14 @@ std::chrono::time_point<std::chrono::system_clock> get_cpp_time(int day, int mon
   start.tm_year = year - 1900;
   return std::chrono::system_clock::from_time_t(std::mktime(&start));
 }
+
+// The sleep function
+
+void my_sleep(size_t n_millisecond) {
+  std::chrono::milliseconds timespan(n_millisecond);
+  std::this_thread::sleep_for(timespan);
+}
+
 
 // The SingletonTime
 
