@@ -23,10 +23,12 @@ private:
   Tint den;
 
 public:
+  // Constructors
   Rational() : num(0), den(1) {}
   Rational(Tint const &x) : num(x), den(1) {}
   Rational(Tint const &num, Tint const &den) : num(num), den(den) {}
   Rational(Rational<Tint> const &x) : num(x.num), den(x.den) {}
+  // Assignment operators
   Rational<Tint> operator=(Tint const &u) { // assignment operator from int
     num = u;
     den = 1;
@@ -200,6 +202,7 @@ public:
     size_t miss_val = std::numeric_limits<size_t>::max();
     size_t pos_slash = miss_val;
     size_t pos = 0;
+    // First skipping the spaces.
     while (true) {
       // is.get(c) will read characters but is >> c skip the spaces.
       is.get(c);

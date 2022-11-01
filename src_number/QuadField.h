@@ -27,31 +27,16 @@ public:
     return b;
   }
 
-  // copy constructor
-  QuadField(QuadField<T, d> const &x) {
-    a = x.a;
-    b = x.b;
-  }
+  // Constructor
+  QuadField() : a(0), b(0) {}
+  QuadField(T const &u) : a(u), b(0) {}
+  QuadField(T const &_a, T const& _b) : a(_a), b(_b) {}
+  QuadField(QuadField<T, d> const &x) : a(x.a), b(x.b) {}
   //  QuadField<T,d>& operator=(QuadField<T,d> const&); // assignment operator
   //  QuadField<T,d>& operator=(T const&); // assignment operator from T
   //  QuadField<T,d>& operator=(int const&); // assignment operator from T
-  // default constructor
-  QuadField() {
-    a = 0;
-    b = 0;
-  }
-  // constructor from integer
-  QuadField(int const &u) {
-    a = u;
-    b = 0;
-  }
-  // constructor from T
-  QuadField(T const &u) {
-    a = u;
-    b = 0;
-  }
   // assignment operator from int
-  QuadField<T, d> operator=(int const &u) {
+  QuadField<T, d> operator=(T const &u) {
     a = u;
     b = 0;
     return *this;
@@ -104,7 +89,7 @@ public:
     z.b = -x.b;
     return z;
   }
-  friend QuadField<T, d> operator/(int const &x, QuadField<T, d> const &y) {
+  friend QuadField<T, d> operator/(T const &x, QuadField<T, d> const &y) {
     QuadField<T, d> z;
     T disc = y.a * y.a - d * y.b * y.b;
     z.a = x * y.a / disc;
@@ -139,7 +124,7 @@ public:
     z.b = x.a * y.b + x.b * y.a;
     return z;
   }
-  friend QuadField<T, d> operator*(int const &x, QuadField<T, d> const &y) {
+  friend QuadField<T, d> operator*(T const &x, QuadField<T, d> const &y) {
     QuadField<T, d> z;
     z.a = x * y.a;
     z.b = x * y.b;
@@ -203,7 +188,7 @@ public:
       return true;
     return false;
   }
-  friend bool operator!=(QuadField<T, d> const &x, int const &y) {
+  friend bool operator!=(QuadField<T, d> const &x, T const &y) {
     if (x.a != y)
       return true;
     if (x.b != 0)
@@ -242,7 +227,7 @@ public:
     z = y - x;
     return IsNonNegative(z);
   }
-  friend bool operator<=(QuadField<T, d> const &x, int const &y) {
+  friend bool operator<=(QuadField<T, d> const &x, T const &y) {
     QuadField<T, d> z;
     z = y - x;
     return IsNonNegative(z);
@@ -261,7 +246,7 @@ public:
       return false;
     return IsNonNegative(z);
   }
-  friend bool operator<(QuadField<T, d> const &x, int const &y) {
+  friend bool operator<(QuadField<T, d> const &x, T const &y) {
     QuadField<T, d> z;
     z = y - x;
     if (z.a == 0 && z.b == 0)
