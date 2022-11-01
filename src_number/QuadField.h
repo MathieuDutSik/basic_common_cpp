@@ -146,14 +146,47 @@ public:
     return z;
   }
   friend std::ostream &operator<<(std::ostream &os, QuadField<T, d> const &v) {
-    return os << v.a << " " << v.b;
+    return os << "(" << v.a << "," << v.b << ")";
   }
   friend std::istream &operator>>(std::istream &is, QuadField<T, d> &v) {
-    T tmpA, tmpB;
-    is >> tmpA;
-    is >> tmpB;
-    v.a = tmpA;
-    v.b = tmpB;
+    char c;
+    std::string s;
+    size_t miss_val = std::numeric_limits<size_t>::max();
+    size_t pos;
+    // First skipping the spaces
+    while(true) {
+      is.get(c);
+      if (c != ' ' && c != '\n') {
+        s += c;
+        break;
+      }
+    }
+    // Second reading the data till a space or end.
+    size_t pos_comma = miss_val;
+    while(true) {
+      if (is.eof()) {
+        break;
+      }
+      is.get(c);
+      if (c == ' ' || c == '\n') {
+        break;
+      }
+      s += c;
+      if (c == ',')
+        pos_comma = pos;
+      pos++;
+    }
+    // Now parsing the data
+    if (pos_comma == miss_val) {
+      std::cerr << "Failed to find the comma\n";
+      throw TerminalException{1};
+    }
+    std::string sA = s.substr(0, pos_comma);
+    std::string sB = s.substr(pos_comma+1, s.size() - 2 - pos_comma);
+    std::istringstream isA(sA);
+    isA >> v.a;
+    std::istringstream isB(sB);
+    isB >> v.b;
     return is;
   }
   friend bool operator==(QuadField<T, d> const &x, QuadField<T, d> const &y) {
