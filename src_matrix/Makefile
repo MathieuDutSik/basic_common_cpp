@@ -14,7 +14,8 @@
 #PROGRAM		= SolutionIntMat
 #PROGRAM		= TestProdMat
 #PROGRAM		= test
-PROGRAM		= NonUniqueScaleToInteger
+#PROGRAM		= NonUniqueScaleToInteger
+PROGRAM		= NullspaceComputationQ5
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

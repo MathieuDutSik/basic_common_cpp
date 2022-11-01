@@ -137,12 +137,13 @@ public:
     char c;
     std::string s;
     size_t miss_val = std::numeric_limits<size_t>::max();
-    size_t pos;
+    size_t pos = 0;
     // First skipping the spaces
     while(true) {
       is.get(c);
       if (c != ' ' && c != '\n') {
         s += c;
+        pos++;
         break;
       }
     }
@@ -156,9 +157,9 @@ public:
       if (c == ' ' || c == '\n') {
         break;
       }
-      s += c;
       if (c == ',')
         pos_comma = pos;
+      s += c;
       pos++;
     }
     // Now parsing the data
@@ -166,12 +167,17 @@ public:
       std::cerr << "Failed to find the comma\n";
       throw TerminalException{1};
     }
-    std::string sA = s.substr(0, pos_comma);
+    //    std::cerr << "-------------------\n";
+    //    std::cerr << "s=" << s << " pos_comma=" << pos_comma << "\n";
+    std::string sA = s.substr(1, pos_comma);
     std::string sB = s.substr(pos_comma+1, s.size() - 2 - pos_comma);
+    //    std::cerr << "sA=" << sA << "  sB=" << sB << "\n";
     std::istringstream isA(sA);
     isA >> v.a;
     std::istringstream isB(sB);
     isB >> v.b;
+    //    std::cerr << "v.a=" << v.a << "  v.b=" << v.b << "\n";
+    //    std::cerr << "-------------------\n";
     return is;
   }
   friend bool operator==(QuadField<T, d> const &x, QuadField<T, d> const &y) {
