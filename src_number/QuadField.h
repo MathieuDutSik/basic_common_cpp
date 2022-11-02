@@ -254,6 +254,13 @@ public:
       return false;
     return IsNonNegative(z);
   }
+  friend bool operator>(QuadField<T, d> const &x, int const &y) {
+    QuadField<T, d> z;
+    z = x - y;
+    if (z.a == 0 && z.b == 0)
+      return false;
+    return IsNonNegative(z);
+  }
   friend bool operator<(QuadField<T, d> const &x, QuadField<T, d> const &y) {
     QuadField<T, d> z;
     z = y - x;
