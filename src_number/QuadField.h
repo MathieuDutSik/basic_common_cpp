@@ -38,6 +38,7 @@ public:
 
   // Constructor
   QuadField() : a(0), b(0) {}
+  QuadField(int const &u) : a(u), b(0) {}
   QuadField(T const &u) : a(u), b(0) {}
   QuadField(T const &_a, T const& _b) : a(_a), b(_b) {}
   QuadField(QuadField<T, d> const &x) : a(x.a), b(x.b) {}
@@ -233,6 +234,11 @@ public:
     return false;
   }
   friend bool operator>=(QuadField<T, d> const &x, QuadField<T, d> const &y) {
+    QuadField<T, d> z;
+    z = x - y;
+    return IsNonNegative(z);
+  }
+  friend bool operator>=(QuadField<T, d> const &x, int const &y) {
     QuadField<T, d> z;
     z = x - y;
     return IsNonNegative(z);
