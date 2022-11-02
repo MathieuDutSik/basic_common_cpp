@@ -87,7 +87,7 @@ public:
     z.b = x.b - y.b;
     return z;
   }
-  friend QuadField<T, d> operator-(QuadField<T, d> const &x, T const &y) {
+  friend QuadField<T, d> operator-(QuadField<T, d> const &x, int const &y) {
     QuadField<T, d> z;
     z.a = x.a - y;
     z.b = x.b;
