@@ -109,7 +109,6 @@ public:
     }
     HelperClassRealField(Pminimal, _val_double, l_approx);
   }
-  HelperClassRealField() {}
   std::vector<T> FindQuotient(std::vector<T> const& num, std::vector<T> const& den) const {
     MyMatrix<T> M(deg,deg);
     SetMatrix(M, den);
@@ -194,7 +193,7 @@ std::map<int,HelperClassRealField<mpq_class>> list_helper;
 
 void insert_helper(int i_field, HelperClassRealField<mpq_class> const& hcrf)
 {
-  list_helper[i_field] = hcrf;
+  list_helper.emplace(i_field, std::move(hcrf));
 }
 
 template<typename T>
