@@ -31,7 +31,7 @@ private:
         M(i_row,i_col) += val * ExprXdeg[i_col];
     }
   }
-  std::vector<T> GetSolution(MyMatrix<T> const& M, std::vector<T> const& num) {
+  std::vector<T> GetSolution(MyMatrix<T> const& M, std::vector<T> const& num) const {
     MyVector<T> w(deg);
     for (int i=0; i<deg; i++)
       w(i) = num[i];
@@ -230,16 +230,16 @@ public:
   // Constructor
   RealField() {
     size_t deg = list_helper.at(i_field).deg;
-    a = std::vector<T>(deg+1,0);
+    a = std::vector<T>(deg,0);
   }
   RealField(int const &u) {
     size_t deg = list_helper.at(i_field).deg;
-    a = std::vector<T>(deg+1,0);
+    a = std::vector<T>(deg,0);
     a[0] = u;
   }
   RealField(T const &u) {
     size_t deg = list_helper.at(i_field).deg;
-    a = std::vector<T>(deg+1,0);
+    a = std::vector<T>(deg,0);
     a[0] = u;
   }
   RealField(std::vector<T> const &_a) : a(_a) {}
@@ -249,9 +249,9 @@ public:
   //  QuadField<T,d>& operator=(int const&); // assignment operator from T
   // assignment operator from int
   RealField<i_field> operator=(int const &u) {
-    for (auto &x : a) {
-      x = 0;
-    }
+    size_t len = a.size();
+    for (size_t u=1; u<len; u++)
+      a[u] = 0;
     a[0] = u;
     return *this;
   }
