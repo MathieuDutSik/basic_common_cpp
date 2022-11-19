@@ -19,11 +19,15 @@ def get_approx_order(n):
     return the_rat
 
 
+f = open("CubicFieldDisc_49", "w")
+f.write("3\n")
+f.write("-1 2 1 1\n")
+f.write(str(float(val)) + "\n");
+
+f.write("10\n")
 for i in range(1,10):
     the_rat = get_approx_order(5*i)
     the_err = get_error(the_rat)
-    print("{", the_rat, ",", the_err, "}")
+    f.write(str(the_rat) + " " + str(the_err) + "\n")
 
-
-
-    
+f.close()
