@@ -561,18 +561,20 @@ bool IsInteger(RealField<i_field> const& x) {
 
 // The conversion tools (int)
 
-/*
-template<typename T1, typename T2, int d>
+template<typename T2, int i_field>
 inline typename std::enable_if<not is_real_algebraic_field<T2>::value, void>::type
-TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, T2 &x2) {
-  if (x1.val.b != 0) {
-    std::string str = "Conversion error for quadratic field";
-    throw ConversionException{str};
+TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
+  std::vector<mpq_class> const& V = x1.val.get_const_seq();
+  size_t len = V.size();
+  for (size_t u=1; u<len; u++) {
+    if (V[u] != 0) {
+      std::string str = "Conversion error for quadratic field";
+      throw ConversionException{str};
+    }
   }
-  stc<T1> a1 { x1.val.get_const_a() };
+  stc<mpq_class> a1 { V[0] };
   TYPE_CONVERSION(a1, x2);
 }
-*/
 
 // Serialization stuff
 
