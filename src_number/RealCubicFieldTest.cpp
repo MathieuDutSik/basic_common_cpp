@@ -11,16 +11,20 @@ int main(int argc, char *argv[]) {
     using T_rat = mpq_class;
     std::string eFile = "../Examples/CubicField/CubicFieldDisc_49";
     HelperClassRealField<T_rat> hcrf(eFile);
+    //    std::cerr << "hcrf.deg=" << hcrf.deg << " |ExprXdeg|=" << hcrf.ExprXdeg.size() << "\n";
     int const idx_discriminant_49 = 1;
     insert_helper(idx_discriminant_49, hcrf);
+    //    print_all_helpers(579);
     //
     using T = RealField<idx_discriminant_49>;
+    //    print_all_helpers(1453);
     T x1 = 42;
     std::cerr << "x1=" << x1 << "\n";
     std::vector<T_rat> V2{1, 2, 4};
     T x2(V2);
     std::cerr << "x2=" << x2 << "\n";
     T x2inv = 1 / x2;
+    //    print_all_helpers(1924);
     std::cerr << "x2inv=" << x2inv << "\n";
   } catch (TerminalException const &e) {
     exit(e.eVal);

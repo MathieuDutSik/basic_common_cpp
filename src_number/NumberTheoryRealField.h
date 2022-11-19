@@ -46,8 +46,8 @@ private:
       V[u] = eSol(u);
     return V;
   }
-public:
-  HelperClassRealField(std::vector<T> const& Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) : val_double(_val_double) {
+  void Initialize(std::vector<T> const& Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) {
+    val_double = _val_double;
     // Finding the expression of X^deg
     deg = Pminimal.size() - 1;
     for (int u=0; u<deg; u++) {
@@ -85,6 +85,10 @@ public:
       SequenceApproximant.push_back({l_pow_low,l_pow_upp});
     }
   }
+public:
+  HelperClassRealField(std::vector<T> const& Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) {
+    Initialize(Pminimal, _val_double, l_approx);
+  }
   HelperClassRealField(std::string const& eFile) {
     std::ifstream is(eFile);
     is >> deg;
@@ -107,7 +111,7 @@ public:
       is >> err;
       l_approx.push_back({val,err});
     }
-    HelperClassRealField(Pminimal, _val_double, l_approx);
+    Initialize(Pminimal, _val_double, l_approx);
   }
   std::vector<T> FindQuotient(std::vector<T> const& num, std::vector<T> const& den) const {
     MyMatrix<T> M(deg,deg);
@@ -181,8 +185,8 @@ public:
     return ret_val;
   }
   int deg;
-private:
   std::vector<T> ExprXdeg;
+private:
   double val_double;
   std::vector<std::pair<std::vector<T>,std::vector<T>>> SequenceApproximant;
 };
@@ -193,8 +197,16 @@ std::map<int,HelperClassRealField<mpq_class>> list_helper;
 
 void insert_helper(int i_field, HelperClassRealField<mpq_class> const& hcrf)
 {
-  list_helper.emplace(i_field, std::move(hcrf));
+  //  std::cerr << "insert_helper deg=" << hcrf.deg << " |ExprXdeg|=" << hcrf.ExprXdeg.size() << "\n";
+  list_helper.emplace(i_field, hcrf);
 }
+
+void print_all_helpers(int val) {
+  for (auto & kv : list_helper) {
+    std::cerr << "val=" << val << " key=" << kv.first << " kv.second.deg=" << kv.second.deg << " |kv.second.ExprXdeg|=" << kv.second.ExprXdeg.size() << "\n";
+  }
+}
+
 
 template<typename T>
 bool IsZeroVector(std::vector<T> const& V) {
@@ -584,7 +596,7 @@ inline void serialize(Archive &ar, RealField<i_field> &val,
                       [[maybe_unused]] const unsigned int version) {
   std::vector<mpq_class> & V = val.get_seq();
   for (auto & val : V)
-    ar &make_nvp("quadfield_a", val);
+    ar &make_nvp("realfield_seq", val);
 }
 
 }
