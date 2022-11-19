@@ -66,6 +66,17 @@ LCMpair(T const &a, T const &b) {
   return -eLCM;
 }
 
+template<typename T>
+T LCMlist(std::vector<T> const& V) {
+  size_t len = V.size();
+  T eLCM = V[0];
+  for (size_t u=1; u<len; u++) {
+    eLCM = LCMpair(eLCM, V[u]);
+  }
+  return eLCM;
+}
+
+
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYGENERIC_H_
 // clang-format on

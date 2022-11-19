@@ -4,52 +4,180 @@
 
 #include "NumberTheory.h"
 #include "Temp_common.h"
+#include "MAT_Matrix.h"
 
-// For general real field, 
-
+// For general real field.
+// We need to use more sophisticated and slower algorithms than quadratic fields.
+// (A) linear algebra is needed.
+// (B) analysis is needed for deciding signs.
 
 template<typename Tfield>
 struct class HelperClassRealField {
 private:
   using T = Tfield;
+  HelperClassRealField(std::vector<T> const& _Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) : Pminimal(_Pminimal), val_double(_val_double) {
+    deg = PMinimal.size() - 1;
+    for (auto & e_approx : l_approx) {
+      T val = e_approx.first;
+      T err= e_approx.second;
+      if (val < 0) {
+        std::cerr << "We require that the value val is positive. val=" << val << "\n";
+        std::cerr << "This is arbitrary of us, but this is our choice\n";
+        throw TerminalException{1};
+      }
+      if (err < 0) {
+        std::cerr << "The error err should be positive. err=" << err << "\n";
+        throw TerminalException{1};
+      }
+      if (err > val) {
+        std::cerr << "The error err should be smaller than val. val=" << val << " err=" << err << "\n";
+        throw TerminalException{1};
+      }
+      T val_low = val - err;
+      T val_upp = val + err;
+      std::vector<T> l_pow_low;
+      std::vector<T> l_pow_low;
+      T pow_low = val_low;
+      T pow_upp = val_upp;
+      for (int i=1; i<deg; i++) {
+        l_pow_low.push_back(pow_low);
+        l_pow_upp.push_back(pow_upp);
+        pow_low *= val_low;
+        pow_upp *= val_upp;
+      }
+      SequenceApproximant.push_back({l_pow_low,l_pow_upp});
+    }
+  }
   HelperClassRealField(std::string const& eFile) {
     std::ifstream is(eFile);
     is >> deg;
+    std::vector<T> _Pminimal;
     for (size_t u=0; u<=deg; u++) {
       T val;
       is >> val;
-      Pminimal.push_back(val);
+      _Pminimal.push_back(val);
     }
+    //
+    double _val_double;
+    is >> _val_double;
+    //
+    std::vector<std::pair<T,T>> l_approx;
     size_t n_approx;
     is >> n_approx;
-    for (size_t i=0; i<n_approx; i++) {
+    for (size_t u=0; u<n_approx; u++) {
       T val, err;
       is >> val;
       is >> err;
-      SequenceApproximant.push_back({val,err});
+      l_approx.push_back({val,err});
     }
-    // Compute a few stuff for inverse and products.
-    ...
+    HelperClassRealField(_Pminimal, _val_double, l_approx);
+  }
+private:
+  void SetMatrix(MyMatrix<T> & M, std::vector<T> const& den) const {
+    for (int i_col=0; i_col<deg; i_col++) {
+      M(0,i_col) = den[i_col];
+    }
+    for (int i_row=1; i_row<deg; i_row++) {
+      M(i_row,0) = 0;
+      for (int i_col=1; i_col<deg; i_col++)
+        M(i_row,i_col) = M(i_row-1,i_col-1);
+      T val = M(i_row-1,deg-1);
+      for (int i_col=0; i_col<deg; i_col++)
+        M(i_row,i_col) += val * ExprXdeg[i_col];
+    }
+  }
+  std::vector<T> GetSolution(MyMatrix<T> const& M, std::vector<T> const& num) {
+    MyVector<T> w(deg);
+    for (int i=0; i<deg; i++)
+      w(i) = num[i];
+    std::optional<MyVector<T>> opt = SolutionMat(M, w);
+    if (!opt) {
+      std::cerr << "Failed to solve the linear system\n";
+      throw TerminalException{1};
+    }
+    MyVector<T> const& eSol = *opt;
+    std::vector<T> V(deg);
+    for (int u=0; u<deg; u++)
+      V[u] = eSol(u);
+    return V;
   }
   std::vector<T> FindQuotient(std::vector<T> const& num, std::vector<T> const& den) const {
+    MyMatrix<T> M(deg,deg);
+    SetMatrix(M, den);
+    return GetSolution(M, num);
   }
   std::vector<T> FindQuotient(T const& num, std::vector<T> const& den) const {
+    std::vector<T> num_V(deg,0);
+    num_V[0] = num;
+    MyMatrix<T> M(deg,deg);
+    SetMatrix(M, den);
+    return GetSolution(M, num_V);
   }
   std::vector<T> FindInverse(std::vector<T> const& x) const {
-    
+    std::vector<T> num_V(deg,0);
+    num_V[0] = 1;
+    MyMatrix<T> M(deg,deg);
+    SetMatrix(M, den);
+    return GetSolution(M, num_V);
   }
-  std::vector<T> FindProduct(std::vector<T> const& a, std::vector<T> const& b) const {
+  std::vector<T> ComputeProduct(std::vector<T> const& a, std::vector<T> const& b) const {
+    MyMatrix<T> M(deg,deg);
+    SetMatrix(M, b);
+    std::vector<T> V(deg, 0);
+    for (int i=0; i<deg; i++) {
+      for (int j=0; j<deg; j++)
+        V[j] += a[i] * M(i,j);
+    }
+    return V;
   }
   bool IsStrictlyPositive(std::vector<T> const& x) const {
-    auto 
+    // x is assumed to be non-zero
+    auto get_bounds=[&](std::pair<std::vector<T>, std::vector<T>> const& epair) -> std::pair<T,T> {
+      T val_low = x[0];
+      T val_upp = x[0];
+      for (int i=1; i<deg; i++) {
+        T val = x[i];
+        if (val > 0) {
+          val_low += val * epair.first[i-1];
+          val_upp += val * epair.second[i-1];
+        }
+        if (val < 0) {
+          val_low += val * epair.second[i-1];
+          val_upp += val * epair.first[i-1];
+        }
+      }
+      return {val_low,val_upp};
+    };
+    for (auto & epair : SequenceApproximant) {
+      auto pair_bound = get_bounds(epair);
+      T const& val_low = pair_bound.first;
+      T const& val_upp = pair_bound.second;
+      if (val_upp <= 0) {
+        return false;
+      }
+      if (val_low >= 0) {
+        return true;
+      }
+    }
+    std::cerr << "Failed to find an approximant that allows to conclude, please produce better approximants\n";
+    throw TerminalException{1};
   }
   double evaluate_as_double(std::vector<T> const& x) const {
+    double ret_val = 0;
+    double pow_double = 1.0;
+    for (int i=0; i<deg; i++) {
+      double coeff = UniversalScalarConversion<double,T>(x[i]);
+      ret_val += coeff * pow_double;
+      pow_double *= val_double;
+    }
+    return ret_val;
   }
 private:
   size_t deg;
   std::vector<T> Pminimal;
-  std::vector<std::pair<T,T>> SequenceApproximant;
-  MyMatrix<T> Amat;
+  std::vector<T> ExprXdeg;
+  double val_double;
+  std::vector<std::pair<std::vector<T>,std::vector<T>>> SequenceApproximant;
 };
 
 
@@ -68,7 +196,12 @@ public:
   using Tresidual = T;
 private:
   std::vector<T> a;
-
+  bool IsZero(std::vector<T> const& V) const {
+    for (auto & val : V)
+      if (val != 0)
+        return false;
+    return true;
+  }
 public:
   std::vector<T>& get_seq() {
     return a;
@@ -185,7 +318,7 @@ public:
   friend RealField<i_field> operator*(RealField<i_field> const &x,
                                       RealField<i_field> const &y) {
     HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
-    std::vector<T> V = gcrf.ComputeProduct(x.a, y.a);
+    std::vector<T> V = hcrf.ComputeProduct(x.a, y.a);
     return RealField<i_field>(V);
   }
   friend RealField<i_field> operator*(int const &x, RealField<i_field> const &y) {
@@ -241,167 +374,159 @@ public:
     for (size_t u=0; u<len; u++) {
       size_t pos_first, pos_last;
       if (u == 0) {
-        
+        pos_first = 1;
+      } else {
+        pos_first = ListPosComma[u-1]+1;
       }
-
-      
+      if (u == len-1) {
+        pos_last = s.size() - 1;
+      } else {
+        pos_last = ListPosComma[u];
+      }
+      std::string sRed = s.substr(pos_first, pos_last - pos_frist);
+      T val;
+      std::istringstream isRed(sRed);
+      isRed >> val;
+      V.push_back(val);
     }
-
-    
-    std::string sA = s.substr(1, pos_comma);
-    std::string sB = s.substr(pos_comma+1, s.size() - 2 - pos_comma);
-    std::istringstream isA(sA);
-    isA >> v.a;
-    std::istringstream isB(sB);
-    isB >> v.b;
-    //    std::cerr << "v.a=" << v.a << "  v.b=" << v.b << "\n";
-    //    std::cerr << "-------------------\n";
-    return is;
+    return RealField<i_field>(V);
   }
-  friend bool operator==(QuadField<T, d> const &x, QuadField<T, d> const &y) {
-    if (x.a != y.a)
-      return false;
-    if (x.b != y.b)
-      return false;
+  friend bool operator==(RealField<i_field> const &x, RealField<i_field> const &y) {
+    size_t deg = x.a.size();
+    for (size_t u=0; u<deg; u++)
+      if (x.a[u] != y.a[u])
+        return false;
     return true;
   }
-  friend bool operator!=(QuadField<T, d> const &x, QuadField<T, d> const &y) {
-    if (x.a != y.a)
-      return true;
-    if (x.b != y.b)
-      return true;
+  friend bool operator!=(RealField<i_field> const &x, RealField<i_field> const &y) {
+    size_t deg = x.a.size();
+    for (size_t u=0; u<deg; u++)
+      if (x.a[u] != y.a[u])
+        return true;
     return false;
   }
-  friend bool operator!=(QuadField<T, d> const &x, int const &y) {
-    if (x.a != y)
-      return true;
-    if (x.b != 0)
-      return true;
-    return false;
+  friend bool operator!=(RealField<i_field> const &x, int const &y) {
+    size_t deg = x.a.size();
+    for (size_t u=1; u<deg; u++)
+      if (x.a[u] != 0)
+        return true;
+    return x.a[0] != y;
   }
-  friend bool IsNonNegative(QuadField<T, d> const &x) {
-    if (x.a == 0 && x.b == 0)
+  friend bool IsNonNegative(RealField<i_field> const &x) {
+    if (IsZero(x.a))
       return true;
-    if (x.a >= 0 && x.b >= 0)
-      return true;
-    if (x.a <= 0 && x.b <= 0)
-      return false;
-    T disc = x.a * x.a - d * x.b * x.b;
-    if (disc > 0) {
-      if (x.a >= 0 && x.b <= 0)
-        return true;
-      if (x.a <= 0 && x.b >= 0)
-        return false;
-    } else {
-      if (x.a >= 0 && x.b <= 0)
-        return false;
-      if (x.a <= 0 && x.b >= 0)
-        return true;
+    HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
+    return hcrf.IsStrictlyPositive(x.a);
+  }
+  friend bool operator>=(RealField<i_field> const &x, RealField<i_field> const &y) {
+    size_t deg = x.a.size();
+    std::vector<T> V(len);
+    for (size_t u=0; u<deg; u++) {
+      T val = x.a[u] = y.a[u];
+      V[u] = val;
     }
-    std::cerr << "Major errors in the code\n";
-    return false;
+    if (IsZero(V))
+      return true;
+    HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
+    return hcrf.IsStrictlyPositive(V);
   }
-  friend bool operator>=(QuadField<T, d> const &x, QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z = x - y;
+  friend bool operator>=(RealField<i_field> const &x, int const &y) {
+    std::vector<T> V = x.a;
+    V[0] -= y;
+    return IsNonNegative(RealField<i_field>(V));
+  }
+  friend bool operator<=(RealField<i_field> const &x, RealField<i_field> const &y) {
+    RealField<i_field> z = y - x;
     return IsNonNegative(z);
   }
-  friend bool operator>=(QuadField<T, d> const &x, int const &y) {
-    QuadField<T, d> z;
-    z = x - y;
+  friend bool operator<=(RealField<i_field> const &x, int const &y) {
+    RealField<i_field> z = y - x;
     return IsNonNegative(z);
   }
-  friend bool operator<=(QuadField<T, d> const &x, QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z = y - x;
-    return IsNonNegative(z);
-  }
-  friend bool operator<=(QuadField<T, d> const &x, int const &y) {
-    QuadField<T, d> z;
-    z = y - x;
-    return IsNonNegative(z);
-  }
-  friend bool operator>(QuadField<T, d> const &x, QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z = x - y;
-    if (z.a == 0 && z.b == 0)
+  friend bool operator>(RealField<i_field> const &x, RealField<i_field> const &y) {
+    RealField<i_field> z = x - y;
+    if (IsZero(z.a))
       return false;
-    return IsNonNegative(z);
+    HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
+    return hcrf.IsStrictlyPositive(z.a);
   }
-  friend bool operator>(QuadField<T, d> const &x, int const &y) {
-    QuadField<T, d> z;
-    z = x - y;
-    if (z.a == 0 && z.b == 0)
+  friend bool operator>(RealField<i_field> const &x, int const &y) {
+    RealField<T, d> z = x - y;
+    if (IsZero(z.a))
       return false;
-    return IsNonNegative(z);
+    HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
+    return hcrf.IsStrictlyPositive(z.a);
   }
-  friend bool operator<(QuadField<T, d> const &x, QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z = y - x;
-    if (z.a == 0 && z.b == 0)
+  friend bool operator<(RealField<i_field> const &x, RealField<i_field> const &y) {
+    RealField<i_field> z = y - x;
+    if (IsZero(z.a))
       return false;
-    return IsNonNegative(z);
+    HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
+    return hcrf.IsStrictlyPositive(z.a);
   }
-  friend bool operator<(QuadField<T, d> const &x, int const &y) {
-    QuadField<T, d> z;
-    z = y - x;
-    if (z.a == 0 && z.b == 0)
+  friend bool operator<(RealField<i_field> const &x, int const &y) {
+    RealField<i_field> z = y - x;
+    if (IsZero(z.a))
       return false;
-    return IsNonNegative(z);
+    HelperClassRealField<T> const& hcrf = list_helper.at(i_field);
+    return hcrf.IsStrictlyPositive(z.a);
   }
 };
 
-template<typename T, int d>
-struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> field_type; };
+// For this construction we cannot hope to handle rings and fields nicely
+
+template<int i_field>
+struct overlying_field<RealField<i_field>> { typedef RealField<i_field> field_type; };
 
 // Note that the underlying ring is not unique, there are many possibiliies actually
 // but we can represent only one in our scheme.
-template<typename T, int d>
-struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> ring_type; };
+template<int i_field>
+struct underlying_ring<RealField<i_field>> { typedef RealField<i_field> ring_type; };
 
 
-template <typename T, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &eQ, double &eD) {
+template <int i_field>
+inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
 }
 
-template <typename T, int d> struct is_totally_ordered<QuadField<T, d>> {
+template <int i_field> struct is_totally_ordered<RealField<i_field>> {
   static const bool value = true;
 };
 
-template <typename T, int d> struct is_ring_field<QuadField<T, d>> {
-  static const bool value = is_ring_field<T>::value;
+template <int i_field> struct is_ring_field<RealField<i_field>> {
+  static const bool value = true;
 };
 
-template <typename T, int d> struct is_exact_arithmetic<QuadField<T, d>> {
+template <int i_field> struct is_exact_arithmetic<RealField<i_field>> {
   static const bool value = true;
 };
 
 // Hashing function
 
-template <typename T, int d>
-struct is_implementation_of_Z<QuadField<T,d>> {
+template <int i_field>
+struct is_implementation_of_Z<RealField<i_field>> {
   static const bool value = false;
 };
 
-template <typename T, int d>
-struct is_implementation_of_Q<QuadField<T,d>> {
+template <int i_field>
+struct is_implementation_of_Q<RealField<i_field>> {
   static const bool value = false;
 };
 
 // Hashing function
 
 namespace std {
-  template <typename T,int d> struct hash<QuadField<T,d>> {
-    std::size_t operator()(const QuadField<T,d> &x) const {
+  template <int i_field> struct hash<RealField<i_field>> {
+    std::size_t operator()(const RealField<i_field> &x) const {
       auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
       	seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
       };
-      size_t seed = std::hash<int>()(d);
-      size_t e_hash1 = std::hash<T>()(x.get_const_a());
-      size_t e_hash2 = std::hash<T>()(x.get_const_b());
-      combine_hash(seed, e_hash1);
-      combine_hash(seed, e_hash2);
+      size_t seed = 0x9e2479b9;
+      std::vector<mpq_class> V = x.get_const_seq();
+      for (auto & val : V) {
+        size_t e_hash = std::hash<mpq_class>()(val);
+        combine_hash(seed, e_hash);
+      }
       return seed;
     }
   };
@@ -410,40 +535,23 @@ namespace std {
 
 // Local typing info
 
-template<typename T> struct is_quad_field {};
+template<typename T> struct is_real_algebraic_field {};
 
-template<typename T, int d> struct is_quad_field<QuadField<T,d>> { static const bool value = false; };
+template<int i_field> struct is_real_algebraic_field<RealField<i_field>> { static const bool value = true; };
 
 // Some functionality
 
-template<typename T, int d>
-bool IsInteger(QuadField<T,d> const& x) {
-  if (x.get_b() != 0)
-    return false;
-  return IsInteger(x.get_const_a());
+template<int i_field>
+bool IsInteger(RealField<i_field> const& x) {
+  std::vector<mpq_class> V = x.get_const_seq();
+  size_t len = V.size();
+  for (size_t u=1; u<len; u++)
+    if (V[u] != 0)
+      return false;
+  return IsInteger(V[0]);
 }
-
 
 // The conversion tools (int)
-
-
-template<typename T1, typename T2, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2) {
-  stc<T1> a1 { x1.val.get_const_a() };
-  stc<T1> b1 { x1.val.get_const_b() };
-  TYPE_CONVERSION(a1, x2.get_a());
-  TYPE_CONVERSION(b1, x2.get_b());
-}
-
-template<typename T1, typename T2, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, double &x2) {
-  stc<T1> a1 { x1.val.get_const_a() };
-  stc<T1> b1 { x1.val.get_const_b() };
-  double a2, b2;
-  TYPE_CONVERSION(a1, a2);
-  TYPE_CONVERSION(b1, b2);
-  x2 = a2 + sqrt(d) * b2;
-}
 
 template<typename T1, typename T2, int d>
 inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, T2 &x2) {
@@ -459,11 +567,12 @@ inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CO
 
 namespace boost::serialization {
 
-template <class Archive, typename T, int d>
-inline void serialize(Archive &ar, QuadField<T,d> &val,
+template <class Archive, int i_field>
+inline void serialize(Archive &ar, RealField<i_field> &val,
                       [[maybe_unused]] const unsigned int version) {
-  ar &make_nvp("quadfield_a", val.get_a());
-  ar &make_nvp("quadfield_b", val.get_b());
+  std::vector<T> & V = val.get_seq();
+  for (auto & val : V)
+    ar &make_nvp("quadfield_a", val);
 }
 
 }
@@ -473,12 +582,13 @@ inline void serialize(Archive &ar, QuadField<T,d> &val,
 template<typename Tring, typename Tquad>
 void ScalingInteger_Kernel(stc<Tquad> const& x, Tring& x_res) {
   using Tfield = typename Tquad::Tresidual;
-  Tfield const& a = x.val.get_const_a();
-  Tfield const& b = x.val.get_const_b();
-  x_res = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
+  std::vector<Tring> V;
+  for (auto & val : x.val.get_const_seq())
+    V.push_back(GetDenominator_z(val));
+  x_res = LCMlist(V);
 }
 
 
 // clang-format off
-#endif  // SRC_NUMBER_QUADFIELD_H_
+#endif  // SRC_NUMBER_REALFIELD_H_
 // clang-format on

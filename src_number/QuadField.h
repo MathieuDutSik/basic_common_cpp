@@ -344,7 +344,7 @@ namespace std {
 
 template<typename T> struct is_quad_field {};
 
-template<typename T, int d> struct is_quad_field<QuadField<T,d>> { static const bool value = false; };
+template<typename T, int d> struct is_quad_field<QuadField<T,d>> { static const bool value = true; };
 
 // Some functionality
 
@@ -367,7 +367,7 @@ inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2)
   TYPE_CONVERSION(b1, x2.get_b());
 }
 
-template<typename T1, typename T2, int d>
+template<typename T1, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, double &x2) {
   stc<T1> a1 { x1.val.get_const_a() };
   stc<T1> b1 { x1.val.get_const_b() };
