@@ -7,7 +7,8 @@
 #PROGRAM		= TestConversion
 #PROGRAM		= TestSquareRoot
 #PROGRAM		= TestTypeConversion
-PROGRAM		= QuadFieldTest
+#PROGRAM		= QuadFieldTest
+PROGRAM		= RealCubicFieldTest
 #PROGRAM		= RationalTest
 
 OBJECTS		= $(PROGRAM:%=%.o)
@@ -31,8 +32,8 @@ OUTPUTFLAG 	= -o
 
 
 
-CLOCAL          = -I../src_basic -I.
-CFLAGS 		= -I$(GMP_INCDIR)
+CLOCAL          = -I../src_basic -I../src_matrix -I.
+CFLAGS 		= -I$(GMP_INCDIR) -I$(EIGEN_PATH)
 CTOTAL 		= $(CLOCAL) $(CFLAGS)
 
 LIBS		= -lm $(GMP_CXX_LINK)

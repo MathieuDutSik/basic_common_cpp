@@ -11,12 +11,20 @@
 // (A) linear algebra is needed.
 // (B) analysis is needed for deciding signs.
 
+
+
+
 template<typename Tfield>
 struct class HelperClassRealField {
 private:
   using T = Tfield;
-  HelperClassRealField(std::vector<T> const& _Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) : Pminimal(_Pminimal), val_double(_val_double) {
-    deg = PMinimal.size() - 1;
+  HelperClassRealField(std::vector<T> const& Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) : val_double(_val_double) {
+    // Finding the expression of X^deg
+    deg = Pminimal.size() - 1;
+    for (int u=0; u<deg; u++) {
+      T val = - Pminimal[u] / Pminimal[deg];
+      ExprXdeg.push_back(val);
+    }
     for (auto & e_approx : l_approx) {
       T val = e_approx.first;
       T err= e_approx.second;
@@ -51,11 +59,11 @@ private:
   HelperClassRealField(std::string const& eFile) {
     std::ifstream is(eFile);
     is >> deg;
-    std::vector<T> _Pminimal;
+    std::vector<T> Pminimal;
     for (size_t u=0; u<=deg; u++) {
       T val;
       is >> val;
-      _Pminimal.push_back(val);
+      Pminimal.push_back(val);
     }
     //
     double _val_double;
@@ -70,7 +78,7 @@ private:
       is >> err;
       l_approx.push_back({val,err});
     }
-    HelperClassRealField(_Pminimal, _val_double, l_approx);
+    HelperClassRealField(Pminimal, _val_double, l_approx);
   }
 private:
   void SetMatrix(MyMatrix<T> & M, std::vector<T> const& den) const {
@@ -174,7 +182,6 @@ private:
   }
 private:
   size_t deg;
-  std::vector<T> Pminimal;
   std::vector<T> ExprXdeg;
   double val_double;
   std::vector<std::pair<std::vector<T>,std::vector<T>>> SequenceApproximant;
@@ -184,9 +191,9 @@ private:
 std::map<int,HelperClassRealField<mpq_class>> list_helper;
 
 
-void insert_helper(int i_field, std::string const& eFile)
+void insert_helper(int i_field, HelperClassRealField<mpq_class> const& hcrf)
 {
-  list_helper[i_field] = HelperClassRealField<mpq_class>(eFile);
+  list_helper[i_field] = hcrf;
 }
 
 
