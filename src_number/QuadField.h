@@ -388,8 +388,8 @@ inline void serialize(Archive &ar, QuadField<T,d> &val,
 
 // Turning into something rational
 
-template<typename Tring, typename Tquad>
-void ScalingInteger_Kernel(stc<Tquad> const& x, Tring& x_res) {
+template<typename Tring, typename T, int d>
+void ScalingInteger_Kernel(stc<QuadField<T,d>> const& x, Tring& x_res) {
   using Tfield = typename Tquad::Tresidual;
   Tfield const& a = x.val.get_const_a();
   Tfield const& b = x.val.get_const_b();

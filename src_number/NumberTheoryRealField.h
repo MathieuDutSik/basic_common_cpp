@@ -613,8 +613,8 @@ inline void serialize(Archive &ar, RealField<i_field> &val,
 
 // Turning into something rational
 
-template<typename Tring, typename Tquad>
-void ScalingInteger_Kernel(stc<Tquad> const& x, Tring& x_res) {
+template<typename Tring, int i_field>
+void ScalingInteger_Kernel(stc<RealField<i_field>> const& x, Tring& x_res) {
   std::vector<Tring> V;
   for (auto & val : x.val.get_const_seq())
     V.push_back(GetDenominator_z(val));
