@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
     HelperClassRealField<T_rat> hcrf(eFile);
     //    std::cerr << "hcrf.deg=" << hcrf.deg << " |ExprXdeg|=" << hcrf.ExprXdeg.size() << "\n";
     int const idx_discriminant_49 = 1;
-    insert_helper(idx_discriminant_49, hcrf);
+    insert_helper_real_algebraic_field(idx_discriminant_49, hcrf);
     //    print_all_helpers(579);
     //
     using T = RealField<idx_discriminant_49>;

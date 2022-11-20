@@ -200,7 +200,7 @@ private:
 std::map<int,HelperClassRealField<mpq_class>> list_helper;
 
 
-void insert_helper(int i_field, HelperClassRealField<mpq_class> const& hcrf)
+void insert_helper_real_algebraic_field(int i_field, HelperClassRealField<mpq_class> const& hcrf)
 {
   //  std::cerr << "insert_helper deg=" << hcrf.deg << " |ExprXdeg|=" << hcrf.ExprXdeg.size() << "\n";
   list_helper.emplace(i_field, hcrf);
