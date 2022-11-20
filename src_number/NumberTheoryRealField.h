@@ -48,6 +48,11 @@ private:
   }
   void Initialize(std::vector<T> const& Pminimal, double const& _val_double, std::vector<std::pair<T,T>> const& l_approx) {
     val_double = _val_double;
+    if (val_double < 0) {
+      std::cerr << "We require that the value val is positive. val_double=" << val_double << "\n";
+      std::cerr << "This is arbitrary of us, but this is our choice and easy for you to correct\n";
+      throw TerminalException{1};
+    }
     // Finding the expression of X^deg
     deg = Pminimal.size() - 1;
     for (int u=0; u<deg; u++) {
@@ -59,7 +64,7 @@ private:
       T err= e_approx.second;
       if (val < 0) {
         std::cerr << "We require that the value val is positive. val=" << val << "\n";
-        std::cerr << "This is arbitrary of us, but this is our choice\n";
+        std::cerr << "This is arbitrary of us, but this is our choice and easy for you to correct\n";
         throw TerminalException{1};
       }
       if (err < 0) {
