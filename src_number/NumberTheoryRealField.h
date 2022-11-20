@@ -132,14 +132,23 @@ public:
     return GetSolution(M, num_V);
   }
   std::vector<T> ComputeProduct(std::vector<T> const& a, std::vector<T> const& b) const {
-    MyMatrix<T> M(deg,deg);
-    SetMatrix(M, b);
-    std::vector<T> V(deg, 0);
+    std::vector<T> result(deg,0);
+    std::vector<T> curr = b;
     for (int i=0; i<deg; i++) {
       for (int j=0; j<deg; j++)
-        V[j] += a[i] * M(i,j);
+        result[j] += a[i] * curr[j];
+      if (i < deg-1) {
+        // Now multiplying by alpha
+        T val = curr[deg-1];
+        for (int j=deg-1; j>0; j++) {
+          curr[j] = curr[j-1];
+        }
+        curr[0] = 0;
+        for (int j=0; j<deg; j++)
+          curr[j] += val * ExprXdeg[j];
+      }
     }
-    return V;
+    return result;
   }
   bool IsStrictlyPositive(std::vector<T> const& x) const {
     // x is assumed to be non-zero
