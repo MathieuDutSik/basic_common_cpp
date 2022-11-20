@@ -114,14 +114,6 @@ public:
     z.b = (x.b * y.a - x.a * y.b) / disc;
     return z;
   }
-  double get_d() const {
-    T hA, hB;
-    double hA_d, hB_d, doubl_d;
-    hA_d = a.get_d();
-    hB_d = b.get_d();
-    doubl_d = static_cast<double>(d);
-    return hA_d + sqrt(doubl_d) * hB_d;
-  }
   void operator*=(QuadField<T, d> const &x) {
     T hA = a * x.a + d * b * x.b;
     b    = a * x.b + b * x.a;
@@ -291,10 +283,14 @@ struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,
 template<typename T, int d>
 struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> ring_type; };
 
-
-template <typename T, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &eQ, double &eD) {
-  eD = eQ.val.get_d();
+template<typename T, int d>
+inline void TYPE_CONVERSION(stc<QuadField<T,d>> const &x1, double &x2) {
+  stc<T> a1 { x1.val.get_const_a() };
+  stc<T> b1 { x1.val.get_const_b() };
+  double a2, b2;
+  TYPE_CONVERSION(a1, a2);
+  TYPE_CONVERSION(b1, b2);
+  x2 = a2 + sqrt(d) * b2;
 }
 
 template <typename T, int d> struct is_totally_ordered<QuadField<T, d>> {
@@ -365,16 +361,6 @@ inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2)
   stc<T1> b1 { x1.val.get_const_b() };
   TYPE_CONVERSION(a1, x2.get_a());
   TYPE_CONVERSION(b1, x2.get_b());
-}
-
-template<typename T1, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, double &x2) {
-  stc<T1> a1 { x1.val.get_const_a() };
-  stc<T1> b1 { x1.val.get_const_b() };
-  double a2, b2;
-  TYPE_CONVERSION(a1, a2);
-  TYPE_CONVERSION(b1, b2);
-  x2 = a2 + sqrt(d) * b2;
 }
 
 template<typename T1, typename T2, int d>
