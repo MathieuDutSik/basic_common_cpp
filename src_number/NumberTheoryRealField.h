@@ -98,7 +98,7 @@ public:
     std::ifstream is(eFile);
     is >> deg;
     std::vector<T> Pminimal;
-    for (size_t u=0; u<=deg; u++) {
+    for (int u=0; u<=deg; u++) {
       T val;
       is >> val;
       Pminimal.push_back(val);
