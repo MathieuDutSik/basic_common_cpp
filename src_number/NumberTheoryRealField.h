@@ -413,7 +413,8 @@ public:
       isRed >> val;
       V.push_back(val);
     }
-    return RealField<i_field>(V);
+    v = RealField<i_field>(V);
+    return is;
   }
   friend bool operator==(RealField<i_field> const &x, RealField<i_field> const &y) {
     size_t deg = x.a.size();
@@ -507,10 +508,14 @@ struct overlying_field<RealField<i_field>> { typedef RealField<i_field> field_ty
 template<int i_field>
 struct underlying_ring<RealField<i_field>> { typedef RealField<i_field> ring_type; };
 
-
 template <int i_field>
 inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
+}
+
+template <int i_field>
+inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ, RealField<i_field> &eD) {
+  eD = eQ.val;
 }
 
 template <int i_field> struct is_totally_ordered<RealField<i_field>> {
