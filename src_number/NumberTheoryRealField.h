@@ -60,23 +60,17 @@ private:
       ExprXdeg.push_back(val);
     }
     for (auto & e_approx : l_approx) {
-      T val = e_approx.first;
-      T err= e_approx.second;
-      if (val < 0) {
-        std::cerr << "We require that the value val is positive. val=" << val << "\n";
+      T val_low = e_approx.first;
+      T val_upp = e_approx.second;
+      if (val_low < 0) {
+        std::cerr << "We require that the value val_low is positive. val_low=" << val_low << "\n";
         std::cerr << "This is arbitrary of us, but this is our choice and easy for you to correct\n";
         throw TerminalException{1};
       }
-      if (err < 0) {
-        std::cerr << "The error err should be positive. err=" << err << "\n";
+      if (val_upp <= val_low) {
+        std::cerr << "The upper bound should be higher than the lower bound. val_low=" << val_low << " val_upp=" << val_upp << "\n";
         throw TerminalException{1};
       }
-      if (err > val) {
-        std::cerr << "The error err should be smaller than val. val=" << val << " err=" << err << "\n";
-        throw TerminalException{1};
-      }
-      T val_low = val - err;
-      T val_upp = val + err;
       std::vector<T> l_pow_low;
       std::vector<T> l_pow_upp;
       T pow_low = val_low;
@@ -111,10 +105,10 @@ public:
     size_t n_approx;
     is >> n_approx;
     for (size_t u=0; u<n_approx; u++) {
-      T val, err;
-      is >> val;
-      is >> err;
-      l_approx.push_back({val,err});
+      T val_low, val_upp;
+      is >> val_low;
+      is >> val_upp;
+      l_approx.push_back({val_low,val_upp});
     }
     Initialize(Pminimal, _val_double, l_approx);
   }
