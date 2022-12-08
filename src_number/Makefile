@@ -34,7 +34,8 @@ OUTPUTFLAG 	= -o
 
 CLOCAL          = -I../src_basic -I../src_matrix -I.
 CFLAGS 		= -I$(GMP_INCDIR) -I$(EIGEN_PATH)
-CTOTAL 		= $(CLOCAL) $(CFLAGS)
+CDEBUG 		= -DCHECK_REAL_ALG_NUMERIC
+CTOTAL 		= $(CLOCAL) $(CFLAGS) $(CDEBUG)
 
 LIBS		= -lm $(GMP_CXX_LINK)
 
@@ -42,7 +43,7 @@ LIBS		= -lm $(GMP_CXX_LINK)
 %.o: %.cpp
 	@echo
 	@echo compile $<
-	$(CC) $(OUTPUTFLAG) $@ $(CLOCAL) $(CFLAGS) $(NOLINKFLAG) $<
+	$(CC) $(OUTPUTFLAG) $@ $(CTOTAL) $(NOLINKFLAG) $<
 
 all:	$(PROGRAM)
 

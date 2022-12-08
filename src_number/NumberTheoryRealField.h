@@ -12,6 +12,10 @@
 // (B) analysis is needed for deciding signs.
 
 
+#ifdef CHECK_REAL_ALG_NUMERIC
+double threshold_real_alg_check = 0.0001;
+#endif
+
 
 
 template<typename Tfield>
@@ -115,21 +119,56 @@ public:
   std::vector<T> FindQuotient(std::vector<T> const& num, std::vector<T> const& den) const {
     MyMatrix<T> M(deg,deg);
     SetMatrix(M, den);
+#ifdef CHECK_REAL_ALG_NUMERIC
+    std::vector<T> TheSol = GetSolution(M, num);
+    double TheSol_d = evaluate_as_double(TheSol);
+    double num_d = evaluate_as_double(num);
+    double den_d = evaluate_as_double(den);
+    if (T_abs(TheSol_d * den_d - num_d) > threshold_real_alg_check) {
+      std::cerr << "Error in FindQuotient\n";
+      throw TerminalException{1};
+    }
+    return TheSol;
+#else
     return GetSolution(M, num);
+#endif
   }
   std::vector<T> FindQuotient(T const& num, std::vector<T> const& den) const {
     std::vector<T> num_V(deg,0);
     num_V[0] = num;
     MyMatrix<T> M(deg,deg);
     SetMatrix(M, den);
+#ifdef CHECK_REAL_ALG_NUMERIC
+    std::vector<T> TheSol = GetSolution(M, num_V);
+    double TheSol_d = evaluate_as_double(TheSol);
+    double num_d = evaluate_as_double(num_V);
+    double den_d = evaluate_as_double(den);
+    if (T_abs(TheSol_d * den_d - num_d) > threshold_real_alg_check) {
+      std::cerr << "Error in FindQuotient\n";
+      throw TerminalException{1};
+    }
+    return TheSol;
+#else
     return GetSolution(M, num_V);
+#endif
   }
   std::vector<T> FindInverse(std::vector<T> const& x) const {
     std::vector<T> num_V(deg,0);
     num_V[0] = 1;
     MyMatrix<T> M(deg,deg);
     SetMatrix(M, x);
+#ifdef CHECK_REAL_ALG_NUMERIC
+    std::vector<T> TheSol = GetSolution(M, num_V);
+    double TheSol_d = evaluate_as_double(TheSol);
+    double x_d = evaluate_as_double(x);
+    if (T_abs(TheSol_d * x_d - 1.0) > threshold_real_alg_check) {
+      std::cerr << "Error in FindInverse\n";
+      throw TerminalException{1};
+    }
+    return TheSol;
+#else
     return GetSolution(M, num_V);
+#endif
   }
   std::vector<T> ComputeProduct(std::vector<T> const& a, std::vector<T> const& b) const {
     std::vector<T> result(deg,0);
@@ -148,6 +187,15 @@ public:
           curr[j] += val * ExprXdeg[j];
       }
     }
+#ifdef CHECK_REAL_ALG_NUMERIC
+    double result_d = evaluate_as_double(result);
+    double a_d = evaluate_as_double(a);
+    double b_d = evaluate_as_double(b);
+    if (T_abs(result_d - a_d * b_d) > threshold_real_alg_check) {
+      std::cerr << "Error in ComputeProduct\n";
+      throw TerminalException{1};
+    }
+#endif
     return result;
   }
   bool IsStrictlyPositive(std::vector<T> const& x) const {
@@ -173,9 +221,23 @@ public:
       T const& val_low = pair_bound.first;
       T const& val_upp = pair_bound.second;
       if (val_upp <= 0) {
+#ifdef CHECK_REAL_ALG_NUMERIC
+        double val_upp_d = evaluate_as_double(val_upp);
+        if (val_upp_d > threshold_real_alg_check) {
+          std::cerr << "Error in IsStrictlyPositive (it is negative)\n";
+          throw TerminalException{1};
+        }
+#endif
         return false;
       }
       if (val_low >= 0) {
+#ifdef CHECK_REAL_ALG_NUMERIC
+        double val_low_d = evaluate_as_double(val_low);
+        if (val_low_d < -threshold_real_alg_check) {
+          std::cerr << "Error in IsStrictlyPositive (it is positive)\n";
+          throw TerminalException{1};
+        }
+#endif
         return true;
       }
     }
