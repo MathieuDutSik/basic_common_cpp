@@ -370,6 +370,14 @@ void WriteMatrix(std::ostream &os, MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
+void WriteMatrixFile(std::string const& eFile, MyMatrix<T> const &TheMat) {
+  std::ofstream os(eFile);
+  WriteMatrix(os, TheMat);
+}
+
+
+
+template <typename T>
 void WriteMatrixNice(std::ostream &os, MyMatrix<T> const &M) {
   long nbRow = M.rows();
   long nbCol = M.cols();
