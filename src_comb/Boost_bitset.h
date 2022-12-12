@@ -261,6 +261,13 @@ void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
   os << "]\n";
 }
 
+void VectVectInt_Magma_PrintFile(std::string const& eFile, vectface const &ListOrbit) {
+  std::ofstream os(eFile);
+  os << "return ";
+  VectVectInt_Magma_Print(os, ListOrbit);
+  os << ";\n";
+}
+
 void VectVectInt_Gap_Print(std::ostream &os, vectface const &ListOrbit) {
   size_t nbOrbit = ListOrbit.size();
   os << "[";
@@ -280,6 +287,13 @@ void VectVectInt_Gap_Print(std::ostream &os, vectface const &ListOrbit) {
     os << "]";
   }
   os << "]";
+}
+
+void VectVectInt_Gap_PrintFile(std::string const& eFile, vectface const &ListOrbit) {
+  std::ofstream os(eFile);
+  os << "return ";
+  VectVectInt_Gap_Print(os, ListOrbit);
+  os << ";\n";
 }
 
 // clang-format off
