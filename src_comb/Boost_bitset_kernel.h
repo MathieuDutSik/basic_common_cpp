@@ -401,6 +401,16 @@ template <typename T> T getsetasint(const Face &face) {
   return eSum;
 }
 
+template <typename T>
+void VectVectInt_SetInt_PrintFile(std::string const& eFile, vectface const& ListOrbit) {
+  std::ofstream os(eFile);
+  os << TheOutput.size() << "\n";
+  for (const Face &f : ListOrbit) {
+    T res = getsetasint<T>(f);
+    os << res << "\n";
+  }
+}
+
 // clang-format off
 #endif  // SRC_COMB_BOOST_BITSET_KERNEL_H_
 // clang-format on
