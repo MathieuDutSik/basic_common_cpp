@@ -419,27 +419,33 @@ public:
     return RealField<i_field>(V);
   }
   friend std::ostream &operator<<(std::ostream &os, RealField<i_field> const &v) {
-    os << "(";
-    size_t len = v.a.size();
-    for (size_t u=0; u<len; u++) {
-      if (u>0)
-        os << ",";
-      os << v.a[u];
+    bool DoSomething = false;
+    for (size_t u=0; u<v.a.size(); u++) {
+      T const& val = v.a[u];
+      if (val != 0) {
+        DoSomething = true;
+        os << val;
+        if (u == 1) {
+          os << "*x";
+        }
+        if (u > 1) {
+          os << "*x^" << u;
+        }
+      }
     }
-    os << ")";
+    if (!DoSomething) {
+      os << "0";
+    }
     return os;
   }
   friend std::istream &operator>>(std::istream &is, RealField<i_field> &v) {
     char c;
     std::string s;
-    size_t pos = 0;
     // First skipping the spaces
-    std::vector<size_t> ListPosComma;
     while(true) {
       is.get(c);
       if (c != ' ' && c != '\n') {
         s += c;
-        pos++;
         break;
       }
     }
@@ -452,31 +458,60 @@ public:
       if (c == ' ' || c == '\n') {
         break;
       }
-      if (c == ',')
-        ListPosComma.push_back(pos);
       s += c;
-      pos++;
     }
     // Now parsing the data
-    size_t len = ListPosComma.size() + 1;
-    std::vector<T> V(len);
-    for (size_t u=0; u<len; u++) {
-      size_t pos_first, pos_last;
-      if (u == 0) {
-        pos_first = 1;
-      } else {
-        pos_first = ListPosComma[u-1]+1;
+    size_t deg = list_helper.at(i_field).deg;
+    std::vector<T> V(deg,0);
+    std::vector<size_t> W;
+    for (size_t u=1; u<s.size(); u++) {
+      std::string echar = s.substr(u,1);
+      if (echar == "+" || echar == "-") {
+        W.push_back(u);
       }
-      if (u == len-1) {
-        pos_last = s.size() - 1;
-      } else {
-        pos_last = ListPosComma[u];
+    }
+    auto eval_coef=[](std::string const& s_coef) -> T {
+      size_t s_len = s_coef.size();
+      if (s_coef.substr(0,1) == "+") {
+        return ParseScalar<T>(s_coef.substr(1,s_len-1));
       }
-      std::string sRed = s.substr(pos_first, pos_last - pos_first);
-      T val;
-      std::istringstream isRed(sRed);
-      isRed >> val;
-      V.push_back(val);
+      return ParseScalar<T>(s_coef);
+    };
+    auto eval_expo=[](std::string const& s_expo) -> size_t {
+      if (s_expo == "x")
+        return 1;
+      std::string s1 = s_expo.substr(0,2);
+      if (s1 != "x^") {
+        std::cerr << "We should have an expression of the form x^n with n the exponent\n";
+        std::cerr << "s_expo=" << s_expo << " s1=" << s1 << "\n";
+        throw TerminalException{1};
+      }
+      std::string s2 = s_expo.substr(2,s_expo.size()-2);
+      return ParseScalar<size_t>(s2);
+    };
+    auto eval=[](std::string const& sb) -> std::pair<T,size_t> {
+      size_t lenb = sb.size();
+      for (size_t ib=0; ib<lenb; ib++) {
+        std::string echar = sb.substr(ib,1);
+        if (sb == "*") {
+          std::string s_coef = sb.substr(0,ib);
+          std::string s_expo = sb.substr(ib+1,lenb - 1 - ib);
+          return {eval_coef(s_coef), eval_expo(s_expo)};
+        }
+      }
+      return {eval_coef(sb), 0};
+    };
+    for (size_t w=0; w<=W.size(); w++) {
+      size_t pos_first=0, pos_last=s.size();
+      if (w > 0) {
+        pos_first = W[w-1];
+      }
+      if (w < W.size()) {
+        pos_last = W[w];
+      }
+      std::string sb = s.substr(pos_first, pos_last - pos_first);
+      std::pair<T,size_t> ep = eval(sb);
+      V[ep.second] = ep.first;
     }
     v = RealField<i_field>(V);
     return is;
