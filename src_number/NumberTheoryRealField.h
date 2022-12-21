@@ -125,7 +125,8 @@ public:
     double num_d = evaluate_as_double(num);
     double den_d = evaluate_as_double(den);
     if (T_abs(TheSol_d * den_d - num_d) > threshold_real_alg_check) {
-      std::cerr << "Error in FindQuotient\n";
+      std::cerr << "Error in FindQuotient 1\n";
+      std::cerr << "TheSol_d=" << TheSol_d << " num_d=" << num_d << " den_d=" << den_d << "\n";
       throw TerminalException{1};
     }
     return TheSol;
@@ -144,7 +145,8 @@ public:
     double num_d = evaluate_as_double(num_V);
     double den_d = evaluate_as_double(den);
     if (T_abs(TheSol_d * den_d - num_d) > threshold_real_alg_check) {
-      std::cerr << "Error in FindQuotient\n";
+      std::cerr << "Error in FindQuotient 2\n";
+      std::cerr << "TheSol_d=" << TheSol_d << " num_d=" << num_d << " den_d=" << den_d << "\n";
       throw TerminalException{1};
     }
     return TheSol;
@@ -489,7 +491,7 @@ public:
       std::string s2 = s_expo.substr(2,s_expo.size()-2);
       return ParseScalar<size_t>(s2);
     };
-    auto eval=[](std::string const& sb) -> std::pair<T,size_t> {
+    auto eval=[&](std::string const& sb) -> std::pair<T,size_t> {
       size_t lenb = sb.size();
       for (size_t ib=0; ib<lenb; ib++) {
         std::string echar = sb.substr(ib,1);
