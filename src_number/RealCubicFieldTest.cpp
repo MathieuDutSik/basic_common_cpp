@@ -34,6 +34,9 @@ int main(int argc, char *argv[]) {
     std::istringstream(strI) >> x2inv_cp;
     if (x2inv != x2inv_cp) {
       std::cerr << "Error in the conversion T -> string -> T\n";
+      std::cerr << "INFO: x2inv=" << x2inv << "\n";
+      std::cerr << "INFO: strI=" << strI << "\n";
+      std::cerr << "INFO: x2inv_cp=" << x2inv_cp << "\n";
       throw TerminalException{1};
     }
     std::cerr << "Normal termination of the program\n";

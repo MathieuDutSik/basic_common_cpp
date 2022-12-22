@@ -465,6 +465,7 @@ public:
       is.get(c);
       if (c != ' ' && c != '\n') {
         s += c;
+        std::cerr << "Inserting 1 c=" << c << "\n";
         break;
       }
     }
@@ -478,7 +479,9 @@ public:
         break;
       }
       s += c;
+      std::cerr << "Inserting 2 c=" << c << "\n";
     }
+    std::cerr << "s=" << s << "\n";
     // Now parsing the data
     size_t deg = list_helper.at(i_field).deg;
     std::vector<T> V(deg,0);
@@ -486,6 +489,7 @@ public:
     for (size_t u=1; u<s.size(); u++) {
       std::string echar = s.substr(u,1);
       if (echar == "+" || echar == "-") {
+        std::cerr << "Inserting u=" << u << "\n";
         W.push_back(u);
       }
     }
@@ -497,6 +501,7 @@ public:
       return ParseScalar<T>(s_coef);
     };
     auto eval_expo=[](std::string const& s_expo) -> size_t {
+      std::cerr << "s_expo=" << s_expo << "\n";
       if (s_expo == "x")
         return 1;
       std::string s1 = s_expo.substr(0,2);
@@ -506,13 +511,14 @@ public:
         throw TerminalException{1};
       }
       std::string s2 = s_expo.substr(2,s_expo.size()-2);
+      std::cerr << "s2=" << s2 << "\n";
       return ParseScalar<size_t>(s2);
     };
     auto eval=[&](std::string const& sb) -> std::pair<T,size_t> {
       size_t lenb = sb.size();
       for (size_t ib=0; ib<lenb; ib++) {
         std::string echar = sb.substr(ib,1);
-        if (sb == "*") {
+        if (echar == "*") {
           std::string s_coef = sb.substr(0,ib);
           std::string s_expo = sb.substr(ib+1,lenb - 1 - ib);
           return {eval_coef(s_coef), eval_expo(s_expo)};
@@ -529,6 +535,7 @@ public:
         pos_last = W[w];
       }
       std::string sb = s.substr(pos_first, pos_last - pos_first);
+      std::cerr << "sb=" << sb << "\n";
       std::pair<T,size_t> ep = eval(sb);
       V[ep.second] = ep.first;
     }
