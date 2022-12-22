@@ -22,14 +22,19 @@ int main(int argc, char *argv[]) {
     std::cerr << "x1=" << x1 << "\n";
     std::vector<T_rat> V2{1, 2, 4};
     T x2(V2);
+    std::vector<T_rat> V3{1, 3, 1};
+    T x3(V3);
     std::cerr << "x2=" << x2 << "\n";
-    T x2inv = 1 / x2;
+    T x2inv = -1 / x2;
     //    print_all_helpers(1924);
     std::cerr << "x2inv=" << x2inv << "\n";
+    T x2_3 = x2 * x3;
+    std::cerr << "x2_3=" << x2_3 << "\n";
     //
     std::ostringstream convert;
     convert << x2inv;
     std::string strI = convert.str();
+    std::cerr << "strI=" << strI << "X\n";
     T x2inv_cp;
     std::istringstream(strI) >> x2inv_cp;
     if (x2inv != x2inv_cp) {

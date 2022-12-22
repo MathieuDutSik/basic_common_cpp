@@ -198,7 +198,7 @@ public:
       if (i < deg-1) {
         // Now multiplying by alpha
         T val = curr[deg-1];
-        for (int j=deg-1; j>0; j++) {
+        for (int j=deg-1; j>0; j--) {
           curr[j] = curr[j-1];
         }
         curr[0] = 0;
@@ -439,17 +439,25 @@ public:
   }
   friend std::ostream &operator<<(std::ostream &os, RealField<i_field> const &v) {
     bool DoSomething = false;
+    bool is_first = true;
     for (size_t u=0; u<v.a.size(); u++) {
       T const& val = v.a[u];
       if (val != 0) {
         DoSomething = true;
-        os << val;
+        if (val > 0) {
+          if (!is_first)
+            os << "+";
+          os << val;
+        } else {
+          os << val;
+        }
         if (u == 1) {
           os << "*x";
         }
         if (u > 1) {
           os << "*x^" << u;
         }
+        is_first = false;
       }
     }
     if (!DoSomething) {
@@ -465,7 +473,6 @@ public:
       is.get(c);
       if (c != ' ' && c != '\n') {
         s += c;
-        std::cerr << "Inserting 1 c=" << c << "\n";
         break;
       }
     }
@@ -475,13 +482,14 @@ public:
         break;
       }
       is.get(c);
+      if (is.gcount() == 0) { // If number of characters read is 0, then we have reached eof.
+        break;
+      }
       if (c == ' ' || c == '\n') {
         break;
       }
       s += c;
-      std::cerr << "Inserting 2 c=" << c << "\n";
     }
-    std::cerr << "s=" << s << "\n";
     // Now parsing the data
     size_t deg = list_helper.at(i_field).deg;
     std::vector<T> V(deg,0);
@@ -489,7 +497,6 @@ public:
     for (size_t u=1; u<s.size(); u++) {
       std::string echar = s.substr(u,1);
       if (echar == "+" || echar == "-") {
-        std::cerr << "Inserting u=" << u << "\n";
         W.push_back(u);
       }
     }
@@ -501,7 +508,6 @@ public:
       return ParseScalar<T>(s_coef);
     };
     auto eval_expo=[](std::string const& s_expo) -> size_t {
-      std::cerr << "s_expo=" << s_expo << "\n";
       if (s_expo == "x")
         return 1;
       std::string s1 = s_expo.substr(0,2);
@@ -511,7 +517,6 @@ public:
         throw TerminalException{1};
       }
       std::string s2 = s_expo.substr(2,s_expo.size()-2);
-      std::cerr << "s2=" << s2 << "\n";
       return ParseScalar<size_t>(s2);
     };
     auto eval=[&](std::string const& sb) -> std::pair<T,size_t> {
@@ -535,7 +540,6 @@ public:
         pos_last = W[w];
       }
       std::string sb = s.substr(pos_first, pos_last - pos_first);
-      std::cerr << "sb=" << sb << "\n";
       std::pair<T,size_t> ep = eval(sb);
       V[ep.second] = ep.first;
     }

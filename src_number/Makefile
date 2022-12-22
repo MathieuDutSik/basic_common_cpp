@@ -14,11 +14,11 @@ PROGRAM		= RealCubicFieldTest
 OBJECTS		= $(PROGRAM:%=%.o)
 
 #CC		= icpc -std=c++17 -Wall -g -O2
-#CC		= clang++ -Weverything -std=c++17
-#CC		= clang++ -g -Weverything -std=c++17 -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null
-#CC		= clang++ -g -Weverything -std=c++17
-#CC		= clang++ -g -Weverything -std=c++17 -fsanitize=bounds -fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins
-#CC		= clang++ -O2 -Weverything -std=c++17 -DDEBUG
+#CC		= clang++ -Wall -std=c++17
+#CC		= clang++ -g -Wall -std=c++17 -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null
+#CC		= clang++ -g -Wall -std=c++17
+#CC		= clang++ -g -Wall -std=c++17 -fsanitize=bounds -fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins
+#CC		= clang++ -O2 -Wall -std=c++17 -DDEBUG
 #CC              = /usr/share/clang/scan-build-3.8/libexec/c++-analyzer -std=c++17 -O2
 #CC              = /home/mathieu/opt/gcc-6.3.0/bin/g++ -std=c++17 -O3
 #CC		= g++ -std=c++17 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
