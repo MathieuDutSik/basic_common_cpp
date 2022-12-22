@@ -57,6 +57,23 @@ private:
       std::cerr << "This is arbitrary of us, but this is our choice and easy for you to correct\n";
       throw TerminalException{1};
     }
+#ifdef CHECK_REAL_ALG_NUMERIC
+    double sum = 0;
+    double expo = 1;
+    for (int i=0; i<Pminimal.size(); i++) {
+      sum += UniversalScalarConversion<double,T>(Pminimal[i]) * expo;
+      expo *= val_double;
+    }
+    if (T_abs(sum) > threshold_real_alg_check) {
+      std::cerr << "Error in Initialize\n";
+      std::cerr << "sum=" << sum << " val_double=" << val_double << "\n";
+      std::cerr << "Pminimal =";
+      for (auto & eVal : Pminimal)
+        std::cerr << " " << eVal;
+      std::cerr << "\n";
+      throw TerminalException{1};
+    }
+#endif
     // Finding the expression of X^deg
     deg = Pminimal.size() - 1;
     for (int u=0; u<deg; u++) {

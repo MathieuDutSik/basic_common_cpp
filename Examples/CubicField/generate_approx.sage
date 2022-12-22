@@ -46,7 +46,7 @@ def get_approximant(n):
 
 f = open("CubicFieldDisc_49", "w")
 f.write("3\n")
-f.write("-1 2 1 1\n")
+f.write("-1 -2 1 1\n")
 f.write(str(float(val)) + "\n");
 
 n_expo = 20
