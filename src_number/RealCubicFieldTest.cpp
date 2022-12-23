@@ -44,7 +44,8 @@ int main(int argc, char *argv[]) {
     }
     std::cerr << "STEP 3: conversion to string and back ckecked\n";
     //
-    T thr = 1 / 100000;
+    T thr = 1 / T(100000);
+    std::cerr << "thr=" << thr << "\n";
     T approx = find_approximation_dichotomy(x2inv, thr);
     double x2inv_d = UniversalScalarConversion<double,T>(x2inv);
     double approx_d = UniversalScalarConversion<double,T>(approx);

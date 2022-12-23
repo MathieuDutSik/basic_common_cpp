@@ -239,6 +239,12 @@ public:
       auto pair_bound = get_bounds(epair);
       T const& val_low = pair_bound.first;
       T const& val_upp = pair_bound.second;
+#ifdef CHECK_REAL_ALG_NUMERIC
+      if (val_low > val_upp) {
+        std::cerr << "The ordering of values is not respected\n";
+        throw TerminalException{1};
+      }
+#endif
       if (val_upp <= 0) {
 #ifdef CHECK_REAL_ALG_NUMERIC
         double val_upp_d = UniversalScalarConversion<double,T>(val_upp);
