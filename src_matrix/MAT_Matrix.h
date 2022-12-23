@@ -269,6 +269,7 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
   if (str != "integer" && str != "rational" && str != "double") {
     std::cerr << "Error while reading\n";
     std::cerr << "str = " << str << "\n";
+    std::cerr << "But it should be integer, rational or double. Note that it is not being used\n";
     throw TerminalException{1};
   }
   //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
