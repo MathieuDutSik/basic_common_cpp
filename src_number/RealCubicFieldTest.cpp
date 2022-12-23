@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "NumberTheoryRealField.h"
 #include "NumberTheory.h"
-
+#include "approximation.h"
 
 // The quantity is 2*cos(2*pi/7)
 // The minimal polynomial is X^3 + X^2 - 2X - 1
@@ -11,13 +11,11 @@ int main(int argc, char *argv[]) {
     using T_rat = mpq_class;
     std::string eFile = "../Examples/CubicField/CubicFieldDisc_49";
     HelperClassRealField<T_rat> hcrf(eFile);
-    //    std::cerr << "hcrf.deg=" << hcrf.deg << " |ExprXdeg|=" << hcrf.ExprXdeg.size() << "\n";
     int const idx_discriminant_49 = 1;
     insert_helper_real_algebraic_field(idx_discriminant_49, hcrf);
-    //    print_all_helpers(579);
-    //
     using T = RealField<idx_discriminant_49>;
-    //    print_all_helpers(1453);
+    std::cerr << "STEP 1: Initial setup done\n";
+    //
     T x1 = 42;
     std::cerr << "x1=" << x1 << "\n";
     std::vector<T_rat> V2{1, 2, 4};
@@ -26,10 +24,10 @@ int main(int argc, char *argv[]) {
     T x3(V3);
     std::cerr << "x2=" << x2 << "\n";
     T x2inv = -1 / x2;
-    //    print_all_helpers(1924);
     std::cerr << "x2inv=" << x2inv << "\n";
     T x2_3 = x2 * x3;
     std::cerr << "x2_3=" << x2_3 << "\n";
+    std::cerr << "STEP 2: Product and quotient checked\n";
     //
     std::ostringstream convert;
     convert << x2inv;
@@ -44,6 +42,15 @@ int main(int argc, char *argv[]) {
       std::cerr << "INFO: x2inv_cp=" << x2inv_cp << "\n";
       throw TerminalException{1};
     }
+    std::cerr << "STEP 3: conversion to string and back ckecked\n";
+    //
+    T thr = 1 / 100000;
+    T approx = find_approximation_dichotomy(x2inv, thr);
+    double x2inv_d = UniversalScalarConversion<double,T>(x2inv);
+    double approx_d = UniversalScalarConversion<double,T>(approx);
+    std::cerr << "x2inv_d=" << x2inv_d << " approx_d=" << approx_d << "\n";
+    std::cerr << "STEP 4: comparison operations\n";
+    //
     std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
     std::cerr << "Something wrong happened\n";

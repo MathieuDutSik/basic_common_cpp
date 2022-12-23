@@ -241,7 +241,7 @@ public:
       T const& val_upp = pair_bound.second;
       if (val_upp <= 0) {
 #ifdef CHECK_REAL_ALG_NUMERIC
-        double val_upp_d = evaluate_as_double(val_upp);
+        double val_upp_d = UniversalScalarConversion<double,T>(val_upp);
         if (val_upp_d > threshold_real_alg_check) {
           std::cerr << "Error in IsStrictlyPositive (it is negative)\n";
           throw TerminalException{1};
@@ -251,7 +251,7 @@ public:
       }
       if (val_low >= 0) {
 #ifdef CHECK_REAL_ALG_NUMERIC
-        double val_low_d = evaluate_as_double(val_low);
+        double val_low_d = UniversalScalarConversion<double,T>(val_low);
         if (val_low_d < -threshold_real_alg_check) {
           std::cerr << "Error in IsStrictlyPositive (it is positive)\n";
           throw TerminalException{1};
@@ -541,6 +541,11 @@ public:
       }
       std::string sb = s.substr(pos_first, pos_last - pos_first);
       std::pair<T,size_t> ep = eval(sb);
+      if (ep.second >= deg) {
+        std::cerr << "sb=" << sb << "\n";
+        std::cerr << "We found a term of the form x^{" << ep.second << "} while deg=" << deg << "\n";
+        throw TerminalException{1};
+      }
       V[ep.second] = ep.first;
     }
     v = RealField<i_field>(V);
