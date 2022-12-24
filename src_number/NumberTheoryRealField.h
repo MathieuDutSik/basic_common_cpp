@@ -60,7 +60,7 @@ private:
 #ifdef CHECK_REAL_ALG_NUMERIC
     double sum = 0;
     double expo = 1;
-    for (int i=0; i<Pminimal.size(); i++) {
+    for (size_t i=0; i<Pminimal.size(); i++) {
       sum += UniversalScalarConversion<double,T>(Pminimal[i]) * expo;
       expo *= val_double;
     }
