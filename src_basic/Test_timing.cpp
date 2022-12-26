@@ -12,8 +12,8 @@ int main() {
   MillisecondTime millist;
   MicrosecondTime microst;
   my_sleep(1000);
-  std::cerr << "duration 1 s=" << st << " millisecond=" << millist << " microsecond=" << microst << "\n";
+  std::cerr << "duration 1 s=" << st << " millisecond=" << millist << " microsecond=" << microst << " dateandtime=" << dateandtime() << "\n";
   my_sleep(1000);
-  std::cerr << "duration 1 s=" << st << " millisecond=" << millist << " microsecond=" << microst << "\n";
+  std::cerr << "duration 1 s=" << st << " millisecond=" << millist << " microsecond=" << microst << " dateandtime=" << dateandtime() << "\n";
 
 }
