@@ -14,12 +14,19 @@
 
 struct SingleBlock {
   std::map<std::string, int> ListIntValues;
+  std::map<std::string, std::string> ListIntValues_doc;
   std::map<std::string, bool> ListBoolValues;
+  std::map<std::string, std::string> ListBoolValues_doc;
   std::map<std::string, double> ListDoubleValues;
+  std::map<std::string, std::string> ListDoubleValues_doc;
   std::map<std::string, std::vector<double>> ListListDoubleValues;
+  std::map<std::string, std::string> ListListDoubleValues_doc;
   std::map<std::string, std::vector<int>> ListListIntValues;
+  std::map<std::string, std::string> ListListIntValues_doc;
   std::map<std::string, std::string> ListStringValues;
+  std::map<std::string, std::string> ListStringValues_doc;
   std::map<std::string, std::vector<std::string>> ListListStringValues;
+  std::map<std::string, std::string> ListListStringValues_doc;
 };
 
 struct FullNamelist {
@@ -243,59 +250,124 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
   return eListRetInt;
 }
 
-void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
-                         SingleBlock const &eBlock) {
+void NAMELIST_WriteBlock_Kernel(std::ostream &os, std::string const &eBlockName,
+                                SingleBlock const &eBlock, bool const& WithDoc) {
   os << "&" << eBlockName << "\n";
-  for (auto & kv : eBlock.ListIntValues)
-    os << "  " << kv.first << " = " << kv.second << "\n";
+  //
+  // Integer values
+  //
+  for (auto & kv : eBlock.ListIntValues) {
+    auto iter = eBlock.ListIntValues_doc.find(kv.first);
+    if (iter == eBlock.ListIntValues_doc.end() || !WithDoc) {
+      os << "  " << kv.first << " = " << kv.second << "\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
+    }
+  }
+  //
+  // Bool values
+  //
   for (auto & kv : eBlock.ListBoolValues) {
-    bool eVal = kv.second;
-    std::string eValStr;
-    if (!eVal)
-      eValStr = "F";
-    else
-      eValStr = "T";
-    os << "  " << kv.first << " = " << eValStr << "\n";
+    auto iter = eBlock.ListBoolValues_doc.find(kv.first);
+    if (iter == eBlock.ListBoolValues_doc.end() || !WithDoc) {
+      bool eVal = kv.second;
+      std::string eValStr;
+      if (!eVal)
+        eValStr = "F";
+      else
+        eValStr = "T";
+      os << "  " << kv.first << " = " << eValStr << "\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
+    }
   }
-  for (auto & kv : eBlock.ListDoubleValues)
-    os << "  " << kv.first << " = " << kv.second << "\n";
+  //
+  // Double values
+  //
+  for (auto & kv : eBlock.ListDoubleValues) {
+    auto iter = eBlock.ListDoubleValues_doc.find(kv.first);
+    if (iter == eBlock.ListDoubleValues_doc.end() || !WithDoc) {
+      os << "  " << kv.first << " = " << kv.second << "\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
+    }
+  }
+  //
+  // ListDouble values
+  //
   for (auto & kv : eBlock.ListListDoubleValues) {
-    os << "  " << kv.first << " = ";
-    std::vector<double> const& eListDoubl = kv.second;
-    int nbDoubl = eListDoubl.size();
-    for (int iDoubl = 0; iDoubl < nbDoubl; iDoubl++) {
-      if (iDoubl > 0)
-        os << ", ";
-      os << eListDoubl[iDoubl];
+    auto iter = eBlock.ListListDoubleValues_doc.find(kv.first);
+    if (iter == eBlock.ListListDoubleValues_doc.end() || !WithDoc) {
+      os << "  " << kv.first << " = ";
+      std::vector<double> const& eListDoubl = kv.second;
+      int nbDoubl = eListDoubl.size();
+      for (int iDoubl = 0; iDoubl < nbDoubl; iDoubl++) {
+        if (iDoubl > 0)
+          os << ", ";
+        os << eListDoubl[iDoubl];
+      }
+      os << "\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
     }
-    os << "\n";
   }
+  //
+  // ListInt values
+  //
   for (auto & kv : eBlock.ListListIntValues) {
-    os << "  " << kv.first << " = ";
-    std::vector<int> const& eListInt = kv.second;
-    int nbInt = eListInt.size();
-    for (int iInt = 0; iInt < nbInt; iInt++) {
-      if (iInt > 0)
-        os << ", ";
-      os << eListInt[iInt];
+    auto iter = eBlock.ListListIntValues_doc.find(kv.first);
+    if (iter == eBlock.ListListIntValues_doc.end() || !WithDoc) {
+      os << "  " << kv.first << " = ";
+      std::vector<int> const& eListInt = kv.second;
+      int nbInt = eListInt.size();
+      for (int iInt = 0; iInt < nbInt; iInt++) {
+        if (iInt > 0)
+          os << ", ";
+        os << eListInt[iInt];
+      }
+      os << "\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
     }
-    os << "\n";
   }
-  for (auto & kv : eBlock.ListStringValues)
-    os << "  " << kv.first << " = \"" << kv.second << "\"\n";
-  for (auto & kv : eBlock.ListListStringValues) {
-    os << "  " << kv.first << " = ";
-    std::vector<std::string> const& eListStr = kv.second;
-    int nbString = eListStr.size();
-    for (int iString = 0; iString < nbString; iString++) {
-      if (iString > 0)
-        os << ", ";
-      os << "\"" << eListStr[iString] << "\"";
+  //
+  // String values
+  //
+  for (auto & kv : eBlock.ListStringValues) {
+    auto iter = eBlock.ListStringValues_doc.find(kv.first);
+    if (iter == eBlock.ListStringValues_doc.end() || !WithDoc) {
+      os << "  " << kv.first << " = \"" << kv.second << "\"\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
     }
-    os << "\n";
+  }
+  //
+  // ListString values
+  //
+  for (auto & kv : eBlock.ListListStringValues) {
+    auto iter = eBlock.ListListStringValues_doc.find(kv.first);
+    if (iter == eBlock.ListListStringValues_doc.end() || !WithDoc) {
+      os << "  " << kv.first << " = ";
+      std::vector<std::string> const& eListStr = kv.second;
+      int nbString = eListStr.size();
+      for (int iString = 0; iString < nbString; iString++) {
+        if (iString > 0)
+          os << ", ";
+        os << "\"" << eListStr[iString] << "\"";
+      }
+      os << "\n";
+    } else {
+      os << "  " << kv.first << " : " << iter->second << "\n";
+    }
   }
   os << "/\n";
 }
+
+void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
+                         SingleBlock const &eBlock) {
+  NAMELIST_WriteBlock_Kernel(os, eBlockName, eBlock, false);
+}
+
 
 void NAMELIST_WriteNamelistFile(std::ostream &os,
                                 FullNamelist const &eFull) {

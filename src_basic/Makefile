@@ -3,10 +3,11 @@
 #PROGRAM		= Test_String_Split
 #PROGRAM		= Test_Thompson_sampling
 #PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling
+PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling Test_timing
 #PROGRAM		= Test_EmpiricalDistridution
 #PROGRAM		= Temp_PerfectMPI
 #PROGRAM		= Test_serialization
-PROGRAM		= Test_timing
+#PROGRAM		= Test_timing
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

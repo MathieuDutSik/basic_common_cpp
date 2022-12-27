@@ -26,14 +26,13 @@ void my_sleep(size_t n_millisecond) {
   std::this_thread::sleep_for(timespan);
 }
 
-// The nice time
+// The nice time printout
 
-std::string dateandtime() {
+std::string timeanddate() {
   std::time_t result = std::time(nullptr);
   std::string estr = std::asctime(std::localtime(&result));
   return estr.substr(0,estr.size()-1);
 }
-
 
 // The SingletonTime
 
