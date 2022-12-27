@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
       fprintf(stderr, "This program is used as\n");
       fprintf(stderr, "AnalysisSingMat [Namelist]\n");
-      NAMELIST_WriteNamelistFile(std::cerr, eFull);
+      NAMELIST_WriteNamelistFile(std::cerr, eFull, true);
       return -1;
     }
     std::string eFileName = argv[1];

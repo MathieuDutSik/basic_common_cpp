@@ -389,8 +389,8 @@ std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
   return eStr3;
 }
 
-void NAMELIST_WriteBlock_Kernel(std::ostream &os, std::string const &eBlockName,
-                                SingleBlock const &eBlock, bool const& WithDoc) {
+void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
+                         SingleBlock const &eBlock, bool const& WithDoc) {
   os << "&" << eBlockName << "\n";
   //
   // Integer values
@@ -502,21 +502,15 @@ void NAMELIST_WriteBlock_Kernel(std::ostream &os, std::string const &eBlockName,
   os << "/\n";
 }
 
-void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
-                         SingleBlock const &eBlock) {
-  NAMELIST_WriteBlock_Kernel(os, eBlockName, eBlock, false);
-}
-
-
 void NAMELIST_WriteNamelistFile(std::ostream &os,
-                                FullNamelist const &eFull) {
+                                FullNamelist const &eFull, bool const& WithDoc) {
   int iBlock = 0;
   for (auto & kv : eFull.ListBlock) {
     std::string const& eBlockName = kv.first;
     SingleBlock const& eBlock = kv.second;
     if (iBlock > 0)
       os << "\n\n";
-    NAMELIST_WriteBlock(os, eBlockName, eBlock);
+    NAMELIST_WriteBlock(os, eBlockName, eBlock, WithDoc);
     iBlock++;
   }
 }
@@ -617,7 +611,7 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
                 eVarName, eFull.ListBlock[eBlockName]);
             if (eVarNature == "not found") {
               NAMELIST_WriteBlock(std::cerr, eBlockName,
-                                  eFull.ListBlock[eBlockName]);
+                                  eFull.ListBlock[eBlockName], true);
               std::cerr << "Error in reading the NAMELIST file. See above "
                            "allowed entries\n";
               std::cerr << "The variable " << eVarName << "\n";

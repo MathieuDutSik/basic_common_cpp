@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     FullNamelist eFull = ConvertHeuristicToFullNamelist(heu);
     std::cerr << "heu=\n" << heu << "\n";
     std::cerr << "eFull=\n";
-    NAMELIST_WriteNamelistFile(std::cerr, eFull);
+    NAMELIST_WriteNamelistFile(std::cerr, eFull, false);
     //
     ThompsonSamplingHeuristic<T> TSH(eFull, std::cerr);
     std::cerr << "The TSH object has been BUILD\n";

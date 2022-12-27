@@ -1100,7 +1100,7 @@ public:
 template <typename T>
 std::ostream &operator<<(std::ostream &os,
                          ThompsonSamplingHeuristic<T> const &eTS) {
-  NAMELIST_WriteNamelistFile(os, eTS.TS);
+  NAMELIST_WriteNamelistFile(os, eTS.TS, false);
   return os;
 }
 
