@@ -11,115 +11,8 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <optional>
 
-struct SingleBlock {
-  std::map<std::string, int> ListIntValues;
-  std::map<std::string, std::string> ListIntValues_doc;
-  std::map<std::string, bool> ListBoolValues;
-  std::map<std::string, std::string> ListBoolValues_doc;
-  std::map<std::string, double> ListDoubleValues;
-  std::map<std::string, std::string> ListDoubleValues_doc;
-  std::map<std::string, std::vector<double>> ListListDoubleValues;
-  std::map<std::string, std::string> ListListDoubleValues_doc;
-  std::map<std::string, std::vector<int>> ListListIntValues;
-  std::map<std::string, std::string> ListListIntValues_doc;
-  std::map<std::string, std::string> ListStringValues;
-  std::map<std::string, std::string> ListStringValues_doc;
-  std::map<std::string, std::vector<std::string>> ListListStringValues;
-  std::map<std::string, std::string> ListListStringValues_doc;
-};
-
-struct FullNamelist {
-  std::map<std::string, SingleBlock> ListBlock;
-  std::string FileName;
-};
-
-std::vector<std::string> ExtractMatchingBool(SingleBlock const &eBlock) {
-  std::vector<std::string> ListMatch;
-  for (auto & kv : eBlock.ListBoolValues)
-    if (kv.second)
-      ListMatch.push_back(kv.first);
-  return ListMatch;
-}
-
-std::string
-NAMELIST_FindPositionVariableInBlock(std::string const &FullVarName,
-                                     SingleBlock const &eSingleBlock) {
-  std::vector<std::string> LStr = STRING_Split(FullVarName, ":");
-  std::string eVarName = LStr[0];
-  if (eSingleBlock.ListIntValues.count(eVarName) > 0)
-    return "int";
-  if (eSingleBlock.ListBoolValues.count(eVarName) > 0)
-    return "bool";
-  if (eSingleBlock.ListDoubleValues.count(eVarName) > 0)
-    return "double";
-  if (eSingleBlock.ListListDoubleValues.count(eVarName) > 0)
-    return "listdouble";
-  if (eSingleBlock.ListListIntValues.count(eVarName) > 0)
-    return "listint";
-  if (eSingleBlock.ListStringValues.count(eVarName) > 0)
-    return "string";
-  if (eSingleBlock.ListListStringValues.count(eVarName) > 0)
-    return "liststring";
-  return "not found";
-}
-
-std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
-                                            std::string const &eChar) {
-  bool WeFound = false;
-  std::string RetStr;
-  int len = eStr.size();
-  for (int i = 0; i < len; i++) {
-    std::string fChar = eStr.substr(i, 1);
-    if (fChar == eChar)
-      WeFound = true;
-    if (!WeFound)
-      RetStr += eStr.at(i);
-  }
-  return RetStr;
-}
-
-std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
-                                         std::string const &eLastChar) {
-  int iPos = -1;
-  int len = eStr.size();
-  for (int i = 0; i < len; i++) {
-    int j = len - 1 - i;
-    if (iPos == -1) {
-      std::string eChar = eStr.substr(j, 1);
-      if (eChar == eLastChar)
-        iPos = j;
-    }
-  }
-  if (iPos == -1)
-    return eStr;
-  return eStr.substr(0, iPos);
-}
-
-std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
-  std::string eCharCommentB = "!";
-  std::string eStr3 = NAMELIST_RemoveAfterLastChar(eStr, eCharCommentB);
-  //
-  int iPos = -1;
-  int len = eStr3.size();
-  std::string eLastChar = ",";
-  for (int i = 0; i < len; i++) {
-    int j = len - 1 - i;
-    if (iPos == -1) {
-      std::string eChar = eStr3.substr(j, 1);
-      if (eChar == eLastChar)
-        iPos = j;
-    }
-  }
-  if (iPos == -1)
-    return eStr3;
-  std::string eStrPrior = eStr3.substr(0, iPos);
-  std::string eStrPosterior = eStr3.substr(iPos + 1, len - iPos - 1);
-  bool test = STRING_IsStringReduceToSpace(eStrPosterior);
-  if (test)
-    return eStrPrior;
-  return eStr3;
-}
 
 struct NamelistException {
   int val;
@@ -248,6 +141,252 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
     eListRetInt.push_back(eVal);
   }
   return eListRetInt;
+}
+
+std::optional<std::string> get_default(std::string const& strin) {
+  std::string prefix = "Default: ";
+  size_t prefix_s = prefix.size();
+  if (strin.size() < prefix_s) {
+    return {};
+  }
+  if (strin.substr(0, prefix_s) != prefix) {
+    return {};
+  }
+  size_t n_char = strin.size();
+  for (size_t i_char=0; i_char<n_char; i_char++) {
+    std::string e_char = strin.substr(i_char,1);
+    if (e_char != "\n") {
+      return strin.substr(prefix_s, i_char - prefix_s);
+    }
+  }
+  return strin.substr(prefix_s, n_char - prefix_s);
+}
+
+struct SingleBlock {
+public:
+  std::map<std::string, int> ListIntValues;
+  std::map<std::string, bool> ListBoolValues;
+  std::map<std::string, double> ListDoubleValues;
+  std::map<std::string, std::vector<double>> ListListDoubleValues;
+  std::map<std::string, std::vector<int>> ListListIntValues;
+  std::map<std::string, std::string> ListStringValues;
+  std::map<std::string, std::vector<std::string>> ListListStringValues;
+  std::map<std::string, std::string> ListIntValues_doc;
+  std::map<std::string, std::string> ListBoolValues_doc;
+  std::map<std::string, std::string> ListDoubleValues_doc;
+  std::map<std::string, std::string> ListListDoubleValues_doc;
+  std::map<std::string, std::string> ListListIntValues_doc;
+  std::map<std::string, std::string> ListStringValues_doc;
+  std::map<std::string, std::string> ListListStringValues_doc;
+  std::vector<std::string> ListNoDefault;
+  void setListIntValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListIntValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        ListIntValues[kv.first] = ParseScalar<int>(*opt);
+      } else {
+        ListIntValues[kv.first] = 0;
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+  void setListBoolValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListBoolValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        try {
+          ListBoolValues[kv.first] = NAMELIST_ReadBoolValue(*opt);
+        }
+        catch (NamelistException &e) {
+          std::cerr << "Error parsing the boolean kv.second=" << kv.second << "\n";
+          throw TerminalException{1};
+        }
+      } else {
+        ListBoolValues[kv.first] = false;
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+  void setListDoubleValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListDoubleValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        ListDoubleValues[kv.first] = ParseScalar<double>(*opt);
+      } else {
+        ListDoubleValues[kv.first] = 0;
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+  void setListStringValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListStringValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        try {
+          ListStringValues[kv.first] = NAMELIST_ConvertFortranStringToCppString(*opt);
+        }
+        catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          throw TerminalException{1};
+        }
+      } else {
+        ListStringValues[kv.first] = "";
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+  void setListListDoubleValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListListDoubleValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        try {
+          ListListDoubleValues[kv.first] = NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(*opt);
+        }
+        catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          throw TerminalException{1};
+        }
+      } else {
+        ListListDoubleValues[kv.first] = {};
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+  void setListListIntValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListListIntValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        try {
+          ListListIntValues[kv.first] = NAMELIST_ConvertFortranStringListIntToCppVectorInt(*opt);
+        }
+        catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          throw TerminalException{1};
+        }
+      } else {
+        ListListIntValues[kv.first] = {};
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+  void setListListStringValues(std::map<std::string, std::string> const& m) {
+    for (auto & kv : m) {
+      ListListStringValues_doc[kv.first] = kv.second;
+      std::optional<std::string> opt = get_default(kv.second);
+      if (opt) {
+        try {
+          ListListStringValues[kv.first] = NAMELIST_ConvertFortranListStringToCppListString(*opt);
+        }
+        catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          throw TerminalException{1};
+        }
+      } else {
+        ListListStringValues[kv.first] = {};
+        ListNoDefault.push_back(kv.first);
+      }
+    }
+  }
+
+};
+
+
+struct FullNamelist {
+  std::map<std::string, SingleBlock> ListBlock;
+  std::string FileName;
+};
+
+std::vector<std::string> ExtractMatchingBool(SingleBlock const &eBlock) {
+  std::vector<std::string> ListMatch;
+  for (auto & kv : eBlock.ListBoolValues)
+    if (kv.second)
+      ListMatch.push_back(kv.first);
+  return ListMatch;
+}
+
+std::string
+NAMELIST_FindPositionVariableInBlock(std::string const &FullVarName,
+                                     SingleBlock const &eSingleBlock) {
+  std::vector<std::string> LStr = STRING_Split(FullVarName, ":");
+  std::string eVarName = LStr[0];
+  if (eSingleBlock.ListIntValues.count(eVarName) > 0)
+    return "int";
+  if (eSingleBlock.ListBoolValues.count(eVarName) > 0)
+    return "bool";
+  if (eSingleBlock.ListDoubleValues.count(eVarName) > 0)
+    return "double";
+  if (eSingleBlock.ListListDoubleValues.count(eVarName) > 0)
+    return "listdouble";
+  if (eSingleBlock.ListListIntValues.count(eVarName) > 0)
+    return "listint";
+  if (eSingleBlock.ListStringValues.count(eVarName) > 0)
+    return "string";
+  if (eSingleBlock.ListListStringValues.count(eVarName) > 0)
+    return "liststring";
+  return "not found";
+}
+
+std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
+                                            std::string const &eChar) {
+  bool WeFound = false;
+  std::string RetStr;
+  int len = eStr.size();
+  for (int i = 0; i < len; i++) {
+    std::string fChar = eStr.substr(i, 1);
+    if (fChar == eChar)
+      WeFound = true;
+    if (!WeFound)
+      RetStr += eStr.at(i);
+  }
+  return RetStr;
+}
+
+std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
+                                         std::string const &eLastChar) {
+  int iPos = -1;
+  int len = eStr.size();
+  for (int i = 0; i < len; i++) {
+    int j = len - 1 - i;
+    if (iPos == -1) {
+      std::string eChar = eStr.substr(j, 1);
+      if (eChar == eLastChar)
+        iPos = j;
+    }
+  }
+  if (iPos == -1)
+    return eStr;
+  return eStr.substr(0, iPos);
+}
+
+std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
+  std::string eCharCommentB = "!";
+  std::string eStr3 = NAMELIST_RemoveAfterLastChar(eStr, eCharCommentB);
+  //
+  int iPos = -1;
+  int len = eStr3.size();
+  std::string eLastChar = ",";
+  for (int i = 0; i < len; i++) {
+    int j = len - 1 - i;
+    if (iPos == -1) {
+      std::string eChar = eStr3.substr(j, 1);
+      if (eChar == eLastChar)
+        iPos = j;
+    }
+  }
+  if (iPos == -1)
+    return eStr3;
+  std::string eStrPrior = eStr3.substr(0, iPos);
+  std::string eStrPosterior = eStr3.substr(iPos + 1, len - iPos - 1);
+  bool test = STRING_IsStringReduceToSpace(eStrPosterior);
+  if (test)
+    return eStrPrior;
+  return eStr3;
 }
 
 void NAMELIST_WriteBlock_Kernel(std::ostream &os, std::string const &eBlockName,
