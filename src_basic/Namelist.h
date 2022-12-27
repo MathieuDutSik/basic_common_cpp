@@ -397,8 +397,10 @@ void print_key_doc(std::ostream & os, std::string const& key, std::string const&
   for (size_t i_char=0; i_char<n_char; i_char++) {
     std::string e_char = doc.substr(i_char,1);
     os << e_char;
-    for (size_t u=0; u<shift; u++)
-      os << " ";
+    if (e_char == "\n") {
+      for (size_t u=0; u<shift; u++)
+        os << " ";
+    }
   }
   os << "\n";
 }
