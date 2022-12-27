@@ -200,7 +200,7 @@ public:
           ListBoolValues[kv.first] = NAMELIST_ReadBoolValue(*opt);
         }
         catch (NamelistException &e) {
-          std::cerr << "Error parsing the boolean kv.second=" << kv.second << "\n";
+          std::cerr << "Error parsing the boolean kv.second=" << kv.second << " *opt=" << *opt << " |*opt|=" << opt->size() << "\n";
           throw TerminalException{1};
         }
       } else {
