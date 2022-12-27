@@ -545,6 +545,7 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
   };
   bool InBlock = false;
   std::string eBlockName;
+  std::map<std::string, std::set<std::string>> ls_string;
   while (!is.eof()) {
     std::string Ampersand = "&";
     std::string strTab = "\t";
@@ -627,12 +628,14 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
             if (eVarNature == "int") {
               int eVal = ParseScalar<int>(eVarValue);
               eFull.ListBlock[eBlockName].ListIntValues[eVarName] = eVal;
+              ls_string[eBlockName].insert(eVarName);
             }
             if (eVarNature == "bool") {
               try {
                 bool eVal = NAMELIST_ReadBoolValue(eVarValue);
                 eFull.ListBlock[eBlockName].ListBoolValues[eVarName] =
                     eVal;
+                ls_string[eBlockName].insert(eVarName);
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "bool");
               }
@@ -640,12 +643,14 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
             if (eVarNature == "double") {
               double eVal = ParseScalar<double>(eVarValue);
               eFull.ListBlock[eBlockName].ListDoubleValues[eVarName] = eVal;
+              ls_string[eBlockName].insert(eVarName);
             }
             if (eVarNature == "string") {
               try {
                 std::string eVal =
                     NAMELIST_ConvertFortranStringToCppString(eVarValue);
                 eFull.ListBlock[eBlockName].ListStringValues[eVarName] = eVal;
+                ls_string[eBlockName].insert(eVarName);
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "string");
               }
@@ -656,12 +661,14 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
                       eVarValue);
               eFull.ListBlock[eBlockName]
                   .ListListDoubleValues[eVarName] = eVal;
+              ls_string[eBlockName].insert(eVarName);
             }
             if (eVarNature == "listint") {
               std::vector<int> eVal =
                   NAMELIST_ConvertFortranStringListIntToCppVectorInt(eVarValue);
               eFull.ListBlock[eBlockName].ListListIntValues[eVarName] =
                   eVal;
+              ls_string[eBlockName].insert(eVarName);
             }
             if (eVarNature == "liststring") {
               try {
@@ -669,6 +676,7 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
                     NAMELIST_ConvertFortranListStringToCppListString(eVarValue);
                 eFull.ListBlock[eBlockName]
                     .ListListStringValues[eVarName] = eVal;
+                ls_string[eBlockName].insert(eVarName);
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "liststring");
               }
@@ -690,6 +698,17 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
     std::cerr
         << "Error. When leaving namelist reading, we should be out of block\n";
     throw TerminalException{1};
+  }
+  for (auto & kv : eFull.ListBlock) {
+    auto the_set = ls_string[kv.first];
+    for (auto & KeyNotDefault : kv.second.ListNoDefault) {
+      auto iter = the_set.find(KeyNotDefault);
+      if (iter == the_set.end()) {
+        std::cerr << "The key " << KeyNotDefault << " has not been assigned\n";
+        std::cerr << "This is needed because it is not a default key\n";
+        throw TerminalException{1};
+      }
+    }
   }
 }
 
