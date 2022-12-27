@@ -389,6 +389,22 @@ std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
   return eStr3;
 }
 
+
+void print_key_doc(std::ostream & os, std::string const& key, std::string const& doc) {
+  size_t shift = 5 + key.size();
+  os << "  " << key << " : ";
+  size_t n_char = doc.size();
+  for (size_t i_char=0; i_char<n_char; i_char++) {
+    std::string e_char = doc.substr(i_char,1);
+    os << e_char;
+    for (size_t u=0; u<shift; u++)
+      os << " ";
+  }
+  os << "\n";
+}
+
+
+
 void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
                          SingleBlock const &eBlock, bool const& WithDoc) {
   os << "&" << eBlockName << "\n";
@@ -400,7 +416,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
     if (iter == eBlock.ListIntValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = " << kv.second << "\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   //
@@ -417,7 +433,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
         eValStr = "T";
       os << "  " << kv.first << " = " << eValStr << "\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   //
@@ -428,7 +444,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
     if (iter == eBlock.ListDoubleValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = " << kv.second << "\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   //
@@ -447,7 +463,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
       }
       os << "\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   //
@@ -466,7 +482,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
       }
       os << "\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   //
@@ -477,7 +493,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
     if (iter == eBlock.ListStringValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = \"" << kv.second << "\"\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   //
@@ -496,7 +512,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
       }
       os << "\n";
     } else {
-      os << "  " << kv.first << " : " << iter->second << "\n";
+      print_key_doc(os, kv.first, iter->second);
     }
   }
   os << "/\n";
