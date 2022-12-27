@@ -155,7 +155,7 @@ std::optional<std::string> get_default(std::string const& strin) {
   size_t n_char = strin.size();
   for (size_t i_char=0; i_char<n_char; i_char++) {
     std::string e_char = strin.substr(i_char,1);
-    if (e_char != "\n") {
+    if (e_char == "\n") {
       return strin.substr(prefix_s, i_char - prefix_s);
     }
   }
