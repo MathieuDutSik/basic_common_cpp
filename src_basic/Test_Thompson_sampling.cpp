@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 
-#include "Heuristic_fct.h"
+#include "Heuristic_ThompsonSampling.h"
 #include "NumberTheoryGmp.h"
 
 int main(int argc, char *argv[]) {
