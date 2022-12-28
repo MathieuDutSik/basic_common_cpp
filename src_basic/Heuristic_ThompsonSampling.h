@@ -398,6 +398,7 @@ std::pair<std::string,std::string> SplitByLastSep(std::string const& full_str, s
 {
   std::vector<std::string> LStrB = STRING_Split(full_str, sep);
   if (LStrB.size() < 2) {
+    std::cerr << "full_str=" << full_str << " sep=" << sep << "\n";
     std::cerr << "The LStrB should have length at least 2\n";
     throw TerminalException{1};
   }
@@ -555,6 +556,7 @@ struct SingleThompsonSamplingState {
   std::optional<size_t> opt_noprior;
   SingleThompsonSamplingState(std::vector<std::string> const& ListAnswer, std::string const& desc, std::map<std::string, LimitedEmpiricalDistributionFunction> const& map_name_ledf, std::ostream & os) {
     os << "SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
+    os << "ledf = LimitedEmpiricalDistributionFunction\n";
     for (auto & kv : map_name_ledf)
       os << "map_name_ledf key=" << kv.first << "\n";
     n_insert = 0;
