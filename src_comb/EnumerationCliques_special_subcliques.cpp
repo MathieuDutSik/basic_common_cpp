@@ -242,11 +242,8 @@ void SetListPoss(GraphType const &eGraph, FullChain &eChain,
           0) { // no need to compute if there is already one regular extension
     int iPointStart = eChain.ListLevel[iLevel - 1].ListComplex[CurrPos];
     auto IsCorrectExte = [&](int const &iPoint) -> bool {
-      for (int idx = 0; idx < eChain.ListLevel[iLevel].eVect.len; idx++) {
-        int jPoint = eChain.ListLevel[iLevel].eVect.V[idx];
-        if (eGraph.LLAdj[iPoint][jPoint] == 0)
-          return false;
-      }
+      if (!IsCorrect(iPoint))
+        return false;
       for (int idx = 0; idx < nbCompletelyAdjacent; idx++) {
         int jPoint = eChain.ListLevel[iLevel].ListCompletelyAdjacent[idx];
         if (eGraph.LLAdj[iPoint][jPoint] == 0)
