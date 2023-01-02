@@ -94,7 +94,14 @@ private:
       return true;
     }
   };
-
+  IteratorContain get_begin() const {
+    if (size > dim)
+      return {dim, size, {}};
+    std::vector<Tidx> V(size);
+    for (Tidx i = 0; i < size; i++)
+      V[i] = i;
+    return {dim, size, V};
+  }
 public:
   // no copy
   SetCppIterator(const SetCppIterator &) = delete;
@@ -119,21 +126,11 @@ public:
   using iterator = IteratorContain;
   using const_iterator = IteratorContain;
   const_iterator cbegin() const {
-    if (size > dim)
-      return {dim, size, {}};
-    std::vector<Tidx> V(size);
-    for (Tidx i = 0; i < size; i++)
-      V[i] = i;
-    return {dim, size, V};
+    return get_begin();
   }
   const_iterator cend() const { return {dim, size, {}}; }
   const_iterator begin() const {
-    if (size > dim)
-      return {dim, size, {}};
-    std::vector<Tidx> V(size);
-    for (Tidx i = 0; i < size; i++)
-      V[i] = i;
-    return {dim, size, V};
+    return get_begin();
   }
   const_iterator end() const { return {dim, size, {}}; }
 };
