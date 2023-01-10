@@ -285,7 +285,15 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
   is >> footer;
   if (footer != "end") {
     std::cerr << "Error while reading\n";
-    std::cerr << "footer = " << footer << "\n";
+    std::cerr << "footer = " << footer << " while it should be \"end\"\n";
+    std::cerr << "What has been read (if that helps you):\n";
+    std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
+    for (int iRow=0; iRow<nbRow; iRow++) {
+      std::cerr << "iRow=" << iRow << " :";
+      for (int iCol=0; iCol<nbCol; iCol++)
+        std::cerr << " " << TheMat(iRow,iCol);
+      std::cerr << "\n";
+    }
     throw TerminalException{1};
   }
   return TheMat;
