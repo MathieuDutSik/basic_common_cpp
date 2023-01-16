@@ -269,7 +269,7 @@ void RemoveFileIfExist(std::string const &eFile) {
     RemoveFile(eFile);
 }
 
-bool IsProgramInPath(std::string const& ProgName) {
+bool IsProgramInPath(std::string const &ProgName) {
   std::string strRand = random_string(20);
   std::string FileOut = "/tmp/out_" + strRand;
   std::string FileErr = "/tmp/err_" + strRand;

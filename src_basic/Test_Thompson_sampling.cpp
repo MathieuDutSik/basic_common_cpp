@@ -20,18 +20,17 @@ int main(int argc, char *argv[]) {
     std::string filename = argv[1];
     NAMELIST_ReadNamelistFile(filename, eFull);
 
-
     ThompsonSamplingHeuristic<T> TSH(eFull, std::cerr);
 
     std::vector<std::string> l_input = GetHeuristicInput(TSH.heu);
     std::map<std::string, std::vector<T>> l_poss;
-    for (auto & eKey : l_input)
+    for (auto &eKey : l_input)
       l_poss[eKey] = GetHeuristicPivots(TSH.heu, eKey);
     size_t N = 10000;
-    std::map<std::string,T> TheCand;
-    for (size_t i=0; i<N; i++) {
-      for (auto & eKey : l_input) {
-        auto & e_vect = l_poss[eKey];
+    std::map<std::string, T> TheCand;
+    for (size_t i = 0; i < N; i++) {
+      for (auto &eKey : l_input) {
+        auto &e_vect = l_poss[eKey];
         size_t len = e_vect.size();
         size_t pos = random() % len;
         T val = e_vect[pos];

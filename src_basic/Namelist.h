@@ -7,12 +7,11 @@
 #include "Temp_common.h"
 #include "hash_functions.h"
 #include <map>
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <optional>
-
 
 struct NamelistException {
   int val;
@@ -143,7 +142,7 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
   return eListRetInt;
 }
 
-std::optional<std::string> get_default(std::string const& strin) {
+std::optional<std::string> get_default(std::string const &strin) {
   std::string prefix = "Default: ";
   size_t prefix_s = prefix.size();
   if (strin.size() < prefix_s) {
@@ -153,8 +152,8 @@ std::optional<std::string> get_default(std::string const& strin) {
     return {};
   }
   size_t n_char = strin.size();
-  for (size_t i_char=0; i_char<n_char; i_char++) {
-    std::string e_char = strin.substr(i_char,1);
+  for (size_t i_char = 0; i_char < n_char; i_char++) {
+    std::string e_char = strin.substr(i_char, 1);
     if (e_char == "\n") {
       return strin.substr(prefix_s, i_char - prefix_s);
     }
@@ -179,8 +178,8 @@ public:
   std::map<std::string, std::string> ListStringValues_doc;
   std::map<std::string, std::string> ListListStringValues_doc;
   std::vector<std::string> ListNoDefault;
-  void setListIntValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListIntValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListIntValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
@@ -191,16 +190,16 @@ public:
       }
     }
   }
-  void setListBoolValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListBoolValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListBoolValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
         try {
           ListBoolValues[kv.first] = NAMELIST_ReadBoolValue(*opt);
-        }
-        catch (NamelistException &e) {
-          std::cerr << "Error parsing the boolean kv.second=" << kv.second << " *opt=" << *opt << " |*opt|=" << opt->size() << "\n";
+        } catch (NamelistException &e) {
+          std::cerr << "Error parsing the boolean kv.second=" << kv.second
+                    << " *opt=" << *opt << " |*opt|=" << opt->size() << "\n";
           throw TerminalException{1};
         }
       } else {
@@ -209,8 +208,8 @@ public:
       }
     }
   }
-  void setListDoubleValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListDoubleValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListDoubleValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
@@ -221,16 +220,17 @@ public:
       }
     }
   }
-  void setListStringValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListStringValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListStringValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
         try {
-          ListStringValues[kv.first] = NAMELIST_ConvertFortranStringToCppString(*opt);
-        }
-        catch (NamelistException &e) {
-          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          ListStringValues[kv.first] =
+              NAMELIST_ConvertFortranStringToCppString(*opt);
+        } catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second
+                    << "\n";
           throw TerminalException{1};
         }
       } else {
@@ -239,16 +239,17 @@ public:
       }
     }
   }
-  void setListListDoubleValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListListDoubleValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListListDoubleValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
         try {
-          ListListDoubleValues[kv.first] = NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(*opt);
-        }
-        catch (NamelistException &e) {
-          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          ListListDoubleValues[kv.first] =
+              NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(*opt);
+        } catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second
+                    << "\n";
           throw TerminalException{1};
         }
       } else {
@@ -257,16 +258,17 @@ public:
       }
     }
   }
-  void setListListIntValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListListIntValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListListIntValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
         try {
-          ListListIntValues[kv.first] = NAMELIST_ConvertFortranStringListIntToCppVectorInt(*opt);
-        }
-        catch (NamelistException &e) {
-          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          ListListIntValues[kv.first] =
+              NAMELIST_ConvertFortranStringListIntToCppVectorInt(*opt);
+        } catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second
+                    << "\n";
           throw TerminalException{1};
         }
       } else {
@@ -275,16 +277,17 @@ public:
       }
     }
   }
-  void setListListStringValues(std::map<std::string, std::string> const& m) {
-    for (auto & kv : m) {
+  void setListListStringValues(std::map<std::string, std::string> const &m) {
+    for (auto &kv : m) {
       ListListStringValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
       if (opt) {
         try {
-          ListListStringValues[kv.first] = NAMELIST_ConvertFortranListStringToCppListString(*opt);
-        }
-        catch (NamelistException &e) {
-          std::cerr << "Error parsing the string kv.second=" << kv.second << "\n";
+          ListListStringValues[kv.first] =
+              NAMELIST_ConvertFortranListStringToCppListString(*opt);
+        } catch (NamelistException &e) {
+          std::cerr << "Error parsing the string kv.second=" << kv.second
+                    << "\n";
           throw TerminalException{1};
         }
       } else {
@@ -293,9 +296,7 @@ public:
       }
     }
   }
-
 };
-
 
 struct FullNamelist {
   std::map<std::string, SingleBlock> ListBlock;
@@ -304,7 +305,7 @@ struct FullNamelist {
 
 std::vector<std::string> ExtractMatchingBool(SingleBlock const &eBlock) {
   std::vector<std::string> ListMatch;
-  for (auto & kv : eBlock.ListBoolValues)
+  for (auto &kv : eBlock.ListBoolValues)
     if (kv.second)
       ListMatch.push_back(kv.first);
   return ListMatch;
@@ -389,31 +390,29 @@ std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
   return eStr3;
 }
 
-
-void print_key_doc(std::ostream & os, std::string const& key, std::string const& doc) {
+void print_key_doc(std::ostream &os, std::string const &key,
+                   std::string const &doc) {
   size_t shift = 5 + key.size();
   os << "  " << key << " : ";
   size_t n_char = doc.size();
-  for (size_t i_char=0; i_char<n_char; i_char++) {
-    std::string e_char = doc.substr(i_char,1);
+  for (size_t i_char = 0; i_char < n_char; i_char++) {
+    std::string e_char = doc.substr(i_char, 1);
     os << e_char;
     if (e_char == "\n") {
-      for (size_t u=0; u<shift; u++)
+      for (size_t u = 0; u < shift; u++)
         os << " ";
     }
   }
   os << "\n";
 }
 
-
-
 void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
-                         SingleBlock const &eBlock, bool const& WithDoc) {
+                         SingleBlock const &eBlock, bool const &WithDoc) {
   os << "&" << eBlockName << "\n";
   //
   // Integer values
   //
-  for (auto & kv : eBlock.ListIntValues) {
+  for (auto &kv : eBlock.ListIntValues) {
     auto iter = eBlock.ListIntValues_doc.find(kv.first);
     if (iter == eBlock.ListIntValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = " << kv.second << "\n";
@@ -424,7 +423,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   //
   // Bool values
   //
-  for (auto & kv : eBlock.ListBoolValues) {
+  for (auto &kv : eBlock.ListBoolValues) {
     auto iter = eBlock.ListBoolValues_doc.find(kv.first);
     if (iter == eBlock.ListBoolValues_doc.end() || !WithDoc) {
       bool eVal = kv.second;
@@ -441,7 +440,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   //
   // Double values
   //
-  for (auto & kv : eBlock.ListDoubleValues) {
+  for (auto &kv : eBlock.ListDoubleValues) {
     auto iter = eBlock.ListDoubleValues_doc.find(kv.first);
     if (iter == eBlock.ListDoubleValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = " << kv.second << "\n";
@@ -452,11 +451,11 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   //
   // ListDouble values
   //
-  for (auto & kv : eBlock.ListListDoubleValues) {
+  for (auto &kv : eBlock.ListListDoubleValues) {
     auto iter = eBlock.ListListDoubleValues_doc.find(kv.first);
     if (iter == eBlock.ListListDoubleValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = ";
-      std::vector<double> const& eListDoubl = kv.second;
+      std::vector<double> const &eListDoubl = kv.second;
       int nbDoubl = eListDoubl.size();
       for (int iDoubl = 0; iDoubl < nbDoubl; iDoubl++) {
         if (iDoubl > 0)
@@ -471,11 +470,11 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   //
   // ListInt values
   //
-  for (auto & kv : eBlock.ListListIntValues) {
+  for (auto &kv : eBlock.ListListIntValues) {
     auto iter = eBlock.ListListIntValues_doc.find(kv.first);
     if (iter == eBlock.ListListIntValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = ";
-      std::vector<int> const& eListInt = kv.second;
+      std::vector<int> const &eListInt = kv.second;
       int nbInt = eListInt.size();
       for (int iInt = 0; iInt < nbInt; iInt++) {
         if (iInt > 0)
@@ -490,7 +489,7 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   //
   // String values
   //
-  for (auto & kv : eBlock.ListStringValues) {
+  for (auto &kv : eBlock.ListStringValues) {
     auto iter = eBlock.ListStringValues_doc.find(kv.first);
     if (iter == eBlock.ListStringValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = \"" << kv.second << "\"\n";
@@ -501,11 +500,11 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   //
   // ListString values
   //
-  for (auto & kv : eBlock.ListListStringValues) {
+  for (auto &kv : eBlock.ListListStringValues) {
     auto iter = eBlock.ListListStringValues_doc.find(kv.first);
     if (iter == eBlock.ListListStringValues_doc.end() || !WithDoc) {
       os << "  " << kv.first << " = ";
-      std::vector<std::string> const& eListStr = kv.second;
+      std::vector<std::string> const &eListStr = kv.second;
       int nbString = eListStr.size();
       for (int iString = 0; iString < nbString; iString++) {
         if (iString > 0)
@@ -520,12 +519,12 @@ void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
   os << "/\n";
 }
 
-void NAMELIST_WriteNamelistFile(std::ostream &os,
-                                FullNamelist const &eFull, bool const& WithDoc) {
+void NAMELIST_WriteNamelistFile(std::ostream &os, FullNamelist const &eFull,
+                                bool const &WithDoc) {
   int iBlock = 0;
-  for (auto & kv : eFull.ListBlock) {
-    std::string const& eBlockName = kv.first;
-    SingleBlock const& eBlock = kv.second;
+  for (auto &kv : eFull.ListBlock) {
+    std::string const &eBlockName = kv.first;
+    SingleBlock const &eBlock = kv.second;
     if (iBlock > 0)
       os << "\n\n";
     NAMELIST_WriteBlock(os, eBlockName, eBlock, WithDoc);
@@ -543,8 +542,7 @@ NAMELIST_ListTrueEntryBool(FullNamelist const &eFull,
   return ListString;
 }
 
-void NAMELIST_ReadNamelistStream(std::istream & is,
-                                 FullNamelist &eFull) {
+void NAMELIST_ReadNamelistStream(std::istream &is, FullNamelist &eFull) {
   std::unordered_set<std::pair<std::string, std::string>> ListInsertValues;
   auto parsing_error_end = [&](std::string const &eBlockName,
                                std::string const &eVarName,
@@ -645,8 +643,7 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
             if (eVarNature == "bool") {
               try {
                 bool eVal = NAMELIST_ReadBoolValue(eVarValue);
-                eFull.ListBlock[eBlockName].ListBoolValues[eVarName] =
-                    eVal;
+                eFull.ListBlock[eBlockName].ListBoolValues[eVarName] = eVal;
                 ls_string[eBlockName].insert(eVarName);
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "bool");
@@ -671,23 +668,21 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
               std::vector<double> eVal =
                   NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(
                       eVarValue);
-              eFull.ListBlock[eBlockName]
-                  .ListListDoubleValues[eVarName] = eVal;
+              eFull.ListBlock[eBlockName].ListListDoubleValues[eVarName] = eVal;
               ls_string[eBlockName].insert(eVarName);
             }
             if (eVarNature == "listint") {
               std::vector<int> eVal =
                   NAMELIST_ConvertFortranStringListIntToCppVectorInt(eVarValue);
-              eFull.ListBlock[eBlockName].ListListIntValues[eVarName] =
-                  eVal;
+              eFull.ListBlock[eBlockName].ListListIntValues[eVarName] = eVal;
               ls_string[eBlockName].insert(eVarName);
             }
             if (eVarNature == "liststring") {
               try {
                 std::vector<std::string> eVal =
                     NAMELIST_ConvertFortranListStringToCppListString(eVarValue);
-                eFull.ListBlock[eBlockName]
-                    .ListListStringValues[eVarName] = eVal;
+                eFull.ListBlock[eBlockName].ListListStringValues[eVarName] =
+                    eVal;
                 ls_string[eBlockName].insert(eVarName);
               } catch (NamelistException &e) {
                 parsing_error_end(eBlockName, eVarName, "liststring");
@@ -711,9 +706,9 @@ void NAMELIST_ReadNamelistStream(std::istream & is,
         << "Error. When leaving namelist reading, we should be out of block\n";
     throw TerminalException{1};
   }
-  for (auto & kv : eFull.ListBlock) {
+  for (auto &kv : eFull.ListBlock) {
     auto the_set = ls_string[kv.first];
-    for (auto & KeyNotDefault : kv.second.ListNoDefault) {
+    for (auto &KeyNotDefault : kv.second.ListNoDefault) {
       auto iter = the_set.find(KeyNotDefault);
       if (iter == the_set.end()) {
         std::cerr << "The key " << KeyNotDefault << " has not been assigned\n";
@@ -735,9 +730,8 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
   NAMELIST_ReadNamelistStream(INfs, eFull);
 }
 
-
-
-void NAMELIST_ReadListString(FullNamelist &eFull, std::vector<std::string> const &ListString) {
+void NAMELIST_ReadListString(FullNamelist &eFull,
+                             std::vector<std::string> const &ListString) {
   std::string str_tot;
   for (auto const &eStr : ListString) {
     str_tot += eStr;
@@ -746,8 +740,6 @@ void NAMELIST_ReadListString(FullNamelist &eFull, std::vector<std::string> const
   std::istringstream is(str_tot);
   NAMELIST_ReadNamelistStream(is, eFull);
 }
-
-
 
 // clang-format off
 #endif  // SRC_BASIC_NAMELIST_H_
