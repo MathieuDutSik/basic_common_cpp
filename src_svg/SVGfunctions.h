@@ -41,12 +41,12 @@ coor IsobarycenterPoint(std::vector<coor> const &ListPt) {
     eX += ePt.x;
     eY += ePt.y;
   }
-  double eF = 1 / double(ListPt.size());
+  double eF = 1 / static_cast<double>(ListPt.size());
   return {eX * eF, eY * eF};
 }
 
 coor RotateCoor(coor const &c, double const &eAngDeg) {
-  double eAngRad = eAngDeg * (M_PI / double(180));
+  double eAngRad = eAngDeg * (M_PI / static_cast<double>(180));
   //  std::cerr << "eAngRad=" << eAngRad << "\n";
   double eCos = cos(eAngRad);
   double eSin = sin(eAngRad);
@@ -67,7 +67,7 @@ std::vector<coor> GetListTangent(std::vector<coor> const &ListPoint) {
         eTangent = ListPoint[len - 1] - ListPoint[len - 2];
       } else {
         coor coorSum = ListPoint[i + 1] - ListPoint[i - 1];
-        eTangent = MultScal(coorSum, double(1) / double(2));
+        eTangent = MultScal(coorSum, 0.5);
       }
     }
     ListTangent[i] = eTangent;
