@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
       for (size_t i = 0; i < nbVert; i++) {
         if (i > 0)
           std::cout << ",";
-        int eVal = 1 + int(eGen[i]);
+        int eVal = 1 + static_cast<int>(eGen[i]);
         std::cout << eVal;
       }
       std::cout << "]";

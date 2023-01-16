@@ -224,15 +224,17 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
   bool HasVertexColor = eGR.GetHasVertexColor();
 
   /* Now make the graph */
-  SG_ALLOC(sg1, int(n), int(nbAdjacent), "malloc");
-  sg1.nv = int(n);           /* Number of vertices */
-  sg1.nde = int(nbAdjacent); /* Number of directed edges */
+  int n_i = static_cast<int>(n);
+  int nbAdjacent_i = static_cast<int>(nbAdjacent);
+  SG_ALLOC(sg1, n_i, nbAdjacent_i, "malloc");
+  sg1.nv = n_i;           /* Number of vertices */
+  sg1.nde = nbAdjacent_i; /* Number of directed edges */
 
   /* Select option for canonical labelling */
   options.getcanon = TRUE;
 
-  int m = SETWORDSNEEDED(int(n));
-  nauty_check(WORDSIZE, m, int(n), NAUTYVERSIONID);
+  int m = SETWORDSNEEDED(n_i);
+  nauty_check(WORDSIZE, m, n_i, NAUTYVERSIONID);
 
   DYNALLOC1(int, lab1, lab1_sz, n, "malloc");
   DYNALLOC1(int, ptn, ptn_sz, n, "malloc");
@@ -347,8 +349,9 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
 
   /* Declare and initialize sparse graph structures */
   SG_DECL(sg1);
-  int m = SETWORDSNEEDED(int(n));
-  nauty_check(WORDSIZE, m, int(n), NAUTYVERSIONID);
+  int n_i = static_cast<int>(n);
+  int m = SETWORDSNEEDED(n_i);
+  nauty_check(WORDSIZE, m, n_i, NAUTYVERSIONID);
 
   DYNALLOC1(int, lab1, lab1_sz, n, "malloc");
   DYNALLOC1(int, ptn, ptn_sz, n, "malloc");
@@ -365,9 +368,10 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
   }
 
   /* Now make the graph */
+  int nbAdjacent_i = static_cast<int>(nbAdjacent);
   SG_ALLOC(sg1, n, nbAdjacent, "malloc");
-  sg1.nv = int(n);           /* Number of vertices */
-  sg1.nde = int(nbAdjacent); /* Number of directed edges */
+  sg1.nv = n_i;           /* Number of vertices */
+  sg1.nde = nbAdjacent_i; /* Number of directed edges */
   Assign_sg(eGR, &sg1);
   /* Calling Traces */
   Traces(&sg1, lab1, ptn, orbits, &options, &stats, NULL);
@@ -463,7 +467,8 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   /* Select option for canonical labelling */
   options.getcanon = TRUE;
 
-  int m = SETWORDSNEEDED(int(n));
+  int n_i = static_cast<int>(n);
+  int m = SETWORDSNEEDED(n_i);
   nauty_check(WORDSIZE, m, n, NAUTYVERSIONID);
 
   DYNALLOC1(int, lab1, lab1_sz, n, "malloc");

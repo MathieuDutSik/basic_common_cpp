@@ -7,6 +7,7 @@
 #include "Temp_common.h"
 #include "hash_functions.h"
 #include <map>
+#include <set>
 #include <optional>
 #include <string>
 #include <unordered_set>

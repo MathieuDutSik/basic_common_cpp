@@ -26,7 +26,7 @@ std::vector<T> DiffIntVect(std::vector<T> const &V1, std::vector<T> const &V2,
     eSet2.insert(eVal);
   std::vector<T> eV;
   for (auto &eVal : V1) {
-    if (eSet2.count(eVal) == n_int)
+    if (eSet2.count(eVal) == static_cast<size_t>(n_int))
       eV.push_back(eVal);
   }
   return eV;

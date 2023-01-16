@@ -1,14 +1,17 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_BASIC_HEURISTIC_FCT_H_
-#define SRC_BASIC_HEURISTIC_FCT_H_
+#ifndef SRC_BASIC_HEURISTIC_THOMPSONSAMPLING_H_
+#define SRC_BASIC_HEURISTIC_THOMPSONSAMPLING_H_
 
 #include "Basic_file.h"
 #include "Namelist.h"
 #include "Temp_common.h"
 #include "Timings.h"
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
+#include <utility>
+#include <unordered_map>
 
 template <typename T> struct SingleCondition {
   std::string eCond;
@@ -592,7 +595,7 @@ struct SingleThompsonSamplingState {
   double get_random() {
     size_t N = 1000000000;
     size_t val = random() % N;
-    return double(val) / double(N);
+    return static_cast<double>(val) / static_cast<double>(N);
   }
   std::string get_lowest_sampling_raw() {
     double best_val = std::numeric_limits<double>::max();
@@ -1140,5 +1143,5 @@ std::ostream &operator<<(std::ostream &os,
 }
 
 // clang-format off
-#endif  // SRC_BASIC_HEURISTIC_FCT_H_
+#endif  // SRC_BASIC_HEURISTIC_THOMPSONSAMPLING_H_
 // clang-format on
