@@ -3,7 +3,7 @@
 
 int main() {
   std::vector<uint8_t> eV;
-  for (uint8_t u=0; u<10; u++)
+  for (uint8_t u = 0; u < 10; u++)
     eV.push_back(u);
   //
   std::string filename = "/tmp/Archive_std_vector_uint8";
@@ -29,8 +29,7 @@ int main() {
   if (eV.size() != fV.size()) {
     std::cerr << "Error are different\n";
   }
-  for (size_t u=0; u<eV.size(); u++)
+  for (size_t u = 0; u < eV.size(); u++)
     if (eV[u] != fV[u])
       std::cerr << "eV[u] != fV[u] and so different\n";
-
 }
