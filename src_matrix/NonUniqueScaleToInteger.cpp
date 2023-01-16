@@ -4,7 +4,7 @@
 #include "QuadField.h"
 int main(int argc, char *argv[]) {
   using Trat = mpq_class;
-  using T = QuadField<Trat,5>;
+  using T = QuadField<Trat, 5>;
   try {
     MyVector<T> V(5);
     FractionVector<T> frv = NonUniqueScaleToIntegerVectorPlusCoeff(V);

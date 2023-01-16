@@ -20,9 +20,7 @@
 #include <utility>
 #include <vector>
 
-
-template<typename T>
-struct is_mymatrix<MyMatrix<T>> {
+template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;
 };
 
@@ -88,7 +86,7 @@ inline void save(Archive &ar, MySparseMatrix<T> const &val,
   for (int k = 0; k < val.outerSize(); ++k)
     for (typename MySparseMatrix<T>::InnerIterator it(val, k); it; ++it) {
       T eVal = it.value();
-       // row index
+      // row index
       int iRow = it.row();
       // col index (here it is equal to k)
       int iCol = it.col();
@@ -269,7 +267,8 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
   if (str != "integer" && str != "rational" && str != "double") {
     std::cerr << "Error while reading\n";
     std::cerr << "str = " << str << "\n";
-    std::cerr << "But it should be integer, rational or double. Note that it is not being used\n";
+    std::cerr << "But it should be integer, rational or double. Note that it "
+                 "is not being used\n";
     throw TerminalException{1};
   }
   //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
@@ -288,10 +287,10 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
     std::cerr << "footer = " << footer << " while it should be \"end\"\n";
     std::cerr << "What has been read (if that helps you):\n";
     std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
-    for (int iRow=0; iRow<nbRow; iRow++) {
+    for (int iRow = 0; iRow < nbRow; iRow++) {
       std::cerr << "iRow=" << iRow << " :";
-      for (int iCol=0; iCol<nbCol; iCol++)
-        std::cerr << " " << TheMat(iRow,iCol);
+      for (int iCol = 0; iCol < nbCol; iCol++)
+        std::cerr << " " << TheMat(iRow, iCol);
       std::cerr << "\n";
     }
     throw TerminalException{1};
@@ -379,12 +378,10 @@ void WriteMatrix(std::ostream &os, MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
-void WriteMatrixFile(std::string const& eFile, MyMatrix<T> const &TheMat) {
+void WriteMatrixFile(std::string const &eFile, MyMatrix<T> const &TheMat) {
   std::ofstream os(eFile);
   WriteMatrix(os, TheMat);
 }
-
-
 
 template <typename T>
 void WriteMatrixNice(std::ostream &os, MyMatrix<T> const &M) {
@@ -1675,8 +1672,7 @@ ColumnReductionSet(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value,
-                               std::vector<int>>::type
+inline typename std::enable_if<!is_ring_field<T>::value, std::vector<int>>::type
 ColumnReductionSet(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
@@ -2407,9 +2403,8 @@ template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-inline
-    typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
-    Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
+inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
+Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
   std::stringstream s;
   int nbRow = M.rows();
   int nbCol = M.cols();
@@ -2431,9 +2426,8 @@ Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
 }
 
 template <typename T>
-inline
-    typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
-    Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
+inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
+Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
   std::stringstream s;
   int n = V.size();
   for (int i = 0; i < n; i++)

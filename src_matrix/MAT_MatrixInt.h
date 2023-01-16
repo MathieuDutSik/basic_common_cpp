@@ -10,8 +10,8 @@
 #include <utility>
 #include <vector>
 
-//#undef TRACK_MAXIMUM_SIZE_COEFF
-//#undef DEBUG_MATRIX_INT
+// #undef TRACK_MAXIMUM_SIZE_COEFF
+// #undef DEBUG_MATRIX_INT
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction
@@ -125,8 +125,7 @@ void WriteGCD_int(std::ostream &os, GCD_int<T> const &eGCD) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_mpz_class<T>::value,
-                               GCD_int<T>>::type
+inline typename std::enable_if<!is_mpz_class<T>::value, GCD_int<T>>::type
 ComputePairGcd(T const &m, T const &n) {
   //  std::cerr << "m=" << m << " n=" << n << "\n";
   static_assert(is_euclidean_domain<T>::value,
@@ -209,7 +208,7 @@ ComputePairGcd(T const &m, T const &n) {
   Pmat(1, 0) = t;
   Pmat(0, 1) = -n / eGCD;
   Pmat(1, 1) = m / eGCD;
-# ifdef DEBUG_MATRIX_INT
+#ifdef DEBUG_MATRIX_INT
   T diff1 = eGCD - Pmat(0, 0) * m - Pmat(1, 0) * n;
   T diff2 = Pmat(0, 1) * m + Pmat(1, 1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -218,12 +217,11 @@ ComputePairGcd(T const &m, T const &n) {
     std::cerr << "B: diff1=" << diff1 << " diff2=" << diff2 << "\n";
     throw TerminalException{1};
   }
-# endif
+#endif
   return {std::move(Pmat), eGCD};
 }
 
 #endif
-
 
 template <typename T> T ComputeLCM(std::vector<T> const &eVect) {
   int siz = eVect.size();
@@ -264,11 +262,12 @@ template <typename T> MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-FractionMatrix<T> CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
+FractionMatrix<T>
+CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
   int nbRow = M.rows();
   int nbCol = M.cols();
-  auto get_abs=[](T const& val) -> T {
+  auto get_abs = [](T const &val) -> T {
     if (val < 0)
       return -val;
     return val;
@@ -276,7 +275,7 @@ FractionMatrix<T> CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T>
   T the_sma = 1;
   for (int iCol = 0; iCol < nbCol; iCol++)
     for (int iRow = 0; iRow < nbRow; iRow++) {
-      T val = get_abs(M(iRow,iCol));
+      T val = get_abs(M(iRow, iCol));
       if (val < the_sma && val > 0)
         the_sma = val;
     }
@@ -288,14 +287,15 @@ FractionMatrix<T> CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T>
 template <typename T>
 FractionMatrix<T> ScalarCanonicalizationMatrixPlusCoeff(MyMatrix<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
-  if constexpr(is_implementation_of_Q<Tfield>::value) {
+  if constexpr (is_implementation_of_Q<Tfield>::value) {
     return RemoveFractionMatrixPlusCoeff(M);
   } else {
     return CanonicalizationSmallestCoefficientMatrixPlusCoeff(M);
   }
 }
 
-template <typename T> MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
+template <typename T>
+MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
   return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
 }
 
@@ -320,36 +320,34 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   return {TheMult, std::move(Vret)};
 }
 
-template<typename T>
-FractionVector<T> NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(MyVector<T> const& V) {
+template <typename T>
+FractionVector<T>
+NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(MyVector<T> const &V) {
   using Tresidual = typename T::Tresidual;
   using Tring = typename underlying_ring<Tresidual>::ring_type;
   int siz = V.size();
-  Tring eLCM_ring = ScalingInteger<Tring,T>(V(0));
-  for (int i=1; i<siz; i++)
-    eLCM_ring = LCMpair(eLCM_ring, ScalingInteger<Tring,T>(V(i)));
-  Tresidual eLCM_res = UniversalScalarConversion<Tresidual,Tring>(eLCM_ring);
+  Tring eLCM_ring = ScalingInteger<Tring, T>(V(0));
+  for (int i = 1; i < siz; i++)
+    eLCM_ring = LCMpair(eLCM_ring, ScalingInteger<Tring, T>(V(i)));
+  Tresidual eLCM_res = UniversalScalarConversion<Tresidual, Tring>(eLCM_ring);
   T eLCM(eLCM_res);
   MyVector<T> Vret = V * eLCM;
   return {eLCM, std::move(Vret)};
 }
 
-template<typename T>
-FractionVector<T> NonUniqueScaleToIntegerVectorPlusCoeff(MyVector<T> const& V) {
-  if constexpr(is_implementation_of_Q<T>::value) {
+template <typename T>
+FractionVector<T> NonUniqueScaleToIntegerVectorPlusCoeff(MyVector<T> const &V) {
+  if constexpr (is_implementation_of_Q<T>::value) {
     return RemoveFractionVectorPlusCoeff(V);
   } else {
     return NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(V);
   }
 }
 
-
-template<typename T>
-MyVector<T> NonUniqueScaleToIntegerVector(MyVector<T> const& V) {
+template <typename T>
+MyVector<T> NonUniqueScaleToIntegerVector(MyVector<T> const &V) {
   return NonUniqueScaleToIntegerVectorPlusCoeff(V).TheVect;
 }
-
-
 
 template <typename T>
 inline
@@ -359,9 +357,9 @@ inline
 }
 
 template <typename T>
-inline typename std::enable_if<!is_float_arithmetic<T>::value,
-                               MyVector<T>>::type
-RemoveFractionVector(MyVector<T> const &V) {
+inline
+    typename std::enable_if<!is_float_arithmetic<T>::value, MyVector<T>>::type
+    RemoveFractionVector(MyVector<T> const &V) {
   return RemoveFractionVectorPlusCoeff(V).TheVect;
 }
 
@@ -2259,10 +2257,6 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const &M) {
   }
   return CompleteBasis;
 }
-
-
-
-
 
 template <typename T>
 MyMatrix<T> CanonicalizeOrderedMatrix_Kernel(const MyMatrix<T> &M) {
