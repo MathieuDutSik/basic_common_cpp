@@ -157,7 +157,7 @@ struct RecParam {
 static inline void report_aut_vectvectint(void *param,
                                           [[maybe_unused]] const unsigned int n,
                                           const unsigned int *aut) {
-  RecParam *rec_param = reinterpret_cast<RecParam*>(param);
+  RecParam *rec_param = reinterpret_cast<RecParam *>(param);
   size_t n_last = rec_param->n_last;
   std::vector<unsigned int> eVect(n_last);
   for (size_t i = 0; i < n_last; i++)
@@ -173,7 +173,8 @@ std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const &eGR,
   RecParam rec_param;
   rec_param.n_last = n_last;
   RecParam *rec_param_ptr = &rec_param;
-  g.find_automorphisms(stats, &report_aut_vectvectint, reinterpret_cast<void*>(rec_param_ptr));
+  g.find_automorphisms(stats, &report_aut_vectvectint,
+                       reinterpret_cast<void *>(rec_param_ptr));
   std::vector<std::vector<Tidx>> ListGen;
   for (auto &eList : rec_param.LGen) {
     std::vector<Tidx> V(n_last);
@@ -201,7 +202,8 @@ BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
   RecParam rec_param;
   rec_param.n_last = n_last;
   RecParam *rec_param_ptr = &rec_param;
-  g.find_automorphisms(stats, &report_aut_vectvectint, reinterpret_cast<void*>(rec_param_ptr));
+  g.find_automorphisms(stats, &report_aut_vectvectint,
+                       reinterpret_cast<void *>(rec_param_ptr));
   std::vector<std::vector<Tidx>> ListGen;
   for (auto &eList : rec_param.LGen) {
     std::vector<Tidx> V(n_last);

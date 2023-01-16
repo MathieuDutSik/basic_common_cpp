@@ -2,9 +2,9 @@
 #ifndef SRC_GRAPH_GRAPH_TRACES_H_
 #define SRC_GRAPH_GRAPH_TRACES_H_
 
+#include "ExceptionsFunc.h"
 #include "Timings.h"
 #include "traces.h"
-#include "ExceptionsFunc.h"
 #include <iostream>
 #include <limits>
 #include <utility>
@@ -21,15 +21,15 @@ public:
   sparsegraph cg1;
   DataTraces(size_t _n, size_t _nbAdjacent) : n(_n), nbAdjacent(_nbAdjacent) {
     //    std::cerr << "Invoking DataTraces constructor\n";
-    lab1 = reinterpret_cast<int*>(malloc(n * sizeof(int)));
-    ptn = reinterpret_cast<int*>(malloc(n * sizeof(int)));
-    orbits = reinterpret_cast<int*>(malloc(n * sizeof(int)));
+    lab1 = reinterpret_cast<int *>(malloc(n * sizeof(int)));
+    ptn = reinterpret_cast<int *>(malloc(n * sizeof(int)));
+    orbits = reinterpret_cast<int *>(malloc(n * sizeof(int)));
     // We allocate the arrays for Traces
     sg1.nv = static_cast<int>(n);
     sg1.nde = static_cast<int>(nbAdjacent);
-    sg1.v = reinterpret_cast<size_t*>(malloc(n * sizeof(size_t)));
-    sg1.d = reinterpret_cast<int*>(malloc(n * sizeof(int)));
-    sg1.e = reinterpret_cast<int*>(malloc(nbAdjacent * sizeof(int)));
+    sg1.v = reinterpret_cast<size_t *>(malloc(n * sizeof(size_t)));
+    sg1.d = reinterpret_cast<int *>(malloc(n * sizeof(int)));
+    sg1.e = reinterpret_cast<int *>(malloc(nbAdjacent * sizeof(int)));
     sg1.w = NULL;
     sg1.vlen = static_cast<int>(n);
     sg1.dlen = static_cast<int>(n);
@@ -426,7 +426,8 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time << "\n";
+  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time
+            << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
