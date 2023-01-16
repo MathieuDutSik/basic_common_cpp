@@ -237,8 +237,7 @@ std::string MD5_hash_string(std::string const &data) {
   return converted;
 }
 
-template<typename T>
-T ConvertHex_to_T(std::string const &data) {
+template <typename T> T ConvertHex_to_T(std::string const &data) {
   std::vector<std::string> LChar{"0", "1", "2", "3", "4", "5", "6", "7",
                                  "8", "9", "a", "b", "c", "d", "e", "f"};
   auto GetPosition = [&](std::string const &eChar) -> int {
@@ -258,8 +257,7 @@ T ConvertHex_to_T(std::string const &data) {
   return sum;
 }
 
-template<typename T>
-T MD5_hash_T(std::string const &data) {
+template <typename T> T MD5_hash_T(std::string const &data) {
   std::string data_out = MD5_hash_string(data);
   return ConvertHex_to_T<T>(data_out);
 }
@@ -395,7 +393,7 @@ template <typename T> struct hash<std::vector<T>> {
     }
     if constexpr (std::is_arithmetic<T>::value) {
       const T *ptr_T = V.data();
-      const uint8_t *ptr_i = reinterpret_cast<const uint8_t*>(ptr_T);
+      const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(ptr_T);
       size_t len = sizeof(T) * V.size();
       uint32_t seed = 0x1b873540;
       return murmur3_32(ptr_i, len, seed);

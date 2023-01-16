@@ -19,8 +19,8 @@ std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {
   return eV;
 }
 template <typename T>
-std::vector<T> DiffIntVect(std::vector<T> const &V1,
-                           std::vector<T> const &V2, int n_int) {
+std::vector<T> DiffIntVect(std::vector<T> const &V1, std::vector<T> const &V2,
+                           int n_int) {
   std::unordered_set<T> eSet2;
   for (auto &eVal : V2)
     eSet2.insert(eVal);
@@ -45,8 +45,6 @@ std::vector<T> IntersectionVect(std::vector<T> const &V1,
                                 std::vector<T> const &V2) {
   return DiffIntVect(V1, V2, 1);
 }
-
-
 
 template <typename T>
 void AppendVect(std::vector<T> &V1, std::vector<T> const &V2) {

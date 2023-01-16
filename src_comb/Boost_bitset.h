@@ -261,7 +261,8 @@ void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
   os << "]\n";
 }
 
-void VectVectInt_Magma_PrintFile(std::string const& eFile, vectface const &ListOrbit) {
+void VectVectInt_Magma_PrintFile(std::string const &eFile,
+                                 vectface const &ListOrbit) {
   std::ofstream os(eFile);
   os << "return ";
   VectVectInt_Magma_Print(os, ListOrbit);
@@ -289,7 +290,8 @@ void VectVectInt_Gap_Print(std::ostream &os, vectface const &ListOrbit) {
   os << "]";
 }
 
-void VectVectInt_Gap_PrintFile(std::string const& eFile, vectface const &ListOrbit) {
+void VectVectInt_Gap_PrintFile(std::string const &eFile,
+                               vectface const &ListOrbit) {
   std::ofstream os(eFile);
   os << "return ";
   VectVectInt_Gap_Print(os, ListOrbit);
@@ -297,7 +299,8 @@ void VectVectInt_Gap_PrintFile(std::string const& eFile, vectface const &ListOrb
 }
 
 template <typename T>
-void VectVectInt_SetInt_PrintFile(std::string const& eFile, vectface const& ListOrbit) {
+void VectVectInt_SetInt_PrintFile(std::string const &eFile,
+                                  vectface const &ListOrbit) {
   std::ofstream os(eFile);
   os << ListOrbit.size() << "\n";
   for (const Face &f : ListOrbit) {

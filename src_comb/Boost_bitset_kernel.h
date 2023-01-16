@@ -45,8 +45,6 @@ inline void serialize(Archive &ar, Face &val, const unsigned int version) {
 
 } // namespace boost::serialization
 
-
-
 // Those are needed for the tsl::sparse_map
 
 /* Basic bit operations */
@@ -89,19 +87,19 @@ public:
         Vappend(std::vector<uint8_t>(append_len, 0)) {}
 
   vectface(const size_t &_n, const std::vector<size_t> &l_n_face,
-           std::vector<std::vector<uint8_t>> const& l_V) {
+           std::vector<std::vector<uint8_t>> const &l_V) {
     n = _n;
     n_face = 0;
-    for (auto & e_n : l_n_face)
+    for (auto &e_n : l_n_face)
       n_face += e_n;
     //
     size_t n_tot = (n_face * n + 7) / 8;
     V = std::vector<uint8_t>(n_tot);
     size_t pos = 0;
-    for (size_t u=0; u<l_n_face.size(); u++) {
-      size_t const& e_n_face = l_n_face[u];
-      std::vector<uint8_t> const& eV = l_V[u];
-      for (size_t v=0; v<e_n_face * n; v++) {
+    for (size_t u = 0; u < l_n_face.size(); u++) {
+      size_t const &e_n_face = l_n_face[u];
+      std::vector<uint8_t> const &eV = l_V[u];
+      for (size_t v = 0; v < e_n_face * n; v++) {
         bool val = getbit(eV, v);
         setbit(V, pos, val);
         pos++;
@@ -137,7 +135,8 @@ public:
 
   // vectface API similar to std::vector<Face>
   void push_back(const Face &f) {
-    // We have to handle the fact that vectface was built with default constructor. And so we assign n
+    // We have to handle the fact that vectface was built with default
+    // constructor. And so we assign n
     n = f.size();
     size_t curr_len = V.size();
     size_t n_bits = (n_face + 1) * n;
@@ -190,12 +189,12 @@ public:
     if (n_face != vf.n_face)
       return false;
     size_t n_elt = n * n_face;
-    size_t q   = n_elt / 8;
-    size_t q8  = q * 8;
+    size_t q = n_elt / 8;
+    size_t q8 = q * 8;
     for (size_t u = 0; u < q; u++)
       if (V[u] != vf.V[u])
         return false;
-    for (size_t i = q8; i<n_elt; i++)
+    for (size_t i = q8; i < n_elt; i++)
       if (getbit(V, i) != getbit(vf.V, i))
         return false;
     return true;
@@ -207,12 +206,12 @@ public:
     if (n_face != vf.n_face)
       return true;
     size_t n_elt = n * n_face;
-    size_t q   = n_elt / 8;
-    size_t q8  = q * 8;
+    size_t q = n_elt / 8;
+    size_t q8 = q * 8;
     for (size_t u = 0; u < q; u++)
       if (V[u] != vf.V[u])
         return true;
-    for (size_t i = q8; i<n_elt; i++)
+    for (size_t i = q8; i < n_elt; i++)
       if (getbit(V, i) != getbit(vf.V, i))
         return true;
     return false;

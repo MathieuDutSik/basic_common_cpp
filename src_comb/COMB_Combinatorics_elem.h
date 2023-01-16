@@ -102,6 +102,7 @@ private:
       V[i] = i;
     return {dim, size, V};
   }
+
 public:
   // no copy
   SetCppIterator(const SetCppIterator &) = delete;
@@ -125,13 +126,9 @@ public:
   // The iterator business
   using iterator = IteratorContain;
   using const_iterator = IteratorContain;
-  const_iterator cbegin() const {
-    return get_begin();
-  }
+  const_iterator cbegin() const { return get_begin(); }
   const_iterator cend() const { return {dim, size, {}}; }
-  const_iterator begin() const {
-    return get_begin();
-  }
+  const_iterator begin() const { return get_begin(); }
   const_iterator end() const { return {dim, size, {}}; }
 };
 

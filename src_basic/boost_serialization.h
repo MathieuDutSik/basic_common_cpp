@@ -16,7 +16,6 @@
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/utility.hpp>
 
-
 namespace boost::serialization {
 
 template <class Archive, typename T>
@@ -31,8 +30,6 @@ inline void serialize(Archive &ar, std::vector<T> &val,
 }
 
 } // namespace boost::serialization
-
-
 
 // clang-format off
 #endif  // SRC_BASIC_BOOST_SERIALIZATION_H_

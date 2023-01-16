@@ -4,10 +4,9 @@
 
 int main() {
 
-
   size_t n = 20;
   Face f1(n);
-  for (size_t i=0; i<n; i++)
+  for (size_t i = 0; i < n; i++)
     f1[i] = random() % 2;
   std::string filename = "/tmp/Face_filename.boost_archive";
 
@@ -37,7 +36,7 @@ int main() {
     std::cerr << "f1 and f2 have DIFFERENT length\n";
     is_equal = false;
   }
-  for (size_t u=0; u<f1.size(); u++)
+  for (size_t u = 0; u < f1.size(); u++)
     if (f1[u] != f2[u]) {
       std::cerr << "f1 and f2 differ at u=" << u << "\n";
       is_equal = false;
