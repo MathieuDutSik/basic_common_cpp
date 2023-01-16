@@ -15,9 +15,13 @@
 // We cannot use the std::is_same_v<T,mpq_class>  or std::is_same_v<T,mpz_class>
 // because this requires mpz_class / mpq_class to be known in the scope.
 
-template <> struct is_mpq_class<mpq_class> { static const bool value = true; };
+template <> struct is_mpq_class<mpq_class> {
+  static const bool value = true;
+};
 
-template <> struct is_mpz_class<mpz_class> { static const bool value = true; };
+template <> struct is_mpz_class<mpz_class> {
+  static const bool value = true;
+};
 
 // is an implementation of Z
 
@@ -55,7 +59,9 @@ template <> struct is_ring_field<mpz_class> {
   static const bool value = false;
 };
 
-template <> struct is_ring_field<mpq_class> { static const bool value = true; };
+template <> struct is_ring_field<mpq_class> {
+  static const bool value = true;
+};
 
 // is_totally_ordered (i.e. not a complex field or ring)
 
@@ -85,14 +91,20 @@ template <> struct is_exact_arithmetic<mpq_class> {
 // but we need some ways to convert from one setting to another
 //
 
-template <> struct underlying_ring<mpq_class> { typedef mpz_class ring_type; };
+template <> struct underlying_ring<mpq_class> {
+  typedef mpz_class ring_type;
+};
 
 //
 //
 
-template <> struct overlying_field<mpz_class> { typedef mpq_class field_type; };
+template <> struct overlying_field<mpz_class> {
+  typedef mpq_class field_type;
+};
 
-template <> struct overlying_field<mpq_class> { typedef mpq_class field_type; };
+template <> struct overlying_field<mpq_class> {
+  typedef mpq_class field_type;
+};
 
 template <> struct underlying_totally_ordered_ring<mpq_class> {
   typedef mpq_class real_type;
@@ -278,11 +290,12 @@ inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const &x) {
   return 1;
 }
 
-inline void ScalingInteger_Kernel(stc<mpq_class> const &x, mpz_class & x_ret) {
-  x_ret =  x.val.get_den();
+inline void ScalingInteger_Kernel(stc<mpq_class> const &x, mpz_class &x_ret) {
+  x_ret = x.val.get_den();
 }
 
-inline void ScalingInteger_Kernel([[maybe_unused]] stc<mpz_class> const &x, mpz_class & x_ret) {
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<mpz_class> const &x,
+                                  mpz_class &x_ret) {
   x_ret = 1;
 }
 
@@ -449,33 +462,26 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
   a2 = a1.val.get_d();
 }
 
-inline void TYPE_CONVERSION(stc<mpz_class> const& a1, T_uint64_t & a2)
-{
-  long eVal_long=a1.val.get_si();
-  a2=T_uint64_t(eVal_long);
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, T_uint64_t &a2) {
+  long eVal_long = a1.val.get_si();
+  a2 = T_uint64_t(eVal_long);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const& a1, mpz_class & a2)
-{
-  T_uint64_t const& eVal = a1.val;
+inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, mpz_class &a2) {
+  T_uint64_t const &eVal = a1.val;
   a2 = eVal;
 }
 
-inline void TYPE_CONVERSION(stc<mpq_class> const& a1, T_uint64_t & a2)
-{
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1, T_uint64_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   a2 = a1_z.get_si();
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const& a1, mpq_class & a2)
-{
-  T_uint64_t const& eVal = a1.val;
+inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, mpq_class &a2) {
+  T_uint64_t const &eVal = a1.val;
   a2 = eVal;
 }
-
-
-
 
 bool universal_square_root(mpz_class &ret, mpz_class const &val) {
   mpz_sqrt(ret.get_mpz_t(), val.get_mpz_t());
@@ -523,8 +529,6 @@ template <typename T> T practical_infinity() {
   set_to_infinity(ret);
   return ret;
 }
-
-
 
 //
 // Nearest integer and similar stuff.

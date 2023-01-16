@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "NumberTheoryRealField.h"
 #include "NumberTheory.h"
+#include "NumberTheoryRealField.h"
 #include "approximation.h"
 
 // The quantity is 2*cos(2*pi/7)
@@ -47,8 +47,8 @@ int main(int argc, char *argv[]) {
     T thr = 1 / T(100000);
     std::cerr << "thr=" << thr << "\n";
     T approx = find_approximation_dichotomy(x2inv, thr);
-    double x2inv_d = UniversalScalarConversion<double,T>(x2inv);
-    double approx_d = UniversalScalarConversion<double,T>(approx);
+    double x2inv_d = UniversalScalarConversion<double, T>(x2inv);
+    double approx_d = UniversalScalarConversion<double, T>(approx);
     std::cerr << "x2inv_d=" << x2inv_d << " approx_d=" << approx_d << "\n";
     std::cerr << "STEP 4: comparison operations\n";
     //

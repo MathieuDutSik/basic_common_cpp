@@ -8,6 +8,7 @@
 //  All GMP are in NumberTheory.h
 //  All mpreal are in mpreal_related.h
 
+#include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include <cstdint>
@@ -15,7 +16,6 @@
 #include <math.h>
 #include <type_traits>
 #include <utility>
-#include "BasicNumberTypes.h"
 
 //
 // UniversalScalarConversion and TYPE_CONVERSION
@@ -385,14 +385,22 @@ std::pair<bool, T1> UniversalScalarConversionCheck(T2 const &a) {
 }
 
 //
-// ScalingInteger that is find a positive number an integer number q = ScalingInteger(x) such that q x belongs to an integer ring.
+// ScalingInteger that is find a positive number an integer number q =
+// ScalingInteger(x) such that q x belongs to an integer ring.
 // ---For x a rational this is the denominator
-// ---For x in a quadratic number field, q x should belong to something like Z[sqrt(d)]
+// ---For x in a quadratic number field, q x should belong to something like
+// Z[sqrt(d)]
 //
 
-inline void ScalingInteger_Kernel([[maybe_unused]] stc<int> const &x, int & x_ret) { x_ret = 1; }
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<int> const &x,
+                                  int &x_ret) {
+  x_ret = 1;
+}
 
-inline void ScalingInteger_Kernel([[maybe_unused]] stc<long> const &x, long & x_ret) { x_ret = 1; }
+inline void ScalingInteger_Kernel([[maybe_unused]] stc<long> const &x,
+                                  long &x_ret) {
+  x_ret = 1;
+}
 
 template <typename T1, typename T2> T1 ScalingInteger(T2 const &a) {
   T1 ret;

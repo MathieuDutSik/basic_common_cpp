@@ -9,10 +9,10 @@
 // This code is used for checking the numerics comparison code
 // It is not really useful since continued fractions work better
 template <typename T>
-T find_approximation_dichotomy(T const& val, T const& thr) {
+T find_approximation_dichotomy(T const &val, T const &thr) {
   T val_low, val_upp;
   int pos = 1;
-  while(true) {
+  while (true) {
     val_low = -pos;
     val_upp = pos;
     if (val_low < val && val < val_upp)
@@ -21,7 +21,7 @@ T find_approximation_dichotomy(T const& val, T const& thr) {
   }
   // We now have our starting point now reducing it.
   T mid;
-  while(true) {
+  while (true) {
     mid = (val_upp + val_low) / 2;
     T delta = val_upp - val_low;
     if (delta < thr)

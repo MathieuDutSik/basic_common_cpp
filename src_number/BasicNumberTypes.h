@@ -9,7 +9,9 @@
 // vice versa under the hood.
 // The overhead is eliminated at the compilation. The stc<T> does
 // not show up outside of internal conversion code.
-template <typename T> struct stc { T const &val; };
+template <typename T> struct stc {
+  T const &val;
+};
 
 // The problem we face is that we have
 // --- std::is_same_v<size_t,uint64_t> = T on the Linux X86

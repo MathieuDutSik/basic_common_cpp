@@ -8,9 +8,13 @@
 
 #include <cstdint>
 
-template <typename T> struct is_mpq_class { static const bool value = false; };
+template <typename T> struct is_mpq_class {
+  static const bool value = false;
+};
 
-template <typename T> struct is_mpz_class { static const bool value = false; };
+template <typename T> struct is_mpz_class {
+  static const bool value = false;
+};
 
 template <typename T> struct is_boost_cpp_int {
   static const bool value = false;
@@ -54,21 +58,33 @@ template <> struct is_euclidean_domain<int8_t> {
 
 template <typename T> struct overlying_field {};
 
-template <> struct overlying_field<double> { typedef double field_type; };
+template <> struct overlying_field<double> {
+  typedef double field_type;
+};
 
-template <> struct overlying_field<float> { typedef float field_type; };
+template <> struct overlying_field<float> {
+  typedef float field_type;
+};
 
 // underlying_ring
 
 template <typename T> struct underlying_ring {};
 
-template <> struct underlying_ring<int64_t> { typedef int64_t ring_type; };
+template <> struct underlying_ring<int64_t> {
+  typedef int64_t ring_type;
+};
 
-template <> struct underlying_ring<int32_t> { typedef int32_t ring_type; };
+template <> struct underlying_ring<int32_t> {
+  typedef int32_t ring_type;
+};
 
-template <> struct underlying_ring<int16_t> { typedef int16_t ring_type; };
+template <> struct underlying_ring<int16_t> {
+  typedef int16_t ring_type;
+};
 
-template <> struct underlying_ring<int8_t> { typedef int8_t ring_type; };
+template <> struct underlying_ring<int8_t> {
+  typedef int8_t ring_type;
+};
 
 // Trait definition for subset of integers
 
@@ -142,17 +158,29 @@ template <> struct is_exact_arithmetic<float> {
 
 template <typename T> struct is_ring_field {};
 
-template <> struct is_ring_field<int64_t> { static const bool value = false; };
+template <> struct is_ring_field<int64_t> {
+  static const bool value = false;
+};
 
-template <> struct is_ring_field<int32_t> { static const bool value = false; };
+template <> struct is_ring_field<int32_t> {
+  static const bool value = false;
+};
 
-template <> struct is_ring_field<int16_t> { static const bool value = false; };
+template <> struct is_ring_field<int16_t> {
+  static const bool value = false;
+};
 
-template <> struct is_ring_field<int8_t> { static const bool value = false; };
+template <> struct is_ring_field<int8_t> {
+  static const bool value = false;
+};
 
-template <> struct is_ring_field<double> { static const bool value = true; };
+template <> struct is_ring_field<double> {
+  static const bool value = true;
+};
 
-template <> struct is_ring_field<float> { static const bool value = true; };
+template <> struct is_ring_field<float> {
+  static const bool value = true;
+};
 
 // Trait of totally ordered set
 

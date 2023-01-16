@@ -391,11 +391,15 @@ GetDenominator_z([[maybe_unused]] boost::multiprecision::cpp_int const &x) {
   return 1;
 }
 
-inline void ScalingInteger_Kernel(stc<boost::multiprecision::cpp_rational> const &x, boost::multiprecision::cpp_int & x_ret) {
+inline void
+ScalingInteger_Kernel(stc<boost::multiprecision::cpp_rational> const &x,
+                      boost::multiprecision::cpp_int &x_ret) {
   x_ret = denominator(x.val);
 }
 
-inline void ScalingInteger_Kernel([[maybe_unused]] stc<boost::multiprecision::cpp_int> const &x, boost::multiprecision::cpp_int & x_ret) {
+inline void ScalingInteger_Kernel(
+    [[maybe_unused]] stc<boost::multiprecision::cpp_int> const &x,
+    boost::multiprecision::cpp_int &x_ret) {
   x_ret = 1;
 }
 

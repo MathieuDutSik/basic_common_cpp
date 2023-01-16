@@ -390,13 +390,17 @@ inline Rational<Tint> QuoInt(Rational<Tint> const &a, Rational<Tint> const &b) {
 
 // OVerlying fields, the original motivation
 
-template <> struct overlying_field<int> { typedef Rational<int> field_type; };
+template <> struct overlying_field<int> {
+  typedef Rational<int> field_type;
+};
 
 template <> struct overlying_field<short> {
   typedef Rational<short> field_type;
 };
 
-template <> struct overlying_field<long> { typedef Rational<long> field_type; };
+template <> struct overlying_field<long> {
+  typedef Rational<long> field_type;
+};
 
 template <> struct overlying_field<Rational<int>> {
   typedef Rational<int> field_type;
@@ -413,18 +417,18 @@ template <> struct overlying_field<Rational<long>> {
 // hashing function
 
 namespace std {
-  template <typename T> struct hash<Rational<T>> {
-    std::size_t operator()(const Rational<T> &x) const {
-      auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
-        seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-      };
-      size_t seed = std::hash<T>()(x.get_const_num());
-      size_t e_hash = std::hash<T>()(x.get_const_den());
-      combine_hash(seed, e_hash);
-      return seed;
-    }
-  };
-}
+template <typename T> struct hash<Rational<T>> {
+  std::size_t operator()(const Rational<T> &x) const {
+    auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+      seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+    size_t seed = std::hash<T>()(x.get_const_num());
+    size_t e_hash = std::hash<T>()(x.get_const_den());
+    combine_hash(seed, e_hash);
+    return seed;
+  }
+};
+} // namespace std
 
 // The conversion tools (int)
 
@@ -477,7 +481,7 @@ template <typename Tint> inline Tint GetDenominator_z(Rational<Tint> const &x) {
 }
 
 template <typename Tint>
-void ScalingInteger_Kernel(stc<Rational<Tint>> const &x, Tint & x_ret) {
+void ScalingInteger_Kernel(stc<Rational<Tint>> const &x, Tint &x_ret) {
   x_ret = x.val.get_const_den();
 }
 
@@ -541,7 +545,7 @@ inline void serialize(Archive &ar, Rational<T> &val,
   ar &make_nvp("rational_den", val.get_den());
 }
 
-}
+} // namespace boost::serialization
 
 // clang-format off
 #endif  // SRC_NUMBER_RATIONAL_H_

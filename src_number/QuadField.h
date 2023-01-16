@@ -8,39 +8,33 @@
 template <typename Tinp, int d> class QuadField {
 public:
   using Tresidual = Tinp;
+
 private:
   using T = Tinp;
   T a;
   T b;
 
 public:
-  T& get_a() {
-    return a;
-  }
-  T& get_b() {
-    return b;
-  }
-  const T& get_const_a() const{
-    return a;
-  }
-  const T& get_const_b() const {
-    return b;
-  }
+  T &get_a() { return a; }
+  T &get_b() { return b; }
+  const T &get_const_a() const { return a; }
+  const T &get_const_b() const { return b; }
 
-  // Note: We are putting "int" as argument here because we want to do the comparison with the
-  // stuff like x > 0 or x = 1.
-  // For the type "rational<T>" we had to forbid that because this lead to erroneous conversion
-  // of say int64_t to int with catastrophic loss of precision.
-  // But for the QuadField<T> the loss of precision does not occur because T is typically mpq_class.
-  // or some other type that does not convert to integers easily. And at the same time the natural
-  // conversion of int to int64_t allows the comparison x > 0 and equality set x = 1 to work despite
-  // the lack of a operator=(int const& u)
+  // Note: We are putting "int" as argument here because we want to do the
+  // comparison with the stuff like x > 0 or x = 1. For the type "rational<T>"
+  // we had to forbid that because this lead to erroneous conversion of say
+  // int64_t to int with catastrophic loss of precision. But for the
+  // QuadField<T> the loss of precision does not occur because T is typically
+  // mpq_class. or some other type that does not convert to integers easily. And
+  // at the same time the natural conversion of int to int64_t allows the
+  // comparison x > 0 and equality set x = 1 to work despite the lack of a
+  // operator=(int const& u)
 
   // Constructor
   QuadField() : a(0), b(0) {}
   QuadField(int const &u) : a(u), b(0) {}
   QuadField(T const &u) : a(u), b(0) {}
-  QuadField(T const &_a, T const& _b) : a(_a), b(_b) {}
+  QuadField(T const &_a, T const &_b) : a(_a), b(_b) {}
   QuadField(QuadField<T, d> const &x) : a(x.a), b(x.b) {}
   //  QuadField<T,d>& operator=(QuadField<T,d> const&); // assignment operator
   //  QuadField<T,d>& operator=(T const&); // assignment operator from T
@@ -68,9 +62,9 @@ public:
     b -= x.b;
   }
   void operator/=(QuadField<T, d> const &x) {
-    T disc  = x.a * x.a - d * x.b * x.b;
+    T disc = x.a * x.a - d * x.b * x.b;
     T a_new = (a * x.a - d * b * x.b) / disc;
-    b       = (b * x.a -     a * x.b) / disc;
+    b = (b * x.a - a * x.b) / disc;
     a = a_new;
   }
   friend QuadField<T, d> operator+(QuadField<T, d> const &x,
@@ -116,7 +110,7 @@ public:
   }
   void operator*=(QuadField<T, d> const &x) {
     T hA = a * x.a + d * b * x.b;
-    b    = a * x.b + b * x.a;
+    b = a * x.b + b * x.a;
     a = hA;
   }
   friend QuadField<T, d> operator*(QuadField<T, d> const &x,
@@ -141,7 +135,7 @@ public:
     size_t miss_val = std::numeric_limits<size_t>::max();
     size_t pos = 0;
     // First skipping the spaces
-    while(true) {
+    while (true) {
       is.get(c);
       if (c != ' ' && c != '\n') {
         s += c;
@@ -151,7 +145,7 @@ public:
     }
     // Second reading the data till a space or end.
     size_t pos_comma = miss_val;
-    while(true) {
+    while (true) {
       if (is.eof()) {
         break;
       }
@@ -172,7 +166,7 @@ public:
     //    std::cerr << "-------------------\n";
     //    std::cerr << "s=" << s << " pos_comma=" << pos_comma << "\n";
     std::string sA = s.substr(1, pos_comma);
-    std::string sB = s.substr(pos_comma+1, s.size() - 2 - pos_comma);
+    std::string sB = s.substr(pos_comma + 1, s.size() - 2 - pos_comma);
     //    std::cerr << "sA=" << sA << "  sB=" << sB << "\n";
     std::istringstream isA(sA);
     isA >> v.a;
@@ -275,18 +269,20 @@ public:
   }
 };
 
-template<typename T, int d>
-struct overlying_field<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> field_type; };
+template <typename T, int d> struct overlying_field<QuadField<T, d>> {
+  typedef QuadField<typename QuadField<T, d>::Tresidual, d> field_type;
+};
 
-// Note that the underlying ring is not unique, there are many possibiliies actually
-// but we can represent only one in our scheme.
-template<typename T, int d>
-struct underlying_ring<QuadField<T,d>> { typedef QuadField<typename QuadField<T,d>::Tresidual,d> ring_type; };
+// Note that the underlying ring is not unique, there are many possibiliies
+// actually but we can represent only one in our scheme.
+template <typename T, int d> struct underlying_ring<QuadField<T, d>> {
+  typedef QuadField<typename QuadField<T, d>::Tresidual, d> ring_type;
+};
 
-template<typename T, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T,d>> const &x1, double &x2) {
-  stc<T> a1 { x1.val.get_const_a() };
-  stc<T> b1 { x1.val.get_const_b() };
+template <typename T, int d>
+inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &x1, double &x2) {
+  stc<T> a1{x1.val.get_const_a()};
+  stc<T> b1{x1.val.get_const_b()};
   double a2, b2;
   TYPE_CONVERSION(a1, a2);
   TYPE_CONVERSION(b1, b2);
@@ -307,69 +303,67 @@ template <typename T, int d> struct is_exact_arithmetic<QuadField<T, d>> {
 
 // Hashing function
 
-template <typename T, int d>
-struct is_implementation_of_Z<QuadField<T,d>> {
+template <typename T, int d> struct is_implementation_of_Z<QuadField<T, d>> {
   static const bool value = false;
 };
 
-template <typename T, int d>
-struct is_implementation_of_Q<QuadField<T,d>> {
+template <typename T, int d> struct is_implementation_of_Q<QuadField<T, d>> {
   static const bool value = false;
 };
 
 // Hashing function
 
 namespace std {
-  template <typename T,int d> struct hash<QuadField<T,d>> {
-    std::size_t operator()(const QuadField<T,d> &x) const {
-      auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
-      	seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-      };
-      size_t seed = std::hash<int>()(d);
-      size_t e_hash1 = std::hash<T>()(x.get_const_a());
-      size_t e_hash2 = std::hash<T>()(x.get_const_b());
-      combine_hash(seed, e_hash1);
-      combine_hash(seed, e_hash2);
-      return seed;
-    }
-  };
-}
-
+template <typename T, int d> struct hash<QuadField<T, d>> {
+  std::size_t operator()(const QuadField<T, d> &x) const {
+    auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+      seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+    size_t seed = std::hash<int>()(d);
+    size_t e_hash1 = std::hash<T>()(x.get_const_a());
+    size_t e_hash2 = std::hash<T>()(x.get_const_b());
+    combine_hash(seed, e_hash1);
+    combine_hash(seed, e_hash2);
+    return seed;
+  }
+};
+} // namespace std
 
 // Local typing info
 
-template<typename T> struct is_quad_field {};
+template <typename T> struct is_quad_field {};
 
-template<typename T, int d> struct is_quad_field<QuadField<T,d>> { static const bool value = true; };
+template <typename T, int d> struct is_quad_field<QuadField<T, d>> {
+  static const bool value = true;
+};
 
 // Some functionality
 
-template<typename T, int d>
-bool IsInteger(QuadField<T,d> const& x) {
+template <typename T, int d> bool IsInteger(QuadField<T, d> const &x) {
   if (x.get_b() != 0)
     return false;
   return IsInteger(x.get_const_a());
 }
 
-
 // The conversion tools (int)
 
-
-template<typename T1, typename T2, int d>
-inline void TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, QuadField<T2,d> &x2) {
-  stc<T1> a1 { x1.val.get_const_a() };
-  stc<T1> b1 { x1.val.get_const_b() };
+template <typename T1, typename T2, int d>
+inline void TYPE_CONVERSION(stc<QuadField<T1, d>> const &x1,
+                            QuadField<T2, d> &x2) {
+  stc<T1> a1{x1.val.get_const_a()};
+  stc<T1> b1{x1.val.get_const_b()};
   TYPE_CONVERSION(a1, x2.get_a());
   TYPE_CONVERSION(b1, x2.get_b());
 }
 
-template<typename T1, typename T2, int d>
-inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CONVERSION(stc<QuadField<T1,d>> const &x1, T2 &x2) {
+template <typename T1, typename T2, int d>
+inline typename std::enable_if<not is_quad_field<T2>::value, void>::type
+TYPE_CONVERSION(stc<QuadField<T1, d>> const &x1, T2 &x2) {
   if (x1.val.b != 0) {
     std::string str = "Conversion error for quadratic field";
     throw ConversionException{str};
   }
-  stc<T1> a1 { x1.val.get_const_a() };
+  stc<T1> a1{x1.val.get_const_a()};
   TYPE_CONVERSION(a1, x2);
 }
 
@@ -378,24 +372,23 @@ inline typename std::enable_if<not is_quad_field<T2>::value, void>::type TYPE_CO
 namespace boost::serialization {
 
 template <class Archive, typename T, int d>
-inline void serialize(Archive &ar, QuadField<T,d> &val,
+inline void serialize(Archive &ar, QuadField<T, d> &val,
                       [[maybe_unused]] const unsigned int version) {
   ar &make_nvp("quadfield_a", val.get_a());
   ar &make_nvp("quadfield_b", val.get_b());
 }
 
-}
+} // namespace boost::serialization
 
 // Turning into something rational
 
-template<typename Tring, typename T, int d>
-void ScalingInteger_Kernel(stc<QuadField<T,d>> const& x, Tring& x_res) {
+template <typename Tring, typename T, int d>
+void ScalingInteger_Kernel(stc<QuadField<T, d>> const &x, Tring &x_res) {
   using Tfield = T;
-  Tfield const& a = x.val.get_const_a();
-  Tfield const& b = x.val.get_const_b();
+  Tfield const &a = x.val.get_const_a();
+  Tfield const &b = x.val.get_const_b();
   x_res = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
 }
-
 
 // clang-format off
 #endif  // SRC_NUMBER_QUADFIELD_H_
