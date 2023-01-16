@@ -255,7 +255,7 @@ inline int T_Norm(mpq_class const &x) {
     throw TerminalException{1};
   }
   double x_d = x.get_d();
-  int eValI = int(round(x_d));
+  int eValI = static_cast<int>(round(x_d));
   if (eValI > 0)
     return eValI;
   return -eValI;
@@ -345,7 +345,7 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
-  a2 = int(a1_long);
+  a2 = static_cast<int>(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint8_t &a2) {
@@ -621,7 +621,7 @@ inline void NearestInteger(long const &xI, mpq_class &xO) { xO = xI; }
 
 inline void NearestInteger(mpq_class const &xI, int &xO) {
   mpq_class xO_q = NearestInteger_rni(xI);
-  xO = int(xO_q.get_num().get_si());
+  xO = static_cast<int>(xO_q.get_num().get_si());
 }
 
 inline void NearestInteger(mpq_class const &xI, long &xO) {

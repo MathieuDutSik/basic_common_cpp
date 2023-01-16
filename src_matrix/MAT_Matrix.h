@@ -2238,14 +2238,15 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
         << "We cannot create the matrix since we cannot know the dimension\n";
     throw TerminalException{1};
   }
-  int dim = ListVect[0].size();
-  MyMatrix<T> M(nbVect, dim);
+  size_t dim = ListVect[0].size();
+  int dim_i = static_cast<int>(dim);
+  MyMatrix<T> M(nbVect, dim_i);
   for (int iVect = 0; iVect < nbVect; iVect++) {
-    if (int(ListVect[iVect].size()) != dim) {
+    if (ListVect[iVect].size() != dim) {
       std::cerr << "Vector lengths are not homogeneous\n";
       throw TerminalException{1};
     }
-    for (int i = 0; i < dim; i++)
+    for (int i = 0; i < dim_i; i++)
       M(iVect, i) = ListVect[iVect](i);
   }
   return M;
@@ -2412,7 +2413,7 @@ Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
     for (int iRow = 0; iRow < nbRow; iRow++)
       s << " " << M(iRow, iCol);
   std::string converted(s.str());
-  const uint8_t *ptr_i = (uint8_t *)converted.c_str();
+  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(converted.c_str());
   return murmur3_32(ptr_i, converted.size(), seed);
 }
 
@@ -2420,7 +2421,7 @@ template <typename T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, uint32_t>::type
 Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
   const T *ptr_T = M.data();
-  const uint8_t *ptr_i = (uint8_t *)ptr_T;
+  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(ptr_T);
   size_t len = sizeof(T) * M.size();
   return murmur3_32(ptr_i, len, seed);
 }
@@ -2433,7 +2434,7 @@ Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
   for (int i = 0; i < n; i++)
     s << " " << V(i);
   std::string converted(s.str());
-  const uint8_t *ptr_i = (uint8_t *)converted.c_str();
+  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(converted.c_str());
   return murmur3_32(ptr_i, converted.size(), seed);
 }
 
@@ -2441,7 +2442,7 @@ template <typename T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, uint32_t>::type
 Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
   const T *ptr_T = V.data();
-  const uint8_t *ptr_i = (uint8_t *)ptr_T;
+  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(ptr_T);
   size_t len = sizeof(T) * V.size();
   return murmur3_32(ptr_i, len, seed);
 }
@@ -2465,7 +2466,7 @@ template <typename T>
 int IntegerDiscriminantInvariant(MyMatrix<T> const &NewMat, int const &n_pes) {
   uint32_t seed = 0x1b873540;
   uint32_t e_hash = Matrix_Hash(NewMat, seed);
-  int residue = int(e_hash % n_pes);
+  int residue = static_cast<int>(e_hash % n_pes);
   return residue;
 }
 
