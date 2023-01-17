@@ -10,8 +10,8 @@
 #include <utility>
 #include <vector>
 
-// #undef TRACK_MAXIMUM_SIZE_COEFF
-// #undef DEBUG_MATRIX_INT
+//  #undef TRACK_MAXIMUM_SIZE_COEFF
+//  #undef DEBUG_MATRIX_INT
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction

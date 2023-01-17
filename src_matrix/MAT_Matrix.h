@@ -11,6 +11,7 @@
 #include "MatrixTypes.h"
 #include "Temp_common.h"
 #include "hash_functions.h"
+#include "Timings.h"
 #include <algorithm>
 #include <functional>
 #include <limits>
