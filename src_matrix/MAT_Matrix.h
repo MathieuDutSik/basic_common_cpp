@@ -2243,7 +2243,7 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   int dim_i = static_cast<int>(dim);
   MyMatrix<T> M(nbVect, dim_i);
   for (int iVect = 0; iVect < nbVect; iVect++) {
-    if (ListVect[iVect].size() != dim) {
+    if (ListVect[iVect].size() != dim_i) {
       std::cerr << "Vector lengths are not homogeneous\n";
       throw TerminalException{1};
     }
