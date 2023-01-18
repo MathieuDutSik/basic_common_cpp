@@ -480,6 +480,17 @@ std::optional<std::string> get_postfix(std::string const& full_str, std::string 
   return full_str.substr(len_prefix, len_full - len_prefix);
 }
 
+std::optional<std::string> get_prefix(std::string const& full_str, std::string const& postfix) {
+  size_t len_full = full_str.size();
+  size_t len_postfix = postfix.size();
+  if (len_full < len_postfix)
+    return {};
+  std::string last_part = full_str.substr(len_full - len_postfix, len_postfix);
+  if (last_part != postfix)
+    return {};
+  return full_str.substr(0, len_full - len_postfix);
+}
+
 // clang-format off
 #endif  // SRC_BASIC_BASIC_STRING_H_
 // clang-format on
