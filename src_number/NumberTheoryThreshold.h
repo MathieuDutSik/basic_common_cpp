@@ -252,7 +252,9 @@ template <int i_field> struct hash<RealField<i_field>> {
     return seed;
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // Local typing info
 
@@ -303,7 +305,9 @@ inline void serialize(Archive &ar, RealField<i_field> &val,
     ar &make_nvp("realfield_seq", val);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 // Turning into something rational
 
