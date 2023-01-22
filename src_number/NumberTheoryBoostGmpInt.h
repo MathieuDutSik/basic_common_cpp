@@ -39,7 +39,9 @@ template <> struct hash<boost::multiprecision::mpq_rational> {
     return std::hash<std::string>()(converted);
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // to_string
 
@@ -56,7 +58,9 @@ std::string to_string(const boost::multiprecision::mpq_rational &e_val) {
   std::string converted(s.str());
   return converted;
 }
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // boost serialization
 
@@ -114,7 +118,9 @@ inline void serialize(Archive &ar, boost::multiprecision::mpz_int &val,
   split_free(ar, val, version);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 template <> struct is_euclidean_domain<boost::multiprecision::mpz_int> {
   static const bool value = true;

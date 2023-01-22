@@ -38,7 +38,9 @@ template <> struct hash<boost::multiprecision::cpp_rational> {
     return std::hash<std::string>()(converted);
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // to_string
 
@@ -55,7 +57,9 @@ std::string to_string(const boost::multiprecision::cpp_rational &e_val) {
   std::string converted(s.str());
   return converted;
 }
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // boost::serialization
 

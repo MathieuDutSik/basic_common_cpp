@@ -151,7 +151,9 @@ template <> struct hash<mpq_class> {
     }
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // to_string functionality
 
@@ -168,7 +170,9 @@ std::string to_string(const mpq_class &e_val) {
   std::string converted(s.str());
   return converted;
 }
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // As documented in section 5.6 this is done exactly as in C int
 inline void ResInt_Kernel(mpz_class const &a, mpz_class const &b,
