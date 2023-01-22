@@ -237,9 +237,8 @@ void SetListPoss(GraphType const &eGraph, FullChain &eChain,
     };
     nbPossibilityTotal = IsNotMaximal();
   }
-  if (TheMethod == 2 &&
-      nbComplex ==
-          0) { // no need to compute if there is already one regular extension
+  if (TheMethod == 2 && nbComplex == 0) {
+    // no need to compute if there is already one regular extension
     int iPointStart = eChain.ListLevel[iLevel - 1].ListComplex[CurrPos];
     auto IsCorrectExte = [&](int const &iPoint) -> bool {
       if (!IsCorrect(iPoint))
@@ -298,7 +297,8 @@ FullChain GetTotalFullLevel(int const &nbPoint) {
   for (int iPoint = 0; iPoint < nbPoint; iPoint++)
     ListLevel[0].ListComplex[iPoint] = iPoint;
   ListLevel[0].nbComplex = nbPoint;
-  ListLevel[0].nbCompletelyAdjacent = 0; // otherwise your input is really bad
+  // nbCompletelyAdjacent = 0 otherwise your input is really bad
+  ListLevel[0].nbCompletelyAdjacent = 0;
   ListLevel[0].CurrPos = 0;
   std::vector<int> ListPossibility(nbPoint);
   return {0, ListPossibility, ListLevel};

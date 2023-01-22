@@ -38,7 +38,8 @@ public:
     // We imitate SG_DECL here
     cg1.nv = 0;
     cg1.nde = 0;
-    cg1.d = NULL; // set to NULL, but it may or may not be expanded.
+    // set to NULL, but it may or may not be expanded.
+    cg1.d = NULL;
     cg1.v = NULL;
     cg1.e = NULL;
     cg1.w = NULL;

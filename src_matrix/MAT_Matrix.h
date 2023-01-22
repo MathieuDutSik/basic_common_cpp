@@ -53,7 +53,6 @@ inline void serialize(Archive &ar, MyMatrix<T> &matrix,
 template <class Archive, typename T>
 inline void load(Archive &ar, MySparseMatrix<T> &val,
                  [[maybe_unused]] const unsigned int version) {
-  //    std::cerr << "load(MySparseMatrix<T>), step 1\n";
   int nbRow, nbCol, nnz;
   ar &make_nvp("rows", nbRow);
   ar &make_nvp("cols", nbCol);
@@ -71,13 +70,11 @@ inline void load(Archive &ar, MySparseMatrix<T> &val,
   MySparseMatrix<T> SpMat(nbRow, nbCol);
   SpMat.setFromTriplets(tripletList.begin(), tripletList.end());
   val = SpMat;
-  //    std::cerr << "load(MySparseMatrix<T>), step 2\n";
 }
 
 template <class Archive, typename T>
 inline void save(Archive &ar, MySparseMatrix<T> const &val,
                  [[maybe_unused]] const unsigned int version) {
-  //    std::cerr << "save(MySparseMatrix<T>), step 1\n";
   int nbRow = val.rows();
   int nbCol = val.cols();
   int nnz = val.nonZeros();
@@ -95,7 +92,6 @@ inline void save(Archive &ar, MySparseMatrix<T> const &val,
       ar &make_nvp("iCol", iCol);
       ar &make_nvp("eVal", eVal);
     }
-  //    std::cerr << "save(MySparseMatrix<T>), step 2\n";
 }
 
 template <class Archive, typename T>
@@ -104,7 +100,9 @@ inline void serialize(Archive &ar, MySparseMatrix<T> &val,
   split_free(ar, val, version);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 template <typename T> bool IsIdentity(MyMatrix<T> const &M) {
   int len = M.rows();
@@ -221,7 +219,6 @@ template <typename T> std::pair<bool, T> ReadMatrixInfo(std::istream &is) {
   T eVal;
   int nbRow, nbCol;
   is >> nbRow >> nbCol;
-  //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   if (nbRow < 0 || nbCol < 0) {
     std::cerr << "We should have nbRow > 0 and nbCol > 0\n";
     std::cerr << "But we have nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
@@ -272,7 +269,6 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
                  "is not being used\n";
     throw TerminalException{1};
   }
-  //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   MyMatrix<T> TheMat(nbRow, nbCol);
   for (int iRow = 0; iRow < nbRow; iRow++)
     for (int iCol = 0; iCol < nbCol; iCol++) {
@@ -356,7 +352,6 @@ template <typename T> std::vector<T> ReadStdVector(std::istream &is) {
   T eVal;
   size_t nbRow;
   is >> nbRow;
-  //  std::cerr << "nbRow=" << nbRow << "\n";
   std::vector<T> eVect(nbRow);
   for (size_t iRow = 0; iRow < nbRow; iRow++) {
     is >> eVal;
@@ -1850,8 +1845,9 @@ void WriteSparseMatrix(std::ostream &os, MySparseMatrix<T> const &eMat) {
   for (int k = 0; k < eMat.outerSize(); ++k)
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {
       T eVal = it.value();
-      int iRow = it.row(); // row index
-      int iCol = it.col(); // col index (here it is equal to k)
+      int iRow = it.row();
+       // col index (here it is equal to k)
+      int iCol = it.col();
       os << iRow << " " << iCol << " " << eVal << "\n";
       nb++;
     }
@@ -1869,8 +1865,9 @@ MyMatrix<T> MyMatrixFromSparseMatrix(MySparseMatrix<T> const &eMat) {
   for (int k = 0; k < eMat.outerSize(); ++k)
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {
       T eVal = it.value();
-      int iRow = it.row(); // row index
-      int iCol = it.col(); // col index (here it is equal to k)
+      int iRow = it.row();
+       // col index (here it is equal to k)
+      int iCol = it.col();
       M(iRow, iCol) = eVal;
     }
   return M;
@@ -2150,7 +2147,9 @@ template <typename T> struct less<MyVector<T>> {
     return false;
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 template <typename T> T L1_norm_vect(MyVector<T> const &V) {
   int siz = V.size();
@@ -2461,7 +2460,9 @@ template <typename T> struct hash<MyMatrix<T>> {
     return Matrix_Hash(e_val, seed);
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 template <typename T>
 int IntegerDiscriminantInvariant(MyMatrix<T> const &NewMat, int const &n_pes) {

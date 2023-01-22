@@ -298,8 +298,8 @@ bool IsMaximalClique(GraphType const &eGraph, FullChain const &eChain) {
     return true;
   };
   for (int iPoint = 0; iPoint < nbPoint; iPoint++) {
-    if (eChain.ListLevel[nbPoint].eVectBRW.eVect[iPoint] ==
-        0) { // a blue vertex so candidate for extension
+    if (eChain.ListLevel[nbPoint].eVectBRW.eVect[iPoint] == 0) {
+      // a blue vertex so candidate for extension
       if (IsVertexOK(iPoint))
         return false;
     }

@@ -43,7 +43,9 @@ inline void serialize(Archive &ar, Face &val, const unsigned int version) {
   split_free(ar, val, version);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 // Those are needed for the tsl::sparse_map
 
@@ -386,7 +388,9 @@ inline void serialize(Archive &ar, vectface &val, const unsigned int version) {
   split_free(ar, val, version);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 template <typename T> T getsetasint(const Face &face) {
   size_t len = face.size();

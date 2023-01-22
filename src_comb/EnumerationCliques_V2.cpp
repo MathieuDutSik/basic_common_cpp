@@ -54,8 +54,8 @@ bool IsMinimal(GroupType const &eGroup, std::vector<int> const &eVect) {
     for (int i = 0; i < len; i++) {
       if (uVect[i] < eVect[i])
         return true;
-      if (uVect[i] > eVect[i]) // for the next item to be counterexample, it has
-                               // to be equal
+      // for the next item to be counterexample, it has to be equal
+      if (uVect[i] > eVect[i])
         return false;
     }
     return false;
@@ -120,8 +120,8 @@ void SetListPoss(GraphType const &eGraph, FullChain &eChain,
       nbPossibility++;
     }
   }
-  if (nbPossibility ==
-      0) { // no need to compute if there is already one reular extension
+  if (nbPossibility == 0) {
+    // no need to compute if there is already one reular extension
     for (int iPoint = 0; iPoint < iPointStart; iPoint++)
       if (IsCorrect(iPoint))
         nbComplement++;

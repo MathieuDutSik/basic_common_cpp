@@ -73,8 +73,8 @@ bool IsMinimal(GroupType const &eGroup, std::vector<int> const &eVect) {
     for (int i = 0; i < len; i++) {
       if (uVect[i] < eVect[i])
         return true;
-      if (uVect[i] > eVect[i]) // for the next item to be counterexample, it has
-                               // to be equal
+      // for the next item to be counterexample, it has to be equal
+      if (uVect[i] > eVect[i])
         return false;
     }
     return false;

@@ -74,8 +74,8 @@ bool IsMinimal(GroupType const &eGroup, ArrMinimal &eArr,
     for (int i = 0; i < len; i++) {
       if (eArr.VectCompar[i] < eVect[i])
         return true;
-      if (eArr.VectCompar[i] > eVect[i]) // for the next item to be
-                                         // counterexample, it has to be equal
+      // for the next item to be counterexample, it has to be equal
+      if (eArr.VectCompar[i] > eVect[i])
         return false;
     }
     return false;
@@ -133,8 +133,8 @@ void SetListPoss(GraphType const &eGraph, FullChain &eChain,
       nbPossibility++;
     }
   }
-  if (nbPossibility ==
-      0) { // no need to compute if there is already one reular extension
+  if (nbPossibility == 0) {
+    // no need to compute if there is already one reular extension
     auto IsNotMaximal = [&]() -> int {
       for (int iPoint = 0; iPoint < iPointStart; iPoint++)
         if (IsCorrect(iPoint))
