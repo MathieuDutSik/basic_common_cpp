@@ -10,8 +10,8 @@
 #include "Basic_string.h"
 #include "MatrixTypes.h"
 #include "Temp_common.h"
-#include "hash_functions.h"
 #include "Timings.h"
+#include "hash_functions.h"
 #include <algorithm>
 #include <functional>
 #include <limits>
