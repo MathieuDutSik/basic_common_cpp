@@ -62,9 +62,9 @@ std::pair<bool, std::vector<int>> GetColoringOrFail(Tgr eGR,
   for (int iVert = 0; iVert < nbVert; iVert++)
     for (int iColor = 0; iColor < nbColor; iColor++) {
       int pos = nbColor * iVert + iColor;
+      // Curiously, this is how we should do it, it seems.
       using namespace Minisat;
-      if (S.modelValue(pos) ==
-          l_False) { // Curiously, this is how we should do it, it seems.
+      if (S.modelValue(pos) == l_False) {
         if (V[iVert] != -1) {
           std::cerr << "iVert=" << iVert << " has already been assigned\n";
           throw TerminalException{1};

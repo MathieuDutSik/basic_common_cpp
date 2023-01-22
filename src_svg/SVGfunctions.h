@@ -413,4 +413,6 @@ void GeneralWriteSVGfile(std::string const &eFile,
   os << "</svg>\n";
 }
 
-#endif // SRC_SVG_SVGFUNCTIONS_H_
+// clang-format off
+#endif  // SRC_SVG_SVGFUNCTIONS_H_
+// clang-format on

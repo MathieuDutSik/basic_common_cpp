@@ -110,9 +110,9 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
     for (int i = 0; i < nbVar; i++)
       eFace[i] = 0;
     for (int i = 0; i < nbVar; i++) {
+      // Curiously, this is how we should do it, it seems.
       using namespace Minisat;
-      if (S.modelValue(i) ==
-          l_False) // Curiously, this is how we should do it, it seems.
+      if (S.modelValue(i) == l_False)
         eFace[i] = 1;
     }
     int terminate = f(eFace);
