@@ -3,6 +3,7 @@
 #define SRC_NUMBER_NUMBERTHEORYGENERIC_H_
 
 #include "Basic_functions.h"
+#include <vector>
 
 template <typename T> T GenericGcd(T const &m, T const &n) {
   T h, q;

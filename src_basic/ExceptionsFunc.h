@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_BASIC_EXCEPTIONENDING_H_
-#define SRC_BASIC_EXCEPTIONENDING_H_
+#ifndef SRC_BASIC_EXCEPTIONSFUNC_H_
+#define SRC_BASIC_EXCEPTIONSFUNC_H_
 
 #include <cassert>
 #include <string>
@@ -26,5 +26,5 @@ void TerminalEnding() {
 }
 
 // clang-format off
-#endif  // SRC_BASIC_EXCEPTIONENDING_H_
+#endif  // SRC_BASIC_EXCEPTIONSFUNC_H_
 // clang-format on

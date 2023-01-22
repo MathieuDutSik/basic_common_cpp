@@ -4,6 +4,8 @@
 
 #include "NumberTheory.h"
 #include "Temp_common.h"
+#include <limits>
+#include <string>
 
 template <typename Tinp, int d> class QuadField {
 public:

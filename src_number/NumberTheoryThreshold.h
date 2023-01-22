@@ -5,6 +5,9 @@
 #include "MAT_Matrix.h"
 #include "NumberTheory.h"
 #include "Temp_common.h"
+#include <map>
+#include <string>
+#include <vector>
 
 // For general real field.
 // We need to use more sophisticated and slower algorithms than quadratic

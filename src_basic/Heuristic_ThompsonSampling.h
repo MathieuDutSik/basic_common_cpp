@@ -6,6 +6,7 @@
 #include "Namelist.h"
 #include "Temp_common.h"
 #include "Timings.h"
+#include <limits>
 #include <map>
 #include <set>
 #include <string>
