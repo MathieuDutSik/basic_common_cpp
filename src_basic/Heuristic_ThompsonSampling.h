@@ -685,7 +685,8 @@ template <typename T> struct KeyCompression {
     T val_sz2 = UniversalScalarConversion<T, size_t>(val_sz);
     if (val < val_sz2)
       val_sz = UniversalScalarConversion<size_t, T>(val);
-    if (l_interval.size() == 0) { // It is superfine case
+    if (l_interval.size() == 0) {
+      // It is superfine case
       return val_sz;
     }
     size_t len = l_interval.size();
@@ -1081,7 +1082,8 @@ private:
       iter->second.insert_meas(eTCR.input.choice, eTCR.result);
     } else {
       std::string name = HeuristicEvaluation(TheCand, heu);
-      SingleThompsonSamplingState ts = m_name_ts.at(name); // Copy is needed
+      // Copy of SingleThompsonSamplingState is needed below
+      SingleThompsonSamplingState ts = m_name_ts.at(name);
       ts.insert_meas(eTCR.input.choice, eTCR.result);
       um_compress_ts.try_emplace(vect_key, ts);
     }
@@ -1110,7 +1112,8 @@ private:
       return iter->second.get_lowest_sampling();
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
-    SingleThompsonSamplingState ts = m_name_ts.at(name); // Copy is needed
+    // Copy of SingleThompsonSamplingState is needed below
+    SingleThompsonSamplingState ts = m_name_ts.at(name);
     std::string ret = ts.get_lowest_sampling();
     um_compress_ts.try_emplace(vect_key, ts);
     return ret;

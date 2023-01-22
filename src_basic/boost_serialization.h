@@ -30,7 +30,9 @@ inline void serialize(Archive &ar, std::vector<T> &val,
     ar &make_nvp("Vu", val[u]);
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 // clang-format off
 #endif  // SRC_BASIC_BOOST_SERIALIZATION_H_

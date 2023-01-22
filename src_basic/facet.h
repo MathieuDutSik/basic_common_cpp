@@ -79,7 +79,8 @@ protected:
 
   // Override so the do_out() virtual function is called.
   virtual bool do_always_noconv() const noexcept {
-    return false; // Sometime we add extra tabs
+    // Sometime we add extra tabs
+    return false;
   }
 };
 
@@ -191,7 +192,8 @@ protected:
   }
   // Override so the do_out() virtual function is called.
   virtual bool do_always_noconv() const noexcept {
-    return false; // Sometime we add extra tabs
+    // Sometime we add extra tabs
+    return false;
   }
 };
 
