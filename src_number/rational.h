@@ -29,12 +29,14 @@ public:
   Rational(Tint const &num, Tint const &den) : num(num), den(den) {}
   Rational(Rational<Tint> const &x) : num(x.num), den(x.den) {}
   // Assignment operators
-  Rational<Tint> operator=(Tint const &u) { // assignment operator from int
+  Rational<Tint> operator=(Tint const &u) {
+    // assignment operator from int
     num = u;
     den = 1;
     return *this;
   }
-  Rational<Tint> operator=(Rational<Tint> const &x) { // assignment operator
+  Rational<Tint> operator=(Rational<Tint> const &x) {
+    // assignment operator
     num = x.num;
     den = x.den;
     return *this;
@@ -44,7 +46,8 @@ public:
   const Tint &get_const_num() const { return num; }
   const Tint &get_const_den() const { return den; }
 
-private: // A few internal functions.
+private:
+  // A few internal functions.
   static Tint comp_gcd(Tint const &m, Tint const &n) {
     Tint f = m;
     if (m < 0)
@@ -87,19 +90,20 @@ public:
     gcd_reduction();
   }
   void operator+=(Rational<Tint> const &x) {
-    //    std::cerr << "operator+ 1\n";
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
     num = num * (x.den / gcd) + x.num * (den / gcd);
     den = new_den;
-    gcd_reduction(); // Yes, it is needed: example 1/2 + 1/2
+    // Yes, it is needed: example 1/2 + 1/2
+    gcd_reduction();
   }
   void operator-=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
     num = num * (x.den / gcd) - x.num * (den / gcd);
     den = new_den;
-    gcd_reduction(); // Yes, it is needed: example 1/2 - 1/2
+    // Yes, it is needed: example 1/2 - 1/2
+    gcd_reduction();
   }
   friend Rational<Tint> operator+(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
@@ -206,10 +210,10 @@ public:
     while (true) {
       // is.get(c) will read characters but is >> c skip the spaces.
       is.get(c);
-      //      is >> c;
       if (c != ' ' && c != '\n') {
         s += c;
-        pos++; // First character cannot be a slash
+        // First character cannot be a slash
+        pos++;
         break;
       }
     }
@@ -218,7 +222,6 @@ public:
         break;
       }
       is.get(c);
-      //      is >> c;
       if (c == ' ' || c == '\n') {
         break;
       }
@@ -281,7 +284,9 @@ template <typename Tint> std::string to_string(const Rational<Tint> &e_val) {
   std::string converted(s.str());
   return converted;
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 template <typename Tint> struct is_euclidean_domain<Rational<Tint>> {
   static const bool value = true;
@@ -369,9 +374,8 @@ ResQuoInt_kernel(Rational<Tint> const &a, Rational<Tint> const &b) {
                     << "\n";
           throw TerminalException{1};
         }
-        return {
-            res,
-            q}; // Conversion of q from Tint to Rational<Tint> occurring here.
+        // Conversion of q from Tint to Rational<Tint> occurring here.
+        return {res, q};
       }
     }
   }
@@ -428,7 +432,9 @@ template <typename T> struct hash<Rational<T>> {
     return seed;
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // The conversion tools (int)
 
@@ -545,7 +551,9 @@ inline void serialize(Archive &ar, Rational<T> &val,
   ar &make_nvp("rational_den", val.get_den());
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 // clang-format off
 #endif  // SRC_NUMBER_RATIONAL_H_
