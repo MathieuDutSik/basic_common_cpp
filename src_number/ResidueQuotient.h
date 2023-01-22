@@ -31,7 +31,8 @@ template <typename T> T ResInt_C_unsigned_integer(T const &a, T const &b) {
 // We should have a = bq + r
 // with 0 <= r < |b| and q integer.
 template <typename T> T ResInt_Generic(T const &a, T const &b) {
-  T b_abs; // We cannot use std::abs which is not defined for all data types.
+  // We cannot use std::abs which is not defined for all data types.
+  T b_abs;
   if (b > 0)
     b_abs = b;
   else

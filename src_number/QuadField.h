@@ -329,7 +329,9 @@ template <typename T, int d> struct hash<QuadField<T, d>> {
     return seed;
   }
 };
-} // namespace std
+// clang-format off
+}  // namespace std
+// clang-format on
 
 // Local typing info
 
@@ -380,7 +382,9 @@ inline void serialize(Archive &ar, QuadField<T, d> &val,
   ar &make_nvp("quadfield_b", val.get_b());
 }
 
-} // namespace boost::serialization
+// clang-format off
+}  // namespace boost::serialization
+// clang-format on
 
 // Turning into something rational
 
