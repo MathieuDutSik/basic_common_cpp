@@ -469,18 +469,20 @@ std::string FILE_GetExtension(std::string const &eFile) {
   return LBlck[LBlck.size() - 1];
 }
 
-std::optional<std::string> get_postfix(std::string const& full_str, std::string const& prefix) {
+std::optional<std::string> get_postfix(std::string const &full_str,
+                                       std::string const &prefix) {
   size_t len_full = full_str.size();
   size_t len_prefix = prefix.size();
   if (len_full < len_prefix)
     return {};
-  std::string first_part = full_str.substr(0,len_prefix);
+  std::string first_part = full_str.substr(0, len_prefix);
   if (first_part != prefix)
     return {};
   return full_str.substr(len_prefix, len_full - len_prefix);
 }
 
-std::optional<std::string> get_prefix(std::string const& full_str, std::string const& postfix) {
+std::optional<std::string> get_prefix(std::string const &full_str,
+                                      std::string const &postfix) {
   size_t len_full = full_str.size();
   size_t len_postfix = postfix.size();
   if (len_full < len_postfix)
