@@ -29,23 +29,23 @@ public:
   //  fmpq_class<T,d>& operator=(fmpq_class<T,d> const&); // assignment operator
   //  fmpq_class<T,d>& operator=(T const&); // assignment operator from T
   //  fmpq_class<T,d>& operator=(int const&); // assignment operator from T
-  fmpq_class() // constructor from nothing
-  {
+  fmpq_class() {
+    // constructor from nothing
     fmpq_init(a);
   }
-  fmpq_class(int const &u) // constructor from int
-  {
+  fmpq_class(int const &u) {
+    // constructor from int
     fmpq_init(a);
     fmpq_set_si(a, u, 1);
   }
-  fmpq_class operator=(int const &u) // assignment operator from int
-  {
+  fmpq_class operator=(int const &u) {
+    // assignment operator from int
     fmpq_class x;
     fmpq_set_si(x.a, u, 1);
     return x;
   }
-  fmpq_class operator=(fmpq_class const &x) // assignment operator
-  {
+  fmpq_class operator=(fmpq_class const &x) {
+    // assignment operator
     fmpq_class y;
     fmpq_set(y.a, x.a);
     return y;
