@@ -27,7 +27,6 @@ int main(int argc, char *argv[]) {
         WriteMatrix(std::cerr, eMat);
         std::cerr << "eInv=\n";
         WriteMatrix(std::cerr, eInv);
-        ;
         std::cerr << "eProd=\n";
         WriteMatrix(std::cerr, eProd);
         throw TerminalException{1};

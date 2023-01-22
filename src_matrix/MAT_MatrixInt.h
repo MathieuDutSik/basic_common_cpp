@@ -52,9 +52,9 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
   while (true) {
     bool IsFirst = true;
     int MinPivot = 0;
-    for (size_t iCol = 0; iCol < nbCol; iCol++)
-      if (colStat[iCol] == 1)
-        for (size_t iRow = 0; iRow < nbRow; iRow++)
+    for (size_t iCol = 0; iCol < nbCol; iCol++) {
+      if (colStat[iCol] == 1) {
+        for (size_t iRow = 0; iRow < nbRow; iRow++) {
           if (rowStat[iRow] == 1) {
             T eVal = eMatW(iRow, iCol);
             if (eVal != 0) {
@@ -73,6 +73,9 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
               IsFirst = false;
             }
           }
+        }
+      }
+    }
     if (IsFirst)
       return 0;
 #ifdef DEBUG_MATRIX_INT
@@ -81,7 +84,6 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
       throw TerminalException{1};
     }
 #endif
-    //    std::cerr << "Before row operations\n";
     T ThePivot = eMatW(iRowF, iColF);
     bool IsFinished = true;
     for (size_t iRow = 0; iRow < nbRow; iRow++) {

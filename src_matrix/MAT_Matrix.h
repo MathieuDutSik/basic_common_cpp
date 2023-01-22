@@ -1147,9 +1147,10 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
           provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
     }
     auto get_firstnonzerocol_iife = [&]() -> size_t {
-      for (size_t iCol = 0; iCol < nbCol; iCol++)
+      for (size_t iCol = 0; iCol < nbCol; iCol++) {
         if (provMat(eRank, iCol) != 0)
           return iCol;
+      }
       return std::numeric_limits<size_t>::max();
     };
     size_t FirstNonZeroCol = get_firstnonzerocol_iife();

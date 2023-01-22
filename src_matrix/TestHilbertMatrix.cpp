@@ -4,7 +4,7 @@
 #include "rational.h"
 int main(int argc, char *argv[]) {
   //  using T=mpq_class;
-  using T = Rational<long>;
+  using T = Rational<int64_t>;
   try {
     if (argc != 2) {
       fprintf(stderr, "TestHilbertMatrix is used as\n");

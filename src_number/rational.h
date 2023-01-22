@@ -283,7 +283,7 @@ template <typename Tint> std::string to_string(const Rational<Tint> &e_val) {
   s << e_val;
   std::string converted(s.str());
   return converted;
-};
+}
 // clang-format off
 }  // namespace std
 // clang-format on

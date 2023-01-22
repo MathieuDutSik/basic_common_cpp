@@ -48,9 +48,9 @@ template <typename T> int jacobi_kernel(T **a, int n, T *d, T **v) {
           a[ip][iq] = 0.0;
         else if (fabs(a[ip][iq]) > tresh) {
           h = d[iq] - d[ip];
-          if (fabs(h) + g == fabs(h))
+          if (fabs(h) + g == fabs(h)) {
             t = (a[ip][iq]) / h;
-          else {
+          } else {
             theta = 0.5 * h / (a[ip][iq]);
             t = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
             if (theta < 0.0)
@@ -168,7 +168,7 @@ InverseSquareMatrix(std::vector<std::vector<T>> TheMat) {
         MaxVal = hVal;
       }
     }
-    if (i != jSel)
+    if (i != jSel) {
       for (k = 0; k < n; k++) {
         eVal1 = WorkMat[k][i];
         eVal2 = WorkMat[k][jSel];
@@ -179,6 +179,7 @@ InverseSquareMatrix(std::vector<std::vector<T>> TheMat) {
         InvMat[k][i] = eVal1;
         InvMat[k][jSel] = eVal2;
       }
+    }
     T alpha = 1 / WorkMat[i][i];
     for (k = 0; k < n; k++) {
       WorkMat[k][i] = alpha * WorkMat[k][i];
