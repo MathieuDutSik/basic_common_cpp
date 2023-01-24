@@ -2528,12 +2528,12 @@ public:
         return false;
     return true;
   }
-  std::pair<bool, size_t> GetIdx() {
+  std::optional<size_t> GetIdx() {
     auto iter = set.find(n_rows);
     if (iter == set.end())
-      return {false, 0};
+      return {};
     size_t idx = *iter;
-    return {true, idx};
+    return idx;
   }
 };
 
