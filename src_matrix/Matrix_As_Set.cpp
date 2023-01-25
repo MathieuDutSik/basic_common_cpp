@@ -18,9 +18,12 @@ int main() {
   ContainerMatrix<T> Cont(M, VectorContain);
   //  Cont.SetPtr(&VectorContain);
   for (size_t i_row = 0; i_row < n_rows; i_row++) {
-    std::pair<bool, size_t> pair = Cont.GetIdx();
-    std::cerr << "i_row=" << i_row << " pair.first=" << pair.first << " / "
-              << pair.second << "\n";
+    std::optional<size_t> opt = Cont.GetIdx();
+    if (opt) {
+      std::cerr << "i_row=" << i_row << " pos=" << *opt << "\n";
+    } else {
+      std::cerr << "i_row=" << i_row << " pos=missing\n";
+    }
     for (size_t i_col = 0; i_col < n_cols; i_col++)
       VectorContain(0, i_col) = M(i_row, i_col);
   }
