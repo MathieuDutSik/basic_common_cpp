@@ -253,6 +253,10 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
 template <typename F>
 void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F &f) {
   size_t lenA = eStrA.length();
+  if (lenA == 0) {
+    // Nothing can be found so we exit right away
+    return;
+  }
   size_t lenB = eStrB.length();
   //  std::cerr << "lenA=" << lenA << " lenB=" << lenB << "\n";
   std::vector<int> ListStatus(lenA, 1);
