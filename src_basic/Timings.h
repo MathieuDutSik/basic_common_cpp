@@ -98,88 +98,33 @@ struct SingletonTimeInc {
   }
 };
 
-// The SecondTime
+// The TimeEval
 
-struct SecondTime {
+template<typename T>
+struct TimeEval {
   std::chrono::time_point<std::chrono::system_clock> time;
-  SecondTime() { time = std::chrono::system_clock::now(); }
+  TimeEval() { time = std::chrono::system_clock::now(); }
   int eval() {
     std::chrono::time_point<std::chrono::system_clock> timeNew =
         std::chrono::system_clock::now();
-    int delta = std::chrono::duration_cast<std::chrono::seconds>(timeNew - time)
-                    .count();
+    int delta = std::chrono::duration_cast<T>(timeNew - time).count();
     time = timeNew;
     return delta;
   }
 };
 
-std::ostream &operator<<(std::ostream &os, SecondTime &x) {
+template<typename T>
+std::ostream &operator<<(std::ostream &os, TimeEval<T> &x) {
   os << x.eval();
   return os;
 }
 
-// The MillisecondTime
+// The instantiations
 
-struct MillisecondTime {
-  std::chrono::time_point<std::chrono::system_clock> time;
-  MillisecondTime() { time = std::chrono::system_clock::now(); }
-  int eval() {
-    std::chrono::time_point<std::chrono::system_clock> timeNew =
-        std::chrono::system_clock::now();
-    int delta =
-        std::chrono::duration_cast<std::chrono::milliseconds>(timeNew - time)
-            .count();
-    time = timeNew;
-    return delta;
-  }
-};
-
-std::ostream &operator<<(std::ostream &os, MillisecondTime &x) {
-  os << x.eval();
-  return os;
-}
-
-// The MicrosecondTime
-
-struct MicrosecondTime {
-  std::chrono::time_point<std::chrono::system_clock> time;
-  MicrosecondTime() { time = std::chrono::system_clock::now(); }
-  int eval() {
-    std::chrono::time_point<std::chrono::system_clock> timeNew =
-        std::chrono::system_clock::now();
-    int delta =
-        std::chrono::duration_cast<std::chrono::microseconds>(timeNew - time)
-            .count();
-    time = timeNew;
-    return delta;
-  }
-};
-
-std::ostream &operator<<(std::ostream &os, MicrosecondTime &x) {
-  os << x.eval();
-  return os;
-}
-
-// The NanosecondTime
-
-struct NanosecondTime {
-  std::chrono::time_point<std::chrono::system_clock> time;
-  NanosecondTime() { time = std::chrono::system_clock::now(); }
-  int eval() {
-    std::chrono::time_point<std::chrono::system_clock> timeNew =
-        std::chrono::system_clock::now();
-    int delta =
-        std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time)
-            .count();
-    time = timeNew;
-    return delta;
-  }
-};
-
-std::ostream &operator<<(std::ostream &os, NanosecondTime &x) {
-  os << x.eval();
-  return os;
-}
+using SecondTime = TimeEval<std::chrono::seconds>;
+using MillisecondTime = TimeEval<std::chrono::milliseconds>;
+using MicrosecondTime = TimeEval<std::chrono::microseconds>;
+using NanosecondTime = TimeEval<std::chrono::nanoseconds>;
 
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
