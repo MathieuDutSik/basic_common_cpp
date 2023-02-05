@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_NUMBER_REALFIELD_H_
-#define SRC_NUMBER_REALFIELD_H_
+#ifndef SRC_NUMBER_NUMBERTHEORYTHRESHOLD_H_
+#define SRC_NUMBER_NUMBERTHEORYTHRESHOLD_H_
 
 #include "MAT_Matrix.h"
 #include "NumberTheory.h"
@@ -320,5 +320,5 @@ void ScalingInteger_Kernel(stc<RealField<i_field>> const &x, Tring &x_res) {
 }
 
 // clang-format off
-#endif  // SRC_NUMBER_REALFIELD_H_
+#endif  // SRC_NUMBER_NUMBERTHEORYTHRESHOLD_H_
 // clang-format on

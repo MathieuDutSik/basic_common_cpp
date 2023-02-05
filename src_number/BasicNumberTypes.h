@@ -25,5 +25,5 @@ using T_uint64_t = uint64_t;
 #endif
 
 // clang-format off
-#endif  // SRC_NUMBER_TYPECONVERSION_H_
+#endif  // SRC_NUMBER_BASICNUMBERTYPES_H_
 // clang-format on
