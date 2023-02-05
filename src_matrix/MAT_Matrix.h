@@ -362,12 +362,12 @@ template <typename T> std::vector<T> ReadStdVector(std::istream &is) {
 
 template <typename T>
 void WriteMatrix(std::ostream &os, MyMatrix<T> const &TheMat) {
-  long nbRow = TheMat.rows();
-  long nbCol = TheMat.cols();
+  size_t nbRow = TheMat.rows();
+  size_t nbCol = TheMat.cols();
   //  TerminalEnding();
   os << nbRow << " " << nbCol << "\n";
-  for (long iRow = 0; iRow < nbRow; iRow++) {
-    for (long iCol = 0; iCol < nbCol; iCol++)
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
+    for (size_t iCol = 0; iCol < nbCol; iCol++)
       os << " " << TheMat(iRow, iCol);
     os << "\n";
   }
@@ -381,14 +381,14 @@ void WriteMatrixFile(std::string const &eFile, MyMatrix<T> const &TheMat) {
 
 template <typename T>
 void WriteMatrixNice(std::ostream &os, MyMatrix<T> const &M) {
-  long nbRow = M.rows();
-  long nbCol = M.cols();
+  size_t nbRow = M.rows();
+  size_t nbCol = M.cols();
   //  TerminalEnding();
   os << nbRow << " " << nbCol << "\n";
   std::vector<std::vector<std::string>> LLStr;
-  for (long iRow = 0; iRow < nbRow; iRow++) {
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
     std::vector<std::string> LStr;
-    for (long iCol = 0; iCol < nbCol; iCol++) {
+    for (size_t iCol = 0; iCol < nbCol; iCol++) {
       std::stringstream s;
       s << M(iRow, iCol);
       std::string converted(s.str());
@@ -397,14 +397,14 @@ void WriteMatrixNice(std::ostream &os, MyMatrix<T> const &M) {
     LLStr.push_back(LStr);
   }
   std::vector<size_t> l_max_nchar(nbCol);
-  for (long iCol = 0; iCol < nbCol; iCol++) {
+  for (size_t iCol = 0; iCol < nbCol; iCol++) {
     size_t max_nchar = 0;
-    for (long iRow = 0; iRow < nbRow; iRow++)
+    for (size_t iRow = 0; iRow < nbRow; iRow++)
       max_nchar = std::max(max_nchar, LLStr[iRow][iCol].size());
     l_max_nchar[iCol] = max_nchar;
   }
-  for (long iRow = 0; iRow < nbRow; iRow++) {
-    for (long iCol = 0; iCol < nbCol; iCol++) {
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
+    for (size_t iCol = 0; iCol < nbCol; iCol++) {
       std::string str = LLStr[iRow][iCol];
       size_t n_sp = l_max_nchar[iCol] - str.size();
       os << " " << str;
@@ -428,8 +428,8 @@ void WriteMatrixMatlab(std::ostream &os, MyMatrix<T> const &TheMat) {
 
 template <typename T>
 void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const &TheMat) {
-  long nbRow = TheMat.rows();
-  long nbCol = TheMat.cols();
+  size_t nbRow = TheMat.rows();
+  size_t nbCol = TheMat.cols();
   struct PairCV {
     int iCol;
     T eVal;
@@ -444,19 +444,19 @@ void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const &TheMat) {
       LLPair[iRow].push_back(ePair);
     }
   os << "rec(nbRow:=" << nbRow << ", nbCol:=" << nbCol << ", ListEntries:=[";
-  for (int iRow = 0; iRow < nbRow; iRow++) {
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
     if (iRow > 0)
       os << ",\n";
-    int len = LLPair[iRow].size();
+    size_t len = LLPair[iRow].size();
     os << "rec(ListCol:=[";
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
       if (i > 0)
         os << ", ";
       int eCol = LLPair[iRow][i].iCol + 1;
       os << eCol;
     }
     os << "], ListVal:=[";
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
       if (i > 0)
         os << ", ";
       os << LLPair[iRow][i].eVal;
@@ -469,17 +469,17 @@ void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const &TheMat) {
 template <typename T>
 void WriteMatrixGAP_gen(std::ostream &os, MyMatrix<T> const &TheMat,
                         bool const &as_line) {
-  long nbRow = TheMat.rows();
-  long nbCol = TheMat.cols();
+  size_t nbRow = TheMat.rows();
+  size_t nbCol = TheMat.cols();
   os << "[ ";
-  for (long iRow = 0; iRow < nbRow; iRow++) {
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
     if (iRow > 0) {
       os << ",";
       if (!as_line)
         os << "\n";
     }
     os << "[";
-    for (long iCol = 0; iCol < nbCol; iCol++) {
+    for (size_t iCol = 0; iCol < nbCol; iCol++) {
       T eVal = TheMat(iRow, iCol);
       if (iCol > 0)
         os << ",";
@@ -1142,9 +1142,11 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
     for (size_t iRank = 0; iRank < eRank; iRank++) {
       size_t eCol = ListColSelect[iRank];
       T eVal1 = provMat(eRank, eCol);
-      if (eVal1 != 0)
-        for (size_t iCol = eCol; iCol < nbCol; iCol++)
+      if (eVal1 != 0) {
+        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
           provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        }
+      }
     }
     auto get_firstnonzerocol_iife = [&]() -> size_t {
       for (size_t iCol = 0; iCol < nbCol; iCol++) {
