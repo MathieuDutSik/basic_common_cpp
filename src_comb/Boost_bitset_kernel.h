@@ -203,20 +203,7 @@ public:
   }
 
   bool operator!=(vectface const &vf) {
-    if (n != vf.n)
-      return true;
-    if (n_face != vf.n_face)
-      return true;
-    size_t n_elt = n * n_face;
-    size_t q = n_elt / 8;
-    size_t q8 = q * 8;
-    for (size_t u = 0; u < q; u++)
-      if (V[u] != vf.V[u])
-        return true;
-    for (size_t i = q8; i < n_elt; i++)
-      if (getbit(V, i) != getbit(vf.V, i))
-        return true;
-    return false;
+    return !(*this == vf);
   }
 
   // non standard API
