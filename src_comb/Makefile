@@ -1,4 +1,4 @@
-#PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques Block_CppIterator Timing_HashMap Vector_Face_iterator SerializeVectface SerializeFace
+PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques Block_CppIterator Timing_HashMap Vector_Face_iterator SerializeVectface SerializeFace
 #PROGRAM		= EnumerationCliques_myrvold EnumerationCliques_ordered_enum EnumerationCliques_special_subcliques
 #PROGRAM		= EnumerationCliques_special_subcliques
 #PROGRAM		= Block_CppIterator
@@ -9,7 +9,7 @@
 #PROGRAM		= BlockMultiple_CppIterator
 #PROGRAM		= SerializeVectface
 #PROGRAM		= SerializeFace
-PROGRAM		= IterFace
+#PROGRAM		= IterFace
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

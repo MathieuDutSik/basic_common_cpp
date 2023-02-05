@@ -240,7 +240,7 @@ Face UnsignedLongToFace(size_t const &len, ulong const &eVal) {
   return eFace;
 }
 
-void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
+void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit, int const& shift) {
   size_t nbOrbit = ListOrbit.size();
   os << "[";
   for (size_t iOrbit = 0; iOrbit < nbOrbit; iOrbit++) {
@@ -253,12 +253,17 @@ void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
     for (size_t i = 0; i < siz; i++) {
       if (i > 0)
         os << ",";
-      os << int(eVal);
+      os << int(eVal + shift);
       eVal = eRepr.find_next(eVal);
     }
     os << "]";
   }
-  os << "]\n";
+  os << "]";
+}
+
+
+void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
+  VectVectInt_Print_Kernel(os, ListOrbit, 0);
 }
 
 void VectVectInt_Magma_PrintFile(std::string const &eFile,
@@ -270,24 +275,7 @@ void VectVectInt_Magma_PrintFile(std::string const &eFile,
 }
 
 void VectVectInt_Gap_Print(std::ostream &os, vectface const &ListOrbit) {
-  size_t nbOrbit = ListOrbit.size();
-  os << "[";
-  for (size_t iOrbit = 0; iOrbit < nbOrbit; iOrbit++) {
-    if (iOrbit > 0)
-      os << ",\n";
-    Face eRepr = ListOrbit[iOrbit];
-    size_t siz = eRepr.count();
-    os << "[";
-    boost::dynamic_bitset<>::size_type eVal = eRepr.find_first();
-    for (size_t i = 0; i < siz; i++) {
-      if (i > 0)
-        os << ",";
-      os << int(eVal + 1);
-      eVal = eRepr.find_next(eVal);
-    }
-    os << "]";
-  }
-  os << "]";
+  VectVectInt_Print_Kernel(os, ListOrbit, 1);
 }
 
 void VectVectInt_Gap_PrintFile(std::string const &eFile,
