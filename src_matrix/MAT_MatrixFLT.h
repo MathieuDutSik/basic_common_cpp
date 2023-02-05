@@ -44,40 +44,42 @@ template <typename T> int jacobi_kernel(T **a, int n, T *d, T **v) {
       for (iq = ip + 1; iq <= n; iq++) {
         g = 100.0 * fabs(a[ip][iq]);
         if (i > 4 && T_abs(d[ip]) + g == T_abs(d[ip]) &&
-            T_abs(d[iq]) + g == T_abs(d[iq]))
+            T_abs(d[iq]) + g == T_abs(d[iq])) {
           a[ip][iq] = 0.0;
-        else if (fabs(a[ip][iq]) > tresh) {
-          h = d[iq] - d[ip];
-          if (fabs(h) + g == fabs(h)) {
-            t = (a[ip][iq]) / h;
-          } else {
-            theta = 0.5 * h / (a[ip][iq]);
-            t = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
-            if (theta < 0.0)
-              t = -t;
+        } else {
+          if (fabs(a[ip][iq]) > tresh) {
+            h = d[iq] - d[ip];
+            if (fabs(h) + g == fabs(h)) {
+              t = (a[ip][iq]) / h;
+            } else {
+              theta = 0.5 * h / (a[ip][iq]);
+              t = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
+              if (theta < 0.0)
+                t = -t;
+            }
+            c = 1.0 / sqrt(1 + t * t);
+            s = t * c;
+            tau = s / (1.0 + c);
+            h = t * a[ip][iq];
+            z[ip] -= h;
+            z[iq] += h;
+            d[ip] -= h;
+            d[iq] += h;
+            a[ip][iq] = 0.0;
+            for (j = 1; j <= ip - 1; j++) {
+              ROTATE(a, j, ip, j, iq, tau, s);
+            }
+            for (j = ip + 1; j <= iq - 1; j++) {
+              ROTATE(a, ip, j, j, iq, tau, s);
+            }
+            for (j = iq + 1; j <= n; j++) {
+              ROTATE(a, ip, j, iq, j, tau, s);
+            }
+            for (j = 1; j <= n; j++) {
+              ROTATE(v, j, ip, j, iq, tau, s);
+            }
+            nrot++;
           }
-          c = 1.0 / sqrt(1 + t * t);
-          s = t * c;
-          tau = s / (1.0 + c);
-          h = t * a[ip][iq];
-          z[ip] -= h;
-          z[iq] += h;
-          d[ip] -= h;
-          d[iq] += h;
-          a[ip][iq] = 0.0;
-          for (j = 1; j <= ip - 1; j++) {
-            ROTATE(a, j, ip, j, iq, tau, s);
-          }
-          for (j = ip + 1; j <= iq - 1; j++) {
-            ROTATE(a, ip, j, j, iq, tau, s);
-          }
-          for (j = iq + 1; j <= n; j++) {
-            ROTATE(a, ip, j, iq, j, tau, s);
-          }
-          for (j = 1; j <= n; j++) {
-            ROTATE(v, j, ip, j, iq, tau, s);
-          }
-          nrot++;
         }
       }
     }
