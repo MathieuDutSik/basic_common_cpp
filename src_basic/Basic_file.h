@@ -555,10 +555,7 @@ public:
   TempDirectory &operator=(const TempDirectory &eTemp) = delete;
 
   ~TempDirectory() {
-    //    std::cerr << "Calling destructor\n";
     if (IsInitialized) {
-      //      std::cerr << "  Destructor is really needed\n";
-      //      std::cerr << "  DirName=" << DirName << "\n";
       if (IsExistingDirectory(DirName)) {
         if (!FILE_IsDirectoryEmpty(DirName)) {
           std::cerr << "Keeping " << DirName << " since it is not empty\n";
@@ -601,10 +598,7 @@ public:
   CondTempDirectory(CondTempDirectory &&eTemp)
       : used(eTemp.usedness()), DirName(eTemp.str()) {}
   ~CondTempDirectory() {
-    //    std::cerr << "Calling destructor\n";
     if (used && DirName != "unset_and_irrelevant") {
-      //      std::cerr << "  Destructor is really needed\n";
-      //      std::cerr << "  DirName=" << DirName << "\n";
       if (IsExistingDirectory(DirName)) {
         if (!FILE_IsDirectoryEmpty(DirName)) {
           std::cerr << "Keeping " << DirName << " since it is not empty\n";
