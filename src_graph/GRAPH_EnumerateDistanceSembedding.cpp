@@ -25,10 +25,10 @@ int main(int argc, char *argv[]) {
     int sDist;
     sscanf(argv[2], "%d", &sDist);
     //
-    long MaxIter;
+    size_t MaxIter;
     sscanf(argv[3], "%ld", &MaxIter);
     //
-    long iter;
+    size_t iter;
     std::vector<MyMatrix<int>> ListEmbedding =
         GRAPH_S_Embedding(eGR, sDist, MaxIter, iter);
     //
