@@ -1847,7 +1847,7 @@ void WriteSparseMatrix(std::ostream &os, MySparseMatrix<T> const &eMat) {
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {
       T eVal = it.value();
       int iRow = it.row();
-       // col index (here it is equal to k)
+      // col index (here it is equal to k)
       int iCol = it.col();
       os << iRow << " " << iCol << " " << eVal << "\n";
       nb++;
@@ -1867,7 +1867,7 @@ MyMatrix<T> MyMatrixFromSparseMatrix(MySparseMatrix<T> const &eMat) {
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {
       T eVal = it.value();
       int iRow = it.row();
-       // col index (here it is equal to k)
+      // col index (here it is equal to k)
       int iCol = it.col();
       M(iRow, iCol) = eVal;
     }
