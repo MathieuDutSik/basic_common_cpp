@@ -90,28 +90,25 @@ void srand_random_set() {
 #endif
 }
 
-std::string random_string(size_t length) {
-  auto randchar = []() -> char {
-    const char charset[] = "0123456789"
-                           "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                           "abcdefghijklmnopqrstuvwxyz";
-    const size_t max_index = (sizeof(charset) - 1);
-    return charset[size_t(random()) % max_index];
+std::string random_string_kernel(std::string const& strChoice, size_t length) {
+  const size_t n_index = strChoice.size();
+  auto randchar = [&]() -> char {
+    size_t pos = size_t(random()) % n_index;
+    return strChoice[pos];
   };
   std::string str(length, 0);
   std::generate_n(str.begin(), length, randchar);
   return str;
 }
 
+std::string random_string(size_t length) {
+  std::string strChoice = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  return random_string_kernel(strChoice, length);
+}
+
 std::string random_string_restricted(size_t length) {
-  auto randchar = []() -> char {
-    const char charset[] = "abcdefghijklmnopqrstuvwxyz";
-    const size_t max_index = (sizeof(charset) - 1);
-    return charset[size_t(random()) % max_index];
-  };
-  std::string str(length, 0);
-  std::generate_n(str.begin(), length, randchar);
-  return str;
+  std::string strChoice = "abcdefghijklmnopqrstuvwxyz";
+  return random_string_kernel(strChoice, length);
 }
 
 std::string GAP_logical(bool const &x) {
