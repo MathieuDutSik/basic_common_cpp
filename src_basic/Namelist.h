@@ -19,6 +19,10 @@ struct NamelistException {
 };
 
 bool NAMELIST_ReadBoolValue(std::string const &eVarValue) {
+  if (eVarValue == "false")
+    return false;
+  if (eVarValue == "true")
+    return true;
   if (eVarValue == ".F.")
     return false;
   if (eVarValue == ".T.")
