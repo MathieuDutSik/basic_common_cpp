@@ -2480,7 +2480,7 @@ private:
   MyMatrix<T> const &mat;
   const size_t n_rows;
   const size_t n_cols;
-  MyMatrix<T> &mat_test;
+  MyVector<T> v_test;
   std::vector<T> V1, V2;
   std::unordered_set<size_t, std::function<size_t(size_t)>,
                      std::function<bool(size_t, size_t)>>
@@ -2492,16 +2492,14 @@ public:
       for (size_t i = 0; i < n_cols; i++)
         W[i] = mat(idx, i);
     } else {
-      for (size_t i = 0; i < n_cols; i++) {
-        size_t alpha = idx - n_rows;
-        T val = mat_test(alpha, i);
-        W[i] = val;
-      }
+      for (size_t i = 0; i < n_cols; i++)
+        W[i] = v_test(i);
     }
   }
-  ContainerMatrix(MyMatrix<T> const &_mat, MyMatrix<T> &_mat_test)
-      : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), mat_test(_mat_test),
+  ContainerMatrix(MyMatrix<T> const &_mat)
+      : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()),
         V1(n_cols), V2(n_cols) {
+    v_test = MyVector<T>(n_cols);
     std::function<size_t(size_t)> fct_hash = [&](size_t idx) -> size_t {
       set_v(V1, idx);
       size_t hash = std::hash<std::vector<T>>()(V1);
@@ -2522,20 +2520,22 @@ public:
     for (size_t i_row = 0; i_row < n_rows; i_row++)
       set.insert(i_row);
   }
-  bool IsSubset(MyMatrix<T> &M) {
-    mat_test = M;
-    size_t n_rows_m = M.rows();
-    for (size_t i_row = 0; i_row < n_rows_m; i_row++)
-      if (set.find(i_row + n_rows) == set.end())
-        return false;
-    return true;
-  }
   std::optional<size_t> GetIdx() {
     auto iter = set.find(n_rows);
     if (iter == set.end())
       return {};
     size_t idx = *iter;
     return idx;
+  }
+  std::optional<size_t> GetIdx_v(MyVector<T> const& V) {
+    v_test = V;
+    return GetIdx();
+  }
+  template<typename F>
+  std::optional<size_t> GetIdx_f(F f) {
+    for (int i=0; i<n_cols; i++) 
+      v_test(i) = f(i);
+    return GetIdx();
   }
 };
 
