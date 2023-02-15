@@ -1,0 +1,67 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
+#include "NumberTheory.h"
+#include "NumberTheoryRealField.h"
+#include "QuadField.h"
+#include "MAT_MatrixInt.h"
+// clang-format on
+
+
+template<typename T>
+void compute_determinant_kernel(std::string const& eFile) {
+  MyMatrix<T> TheMat = ReadMatrixFile<T>(eFile);
+  T TheDet = DeterminantMat(TheMat);
+  std::cerr << "TheDet=" << TheDet << "\n";
+}
+
+void compute_determinant(std::string const& arithmetic, std::string const& eFile) {
+  if (arithmetic == "rational") {
+    using T = mpq_class;
+    return compute_determinant_kernel<T>(eFile);
+  }
+  if (arithmetic == "Qsqrt5") {
+    using Trat = mpq_class;
+    using T = QuadField<Trat, 5>;
+    return compute_determinant_kernel<T>(eFile);
+  }
+  if (arithmetic == "Qsqrt2") {
+    using Trat = mpq_class;
+    using T = QuadField<Trat, 2>;
+    return compute_determinant_kernel<T>(eFile);
+  }
+  std::optional<std::string> opt_realalgebraic =
+    get_postfix(arithmetic, "RealAlgebraic=");
+  if (opt_realalgebraic) {
+    std::string const &FileAlgebraicField = *opt_realalgebraic;
+    if (!IsExistingFile(FileAlgebraicField)) {
+      std::cerr << "FileAlgebraicField=" << FileAlgebraicField
+                << " is missing\n";
+      throw TerminalException{1};
+    }
+    using T_rat = mpq_class;
+    HelperClassRealField<T_rat> hcrf(FileAlgebraicField);
+    int const idx_real_algebraic_field = 1;
+    insert_helper_real_algebraic_field(idx_real_algebraic_field, hcrf);
+    using T = RealField<idx_real_algebraic_field>;
+    return compute_determinant_kernel<T>(eFile);
+  }
+  std::cerr << "Failed to find a matching arithmetic\n";
+  throw TerminalException{1};
+}
+
+
+int main(int argc, char *argv[]) {
+  try {
+    if (argc != 3) {
+      fprintf(stderr, "Number of argument is = %d\n", argc);
+      fprintf(stderr, "This program is used as\n");
+      fprintf(stderr, "SolutionIntMat [arithmetic] [inputMat]\n");
+      return -1;
+    }
+    std::string arithmetic = argv[1];
+    std::string eFile = argv[2];
+    compute_determinant(arithmetic, eFile);
+  } catch (TerminalException const &e) {
+    exit(e.eVal);
+  }
+}

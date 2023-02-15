@@ -7,7 +7,8 @@
 #PROGRAM		= IntersectionLattice
 #PROGRAM		= NullspaceComputationLinbox
 #PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
-PROGRAM		= Matrix_As_Set
+#PROGRAM		= Matrix_As_Set
+PROGRAM		= DeterminantMat
 #PROGRAM		= SerializeMatrix
 #PROGRAM		= NullspaceIntTrMat
 #PROGRAM		= NullspaceIntMat
@@ -36,7 +37,7 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number -I../src_comb
 
 
-CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH)
+CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) -I.
 
 LIBS		= -lm $(GMP_CXX_LINK) $(BOOST_LINK) -pthread
 
