@@ -1398,6 +1398,30 @@ DeterminantMat(MyMatrix<T> const &Input) {
   return UniversalScalarConversion<T, Tfield>(eDet_field);
 }
 
+template <typename T>
+T DeterminantMatPermutation(MyMatrix<T> const& A) {
+  int n = A.rows();
+  if (n == 0)
+    return 1;
+  std::vector<int> s(n);
+  for (int i=0; i<n; i++)
+    s[i] = i;
+  T TheDet = 0;
+  do {
+    T eProd = 1;
+    for (int u=0; u<n; u++)
+      eProd *= A(u,s[u]);
+    TheDet += eProd;
+    std::cerr << "s =";
+    for (int u=0; u<n; u++)
+      std::cerr << " " << s[u];
+    std::cerr << "\n";
+  } while(std::next_permutation(s.begin(), s.end()));
+  return TheDet;
+}
+
+
+
 template <typename Tint, typename Tfloat>
 std::pair<Tfloat, MyVector<Tint>>
 FindBestIntegerApproximation(MyVector<Tfloat> const &V, int const &N) {

@@ -9,9 +9,11 @@
 
 template<typename T>
 void compute_determinant_kernel(std::string const& eFile) {
-  MyMatrix<T> TheMat = ReadMatrixFile<T>(eFile);
-  T TheDet = DeterminantMat(TheMat);
-  std::cerr << "TheDet=" << TheDet << "\n";
+  MyMatrix<T> A = ReadMatrixFile<T>(eFile);
+  T TheDet_gauss = DeterminantMat(A);
+  T TheDet_symm = DeterminantMatPermutation(A);
+  std::cerr << "TheDet_gauss=" << TheDet_gauss << "\n";
+  std::cerr << "TheDet_symm =" << TheDet_symm << "\n";
 }
 
 void compute_determinant(std::string const& arithmetic, std::string const& eFile) {
