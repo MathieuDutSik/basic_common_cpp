@@ -1345,27 +1345,26 @@ template <typename T> MyMatrix<T> TMat_CongrMap(MyMatrix<T> const &eMat) {
 template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to be a field in DeterminantMatKernel");
-  T TheDet, hVal, alpha;
+  T hVal, alpha;
   T eVal1, eVal2, nVal;
-  size_t n = TheMat.rows();
+  int n = TheMat.rows();
   MyMatrix<T> WorkMat = TheMat;
-  std::vector<std::ptrdiff_t> eVectPos(n, -1);
-  TheDet = 1;
-  for (size_t i = 0; i < n; i++) {
-    std::ptrdiff_t jSel = -1;
-    for (size_t j = 0; j < n; j++)
+  std::vector<int> eVectPos(n, -1);
+  T TheDet = 1;
+  for (int i = 0; i < n; i++) {
+    int jSel = -1;
+    for (int j = 0; j < n; j++)
       if (eVectPos[j] == -1) {
         hVal = WorkMat(i, j);
         if (hVal != 0)
           jSel = j;
       }
     if (jSel == -1) {
-      TheDet = 0;
-      return TheDet;
+      return 0;
     }
-    eVectPos[size_t(jSel)] = i;
-    for (size_t j = 0; j < n; j++)
-      if (j != size_t(jSel)) {
+    eVectPos[jSel] = i;
+    for (int j = 0; j < n; j++)
+      if (j != jSel) {
         alpha = WorkMat(i, j) / WorkMat(i, jSel);
         for (size_t k = 0; k < n; k++)
           WorkMat(k, j) -= alpha * WorkMat(k, jSel);
@@ -1411,11 +1410,12 @@ T DeterminantMatPermutation(MyMatrix<T> const& A) {
     T eProd = 1;
     for (int u=0; u<n; u++)
       eProd *= A(u,s[u]);
-    TheDet += eProd;
-    std::cerr << "s =";
-    for (int u=0; u<n; u++)
-      std::cerr << " " << s[u];
-    std::cerr << "\n";
+    int eSign = 1;
+    for (int i=0; i<n; i++)
+      for (int j=i+1; j<n; j++)
+        if (s[j] < s[i])
+          eSign = -eSign;
+    TheDet += eSign * eProd;
   } while(std::next_permutation(s.begin(), s.end()));
   return TheDet;
 }
