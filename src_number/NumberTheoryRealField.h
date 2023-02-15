@@ -558,6 +558,12 @@ public:
           return {eval_coef(s_coef), eval_expo(s_expo)};
         }
       }
+      if (sb.substr(0,1) == "x") {
+        return {1, eval_expo(sb)};
+      }
+      if (sb.substr(0,2) == "-x") {
+        return {-1, eval_expo(sb.substr(1,lenb-1))};
+      }
       return {eval_coef(sb), 0};
     };
     for (size_t w = 0; w <= W.size(); w++) {

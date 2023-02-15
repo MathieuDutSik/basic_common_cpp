@@ -10,6 +10,8 @@
 template<typename T>
 void compute_determinant_kernel(std::string const& eFile) {
   MyMatrix<T> A = ReadMatrixFile<T>(eFile);
+  std::cerr << "Computing determinant of matrix A=\n";
+  WriteMatrix(std::cerr, A);
   T TheDet_gauss = DeterminantMat(A);
   T TheDet_symm = DeterminantMatPermutation(A);
   std::cerr << "TheDet_gauss=" << TheDet_gauss << "\n";
