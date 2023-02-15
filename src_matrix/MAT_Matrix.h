@@ -1397,6 +1397,9 @@ DeterminantMat(MyMatrix<T> const &Input) {
   return UniversalScalarConversion<T, Tfield>(eDet_field);
 }
 
+// A significantly slower algorithm for computing the determinant.
+// It is good as a control for the above method and can also be used
+// for consistency checks of arithmetics.
 template <typename T>
 T DeterminantMatPermutation(MyMatrix<T> const& A) {
   int n = A.rows();
