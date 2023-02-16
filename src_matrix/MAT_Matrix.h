@@ -1366,14 +1366,14 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
     for (int j = 0; j < n; j++)
       if (j != jSel) {
         alpha = WorkMat(i, j) / WorkMat(i, jSel);
-        for (size_t k = 0; k < n; k++)
+        for (int k = 0; k < n; k++)
           WorkMat(k, j) -= alpha * WorkMat(k, jSel);
       }
     TheDet = TheDet * WorkMat(i, jSel);
   }
   int nbchg = 0;
-  for (size_t i = 0; i < n - 1; i++)
-    for (size_t j = i + 1; j < n; j++)
+  for (int i = 0; i < n - 1; i++)
+    for (int j = i + 1; j < n; j++)
       if (eVectPos[i] > eVectPos[j])
         nbchg++;
   int res = nbchg % 2;
