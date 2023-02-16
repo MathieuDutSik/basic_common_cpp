@@ -2560,7 +2560,7 @@ public:
   }
   template<typename F>
   std::optional<size_t> GetIdx_f(F f) {
-    for (int i=0; i<n_cols; i++) 
+    for (size_t i=0; i<n_cols; i++) 
       v_test(i) = f(i);
     return GetIdx();
   }
