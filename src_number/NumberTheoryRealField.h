@@ -283,6 +283,10 @@ public:
         return true;
       }
     }
+    std::cerr << "x =";
+    for (auto & eVal : x)
+      std::cerr << " " << eVal;
+    std::cerr << "\n";
     std::cerr << "Failed to find an approximant that allows to conclude, "
                  "please produce better approximants\n";
     throw TerminalException{1};
