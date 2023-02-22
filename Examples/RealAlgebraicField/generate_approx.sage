@@ -55,7 +55,7 @@ def create_real_algebraic_input(val, l_coeff, FileName):
     # The double approximation of the value
     f.write(str(float(val)) + "\n");
     # the rational approximations
-    n_expo = 20
+    n_expo = 100
     f.write(str(n_expo) + "\n")
     for i in range(1,n_expo+1):
         print("i=", i, " / ", n_expo)

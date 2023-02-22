@@ -274,7 +274,7 @@ CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
       return -val;
     return val;
   };
-  T the_sma = 1;
+  T the_sma = get_abs(M(0, 0));
   for (int iCol = 0; iCol < nbCol; iCol++)
     for (int iRow = 0; iRow < nbRow; iRow++) {
       T val = get_abs(M(iRow, iCol));
@@ -284,6 +284,32 @@ CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
   MyMatrix<T> M2 = M / the_sma;
   T TheMult = 1 / the_sma;
   return {TheMult, std::move(M2)};
+}
+
+template <typename T> struct FractionVector {
+  T TheMult;
+  MyVector<T> TheVect;
+};
+
+template <typename T>
+FractionVector<T>
+CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
+  static_assert(is_ring_field<T>::value, "Requires T to be a field");
+  int n = V.size();
+  auto get_abs = [](T const &val) -> T {
+    if (val < 0)
+      return -val;
+    return val;
+  };
+  T the_sma = get_abs(V(0));
+  for (int i = 1; i < n; i++) {
+    T val = get_abs(V(i));
+    if (val < the_sma && val > 0)
+      the_sma = val;
+  }
+  MyVector<T> V2 = V / the_sma;
+  T TheMult = 1 / the_sma;
+  return {TheMult, std::move(V2)};
 }
 
 template <typename T>
@@ -300,11 +326,6 @@ template <typename T>
 MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
   return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
 }
-
-template <typename T> struct FractionVector {
-  T TheMult;
-  MyVector<T> TheVect;
-};
 
 template <typename T>
 FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
