@@ -274,13 +274,27 @@ CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
       return -val;
     return val;
   };
-  T the_sma = get_abs(M(0, 0));
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    for (int iRow = 0; iRow < nbRow; iRow++) {
-      T val = get_abs(M(iRow, iCol));
-      if (val < the_sma && val > 0)
+  T the_sma = 1; // Just to shut up warnings. Will not be used
+  bool IsAssigned = false;
+  auto f_insert=[&](T const&input) -> void {
+    T val = get_abs(input);
+    if (val > 0) {
+      if (!IsAssigned) {
         the_sma = val;
+        IsAssigned = true;
+      } else {
+        if (val < the_sma)
+          the_sma = val;
+      }
     }
+  };
+  for (int iCol = 0; iCol < nbCol; iCol++)
+    for (int iRow = 0; iRow < nbRow; iRow++)
+      f_insert(M(iRow, iCol));
+  if (!IsAssigned) {
+    std::cerr << "Failed to find a non-zero value for M, so impossible to canonicalize\n";
+    throw TerminalException{1};
+  }
   MyMatrix<T> M2 = M / the_sma;
   T TheMult = 1 / the_sma;
   return {TheMult, std::move(M2)};
@@ -301,11 +315,25 @@ CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
       return -val;
     return val;
   };
-  T the_sma = get_abs(V(0));
-  for (int i = 1; i < n; i++) {
-    T val = get_abs(V(i));
-    if (val < the_sma && val > 0)
-      the_sma = val;
+  T the_sma = 1; // Just to shut up warnings. Will not be used
+  bool IsAssigned = false;
+  auto f_insert=[&](T const&input) -> void {
+    T val = get_abs(input);
+    if (val > 0) {
+      if (!IsAssigned) {
+        the_sma = val;
+        IsAssigned = true;
+      } else {
+        if (val < the_sma)
+          the_sma = val;
+      }
+    }
+  };
+  for (int i = 0; i < n; i++)
+    f_insert(V(i));
+  if (!IsAssigned) {
+    std::cerr << "Failed to find a non-zero value for V, so impossible to canonicalize\n";
+    throw TerminalException{1};
   }
   MyVector<T> V2 = V / the_sma;
   T TheMult = 1 / the_sma;
