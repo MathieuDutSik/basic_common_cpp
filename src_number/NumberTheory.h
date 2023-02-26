@@ -3,6 +3,7 @@
 #define SRC_NUMBER_NUMBERTHEORY_H_
 
 // clang-format off
+#include "InputOutput.h"
 #include "TemplateTraits.h"
 #include "ResidueQuotient.h"
 #include "NumberTheoryGeneric.h"
