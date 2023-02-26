@@ -25,6 +25,8 @@ int main(int argc, char *argv[]) {
     std::cerr << "x2=" << x2 << "\n";
     T x2inv = -1 / x2;
     std::cerr << "x2inv=" << x2inv << "\n";
+    T minus_x2 = -x2;
+    std::cerr << "minus_x2=" << minus_x2 << "\n";
     T x2_3 = x2 * x3;
     std::cerr << "x2_3=" << x2_3 << "\n";
     std::cerr << "STEP 2: Product and quotient checked\n";
