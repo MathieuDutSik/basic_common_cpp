@@ -19,15 +19,21 @@ void WriteVectorFromRealAlgebraicString(std::ostream& os, std::vector<T> const& 
       if (val > 0) {
         if (!is_first)
           os << "+";
-        os << val;
+        if (val != 1) {
+          os << val << "*";
+        }
       } else {
-        os << val;
+        if (val == -1) {
+          os << "-";
+        } else {
+          os << val << "*";
+        }
       }
       if (u == 1) {
-        os << "*x";
+        os << "x";
       }
       if (u > 1) {
-        os << "*x^" << u;
+        os << "x^" << u;
       }
       is_first = false;
     }
