@@ -16,24 +16,28 @@ void WriteVectorFromRealAlgebraicString(std::ostream& os, std::vector<T> const& 
     T const &val = V[u];
     if (val != 0) {
       DoSomething = true;
-      if (val > 0) {
-        if (!is_first)
-          os << "+";
-        if (val != 1) {
-          os << val << "*";
-        }
+      if (u == 0) {
+        os << val;
       } else {
-        if (val == -1) {
-          os << "-";
+        if (val > 0) {
+          if (!is_first)
+            os << "+";
+          if (val != 1) {
+            os << val << "*";
+          }
         } else {
-          os << val << "*";
+          if (val == -1) {
+            os << "-";
+          } else {
+            os << val << "*";
+          }
         }
-      }
-      if (u == 1) {
-        os << "x";
-      }
-      if (u > 1) {
-        os << "x^" << u;
+        if (u == 1) {
+          os << "x";
+        }
+        if (u > 1) {
+          os << "x^" << u;
+        }
       }
       is_first = false;
     }
