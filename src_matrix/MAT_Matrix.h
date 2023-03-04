@@ -542,6 +542,15 @@ std::ostream &operator<<(std::ostream &os, MyVector<T> const &TheVec) {
 template <typename T>
 void WriteVector(std::ostream &os, MyVector<T> const &TheVec) {
   int n = TheVec.size();
+  os << n << "\n";
+  for (int i = 0; i < n; i++)
+    os << " " << TheVec(i);
+  os << "\n";
+}
+
+template <typename T>
+void WriteVectorNoDim(std::ostream &os, MyVector<T> const &TheVec) {
+  int n = TheVec.size();
   for (int i = 0; i < n; i++)
     os << " " << TheVec(i);
   os << "\n";

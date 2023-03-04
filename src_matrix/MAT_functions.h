@@ -17,14 +17,9 @@ template <typename T> MyMatrix<T> SortUnicizeMatrix(MyMatrix<T> const &M) {
   };
   std::set<MyVector<T>, std::function<bool(MyVector<T>, MyVector<T>)>>
       eListVect(comp);
-  //  eListVect=std::set<MyVector<T>, decltype(comp)> (comp);
   for (int iRow = 0; iRow < nbRow; iRow++) {
     MyVector<T> V = GetMatrixRow(M, iRow);
-    /*    std::cerr << "V=";
-    WriteVector(std::cerr, V);
-    std::cerr << "Before CanonicalizeVector\n";*/
     MyVector<T> Vcan = CanonicalizeVector(V);
-    //    std::cerr << " After CanonicalizeVector\n";
     eListVect.insert(Vcan);
   }
   int nbVect = eListVect.size();

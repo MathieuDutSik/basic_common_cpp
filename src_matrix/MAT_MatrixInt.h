@@ -1209,9 +1209,9 @@ template <typename T> MyMatrix<T> ComplementToBasis(MyVector<T> const &TheV) {
 #ifdef DEBUG_MATRIX_INT
   if (!TestEquality(TheVcopy, TheV)) {
     std::cerr << "TheVcopy =";
-    WriteVector(std::cerr, TheVcopy);
+    WriteVectorNoDim(std::cerr, TheVcopy);
     std::cerr << "TheV =";
-    WriteVector(std::cerr, TheV);
+    WriteVectorNoDim(std::cerr, TheV);
     std::cerr << "Bookkeeping error\n";
     throw TerminalException{1};
   }
@@ -2034,8 +2034,6 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
 #endif
     MyVector<T> eVect_pre = GetMatrixRow(NSP, 0);
     MyVector<T> eVect = CanonicalizeVectorToInvertible(eVect_pre);
-    /*    std::cerr << "eVect=";
-          WriteVector(std::cerr, eVect);*/
     int n2 = DimLoc + 1;
     while (true) {
       std::vector<int> ListIdxZ;
@@ -2136,13 +2134,7 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   int DimSpace = TheBasis.rows();
   for (int iBas = 0; iBas < DimSpace; iBas++) {
     MyVector<T> eLine = GetMatrixRow(TheBasis, iBas);
-    //      std::cerr << "Before SolutionIntMat, iBas=" << iBas << "\n";
     std::optional<MyVector<T>> opt = SolutionIntMat(ListElement, eLine);
-    /*      std::cerr << "ListElement=\n";
-            WriteMatrixGAP(std::cerr, ListElement);
-            std::cerr << "eLine=\n";
-            WriteVectorGAP(std::cerr, eLine);
-            std::cerr << "After SolutionIntMat 1\n";*/
     if (!opt) {
       std::cerr << "Error in GetZbasis 1\n";
       throw TerminalException{1};
@@ -2150,14 +2142,7 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   }
   for (int iElt = 0; iElt < nbElt; iElt++) {
     MyVector<T> eElt = GetMatrixRow(ListElement, iElt);
-    //      std::cerr << "Before SolutionIntMat, iElt=" << iElt << "\n";
     std::optional<MyVector<T>> opt = SolutionIntMat(TheBasis, eElt);
-    /*      std::cerr << "TheBasis=\n";
-            WriteMatrixGAP(std::cerr, TheBasis);
-            std::cerr << "eElt=\n";
-            WriteVectorGAP(std::cerr, eElt);
-            std::cerr << "After SolutionIntMat 2 eResIntMat.TheRes=" <<
-       eResIntMat.TheRes << "\n";*/
     if (!opt) {
       std::cerr << "Error in GetZbasis 2\n";
       throw TerminalException{1};
