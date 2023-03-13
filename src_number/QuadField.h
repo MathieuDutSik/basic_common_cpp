@@ -4,6 +4,7 @@
 
 #include "NumberTheory.h"
 #include "Temp_common.h"
+#include "InputOutput.h"
 #include <limits>
 #include <string>
 
@@ -129,53 +130,13 @@ public:
     return z;
   }
   friend std::ostream &operator<<(std::ostream &os, QuadField<T, d> const &v) {
-    return os << "(" << v.a << "," << v.b << ")";
+    std::vector<T> V{v.a, v.b};
+    WriteVectorFromRealAlgebraicString(os, V);
   }
   friend std::istream &operator>>(std::istream &is, QuadField<T, d> &v) {
-    char c;
-    std::string s;
-    size_t miss_val = std::numeric_limits<size_t>::max();
-    size_t pos = 0;
-    // First skipping the spaces
-    while (true) {
-      is.get(c);
-      if (c != ' ' && c != '\n') {
-        s += c;
-        pos++;
-        break;
-      }
-    }
-    // Second reading the data till a space or end.
-    size_t pos_comma = miss_val;
-    while (true) {
-      if (is.eof()) {
-        break;
-      }
-      is.get(c);
-      if (c == ' ' || c == '\n') {
-        break;
-      }
-      if (c == ',')
-        pos_comma = pos;
-      s += c;
-      pos++;
-    }
-    // Now parsing the data
-    if (pos_comma == miss_val) {
-      std::cerr << "Failed to find the comma\n";
-      throw TerminalException{1};
-    }
-    //    std::cerr << "-------------------\n";
-    //    std::cerr << "s=" << s << " pos_comma=" << pos_comma << "\n";
-    std::string sA = s.substr(1, pos_comma);
-    std::string sB = s.substr(pos_comma + 1, s.size() - 2 - pos_comma);
-    //    std::cerr << "sA=" << sA << "  sB=" << sB << "\n";
-    std::istringstream isA(sA);
-    isA >> v.a;
-    std::istringstream isB(sB);
-    isB >> v.b;
-    //    std::cerr << "v.a=" << v.a << "  v.b=" << v.b << "\n";
-    //    std::cerr << "-------------------\n";
+    std::vector<T> V = ReadVectorFromRealAlgebraicString<T>(is, 2);
+    v.a = V[0];
+    v.b = V[1];
     return is;
   }
   friend bool operator==(QuadField<T, d> const &x, QuadField<T, d> const &y) {
