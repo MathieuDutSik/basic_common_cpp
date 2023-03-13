@@ -568,6 +568,13 @@ void WriteVectorGAP(std::ostream &os, MyVector<T> const &TheVec) {
   os << " ]";
 }
 
+
+template <typename T>
+void WriteVectorFile(std::string const &eFile, MyVector<T> const &TheV) {
+  std::ofstream os(eFile);
+  WriteVector(os, TheV);
+}
+
 template <typename T> std::string StringVector(MyVector<T> const &TheVec) {
   std::ostringstream os;
   int n = TheVec.size();
