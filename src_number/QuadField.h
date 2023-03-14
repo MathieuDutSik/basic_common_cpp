@@ -132,6 +132,7 @@ public:
   friend std::ostream &operator<<(std::ostream &os, QuadField<T, d> const &v) {
     std::vector<T> V{v.a, v.b};
     WriteVectorFromRealAlgebraicString(os, V);
+    return os;
   }
   friend std::istream &operator>>(std::istream &is, QuadField<T, d> &v) {
     std::vector<T> V = ReadVectorFromRealAlgebraicString<T>(is, 2);
