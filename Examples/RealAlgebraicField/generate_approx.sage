@@ -80,7 +80,7 @@ FileName1 = "QuadField2"
 create_real_algebraic_input(val1, l_coeff1, FileName1)
 
 val0 = 2 * cos(2*pi/9)
-l_coeff0 = [-1, -3, 0, 1]
+l_coeff0 = [1, -3, 0, 1]
 FileName0 = "CubicFieldDisc_81"
 create_real_algebraic_input(val0, l_coeff0, FileName0)
 

@@ -33,6 +33,17 @@ bool IsExistingFile(std::string const &eFile) {
   }
 }
 
+std::string FindAvailableFileFromPrefix(std::string const& prefix) {
+  size_t iFile = 0;
+  while(true) {
+    std::string FullFile = prefix + std::to_string(iFile);
+    if (!IsExistingFile(FullFile)) {
+      return FullFile;
+    }
+    iFile++;
+  }
+}
+
 void IsExistingFileDie(std::string const &eFile) {
   if (!IsExistingFile(eFile)) {
     std::cerr << "The file eFile = " << eFile << "\n";
