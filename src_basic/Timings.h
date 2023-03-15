@@ -173,6 +173,15 @@ struct HumanTime {
       }
       return reply;
     }
+    if (delta < one_hour) {
+      int64_t res = delta / one_minute;
+      std::string reply = std::to_string(res) + "min";
+      int64_t res2 = (delta - one_day * res) / one_second;
+      if (res2 > 0) {
+        reply += " " + std::to_string(res2) + "s";
+      }
+      return reply;
+    }
     if (delta < one_day) {
       int64_t res = delta / one_hour;
       std::string reply = std::to_string(res) + "h";
