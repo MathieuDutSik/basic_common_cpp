@@ -148,7 +148,7 @@ struct HumanTime {
     }
     if (delta < one_millisecond) {
       int64_t res = delta / one_microsecond;
-      std::string reply = std::to_string(res) + "\u039Cs";
+      std::string reply = std::to_string(res) + "micros";
       int64_t res2 = delta - one_microsecond * res;
       if (res2 > 0) {
         reply += " " + std::to_string(res2) + "ns";
@@ -160,7 +160,7 @@ struct HumanTime {
       std::string reply = std::to_string(res) + "ms";
       int64_t res2 = (delta - one_millisecond * res) / one_microsecond;
       if (res2 > 0) {
-        reply += " " + std::to_string(res2) + "\u039Cs";
+        reply += " " + std::to_string(res2) + "micros";
       }
       return reply;
     }
