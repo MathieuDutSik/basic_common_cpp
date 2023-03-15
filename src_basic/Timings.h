@@ -126,6 +126,77 @@ using MillisecondTime = TimeEval<std::chrono::milliseconds>;
 using MicrosecondTime = TimeEval<std::chrono::microseconds>;
 using NanosecondTime = TimeEval<std::chrono::nanoseconds>;
 
+// The HumanTime
+
+struct HumanTime {
+  std::chrono::time_point<std::chrono::system_clock> time;
+  HumanTime() { time = std::chrono::system_clock::now(); }
+  std::string eval() {
+    std::chrono::time_point<std::chrono::system_clock> timeNew =
+        std::chrono::system_clock::now();
+    int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time).count();
+    time = timeNew;
+    int64_t one_microsecond = 1000;
+    int64_t one_millisecond = 1000 * one_microsecond;
+    int64_t one_second = 1000 * one_millisecond;
+    int64_t one_minute = 60 * one_second;
+    int64_t one_hour = 60 * one_minute;
+    int64_t one_day = 24 * one_hour;
+    if (delta < one_microsecond) {
+      std::string reply = std::to_string(delta) + "ns";
+      return reply;
+    }
+    if (delta < one_millisecond) {
+      int64_t res = delta / one_microsecond;
+      std::string reply = std::to_string(res) + "\u039Cs";
+      int64_t res2 = delta - one_microsecond * res;
+      if (res2 > 0) {
+        reply += " " + std::to_string(res2) + "ns";
+      }
+      return reply;
+    }
+    if (delta < one_second) {
+      int64_t res = delta / one_millisecond;
+      std::string reply = std::to_string(res) + "ms";
+      int64_t res2 = (delta - one_millisecond * res) / one_microsecond;
+      if (res2 > 0) {
+        reply += " " + std::to_string(res2) + "\u039Cs";
+      }
+      return reply;
+    }
+    if (delta < one_minute) {
+      int64_t res = delta / one_second;
+      std::string reply = std::to_string(res) + "s";
+      int64_t res2 = (delta - one_second * res) / one_millisecond;
+      if (res2 > 0) {
+        reply += " " + std::to_string(res2) + "ms";
+      }
+      return reply;
+    }
+    if (delta < one_day) {
+      int64_t res = delta / one_hour;
+      std::string reply = std::to_string(res) + "h";
+      int64_t res2 = (delta - one_day * res) / one_minute;
+      if (res2 > 0) {
+        reply += " " + std::to_string(res2) + "min";
+      }
+      return reply;
+    }
+    int64_t res = delta / one_day;
+    std::string reply = std::to_string(res) + "day";
+    int64_t res2 = (delta - one_day * res) / one_hour;
+    if (res2 > 0) {
+      reply += " " + std::to_string(res2) + "h";
+    }
+    return reply;
+  }
+};
+
+std::ostream &operator<<(std::ostream &os, HumanTime &x) {
+  os << x.eval();
+  return os;
+}
+
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
 // clang-format on
