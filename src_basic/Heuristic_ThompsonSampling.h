@@ -626,6 +626,16 @@ struct SingleThompsonSamplingState {
       iter++;
     return iter->first;
   }
+  void print(std::ostream & os) const {
+    os << "ListAllowedOut =";
+    for (auto & eStr : ListAllowedOut)
+      os << " " << eStr;
+    os << "\n";
+    os << "map_ans_ledf=\n";
+    for (auto & kv : map_ans_ledf) {
+      os << "key=" << kv.first << " ledf=" << kv.second.string() << "\n";
+    }
+  }
 };
 
 template <typename T> struct KeyCompression {
@@ -1070,6 +1080,20 @@ public:
                    "submission being uncompleted\n";
       std::cerr << "Just so you know. Most likely, premature termination, "
                    "otherwise a bug\n";
+    }
+    if (WriteLog) {
+      std::cerr << "map_name_ledf=\n";
+      for (auto & kv : map_name_ledf) {
+        std::cerr << "key=" << kv.first << " desc=" << kv.second.string() << "\n";
+      }
+      std::cerr << "um_compress_ts\n";
+      for (auto & kv : um_compress_ts) {
+        std::cerr << "key =";
+        for (auto & val : kv.first)
+          std::cerr << " " << val;
+        std::cerr << " val=\n";
+        kv.second.print(std::cerr);
+      }
     }
   }
 
