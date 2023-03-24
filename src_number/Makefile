@@ -1,7 +1,7 @@
-PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion RealCubicFieldTest QuadFieldTest RationalTest
+#PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion RealCubicFieldTest QuadFieldTest RationalTest
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
-#PROGRAM		= Factorize
+PROGRAM		= Factorize
 #PROGRAM		= PracticalInf
 #PROGRAM		= TestQuoInt
 #PROGRAM		= TestConversion
