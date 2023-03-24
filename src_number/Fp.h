@@ -25,6 +25,7 @@ public:
   // Constructors
   Fp() : num(0) {}
   Fp(Tint const &x) : num(x) { reduce(); }
+  Fp(Tint const &_x, Tint const &_y) { Fp<Tint,P> x = _x; x/=Fp<Tint,P>(_y); num = x.num; }
   // Assignment operators
   Fp<Tint, P> operator=(Tint const &u) {
     // assignment operator from int
@@ -112,13 +113,13 @@ public:
   }
   
   void operator/=(Fp<Tint,P> const &x) {
-    num = num / x;
+    *this  = *this / x;
   }
   void operator+=(Fp<Tint,P> const &x) {
-    num = num+x;
+    *this = *this+x;
   }
   void operator-=(Fp<Tint,P> const &x) {
-    num = num-x;
+    *this = *this-x;
   }
   friend Fp<Tint,P> operator+(Fp<Tint,P> const &x,
                                   Fp<Tint,P> const &y) {
@@ -143,7 +144,7 @@ public:
     return z;
   }
   void operator*=(Fp<Tint,P> const &x) {
-    num = num * x;
+    *this = *this * x;
   }
   friend Fp<Tint,P> operator*(Fp<Tint,P> const &x,
                                   Fp<Tint,P> const &y) {
