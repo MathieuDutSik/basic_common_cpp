@@ -3,19 +3,32 @@
 
 
 #define MAX_INT64_PROD 2147483647
-#define MAX_INT64_SUM 4611686018427387903
+#define MAX_INT64_SUM  4611686018427387903
 
 
 void check_prod_int64(int64_t val) {
   if (val > MAX_INT64_PROD || val < -MAX_INT64_PROD) {
-    std::cerr << "Error in product operation\n";
+    std::cerr << "Safety check triggerred for product operation of int64_t\n";
+    std::cerr << "val=" << val << " MAX_INT64_PROD=" << MAX_INT64_PROD << "\n";
     throw TerminalException{1};
   }
 }
 
 void check_sum_int64(int64_t val) {
   if (val > MAX_INT64_SUM || val < -MAX_INT64_SUM) {
-    std::cerr << "Error in sum operation\n";
+    std::cerr << "Safety check triggerred for sum operation of int64_t\n";
+    std::cerr << "val=" << val << " MAX_INT64_SUM=" << MAX_INT64_SUM << "\n";
+    throw TerminalException{1};
+  }
+}
+
+void check_reasonableness(std::string oper, int64_t val) {
+  //  int64_t limit = 1000;
+  //  int64_t limit = MAX_INT64_PROD;
+  int64_t limit = MAX_INT64_SUM;
+  if (T_abs(val) > limit) {
+    std::cerr << "We have val=" << val << " int(val)=" << int(val) << "\n";
+    std::cerr << "which does not seem reasonable at oper=" << oper << "\n";
     throw TerminalException{1};
   }
 }
@@ -25,9 +38,15 @@ struct SafeInt64 {
 private:
   int64_t val;
 public:
-  SafeInt64() : val(0) {}
-  SafeInt64(int64_t const &x) : val(x) {}
-  SafeInt64(SafeInt64 const &x) : val(x.val) {}
+  SafeInt64() : val(0) {
+    std::cerr << "Default constructor for SafeInt64 val=" << val << "\n";
+  }
+  SafeInt64(int64_t const &x) : val(x) {
+    std::cerr << "Int64_t constructor for SafeInt64 val=" << x << "\n";
+  }
+  SafeInt64(SafeInt64 const &x) : val(x.val) {
+    std::cerr << "SafeInt64 constructor for SafeInt64 val=" << x << "\n";
+  }
   // Assignment operators
   SafeInt64 operator=(SafeInt64 const &u) {
     // assignment operator from int
@@ -40,17 +59,26 @@ public:
     check_sum_int64(val);
     check_sum_int64(x.val);
     val += x.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator+", val);
+#endif
   }
   void operator-=(SafeInt64 const &x) {
     check_sum_int64(val);
     check_sum_int64(x.val);
     val -= x.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator-=", val);
+#endif
   }
   friend SafeInt64 operator+(SafeInt64 const &x, SafeInt64 const &y) {
     check_sum_int64(x.val);
     check_sum_int64(y.val);
     SafeInt64 z;
     z.val = x.val + y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator+(SafeInt64,SafeInt64)", z.val);
+#endif
     return z;
   }
   friend SafeInt64 operator+(int64_t const &x, SafeInt64 const &y) {
@@ -58,6 +86,9 @@ public:
     check_sum_int64(y.val);
     SafeInt64 z;
     z.val = x + y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator+(int64_t,SafeInt64)", z.val);
+#endif
     return z;
   }
   friend SafeInt64 operator+(SafeInt64 const &x, int64_t const &y) {
@@ -65,45 +96,74 @@ public:
     check_sum_int64(y);
     SafeInt64 z;
     z.val = x.val + y;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator+(SafeInt64,int64_t)", z.val);
+#endif
     return z;
   }
   friend SafeInt64 operator-(SafeInt64 const &x, SafeInt64 const &y) {
     check_sum_int64(x.val);
     check_sum_int64(y.val);
     SafeInt64 z;
-    z.val = x.val + y.val;
+    z.val = x.val - y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    std::cerr << "x.val=" << x.val << " y.val=" << y.val << "\n";
+    check_reasonableness("operator-(SafeInt64,SafeInt64)", z.val);
+#endif
     return z;
   }
   friend SafeInt64 operator-(SafeInt64 const &x) {
     SafeInt64 z;
     z.val = -x.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator-(SafeInt64)", z.val);
+#endif
     return z;
   }
   SafeInt64 operator++() {
     check_sum_int64(val);
     val++;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator++()", val);
+#endif
     return *this;
   }
   SafeInt64 operator++(int) {
     SafeInt64 tmp = *this;
     check_sum_int64(val);
     val++;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator++(int)", val);
+#endif
     return tmp;
   }
   SafeInt64 operator--() {
     check_sum_int64(val);
     val--;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator--()", val);
+#endif
     return *this;
   }
   SafeInt64 operator--(int) {
     SafeInt64 tmp = *this;
     check_sum_int64(val);
     val--;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator--(int)", val);
+#endif
     return tmp;
   }
   void operator*=(SafeInt64 const &x) {
     check_sum_int64(x.val);
+#ifdef CHECK_SAFETY_INTEGER
+    std::cerr << "val=" << val << "\n";
+#endif
     val *= x.val;
+#ifdef CHECK_SAFETY_INTEGER
+    std::cerr << "x.val=" << x.val << "\n";
+    check_reasonableness("operator*=()", val);
+#endif
   }
   friend SafeInt64 operator*(SafeInt64 const &x,
                              SafeInt64 const &y) {
@@ -111,6 +171,9 @@ public:
     check_prod_int64(y.val);
     SafeInt64 z;
     z.val = x.val * y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator*(SafeInt64_t,SafeInt64_t)", z.val);
+#endif
     return z;
   }
   friend SafeInt64 operator*(int64_t const &x, SafeInt64 const &y) {
@@ -118,6 +181,9 @@ public:
     check_prod_int64(y.val);
     SafeInt64 z;
     z.val = x * y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator*(int64_t,SafeInt64)", z.val);
+#endif
     return z;
   }
   friend SafeInt64 operator*(SafeInt64 const &x, int64_t const &y) {
@@ -125,6 +191,9 @@ public:
     check_prod_int64(y);
     SafeInt64 z;
     z.val = x.val * y;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator*(SafeInt64,int64_t)", z.val);
+#endif
     return z;
   }
   friend std::ostream &operator<<(std::ostream &os, SafeInt64 const &v) {

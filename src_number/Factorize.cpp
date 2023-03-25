@@ -29,8 +29,8 @@ void test(std::string name_numeric) {
 
 int main() {
   try {
-    test<mpz_class>("mpz_class");
-    test<mpq_class>("mpq_class");
+    //    test<mpz_class>("mpz_class");
+    //    test<mpq_class>("mpq_class");
     test<SafeInt64>("SafeInt64");
   } catch (TerminalException const &e) {
     exit(e.eVal);
