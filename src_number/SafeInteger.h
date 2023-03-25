@@ -35,7 +35,7 @@ public:
     return *this;
   }
   int64_t & get_val() { return val; }
-  const int64_t & get_const_num() const { return val; }
+  const int64_t & get_const_val() const { return val; }
   void operator+=(SafeInt64 const &x) {
     check_sum_int64(val);
     check_sum_int64(x.val);
@@ -145,9 +145,20 @@ public:
 
 
 
+inline SafeInt64 GetDenominator_z([[maybe_unused]] SafeInt64 const &x) { return SafeInt64(1); }
 
+SafeInt64 QuoInt(SafeInt64 const &a, SafeInt64 const &b) {
+  const int64_t& a_int = a.get_const_val();
+  const int64_t& b_int = b.get_const_val();
+  int64_t quot = QuoInt_C_integer<int64_t>(a_int, b_int);
+  return SafeInt64(quot);
+}
 
-
+void ResInt_Kernel(SafeInt64 const &a, SafeInt64 const &b, SafeInt64 & res) {
+  const int64_t& a_int = a.get_const_val();
+  const int64_t& b_int = b.get_const_val();
+  res.get_val() = ResInt_C_integer<int64_t>(a_int, b_int);
+}
 
 
 
