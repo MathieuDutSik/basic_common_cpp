@@ -79,6 +79,28 @@ public:
     z.val = -x.val;
     return z;
   }
+  SafeInt64 operator++() {
+    check_sum_int64(val);
+    val++;
+    return *this;
+  }
+  SafeInt64 operator++(int) {
+    SafeInt64 tmp = *this;
+    check_sum_int64(val);
+    val++;
+    return tmp;
+  }
+  SafeInt64 operator--() {
+    check_sum_int64(val);
+    val--;
+    return *this;
+  }
+  SafeInt64 operator--(int) {
+    SafeInt64 tmp = *this;
+    check_sum_int64(val);
+    val--;
+    return tmp;
+  }
   void operator*=(SafeInt64 const &x) {
     check_sum_int64(x.val);
     val *= x.val;

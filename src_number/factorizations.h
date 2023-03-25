@@ -18,7 +18,7 @@ std::pair<bool, T> rho_pollard_factorize(T const &number) {
       if (diff < 0)
         diff = -diff;
       factor = GcdPair(diff, number);
-    } while (--count && (factor == 1));
+    } while (--count > 0 && factor == 1);
     size *= 2;
     x_fixed = x;
   } while (factor == 1);
