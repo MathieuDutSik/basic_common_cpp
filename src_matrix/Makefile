@@ -1,4 +1,4 @@
-PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix TestMatrixInverse TestPerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice TestHilbertMatrix TestProdMat Matrix_As_Set
+#PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix TestMatrixInverse TestPerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice TestHilbertMatrix TestProdMat Matrix_As_Set
 #PROGRAM		= ComputePointer
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= TestMatrixInverse
@@ -16,7 +16,7 @@ PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNorm
 #PROGRAM		= TestProdMat
 #PROGRAM		= test
 #PROGRAM		= NonUniqueScaleToInteger
-#PROGRAM		= NullspaceComputationQ5
+PROGRAM		= NullspaceComputation
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
