@@ -39,13 +39,19 @@ private:
   int64_t val;
 public:
   SafeInt64() : val(0) {
+#ifdef CHECK_SAFETY_INTEGER
     std::cerr << "Default constructor for SafeInt64 val=" << val << "\n";
+#endif
   }
   SafeInt64(int64_t const &x) : val(x) {
+#ifdef CHECK_SAFETY_INTEGER
     std::cerr << "Int64_t constructor for SafeInt64 val=" << x << "\n";
+#endif
   }
   SafeInt64(SafeInt64 const &x) : val(x.val) {
+#ifdef CHECK_SAFETY_INTEGER
     std::cerr << "SafeInt64 constructor for SafeInt64 val=" << x << "\n";
+#endif
   }
   // Assignment operators
   SafeInt64 operator=(SafeInt64 const &u) {
