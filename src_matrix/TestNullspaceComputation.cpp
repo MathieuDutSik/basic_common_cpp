@@ -3,14 +3,24 @@
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "QuadField.h"
+#include "SafeInteger.h"
+#include "Fp.h"
 #include "MAT_Matrix.h"
 // clang-format on
 
 
 template<typename T>
 std::string full_process_type(MyMatrix<int> const& M) {
-  MyMatrix<T> M_T = UniversalMatrixConversion<T,int>(M);
-  MyMatrix<T> TheKer = NullspaceMat(TheMat);
+  int n_row = M.rows();
+  int n_col = M.cols();
+  MyMatrix<T> M_T(n_row,n_col);
+  for (int i=0; i<n_row; i++) {
+    for (int j=0; j<n_col; j++) {
+      M_T(i,j) = M(i,j);
+    }
+  }
+  //  MyMatrix<T> M_T = UniversalMatrixConversion<T,int>(M);
+  MyMatrix<T> TheKer = NullspaceMat(M_T);
   //
   std::stringstream os;
   WriteMatrix(os, TheKer);
@@ -20,10 +30,12 @@ std::string full_process_type(MyMatrix<int> const& M) {
 
 
 std::string process(std::string const& arith, MyMatrix<int> const& M) {
+  /*
   if (arith == "Fp") {
     using T = Fp<long, 2147389441>;
     return full_process_type<T>(M);
   }
+  */
   if (arith == "rational<SafeInt64>") {
     using T = Rational<SafeInt64>;
     return full_process_type<T>(M);
@@ -68,14 +80,9 @@ std::string process(std::string const& arith, MyMatrix<int> const& M) {
 
 
 void process_listm_listarith(std::vector<MyMatrix<int>> const& ListM, std::vector<std::string> const& ListArith) {
-  for (auto arith : ListArith) {
-    HumanTime time;
-    for (auto & eM : ListM)
-      process(arith, eM);
-    std::cerr << "Result for arithmetic arith, time=" << time << "\n";
-  }
   for (auto & eM : ListM) {
     std::unordered_map<std::string, std::vector<std::string>> map;
+    std::cerr << "|eM|=" << eM.rows() << " / " << eM.cols() << "\n";
     for (auto & arith : ListArith) {
       std::string e_str = process(arith, eM);
       map[e_str].push_back(arith);
@@ -89,6 +96,12 @@ void process_listm_listarith(std::vector<MyMatrix<int>> const& ListM, std::vecto
         std::cerr << "\n";
       }
     }
+  }
+  for (auto arith : ListArith) {
+    HumanTime time;
+    for (auto & eM : ListM)
+      process(arith, eM);
+    std::cerr << "Result for arithmetic arith=" << arith << " time=" << time << "\n";
   }
 }
 
@@ -109,7 +122,8 @@ MyMatrix<int> get_random_matrix(int m, int n) {
 int main(int argc, char *argv[]) {
   SingletonTime time1;
   try {
-    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>", "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
+    //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>", "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
+    std::vector<std::string> ListArith = {"rational<SafeInt64>", "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
 
 
     std::vector<MyMatrix<int>> ListM;
@@ -121,6 +135,14 @@ int main(int argc, char *argv[]) {
     insert(5,3);
     insert(6,2);
     insert(4,2);
+    insert(6,7);
+    /*
+    insert(8,9);
+    insert(10,11);
+    insert(15,14);
+    insert(20,21);
+    insert(25,24);
+    */
     //
     process_listm_listarith(ListM, ListArith);
     //

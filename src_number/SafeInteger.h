@@ -182,6 +182,24 @@ public:
 #endif
     return z;
   }
+  friend SafeInt64 operator/(SafeInt64 const &x,
+                             SafeInt64 const &y) {
+    SafeInt64 z;
+    z.val = x.val / y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator/(SafeInt64_t,SafeInt64_t)", z.val);
+#endif
+    return z;
+  }
+  friend SafeInt64 operator%(SafeInt64 const &x,
+                             SafeInt64 const &y) {
+    SafeInt64 z;
+    z.val = x.val % y.val;
+#ifdef CHECK_SAFETY_INTEGER
+    check_reasonableness("operator/(SafeInt64_t,SafeInt64_t)", z.val);
+#endif
+    return z;
+  }
   friend SafeInt64 operator*(int64_t const &x, SafeInt64 const &y) {
     check_prod_int64(x);
     check_prod_int64(y.val);
