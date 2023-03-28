@@ -16,7 +16,8 @@
 #PROGRAM		= TestProdMat
 #PROGRAM		= test
 #PROGRAM		= NonUniqueScaleToInteger
-PROGRAM		= NullspaceComputation
+#PROGRAM		= NullspaceComputation
+PROGRAM		= TestNullspaceComputation
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
