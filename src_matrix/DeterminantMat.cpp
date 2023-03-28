@@ -6,7 +6,6 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-
 template<typename T>
 void compute_determinant_kernel(std::string const& eFile) {
   MyMatrix<T> A = ReadMatrixFile<T>(eFile);
