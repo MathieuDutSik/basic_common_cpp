@@ -194,6 +194,11 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
 template <typename T>
 TheHeuristic<T>
 HeuristicFromListString(std::vector<std::string> const &ListString) {
+  size_t n_cond = ParseScalar<int>(ListString[0]);
+  if (n_cond + 2 != ListString.size()) {
+    std::cerr << "The input ListString appears incoherent with respect to length\n";
+    throw TerminalException{1};
+  }
   std::string str_tot;
   for (auto const &eStr : ListString) {
     str_tot += eStr;
