@@ -233,6 +233,44 @@ template <typename T> T ComputeLCM(std::vector<T> const &eVect) {
   return eLCM;
 }
 
+template <typename T, typename Tint>
+MyVector<Tint> RescaleVec(MyVector<T> const &v) {
+  static_assert(is_implementation_of_Q<T>::value, "Requires T to be an implementation of Q");
+  static_assert(is_implementation_of_Q<Tint>::value || is_implementation_of_Z<Tint>::value, "Requires Tint to be an implementation of Z or Q");
+  int cols = v.size();
+  std::vector<Tint> dens(cols,1);
+  MyVector<Tint> vret = MyVector<Tint>(cols);
+  for( int iCol = 0; iCol < cols; iCol++){
+    dens[iCol] = v(iCol).get_den();
+  }
+  Tint scale = LCMlist(dens);
+  for( int iCol = 0; iCol < cols; iCol++) {
+    vret(iCol) = (scale / v(iCol).get_den()) * v(iCol).get_num();
+  }
+  return vret;
+}
+
+template <typename T, typename Tint>
+MyMatrix<Tint> RescaleRows(MyMatrix<T> const &M) {
+  static_assert(is_implementation_of_Q<T>::value, "Requires T to be an implementation of Q");
+  static_assert(is_implementation_of_Q<Tint>::value || is_implementation_of_Z<Tint>::value, "Requires Tint to be an implementation of Z or Q"); 
+  int rows = M.rows();
+  int cols = M.cols();
+  std::vector<Tint> dens(cols,1);
+  MyMatrix<Tint> Mret = MyMatrix<Tint>(rows, cols);
+  for( int iRow = 0; iRow < rows; iRow++) {
+    for( int iCol = 0; iCol < cols; iCol++){
+      dens[iCol] = M(iRow, iCol).get_den();
+    }
+    Tint scale = LCMlist(dens);
+    for( int iCol = 0; iCol < cols; iCol++) {
+      Mret(iRow, iCol) = (scale / M(iRow,iCol).get_den()) * M(iRow,iCol).get_num();
+    }
+  }
+  return Mret;
+}
+
+
 template <typename T> struct FractionMatrix {
   T TheMult;
   MyMatrix<T> TheMat;
