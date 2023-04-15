@@ -79,7 +79,7 @@ Face ReadFaceFile(std::string const &eFile) {
 
 Face RandomFace(int n) {
   Face f(n);
-  for (Tidx i = 0; i < len; i++) {
+  for (int i = 0; i < n; i++) {
     int eVal = random() % 2;
     f[i] = eVal;
   }
