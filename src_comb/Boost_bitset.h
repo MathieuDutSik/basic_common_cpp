@@ -77,6 +77,15 @@ Face ReadFaceFile(std::string const &eFile) {
   return ReadFace(is);
 }
 
+Face RandomFace(int n) {
+  Face f(n);
+  for (Tidx i = 0; i < len; i++) {
+    int eVal = random() % 2;
+    f[i] = eVal;
+  }
+  return f;
+}
+
 Face RandomKFace(int n, int k) {
   if (n < 0) {
     std::cerr << "We should have n >= 0. We have n=" << n << "\n";
