@@ -211,6 +211,10 @@ std::ostream &operator<<(std::ostream &os, HumanTime &x) {
   return os;
 }
 
+void runtime(HumanTime & time) {
+  std::cerr << "runtime = " << time << "\n";
+}
+
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
 // clang-format on
