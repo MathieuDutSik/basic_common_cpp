@@ -68,7 +68,20 @@ private:
     num = num / gcd;
     den = den / gcd;
   }
-
+  void check(std::string const& str_test) const {
+    if (den < 0) {
+      std::cerr << "Error occurred at " << str_test << "\n";
+      std::cerr << "num=" << num << " den=" << den << "\n";
+      throw TerminalException{1};
+    }
+  }
+  static void check_static(Rational<Tint> const& x, std::string const& str_test) {
+    if (x.den < 0) {
+      std::cerr << "Error occurred at " << str_test << "\n";
+      std::cerr << "x.num=" << x.num << " x.den=" << x.den << "\n";
+      throw TerminalException{1};
+    }
+  }
 public:
   void operator/=(Rational<Tint> const &x) {
     if (x.num > 0) {
@@ -78,6 +91,7 @@ public:
       num *= -x.den;
       den *= -x.num;
     }
+    check("/=");
     gcd_reduction();
   }
   void operator/=(Tint const &x) {
@@ -87,6 +101,7 @@ public:
       num = -num;
       den *= -x;
     }
+    check("/= (Tint)");
     gcd_reduction();
   }
   void operator+=(Rational<Tint> const &x) {
@@ -95,6 +110,7 @@ public:
     num = num * (x.den / gcd) + x.num * (den / gcd);
     den = new_den;
     // Yes, it is needed: example 1/2 + 1/2
+    check("+=");
     gcd_reduction();
   }
   void operator-=(Rational<Tint> const &x) {
@@ -103,6 +119,7 @@ public:
     num = num * (x.den / gcd) - x.num * (den / gcd);
     den = new_den;
     // Yes, it is needed: example 1/2 - 1/2
+    check("-=");
     gcd_reduction();
   }
   friend Rational<Tint> operator+(Rational<Tint> const &x,
@@ -170,6 +187,7 @@ public:
   void operator*=(Rational<Tint> const &x) {
     num = num * x.num;
     den = den * x.den;
+    check("*");
     gcd_reduction();
   }
   friend Rational<Tint> operator*(Rational<Tint> const &x,
