@@ -116,8 +116,9 @@ public:
   }
   void operator-=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
-    Tint new_den = den * x.den / gcd;
-    num = num * (x.den / gcd) - x.num * (den / gcd);
+    Tint part_prod = x.den / gcd;
+    Tint new_den = den * part_prod;
+    num = num * part_prod - x.num * (den / gcd);
     den = new_den;
     // Yes, it is needed: example 1/2 - 1/2
     //    check("-=");
