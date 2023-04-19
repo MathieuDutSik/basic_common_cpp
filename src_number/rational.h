@@ -116,6 +116,7 @@ public:
   void operator-=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
+    std::cerr << "den=" << den << " x.den=" << x.den << " gcd=" << gcd << "\n";
     num = num * (x.den / gcd) - x.num * (den / gcd);
     den = new_den;
     // Yes, it is needed: example 1/2 - 1/2
