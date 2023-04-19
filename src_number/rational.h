@@ -91,7 +91,7 @@ public:
       num *= -x.den;
       den *= -x.num;
     }
-    check("/=");
+    //    check("/=");
     gcd_reduction();
   }
   void operator/=(Tint const &x) {
@@ -101,26 +101,26 @@ public:
       num = -num;
       den *= -x;
     }
-    check("/= (Tint)");
+    //    check("/= (Tint)");
     gcd_reduction();
   }
   void operator+=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
-    Tint new_den = den * x.den / gcd;
-    num = num * (x.den / gcd) + x.num * (den / gcd);
+    Tint part_prod = x.den / gcd;
+    Tint new_den = den * part_prod;
+    num = num * part_prod + x.num * (den / gcd);
     den = new_den;
     // Yes, it is needed: example 1/2 + 1/2
-    check("+=");
+    //    check("+=");
     gcd_reduction();
   }
   void operator-=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint new_den = den * x.den / gcd;
-    std::cerr << "den=" << den << " x.den=" << x.den << " gcd=" << gcd << "\n";
     num = num * (x.den / gcd) - x.num * (den / gcd);
     den = new_den;
     // Yes, it is needed: example 1/2 - 1/2
-    check("-=");
+    //    check("-=");
     gcd_reduction();
   }
   friend Rational<Tint> operator+(Rational<Tint> const &x,
@@ -188,7 +188,7 @@ public:
   void operator*=(Rational<Tint> const &x) {
     num = num * x.num;
     den = den * x.den;
-    check("*");
+    //    check("*");
     gcd_reduction();
   }
   friend Rational<Tint> operator*(Rational<Tint> const &x,
