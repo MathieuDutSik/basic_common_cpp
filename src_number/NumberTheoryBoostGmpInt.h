@@ -269,7 +269,7 @@ ResQuoInt_kernel(boost::multiprecision::mpq_rational const &a,
         q += sign;
       } else {
         if (res + q * b != a) {
-          std::cerr << "Some error somewhere\n";
+          std::cerr << "Error in ResQuoInt_kernel for boost::multiprecision::mpq_rational\n";
           throw TerminalException{1};
         }
         return {res, q};

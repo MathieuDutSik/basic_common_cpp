@@ -364,7 +364,7 @@ ResQuoInt_kernel(Rational<Tint> const &a, Rational<Tint> const &b) {
         q += sign;
       } else {
         if (res + q * b != a) {
-          std::cerr << "Some error somewhere\n";
+          std::cerr << "Error in ResQuoInt_kernel for raional\n";
           std::cerr << "a=" << a << " b=" << b << "\n";
           std::cerr << "res=" << res << " q=" << q << "\n";
           Tf val = res + q * b;
