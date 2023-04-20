@@ -479,36 +479,6 @@ template <typename To> void NearestInteger_double_To(double const &xI, To &xO) {
   xO = xRnd_To;
 }
 
-template <typename To, typename Ti>
-inline To UniversalFloorScalarInteger(Ti const &a) {
-  To ret;
-  FloorInteger(a, ret);
-  return ret;
-}
-
-template <typename To, typename Ti>
-inline To UniversalCeilScalarInteger(Ti const &a) {
-  To ret;
-  CeilInteger(a, ret);
-  return ret;
-}
-
-template <typename To, typename Ti>
-inline typename std::enable_if<!std::is_same_v<Ti, double>, To>::type
-UniversalNearestScalarInteger(Ti const &a) {
-  To ret;
-  NearestInteger(a, ret);
-  return ret;
-}
-
-template <typename To, typename Ti>
-inline typename std::enable_if<std::is_same_v<Ti, double>, To>::type
-UniversalNearestScalarInteger(Ti const &a) {
-  To ret;
-  NearestInteger_double_To<To>(a, ret);
-  return ret;
-}
-
 // clang-format off
 #endif  // SRC_NUMBER_TYPECONVERSION_H_
 // clang-format on

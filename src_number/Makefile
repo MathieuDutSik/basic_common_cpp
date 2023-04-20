@@ -1,4 +1,4 @@
-PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion RealCubicFieldTest QuadFieldTest RationalTest
+PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion RealCubicFieldTest QuadFieldTest RationalTest TestTypeBoostGmp
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
@@ -10,6 +10,7 @@ PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuo
 #PROGRAM		= QuadFieldTest
 #PROGRAM		= RealCubicFieldTest
 #PROGRAM		= RationalTest
+#PROGRAM		= TestTypeBoostGmp
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
