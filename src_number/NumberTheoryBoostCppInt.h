@@ -5,7 +5,6 @@
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
-#include "NumberTheoryGeneric.h"
 #include "boost_serialization.h"
 #include <boost/multiprecision/cpp_int.hpp>
 #include <limits>
@@ -540,6 +539,9 @@ bool universal_square_root(boost::multiprecision::cpp_rational &ret,
   ret = Tf(ret_n) / Tf(ret_d);
   return true;
 }
+
+#include "TypeConversionFinal.h"
+#include "NumberTheoryGeneric.h"
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYBOOSTCPPINT_H_

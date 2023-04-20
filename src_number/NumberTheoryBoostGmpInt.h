@@ -5,7 +5,6 @@
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
-#include "NumberTheoryGeneric.h"
 #include "boost_serialization.h"
 #include <boost/multiprecision/gmp.hpp>
 #include <iostream>
@@ -531,6 +530,7 @@ bool universal_square_root(boost::multiprecision::mpq_rational &ret,
 }
 
 #include "TypeConversionFinal.h"
+#include "NumberTheoryGeneric.h"
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
