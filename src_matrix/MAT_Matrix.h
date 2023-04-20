@@ -1439,39 +1439,6 @@ T DeterminantMatPermutation(MyMatrix<T> const& A) {
   return TheDet;
 }
 
-
-
-template <typename Tint, typename Tfloat>
-std::pair<Tfloat, MyVector<Tint>>
-FindBestIntegerApproximation(MyVector<Tfloat> const &V, int const &N) {
-  int n = V.size();
-  Tfloat SumAbsVal = 0;
-  for (int i = 0; i < n; i++)
-    SumAbsVal += T_abs(V(i));
-  Tfloat MinErr = SumAbsVal;
-  MyVector<Tint> MinimalApprox(n);
-  //
-  for (int iter = 1; iter < N; iter++) {
-    MyVector<Tint> CandApprox(n);
-    Tfloat SumErr = 0;
-    Tfloat TheMult = iter;
-    for (int i = 0; i < n; i++) {
-      Tfloat val = TheMult * V(i);
-      Tint val_i = UniversalNearestScalarInteger<Tint, Tfloat>(val);
-      CandApprox(i) = val_i;
-      Tfloat valApprox_d =
-          UniversalScalarConversion<Tfloat, Tint>(val_i) / TheMult;
-      SumErr += T_abs(valApprox_d - V(i));
-    }
-    //
-    if (SumErr < MinErr) {
-      MinErr = SumErr;
-      MinimalApprox = CandApprox;
-    }
-  }
-  return {MinErr, std::move(MinimalApprox)};
-}
-
 template <typename T> MyVector<T> OrthogonalHyperplane(MyMatrix<T> const &M) {
   int nbVert = M.rows();
   MyVector<T> eVect(nbVert);
