@@ -2,7 +2,7 @@
 #ifndef SRC_NUMBER_QUADFIELD_H_
 #define SRC_NUMBER_QUADFIELD_H_
 
-#include "NumberTheory.h"
+//#include "NumberTheory.h"
 #include "Temp_common.h"
 #include "InputOutput.h"
 #include <limits>

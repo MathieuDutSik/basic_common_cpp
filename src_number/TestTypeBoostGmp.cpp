@@ -13,4 +13,9 @@ int main() {
   std::cerr << "val=" << val << "\n";
   Tint val_red = UniversalNearestScalarInteger<Tint,T>(val);
   std::cerr << "val_red=" << val_red << "\n";
+  //
+  Tint val3 = 15;
+  Tint val4 = 12;
+  Tint lcm = LCMpair(val3, val4);
+  std::cerr << "lcm=" << lcm << "\n";
 }

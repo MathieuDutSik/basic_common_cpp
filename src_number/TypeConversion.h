@@ -5,7 +5,6 @@
 // All the definitions of special fields are in other include.
 // Nothing of this should depend on GMP or MPREAL or FLINT or whatever.
 //
-//  All GMP are in NumberTheory.h
 //  All mpreal are in mpreal_related.h
 
 #include "BasicNumberTypes.h"
