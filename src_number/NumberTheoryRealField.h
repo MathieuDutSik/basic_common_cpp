@@ -3,7 +3,11 @@
 #define SRC_NUMBER_NUMBERTHEORYREALFIELD_H_
 
 #include "MAT_Matrix.h"
-#include "NumberTheory.h"
+#ifdef OSCAR_USE_BOOST_GMP_BINDINGS
+# include "NumberTheoryBoostGmpInt.h"
+#else
+# include "NumberTheory.h"
+#endif
 #include "Temp_common.h"
 #include "InputOutput.h"
 #include <map>
