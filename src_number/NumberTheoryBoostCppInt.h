@@ -5,6 +5,7 @@
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
+#include "NumberTheoryGeneric.h"
 #include "boost_serialization.h"
 #include <boost/multiprecision/cpp_int.hpp>
 #include <limits>
