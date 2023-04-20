@@ -9,6 +9,7 @@
 #include "NumberTheoryGeneric.h"
 #include "NumberTheoryGmp.h"
 #include "TypeConversion.h"
+#include "TypeConversionFinal.h"
 // clang-format on
 
 // clang-format off
