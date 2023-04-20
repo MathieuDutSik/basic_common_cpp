@@ -309,10 +309,17 @@ private:
   std::vector<std::pair<std::vector<T>, std::vector<T>>> SequenceApproximant;
 };
 
-std::map<int, HelperClassRealField<mpq_class>> list_helper;
+#ifdef OSCAR_USE_BOOST_GMP_BINDINGS
+using Trat_real_field = boost::multiprecision::mpq_rational;
+#else
+using Trat_real_field = mpq_class;
+#endif
+
+
+std::map<int, HelperClassRealField<Trat_real_field>> list_helper;
 
 void insert_helper_real_algebraic_field(
-    int i_field, HelperClassRealField<mpq_class> const &hcrf) {
+    int i_field, HelperClassRealField<Trat_real_field> const &hcrf) {
   //  std::cerr << "insert_helper deg=" << hcrf.deg << " |ExprXdeg|=" <<
   //  hcrf.ExprXdeg.size() << "\n";
   list_helper.emplace(i_field, hcrf);
@@ -335,7 +342,7 @@ template <typename T> bool IsZeroVector(std::vector<T> const &V) {
 
 template <int i_field> class RealField {
 public:
-  using T = mpq_class;
+  using T = Trat_real_field;
   using Tresidual = T;
 
 private:
@@ -620,9 +627,9 @@ template <int i_field> struct hash<RealField<i_field>> {
       seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     };
     size_t seed = 0x9e2479b9;
-    std::vector<mpq_class> V = x.get_const_seq();
+    std::vector<Trat_real_field> V = x.get_const_seq();
     for (auto &val : V) {
-      size_t e_hash = std::hash<mpq_class>()(val);
+      size_t e_hash = std::hash<Trat_real_field>()(val);
       combine_hash(seed, e_hash);
     }
     return seed;
@@ -643,7 +650,7 @@ template <int i_field> struct is_real_algebraic_field<RealField<i_field>> {
 // Some functionality
 
 template <int i_field> bool IsInteger(RealField<i_field> const &x) {
-  std::vector<mpq_class> V = x.get_const_seq();
+  std::vector<Trat_real_field> V = x.get_const_seq();
   size_t len = V.size();
   for (size_t u = 1; u < len; u++)
     if (V[u] != 0)
@@ -657,7 +664,7 @@ template <typename T2, int i_field>
 inline
     typename std::enable_if<not is_real_algebraic_field<T2>::value, void>::type
     TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
-  std::vector<mpq_class> const &V = x1.val.get_const_seq();
+  std::vector<Trat_real_field> const &V = x1.val.get_const_seq();
   size_t len = V.size();
   for (size_t u = 1; u < len; u++) {
     if (V[u] != 0) {
@@ -665,7 +672,7 @@ inline
       throw ConversionException{str};
     }
   }
-  stc<mpq_class> a1{V[0]};
+  stc<Trat_real_field> a1{V[0]};
   TYPE_CONVERSION(a1, x2);
 }
 
@@ -676,7 +683,7 @@ namespace boost::serialization {
 template <class Archive, int i_field>
 inline void serialize(Archive &ar, RealField<i_field> &val,
                       [[maybe_unused]] const unsigned int version) {
-  std::vector<mpq_class> &V = val.get_seq();
+  std::vector<Trat_real_field> &V = val.get_seq();
   for (auto &val : V)
     ar &make_nvp("realfield_seq", val);
 }
