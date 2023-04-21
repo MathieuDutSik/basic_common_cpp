@@ -53,11 +53,11 @@ inline void serialize(Archive &ar, Face &val, const unsigned int version) {
 
 static constexpr uint8_t kBitmask[] = {1, 2, 4, 8, 16, 32, 64, 128};
 
-inline bool getbit(std::vector<uint8_t> const &V, size_t const &pos) {
+inline bool getbit_vector(std::vector<uint8_t> const &V, size_t const &pos) {
   return (V[pos >> 3] >> (pos & 0x07)) & 1;
 }
 
-inline void setbit(std::vector<uint8_t> &V, size_t const &pos, bool val) {
+inline void setbit_vector(std::vector<uint8_t> &V, size_t const &pos, bool val) {
   V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ V[pos / 8]) &
                 kBitmask[pos % 8];
 }
@@ -102,8 +102,8 @@ public:
       size_t const &e_n_face = l_n_face[u];
       std::vector<uint8_t> const &eV = l_V[u];
       for (size_t v = 0; v < e_n_face * n; v++) {
-        bool val = getbit(eV, v);
-        setbit(V, pos, val);
+        bool val = getbit_vector(eV, v);
+        setbit_vector(V, pos, val);
         pos++;
       }
     }
@@ -150,7 +150,7 @@ public:
     size_t pos = n_face * n;
     for (size_t i = 0; i < n; i++) {
       bool val = f[i];
-      setbit(V, pos, val);
+      setbit_vector(V, pos, val);
       pos++;
     }
     n_face++;
@@ -160,7 +160,7 @@ public:
     Face f(n);
     size_t pos = i_orb * n;
     for (size_t i = 0; i < n; i++) {
-      f[i] = getbit(V, pos);
+      f[i] = getbit_vector(V, pos);
       pos++;
     }
     return f;
@@ -179,7 +179,7 @@ public:
     Face f(n);
     size_t pos = n_face * n;
     for (size_t i = 0; i < n; i++) {
-      f[i] = getbit(V, pos);
+      f[i] = getbit_vector(V, pos);
       pos++;
     }
     return f;
@@ -197,7 +197,7 @@ public:
       if (V[u] != vf.V[u])
         return false;
     for (size_t i = q8; i < n_elt; i++)
-      if (getbit(V, i) != getbit(vf.V, i))
+      if (getbit_vector(V, i) != getbit_vector(vf.V, i))
         return false;
     return true;
   }
@@ -218,7 +218,7 @@ public:
     size_t pos = n_face * n;
     for (size_t i = 0; i < n; i++) {
       bool val = fct(i);
-      setbit(V, pos, val);
+      setbit_vector(V, pos, val);
       pos++;
     }
     n_face++;
@@ -235,7 +235,7 @@ public:
     size_t pos = n_face * n;
     for (size_t i = 0; i < n; i++) {
       bool val = fct(i);
-      setbit(V, pos, val);
+      setbit_vector(V, pos, val);
       pos++;
     }
     n_face++;
@@ -244,7 +244,7 @@ public:
   void SetFace(Face &f, size_t i_orb) const {
     size_t pos = i_orb * n;
     for (size_t i = 0; i < n; i++) {
-      f[i] = getbit(V, pos);
+      f[i] = getbit_vector(V, pos);
       pos++;
     }
   }
@@ -260,8 +260,8 @@ public:
     size_t pos = n_face * n;
     size_t depl = w.n_face * n;
     for (size_t i = 0; i < depl; i++) {
-      bool val = getbit(w.V, i);
-      setbit(V, pos, val);
+      bool val = getbit_vector(w.V, i);
+      setbit_vector(V, pos, val);
       pos++;
     }
     n_face += w.n_face;
