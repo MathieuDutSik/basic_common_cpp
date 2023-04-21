@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 
+#include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "ResidueQuotient.h"
 #include "TemplateTraits.h"
@@ -408,11 +409,13 @@ inline void ResInt_Kernel(Rational<Tint> const &a, Rational<Tint> const &b,
 }
 
 template <typename Tint>
-inline Rational<Tint> QuoInt(Rational<Tint> const &a, Rational<Tint> const &b) {
-  return ResQuoInt_kernel(a, b).second;
+inline void QUO_INT(stc<Rational<Tint>> const &a, stc<Rational<Tint>> const &b, Rational<Tint> & q) {
+  q = ResQuoInt_kernel(a.val, b.val).second;
 }
 
-// OVerlying fields, the original motivation
+#include "QuoIntFcts.h"
+
+// Overlying fields, the original motivation
 
 template <> struct overlying_field<int> {
   typedef Rational<int> field_type;

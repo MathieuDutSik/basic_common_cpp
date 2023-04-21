@@ -1,6 +1,7 @@
 #ifndef SRC_NUMBER_SAFEINTEGER_H_
 #define SRC_NUMBER_SAFEINTEGER_H_
 
+#include "BasicNumberTypes.h"
 
 #define MAX_INT64_PROD 2147483647
 #define MAX_INT64_SUM  4611686018427387903
@@ -262,12 +263,14 @@ public:
 
 inline SafeInt64 GetDenominator_z([[maybe_unused]] SafeInt64 const &x) { return SafeInt64(1); }
 
-SafeInt64 QuoInt(SafeInt64 const &a, SafeInt64 const &b) {
-  const int64_t& a_int = a.get_const_val();
-  const int64_t& b_int = b.get_const_val();
+inline void QUO_INT(stc<SafeInt64> const &a, stc<SafeInt64> const &b, SafeInt64 & q) {
+  const int64_t& a_int = a.val.get_const_val();
+  const int64_t& b_int = b.val.get_const_val();
   int64_t quot = QuoInt_C_integer<int64_t>(a_int, b_int);
-  return SafeInt64(quot);
+  q = SafeInt64(quot);
 }
+
+#include "QuoIntFcts.h"
 
 void ResInt_Kernel(SafeInt64 const &a, SafeInt64 const &b, SafeInt64 & res) {
   const int64_t& a_int = a.get_const_val();

@@ -2,6 +2,7 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYGMP_H_
 #define SRC_NUMBER_NUMBERTHEORYGMP_H_
 
+#include "BasicNumberTypes.h"
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
 #include "TypeConversion.h"
@@ -215,22 +216,22 @@ inline void ResInt_Kernel(mpq_class const &a, mpq_class const &b,
   res = mpq_class(res_z) / mpq_class(eLCM);
 }
 
-inline mpz_class QuoInt(mpz_class const &a, mpz_class const &b) {
-  mpz_class quo2;
-  mpz_cdiv_q(quo2.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  if (b > 0 && b * quo2 != a) {
-    if (b > 0)
-      quo2--;
+inline void QUO_INT(stc<mpz_class> const &a, stc<mpz_class> const &b, mpz_class & q) {
+  mpz_cdiv_q(q.get_mpz_t(), a.val.get_mpz_t(), b.val.get_mpz_t());
+  if (b.val > 0 && b.val * q != a.val) {
+    if (b.val > 0)
+      q--;
     else
-      quo2++;
+      q++;
   }
-  return quo2;
 }
 
-inline mpq_class QuoInt(mpq_class const &a, mpq_class const &b) {
-  mpq_class res = ResInt(a, b);
-  return (a - res) / b;
+inline void QUO_INT(stc<mpq_class> const &a, stc<mpq_class> const &b, mpq_class & q) {
+  mpq_class res = ResInt(a.val, b.val);
+  q = (a.val - res) / b.val;
 }
+
+#include "QuoIntFcts.h"
 
 template <typename T> std::pair<T, T> ResQuoInt(T const &a, T const &b) {
   T res = ResInt(a, b);

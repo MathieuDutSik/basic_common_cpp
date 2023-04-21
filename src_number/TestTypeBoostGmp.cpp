@@ -1,5 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "NumberTheoryBoostGmpInt.h"
+#include "ResidueQuotient.h"
 
 int main() {
 
@@ -14,8 +15,8 @@ int main() {
   Tint val_red = UniversalNearestScalarInteger<Tint,T>(val);
   std::cerr << "val_red=" << val_red << "\n";
   //
-  Tint val3 = 15;
-  Tint val4 = 12;
-  Tint lcm = LCMpair(val3, val4);
+  long val3 = 15;
+  long val4 = 12;
+  long lcm = LCMpair(val3, val4);
   std::cerr << "lcm=" << lcm << "\n";
 }

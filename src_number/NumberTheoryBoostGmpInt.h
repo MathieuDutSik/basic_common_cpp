@@ -2,6 +2,7 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
 #define SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
 
+#include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
@@ -214,18 +215,18 @@ inline void ResInt_Kernel(boost::multiprecision::mpz_int const &a,
   }
   res = a - q * b;
 }
-inline boost::multiprecision::mpz_int
-QuoInt(boost::multiprecision::mpz_int const &a,
-       boost::multiprecision::mpz_int const &b) {
+
+void QUO_INT(stc<boost::multiprecision::mpz_int> const &a,
+             stc<boost::multiprecision::mpz_int> const &b,
+             boost::multiprecision::mpz_int & q) {
   using T = boost::multiprecision::mpz_int;
-  T q = a / b;
-  if (a < 0 && b * q != a) {
-    if (b > 0)
+  q = a.val / b.val;
+  if (a.val < 0 && b.val * q != a.val) {
+    if (b.val > 0)
       q--;
     else
       q++;
   }
-  return q;
 }
 
 inline std::pair<boost::multiprecision::mpq_rational,
@@ -282,11 +283,14 @@ inline void ResInt_Kernel(boost::multiprecision::mpq_rational const &a,
                           boost::multiprecision::mpq_rational &res) {
   res = ResQuoInt_kernel(a, b).first;
 }
-inline boost::multiprecision::mpq_rational
-QuoInt(boost::multiprecision::mpq_rational const &a,
-       boost::multiprecision::mpq_rational const &b) {
-  return ResQuoInt_kernel(a, b).second;
+
+void QUO_INT(stc<boost::multiprecision::mpq_rational> const &a,
+             stc<boost::multiprecision::mpq_rational> const &b,
+             boost::multiprecision::mpq_rational & q) {
+  q = ResQuoInt_kernel(a.val, b.val).second;
 }
+
+#include "QuoIntFcts.h"
 
 inline bool IsInteger(boost::multiprecision::mpq_rational const &x) {
   boost::multiprecision::mpz_int one = 1;

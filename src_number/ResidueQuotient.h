@@ -2,6 +2,7 @@
 #ifndef SRC_NUMBER_RESIDUEQUOTIENT_H_
 #define SRC_NUMBER_RESIDUEQUOTIENT_H_
 
+#include "BasicNumberTypes.h"
 #include <cstdint>
 #include <cstdlib>
 
@@ -85,13 +86,15 @@ template <typename T> T QuoInt_Generic(T const &a, T const &b) {
   return (a - res) / b;
 }
 
-inline int QuoInt(int const &a, int const &b) {
-  return QuoInt_C_integer<int>(a, b);
+inline void QUO_INT(stc<int> const &a, stc<int> const &b, int & q) {
+  q = QuoInt_C_integer<int>(a.val, b.val);
 }
 
-inline long QuoInt(long const &a, long const &b) {
-  return QuoInt_C_integer<long>(a, b);
+inline void QUO_INT(stc<long> const &a, stc<long> const &b, long & q) {
+  q = QuoInt_C_integer<long>(a.val, b.val);
 }
+
+#include "QuoIntFcts.h"
 
 inline int GetDenominator([[maybe_unused]] int const &x) { return 1; }
 
