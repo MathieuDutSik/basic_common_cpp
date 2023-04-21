@@ -230,7 +230,6 @@ inline void ResInt_Kernel(boost::multiprecision::cpp_int const &a,
 void QUO_INT(stc<boost::multiprecision::cpp_int> const &a,
              stc<boost::multiprecision::cpp_int> const &b,
              boost::multiprecision::cpp_int &q) {
-  using T = boost::multiprecision::cpp_int;
   q = a.val / b.val;
   if (a.val < 0 && b.val * q != a.val) {
     if (b.val > 0)
