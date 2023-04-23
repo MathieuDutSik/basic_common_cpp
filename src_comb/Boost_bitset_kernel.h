@@ -322,6 +322,23 @@ template <> struct std::iterator_traits<typename vectface::iterator> {
   using difference_type = std::ptrdiff_t;
 };
 
+vectface select_minimum_count(vectface const& vf) {
+  size_t n = vf.n;
+  size_t min_incd = std::numeric_limits<size_t>::max();
+  for (auto & eFace : vf) {
+    size_t incd = eFace.count();
+    if (incd < min_incd)
+      min_incd = incd;
+  }
+  vectface vf_ret(n);
+  for (auto & eFace : vf) {
+    size_t incd = eFace.count();
+    if (incd == min_incd)
+      vf_ret.push_back(eFace);
+  }
+  return vf_ret;
+}
+
 /*
 template<>
 void std::swap(Face & x, Face & y)
