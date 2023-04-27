@@ -306,7 +306,7 @@ template <typename T, int d> struct is_quad_field<QuadField<T, d>> {
 // Some functionality
 
 template <typename T, int d> bool IsInteger(QuadField<T, d> const &x) {
-  if (x.get_b() != 0)
+  if (x.get_const_b() != 0)
     return false;
   return IsInteger(x.get_const_a());
 }
