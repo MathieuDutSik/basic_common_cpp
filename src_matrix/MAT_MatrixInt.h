@@ -41,6 +41,7 @@ template <typename T> bool IsIntegralMatrix(MyMatrix<T> const &M) {
 template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
   static_assert(is_euclidean_domain<T>::value,
                 "Requires T to be an Euclidean domain in Int_IndexLattice");
+  using Treal = typename underlying_totally_ordered_ring<T>::real_type;
   size_t iRowF = 0, iColF = 0;
   MyMatrix<T> eMatW = eMat;
   size_t nbCol = eMat.cols();
@@ -51,14 +52,14 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
   T TheIndex = 1;
   while (true) {
     bool IsFirst = true;
-    int MinPivot = 0;
+    Treal MinPivot = 0;
     for (size_t iCol = 0; iCol < nbCol; iCol++) {
       if (colStat[iCol] == 1) {
         for (size_t iRow = 0; iRow < nbRow; iRow++) {
           if (rowStat[iRow] == 1) {
             T eVal = eMatW(iRow, iCol);
             if (eVal != 0) {
-              int eValA = T_Norm(eVal);
+              Treal eValA = T_NormGen(eVal);
               if (IsFirst) {
                 iRowF = iRow;
                 iColF = iCol;

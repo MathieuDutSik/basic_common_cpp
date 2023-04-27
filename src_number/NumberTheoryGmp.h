@@ -251,21 +251,6 @@ inline mpq_class CanonicalizationUnit(mpq_class const &eVal) {
   return 1;
 }
 
-inline int T_Norm(mpq_class const &x) {
-  mpz_class eDen = x.get_den();
-  if (eDen != 1) {
-    std::cerr << "Denominator is not 1 as wished\n";
-    std::cerr << "x=" << x << " eDen=" << eDen << "\n";
-    std::cerr << "Error in T_Norm computation\n";
-    throw TerminalException{1};
-  }
-  double x_d = x.get_d();
-  int eValI = static_cast<int>(round(x_d));
-  if (eValI > 0)
-    return eValI;
-  return -eValI;
-}
-
 inline mpq_class T_NormGen(mpq_class const &x) { return T_abs(x); }
 
 inline mpz_class T_NormGen(mpz_class const &x) { return T_abs(x); }
