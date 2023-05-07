@@ -609,6 +609,9 @@ struct SingleThompsonSamplingState {
     for (auto &kv : map_ans_ledf) {
       double alpha = get_random();
       double val = kv.second.get_percentile(alpha);
+#ifdef DEBUG
+      std::cerr << "alpha=" << alpha << " kv.first=" << kv.first << " val=" << val << "\n";
+#endif
       if (val < best_val) {
         ret = kv.first;
         best_val = val;
@@ -621,15 +624,31 @@ struct SingleThompsonSamplingState {
     return ret;
   }
   std::string get_lowest_sampling() {
-    if (!opt_noprior)
+#ifdef DEBUG
+    std::cerr << "get_lowest_sampling |map_and_ledf|=" << map_ans_ledf.size() << "\n";
+#endif
+    if (!opt_noprior) {
+#ifdef DEBUG
+      std::cerr << "Exiting in case !opt_noprior\n";
+#endif
       return get_lowest_sampling_raw();
-    if (n_insert > *opt_noprior)
+    }
+    if (n_insert > *opt_noprior) {
+#ifdef DEBUG
+      std::cerr << "n_insert=" << n_insert << "\n";
+      std::cerr << "Exiting in case n_insert > opt_noprior\n";
+#endif
       return get_lowest_sampling_raw();
+    }
     size_t res = n_insert % map_ans_ledf.size();
     auto iter = map_ans_ledf.begin();
     for (size_t u = 0; u < res; u++)
       iter++;
-    return iter->first;
+    std::string strRet = iter->first;
+#ifdef DEBUG
+    std::cerr << "strRet=" << strRet << "\n";
+#endif
+    return strRet;
   }
   void print(std::ostream & os) const {
     os << "ListAllowedOut =";
@@ -1135,15 +1154,36 @@ private:
     }
   }
   std::string Kernel_GetEvaluation(std::map<std::string, T> const &TheCand) {
+#ifdef DEBUG
+    for (auto & kv : TheCand) {
+      std::cerr << "TheCand k=" << kv.first << " v=" << kv.second << "\n";
+    }
+#endif
     std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
+#ifdef DEBUG
+    std::cerr << "vect_key =";
+    for (auto & eVal : vect_key)
+      std::cerr << " " << eVal;
+    std::cerr << "\n";
+#endif
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
-      return iter->second.get_lowest_sampling();
+      std::string strRet = iter->second.get_lowest_sampling();
+#ifdef DEBUG
+      std::cerr << "Returning fast strRet=" << strRet << "\n";
+#endif
+      return strRet;
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
+#ifdef DEBUG
+    std::cerr << "Kernel_GetEvaluation, name=" << name << "\n";
+#endif
     // Copy of SingleThompsonSamplingState is needed below
     SingleThompsonSamplingState ts = m_name_ts.at(name);
     std::string ret = ts.get_lowest_sampling();
+#ifdef DEBUG
+    std::cerr << "Kernel_GetEvaluation, ret=" << ret << "\n";
+#endif
     um_compress_ts.try_emplace(vect_key, ts);
     return ret;
   }
