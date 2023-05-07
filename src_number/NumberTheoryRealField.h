@@ -524,7 +524,7 @@ public:
     size_t len = x.a.size();
     std::vector<T> V(len);
     for (size_t u = 0; u < len; u++) {
-      T val = x.a[u] = y.a[u];
+      T val = x.a[u] - y.a[u];
       V[u] = val;
     }
     if (IsZeroVector(V))
