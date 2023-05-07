@@ -481,6 +481,9 @@ struct LimitedEmpiricalDistributionFunction {
       pos++;
       iter++;
     }
+#ifdef DEBUG
+    std::cerr << "TS: clear_entry, pos_found=" << pos_found << " min_delta=" << min_delta << "\n";
+#endif
     //    std::cerr << "NEXT : pos_found=" << pos_found << " |ListValWei|=" <<
     //    ListValWei.size() << "\n";
     // Now clearing the entries
@@ -495,14 +498,26 @@ struct LimitedEmpiricalDistributionFunction {
     double w2 = iter2->second;
     double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
     double new_w = w1 + w2;
+#ifdef DEBUG
+    std::cerr << "TS: clear_entry w1=" << w1 << " w2=" << w2 << " new_w=" << new_w << "\n";
+#endif
     ListValWei.erase(val1);
     ListValWei.erase(val2);
     ListValWei[new_val] = new_w;
+#ifdef DEBUG
+    std::cerr << "TS: clear_entry val1=" << val1 << " val2=" << val2 << " new_val=" << new_val << "\n";
+#endif
   }
   void insert_value(double new_val) {
+#ifdef DEBUG
+    std::cerr << "TS: ledf, insert_value new_val=" << new_val << " |ListValWei|=" << ListValWei.size() << " n_max=" << n_max << "\n";
+#endif
     ListValWei[new_val] += 1;
     n_ins++;
     if (ListValWei.size() > n_max) {
+#ifdef DEBUG
+      std::cerr << "TS: Before clear_entry\n";
+#endif
       clear_entry();
     }
   }
@@ -512,7 +527,7 @@ struct LimitedEmpiricalDistributionFunction {
     size_t crit_w = round(alpha * n_ins);
 #ifdef DEBUG
     std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << ListValWei.size() << "\n";
-    std::cerr << "ListValWei =";
+    std::cerr << "TS: ListValWei =";
     for (auto & kv : ListValWei) {
       std::cerr << " (" << kv.first << "|" << kv.second << ")";
     }
