@@ -510,18 +510,25 @@ struct LimitedEmpiricalDistributionFunction {
     size_t sum_w = 0;
     auto iter = ListValWei.begin();
     size_t crit_w = round(alpha * n_ins);
+#ifdef DEBUG
+    std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << ListValWei.size() << "\n";
+#endif
     while (true) {
       sum_w += iter->second;
-      if (sum_w >= crit_w)
+      if (sum_w >= crit_w) {
+#ifdef DEBUG
+        std::cerr << "TS: crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
+#endif
         return iter->first;
+      }
       iter++;
       if (iter == ListValWei.end()) {
         for (auto &kv : ListValWei)
-          std::cerr << "kv : val=" << kv.first << " weight=" << kv.second
+          std::cerr << "TS: kv : val=" << kv.first << " weight=" << kv.second
                     << "\n";
-        std::cerr << "alpha=" << alpha << " n_ins=" << n_ins << "\n";
-        std::cerr << "crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
-        std::cerr << "Failed to find an entry in the map\n";
+        std::cerr << "TS: alpha=" << alpha << " n_ins=" << n_ins << "\n";
+        std::cerr << "TS: crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
+        std::cerr << "TS: Failed to find an entry in the map\n";
         throw TerminalException{1};
       }
     }
@@ -610,7 +617,7 @@ struct SingleThompsonSamplingState {
       double alpha = get_random();
       double val = kv.second.get_percentile(alpha);
 #ifdef DEBUG
-      std::cerr << "alpha=" << alpha << " kv.first=" << kv.first << " val=" << val << "\n";
+      std::cerr << "TS: alpha=" << alpha << " kv.first=" << kv.first << " val=" << val << "\n";
 #endif
       if (val < best_val) {
         ret = kv.first;
@@ -625,18 +632,18 @@ struct SingleThompsonSamplingState {
   }
   std::string get_lowest_sampling() {
 #ifdef DEBUG
-    std::cerr << "get_lowest_sampling |map_and_ledf|=" << map_ans_ledf.size() << "\n";
+    std::cerr << "TS: get_lowest_sampling |map_and_ledf|=" << map_ans_ledf.size() << "\n";
 #endif
     if (!opt_noprior) {
 #ifdef DEBUG
-      std::cerr << "Exiting in case !opt_noprior\n";
+      std::cerr << "TS: Exiting in case !opt_noprior\n";
 #endif
       return get_lowest_sampling_raw();
     }
     if (n_insert > *opt_noprior) {
 #ifdef DEBUG
-      std::cerr << "n_insert=" << n_insert << "\n";
-      std::cerr << "Exiting in case n_insert > opt_noprior\n";
+      std::cerr << "TS: n_insert=" << n_insert << "\n";
+      std::cerr << "TS: Exiting in case n_insert > opt_noprior\n";
 #endif
       return get_lowest_sampling_raw();
     }
@@ -646,7 +653,7 @@ struct SingleThompsonSamplingState {
       iter++;
     std::string strRet = iter->first;
 #ifdef DEBUG
-    std::cerr << "strRet=" << strRet << "\n";
+    std::cerr << "TS: strRet=" << strRet << "\n";
 #endif
     return strRet;
   }
@@ -1156,12 +1163,12 @@ private:
   std::string Kernel_GetEvaluation(std::map<std::string, T> const &TheCand) {
 #ifdef DEBUG
     for (auto & kv : TheCand) {
-      std::cerr << "TheCand k=" << kv.first << " v=" << kv.second << "\n";
+      std::cerr << "TS: TheCand k=" << kv.first << " v=" << kv.second << "\n";
     }
 #endif
     std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
 #ifdef DEBUG
-    std::cerr << "vect_key =";
+    std::cerr << "TS: vect_key =";
     for (auto & eVal : vect_key)
       std::cerr << " " << eVal;
     std::cerr << "\n";
@@ -1170,19 +1177,19 @@ private:
     if (iter != um_compress_ts.end()) {
       std::string strRet = iter->second.get_lowest_sampling();
 #ifdef DEBUG
-      std::cerr << "Returning fast strRet=" << strRet << "\n";
+      std::cerr << "TS: Returning fast strRet=" << strRet << "\n";
 #endif
       return strRet;
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
 #ifdef DEBUG
-    std::cerr << "Kernel_GetEvaluation, name=" << name << "\n";
+    std::cerr << "TS: Kernel_GetEvaluation, name=" << name << "\n";
 #endif
     // Copy of SingleThompsonSamplingState is needed below
     SingleThompsonSamplingState ts = m_name_ts.at(name);
     std::string ret = ts.get_lowest_sampling();
 #ifdef DEBUG
-    std::cerr << "Kernel_GetEvaluation, ret=" << ret << "\n";
+    std::cerr << "TS: Kernel_GetEvaluation, ret=" << ret << "\n";
 #endif
     um_compress_ts.try_emplace(vect_key, ts);
     return ret;
