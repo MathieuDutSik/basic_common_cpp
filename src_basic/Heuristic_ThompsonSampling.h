@@ -644,6 +644,9 @@ struct SingleThompsonSamplingState {
         best_val = val;
       }
     }
+#ifdef DEBUG
+    std::cerr << "TS: get_lowest_sampling_raw, ret=" << ret << "\n";
+#endif
     if (ret == "unset") {
       std::cerr << "We failed to assign ret\n";
       throw TerminalException{1};
