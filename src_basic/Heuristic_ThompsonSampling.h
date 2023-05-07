@@ -512,6 +512,11 @@ struct LimitedEmpiricalDistributionFunction {
     size_t crit_w = round(alpha * n_ins);
 #ifdef DEBUG
     std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << ListValWei.size() << "\n";
+    std::cerr << "ListValWei =";
+    for (auto & kv : ListValWei) {
+      std::cerr << " (" << kv.first << "|" << kv.second << ")";
+    }
+    std::cerr << "\n";
 #endif
     while (true) {
       sum_w += iter->second;
@@ -1206,6 +1211,9 @@ public:
     std::pair<TimingComputationAttempt<T>, SingletonTime> eback =
         l_submission.back();
     double result = sd(eback.second);
+#ifdef DEBUG
+    std::cerr << "TS: pop, result=" << result << "\n";
+#endif
     TimingComputationResult<T> eTCR{std::move(eback.first), result};
     push_complete_result(eTCR);
     l_submission.pop_back();
