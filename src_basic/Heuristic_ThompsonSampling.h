@@ -411,7 +411,7 @@ std::pair<std::string, std::string> SplitByLastSep(std::string const &full_str,
 struct LimitedEmpiricalDistributionFunction {
   size_t n_max;
   size_t n_ins;
-  std::map<double, size_t> ListValWei;
+  std::vector<std::pair<double, size_t>> ListValWei;
   LimitedEmpiricalDistributionFunction(size_t n_max) : n_max(n_max), n_ins(0) {}
   LimitedEmpiricalDistributionFunction(size_t n_max, size_t n_start,
                                        std::string const &nature,
@@ -423,7 +423,7 @@ struct LimitedEmpiricalDistributionFunction {
     }
     if (nature == "dirac") {
       double val = ParseScalar<double>(desc);
-      ListValWei[val] = n_start;
+      ListValWei.push_back({val, n_start});
       n_ins = n_start;
       return;
     }
@@ -438,7 +438,7 @@ struct LimitedEmpiricalDistributionFunction {
         }
         double val = ParseScalar<double>(LStrB[0]);
         size_t mult = ParseScalar<size_t>(LStrB[1]);
-        ListValWei[val] = mult;
+        ListValWei.push_back({val,mult});
         totsum += mult;
       }
       if (totsum != n_start) {
@@ -460,59 +460,53 @@ struct LimitedEmpiricalDistributionFunction {
   }
   void clear_entry() {
     //    std::cerr << "|ListValWei|=" << ListValWei.size() << "\n";
-    auto iter = ListValWei.begin();
+    size_t len = ListValWei.size();
     double min_delta = std::numeric_limits<double>::max();
-    size_t pos = 0;
-    size_t pos_found = 0;
+    size_t pos_found = std::numeric_limits<size_t>::max();
     // Determine the smallest delta
-    while (true) {
-      auto iterN = iter;
-      iterN++;
-      if (iterN == ListValWei.end())
-        break;
-      //      std::cerr << "pos=" << pos << "  val=" << iter->first << " mult="
-      //      << iter->second << "\n";
-      double delta = iterN->first - iter->first;
-      //      std::cerr << "   delta=" << delta << "\n";
+    for (size_t pos=0; pos<len-1; pos++) {
+      double val1 = ListValWei[pos].first;
+      double val2 = ListValWei[pos+1].first;
+      double delta = val2 - val1;
       if (delta < min_delta) {
         pos_found = pos;
         min_delta = delta;
       }
-      pos++;
-      iter++;
     }
 #ifdef DEBUG
     std::cerr << "TS: clear_entry, pos_found=" << pos_found << " min_delta=" << min_delta << "\n";
 #endif
-    //    std::cerr << "NEXT : pos_found=" << pos_found << " |ListValWei|=" <<
-    //    ListValWei.size() << "\n";
-    // Now clearing the entries
-    auto iter1 = ListValWei.begin();
-    for (size_t u = 0; u < pos_found; u++)
-      iter1++;
-    auto iter2 = iter1;
-    iter2++;
-    double val1 = iter1->first;
-    double val2 = iter2->first;
-    double w1 = iter1->second;
-    double w2 = iter2->second;
+    double val1 = ListValWei[pos_found].first;
+    double val2 = ListValWei[pos_found + 1].first;
+    size_t w1 = ListValWei[pos_found].second;
+    size_t w2 = ListValWei[pos_found + 1].second;
     double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
-    double new_w = w1 + w2;
+    size_t new_w = w1 + w2;
 #ifdef DEBUG
     std::cerr << "TS: clear_entry w1=" << w1 << " w2=" << w2 << " new_w=" << new_w << "\n";
-#endif
-    ListValWei.erase(val1);
-    ListValWei.erase(val2);
-    ListValWei[new_val] = new_w;
-#ifdef DEBUG
     std::cerr << "TS: clear_entry val1=" << val1 << " val2=" << val2 << " new_val=" << new_val << "\n";
 #endif
+    ListValWei[pos_found] = {new_val, new_w};
+    ListValWei.erase(ListValWei.begin() + pos_found + 1);
   }
   void insert_value(double new_val) {
 #ifdef DEBUG
     std::cerr << "TS: ledf, insert_value new_val=" << new_val << " |ListValWei|=" << ListValWei.size() << " n_max=" << n_max << "\n";
 #endif
-    ListValWei[new_val] += 1;
+    size_t len = ListValWei.size();
+    std::pair<double,size_t> pair{new_val,1};
+    if (new_val < ListValWei[0].first) {
+      ListValWei.insert(ListValWei.begin(), pair);
+    }
+    for (size_t pos=0; pos<len-1; pos++) {
+      double val1 = ListValWei[pos].first;
+      double val2 = ListValWei[pos+1].first;
+      if (val1 <= new_val && new_val < val2) {
+        ListValWei.insert(ListValWei.begin() + pos + 1, pair);
+        return;
+      }
+    }
+    ListValWei.push_back(pair);
     n_ins++;
     if (ListValWei.size() > n_max) {
 #ifdef DEBUG
@@ -522,8 +516,7 @@ struct LimitedEmpiricalDistributionFunction {
     }
   }
   double get_percentile(double const &alpha) const {
-    size_t sum_w = 0;
-    auto iter = ListValWei.begin();
+    size_t len = ListValWei.size();
     size_t crit_w = round(alpha * n_ins);
 #ifdef DEBUG
     std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << ListValWei.size() << "\n";
@@ -533,25 +526,88 @@ struct LimitedEmpiricalDistributionFunction {
     }
     std::cerr << "\n";
 #endif
-    while (true) {
-      sum_w += iter->second;
-      if (sum_w >= crit_w) {
-#ifdef DEBUG
-        std::cerr << "TS: crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
-#endif
-        return iter->first;
+    int OptionSampling = 1;
+    if (OptionSampling == 1) {
+      size_t sum_w = 0;
+      for (size_t u=0; u<len; u++) {
+        if (sum_w >= crit_w) {
+          return ListValWei[u].first;
+        }
+        sum_w += ListValWei[u].second;
       }
-      iter++;
-      if (iter == ListValWei.end()) {
-        for (auto &kv : ListValWei)
-          std::cerr << "TS: kv : val=" << kv.first << " weight=" << kv.second
-                    << "\n";
-        std::cerr << "TS: alpha=" << alpha << " n_ins=" << n_ins << "\n";
-        std::cerr << "TS: crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
-        std::cerr << "TS: Failed to find an entry in the map\n";
-        throw TerminalException{1};
-      }
+      for (auto &kv : ListValWei)
+        std::cerr << "TS: kv : val=" << kv.first << " weight=" << kv.second
+                  << "\n";
+      std::cerr << "TS: alpha=" << alpha << " n_ins=" << n_ins << "\n";
+      std::cerr << "TS: crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
+      std::cerr << "TS: Failed to find an entry in ListValWei\n";
+      throw TerminalException{1};
     }
+    if (OptionSampling == 2) {
+      // The sampling is done so that we have points.
+      // But we can spread the values on each side
+      auto f_d=[](size_t const& u) -> double {
+        return static_cast<double>(u);
+      };
+      double TheVal = alpha * f_d(n_ins);
+      double weight = 0.5 * f_d(ListValWei[0].second);
+      if (TheVal < weight) {
+        return ListValWei[0].first;
+      }
+      TheVal -= weight;
+      for (size_t u=0; u<len-1; u++) {
+        double val1 = ListValWei[u].first;
+        double val2 = ListValWei[u+1].first;
+        size_t w1 = ListValWei[u].second;
+        size_t w2 = ListValWei[u+1].second;
+        weight = 0.5 * f_d(w1 + w2);
+        if (TheVal < weight) {
+          // The distribution between [val1, val2]
+          // the density is
+          // w1 * (val2 - x) / (val2 - val1)^2 + w2 * (x - val1) / (val2 - val1)^2
+          // So, we integrate the function from val1 to x and get phi(x) =
+          // - w1 [(val2 - x)^2 - (val2 - val1)^2] / 2 (val2 - val1)^2 + w2 (x - val1)^2 / 2 (val2 - val1)^2
+          // For x = val2 this gets us phi(val2) = (w1 + w2) / 2 which is correct.
+          // So now we want to find the x in [val1,val2] such that phi(x) = TheVal
+          // We write x = val1 + y and get
+          // phi(val1 + y) = -w1 [(delta - y)^2 - delta^2] / 2 delta^2 + w2 y^2 / 2 delta^2
+          // So, 2 delta^2 phi(val1 + y) = TheVal * 2 delta^2
+          // w1 [ 2 y delta - y^2 ] + w2 y^2 = TheVal * 2 delta^2
+          // (w2 - w1) y^2 + y [2 w1 delta] - TheVal * 2 delta^2 = 0
+          // a = w2 - w1
+          // b = 2 w1 delta
+          // c = -TheVal * 2 * delta^2
+          double delta = val2 - val1;
+          if (w1 == w2) {
+            // It gets us
+            // y w1 = TheVal * delta
+            double y = TheVal * delta / f_d(w1);
+            return val1 + y;
+          } else {
+            double a = f_d(w2 - w1);
+            double b = 2 * f_d(w1) * delta;
+            double c = - TheVal * 2 * delta * delta;
+            double Delta = b*b - 4 * a * c;
+            double sqrt_Delta = sqrt(Delta);
+            double y1 = (-b - sqrt_Delta) / (2 * a);
+            double y2 = (-b + sqrt_Delta) / (2 * a);
+            if (0 <= y1 && y1 <= delta) {
+              return val1 + y1;
+            }
+            if (0 <= y2 && y2 <= delta) {
+              return val1 + y2;
+            }
+            std::cerr << "Numerical error. Please reconsider\n";
+            throw TerminalException{1};
+          }
+        } else {
+          TheVal -= weight;
+        }
+      }
+      return ListValWei[len-1].first;
+    }
+    std::cerr << "Failing to have a matching for OptionSampling=" << OptionSampling << "\n";
+    throw TerminalException{1};
   }
   std::string string() const {
     std::string str_ret;
