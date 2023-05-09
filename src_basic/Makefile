@@ -1,10 +1,10 @@
-PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistridution
+#PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistridution
 #PROGRAM		= Test_parse_split
 #PROGRAM		= test_hash
 #PROGRAM		= Test_String_Split
 #PROGRAM		= Test_Thompson_sampling
 #PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling
-#PROGRAM		= Test_EmpiricalDistridution
+PROGRAM		= Test_EmpiricalDistridution
 #PROGRAM		= Temp_PerfectMPI
 #PROGRAM		= Test_serialization
 #PROGRAM		= Test_timing
@@ -22,7 +22,10 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= g++ -std=c++17 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
 #CC		= g++ -std=c++17 -Wall -O9
 CC		= g++ -std=c++17 -Wall -Wextra -O3
+#  GCC
 #CC		= g++ -std=c++17 -Wall -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=bounds-strict -fsanitize=alignment -fsanitize=leak -Wstrict-aliasing
+#  CLANG
+#CC		= g++ -std=c++17 -Wall -g -O2 -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment -Wstrict-aliasing
 #CC		= g++ -std=c++17 -Wall -g -O2 -static-libgcc -static-libstdc++
 
 NOLINKFLAG 	= -c

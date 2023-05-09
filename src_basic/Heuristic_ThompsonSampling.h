@@ -459,8 +459,13 @@ struct LimitedEmpiricalDistributionFunction {
     throw TerminalException{1};
   }
   void clear_entry() {
-    //    std::cerr << "|ListValWei|=" << ListValWei.size() << "\n";
     size_t len = ListValWei.size();
+#ifdef DEBUG_LEDF
+    std::cerr << "TS: clear_entry, ListValWei =";
+    for (size_t u=0; u<len; u++)
+      std::cerr << " " << ListValWei[u].first;
+    std::cerr << "\n";
+#endif
     double min_delta = std::numeric_limits<double>::max();
     size_t pos_found = std::numeric_limits<size_t>::max();
     // Determine the smallest delta
@@ -473,7 +478,7 @@ struct LimitedEmpiricalDistributionFunction {
         min_delta = delta;
       }
     }
-#ifdef DEBUG
+#ifdef DEBUG_LEDF
     std::cerr << "TS: clear_entry, pos_found=" << pos_found << " min_delta=" << min_delta << "\n";
 #endif
     double val1 = ListValWei[pos_found].first;
@@ -482,34 +487,45 @@ struct LimitedEmpiricalDistributionFunction {
     size_t w2 = ListValWei[pos_found + 1].second;
     double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
     size_t new_w = w1 + w2;
-#ifdef DEBUG
+#ifdef DEBUG_LEDF
     std::cerr << "TS: clear_entry w1=" << w1 << " w2=" << w2 << " new_w=" << new_w << "\n";
     std::cerr << "TS: clear_entry val1=" << val1 << " val2=" << val2 << " new_val=" << new_val << "\n";
 #endif
     ListValWei[pos_found] = {new_val, new_w};
     ListValWei.erase(ListValWei.begin() + pos_found + 1);
+#ifdef DEBUG_LEDF
+    std::cerr << "TS: clear_entry |ListValWei|=" << ListValWei.size() << " len=" << len << "\n";
+#endif
   }
   void insert_value(double new_val) {
-#ifdef DEBUG
+#ifdef DEBUG_LEDF
     std::cerr << "TS: ledf, insert_value new_val=" << new_val << " |ListValWei|=" << ListValWei.size() << " n_max=" << n_max << "\n";
 #endif
     size_t len = ListValWei.size();
     std::pair<double,size_t> pair{new_val,1};
-    if (new_val < ListValWei[0].first) {
-      ListValWei.insert(ListValWei.begin(), pair);
-    }
-    for (size_t pos=0; pos<len-1; pos++) {
-      double val1 = ListValWei[pos].first;
-      double val2 = ListValWei[pos+1].first;
-      if (val1 <= new_val && new_val < val2) {
-        ListValWei.insert(ListValWei.begin() + pos + 1, pair);
+    auto f_insert=[&]() -> void {
+      if (ListValWei.size() == 0) {
+        ListValWei.push_back(pair);
         return;
       }
-    }
-    ListValWei.push_back(pair);
+      if (new_val < ListValWei[0].first) {
+        ListValWei.insert(ListValWei.begin(), pair);
+        return;
+      }
+      for (size_t pos=0; pos<len-1; pos++) {
+        double val1 = ListValWei[pos].first;
+        double val2 = ListValWei[pos+1].first;
+        if (val1 <= new_val && new_val < val2) {
+          ListValWei.insert(ListValWei.begin() + pos + 1, pair);
+          return;
+        }
+      }
+      ListValWei.push_back(pair);
+    };
+    f_insert();
     n_ins++;
     if (ListValWei.size() > n_max) {
-#ifdef DEBUG
+#ifdef DEBUG_LEDF
       std::cerr << "TS: Before clear_entry\n";
 #endif
       clear_entry();
@@ -518,15 +534,15 @@ struct LimitedEmpiricalDistributionFunction {
   double get_percentile(double const &alpha) const {
     size_t len = ListValWei.size();
     size_t crit_w = round(alpha * n_ins);
-#ifdef DEBUG
-    std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << ListValWei.size() << "\n";
+#ifdef DEBUG_LEDF
+    std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
     std::cerr << "TS: ListValWei =";
     for (auto & kv : ListValWei) {
       std::cerr << " (" << kv.first << "|" << kv.second << ")";
     }
     std::cerr << "\n";
 #endif
-    int OptionSampling = 1;
+    int OptionSampling = 2;
     if (OptionSampling == 1) {
       size_t sum_w = 0;
       for (size_t u=0; u<len; u++) {
@@ -535,13 +551,7 @@ struct LimitedEmpiricalDistributionFunction {
         }
         sum_w += ListValWei[u].second;
       }
-      for (auto &kv : ListValWei)
-        std::cerr << "TS: kv : val=" << kv.first << " weight=" << kv.second
-                  << "\n";
-      std::cerr << "TS: alpha=" << alpha << " n_ins=" << n_ins << "\n";
-      std::cerr << "TS: crit_w=" << crit_w << " sum_w=" << sum_w << "\n";
-      std::cerr << "TS: Failed to find an entry in ListValWei\n";
-      throw TerminalException{1};
+      return ListValWei[len-1].first;
     }
     if (OptionSampling == 2) {
       // The sampling is done so that we have points.
@@ -551,6 +561,9 @@ struct LimitedEmpiricalDistributionFunction {
       };
       double TheVal = alpha * f_d(n_ins);
       double weight = 0.5 * f_d(ListValWei[0].second);
+#ifdef DEBUG_LEDF
+      std::cerr << "TS: get_percentile, TheVal=" << TheVal << " weight=" << weight << "\n";
+#endif
       if (TheVal < weight) {
         return ListValWei[0].first;
       }
@@ -561,6 +574,9 @@ struct LimitedEmpiricalDistributionFunction {
         size_t w1 = ListValWei[u].second;
         size_t w2 = ListValWei[u+1].second;
         weight = 0.5 * f_d(w1 + w2);
+#ifdef DEBUG_LEDF
+        std::cerr << "TS: get_percentile, TheVal=" << TheVal << " weight=" << weight << "\n";
+#endif
         if (TheVal < weight) {
           // The distribution between [val1, val2]
           // the density is
@@ -578,19 +594,29 @@ struct LimitedEmpiricalDistributionFunction {
           // b = 2 w1 delta
           // c = -TheVal * 2 * delta^2
           double delta = val2 - val1;
+#ifdef DEBUG_LEDF
+          std::cerr << "TS: get_percentile, delta=" << delta << "\n";
+#endif
           if (w1 == w2) {
             // It gets us
             // y w1 = TheVal * delta
             double y = TheVal * delta / f_d(w1);
+#ifdef DEBUG_LEDF
+            std::cerr << "TS: get_percentile, y=" << y << "\n";
+#endif
             return val1 + y;
           } else {
-            double a = f_d(w2 - w1);
+            double a = f_d(w2) - f_d(w1);
             double b = 2 * f_d(w1) * delta;
             double c = - TheVal * 2 * delta * delta;
             double Delta = b*b - 4 * a * c;
             double sqrt_Delta = sqrt(Delta);
             double y1 = (-b - sqrt_Delta) / (2 * a);
             double y2 = (-b + sqrt_Delta) / (2 * a);
+#ifdef DEBUG_LEDF
+            std::cerr << "TS: get_percentile, a=" << a << " b=" << b << " c=" << c << "\n";
+            std::cerr << "TS: get_percentile, y1=" << y1 << " y2=" << y2 << "\n";
+#endif
             if (0 <= y1 && y1 <= delta) {
               return val1 + y1;
             }

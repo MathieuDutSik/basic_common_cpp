@@ -2,9 +2,9 @@
 #include "Heuristic_ThompsonSampling.h"
 
 int main() {
-  size_t n_max = 10;
+  size_t n_max = 3;
   LimitedEmpiricalDistributionFunction ledf(n_max);
-  size_t N_split = 4587;
+  size_t N_split = 10;
   for (int i = 0; i < 100; i++) {
     double new_val = static_cast<double>(10) *
                      static_cast<double>(random() % N_split) /
