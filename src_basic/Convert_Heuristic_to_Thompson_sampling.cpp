@@ -2,6 +2,8 @@
 #include "Heuristic_ThompsonSampling.h"
 
 int main(int argc, char *argv[]) {
+  srand_random_set();
+  HumanTime time1;
   try {
     if (argc != 3) {
       std::cerr << "Convert_Heuristic_to_Thompson_sampling [fileI] [FileO]\n";
@@ -22,4 +24,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time1);
 }

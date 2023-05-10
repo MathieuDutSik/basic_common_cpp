@@ -2,6 +2,8 @@
 #include "Heuristic_ThompsonSampling.h"
 
 int main(int argc, char *argv[]) {
+  srand_random_set();
+  HumanTime time1;
   try {
     if (argc != 2) {
       std::cerr << "Fuzzing_Heuristic_and_Thompson_sampling [fileI]\n";
@@ -48,4 +50,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time1);
 }

@@ -4,6 +4,8 @@
 #include "NumberTheoryGmp.h"
 
 int main(int argc, char *argv[]) {
+  srand_random_set();
+  HumanTime time1;
   try {
     //  using T = mpq_class;
     using T = mpz_class;
@@ -44,4 +46,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time1);
 }

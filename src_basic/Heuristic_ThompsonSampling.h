@@ -504,6 +504,7 @@ struct LimitedEmpiricalDistributionFunction {
     size_t len = ListValWei.size();
     std::pair<double,size_t> pair{new_val,1};
     auto f_insert=[&]() -> void {
+      n_ins++;
       if (ListValWei.size() == 0) {
         ListValWei.push_back(pair);
         return;
@@ -523,7 +524,14 @@ struct LimitedEmpiricalDistributionFunction {
       ListValWei.push_back(pair);
     };
     f_insert();
-    n_ins++;
+    size_t n_total = 0;
+    for (auto & kv : ListValWei)
+      n_total += kv.second;
+    if (n_ins != n_total) {
+      std::cerr << "n_ins=" << n_ins << " n_total=" << n_total << "\n";
+      std::cerr << "incoherency error in the code\n";
+      throw TerminalException{1};
+    }
     if (ListValWei.size() > n_max) {
 #ifdef DEBUG_LEDF
       std::cerr << "TS: Before clear_entry\n";
@@ -536,10 +544,16 @@ struct LimitedEmpiricalDistributionFunction {
 #ifdef DEBUG
     std::cerr << "TS: n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
     std::cerr << "TS: ListValWei =";
+    size_t n_total = 0;
     for (auto & kv : ListValWei) {
       std::cerr << " (" << kv.first << "|" << kv.second << ")";
+      n_total += kv.second;
     }
     std::cerr << "\n";
+    if (n_ins != n_total) {
+      std::cerr << "TS: n_ins=" << n_ins << " n_total=" << n_total << "\n";
+      throw TerminalException{1};
+    }
 #endif
     int OptionSampling = 2;
     if (OptionSampling == 1) {
