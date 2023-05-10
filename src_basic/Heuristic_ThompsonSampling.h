@@ -533,9 +533,8 @@ struct LimitedEmpiricalDistributionFunction {
   }
   double get_percentile(double const &alpha) const {
     size_t len = ListValWei.size();
-    size_t crit_w = round(alpha * n_ins);
-#ifdef DEBUG_LEDF
-    std::cerr << "TS: crit_w=" << crit_w << " n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
+#ifdef DEBUG
+    std::cerr << "TS: n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
     std::cerr << "TS: ListValWei =";
     for (auto & kv : ListValWei) {
       std::cerr << " (" << kv.first << "|" << kv.second << ")";
@@ -544,6 +543,7 @@ struct LimitedEmpiricalDistributionFunction {
 #endif
     int OptionSampling = 2;
     if (OptionSampling == 1) {
+      size_t crit_w = round(alpha * n_ins);
       size_t sum_w = 0;
       for (size_t u=0; u<len; u++) {
         if (sum_w >= crit_w) {
