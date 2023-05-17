@@ -428,10 +428,17 @@ struct LimitedEmpiricalDistributionFunction {
       return;
     }
     if (nature == "sampled") {
-      std::vector<std::string> LStr = STRING_Split(desc, " ");
+      std::string desc_red;
+      for (size_t iS=0; iS<desc.size(); iS++) {
+        std::string echar = desc.substr(iS,1);
+        if (echar != "(" && echar != ")") {
+          desc_red += echar;
+        }
+      }
+      std::vector<std::string> LStr = STRING_Split(desc_red, " ");
       size_t totsum = 0;
       for (auto &eStr : LStr) {
-        std::vector<std::string> LStrB = STRING_Split(eStr, ":");
+        std::vector<std::string> LStrB = STRING_Split(eStr, "|");
         if (LStrB.size() != 2) {
           std::cerr << "The string should be of the form val:mult\n";
           throw TerminalException{1};
@@ -440,6 +447,9 @@ struct LimitedEmpiricalDistributionFunction {
         size_t mult = ParseScalar<size_t>(LStrB[1]);
         ListValWei.push_back({val,mult});
         totsum += mult;
+      }
+      if (n_start == 0) {
+        n_start = totsum;
       }
       if (totsum != n_start) {
         std::cerr << "Inconsistencies in the reading of the multiplicities\n";
@@ -461,7 +471,7 @@ struct LimitedEmpiricalDistributionFunction {
   void clear_entry() {
     size_t len = ListValWei.size();
 #ifdef DEBUG_LEDF
-    std::cerr << "TS: clear_entry, ListValWei =";
+    std::cerr << "LEDF: clear_entry, ListValWei =";
     for (size_t u=0; u<len; u++)
       std::cerr << " " << ListValWei[u].first;
     std::cerr << "\n";
@@ -479,7 +489,7 @@ struct LimitedEmpiricalDistributionFunction {
       }
     }
 #ifdef DEBUG_LEDF
-    std::cerr << "TS: clear_entry, pos_found=" << pos_found << " min_delta=" << min_delta << "\n";
+    std::cerr << "LEDF: clear_entry, pos_found=" << pos_found << " min_delta=" << min_delta << "\n";
 #endif
     double val1 = ListValWei[pos_found].first;
     double val2 = ListValWei[pos_found + 1].first;
@@ -488,18 +498,18 @@ struct LimitedEmpiricalDistributionFunction {
     double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
     size_t new_w = w1 + w2;
 #ifdef DEBUG_LEDF
-    std::cerr << "TS: clear_entry w1=" << w1 << " w2=" << w2 << " new_w=" << new_w << "\n";
-    std::cerr << "TS: clear_entry val1=" << val1 << " val2=" << val2 << " new_val=" << new_val << "\n";
+    std::cerr << "LEDF: clear_entry w1=" << w1 << " w2=" << w2 << " new_w=" << new_w << "\n";
+    std::cerr << "LEDF: clear_entry val1=" << val1 << " val2=" << val2 << " new_val=" << new_val << "\n";
 #endif
     ListValWei[pos_found] = {new_val, new_w};
     ListValWei.erase(ListValWei.begin() + pos_found + 1);
 #ifdef DEBUG_LEDF
-    std::cerr << "TS: clear_entry |ListValWei|=" << ListValWei.size() << " len=" << len << "\n";
+    std::cerr << "LEDF: clear_entry |ListValWei|=" << ListValWei.size() << " len=" << len << "\n";
 #endif
   }
   void insert_value(double new_val) {
 #ifdef DEBUG_LEDF
-    std::cerr << "TS: ledf, insert_value new_val=" << new_val << " |ListValWei|=" << ListValWei.size() << " n_max=" << n_max << "\n";
+    std::cerr << "LEDF: ledf, insert_value new_val=" << new_val << " |ListValWei|=" << ListValWei.size() << " n_max=" << n_max << "\n";
 #endif
     size_t len = ListValWei.size();
     std::pair<double,size_t> pair{new_val,1};
@@ -534,16 +544,24 @@ struct LimitedEmpiricalDistributionFunction {
     }
     if (ListValWei.size() > n_max) {
 #ifdef DEBUG_LEDF
-      std::cerr << "TS: Before clear_entry\n";
+      std::cerr << "LEDF: Before clear_entry\n";
 #endif
       clear_entry();
     }
   }
+  double get_average() const {
+    double sum = 0;
+    for (auto & eEnt : ListValWei) {
+      sum += eEnt.first * eEnt.second;
+    }
+    double result = sum / double(n_ins);
+    return result;
+  }
   double get_percentile(double const &alpha) const {
     size_t len = ListValWei.size();
-#ifdef DEBUG
-    std::cerr << "TS: n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
-    std::cerr << "TS: ListValWei =";
+#ifdef DEBUG_LEDF
+    std::cerr << "LEDF: n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
+    std::cerr << "LEDF: ListValWei =";
     size_t n_total = 0;
     for (auto & kv : ListValWei) {
       std::cerr << " (" << kv.first << "|" << kv.second << ")";
@@ -551,7 +569,7 @@ struct LimitedEmpiricalDistributionFunction {
     }
     std::cerr << "\n";
     if (n_ins != n_total) {
-      std::cerr << "TS: n_ins=" << n_ins << " n_total=" << n_total << "\n";
+      std::cerr << "LEDF: n_ins=" << n_ins << " n_total=" << n_total << "\n";
       throw TerminalException{1};
     }
 #endif
@@ -576,7 +594,7 @@ struct LimitedEmpiricalDistributionFunction {
       double TheVal = alpha * f_d(n_ins);
       double weight = 0.5 * f_d(ListValWei[0].second);
 #ifdef DEBUG_LEDF
-      std::cerr << "TS: get_percentile, TheVal=" << TheVal << " weight=" << weight << "\n";
+      std::cerr << "LEDF: get_percentile, TheVal=" << TheVal << " weight=" << weight << "\n";
 #endif
       if (TheVal < weight) {
         return ListValWei[0].first;
@@ -589,7 +607,7 @@ struct LimitedEmpiricalDistributionFunction {
         size_t w2 = ListValWei[u+1].second;
         weight = 0.5 * f_d(w1 + w2);
 #ifdef DEBUG_LEDF
-        std::cerr << "TS: get_percentile, TheVal=" << TheVal << " weight=" << weight << "\n";
+        std::cerr << "LEDF: get_percentile, TheVal=" << TheVal << " weight=" << weight << "\n";
 #endif
         if (TheVal < weight) {
           // The distribution between [val1, val2]
@@ -609,14 +627,14 @@ struct LimitedEmpiricalDistributionFunction {
           // c = -TheVal * 2 * delta^2
           double delta = val2 - val1;
 #ifdef DEBUG_LEDF
-          std::cerr << "TS: get_percentile, delta=" << delta << "\n";
+          std::cerr << "LEDF: get_percentile, delta=" << delta << "\n";
 #endif
           if (w1 == w2) {
             // It gets us
             // y w1 = TheVal * delta
             double y = TheVal * delta / f_d(w1);
 #ifdef DEBUG_LEDF
-            std::cerr << "TS: get_percentile, y=" << y << "\n";
+            std::cerr << "LEDF: get_percentile, y=" << y << "\n";
 #endif
             return val1 + y;
           } else {
@@ -628,8 +646,8 @@ struct LimitedEmpiricalDistributionFunction {
             double y1 = (-b - sqrt_Delta) / (2 * a);
             double y2 = (-b + sqrt_Delta) / (2 * a);
 #ifdef DEBUG_LEDF
-            std::cerr << "TS: get_percentile, a=" << a << " b=" << b << " c=" << c << "\n";
-            std::cerr << "TS: get_percentile, y1=" << y1 << " y2=" << y2 << "\n";
+            std::cerr << "LEDF: get_percentile, a=" << a << " b=" << b << " c=" << c << "\n";
+            std::cerr << "LEDF: get_percentile, y1=" << y1 << " y2=" << y2 << "\n";
 #endif
             if (0 <= y1 && y1 <= delta) {
               return val1 + y1;
@@ -732,7 +750,7 @@ struct SingleThompsonSamplingState {
     for (auto &kv : map_ans_ledf) {
       double alpha = get_random();
       double val = kv.second.get_percentile(alpha);
-#ifdef DEBUG
+#ifdef DEBUG_TS
       std::cerr << "TS: alpha=" << alpha << " kv.first=" << kv.first << " val=" << val << "\n";
 #endif
       if (val < best_val) {
@@ -740,7 +758,7 @@ struct SingleThompsonSamplingState {
         best_val = val;
       }
     }
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: get_lowest_sampling_raw, ret=" << ret << "\n";
 #endif
     if (ret == "unset") {
@@ -750,17 +768,17 @@ struct SingleThompsonSamplingState {
     return ret;
   }
   std::string get_lowest_sampling() {
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: get_lowest_sampling |map_and_ledf|=" << map_ans_ledf.size() << "\n";
 #endif
     if (!opt_noprior) {
-#ifdef DEBUG
+#ifdef DEBUG_TS
       std::cerr << "TS: Exiting in case !opt_noprior\n";
 #endif
       return get_lowest_sampling_raw();
     }
     if (n_insert > *opt_noprior) {
-#ifdef DEBUG
+#ifdef DEBUG_TS
       std::cerr << "TS: n_insert=" << n_insert << "\n";
       std::cerr << "TS: Exiting in case n_insert > opt_noprior\n";
 #endif
@@ -771,7 +789,7 @@ struct SingleThompsonSamplingState {
     for (size_t u = 0; u < res; u++)
       iter++;
     std::string strRet = iter->first;
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: strRet=" << strRet << "\n";
 #endif
     return strRet;
@@ -1280,13 +1298,13 @@ private:
     }
   }
   std::string Kernel_GetEvaluation(std::map<std::string, T> const &TheCand) {
-#ifdef DEBUG
+#ifdef DEBUG_TS
     for (auto & kv : TheCand) {
       std::cerr << "TS: TheCand k=" << kv.first << " v=" << kv.second << "\n";
     }
 #endif
     std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: vect_key =";
     for (auto & eVal : vect_key)
       std::cerr << " " << eVal;
@@ -1295,19 +1313,19 @@ private:
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
       std::string strRet = iter->second.get_lowest_sampling();
-#ifdef DEBUG
+#ifdef DEBUG_TS
       std::cerr << "TS: Returning fast strRet=" << strRet << "\n";
 #endif
       return strRet;
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: Kernel_GetEvaluation, name=" << name << "\n";
 #endif
     // Copy of SingleThompsonSamplingState is needed below
     SingleThompsonSamplingState ts = m_name_ts.at(name);
     std::string ret = ts.get_lowest_sampling();
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: Kernel_GetEvaluation, ret=" << ret << "\n";
 #endif
     um_compress_ts.try_emplace(vect_key, ts);
@@ -1325,7 +1343,7 @@ public:
     std::pair<TimingComputationAttempt<T>, SingletonTime> eback =
         l_submission.back();
     double result = sd(eback.second);
-#ifdef DEBUG
+#ifdef DEBUG_TS
     std::cerr << "TS: pop, result=" << result << "\n";
 #endif
     TimingComputationResult<T> eTCR{std::move(eback.first), result};
