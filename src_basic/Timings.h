@@ -19,6 +19,33 @@ get_cpp_time(int day, int month, int year) {
   return std::chrono::system_clock::from_time_t(std::mktime(&start));
 }
 
+// The end of time
+
+std::chrono::time_point<std::chrono::system_clock> end_of_time;
+
+void set_of_time(int runtime) {
+  if (runtime < 0) {
+    end_of_time = get_cpp_time(1,1,2060);
+  } else {
+    std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
+    std::chrono::duration dur = std::chrono::seconds(runtime);
+    end_of_time = time + dur;
+  }
+}
+
+int64_t seconds_till_end_of_time() {
+  std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
+  int64_t dur = std::chrono::duration_cast<std::chrono::seconds>(end_of_time - time).count();
+  return dur;
+}
+
+bool pass_end_of_time() {
+  std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
+  if (time > end_of_time)
+    return true;
+  return false;
+}
+
 // The sleep function
 
 void my_sleep(size_t n_millisecond) {
