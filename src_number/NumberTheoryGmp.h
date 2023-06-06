@@ -375,7 +375,7 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint32_t &a2) {
   a2 = uint32_t(a1_long);
 }
 
-inline void TYPE_CONVERSION(stc<mpq_class> const &a1, long &a2) {
+inline typename std::enable_if<!std::is_same_v<int64_t,long>,void>::type TYPE_CONVERSION(stc<mpq_class> const &a1, long &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   a2 = a1_z.get_si();
