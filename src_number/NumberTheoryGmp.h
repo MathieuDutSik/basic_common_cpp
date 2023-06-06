@@ -376,7 +376,10 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint32_t &a2) {
 }
 
 #ifdef __APPLE__
-
+// On APPLE platform, the long is not the same as the int64_t
+// And we cannot match that case with a
+// std::enable_if<!std::is_same_v<int64_t,long>,void>
+// statement because it is not a template function.
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, long &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
