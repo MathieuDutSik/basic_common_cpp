@@ -423,29 +423,56 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpz_class &a2) {
   a2 = long(a1.val);
 }
 
+// Conversion to mpz_class
+
+mpz_class convert_mpz_class_uint64_t(uint64_t const& val) {
+  mpz_class ret = 0;
+  uint64_t shift = 256;
+  int32_t shift_i = 256;
+  uint64_t work_val = val;
+  mpz_class prod = 1;
+  while(true) {
+    if (work_val == 0)
+      return ret;
+    uint64_t res = work_val % shift;
+    uint64_t q = work_val / shift;
+    int32_t res_t = static_cast<int32_t>(res);
+    ret += mpz_class(res_t) * prod;
+    prod *= shift_i;
+    work_val = q;
+  }
+}
+
+mpz_class convert_mpz_class_int64_t(int64_t const& val) {
+  if (val > 0) {
+    return convert_mpz_class_uint64_t(val);
+  }
+  return convert_mpz_class_uint64_t(-val);
+}
+
 // long long as input
 
-inline void TYPE_CONVERSION(stc<long long> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
 
-inline void TYPE_CONVERSION(stc<long long> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
 
 // long as input
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpq_class &a2) { a2 = a1.val; }
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpz_class &a2) { a2 = a1.val; }
 
 // int as input
 
-inline void TYPE_CONVERSION(stc<int> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpq_class &a2) { a2 = a1.val; }
 
-inline void TYPE_CONVERSION(stc<int> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpz_class &a2) { a2 = a1.val; }
 
 // short as input
 
-inline void TYPE_CONVERSION(stc<short> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpq_class &a2) { a2 = a1.val; }
 
-inline void TYPE_CONVERSION(stc<short> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpz_class &a2) { a2 = a1.val; }
 
 // mpz_class as input
 
