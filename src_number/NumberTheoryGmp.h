@@ -516,7 +516,7 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, T_uint64_t &a2) {
 
 inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, mpz_class &a2) {
   T_uint64_t const &eVal = a1.val;
-  a2 = eVal;
+  a2 = convert_mpz_class_uint64_t(eVal);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, T_uint64_t &a2) {
