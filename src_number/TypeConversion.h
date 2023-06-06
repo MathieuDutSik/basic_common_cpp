@@ -16,6 +16,7 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <optional>
 
 //
 // UniversalScalarConversion and TYPE_CONVERSION
