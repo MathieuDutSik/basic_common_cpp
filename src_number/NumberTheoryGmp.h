@@ -463,25 +463,34 @@ mpz_class convert_mpz_class_int64_t(int64_t const& val) {
   return convert_mpz_class_uint64_t(-val);
 }
 
-// long long as input
+#ifdef __APPLE__
+// long as input (which is not the same as int64_t on APPLE platform)
+
+inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+
+inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+
+#endif
+
+// int64_t as input
 
 inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
 
 inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
 
-// long as input
+// int32_t as input
 
 inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpq_class &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpz_class &a2) { a2 = a1.val; }
 
-// int as input
+// int16_t as input
 
 inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpq_class &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpz_class &a2) { a2 = a1.val; }
 
-// short as input
+// int8_t as input
 
 inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpq_class &a2) { a2 = a1.val; }
 
