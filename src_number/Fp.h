@@ -108,7 +108,7 @@ public:
       b0 = tmp0;
       b1 = tmp1;
       A = B;
-      B = T;
+      B = tmp0*tmp0+tmp1*tmp1;
     }
   }
   
