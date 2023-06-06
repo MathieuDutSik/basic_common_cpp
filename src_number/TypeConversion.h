@@ -373,15 +373,15 @@ template <typename T1, typename T2> T1 UniversalScalarConversion(T2 const &a) {
 }
 
 template <typename T1, typename T2>
-std::pair<bool, T1> UniversalScalarConversionCheck(T2 const &a) {
+std::optional<T1> UniversalScalarConversionCheck(T2 const &a) {
   T1 ret;
   try {
     stc<T2> stc_a{a};
     TYPE_CONVERSION(stc_a, ret);
   } catch (ConversionException &e) {
-    return {false, ret};
+    return {};
   }
-  return {true, ret};
+  return ret;
 }
 
 template <typename T1, typename T2> std::vector<T1> UniversalStdVectorScalarConversion(std::vector<T2> const &V) {
