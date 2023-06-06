@@ -423,6 +423,12 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpz_class &a2) {
   a2 = long(a1.val);
 }
 
+// long long as input
+
+inline void TYPE_CONVERSION(stc<long long> const &a1, mpq_class &a2) { a2 = a1.val; }
+
+inline void TYPE_CONVERSION(stc<long long> const &a1, mpz_class &a2) { a2 = a1.val; }
+
 // long as input
 
 inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) { a2 = a1.val; }
@@ -435,7 +441,7 @@ inline void TYPE_CONVERSION(stc<int> const &a1, mpq_class &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<int> const &a1, mpz_class &a2) { a2 = a1.val; }
 
-// int as input
+// short as input
 
 inline void TYPE_CONVERSION(stc<short> const &a1, mpq_class &a2) { a2 = a1.val; }
 
