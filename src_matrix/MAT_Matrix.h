@@ -145,7 +145,7 @@ MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const &M) {
 }
 
 template <typename T2, typename T1>
-MyMatrix<T2> UniversalStdVectorMatrixConversion(std::vector<MyMatrix<T1>> const &ListM) {
+std::vector<MyMatrix<T2>> UniversalStdVectorMatrixConversion(std::vector<MyMatrix<T1>> const &ListM) {
   size_t n_mat = ListM.size();
   std::vector<MyMatrix<T2>> ListM_ret(n_mat);
   for (size_t i_mat = 0; i_mat < n_mat; i_mat++)

@@ -15,6 +15,7 @@
 #include <math.h>
 #include <type_traits>
 #include <utility>
+#include <vector>
 
 //
 // UniversalScalarConversion and TYPE_CONVERSION
@@ -381,6 +382,15 @@ std::pair<bool, T1> UniversalScalarConversionCheck(T2 const &a) {
     return {false, ret};
   }
   return {true, ret};
+}
+
+template <typename T1, typename T2> std::vector<T1> UniversalStdVectorScalarConversion(std::vector<T2> const &V) {
+  size_t len = V.size();
+  std::vector<T1> V_ret(len);
+  for (size_t i=0; i<len; i++) {
+    V_ret[i] = UniversalScalarConversion<T1,T2>(V[i]);
+  }
+  return V_ret;
 }
 
 //
