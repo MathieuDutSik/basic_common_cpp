@@ -216,7 +216,8 @@ inline void ResInt_Kernel(mpq_class const &a, mpq_class const &b,
   res = mpq_class(res_z) / mpq_class(eLCM);
 }
 
-inline void QUO_INT(stc<mpz_class> const &a, stc<mpz_class> const &b, mpz_class & q) {
+inline void QUO_INT(stc<mpz_class> const &a, stc<mpz_class> const &b,
+                    mpz_class &q) {
   mpz_cdiv_q(q.get_mpz_t(), a.val.get_mpz_t(), b.val.get_mpz_t());
   if (b.val > 0 && b.val * q != a.val) {
     if (b.val > 0)
@@ -226,7 +227,8 @@ inline void QUO_INT(stc<mpz_class> const &a, stc<mpz_class> const &b, mpz_class 
   }
 }
 
-inline void QUO_INT(stc<mpq_class> const &a, stc<mpq_class> const &b, mpq_class & q) {
+inline void QUO_INT(stc<mpq_class> const &a, stc<mpq_class> const &b,
+                    mpq_class &q) {
   mpq_class res = ResInt(a.val, b.val);
   q = (a.val - res) / b.val;
 }
@@ -432,6 +434,12 @@ inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) { a2 = a1.val; }
 inline void TYPE_CONVERSION(stc<int> const &a1, mpq_class &a2) { a2 = a1.val; }
 
 inline void TYPE_CONVERSION(stc<int> const &a1, mpz_class &a2) { a2 = a1.val; }
+
+// int as input
+
+inline void TYPE_CONVERSION(stc<short> const &a1, mpq_class &a2) { a2 = a1.val; }
+
+inline void TYPE_CONVERSION(stc<short> const &a1, mpz_class &a2) { a2 = a1.val; }
 
 // mpz_class as input
 
