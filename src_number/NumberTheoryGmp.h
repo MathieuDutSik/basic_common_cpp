@@ -381,6 +381,12 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, long &a2) {
   a2 = a1_z.get_si();
 }
 
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int64_t &a2) {
+  Termination_mpq_not_integer(a1);
+  mpz_class a1_z = a1.val.get_num();
+  a2 = a1_z.get_si();
+}
+
 /*
 inline void TYPE_CONVERSION(stc<mpq_class> const& a1, int64_t & a2)
 {
