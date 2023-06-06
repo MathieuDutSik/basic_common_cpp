@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "MAT_Matrix.h"
+// clang-format on
 
 int main() {
   size_t n_rows = 10;

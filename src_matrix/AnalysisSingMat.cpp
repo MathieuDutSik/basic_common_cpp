@@ -1,7 +1,10 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "MAT_Matrix.h"
-#include "Namelist.h"
+// clang-format off
 #include "NumberTheory.h"
+#include "MAT_Matrix.h"
+#include "MAT_MatrixInt.h"
+#include "Namelist.h"
+// clang-format on
 
 FullNamelist NAMELIST_GetStandardAnalysis() {
   std::map<std::string, SingleBlock> ListBlock;

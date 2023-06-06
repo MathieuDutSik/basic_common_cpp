@@ -1,6 +1,8 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "MAT_Matrix.h"
+// clang-format off
 #include "NumberTheory.h"
+#include "MAT_Matrix.h"
+// clang-format off
 
 template <typename T> void test_type() {
   size_t n_row = 10;

@@ -1,6 +1,9 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "MAT_Matrix.h"
+// clang-format off
 #include "NumberTheory.h"
+#include "MAT_Matrix.h"
+// clang-format on
+
 int main(int argc, char *argv[]) {
   using T = mpq_class;
   try {

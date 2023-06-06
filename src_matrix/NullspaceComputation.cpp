@@ -6,7 +6,6 @@
 #include "MAT_Matrix.h"
 // clang-format on
 
-
 template<typename T>
 void full_process_type(std::string const& input, std::string const& output) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(input);

@@ -1,6 +1,9 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "MatrixLinbox.h"
+// clang-format off
 #include "NumberTheory.h"
+#include "MatrixLinbox.h"
+// clang-format off
+
 int main(int argc, char *argv[]) {
   using T = mpq_class;
   try {
