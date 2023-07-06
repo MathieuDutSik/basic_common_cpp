@@ -160,6 +160,75 @@ using NanosecondTime = TimeEval<std::chrono::nanoseconds>;
 
 // The HumanTime
 
+
+
+std::string nanoseconds_as_string(int64_t delta) {
+  int64_t one_microsecond = 1000;
+  int64_t one_millisecond = 1000 * one_microsecond;
+  int64_t one_second = 1000 * one_millisecond;
+  int64_t one_minute = 60 * one_second;
+  int64_t one_hour = 60 * one_minute;
+  int64_t one_day = 24 * one_hour;
+  if (delta < one_microsecond) {
+    std::string reply = std::to_string(delta) + "ns";
+    return reply;
+  }
+  if (delta < one_millisecond) {
+    int64_t res = delta / one_microsecond;
+    std::string reply = std::to_string(res) + "micros";
+    int64_t res2 = delta - one_microsecond * res;
+    if (res2 > 0) {
+      reply += " " + std::to_string(res2) + "ns";
+    }
+    return reply;
+  }
+  if (delta < one_second) {
+    int64_t res = delta / one_millisecond;
+    std::string reply = std::to_string(res) + "ms";
+    int64_t res2 = (delta - one_millisecond * res) / one_microsecond;
+    if (res2 > 0) {
+      reply += " " + std::to_string(res2) + "micros";
+    }
+    return reply;
+  }
+  if (delta < one_minute) {
+    int64_t res = delta / one_second;
+    std::string reply = std::to_string(res) + "s";
+    int64_t res2 = (delta - one_second * res) / one_millisecond;
+    if (res2 > 0) {
+      reply += " " + std::to_string(res2) + "ms";
+    }
+    return reply;
+  }
+  if (delta < one_hour) {
+    int64_t res = delta / one_minute;
+    std::string reply = std::to_string(res) + "min";
+    int64_t res2 = (delta - one_minute * res) / one_second;
+    if (res2 > 0) {
+      reply += " " + std::to_string(res2) + "s";
+    }
+    return reply;
+  }
+  if (delta < one_day) {
+    int64_t res = delta / one_hour;
+    std::string reply = std::to_string(res) + "h";
+    int64_t res2 = (delta - one_hour * res) / one_minute;
+    if (res2 > 0) {
+      reply += " " + std::to_string(res2) + "min";
+    }
+    return reply;
+  }
+  int64_t res = delta / one_day;
+  std::string reply = std::to_string(res) + "day";
+  int64_t res2 = (delta - one_day * res) / one_hour;
+  if (res2 > 0) {
+    reply += " " + std::to_string(res2) + "h";
+  }
+  return reply;
+}
+
+
+
 struct HumanTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   HumanTime() { time = std::chrono::system_clock::now(); }
@@ -168,70 +237,16 @@ struct HumanTime {
         std::chrono::system_clock::now();
     int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time).count();
     time = timeNew;
-    int64_t one_microsecond = 1000;
-    int64_t one_millisecond = 1000 * one_microsecond;
-    int64_t one_second = 1000 * one_millisecond;
-    int64_t one_minute = 60 * one_second;
-    int64_t one_hour = 60 * one_minute;
-    int64_t one_day = 24 * one_hour;
-    if (delta < one_microsecond) {
-      std::string reply = std::to_string(delta) + "ns";
-      return reply;
-    }
-    if (delta < one_millisecond) {
-      int64_t res = delta / one_microsecond;
-      std::string reply = std::to_string(res) + "micros";
-      int64_t res2 = delta - one_microsecond * res;
-      if (res2 > 0) {
-        reply += " " + std::to_string(res2) + "ns";
-      }
-      return reply;
-    }
-    if (delta < one_second) {
-      int64_t res = delta / one_millisecond;
-      std::string reply = std::to_string(res) + "ms";
-      int64_t res2 = (delta - one_millisecond * res) / one_microsecond;
-      if (res2 > 0) {
-        reply += " " + std::to_string(res2) + "micros";
-      }
-      return reply;
-    }
-    if (delta < one_minute) {
-      int64_t res = delta / one_second;
-      std::string reply = std::to_string(res) + "s";
-      int64_t res2 = (delta - one_second * res) / one_millisecond;
-      if (res2 > 0) {
-        reply += " " + std::to_string(res2) + "ms";
-      }
-      return reply;
-    }
-    if (delta < one_hour) {
-      int64_t res = delta / one_minute;
-      std::string reply = std::to_string(res) + "min";
-      int64_t res2 = (delta - one_minute * res) / one_second;
-      if (res2 > 0) {
-        reply += " " + std::to_string(res2) + "s";
-      }
-      return reply;
-    }
-    if (delta < one_day) {
-      int64_t res = delta / one_hour;
-      std::string reply = std::to_string(res) + "h";
-      int64_t res2 = (delta - one_hour * res) / one_minute;
-      if (res2 > 0) {
-        reply += " " + std::to_string(res2) + "min";
-      }
-      return reply;
-    }
-    int64_t res = delta / one_day;
-    std::string reply = std::to_string(res) + "day";
-    int64_t res2 = (delta - one_day * res) / one_hour;
-    if (res2 > 0) {
-      reply += " " + std::to_string(res2) + "h";
-    }
-    return reply;
+    return nanoseconds_as_string(delta);
   }
 };
+
+std::string const_current_duration(HumanTime const& x) {
+  std::chrono::time_point<std::chrono::system_clock> timeNew =
+    std::chrono::system_clock::now();
+  int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - x.time).count();
+  return nanoseconds_as_string(delta);
+}
 
 std::ostream &operator<<(std::ostream &os, HumanTime &x) {
   os << x.eval();
