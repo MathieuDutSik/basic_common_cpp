@@ -239,14 +239,13 @@ struct HumanTime {
     time = timeNew;
     return nanoseconds_as_string(delta);
   }
+  std::string const_eval() const {
+    std::chrono::time_point<std::chrono::system_clock> timeNew =
+      std::chrono::system_clock::now();
+    int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time).count();
+    return nanoseconds_as_string(delta);
+  }
 };
-
-std::string const_current_duration(HumanTime const& x) {
-  std::chrono::time_point<std::chrono::system_clock> timeNew =
-    std::chrono::system_clock::now();
-  int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - x.time).count();
-  return nanoseconds_as_string(delta);
-}
 
 std::ostream &operator<<(std::ostream &os, HumanTime &x) {
   os << x.eval();
