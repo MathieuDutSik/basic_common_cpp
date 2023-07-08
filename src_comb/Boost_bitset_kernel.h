@@ -180,6 +180,16 @@ public:
     return f;
   }
 
+  // This exist because we did not manage to code a operator[] that allow modification.
+  void AssignEntry(Face const& f, size_t i_orb) {
+    size_t pos = n_face * n;
+    for (size_t i = 0; i < n; i++) {
+      bool val = f[i];
+      setbit_vector(V, pos, val);
+      pos++;
+    }
+  }
+
   size_t size() const { return n_face; }
 
   size_t get_n() const { return n; }
