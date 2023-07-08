@@ -5,6 +5,7 @@
 // Boost libraries
 
 #include "boost_serialization.h"
+#include "hash_functions.h"
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>
 #include <utility>
@@ -121,6 +122,11 @@ public:
     V = std::move(_V);
     append_len = (n + 7) / 8;
     Vappend = std::vector<uint8_t>(append_len, 0);
+  }
+  size_t hash() const {
+    int size = V.size();
+    uint32_t seed = 0x1b853560;
+    return robin_hood_hash_bytes(V.data(), size, seed);
   }
 
   vectface &operator=(const vectface &&vf) {
