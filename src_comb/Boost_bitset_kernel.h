@@ -123,10 +123,18 @@ public:
     append_len = (n + 7) / 8;
     Vappend = std::vector<uint8_t>(append_len, 0);
   }
-  size_t hash() const {
-    int size = V.size();
+  size_t hash() {
+    // We can have some insertions followed by removals, this has to be handled
+    // The relevant length according to the number of faces
+    int rel_len = (n * n_face + 7) / 8;
+    // Setting the bits to 0 (could have been inserted and then pop_back)
+    int n_bit = n * n_face;
+    int rel_bit = rel_len * 8;
+    for (int i_bit=n_bit; i_bit<rel_bit; i_bit++)
+      setbit_vector(V, i_bit, false);
+    // Now computing with a standard seed.
     uint32_t seed = 0x1b853560;
-    return robin_hood_hash_bytes(V.data(), size, seed);
+    return robin_hood_hash_bytes(V.data(), rel_len, seed);
   }
 
   vectface &operator=(const vectface &&vf) {
