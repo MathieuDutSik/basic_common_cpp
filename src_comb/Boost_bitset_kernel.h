@@ -182,7 +182,7 @@ public:
 
   // This exist because we did not manage to code a operator[] that allow modification.
   void AssignEntry(Face const& f, size_t i_orb) {
-    size_t pos = n_face * n;
+    size_t pos = i_orb * n;
     for (size_t i = 0; i < n; i++) {
       bool val = f[i];
       setbit_vector(V, pos, val);
