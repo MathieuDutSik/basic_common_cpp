@@ -363,6 +363,25 @@ vectface select_minimum_count(vectface const& vf) {
   return vf_ret;
 }
 
+vectface sort_vectface(vectface const& vf) {
+  size_t n = vf.get_n();
+  std::set<Face> set;
+  for (auto & f : vf) {
+    set.insert(f);
+  }
+  vectface vf_ret(n);
+  for (auto & f : set) {
+    vf_ret.push_back(f);
+  }
+  return vf_ret;
+}
+
+vectface unicize_vectface(vectface const& vf) {
+  return sort_vectface(vf);
+}
+
+
+
 /*
 template<>
 void std::swap(Face & x, Face & y)
