@@ -14,6 +14,10 @@ struct RuntimeException {
   int eVal;
 };
 
+struct SafeIntException {
+  int64_t eVal;
+};
+
 // This is guaranteed to trigger an end.
 // Also it gives something that can be used for having the stacktrace via gdb.
 void TerminalEnding() {

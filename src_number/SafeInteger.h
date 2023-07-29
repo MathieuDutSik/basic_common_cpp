@@ -11,7 +11,7 @@ void check_prod_int64(int64_t val) {
   if (val > MAX_INT64_PROD || val < -MAX_INT64_PROD) {
     std::cerr << "Safety check triggerred for product operation of int64_t\n";
     std::cerr << "val=" << val << " MAX_INT64_PROD=" << MAX_INT64_PROD << "\n";
-    throw TerminalException{1};
+    throw SafeIntException{val};
   }
 }
 
@@ -19,7 +19,7 @@ void check_sum_int64(int64_t val) {
   if (val > MAX_INT64_SUM || val < -MAX_INT64_SUM) {
     std::cerr << "Safety check triggerred for sum operation of int64_t\n";
     std::cerr << "val=" << val << " MAX_INT64_SUM=" << MAX_INT64_SUM << "\n";
-    throw TerminalException{1};
+    throw SafeIntException{val};
   }
 }
 
