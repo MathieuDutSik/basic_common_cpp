@@ -54,6 +54,15 @@ public:
     std::cerr << "SafeInt64 constructor for SafeInt64 val=" << x << "\n";
 #endif
   }
+  int64_t& get_val() {
+    return val;
+  }
+  int64_t const& get_const_val() const {
+    return val;
+  }
+  double get_d() const {
+    return static_cast<double>(val);
+  }
   // Assignment operators
   SafeInt64 operator=(SafeInt64 const &u) {
     // assignment operator from int

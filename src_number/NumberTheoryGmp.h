@@ -307,10 +307,6 @@ KernelLCMpair(T const &a, T const &b) {
   return eLCM;
 }
 
-inline mpq_class GetFieldElement(mpz_class const &eVal) { return eVal; }
-
-inline mpq_class GetFieldElement(long const &eVal) { return eVal; }
-
 // mpq_class as input
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, mpq_class &a2) {
@@ -344,35 +340,35 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint8_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
-  a2 = uint8_t(a1_long);
+  a2 = static_cast<uint8_t>(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int8_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
-  a2 = int8_t(a1_long);
+  a2 = static_cast<int8_t>(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint16_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
-  a2 = uint16_t(a1_long);
+  a2 = static_cast<uint16_t>(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int16_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
-  a2 = int16_t(a1_long);
+  a2 = static_cast<int16_t>(a1_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint32_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   long a1_long = a1_z.get_si();
-  a2 = uint32_t(a1_long);
+  a2 = static_cast<uint32_t>(a1_long);
 }
 
 #ifdef __APPLE__
@@ -394,46 +390,34 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int64_t &a2) {
   a2 = a1_z.get_si();
 }
 
-/*
-inline void TYPE_CONVERSION(stc<mpq_class> const& a1, int64_t & a2)
-{
-  if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
-    throw ConversionException{str};
-  }
-  mpz_class a1_z=a1.val.get_num();
-  a2 = int64_t(a1_z.get_si());
-}
-*/
-
 // uint8_t as input
 
 inline void TYPE_CONVERSION(stc<uint8_t> const &a1, mpq_class &a2) {
-  a2 = long(a1.val);
+  a2 = static_cast<long>(a1.val);
 }
 
 inline void TYPE_CONVERSION(stc<uint8_t> const &a1, mpz_class &a2) {
-  a2 = long(a1.val);
+  a2 = static_cast<long>(a1.val);
 }
 
 // uint16_t as input
 
 inline void TYPE_CONVERSION(stc<uint16_t> const &a1, mpq_class &a2) {
-  a2 = long(a1.val);
+  a2 = static_cast<long>(a1.val);
 }
 
 inline void TYPE_CONVERSION(stc<uint16_t> const &a1, mpz_class &a2) {
-  a2 = long(a1.val);
+  a2 = static_cast<long>(a1.val);
 }
 
 // uint32_t as input
 
 inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpq_class &a2) {
-  a2 = long(a1.val);
+  a2 = static_cast<long>(a1.val);
 }
 
 inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpz_class &a2) {
-  a2 = long(a1.val);
+  a2 = static_cast<long>(a1.val);
 }
 
 // Conversion to mpz_class
@@ -527,7 +511,7 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, T_uint64_t &a2) {
   long eVal_long = a1.val.get_si();
-  a2 = T_uint64_t(eVal_long);
+  a2 = static_cast<T_uint64_t>(eVal_long);
 }
 
 inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, mpz_class &a2) {
@@ -690,38 +674,6 @@ inline void NearestInteger(mpq_class const &xI, int &xO) {
 inline void NearestInteger(mpq_class const &xI, long &xO) {
   mpq_class xO_q = NearestInteger_rni(xI);
   xO = xO_q.get_num().get_si();
-}
-
-// return the nearest integer to x.
-// If x is of the form y + 1/2 then it returns y+1 and not y.
-// rpi: "Rounding towards Positive Integers"
-// See https://en.wikipedia.org/wiki/Floor_and_ceiling_functions#Rounding
-inline mpq_class NearestInteger_rpi(mpq_class const &x) {
-  //  std::cerr << "--------------------------------------\n";
-  mpq_class eFrac = FractionalPart(x);
-  mpq_class eOne = 1;
-  mpq_class eTwo = 2;
-  //  std::cerr << "We have eOne, eTwo\n";
-  mpq_class eHalf = eOne / eTwo;
-  //  std::cerr << "We have eHalf\n";
-  mpq_class x2 = x + eHalf;
-  //  std::cerr << "We have x=" << x << " eHalf=" << eHalf << " x2=" << x2 <<
-  //  "\n";
-  mpq_class x3 = Floor_mpq(x2);
-  //  std::cerr << "We have x2=" << x2 << " x3=" << x3 << "\n";
-  return x3;
-  /*
-  mpq_class residual=x3 - eHalf;
-  std::cerr << "We have x3=" << x3 << " x4=" << residual << "\n";
-  std::cerr << "x=" << x << " x4=" << residual << "\n";
-  if (residual < -eHalf || residual >= eHalf) {
-    std::cerr << "inconsistency error in residual computation\n";
-    throw TerminalException{1};
-  }
-  mpq_class x5=x-residual;
-  std::cerr << "x=" << x << " nearestInt=" << x5 << "\n";
-  std::cerr << "--------------------------------------\n";
-  return x5;*/
 }
 
 namespace boost::serialization {
