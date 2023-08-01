@@ -90,7 +90,7 @@ struct underlying_totally_ordered_ring<int64_t> {
 
 namespace std {
 template <> struct hash<SafeInt64> {
-  std::size_t operator()(const mpz_class &val) const {
+  std::size_t operator()(const SafeInt64 &val) const {
     unsigned long int val_uli = val.get_const_val();
     return val_uli;
   }
@@ -133,52 +133,20 @@ std::string to_string(const Rational<SafeInt64> &val) {
 }  // namespace std
 // clang-format on
 
+// 
 inline void ResInt_Kernel(Rational<SafeInt64> const &a, Rational<SafeInt64> const &b,
                           Rational<SafeInt64> &res) {
   SafeInt64 const& a_den = a.get_const_den();
   SafeInt64 const& b_den = b.get_const_den();
-  
-  
-  mpz_class eGcd;
-  mpz_gcd(eGcd.get_mpz_t(), a_den.get_mpz_t(), b_den.get_mpz_t());
-  mpz_class eLCM = a_den * b_den / eGcd;
-  mpq_class aProd = a * eLCM;
-  mpq_class bProd = b * eLCM;
-  mpz_class a_num = aProd.get_num();
-  mpz_class b_num = bProd.get_num();
-  mpz_class b_num_pos;
-  if (b_num < 0) {
-    b_num_pos = -b_num;
-  } else {
-    b_num_pos = b_num;
-  }
-  mpz_class res_z = a_num % b_num_pos;
-  while (true) {
-    if (res_z >= 0 && res_z < b_num_pos)
-      break;
-    if (res_z < 0)
-      res_z += b_num_pos;
-    if (res_z >= b_num_pos)
-      res_z -= b_num_pos;
-  }
-  res = mpq_class(res_z) / mpq_class(eLCM);
-}
-
-inline void QUO_INT(stc<mpz_class> const &a, stc<mpz_class> const &b,
-                    mpz_class &q) {
-  mpz_cdiv_q(q.get_mpz_t(), a.val.get_mpz_t(), b.val.get_mpz_t());
-  if (b.val > 0 && b.val * q != a.val) {
-    if (b.val > 0)
-      q--;
-    else
-      q++;
-  }
-}
-
-inline void QUO_INT(stc<mpq_class> const &a, stc<mpq_class> const &b,
-                    mpq_class &q) {
-  mpq_class res = ResInt(a.val, b.val);
-  q = (a.val - res) / b.val;
+  SafeInt64 const& a_num = a.get_const_num();
+  SafeInt64 const& b_num = b.get_const_num();
+  SafeInt64 gcd = KernelGcdPair(a_den, b_den);
+  SafeInt64 a_mul = a_num * (b_den / gcd);
+  SafeInt64 b_mul = b_num * (a_den / gcd);
+  SafeInt64 res_i(0);
+  ResInt_Kernel(a_mul, b_mul, res_i);
+  SafeInt64 prod = a_den * (b_den / gcd);
+  res = Rational(res_i, prod);
 }
 
 #include "QuoIntFcts.h"
@@ -201,9 +169,9 @@ inline Rational<SafeInt64> CanonicalizationUnit(Rational<SafeInt64> const &eVal)
   return 1;
 }
 
-inline mpq_class T_NormGen(mpq_class const &x) { return T_abs(x); }
+inline Rational<SafeInt64> T_NormGen(Rational<SafeInt64> const &x) { return T_abs(x); }
 
-inline mpz_class T_NormGen(mpz_class const &x) { return T_abs(x); }
+inline SafeInt64 T_NormGen(SafeInt64 const &x) { return T_abs(x); }
 
 inline bool IsInteger(Rational<SafeInt64> const &x) {
   int64_t const& val = x.get_const_den().get_const_val();
@@ -238,23 +206,7 @@ inline void ScalingInteger_Kernel([[maybe_unused]] stc<SafeInt64> const &x,
   x_ret = 1;
 }
 
-template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, T>::type
-KernelGcdPair(T const &a, T const &b) {
-  mpz_class eGCD;
-  mpz_gcd(eGCD.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  return eGCD;
-}
-
-template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, T>::type
-KernelLCMpair(T const &a, T const &b) {
-  mpz_class eLCM;
-  mpz_lcm(eLCM.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
-  return eLCM;
-}
-
-// mpq_class as input
+// Rational<SafeInt64> as input
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, Rational<SafeInt64> &a2) {
   a2 = a1.val;
@@ -368,67 +320,67 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, SafeInt64 &a2) {
   a2 = SafeInt64(a1.val);
 }
 
-// Conversion to mpz_class
-
-mpz_class convert_mpz_class_uint64_t(uint64_t const& val) {
-  mpz_class ret = 0;
-  uint64_t shift = 256;
-  int32_t shift_i = 256;
-  uint64_t work_val = val;
-  mpz_class prod = 1;
-  while(true) {
-    if (work_val == 0)
-      return ret;
-    uint64_t res = work_val % shift;
-    uint64_t q = work_val / shift;
-    int32_t res_t = static_cast<int32_t>(res);
-    ret += mpz_class(res_t) * prod;
-    prod *= shift_i;
-    work_val = q;
-  }
-}
-
-mpz_class convert_mpz_class_int64_t(int64_t const& val) {
-  if (val > 0) {
-    return convert_mpz_class_uint64_t(val);
-  }
-  return convert_mpz_class_uint64_t(-val);
-}
+// Conversion to SafeInt64
 
 #ifdef __APPLE__
 // long as input (which is not the same as int64_t on APPLE platform)
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<long> const &a1, Rational<SafeInt64> &a2) {
+  SafeInt64 val(a1.val);
+  a2 = Rational(val);
+}
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<long> const &a1, SafeInt64 &a2) {
+  a2 = SafeInt64(a1.val);
+}
 
 #endif
 
 // int64_t as input
 
-inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, Rational<SafeInt64> &a2) {
+  SafeInt64 val(a1.val);
+  a2 = Rational(val);
+}
 
-inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, SafeInt64 &a2) {
+  a2 = SafeInt64(a1.val);
+}
 
 // int32_t as input
 
-inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, Rational<SafeInt64> &a2) {
+  SafeInt64 val(a1.val);
+  a2 = Rational(val);
+}
 
-inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, SafeInt64 &a2) {
+  a2 = SafeInt64(a1.val);
+}
 
 // int16_t as input
 
-inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, Rational<SafeInt64> &a2) {
+  SafeInt64 val(a1.val);
+  a2 = Rational(val);
+}
 
-inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, SafeInt64 &a2) {
+  a2 = SafeInt64(a1.val);
+}
 
 // int8_t as input
 
-inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, Rational<SafeInt64> &a2) {
+  SafeInt64 val(a1.val);
+  a2 = Rational(val);
+}
 
-inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, SafeInt64 &a2) {
+  a2 = SafeInt64(a1.val);
+}
 
-// mpz_class as input
+// SafeInt64 as input
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, SafeInt64 &a2) {
   a2 = a1.val;
@@ -463,12 +415,13 @@ inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, T_uint64_t &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, SafeInt64 &a2) {
-  T_uint64_t const &eVal = a1.val;
-  a2 = convert_mpz_class_uint64_t(eVal);
+  T_uint64_t const &val1 = a1.val;
+  int64_t val2 = static_cast<int64_t>(val1);
+  a2 = SafeInt64(val2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T_uint64_t &a2) {
-  Termination_mpq_not_integer(a1);
+  Termination_rat_safeint_not_integer(a1);
   SafeInt64 a1_z = a1.val.get_const_num();
   a2 = static_cast<T_uint64_t>(a1_z.get_const_val());
 }
@@ -539,7 +492,7 @@ inline Rational<SafeInt64> FractionalPart(Rational<SafeInt64> const &x) {
   SafeInt64 const& eNum = x.get_const_num();
   SafeInt64 const& eDen = x.get_const_den();
   SafeInt64 r(0);
-  QUO_INT(eNum, eDen, r);
+  ResInt_Kernel(eNum, eDen, r);
   return Rational(r, eDen);
 }
 
@@ -556,40 +509,40 @@ inline Rational<SafeInt64> Ceil_safe_rat(Rational<SafeInt64> const &x) {
 }
 
 inline void FloorInteger(Rational<SafeInt64> const &xI, Rational<SafeInt64> &xO) {
-  xO = Floor_mpq(xI);
+  xO = Floor_safe_rat(xI);
 }
 
 inline void FloorInteger(Rational<SafeInt64> const &xI, SafeInt64 &xO) {
-  Rational<SafeInt64> xO_q = Floor_mpq(xI);
+  Rational<SafeInt64> xO_q = Floor_safe_rat(xI);
   xO = xO_q.get_const_num();
 }
 
 inline void FloorInteger(Rational<SafeInt64> const &xI, int &xO) {
-  Rational<SafeInt64> xO_q = Floor_mpq(xI);
+  Rational<SafeInt64> xO_q = Floor_safe_rat(xI);
   xO = static_cast<int>(xO_q.get_const_num().get_const_val());
 }
 
 inline void FloorInteger(Rational<SafeInt64> const &xI, long &xO) {
-  Rational<SafeInt64> xO_q = Floor_mpq(xI);
+  Rational<SafeInt64> xO_q = Floor_safe_rat(xI);
   xO = static_cast<long>(xO_q.get_const_num().get_const_val());
 }
 
 inline void CeilInteger(Rational<SafeInt64> const &xI, Rational<SafeInt64> &xO) {
-  xO = Ceil_mpq(xI);
+  xO = Ceil_safe_rat(xI);
 }
 
 inline void CeilInteger(Rational<SafeInt64> const &xI, SafeInt64 &xO) {
-  Rational<SafeInt64> xO_q = Ceil_mpq(xI);
+  Rational<SafeInt64> xO_q = Ceil_safe_rat(xI);
   xO = xO_q.get_const_num();
 }
 
 inline void CeilInteger(Rational<SafeInt64> const &xI, int &xO) {
-  Rational<SafeInt64> xO_q = Ceil_mpq(xI);
+  Rational<SafeInt64> xO_q = Ceil_safe_rat(xI);
   xO = static_cast<int>(xO_q.get_const_num().get_const_val());
 }
 
 inline void CeilInteger(Rational<SafeInt64> const &xI, long &xO) {
-  Rational<SafeInt64> xO_q = Ceil_mpq(xI);
+  Rational<SafeInt64> xO_q = Ceil_safe_rat(xI);
   xO = static_cast<long>(xO_q.get_const_num().get_const_val());
 }
 
@@ -639,7 +592,7 @@ inline void NearestInteger(Rational<SafeInt64> const &xI, long &xO) {
 
 namespace boost::serialization {
 
-// mpq_class
+// Rational<SafeInt64>
 
 template <class Archive>
 inline void load(Archive &ar, Rational<SafeInt64> &val,
@@ -665,7 +618,7 @@ inline void serialize(Archive &ar, Rational<SafeInt64> &val,
   split_free(ar, val, version);
 }
 
-// mpz_class
+// SafeInt64
 
 template <class Archive>
 inline void load(Archive &ar, SafeInt64 &val,
