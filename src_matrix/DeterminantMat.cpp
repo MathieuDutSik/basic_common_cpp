@@ -18,6 +18,14 @@ void compute_determinant_kernel(std::string const& eFile) {
 }
 
 void compute_determinant(std::string const& arithmetic, std::string const& eFile) {
+  if (arithmetic == "safe_integer") {
+    using T = SafeInt64;
+    return compute_determinant_kernel<T>(eFile);
+  }
+  if (arithmetic == "safe_rational") {
+    using T = Rational<SafeInt64>;
+    return compute_determinant_kernel<T>(eFile);
+  }
   if (arithmetic == "rational") {
     using T = mpq_class;
     return compute_determinant_kernel<T>(eFile);

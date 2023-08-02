@@ -26,6 +26,14 @@ void full_process_type(std::string const& input, std::string const& output) {
 
 
 void process(std::string const& arith, std::string const& input, std::string const& output) {
+  if (arith == "safe_integer") {
+    using T = SafeInt64;
+    return full_process_type<T>(input, output);
+  }
+  if (arith == "safe_rational") {
+    using T = Rational<SafeInt64>;
+    return full_process_type<T>(input, output);
+  }
   if (arith == "rational") {
     using T = mpq_class;
     return full_process_type<T>(input, output);

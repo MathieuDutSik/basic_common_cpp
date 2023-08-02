@@ -53,5 +53,8 @@ template <typename T> void test_type() {
 
 int main() {
   test_type<mpz_class>();
+  test_type<mpq_class>();
+  test_type<SafeInt64>();
+  test_type<Rational<SafeInt64>>();
   test_type<int>();
 }

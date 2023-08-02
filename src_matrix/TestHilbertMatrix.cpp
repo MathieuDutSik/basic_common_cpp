@@ -5,33 +5,54 @@
 #include "MAT_Matrix.h"
 // clang-format on
 
+template<typename T>
+void process(int n) {
+  //
+  MyMatrix<T> eMat(n, n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      T val = i + j + 1;
+      eMat(i, j) = 1 / val;
+    }
+  }
+  std::cerr << "eMat=\n";
+  WriteMatrix(std::cerr, eMat);
+  //
+  MyMatrix<T> eInv = Inverse(eMat);
+  std::cerr << "eInv=\n";
+  WriteMatrix(std::cerr, eInv);
+}
+
+
+
 int main(int argc, char *argv[]) {
   //  using T=mpq_class;
   using T = Rational<int64_t>;
   try {
-    if (argc != 2) {
+    if (argc != 3) {
       fprintf(stderr, "TestHilbertMatrix is used as\n");
-      fprintf(stderr, "TestHilbertMatrix [n]\n");
+      fprintf(stderr, "TestHilbertMatrix [arith] [n]\n");
       return -1;
     }
-    // reading the matrix
+    std::string arith = argv[1];
     int n;
-    sscanf(argv[1], "%d", &n);
-    //
-    MyMatrix<T> eMat(n, n);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
-        T val = i + j + 1;
-        eMat(i, j) = 1 / val;
-      }
-    }
-    std::cerr << "eMat=\n";
-    WriteMatrix(std::cerr, eMat);
-
-    MyMatrix<T> eInv = Inverse(eMat);
-    std::cerr << "eInv=\n";
-    WriteMatrix(std::cerr, eInv);
+    sscanf(argv[2], "%d", &n);
+    auto f=[&]() -> void {
+      if (arith == "mpq_class")
+        return process<mpq_class>(n);
+      if (arith == "mpz_class")
+        return process<mpz_class>(n);
+      if (arith == "safe_integer")
+        return process<SafeInt64>(n);
+      if (arith == "safe_rational")
+        return process<Rational<SafeInt64>>(n);
+      std::cerr << "Failed to find a matching type\n";
+      throw TerminalException{1};
+    };
+    f();
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
 }

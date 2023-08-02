@@ -4,28 +4,43 @@
 #include "MAT_MatrixInt.h"
 // clang-format off
 
+template<typename T>
+void process(std::string const& FileI) {
+  // reading the matrix
+  MyMatrix<T> M = ReadMatrixFile<T>(FileI);
+  std::cerr << "M=\n";
+  WriteMatrix(std::cerr, M);
+  //
+  FractionMatrix<T> eRec = RemoveFractionMatrixPlusCoeff(M);
+  std::cerr << "Mult=" << eRec.TheMult << "\n";
+  std::cerr << "TheMat=\n";
+  WriteMatrix(std::cerr, eRec.TheMat);
+}
+
+
 int main(int argc, char *argv[]) {
   using T = mpq_class;
   try {
     if (argc != 2) {
       fprintf(stderr, "Number of argument is = %d\n", argc);
       fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "RemoveFractionMatrix [inputMat]\n");
+      fprintf(stderr, "RemoveFractionMatrix [arith] [inputMat]\n");
       return -1;
     }
-    // reading the matrix
-    std::ifstream INmat(argv[1]);
-    MyMatrix<T> M = ReadMatrix<T>(INmat);
-    //
-    std::cerr << "M=\n";
-    WriteMatrix(std::cerr, M);
-    //
-    FractionMatrix<T> eRec = RemoveFractionMatrixPlusCoeff(M);
-    //
-    std::cerr << "Mult=" << eRec.TheMult << "\n";
-    std::cerr << "TheMat=\n";
-    WriteMatrix(std::cerr, eRec.TheMat);
+    std::string arith = argv[1];
+    std::string FileI = argv[2];
+    auto f=[&]() -> void {
+      if (arith == "mpq_class")
+        process<mpq_class>(FileI);
+      if (arith == "safe_rational")
+        process<Rational<SafeInt64>>(FileI);
+      std::cerr << "Failed to find a matching type\n";
+      throw TerminalException{1};
+    };
+    f();
+    std::cerr << "Normal termination of RemoveFractionMatrix\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of RemoveFractionMatrix\n";
     exit(e.eVal);
   }
 }
