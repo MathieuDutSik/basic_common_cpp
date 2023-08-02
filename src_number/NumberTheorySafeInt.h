@@ -577,14 +577,17 @@ inline void NearestInteger(Rational<SafeInt64> const &xI, SafeInt64 &xO) {
 }
 
 inline void NearestInteger(int const &xI, Rational<SafeInt64> &xO) {
-  SafeInt64 val(xI);
-  xO = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(xI);
+  SafeInt64 val2(val1);
+  xO = Rational(val2);
 }
 
 inline void NearestInteger(long const &xI, Rational<SafeInt64> &xO) {
-  SafeInt64 val(xI);
-  xO = Rational(val);
-  xO = xI;
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(xI);
+  SafeInt64 val2(val1);
+  xO = Rational(val2);
 }
 
 inline void NearestInteger(Rational<SafeInt64> const &xI, int &xO) {
