@@ -43,6 +43,7 @@ a constructed type and *y* an integer. The integer type is always second. The co
 looks like
 * *friend bool operator>(T const& x, T const& y)*
 * *friend bool operator>(T const& x, int const& y)*
+
 This goes the same way for *==*, *!=*, *<=*, *>=*, *<* and *>*.
 
 The *operator<<*, *operator>>*, *hash()*, *load/save* (for boost serialization) have
