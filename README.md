@@ -51,5 +51,5 @@ to be defined for all the types.
 
 The rules for the constructors are not as well defined. But it looks like the constructor
 from integer is forbidden because it leads to inconsistencies with **x > 0** because
-either **operator(T const& x, T const& y)** or **operator(T const& x, int const& y)** could be used.
+either **operator>(T const& x, T const& y)** or **operator>(T const& x, int const& y)** could be used.
 
