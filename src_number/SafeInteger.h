@@ -238,32 +238,53 @@ public:
     is >> v.val;
     return is;
   }
+  //
   friend bool operator==(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val == y.val;
   }
+  friend bool operator==(SafeInt64 const &x, int const &y) {
+    Tint y_i = static_cast<Tint>(y);
+    return x.val == y_i;
+  }
+  //
   friend bool operator!=(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val != y.val;
   }
-  friend bool operator!=(SafeInt64 const &x, Tint const &y) {
-    return x.val != y;
+  friend bool operator!=(SafeInt64 const &x, int const &y) {
+    Tint y_i = static_cast<Tint>(y);
+    return x.val != y_i;
   }
+  //
   friend bool operator>=(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val >= y.val;
   }
+  friend bool operator>=(SafeInt64 const &x, int const &y) {
+    Tint y_i = static_cast<Tint>(y);
+    return x.val >= y_i;
+  }
+  //
   friend bool operator<=(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val <= y.val;
   }
-  friend bool operator<=(SafeInt64 const &x, Tint const &y) {
-    return x.val <= y;
+  friend bool operator<=(SafeInt64 const &x, int const &y) {
+    Tint y_i = static_cast<Tint>(y);
+    return x.val <= y_i;
   }
+  //
   friend bool operator>(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val > y.val;
   }
+  friend bool operator>(SafeInt64 const &x, int const &y) {
+    Tint y_i = static_cast<Tint>(y);
+    return x.val > y_i;
+  }
+  //
   friend bool operator<(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val < y.val;
   }
-  friend bool operator<(SafeInt64 const &x, Tint const &y) {
-    return x.val < y;
+  friend bool operator<(SafeInt64 const &x, int const &y) {
+    Tint y_i = static_cast<Tint>(y);
+    return x.val < y_i;
   }
 };
 

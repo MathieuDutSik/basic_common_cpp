@@ -139,14 +139,14 @@ ComputePairGcd(T const &m, T const &n) {
     MyMatrix<T> Pmat = IdentityMat<T>(2);
     return {std::move(Pmat), f};
   }
-  if (0 <= m) {
+  if (m >= 0) {
     f = m;
     fm = 1;
   } else {
     f = -m;
     fm = -1;
   }
-  if (0 <= n) {
+  if (n >= 0) {
     g = n;
     gm = 0;
   } else {

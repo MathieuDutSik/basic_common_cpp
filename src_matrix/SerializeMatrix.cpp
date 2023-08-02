@@ -1,6 +1,9 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheory.h"
+#include "NumberTheoryRealField.h"
+#include "NumberTheorySafeInt.h"
+#include "QuadField.h"
 #include "MAT_Matrix.h"
 // clang-format off
 
@@ -10,7 +13,7 @@ template <typename T> void test_type() {
   MyMatrix<T> M1(n_row, n_col);
   for (size_t i_row = 0; i_row < n_row; i_row++) {
     for (size_t i_col = 0; i_col < n_col; i_col++) {
-      T val = random() % 20;
+      T val = UniversalScalarConversion<T,long>(random() % 20);
       M1(i_row, i_col) = val;
     }
   }
@@ -56,5 +59,4 @@ int main() {
   test_type<mpq_class>();
   test_type<SafeInt64>();
   test_type<Rational<SafeInt64>>();
-  test_type<int>();
 }

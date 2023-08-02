@@ -125,6 +125,7 @@ public:
     //    check("-=");
     gcd_reduction();
   }
+  //
   friend Rational<Tint> operator+(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
     //    std::cerr << "operator+ 2\n";
@@ -135,18 +136,19 @@ public:
     z.gcd_reduction();
     return z;
   }
-  friend Rational<Tint> operator+(Tint const &x, Rational<Tint> const &y) {
+  friend Rational<Tint> operator+(int const &x, Rational<Tint> const &y) {
     Rational<Tint> z;
     z.num = x * y.den + y.num;
     z.den = y.den;
     return z;
   }
-  friend Rational<Tint> operator+(Rational<Tint> const &x, Tint const &y) {
+  friend Rational<Tint> operator+(Rational<Tint> const &x, int const &y) {
     Rational<Tint> z;
     z.num = x.num + y * x.den;
     z.den = x.den;
     return z;
   }
+  //
   friend Rational<Tint> operator-(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
     Rational<Tint> z;
@@ -156,6 +158,19 @@ public:
     z.gcd_reduction();
     return z;
   }
+  friend Rational<Tint> operator-(int const &x, Rational<Tint> const &y) {
+    Rational<Tint> z;
+    z.num = x * y.den - y.num;
+    z.den = y.den;
+    return z;
+  }
+  friend Rational<Tint> operator-(Rational<Tint> const &x, int const &y) {
+    Rational<Tint> z;
+    z.num = x.num - y * x.den;
+    z.den = x.den;
+    return z;
+  }
+  //
   friend Rational<Tint> operator-(Rational<Tint> const &x) {
     Rational<Tint> z;
     z.num = -x.num;
@@ -193,6 +208,7 @@ public:
     //    check("*");
     gcd_reduction();
   }
+  //
   friend Rational<Tint> operator*(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
     Rational<Tint> z;
@@ -201,20 +217,21 @@ public:
     z.gcd_reduction();
     return z;
   }
-  friend Rational<Tint> operator*(Tint const &x, Rational<Tint> const &y) {
+  friend Rational<Tint> operator*(int const &x, Rational<Tint> const &y) {
     Rational<Tint> z;
     z.num = x * y.num;
     z.den = y.den;
     z.gcd_reduction();
     return z;
   }
-  friend Rational<Tint> operator*(Rational<Tint> const &x, Tint const &y) {
+  friend Rational<Tint> operator*(Rational<Tint> const &x, int const &y) {
     Rational<Tint> z;
     z.num = x.num * y;
     z.den = x.den;
     z.gcd_reduction();
     return z;
   }
+  //
   friend std::ostream &operator<<(std::ostream &os, Rational<Tint> const &v) {
     if (v.den == 1)
       return os << v.num;
@@ -266,30 +283,45 @@ public:
     }
     return is;
   }
+  //
   friend bool operator==(Rational<Tint> const &x, Rational<Tint> const &y) {
     return (x.num == y.num) && (x.den == y.den);
   }
+  friend bool operator==(Rational<Tint> const &x, int const &y) {
+    return (x.num == y) && (x.den == 1);
+  }
+  //
   friend bool operator!=(Rational<Tint> const &x, Rational<Tint> const &y) {
     return (x.num != y.num) || (x.den != y.den);
   }
-  friend bool operator!=(Rational<Tint> const &x, Tint const &y) {
+  friend bool operator!=(Rational<Tint> const &x, int const &y) {
     if (x.den > 1)
       return true;
     return x.num != y;
   }
+  //
   friend bool operator>=(Rational<Tint> const &x, Rational<Tint> const &y) {
     // x >= y is equivalent to x_n * y_d >= y_n * x_d
     return x.num * y.den >= y.num * x.den;
   }
+  friend bool operator>=(Rational<Tint> const &x, int const &y) {
+    return x.num >= y * x.den;
+  }
+  //
   friend bool operator<=(Rational<Tint> const &x, Rational<Tint> const &y) {
     return x.num * y.den <= y.num * x.den;
   }
-  friend bool operator<=(Rational<Tint> const &x, Tint const &y) {
+  friend bool operator<=(Rational<Tint> const &x, int const &y) {
     return x.num <= y * x.den;
   }
+  //
   friend bool operator>(Rational<Tint> const &x, Rational<Tint> const &y) {
     return x.num * y.den > y.num * x.den;
   }
+  friend bool operator>(Rational<Tint> const &x, int const &y) {
+    return x.num > y * x.den;
+  }
+  //
   friend bool operator<(Rational<Tint> const &x, Rational<Tint> const &y) {
     return x.num * y.den < y.num * x.den;
   }
