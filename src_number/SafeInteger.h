@@ -36,15 +36,22 @@ void check_reasonableness(std::string oper, int64_t val) {
 
 
 struct SafeInt64 {
-private:
-  int64_t val;
 public:
-  SafeInt64() : val(0) {
+  using Tint = int64_t;
+private:
+  Tint val;
+public:
+  explicit SafeInt64() : val(0) {
 #ifdef CHECK_SAFETY_INTEGER
     std::cerr << "Default constructor for SafeInt64 val=" << val << "\n";
 #endif
   }
-  SafeInt64(int64_t const &x) : val(x) {
+  SafeInt64(int const &x) : val(x) {
+#ifdef CHECK_SAFETY_INTEGER
+    std::cerr << "Int64_t constructor for SafeInt64 val=" << x << "\n";
+#endif
+  }
+  explicit SafeInt64(Tint const &x) : val(x) {
 #ifdef CHECK_SAFETY_INTEGER
     std::cerr << "Int64_t constructor for SafeInt64 val=" << x << "\n";
 #endif
@@ -61,10 +68,10 @@ public:
   SafeInt64 operator=(SafeInt64 const &u) {
     // assignment operator from int
     val = u.val;
-    return *this;
+    return SafeInt64(val);
   }
-  int64_t & get_val() { return val; }
-  const int64_t & get_const_val() const { return val; }
+  Tint & get_val() { return val; }
+  const Tint & get_const_val() const { return val; }
   void operator+=(SafeInt64 const &x) {
     check_sum_int64(val);
     check_sum_int64(x.val);
@@ -91,7 +98,7 @@ public:
 #endif
     return z;
   }
-  friend SafeInt64 operator+(int64_t const &x, SafeInt64 const &y) {
+  friend SafeInt64 operator+(Tint const &x, SafeInt64 const &y) {
     check_sum_int64(x);
     check_sum_int64(y.val);
     SafeInt64 z;
@@ -101,7 +108,7 @@ public:
 #endif
     return z;
   }
-  friend SafeInt64 operator+(SafeInt64 const &x, int64_t const &y) {
+  friend SafeInt64 operator+(SafeInt64 const &x, Tint const &y) {
     check_sum_int64(x.val);
     check_sum_int64(y);
     SafeInt64 z;
@@ -204,7 +211,7 @@ public:
 #endif
     return z;
   }
-  friend SafeInt64 operator*(int64_t const &x, SafeInt64 const &y) {
+  friend SafeInt64 operator*(Tint const &x, SafeInt64 const &y) {
     check_prod_int64(x);
     check_prod_int64(y.val);
     SafeInt64 z;
@@ -214,7 +221,7 @@ public:
 #endif
     return z;
   }
-  friend SafeInt64 operator*(SafeInt64 const &x, int64_t const &y) {
+  friend SafeInt64 operator*(SafeInt64 const &x, Tint const &y) {
     check_prod_int64(x.val);
     check_prod_int64(y);
     SafeInt64 z;
@@ -237,7 +244,7 @@ public:
   friend bool operator!=(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val != y.val;
   }
-  friend bool operator!=(SafeInt64 const &x, int64_t const &y) {
+  friend bool operator!=(SafeInt64 const &x, Tint const &y) {
     return x.val != y;
   }
   friend bool operator>=(SafeInt64 const &x, SafeInt64 const &y) {
@@ -246,7 +253,7 @@ public:
   friend bool operator<=(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val <= y.val;
   }
-  friend bool operator<=(SafeInt64 const &x, int64_t const &y) {
+  friend bool operator<=(SafeInt64 const &x, Tint const &y) {
     return x.val <= y;
   }
   friend bool operator>(SafeInt64 const &x, SafeInt64 const &y) {
@@ -255,24 +262,26 @@ public:
   friend bool operator<(SafeInt64 const &x, SafeInt64 const &y) {
     return x.val < y.val;
   }
-  friend bool operator<(SafeInt64 const &x, int64_t const &y) {
+  friend bool operator<(SafeInt64 const &x, Tint const &y) {
     return x.val < y;
   }
 };
 
 inline void QUO_INT(stc<SafeInt64> const &a, stc<SafeInt64> const &b, SafeInt64 & q) {
-  const int64_t& a_int = a.val.get_const_val();
-  const int64_t& b_int = b.val.get_const_val();
-  int64_t quot = QuoInt_C_integer<int64_t>(a_int, b_int);
+  using Tint = typename SafeInt64::Tint;
+  const Tint& a_int = a.val.get_const_val();
+  const Tint& b_int = b.val.get_const_val();
+  Tint quot = QuoInt_C_integer<Tint>(a_int, b_int);
   q = SafeInt64(quot);
 }
 
 #include "QuoIntFcts.h"
 
 void ResInt_Kernel(SafeInt64 const &a, SafeInt64 const &b, SafeInt64 & res) {
-  const int64_t& a_int = a.get_const_val();
-  const int64_t& b_int = b.get_const_val();
-  res.get_val() = ResInt_C_integer<int64_t>(a_int, b_int);
+  using Tint = typename SafeInt64::Tint;
+  const Tint& a_int = a.get_const_val();
+  const Tint& b_int = b.get_const_val();
+  res.get_val() = ResInt_C_integer<Tint>(a_int, b_int);
 }
 
 

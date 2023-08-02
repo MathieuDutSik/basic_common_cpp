@@ -286,34 +286,46 @@ inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int64_t &a2) {
 // uint8_t as input
 
 inline void TYPE_CONVERSION(stc<uint8_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<uint8_t> const &a1, SafeInt64 &a2) {
-  a2 = long(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val1);
 }
 
 // uint16_t as input
 
 inline void TYPE_CONVERSION(stc<uint16_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<uint16_t> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val);
 }
 
 // uint32_t as input
 
 inline void TYPE_CONVERSION(stc<uint32_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<uint32_t> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val);
 }
 
 // Conversion to SafeInt64
@@ -322,12 +334,16 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, SafeInt64 &a2) {
 // long as input (which is not the same as int64_t on APPLE platform)
 
 inline void TYPE_CONVERSION(stc<long> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<long> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val1);
 }
 
 #endif
@@ -335,45 +351,61 @@ inline void TYPE_CONVERSION(stc<long> const &a1, SafeInt64 &a2) {
 // int64_t as input
 
 inline void TYPE_CONVERSION(stc<int64_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<int64_t> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val1);
 }
 
 // int32_t as input
 
 inline void TYPE_CONVERSION(stc<int32_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<int32_t> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val1);
 }
 
 // int16_t as input
 
 inline void TYPE_CONVERSION(stc<int16_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<int16_t> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val1);
 }
 
 // int8_t as input
 
 inline void TYPE_CONVERSION(stc<int8_t> const &a1, Rational<SafeInt64> &a2) {
-  SafeInt64 val(a1.val);
-  a2 = Rational(val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  SafeInt64 val2(val1);
+  a2 = Rational(val2);
 }
 
 inline void TYPE_CONVERSION(stc<int8_t> const &a1, SafeInt64 &a2) {
-  a2 = SafeInt64(a1.val);
+  using Tint = typename SafeInt64::Tint;
+  Tint val1 = static_cast<Tint>(a1.val);
+  a2 = SafeInt64(val1);
 }
 
 // SafeInt64 as input
