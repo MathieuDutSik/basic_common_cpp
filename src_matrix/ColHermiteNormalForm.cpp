@@ -1,6 +1,9 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheory.h"
+#include "NumberTheoryRealField.h"
+#include "NumberTheorySafeInt.h"
+#include "QuadField.h"
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -11,7 +14,7 @@ void process(std::string const& FileI, std::string const& FileO) {
   std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
     ComputeColHermiteNormalForm(TheMat);
   //
-  std::ofstream os(File);
+  std::ofstream os(FileO);
   os << "return [";
   WriteMatrixGAP(os, ePair.first);
   os << ",\n";
@@ -42,8 +45,6 @@ int main(int argc, char *argv[]) {
         return process<mpq_class>(FileI, FileO);
       if (arith == "int")
         return process<int>(FileI, FileO);
-      if (arith == "long")
-        return process<long>(FileI, FileO);
       if (arith == "safe_integer")
         return process<SafeInt64>(FileI, FileO);
       if (arith == "safe_rational")

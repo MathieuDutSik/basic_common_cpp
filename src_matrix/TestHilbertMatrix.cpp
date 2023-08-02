@@ -2,6 +2,9 @@
 // clang-format off
 #include "NumberTheory.h"
 #include "rational.h"
+#include "NumberTheoryRealField.h"
+#include "NumberTheorySafeInt.h"
+#include "QuadField.h"
 #include "MAT_Matrix.h"
 // clang-format on
 
@@ -40,12 +43,8 @@ int main(int argc, char *argv[]) {
     auto f=[&]() -> void {
       if (arith == "mpq_class")
         return process<mpq_class>(n);
-      if (arith == "mpz_class")
-        return process<mpz_class>(n);
-      if (arith == "safe_integer")
-        return process<SafeInt64>(n);
-      if (arith == "safe_rational")
-        return process<Rational<SafeInt64>>(n);
+      //      if (arith == "safe_rational")
+      //        return process<Rational<SafeInt64>>(n);
       std::cerr << "Failed to find a matching type\n";
       throw TerminalException{1};
     };
