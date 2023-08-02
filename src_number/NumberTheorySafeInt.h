@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_NUMBER_NUMBERTHEORYGMP_H_
-#define SRC_NUMBER_NUMBERTHEORYGMP_H_
+#ifndef SRC_NUMBER_NUMBERTHEORYSAFEINT_H_
+#define SRC_NUMBER_NUMBERTHEORYSAFEINT_H_
 
 #include "BasicNumberTypes.h"
 #include "ResidueQuotient.h"
@@ -8,6 +8,8 @@
 #include "TypeConversion.h"
 #include "gmpxx.h"
 #include "hash_functions.h"
+#include "rational.h"
+#include "SafeInteger.h"
 #include <limits>
 #include <string>
 #include <utility>
@@ -97,8 +99,8 @@ template <> struct hash<SafeInt64> {
 };
 template <> struct hash<Rational<SafeInt64>> {
   std::size_t operator()(const Rational<SafeInt64> &val) const {
-    int64_t const& val_den = val.get_den().get_const_val();
-    int64_t const& val_num = val.get_num().get_const_val();
+    int64_t const& val_den = val.get_const_den().get_const_val();
+    int64_t const& val_num = val.get_const_num().get_const_val();
     size_t hash1 = std::hash<int64_t>()(val_den);
     size_t hash2 = std::hash<int64_t>()(val_num);
     return hash1 + (hash2 << 6) + (hash2 >> 2);
@@ -118,8 +120,8 @@ std::string to_string(const SafeInt64 &val) {
   return converted;
 }
 std::string to_string(const Rational<SafeInt64> &val) {
-  int64_t const& val_den = val.get_den().get_const_val();
-  int64_t const& val_num = val.get_num().get_const_val();
+  int64_t const& val_den = val.get_const_den().get_const_val();
+  int64_t const& val_num = val.get_const_num().get_const_val();
   std::stringstream s;
   if (val_den != 1) {
     s << val_num << "/" << val_den;
@@ -151,12 +153,6 @@ inline void ResInt_Kernel(Rational<SafeInt64> const &a, Rational<SafeInt64> cons
 
 #include "QuoIntFcts.h"
 
-template <typename T> std::pair<T, T> ResQuoInt(T const &a, T const &b) {
-  T res = ResInt(a, b);
-  T TheQ = (a - res) / b;
-  return {res, TheQ};
-}
-
 inline SafeInt64 CanonicalizationUnit(SafeInt64 const &eVal) {
   if (eVal < 0)
     return -1;
@@ -165,8 +161,8 @@ inline SafeInt64 CanonicalizationUnit(SafeInt64 const &eVal) {
 
 inline Rational<SafeInt64> CanonicalizationUnit(Rational<SafeInt64> const &eVal) {
   if (eVal < 0)
-    return -1;
-  return 1;
+    return Rational<SafeInt64>(-1);
+  return Rational<SafeInt64>(1);
 }
 
 inline Rational<SafeInt64> T_NormGen(Rational<SafeInt64> const &x) { return T_abs(x); }
@@ -213,11 +209,11 @@ inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, Rational<SafeInt
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, double &a2) {
-  int64_t const& val_den = a1.get_const_den().get_const_val();
-  int64_t const& val_num = a1.get_const_num().get_const_val();
+  int64_t const& val_den = a1.val.get_const_den().get_const_val();
+  int64_t const& val_num = a1.val.get_const_num().get_const_val();
   double val_den_d = static_cast<double>(val_den);
   double val_num_d = static_cast<double>(val_num);
-  return val_num_d / val_den_d;
+  a2 = val_num_d / val_den_d;
 }
 
 void Termination_rat_safeint_not_integer(stc<Rational<SafeInt64>> const &a1) {
@@ -441,7 +437,7 @@ bool universal_square_root(SafeInt64 &ret, SafeInt64 const &val) {
   double val_d = static_cast<double>(val_i);
   double ret_d = sqrt(val_d);
   int64_t ret_i = static_cast<int64_t>(round(ret_d));
-  SafeInt64 ret(ret_i);
+  ret = SafeInt64(ret_i);
   SafeInt64 eProd = ret * ret;
   return eProd == val;
 }
@@ -458,31 +454,10 @@ bool universal_square_root(Rational<SafeInt64> &ret, Rational<SafeInt64> const &
   return true;
 }
 
-template <typename T> std::optional<T> UniversalSquareRoot(T const &val) {
-  if (val < 0)
-    return {};
-  T ret;
-  if (!universal_square_root(ret, val))
-    return {};
-  return ret;
-}
-
 inline void set_to_infinity(Rational<SafeInt64> &x) {
   int64_t val1 = std::numeric_limits<int64_t>::max();
   SafeInt64 val2(val1);
   x = Rational(val2);
-}
-
-template <typename T>
-inline typename std::enable_if<std::is_integral<T>::value, void>::type
-set_to_infinity(T &x) {
-  x = std::numeric_limits<T>::max();
-}
-
-template <typename T> T practical_infinity() {
-  T ret;
-  set_to_infinity(ret);
-  return ret;
 }
 
 //
@@ -648,5 +623,5 @@ inline void serialize(Archive &ar, SafeInt64 &val, const unsigned int version) {
 // clang-format on
 
 // clang-format off
-#endif  // SRC_NUMBER_NUMBERTHEORYGMP_H_
+#endif  // SRC_NUMBER_NUMBERTHEORYSAFEINT_H_
 // clang-format on

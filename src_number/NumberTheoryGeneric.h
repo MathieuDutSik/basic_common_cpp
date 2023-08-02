@@ -76,6 +76,27 @@ template <typename T> T LCMlist(std::vector<T> const &V) {
   return eLCM;
 }
 
+template <typename T> std::optional<T> UniversalSquareRoot(T const &val) {
+  if (val < 0)
+    return {};
+  T ret;
+  if (!universal_square_root(ret, val))
+    return {};
+  return ret;
+}
+
+template <typename T>
+inline typename std::enable_if<std::is_integral<T>::value, void>::type
+set_to_infinity(T &x) {
+  x = std::numeric_limits<T>::max();
+}
+
+template <typename T> T practical_infinity() {
+  T ret;
+  set_to_infinity(ret);
+  return ret;
+}
+
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYGENERIC_H_
 // clang-format on

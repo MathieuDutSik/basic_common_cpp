@@ -260,12 +260,6 @@ public:
   }
 };
 
-
-
-
-
-inline SafeInt64 GetDenominator_z([[maybe_unused]] SafeInt64 const &x) { return SafeInt64(1); }
-
 inline void QUO_INT(stc<SafeInt64> const &a, stc<SafeInt64> const &b, SafeInt64 & q) {
   const int64_t& a_int = a.val.get_const_val();
   const int64_t& b_int = b.val.get_const_val();
