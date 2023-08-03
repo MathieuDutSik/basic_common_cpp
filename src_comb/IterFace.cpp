@@ -9,12 +9,12 @@ int main() {
     f[i] = random() % 2;
 
   std::cerr << "f (V1) =";
-  for (int i = 0; i < n; i++)
+  for (size_t i = 0; i < n; i++)
     std::cerr << " " << f[i];
   std::cerr << "\n";
 
   std::cerr << "f (V2) =";
-  for (int i = 0; i < n; i++)
+  for (size_t i = 0; i < n; i++)
     if (f[i] == 1)
       std::cerr << " " << i;
   std::cerr << "\n";
