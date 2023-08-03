@@ -24,10 +24,6 @@ void process(std::string const& FileI, std::string const& FileO) {
 
 
 int main(int argc, char *argv[]) {
-  //  using T=mpq_class;
-  using T = mpz_class;
-  //  using T=int;
-  //  using T=long;
   try {
     if (argc != 4) {
       fprintf(stderr, "Number of argument is = %d\n", argc);

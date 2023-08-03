@@ -45,9 +45,6 @@ void process() {
 
 
 int main(int argc, char *argv[]) {
-  //  using T=mpz_class;
-  //  using T=mpq_class;
-  using T = Rational<long long>;
   try {
     if (argc != 2) {
       std::cerr << "IntersectionLattice [arithmetic]\n";

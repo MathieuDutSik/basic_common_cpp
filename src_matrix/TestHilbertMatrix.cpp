@@ -29,8 +29,6 @@ void process(int n) {
 
 
 int main(int argc, char *argv[]) {
-  //  using T=mpq_class;
-  using T = Rational<int64_t>;
   try {
     if (argc != 3) {
       fprintf(stderr, "TestHilbertMatrix is used as\n");

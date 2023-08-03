@@ -4,6 +4,8 @@
 
 #include "Basic_functions.h"
 #include <vector>
+#include <optional>
+#include <limits>
 
 template <typename T> T GenericGcd(T const &m, T const &n) {
   T h, q;
