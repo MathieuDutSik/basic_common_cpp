@@ -5,9 +5,9 @@ name: Compile the code as test
 # on: release
 
 on:
-  # Every day at 5 am.
+  # At midnight on every Tuesday
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 0 * * 2"
   # Manually triggered
   workflow_dispatch:
   # Disabled right now, when a push is made on master.
