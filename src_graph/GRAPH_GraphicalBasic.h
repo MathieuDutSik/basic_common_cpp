@@ -17,6 +17,19 @@ public:
     for (size_t iVert = 0; iVert < nbVert; iVert++)
       ListListAdj.push_back({});
   }
+  GraphListAdj(std::vector<std::pair<size_t,size_t>> const &ListEdge, size_t const &inpNbVert) {
+    HasVertexColor = false;
+    nbVert = inpNbVert;
+    for (size_t iVert = 0; iVert < nbVert; iVert++)
+      ListListAdj.push_back({});
+    //
+    for (auto & eEdge : ListEdge) {
+      size_t eVert1 = eEdge.first;
+      size_t eVert2 = eEdge.second;
+      ListListAdj[eVert1].push_back(eVert2);
+      ListListAdj[eVert2].push_back(eVert1);
+    }
+  }
   GraphListAdj(MyMatrix<size_t> const &ListEdge, size_t const &inpNbVert) {
     HasVertexColor = false;
     nbVert = inpNbVert;
