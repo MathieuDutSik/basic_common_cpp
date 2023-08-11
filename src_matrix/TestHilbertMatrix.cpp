@@ -4,7 +4,7 @@
 #include "rational.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
-#include "QuadField.h"
+#include "NumberTheoryQuadField.h"
 #include "MAT_Matrix.h"
 // clang-format on
 

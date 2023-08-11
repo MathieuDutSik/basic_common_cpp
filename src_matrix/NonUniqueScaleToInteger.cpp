@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheory.h"
-#include "QuadField.h"
+#include "NumberTheoryQuadField.h"
 #include "MAT_MatrixInt.h"
 // clang-format on
 

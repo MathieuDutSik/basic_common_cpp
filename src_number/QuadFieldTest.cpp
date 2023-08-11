@@ -1,5 +1,5 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "QuadField.h"
+#include "NumberTheoryQuadField.h"
 #include "NumberTheory.h"
 #include "factorizations.h"
 

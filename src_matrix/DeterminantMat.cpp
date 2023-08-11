@@ -2,7 +2,7 @@
 // clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
-#include "QuadField.h"
+#include "NumberTheoryQuadField.h"
 #include "MAT_MatrixInt.h"
 // clang-format on
 

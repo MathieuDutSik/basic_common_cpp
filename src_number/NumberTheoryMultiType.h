@@ -5,7 +5,7 @@
 // clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
-#include "QuadField.h"
+#include "NumberTheoryQuadField.h"
 // clang-format on
 
 
