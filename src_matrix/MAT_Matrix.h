@@ -599,7 +599,7 @@ template <typename T> std::string StringVectorGAP(MyVector<T> const &TheVec) {
 }
 
 template <typename T> T VectorSum(MyVector<T> const &eVect) {
-  T eSum = 0;
+  T eSum(0);
   int siz = eVect.size();
   for (int i = 0; i < siz; i++)
     eSum += eVect(i);
@@ -613,7 +613,7 @@ T ScalarProduct(MyVector<T> const &V1, MyVector<T> const &V2) {
     throw TerminalException{1};
   }
   size_t siz = V1.size();
-  T eSum = 0;
+  T eSum(0);
   for (size_t i = 0; i < siz; i++)
     eSum += V1(i) * V2(i);
   return eSum;
@@ -631,7 +631,7 @@ MyVector<T> ListScalarProduct(MyVector<T> const &V, MyMatrix<T> const &eMat) {
   }
   MyVector<T> retVect(nbRow);
   for (int iRow = 0; iRow < nbRow; iRow++) {
-    T eSum = 0;
+    T eSum(0);
     for (int iCol = 0; iCol < dim; iCol++)
       eSum += eMat(iRow, iCol) * V(iCol);
     retVect(iRow) = eSum;
@@ -712,7 +712,7 @@ MyVector<T> ProductVectorMatrix(MyVector<T> const &X, MyMatrix<T> const &M) {
   }
   MyVector<T> Vret(nbCol);
   for (int iCol = 0; iCol < nbCol; iCol++) {
-    T sum = 0;
+    T sum(0);
     for (int iRow = 0; iRow < nbRow; iRow++)
       sum += M(iRow, iCol) * X(iRow);
     Vret(iCol) = sum;
