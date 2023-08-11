@@ -10,7 +10,7 @@
 template <typename T> T GenericGcd(T const &m, T const &n) {
   T h, q;
   if (n == 0 && m == 0) {
-    return 0;
+    return T(0);
   }
   T f = T_abs(m);
   T g = T_abs(n);
