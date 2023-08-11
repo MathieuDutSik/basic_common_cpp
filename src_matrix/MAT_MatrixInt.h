@@ -228,7 +228,7 @@ ComputePairGcd(T const &m, T const &n) {
 
 template <typename T> T ComputeLCM(std::vector<T> const &eVect) {
   int siz = eVect.size();
-  T eLCM = 1;
+  T eLCM(1);
   for (int i = 0; i < siz; i++)
     eLCM = LCMpair(eLCM, eVect[i]);
   return eLCM;
