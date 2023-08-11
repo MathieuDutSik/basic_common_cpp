@@ -282,7 +282,7 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   using Tring = typename underlying_ring<T>::ring_type;
-  Tring eLCM_ring = 1;
+  Tring eLCM_ring(1);
   // iRow is inner loop because of cache locality
   for (int iCol = 0; iCol < nbCol; iCol++)
     for (int iRow = 0; iRow < nbRow; iRow++)
@@ -398,7 +398,7 @@ template <typename T>
 FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   int n = V.size();
   std::vector<T> eVect(n);
-  T eLCM = 1;
+  T eLCM(1);
   for (int i = 0; i < n; i++)
     eLCM = LCMpair(eLCM, GetDenominator(V(i)));
   MyVector<T> V1 = eLCM * V;
