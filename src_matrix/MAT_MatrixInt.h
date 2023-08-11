@@ -52,7 +52,7 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
   T TheIndex = 1;
   while (true) {
     bool IsFirst = true;
-    Treal MinPivot = 0;
+    Treal MinPivot(0);
     for (size_t iCol = 0; iCol < nbCol; iCol++) {
       if (colStat[iCol] == 1) {
         for (size_t iRow = 0; iRow < nbRow; iRow++) {
@@ -1004,7 +1004,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
     using Treal = typename underlying_totally_ordered_ring<T>::real_type;
     size_t nbRow = eMat.rows();
     while (true) {
-      Treal MinVal = -1;
+      Treal MinVal(-1);
       size_t nbFound = 0;
       for (size_t iRow = MinAllowedRow; iRow < nbRow; iRow++) {
         T eVal = eMat(iRow, iCol);
@@ -1078,9 +1078,9 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
     std::vector<T> eVect;
     for (size_t j = 0; j < dimSpace; j++) {
       if (i == j) {
-        eVect.push_back(1);
+        eVect.push_back(T(1));
       } else {
-        eVect.push_back(0);
+        eVect.push_back(T(0));
       }
     }
     TheBasis.push_back(eVect);
@@ -1102,7 +1102,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
     size_t sizRelIndex = ListRelIndex.size();
     for (size_t iVect = 0; iVect < dimSpace; iVect++) {
       std::vector<T> eVect = TheBasis[iVect];
-      T eSum = 0;
+      T eSum(0);
       for (size_t iRel = 0; iRel < sizRelIndex; iRel++) {
         size_t jCol = ListRelIndex[iRel];
         T fVal = eMatW(iRow, jCol);
@@ -1114,7 +1114,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
     //    CheckGCD_information(eGCD, ListX);
     std::vector<std::vector<T>> NewBasis;
     for (size_t iVect = 0; iVect < dimSpace; iVect++) {
-      std::vector<T> eVectNew(sizRelIndex + 1, 0);
+      std::vector<T> eVectNew(sizRelIndex + 1, T(0));
       eVectNew[0] = eGCD.Pmat(0, iVect + 1);
       for (size_t i = 1; i <= dimSpace; i++) {
         T fVal = eGCD.Pmat(i, iVect + 1);
@@ -1452,7 +1452,7 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
     int iVectFound = -1;
     while (true) {
       bool IsFirst = true;
-      Treal MinValue = 0;
+      Treal MinValue(0);
       nbDiff = 0;
       for (int iVect = 0; iVect < nbVect; iVect++)
         if (VectStatus[iVect] == 1) {
@@ -1546,7 +1546,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
     int iVectFound = -1;
     while (true) {
       bool IsFirst = true;
-      Treal MinValue = 0;
+      Treal MinValue(0);
       nbDiff = 0;
       for (int iVect = 0; iVect < nbRow; iVect++)
         if (VectStatus[iVect] == 1) {

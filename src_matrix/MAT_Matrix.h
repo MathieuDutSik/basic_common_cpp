@@ -670,14 +670,14 @@ MyMatrix<T> TranspositionMatrix(int const &n, int const &i, int const &j) {
 
 template <typename T> MyVector<T> ZeroVector(int const &nbRow) {
   MyVector<T> retVect(nbRow);
-  T eZero = 0;
+  T eZero(0);
   for (int iRow = 0; iRow < nbRow; iRow++)
     retVect(iRow) = eZero;
   return retVect;
 }
 
 template <typename T> void TVec_ZeroAssignation(MyVector<T> &TheVect) {
-  T eZero = 0;
+  T eZero(0);
   for (int i = 0; i < TheVect.size(); i++)
     TheVect(i) = eZero;
 }
@@ -685,8 +685,7 @@ template <typename T> void TVec_ZeroAssignation(MyVector<T> &TheVect) {
 template <typename T> void ZeroAssignation(MyMatrix<T> &TheMat) {
   int nbRow = TheMat.rows();
   int nbCol = TheMat.cols();
-  T eVal;
-  eVal = 0;
+  T eVal(0);
   for (int iRow = 0; iRow < nbRow; iRow++)
     for (int iCol = 0; iCol < nbCol; iCol++)
       TheMat(iRow, iCol) = eVal;

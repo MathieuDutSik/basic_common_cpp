@@ -14,7 +14,7 @@ void process(int n) {
   MyMatrix<T> eMat(n, n);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
-      T val = i + j + 1;
+      T val(i + j + 1);
       eMat(i, j) = 1 / val;
     }
   }
@@ -41,8 +41,8 @@ int main(int argc, char *argv[]) {
     auto f=[&]() -> void {
       if (arith == "mpq_class")
         return process<mpq_class>(n);
-      //      if (arith == "safe_rational")
-      //        return process<Rational<SafeInt64>>(n);
+      if (arith == "safe_rational")
+        return process<Rational<SafeInt64>>(n);
       std::cerr << "Failed to find a matching type\n";
       throw TerminalException{1};
     };

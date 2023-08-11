@@ -53,3 +53,7 @@ The rules for the constructors are not as well defined. But it looks like the co
 from integer is forbidden because it leads to inconsistencies with **x > 0** because
 either **operator>(T const& x, T const& y)** or **operator>(T const& x, int const& y)** could be used.
 
+For the numerical types, some types allow the constructor from **operator=(int)** but some do not allow
+that which means that **T sum = 0** will not compile. The solution is then to write **T sum(0)**.
+This is especially the case for **rational<T>** for which the **T** can be a **int64_t** and this cause
+some implicit conversions.

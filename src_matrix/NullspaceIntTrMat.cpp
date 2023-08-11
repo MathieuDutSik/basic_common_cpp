@@ -37,10 +37,10 @@ int main(int argc, char *argv[]) {
         process<mpz_class>(FileI, os);
       if (arith == "mpq_class")
         process<mpq_class>(FileI, os);
-      //      if (arith == "safe_integer")
-      //        process<SafeInt64>(FileI, os);
-      //      if (arith == "safe_rational")
-      //        process<Rational<SafeInt64>>(FileI, os);
+      if (arith == "safe_integer")
+        process<SafeInt64>(FileI, os);
+      if (arith == "safe_rational")
+        process<Rational<SafeInt64>>(FileI, os);
       std::cerr << "Failed to find a matching type\n";
       throw TerminalException{1};
     };

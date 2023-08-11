@@ -58,10 +58,10 @@ int main(int argc, char *argv[]) {
         return process<mpq_class>();
       if (arith == "Rational<long long>")
         return process<Rational<long long>>();
-      //      if (arith == "safe_integer")
-      //        return process<SafeInt64>();
-      //      if (arith == "safe_rational")
-      //        return process<Rational<SafeInt64>>();
+      if (arith == "safe_integer")
+        return process<SafeInt64>();
+      if (arith == "safe_rational")
+        return process<Rational<SafeInt64>>();
       std::cerr << "Failed to have a matching entry\n";
       throw TerminalException{1};
     };
