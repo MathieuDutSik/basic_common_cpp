@@ -3,7 +3,7 @@
 #include "NumberTheory.h"
 #include "factorizations.h"
 #include "Timings.h"
-#include "SafeInteger.h"
+#include "NumberTheorySafeInt.h"
 // clang-format on
 
 template<typename T>
