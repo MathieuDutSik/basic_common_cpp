@@ -1274,8 +1274,21 @@ MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol, size_t targe
       }
     }
   }
-  std::cerr << "NullspaceTrMatTarget_Kernel: We should never reach that stage\n";
-  throw TerminalException{1};
+  // The target was not achieved, we get a larger kernel than expected.
+  // It could be a problem down the line, but such is life.
+  size_t nbVectZero = nbCol - eRank;
+  MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, nbCol);
+  size_t nbVect = 0;
+  for (size_t iCol = 0; iCol < nbCol; iCol++)
+    if (ListColSelect01[iCol] == 0) {
+      NSP(nbVect, iCol) = -1;
+      for (size_t iRank = 0; iRank < eRank; iRank++) {
+        size_t eCol = ListColSelect[iRank];
+        NSP(nbVect, eCol) = provMat(iRank, iCol);
+      }
+      nbVect++;
+    }
+  return NSP;
 }
 
 
