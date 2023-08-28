@@ -3,7 +3,8 @@
 #PROGRAM		= RowHermiteNormalForm
 #PROGRAM		= RemoveFractionMatrix
 #PROGRAM		= TestSubspaceCompletion
-PROGRAM		= TestProdMat
+#PROGRAM		= TestProdMat
+PROGRAM		= ScalarCanonicalization
 #PROGRAM		= SmithNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
@@ -11,13 +12,13 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= icpc -std=c++17 -Wall -g -O2
 #CC		= clang++ -Weverything -std=c++17
 #CC		= clang++ -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++11
-CC		= g++ -std=c++17 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
+CC		= g++ -std=c++17 -Wall -g -O3
 #CC		= g++ -std=c++17 -Wall -g -O2 -static-libgcc -static-libstdc++
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
-CLOCAL          = -I../src_basic -I../src_number -I../src_comb
+CLOCAL          = -I../src_basic -I../src_number -I../src_comb -I.
 CDEFS           = -DDEBUG_MATRIX_INT
 
 

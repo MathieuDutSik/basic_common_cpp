@@ -398,8 +398,8 @@ template <typename T>
 FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   int n = V.size();
   std::vector<T> eVect(n);
-  T eLCM(1);
-  for (int i = 0; i < n; i++)
+  T eLCM = GetDenominator(V(0));
+  for (int i = 1; i < n; i++)
     eLCM = LCMpair(eLCM, GetDenominator(V(i)));
   MyVector<T> V1 = eLCM * V;
   T eGCD = V1(0);
@@ -408,6 +408,21 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   MyVector<T> Vret = V1 / eGCD;
   T TheMult = eLCM / eGCD;
   return {TheMult, std::move(Vret)};
+}
+
+template <typename T>
+FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
+  using Tfield = typename overlying_field<T>::field_type;
+  if constexpr (is_implementation_of_Q<Tfield>::value) {
+    return RemoveFractionVectorPlusCoeff(M);
+  } else {
+    return CanonicalizationSmallestCoefficientVectorPlusCoeff(M);
+  }
+}
+
+template <typename T>
+MyVector<T> ScalarCanonicalizationVector(MyVector<T> const &M) {
+  return ScalarCanonicalizationVectorPlusCoeff(M).TheVect;
 }
 
 template <typename T>
