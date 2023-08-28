@@ -72,29 +72,17 @@ public:
   }
   friend QuadField<T, d> operator+(QuadField<T, d> const &x,
                                    QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z.a = x.a + y.a;
-    z.b = x.b + y.b;
-    return z;
+    return QuadField<T, d>(x.a + y.a, x.b + y.b);
   }
   friend QuadField<T, d> operator-(QuadField<T, d> const &x,
                                    QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z.a = x.a - y.a;
-    z.b = x.b - y.b;
-    return z;
+    return QuadField<T, d>(x.a - y.a, x.b - y.b);
   }
   friend QuadField<T, d> operator-(QuadField<T, d> const &x, int const &y) {
-    QuadField<T, d> z;
-    z.a = x.a - y;
-    z.b = x.b;
-    return z;
+    return QuadField<T, d>(x.a - y, x.b);
   }
   friend QuadField<T, d> operator-(QuadField<T, d> const &x) {
-    QuadField<T, d> z;
-    z.a = -x.a;
-    z.b = -x.b;
-    return z;
+    return QuadField<T, d>(-x.a, -x.b);
   }
   friend QuadField<T, d> operator/(int const &x, QuadField<T, d> const &y) {
     QuadField<T, d> z;
@@ -118,16 +106,10 @@ public:
   }
   friend QuadField<T, d> operator*(QuadField<T, d> const &x,
                                    QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z.a = x.a * y.a + d * x.b * y.b;
-    z.b = x.a * y.b + x.b * y.a;
-    return z;
+    return QuadField<T, d>(x.a * y.a + d * x.b * y.b, x.a * y.b + x.b * y.a);
   }
   friend QuadField<T, d> operator*(int const &x, QuadField<T, d> const &y) {
-    QuadField<T, d> z;
-    z.a = x * y.a;
-    z.b = x * y.b;
-    return z;
+    return QuadField<T, d>(x * y.a, x * y.b);
   }
   friend std::ostream &operator<<(std::ostream &os, QuadField<T, d> const &v) {
     std::vector<T> V{v.a, v.b};
