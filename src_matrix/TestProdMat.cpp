@@ -10,7 +10,7 @@ int main(int argc, char *argv[]) {
   using T = Rational<int64_t>;
   try {
     if (argc != 3) {
-      fprintf(stderr, "TestProdMat [M1] [M2]\n");
+      std::cerr << "TestProdMat [M1] [M2]\n";
       return -1;
     }
     // reading the matrix

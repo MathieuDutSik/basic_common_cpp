@@ -20,9 +20,9 @@ void process(std::string const& FileI, std::ostream & os) {
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "ScalarCanonicalization [arith] [inputVec]\n");
+      std::cerr << "Number of argument is = " << argc << "\n";
+      std::cerr << "This program is used as\n";
+      std::cerr << "ScalarCanonicalization [arith] [inputVec]\n";
       return -1;
     }
     std::string arith = argv[1];

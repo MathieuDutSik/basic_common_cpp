@@ -31,8 +31,8 @@ void process(int n) {
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3) {
-      fprintf(stderr, "TestHilbertMatrix is used as\n");
-      fprintf(stderr, "TestHilbertMatrix [arith] [n]\n");
+      std::cerr << "TestHilbertMatrix is used as\n";
+      std::cerr << "TestHilbertMatrix [arith] [n]\n";
       return -1;
     }
     std::string arith = argv[1];

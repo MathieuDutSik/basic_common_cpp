@@ -44,9 +44,8 @@ int main(int argc, char *argv[]) {
   try {
     FullNamelist eFull = NAMELIST_GetStandardAnalysis();
     if (argc != 2) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "AnalysisSingMat [Namelist]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "AnalysisSingMat [Namelist]\n";
       NAMELIST_WriteNamelistFile(std::cerr, eFull, true);
       return -1;
     }

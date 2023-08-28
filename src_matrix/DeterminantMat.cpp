@@ -64,9 +64,8 @@ void compute_determinant(std::string const& arithmetic, std::string const& eFile
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "SolutionIntMat [arithmetic] [inputMat]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "SolutionIntMat [arithmetic] [inputMat]\n";
       return -1;
     }
     std::string arithmetic = argv[1];

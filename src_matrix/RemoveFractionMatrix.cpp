@@ -22,9 +22,8 @@ int main(int argc, char *argv[]) {
   using T = mpq_class;
   try {
     if (argc != 2) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "RemoveFractionMatrix [arith] [inputMat]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "RemoveFractionMatrix [arith] [inputMat]\n";
       return -1;
     }
     std::string arith = argv[1];

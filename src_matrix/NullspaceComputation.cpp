@@ -71,13 +71,12 @@ int main(int argc, char *argv[]) {
   SingletonTime time1;
   try {
     if (argc != 4) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "NullspaceComputation [arith] [inputMat] [output]\n");
-      fprintf(stderr, "    where\n");
-      fprintf(stderr, "arith: The arithmetic type\n");
-      fprintf(stderr, "inputMat: The input matrix\n");
-      fprintf(stderr, "output: The output matrix\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "NullspaceComputation [arith] [inputMat] [output]\n";
+      std::cerr << "    where\n";
+      std::cerr << "arith: The arithmetic type\n";
+      std::cerr << "inputMat: The input matrix\n";
+      std::cerr << "output: The output matrix\n";
       return -1;
     }
     //

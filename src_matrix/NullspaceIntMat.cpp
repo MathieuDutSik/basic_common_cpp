@@ -7,11 +7,10 @@
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3 && argc != 2) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "NullspaceIntMat [inputMat] [output]\n");
-      fprintf(stderr, "or\n");
-      fprintf(stderr, "NullspaceIntMat [inputMat]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "NullspaceIntMat [inputMat] [output]\n";
+      std::cerr << "or\n";
+      std::cerr << "NullspaceIntMat [inputMat]\n";
       return -1;
     }
     // using T=mpz_class;

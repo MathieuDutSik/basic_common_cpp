@@ -8,9 +8,8 @@ int main(int argc, char *argv[]) {
   using T = mpq_class;
   try {
     if (argc != 3) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "NullspaceComputation [inputMat] [output]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "NullspaceComputation [inputMat] [output]\n";
       return -1;
     }
     // reading the matrix
@@ -19,7 +18,7 @@ int main(int argc, char *argv[]) {
     // computing the kernel
     Eigen::FullPivLU<MyMatrix<T>> lu(TheMat);
     MyMatrix<T> TheKer = lu.kernel();
-
+    //
     //    MyMatrix<T> TheKer=NullspaceMat(TheMat);
     //
     std::ofstream os(argv[2]);

@@ -23,9 +23,8 @@ void process(std::string const& FileI) {
 int main(int argc, char *argv[]) {
   try {
     if (argc != 2) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "SmithNormalForm [arith] [inputMat]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "SmithNormalForm [arith] [inputMat]\n";
       return -1;
     }
     std::string arith = argv[1];

@@ -7,11 +7,10 @@
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3 && argc != 2) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "SolutionIntMat [inputMat] [output]\n");
-      fprintf(stderr, "or\n");
-      fprintf(stderr, "SolutionIntMat [inputMat]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "SolutionIntMat [inputMat] [output]\n";
+      std::cerr << "  or\n";
+      std::cerr << "SolutionIntMat [inputMat]\n";
       return -1;
     }
     using Tint = mpz_class;

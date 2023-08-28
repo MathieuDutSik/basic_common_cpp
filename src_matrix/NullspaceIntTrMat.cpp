@@ -21,16 +21,14 @@ void process(std::string const& FileI, std::ostream & os) {
 int main(int argc, char *argv[]) {
   try {
     if (argc != 4 && argc != 3) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "NullspaceIntTrMat [arith] [inputMat] [output]\n");
-      fprintf(stderr, "or\n");
-      fprintf(stderr, "NullspaceInttrMat [arith] [inputMat]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "NullspaceIntTrMat [arith] [inputMat] [output]\n";
+      std::cerr << "  or\n";
+      std::cerr << "NullspaceInttrMat [arith] [inputMat]\n";
       return -1;
     }
     std::string arith = argv[1];
     std::string FileI = argv[2];
-    std::ifstream INmat(argv[1]);
 
     auto Prt = [&](std::ostream &os) -> void {
       if (arith == "mpz_class")

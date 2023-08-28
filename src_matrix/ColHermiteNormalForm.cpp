@@ -26,9 +26,8 @@ void process(std::string const& FileI, std::string const& FileO) {
 int main(int argc, char *argv[]) {
   try {
     if (argc != 4) {
-      fprintf(stderr, "Number of argument is = %d\n", argc);
-      fprintf(stderr, "This program is used as\n");
-      fprintf(stderr, "ColHermiteNormalForm arith [inputMat] [output]\n");
+      std::cerr << "This program is used as\n";
+      std::cerr << "ColHermiteNormalForm arith [inputMat] [output]\n";
       return -1;
     }
     std::string arith = argv[1];
