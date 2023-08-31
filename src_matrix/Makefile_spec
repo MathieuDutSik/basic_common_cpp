@@ -4,7 +4,8 @@
 #PROGRAM		= RemoveFractionMatrix
 #PROGRAM		= TestSubspaceCompletion
 #PROGRAM		= TestProdMat
-PROGRAM		= ScalarCanonicalization
+#PROGRAM		= ScalarCanonicalization
+PROGRAM		= MatrixSubsetSolver
 #PROGRAM		= SmithNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)

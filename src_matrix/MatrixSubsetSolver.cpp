@@ -1,11 +1,12 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+
 // clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheoryQuadField.h"
-#include "MAT_MatrixInt.h"
+#include "MAT_Matrix_SubsetSolver.h"
 // clang-format on
 
 
@@ -44,20 +45,8 @@ int main(int argc, char *argv[]) {
         using T = mpq_class;
         return process<T>(FileI, FileO);
       }
-      if (arith == "mpz_class") {
-        using T = mpz_class;
-        return process<T>(FileI, FileO);
-      }
-      if (arith == "cpp_int") {
-        using T = boost::multiprecision::cpp_int;
-        return process<T>(FileI, FileO);
-      }
       if (arith == "cpp_rational") {
         using T = boost::multiprecision::cpp_rational;
-        return process<T>(FileI, FileO);
-      }
-      if (arith == "safe_integer") {
-        using T = SafeInt64;
         return process<T>(FileI, FileO);
       }
       if (arith == "safe_rational") {

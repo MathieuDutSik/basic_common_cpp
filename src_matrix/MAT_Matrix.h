@@ -1292,6 +1292,85 @@ MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol, size_t targe
 }
 
 
+template <typename T, typename F>
+MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
+  static_assert(is_ring_field<T>::value,
+                "Requires T to be a field in NullspaceTrMat_Kernel");
+  size_t target_rank = nbCol - 1;
+  MyMatrix<T> provMat(target_rank, nbCol);
+  std::vector<size_t> ListColSelect;
+  std::vector<uint8_t> ListColSelect01(nbCol, 0);
+  size_t eRank = 0;
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
+    f(provMat, eRank, iRow);
+    for (size_t iRank = 0; iRank < eRank; iRank++) {
+      size_t eCol = ListColSelect[iRank];
+      T eVal1 = provMat(eRank, eCol);
+      if (eVal1 != 0) {
+        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        }
+      }
+    }
+    auto get_firstnonzerocol_iife = [&]() -> size_t {
+      for (size_t iCol = 0; iCol < nbCol; iCol++) {
+        if (provMat(eRank, iCol) != 0)
+          return iCol;
+      }
+      return std::numeric_limits<size_t>::max();
+    };
+    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
+    if (FirstNonZeroCol != std::numeric_limits<size_t>::max()) {
+      ListColSelect.push_back(FirstNonZeroCol);
+      ListColSelect01[FirstNonZeroCol] = 1;
+      T eVal2 = 1 / provMat(eRank, FirstNonZeroCol);
+      for (size_t iCol = 0; iCol < nbCol; iCol++)
+        provMat(eRank, iCol) *= eVal2;
+      for (size_t iRank = 0; iRank < eRank; iRank++) {
+        T eVal1 = provMat(iRank, FirstNonZeroCol);
+        if (eVal1 != 0) {
+          size_t StartCol = ListColSelect[iRank];
+          for (size_t iCol = StartCol; iCol < nbCol; iCol++)
+            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+        }
+      }
+      eRank++;
+      if (eRank == target_rank) {
+        // We reach the expected rank. So now returning.
+        MyVector<T> Vzero = ZeroVector<T>(nbCol);
+        for (size_t iCol = 0; iCol < nbCol; iCol++) {
+          if (ListColSelect01[iCol] == 0) {
+            Vzero(iCol) = -1;
+            for (size_t iRank = 0; iRank < eRank; iRank++) {
+              size_t eCol = ListColSelect[iRank];
+              Vzero(eCol) = provMat(iRank, iCol);
+            }
+            return Vzero;
+          }
+        }
+      }
+    }
+  }
+  // The target was not achieved, we get a larger kernel than expected.
+  // We select one vector and it has to be processed down the line
+  MyVector<T> Vzero = ZeroVector<T>(nbCol);
+  auto set_vzero=[&]() -> void {
+    for (size_t iCol = 0; iCol < nbCol; iCol++) {
+      if (ListColSelect01[iCol] == 0) {
+        Vzero(iCol) = -1;
+        for (size_t iRank = 0; iRank < eRank; iRank++) {
+          size_t eCol = ListColSelect[iRank];
+          Vzero(eCol) = provMat(iRank, iCol);
+        }
+        return;
+      }
+    }
+  };
+  set_vzero();
+  return Vzero;
+}
+
+
 
 
 template <typename T>

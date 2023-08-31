@@ -2,13 +2,14 @@
 #ifndef SRC_MATRIX_MAT_MATRIX_FP_H_
 #define SRC_MATRIX_MAT_MATRIX_FP_H_
 
-#incldue "MAT_Matrix.h"
+#include "MAT_Matrix.h"
+#include "Boost_bitset.h"
 #include "Fp.h"
 
 MyVector<mpz_class> RescaleVec(MyVector<mpq_class> const &v) {
   int cols = v.size();
   std::vector<mpz_class> dens(cols, 1);
-  MyVector<Tint> vret = MyVector<Tint>(cols);
+  MyVector<mpz_class> vret(cols);
   for (int iCol = 0; iCol < cols; iCol++) {
     dens[iCol] = v(iCol).get_den();
   }
@@ -23,7 +24,7 @@ MyMatrix<mpz_class> RescaleRows(MyMatrix<mpq_class> const &M) {
   int rows = M.rows();
   int cols = M.cols();
   std::vector<mpz_class> dens(cols, 1);
-  MyMatrix<Tint> Mret(rows, cols);
+  MyMatrix<mpz_class> Mret(rows, cols);
   for (int iRow = 0; iRow < rows; iRow++) {
     for (int iCol = 0; iCol < cols; iCol++) {
       dens[iCol] = M(iRow, iCol).get_den();
@@ -41,23 +42,24 @@ template<typename T>
 struct SubsetRankOneSolver<T> {
 public:
   using Tint = T;
-  MyMatrix<T> const& EXT_red;
+  MyMatrix<T> const& EXT;
   int nbCol;
 
   SubsetRankOneSolver(MyMatrix<Tint> const& _EXT) : EXT(_EXT) {
     nbCol = EXT.cols();
   }
   MyVector<Tint> GetKernelVector(Face const& sInc) {
+    int nb = sInc.count();
     boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
     auto f = [&](MyMatrix<T> &M, size_t eRank,
                  [[maybe_unused]] size_t iRow) -> void {
       for (int iCol=0; iCol<nbCol; iCol++)
-        M(eRank,iCol) = UniversalScalarIntegral<T,Tint>(EXT(jRow,iCol));
+        M(eRank,iCol) = EXT(jRow,iCol);
       jRow = sInc.find_next(jRow);
     };
-    return NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, 1, f);
+    return NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f);
   }
-}
+};
 
 
 
@@ -72,6 +74,12 @@ public:
   MyMatrix<long> EXT_long;
   bool try_int;
   size_t max_bits;
+  int nbRow;
+  int nbCol;
+
+  size_t get_bit(mpz_class const& v) const {
+    return mpz_sizeinbase(v.get_mpz_t(), 2);
+  }
 
   SubsetRankOneSolver(MyMatrix<Tint> const& _EXT) : EXT(_EXT) {
     nbRow = EXT.rows();
@@ -105,12 +113,12 @@ public:
         M.row(eRank) = EXT_fast.row(jRow);
         jRow = sInc.find_next(jRow);
       };
-      MyMatrix<Tfast> NSP_fastT =
-        NullspaceTrMatTarget_Kernel<Tfast, decltype(f)>(nb, nbCol, 1, f);
+      MyVector<Tfast> Vzero_Tfast =
+        NullspaceTrMatTargetOne_Kernel<Tfast, decltype(f)>(nb, nbCol, f);
       // check result at full precision in case of overflows
       bool allzero = true;
       for (int iCol = 0; iCol < nbCol; iCol++) {
-        if (NSP_fastT(0, iCol) != 0) {
+        if (Vzero_Tfast(iCol) != 0) {
           allzero = false;
           break;
         }
@@ -124,7 +132,7 @@ public:
         std::vector<long> nums(nbCol, 0);
         std::vector<long> dens(nbCol, 1);
         for (int iCol = 0; iCol < nbCol; iCol++) {
-          Rational<long> val = NSP_fastT(0, iCol).rational_lift();
+          Rational<long> val = Vzero_Tfast(0, iCol).rational_lift();
           nums[iCol] = val.get_num();
           dens[iCol] = val.get_den();
         }
@@ -132,7 +140,7 @@ public:
         for (int iCol = 0; iCol < nbCol; iCol++) {
           VZ_long(iCol) = nums[iCol] * (lcm / dens[iCol]);
           Vkernel(iCol) = Tint(VZ_long(iCol));
-          max_bits_NSP = std::max(max_bits_NSP, get_bit(NSP(0, iCol)));
+          max_bits_NSP = std::max(max_bits_NSP, get_bit(Vkernel(iCol)));
         }
         // check if elements are small enough to do computation in
         if (max_bits + max_bits_NSP <= 60) {
@@ -157,20 +165,19 @@ public:
     }
 
     if (failed_int || !try_int) {
-      std::cerr << "Rational<long> strategy failed , retrying with mpq_class"
-                << "\n";
+      std::cerr << "Rational<long> strategy failed, retrying with mpq_class\n";
       boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
       auto f = [&](MyMatrix<T> &M, size_t eRank,
                    [[maybe_unused]] size_t iRow) -> void {
         for (int iCol=0; iCol<nbCol; iCol++)
-          M(eRank,iCol) = UniversalScalarIntegral<T,Tint>(EXT(jRow,iCol));
+          M(eRank,iCol) = UniversalScalarConversion<T,Tint>(EXT(jRow,iCol));
         jRow = sInc.find_next(jRow);
       };
-      Vkernel = RescaleVec(NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, 1, f));
+      Vkernel = RescaleVec(NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f));
     }
     return Vkernel;
   }
-}
+};
 
 
 
