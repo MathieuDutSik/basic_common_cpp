@@ -39,7 +39,7 @@ MyMatrix<mpz_class> RescaleRows(MyMatrix<mpq_class> const &M) {
 }
 
 template<typename T>
-struct SubsetRankOneSolver<T> {
+struct SubsetRankOneSolver {
 public:
   using Tint = T;
   MyMatrix<T> const& EXT;
