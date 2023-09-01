@@ -2,41 +2,9 @@
 #ifndef SRC_MATRIX_MAT_MATRIX_FP_H_
 #define SRC_MATRIX_MAT_MATRIX_FP_H_
 
-#include "MAT_Matrix.h"
+#include "MAT_MatrixInt.h"
 #include "Boost_bitset.h"
 #include "Fp.h"
-
-MyVector<mpz_class> RescaleVec(MyVector<mpq_class> const &v) {
-  int cols = v.size();
-  std::vector<mpz_class> dens(cols, 1);
-  MyVector<mpz_class> vret(cols);
-  for (int iCol = 0; iCol < cols; iCol++) {
-    dens[iCol] = v(iCol).get_den();
-  }
-  mpz_class scale = LCMlist(dens);
-  for (int iCol = 0; iCol < cols; iCol++) {
-    vret(iCol) = (scale / v(iCol).get_den()) * v(iCol).get_num();
-  }
-  return vret;
-}
-
-MyMatrix<mpz_class> RescaleRows(MyMatrix<mpq_class> const &M) {
-  int rows = M.rows();
-  int cols = M.cols();
-  std::vector<mpz_class> dens(cols, 1);
-  MyMatrix<mpz_class> Mret(rows, cols);
-  for (int iRow = 0; iRow < rows; iRow++) {
-    for (int iCol = 0; iCol < cols; iCol++) {
-      dens[iCol] = M(iRow, iCol).get_den();
-    }
-    mpz_class scale = LCMlist(dens);
-    for (int iCol = 0; iCol < cols; iCol++) {
-      Mret(iRow, iCol) =
-        (scale / M(iRow, iCol).get_den()) * M(iRow, iCol).get_num();
-    }
-  }
-  return Mret;
-}
 
 template<typename T>
 struct SubsetRankOneSolver {
@@ -173,7 +141,7 @@ public:
           M(eRank,iCol) = UniversalScalarConversion<T,Tint>(EXT(jRow,iCol));
         jRow = sInc.find_next(jRow);
       };
-      Vkernel = RescaleVec(NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f));
+      Vkernel = NonUniqueRescaleVecRing(NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f));
     }
     return Vkernel;
   }
