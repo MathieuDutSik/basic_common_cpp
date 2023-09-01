@@ -537,6 +537,10 @@ inline Rational<Tint> GetDenominator(Rational<Tint> const &x) {
   return x.get_const_den();
 }
 
+template <typename Tint> inline Tint GetNumerator_z(Rational<Tint> const &x) {
+  return x.get_const_num();
+}
+
 template <typename Tint> inline Tint GetDenominator_z(Rational<Tint> const &x) {
   return x.get_const_den();
 }

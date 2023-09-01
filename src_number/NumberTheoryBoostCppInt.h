@@ -390,8 +390,18 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
 }
 
 inline boost::multiprecision::cpp_int
+GetNumerator_z(boost::multiprecision::cpp_rational const &x) {
+  return numerator(x);
+}
+
+inline boost::multiprecision::cpp_int
 GetDenominator_z(boost::multiprecision::cpp_rational const &x) {
   return denominator(x);
+}
+
+inline boost::multiprecision::cpp_int
+GetNumerator_z(boost::multiprecision::cpp_int const &x) {
+  return x;
 }
 
 inline boost::multiprecision::cpp_int

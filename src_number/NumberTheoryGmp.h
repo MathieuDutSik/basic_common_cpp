@@ -276,7 +276,13 @@ inline mpz_class GetDenominator([[maybe_unused]] mpz_class const &x) {
   return 1;
 }
 
+inline mpz_class GetNumerator_z(mpq_class const &x) { return x.get_num(); }
+
 inline mpz_class GetDenominator_z(mpq_class const &x) { return x.get_den(); }
+
+inline mpz_class GetNumerator_z(mpz_class const &x) {
+  return x;
+}
 
 inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const &x) {
   return 1;

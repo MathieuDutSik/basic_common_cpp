@@ -479,7 +479,13 @@ inline SafeInt64 GetDenominator([[maybe_unused]] SafeInt64 const &x) {
   return 1;
 }
 
+inline SafeInt64 GetNumerator_z(Rational<SafeInt64> const &x) { return x.get_const_num(); }
+
 inline SafeInt64 GetDenominator_z(Rational<SafeInt64> const &x) { return x.get_const_den(); }
+
+inline SafeInt64 GetNumerator_z(SafeInt64 const &x) {
+  return x;
+}
 
 inline SafeInt64 GetDenominator_z([[maybe_unused]] SafeInt64 const &x) {
   return 1;

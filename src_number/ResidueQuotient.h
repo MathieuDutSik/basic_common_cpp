@@ -100,7 +100,11 @@ inline int GetDenominator([[maybe_unused]] int const &x) { return 1; }
 
 inline long GetDenominator([[maybe_unused]] long const &x) { return 1; }
 
+inline int GetNumerator_z(int const &x) { return x; }
+
 inline int GetDenominator_z([[maybe_unused]] int const &x) { return 1; }
+
+inline long GetNumerator_z(long const &x) { return x; }
 
 inline long GetDenominator_z([[maybe_unused]] long const &x) { return 1; }
 
