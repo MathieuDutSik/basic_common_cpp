@@ -12,6 +12,12 @@
 #include <string>
 #include <utility>
 
+// get_bit
+
+size_t get_bit(mpz_class const& v) {
+  return mpz_sizeinbase(v.get_mpz_t(), 2);
+}
+
 // We need to use is_mpq_class and is_mpz_class.
 // We cannot use the std::is_same_v<T,mpq_class>  or std::is_same_v<T,mpz_class>
 // because this requires mpz_class / mpq_class to be known in the scope.

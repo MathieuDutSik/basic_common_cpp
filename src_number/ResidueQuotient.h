@@ -6,6 +6,32 @@
 #include <cstdint>
 #include <cstdlib>
 
+// The number of bits in integer
+
+template<typename T>
+size_t get_bit_C(T const& a) {
+  T val = a;
+  size_t targetlevel = 0;
+  while (val >>= 1) ++targetlevel;
+  return targetlevel;
+}
+
+inline size_t get_bit(int8_t const &a) {
+  return get_bit_C<int8_t>(a);
+}
+
+inline size_t get_bit(int16_t const &a) {
+  return get_bit_C<int16_t>(a);
+}
+
+inline size_t get_bit(int32_t const &a) {
+  return get_bit_C<int32_t>(a);
+}
+
+inline size_t get_bit(int64_t const &a) {
+  return get_bit_C<int64_t>(a);
+}
+
 // The remainder and quotient of integers
 
 template <typename T> T ResInt_C_integer(T const &a, T const &b) {

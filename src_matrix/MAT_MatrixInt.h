@@ -447,10 +447,6 @@ MyMatrix<typename underlying_ring<T>::ring_type> NonUniqueRescaleRowsRing(MyMatr
   return Mret;
 }
 
-
-
-
-
 template <typename T>
 FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;

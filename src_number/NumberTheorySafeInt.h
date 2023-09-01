@@ -33,8 +33,6 @@ void check_sum_int64(int64_t val) {
 }
 
 void check_reasonableness(std::string oper, int64_t val) {
-  //  int64_t limit = 1000;
-  //  int64_t limit = MAX_INT64_PROD;
   int64_t limit = MAX_INT64_SUM;
   if (T_abs(val) > limit) {
     std::cerr << "We have val=" << val << " int(val)=" << int(val) << "\n";
@@ -302,6 +300,11 @@ inline void QUO_INT(stc<SafeInt64> const &a, stc<SafeInt64> const &b, SafeInt64 
   const Tint& b_int = b.val.get_const_val();
   Tint quot = QuoInt_C_integer<Tint>(a_int, b_int);
   q = SafeInt64(quot);
+}
+
+size_t get_bit(SafeInt64 const& x) {
+  int64_t const& val = x.get_const_val();
+  return get_bit(val);
 }
 
 #include "QuoIntFcts.h"
