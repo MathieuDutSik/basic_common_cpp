@@ -410,6 +410,47 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   return {TheMult, std::move(Vret)};
 }
 
+template<typename T>
+MyVector<typename underlying_ring<T>::ring_type> NonUniqueRescaleVecRing(MyVector<T> const& V) {
+  // It is non-unique because if we have V = (4, 6, 8) then we return (4, 6, 8) while for
+  // RemoveFraction it returns (2,3,4).
+  int n = V.size();
+  using Tring = typename underlying_ring<T>::ring_type;
+  std::vector<Tring> Lden(n);
+  for (int i=0; i<n; i++) {
+    Lden[i] = GetDenominator_z(V(i));
+  }
+  Tring scale = LCMlist(Lden);
+  MyVector<Tring> Vret(n);
+  for (int i=0; i<n; i++) {
+    Vret(i) = (scale / Lden[i]) * GetNumerator_z(V(i));
+  }
+  return Vret;
+}
+
+template<typename T>
+MyMatrix<typename underlying_ring<T>::ring_type> NonUniqueRescaleRowsRing(MyMatrix<T> const& M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  using Tring = typename underlying_ring<T>::ring_type;
+  MyMatrix<Tring> Mret(nbRow, nbCol);
+  std::vector<Tring> dens(nbCol);
+  for (int iRow=0; iRow<nbRow; iRow++) {
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      dens[iCol] = GetDenominator_z(M(iRow,iCol));
+    }
+    Tring scale = LCMlist(dens);
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      Mret(iRow,iCol) = (scale / dens[iCol]) * GetNumerator_y(M(iRow,iCol));
+    }
+  }
+  return Mret;
+}
+
+
+
+
+
 template <typename T>
 FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
