@@ -15,8 +15,9 @@ int main() {
   Tint val_red = UniversalNearestScalarInteger<Tint,T>(val);
   std::cerr << "val_red=" << val_red << "\n";
   //
-  long val3 = 15;
-  long val4 = 12;
-  long lcm = LCMpair(val3, val4);
+  using Tlong = int64_t;
+  Tlong val3 = 15;
+  Tlong val4 = 12;
+  Tlong lcm = LCMpair(val3, val4);
   std::cerr << "lcm=" << lcm << "\n";
 }
