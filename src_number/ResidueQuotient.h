@@ -10,8 +10,13 @@
 
 template<typename T>
 size_t get_bit_C(T const& a) {
-  T val = a;
-  size_t targetlevel = 0;
+  T val;
+  if (a < 0) {
+    val = -a;
+  } else {
+    val = a;
+  }
+  size_t targetlevel = 1;
   while (val >>= 1) ++targetlevel;
   return targetlevel;
 }
