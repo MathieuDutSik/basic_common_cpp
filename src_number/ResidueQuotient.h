@@ -117,12 +117,20 @@ template <typename T> T QuoInt_Generic(T const &a, T const &b) {
   return (a - res) / b;
 }
 
-inline void QUO_INT(stc<int> const &a, stc<int> const &b, int & q) {
-  q = QuoInt_C_integer<int>(a.val, b.val);
+inline void QUO_INT(stc<int8_t> const &a, stc<int8_t> const &b, int8_t & q) {
+  q = QuoInt_C_integer<int8_t>(a.val, b.val);
 }
 
-inline void QUO_INT(stc<long> const &a, stc<long> const &b, long & q) {
-  q = QuoInt_C_integer<long>(a.val, b.val);
+inline void QUO_INT(stc<int16_t> const &a, stc<int16_t> const &b, int16_t & q) {
+  q = QuoInt_C_integer<int16_t>(a.val, b.val);
+}
+
+inline void QUO_INT(stc<int32_t> const &a, stc<int32_t> const &b, int32_t & q) {
+  q = QuoInt_C_integer<int32_t>(a.val, b.val);
+}
+
+inline void QUO_INT(stc<int64_t> const &a, stc<int64_t> const &b, int64_t & q) {
+  q = QuoInt_C_integer<int64_t>(a.val, b.val);
 }
 
 #include "QuoIntFcts.h"

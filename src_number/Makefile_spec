@@ -10,7 +10,8 @@
 #PROGRAM		= RealCubicFieldTest
 #PROGRAM		= RationalTest
 #PROGRAM		= TestTypeBoostGmp
-PROGRAM		= TestGetBit
+#PROGRAM		= TestGetBit
+PROGRAM		= TestSizeof
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

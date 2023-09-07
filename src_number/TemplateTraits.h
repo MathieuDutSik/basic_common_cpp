@@ -8,6 +8,10 @@
 
 #include <cstdint>
 
+template <typename T> struct has_reduction_subset_solver {
+  static const bool value = false;
+};
+
 template <typename T> struct is_mpq_class {
   static const bool value = false;
 };

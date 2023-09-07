@@ -316,6 +316,10 @@ void ResInt_Kernel(SafeInt64 const &a, SafeInt64 const &b, SafeInt64 & res) {
   res.get_val() = ResInt_C_integer<Tint>(a_int, b_int);
 }
 
+template <> struct has_reduction_subset_solver<Rational<SafeInt64>> {
+  static const bool value = true;
+};
+
 // is an implementation of Z
 
 template <> struct is_implementation_of_Z<SafeInt64> {

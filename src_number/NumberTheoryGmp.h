@@ -18,6 +18,12 @@ size_t get_bit(mpz_class const& v) {
   return mpz_sizeinbase(v.get_mpz_t(), 2);
 }
 
+// The scheme for rank one reduction is some advanced scheme
+
+template <> struct has_reduction_subset_solver<mpq_class> {
+  static const bool value = true;
+};
+
 // We need to use is_mpq_class and is_mpz_class.
 // We cannot use the std::is_same_v<T,mpq_class>  or std::is_same_v<T,mpz_class>
 // because this requires mpz_class / mpq_class to be known in the scope.

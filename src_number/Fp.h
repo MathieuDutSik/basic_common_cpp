@@ -8,10 +8,7 @@
 #include <string>
 #include <utility>
 #include <boost/math/special_functions/round.hpp>
-#include "rational.h"
-//#include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
-//#include "TypeConversion.h"
 
 /*
   A finite prime field arithmetic class supposed.
@@ -80,7 +77,8 @@ private:
   }
 
 public:
-  Rational<Tint> rational_lift() {
+  // Initially, this was a Rational<Tint> with a fraction defined as x.first / x.second
+  std::pair<Tint,Tint> rational_lift() {
     // we create the integer lattice (a,b) s.t. a = b*num mod P 
     // has basis (num, 1) and (P,0)
     // use lagrange reduction to find small (a,b)
@@ -98,8 +96,8 @@ public:
       if( T+0.5 >= B ) {
         // we are done
         if( b1 < 0 )
-          return Rational<Tint>(-b0, -b1);
-        return Rational<Tint>(b0,b1);
+          return {-b0, -b1};
+        return {b0, b1};
       }
       Tint tmp0 = a0 - r*b0;
       Tint tmp1 = a1 - r*b1;
@@ -111,7 +109,7 @@ public:
       B = tmp0*tmp0+tmp1*tmp1;
     }
   }
-  
+
   void operator/=(Fp<Tint,P> const &x) {
     *this  = *this / x;
   }
@@ -139,7 +137,7 @@ public:
   }
   friend Fp<Tint,P> operator/(Fp<Tint,P> const &x,
                                   Fp<Tint,P> const &y) {
-    Tint den = mod_inverse(y.num);  
+    Tint den = mod_inverse(y.num);
     Fp<Tint,P> z(x.num * den);
     return z;
   }

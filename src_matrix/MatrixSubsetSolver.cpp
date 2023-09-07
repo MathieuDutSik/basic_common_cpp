@@ -11,12 +11,30 @@
 
 
 template<typename T>
-void process(std::string const& FileI, std::string const& FileO) {
-  using Tint = typename SubsetRankOneSolver<T>::Tint;
+inline typename std::enable_if<!has_reduction_subset_solver<T>::value, void>::type process(std::string const& FileI, std::string const& FileO) {
+  MyMatrix<T> TheMat = ReadMatrixFile<T>(FileI);
+  int n_row = TheMat.rows();
+  // This is a test case
+  SubsetRankOneSolver_Field<T> solver(TheMat);
+  for (int i_row=0; i_row<n_row; i_row++) {
+    Face f(n_row);
+    for (int j_row=0; j_row<n_row; j_row++) {
+      if (i_row != j_row) {
+        f[j_row] = 1;
+      }
+    }
+    MyVector<T> V = solver.GetKernelVector(f);
+    std::cerr << "i_row=" << i_row << " V=" << StringVector(V) << "\n";
+  }
+}
+
+template<typename T>
+inline typename std::enable_if<has_reduction_subset_solver<T>::value, void>::type process(std::string const& FileI, std::string const& FileO) {
+  using Tint = typename SubsetRankOneSolver_Acceleration<T>::Tint;
   MyMatrix<Tint> TheMat = ReadMatrixFile<Tint>(FileI);
   int n_row = TheMat.rows();
   // This is a test case
-  SubsetRankOneSolver<T> solver(TheMat);
+  SubsetRankOneSolver_Acceleration<T> solver(TheMat);
   for (int i_row=0; i_row<n_row; i_row++) {
     Face f(n_row);
     for (int j_row=0; j_row<n_row; j_row++) {
@@ -28,6 +46,7 @@ void process(std::string const& FileI, std::string const& FileO) {
     std::cerr << "i_row=" << i_row << " V=" << StringVector(V) << "\n";
   }
 }
+
 
 
 int main(int argc, char *argv[]) {
