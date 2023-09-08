@@ -1,47 +1,49 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheoryBoostCppInt.h"
+#include "NumberTheorySafeInt.h"
 #include "TypeConversion.h"
 #include "NumberTheory.h"
 // clang-format on
 
-int main(int argc, char *argv[]) {
-  //  using T=int;
-  //  using T=long;
-  //  using T=long;
-  using T = boost::multiprecision::cpp_int;
-  //  using T=mpq_class;
-  using Tint = mpz_class;
+template<typename T>
+std::pair<int,int> get_pair(int a, int b) {
+  T a_T = UniversalScalarConversion<T, int>(a);
+  T b_T = UniversalScalarConversion<T, int>(b);
+  T res_T = ResInt(a_T, b_T);
+  int res_int = UniversalScalarConversion<int, T>(res_T);
+  T quo_T = QuoInt(a_T, b_T);
+  int quo_int = UniversalScalarConversion<int, T>(quo_T);
+  return {res_int, quo_int};
+}
+
+void check_consistency(int a, int b, std::vector<std::pair<std::pair<int,int>, std::string>> const& l_result, size_t & n_error) {
+  size_t n_result = l_result.size();
+  for (size_t i_res=0; i_res<n_result; i_res++) {
+    for (size_t j_res=i_res+1; j_res<n_result; j_res++) {
+      auto eP1 = l_result[i_res];
+      auto eP2 = l_result[j_res];
+      if (eP1.first.first != eP2.first.first || eP1.first.second != eP2.first.second) {
+        std::cerr << "Error for a=" << a << " b=" << b << "\n";
+        std::cerr << "For class " << eP1.second << " we found res=" << eP1.first.first << " quot=" << eP1.first.second << "\n";
+        n_error++;
+      }
+    }
+  }
+}
+
+int main() {
   try {
     size_t n_error = 0;
     auto TestCons = [&](int a, int b) -> void {
       if (b != 0) {
-        T a_T = UniversalScalarConversion<T, int>(a);
-        T b_T = UniversalScalarConversion<T, int>(b);
-        Tint a_cont = UniversalScalarConversion<Tint, int>(a);
-        Tint b_cont = UniversalScalarConversion<Tint, int>(b);
-        //
-        T res_T = ResInt(a_T, b_T);
-        int res1 = UniversalScalarConversion<int, T>(res_T);
-        //
-        Tint res_cont = ResInt(a_cont, b_cont);
-        int res2 = UniversalScalarConversion<int, Tint>(res_cont);
-        if (res1 != res2) {
-          std::cerr << "Inconsistency a=" << a << " b=" << b << " res1=" << res1
-                    << " res2=" << res2 << "\n";
-          n_error++;
-        }
-        //
-        T quo_T = QuoInt(a_T, b_T);
-        int quo1 = UniversalScalarConversion<int, T>(quo_T);
-        //
-        Tint quo_cont = QuoInt(a_cont, b_cont);
-        int quo2 = UniversalScalarConversion<int, Tint>(quo_cont);
-        if (quo1 != quo2) {
-          std::cerr << "Inconsistency a=" << a << " b=" << b << " quo1=" << quo1
-                    << " quo2=" << quo2 << "\n";
-          n_error++;
-        }
+        std::vector<std::pair<std::pair<int,int>, std::string>> l_result;
+        l_result.push_back({get_pair<int64_t>(a, b), "int64_t"});
+        l_result.push_back({get_pair<int32_t>(a, b), "int32_t"});
+        l_result.push_back({get_pair<mpz_class>(a, b), "mpz_class"});
+        l_result.push_back({get_pair<mpq_class>(a, b), "mpq_class"});
+        l_result.push_back({get_pair<boost::multiprecision::cpp_int>(a, b), "boost::multiprecision::cpp_int"});
+        check_consistency(a, b, l_result, n_error);
       }
     };
     int nb = 100;

@@ -81,8 +81,20 @@ template <typename T> T ResInt_Generic(T const &a, T const &b) {
   return res;
 }
 
-inline void ResInt_Kernel(int const &a, int const &b, int &res) {
-  res = ResInt_C_integer<int>(a, b);
+inline void ResInt_Kernel(int8_t const &a, int8_t const &b, int8_t &res) {
+  res = ResInt_C_integer<int8_t>(a, b);
+}
+
+inline void ResInt_Kernel(int16_t const &a, int16_t const &b, int16_t &res) {
+  res = ResInt_C_integer<int16_t>(a, b);
+}
+
+inline void ResInt_Kernel(int32_t const &a, int32_t const &b, int32_t &res) {
+  res = ResInt_C_integer<int32_t>(a, b);
+}
+
+inline void ResInt_Kernel(int64_t const &a, int64_t const &b, int64_t &res) {
+  res = ResInt_C_integer<int64_t>(a, b);
 }
 
 inline void ResInt_Kernel(uint8_t const &a, uint8_t const &b, uint8_t &res) {
@@ -95,10 +107,6 @@ inline void ResInt_Kernel(uint16_t const &a, uint16_t const &b, uint16_t &res) {
 
 inline void ResInt_Kernel(uint32_t const &a, uint32_t const &b, uint32_t &res) {
   res = ResInt_C_unsigned_integer<uint32_t>(a, b);
-}
-
-inline void ResInt_Kernel(long const &a, long const &b, long &res) {
-  res = ResInt_C_integer<long>(a, b);
 }
 
 template <typename T> T QuoInt_C_integer(T const &a, T const &b) {
