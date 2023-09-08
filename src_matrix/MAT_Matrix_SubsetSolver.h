@@ -44,9 +44,6 @@ public:
   size_t max_bits;
   int nbRow;
   int nbCol;
-  SubsetRankOneSolver_Acceleration() {
-  }
-
   SubsetRankOneSolver_Acceleration(MyMatrix<Tint> const& _EXT) : EXT(_EXT) {
     nbRow = EXT.rows();
     nbCol = EXT.cols();

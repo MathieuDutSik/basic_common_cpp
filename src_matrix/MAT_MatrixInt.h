@@ -441,7 +441,7 @@ MyMatrix<typename underlying_ring<T>::ring_type> NonUniqueRescaleRowsRing(MyMatr
     }
     Tring scale = LCMlist(dens);
     for (int iCol=0; iCol<nbCol; iCol++) {
-      Mret(iRow,iCol) = (scale / dens[iCol]) * GetNumerator_y(M(iRow,iCol));
+      Mret(iRow,iCol) = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
     }
   }
   return Mret;
