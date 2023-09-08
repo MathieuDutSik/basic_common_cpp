@@ -14,6 +14,7 @@ template<typename T>
 inline typename std::enable_if<!has_reduction_subset_solver<T>::value, void>::type process(std::string const& FileI, std::string const& FileO) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(FileI);
   int n_row = TheMat.rows();
+  int n_col = TheMat.cols();
   // This is a test case
   SubsetRankOneSolver_Field<T> solver(TheMat);
   for (int i_row=0; i_row<n_row; i_row++) {
@@ -24,7 +25,20 @@ inline typename std::enable_if<!has_reduction_subset_solver<T>::value, void>::ty
       }
     }
     MyVector<T> V = solver.GetKernelVector(f);
-    std::cerr << "i_row=" << i_row << " V=" << StringVector(V) << "\n";
+    for (int j_row=0; j_row<n_row; j_row++) {
+      if (j_row != i_row) {
+        T scal(0);
+        for (int i_col=0; i_col<n_col; i_col++) {
+          scal += V(i_col) * TheMat(j_row,i_col);
+        }
+        if (scal != 0) {
+          std::cerr << "j_row=" << j_row << " V=" << StringVector(V) << "\n";
+          std::cerr << "Wrong scalar product\n";
+          throw TerminalException{1};
+        }
+      }
+    }
+    std::cerr << "SCH A : i_row=" << i_row << " V=" << StringVector(V) << "\n";
   }
 }
 
@@ -33,6 +47,7 @@ inline typename std::enable_if<has_reduction_subset_solver<T>::value, void>::typ
   using Tint = typename SubsetRankOneSolver_Acceleration<T>::Tint;
   MyMatrix<Tint> TheMat = ReadMatrixFile<Tint>(FileI);
   int n_row = TheMat.rows();
+  int n_col = TheMat.cols();
   // This is a test case
   SubsetRankOneSolver_Acceleration<T> solver(TheMat);
   for (int i_row=0; i_row<n_row; i_row++) {
@@ -43,7 +58,20 @@ inline typename std::enable_if<has_reduction_subset_solver<T>::value, void>::typ
       }
     }
     MyVector<Tint> V = solver.GetKernelVector(f);
-    std::cerr << "i_row=" << i_row << " V=" << StringVector(V) << "\n";
+    for (int j_row=0; j_row<n_row; j_row++) {
+      if (j_row != i_row) {
+        Tint scal(0);
+        for (int i_col=0; i_col<n_col; i_col++) {
+          scal += V(i_col) * TheMat(j_row,i_col);
+        }
+        if (scal != 0) {
+          std::cerr << "j_row=" << j_row << " V=" << StringVector(V) << "\n";
+          std::cerr << "Wrong scalar product\n";
+          throw TerminalException{1};
+        }
+      }
+    }
+    std::cerr << "SCH B : i_row=" << i_row << " V=" << StringVector(V) << "\n";
   }
 }
 
@@ -73,6 +101,7 @@ int main(int argc, char *argv[]) {
         return process<T>(FileI, FileO);
       }
       std::cerr << "Failed to find a matching type\n";
+      std::cerr << "Allowed types are mpq_class, cpp_rational, safe_rational\n";
       throw TerminalException{1};
     };
     f();
