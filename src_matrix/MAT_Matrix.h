@@ -656,7 +656,8 @@ MyMatrix<T> ConstantMatrix(int const &nbRow, int const &nbCol, T const &eVal) {
 template <typename T>
 MyMatrix<T> TranspositionMatrix(int const &n, int const &i, int const &j) {
   MyMatrix<T> M;
-  M.setConstant(n, n, 0);
+  T val(0);
+  M.setConstant(n, n, val);
   for (int iCol = 0; iCol < n; iCol++) {
     int iRow = iCol;
     if (iCol == i)
@@ -1535,7 +1536,7 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   int n = TheMat.rows();
   MyMatrix<T> WorkMat = TheMat;
   std::vector<int> eVectPos(n, -1);
-  T TheDet = 1;
+  T TheDet(1);
   for (int i = 0; i < n; i++) {
     int jSel = -1;
     for (int j = 0; j < n; j++)
@@ -1545,7 +1546,7 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
           jSel = j;
       }
     if (jSel == -1) {
-      return 0;
+      return T(0);
     }
     eVectPos[jSel] = i;
     for (int j = 0; j < n; j++)
@@ -1589,13 +1590,13 @@ template <typename T>
 T DeterminantMatPermutation(MyMatrix<T> const& A) {
   int n = A.rows();
   if (n == 0)
-    return 1;
+    return T(1);
   std::vector<int> s(n);
   for (int i=0; i<n; i++)
     s[i] = i;
-  T TheDet = 0;
+  T TheDet(0);
   do {
-    T eProd = 1;
+    T eProd(1);
     for (int u=0; u<n; u++)
       eProd *= A(u,s[u]);
     int eSign = 1;

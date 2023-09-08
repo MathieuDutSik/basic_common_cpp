@@ -1,6 +1,10 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheory.h"
+#include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryRealField.h"
+#include "NumberTheorySafeInt.h"
+#include "NumberTheoryQuadField.h"
 #include "MAT_MatrixInt.h"
 // clang-format off
 
@@ -19,7 +23,6 @@ void process(std::string const& FileI) {
 
 
 int main(int argc, char *argv[]) {
-  using T = mpq_class;
   try {
     if (argc != 2) {
       std::cerr << "This program is used as\n";

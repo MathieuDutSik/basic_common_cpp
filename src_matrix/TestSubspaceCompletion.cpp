@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < n - m; i++)
         l_vect.push_back(GetMatrixRow(Munimodular, i));
       MyMatrix<T> M = MatrixFromVectorFamily(l_vect);
-      MyMatrix<T> Msub = SubspaceCompletion(M, n);
+      MyMatrix<T> Msub = SubspaceCompletionInt(M, n);
       MyMatrix<T> Mconcat = Concatenate(M, Msub);
       T eDet = DeterminantMat(Mconcat);
       if (T_abs(eDet) != 1) {

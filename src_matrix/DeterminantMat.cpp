@@ -3,6 +3,7 @@
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
+#include "NumberTheorySafeInt.h"
 #include "MAT_MatrixInt.h"
 // clang-format on
 
