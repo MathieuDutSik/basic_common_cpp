@@ -13,8 +13,7 @@ public:
   MyMatrix<T> const& EXT;
   int nbCol;
 
-  SubsetRankOneSolver_Field(MyMatrix<Tint> const& _EXT) : EXT(_EXT) {
-    nbCol = EXT.cols();
+  SubsetRankOneSolver_Field(MyMatrix<Tint> const& _EXT) : EXT(_EXT), nbCol(EXT.cols()) {
   }
   MyVector<Tint> GetKernelVector(Face const& sInc) {
     int nb = sInc.count();
@@ -30,7 +29,15 @@ public:
 };
 
 
-
+// The acceleration scheme is using reduction to Fp.
+// techniques for the computation of the Kernel.
+//
+// The type T should be an implementation of Q.
+// Then Tint is some implementation of Z.
+// We then do computation over a fast modulo ring Tfast.
+//
+// The scheme should be failsafe, that is not throw any
+// more error than the type T.
 template<typename T>
 struct SubsetRankOneSolver_Acceleration {
 public:
@@ -38,15 +45,14 @@ public:
   using Tlift = int64_t;
   using Tfast = Fp<Tlift, 2147389441>;
   MyMatrix<Tint> const& EXT;
+  int nbRow;
+  int nbCol;
+  std::vector<std::pair<Tlift,Tlift>> lifts;
   MyMatrix<Tfast> EXT_fast;
   MyMatrix<Tlift> EXT_lift;
   bool try_int;
   size_t max_bits;
-  int nbRow;
-  int nbCol;
-  SubsetRankOneSolver_Acceleration(MyMatrix<Tint> const& _EXT) : EXT(_EXT) {
-    nbRow = EXT.rows();
-    nbCol = EXT.cols();
+  SubsetRankOneSolver_Acceleration(MyMatrix<Tint> const& _EXT) : EXT(_EXT), nbRow(EXT.rows()), nbCol(EXT.cols()), lifts(nbCol) {
     //
     // Faster modular version of EXT_red
     //
@@ -62,7 +68,7 @@ public:
       }
     }
     try_int = (max_bits <= 30);
-    max_bits += get_bit(mpz_class(nbCol));
+    max_bits += get_bit(static_cast<int64_t>(nbCol));
   }
 
   MyVector<Tint> GetKernelVector(Face const& sInc) {
@@ -92,7 +98,6 @@ public:
         MyVector<Tlift> VZ_lift(nbCol);
         // reconstruct the vector
         size_t max_bits_NSP = 0;
-        std::vector<std::pair<Tlift,Tlift>> lifts(nbCol);
         lifts[0] = Vzero_Tfast(0, 0).rational_lift();
         Tlift lcm = lifts[0].second;
         for (int iCol = 1; iCol < nbCol; iCol++) {
@@ -109,16 +114,15 @@ public:
           // check if part of kernel
           jRow = sInc.find_first();
           for (size_t iRow = 0; iRow < nb; iRow++) {
-            auto row = EXT_lift.row(jRow);
-            jRow = sInc.find_next(jRow);
             Tlift sm = 0;
             for (int iCol = 0; iCol < nbCol; iCol++) {
-              sm += VZ_lift(iCol) * row(iCol);
+              sm += VZ_lift(iCol) * EXT_lift(jRow, iCol);
             }
             if (sm != 0) {
               failed_int = true;
               break;
             }
+            jRow = sInc.find_next(jRow);
           }
         } else {
           failed_int = true;
