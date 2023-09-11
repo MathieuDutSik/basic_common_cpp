@@ -56,7 +56,6 @@ public:
     //
     // Faster modular version of EXT_red
     //
-    std::cerr << "SubsetRankOneSolver_Acceleration, constructor, step 1\n";
     max_bits = 0;
     EXT_fast = MyMatrix<Tfast>(nbRow, nbCol);
     EXT_lift = MyMatrix<Tlift>(nbRow, nbCol);
@@ -70,16 +69,13 @@ public:
     }
     try_int = (max_bits <= 30);
     max_bits += get_bit(static_cast<int64_t>(nbCol));
-    std::cerr << "SubsetRankOneSolver_Acceleration, constructor, step 2\n";
   }
 
   MyVector<Tint> GetKernelVector(Face const& sInc) {
-    std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 1\n";
     size_t nb = sInc.count();
     MyVector<Tint> Vkernel(nbCol);
     bool failed_int = false;
     if (try_int) {
-      std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 2\n";
       boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
       auto f = [&](MyMatrix<Tfast> &M, size_t eRank,
                    [[maybe_unused]] size_t iRow) -> void {
@@ -88,7 +84,6 @@ public:
       };
       MyVector<Tfast> Vzero_Tfast =
         NullspaceTrMatTargetOne_Kernel<Tfast, decltype(f)>(nb, nbCol, f);
-      std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 3\n";
       // check result at full precision in case of overflows
       bool allzero = true;
       for (int iCol = 0; iCol < nbCol; iCol++) {
@@ -97,28 +92,23 @@ public:
           break;
         }
       }
-      std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 4\n";
       if (allzero) {
         failed_int = true;
       } else {
-        std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 5\n";
         MyVector<Tlift> VZ_lift(nbCol);
         // reconstruct the vector
         size_t max_bits_NSP = 0;
-        std::cerr << "nbCol=" << nbCol << " |Vzero_Tfast|=" << Vzero_Tfast.size() << " |lifts|=" << lifts.size() << "\n";
         lifts[0] = Vzero_Tfast(0, 0).rational_lift();
         Tlift lcm = lifts[0].second;
         for (int iCol = 1; iCol < nbCol; iCol++) {
           lifts[iCol] = Vzero_Tfast(iCol).rational_lift();
           lcm = LCMpair(lcm, lifts[iCol].second);
         }
-        std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 6\n";
         for (int iCol = 0; iCol < nbCol; iCol++) {
           VZ_lift(iCol) = lifts[iCol].first * (lcm / lifts[iCol].second);
           Vkernel(iCol) = UniversalScalarConversion<Tint,Tlift>(VZ_lift(iCol));
           max_bits_NSP = std::max(max_bits_NSP, get_bit(VZ_lift(iCol)));
         }
-        std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 7\n";
         // check if elements are small enough to do computation in
         if (max_bits + max_bits_NSP <= 60) {
           // check if part of kernel
@@ -134,7 +124,6 @@ public:
             }
             jRow = sInc.find_next(jRow);
           }
-        std::cerr << "SubsetRankOneSolver_Acceleration, GetKernelVector, step 8\n";
         } else {
           failed_int = true;
         }

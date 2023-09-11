@@ -462,7 +462,7 @@ mpz_class convert_mpz_class_int64_t(int64_t const& val) {
   if (val > 0) {
     return convert_mpz_class_uint64_t(val);
   }
-  return convert_mpz_class_uint64_t(-val);
+  return -convert_mpz_class_uint64_t(-val);
 }
 
 #ifdef __APPLE__
