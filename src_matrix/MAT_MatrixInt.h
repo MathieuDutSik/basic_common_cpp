@@ -462,7 +462,7 @@ MyMatrix<typename underlying_ring<T>::ring_type> UniqueRescaleRowsRing(MyMatrix<
     for (int iCol=0; iCol<nbCol; iCol++) {
       Vret[iCol] = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
     }
-    T eGCD = Vret[0];
+    Tring eGCD = Vret[0];
     for (int iCol=1; iCol<nbCol; iCol++)
       eGCD = GcdPair(eGCD, Vret[iCol]);
     for (int iCol=0; iCol<nbCol; iCol++) {

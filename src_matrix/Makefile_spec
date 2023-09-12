@@ -5,7 +5,8 @@
 #PROGRAM		= TestSubspaceCompletion
 #PROGRAM		= TestProdMat
 #PROGRAM		= ScalarCanonicalization
-PROGRAM		= MatrixSubsetSolver
+#PROGRAM		= MatrixSubsetSolver
+PROGRAM		= UniqueRescaleRows
 #PROGRAM		= SmithNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)
