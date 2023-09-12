@@ -1,4 +1,4 @@
-PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt TestTypeConversion RealCubicFieldTest QuadFieldTest RationalTest TestTypeBoostGmp TestGetBit
+PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt PrintStaticInfo RealCubicFieldTest QuadFieldTest RationalTest TestTypeBoostGmp TestGetBit
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
@@ -6,7 +6,7 @@ PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuo
 #PROGRAM		= TestQuoInt
 #PROGRAM		= TestConversion
 #PROGRAM		= TestSquareRoot
-#PROGRAM		= TestTypeConversion
+#PROGRAM		= PrintStaticInfo
 #PROGRAM		= QuadFieldTest
 #PROGRAM		= RealCubicFieldTest
 #PROGRAM		= RationalTest

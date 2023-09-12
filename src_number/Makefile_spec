@@ -5,13 +5,12 @@
 #PROGRAM		= TestQuoInt
 #PROGRAM		= TestConversion
 #PROGRAM		= TestSquareRoot
-#PROGRAM		= TestTypeConversion
+#PROGRAM		= PrintStaticInfo
 #PROGRAM		= QuadFieldTest
 #PROGRAM		= RealCubicFieldTest
 #PROGRAM		= RationalTest
 #PROGRAM		= TestTypeBoostGmp
-#PROGRAM		= TestGetBit
-PROGRAM		= TestSizeof
+PROGRAM		= TestGetBit
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
