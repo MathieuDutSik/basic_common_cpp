@@ -447,6 +447,31 @@ MyMatrix<typename underlying_ring<T>::ring_type> NonUniqueRescaleRowsRing(MyMatr
   return Mret;
 }
 
+template<typename T>
+MyMatrix<typename underlying_ring<T>::ring_type> UniqueRescaleRowsRing(MyMatrix<T> const& M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  using Tring = typename underlying_ring<T>::ring_type;
+  MyMatrix<Tring> Mret(nbRow, nbCol);
+  std::vector<Tring> dens(nbCol), Vret(nbCol);
+  for (int iRow=0; iRow<nbRow; iRow++) {
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      dens[iCol] = GetDenominator_z(M(iRow,iCol));
+    }
+    Tring scale = LCMlist(dens);
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      Vret(iCol) = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
+    }
+    T eGCD = Vret(0);
+    for (int iCol=1; iCol<nbCol; iCol++)
+      eGCD = GcdPair(eGCD, Vret(iCol));
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      Mret(iRow, iCol) = Vret(iCol) / eGCD;
+    }
+  }
+  return Mret;
+}
+
 template <typename T>
 FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
