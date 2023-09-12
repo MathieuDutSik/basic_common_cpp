@@ -460,13 +460,13 @@ MyMatrix<typename underlying_ring<T>::ring_type> UniqueRescaleRowsRing(MyMatrix<
     }
     Tring scale = LCMlist(dens);
     for (int iCol=0; iCol<nbCol; iCol++) {
-      Vret(iCol) = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
+      Vret[iCol] = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
     }
-    T eGCD = Vret(0);
+    T eGCD = Vret[0];
     for (int iCol=1; iCol<nbCol; iCol++)
-      eGCD = GcdPair(eGCD, Vret(iCol));
+      eGCD = GcdPair(eGCD, Vret[iCol]);
     for (int iCol=0; iCol<nbCol; iCol++) {
-      Mret(iRow, iCol) = Vret(iCol) / eGCD;
+      Mret(iRow, iCol) = Vret[iCol] / eGCD;
     }
   }
   return Mret;
