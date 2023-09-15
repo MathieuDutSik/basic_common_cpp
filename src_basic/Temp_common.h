@@ -79,15 +79,20 @@ template <typename T> struct is_mymatrix {
   static const bool value = false;
 };
 
-void srand_random_set() {
+unsigned get_random_seed() {
 #ifdef USE_NANOSECOND_RAND
   std::timespec ts;
   std::timespec_get(&ts, TIME_UTC);
   unsigned val = ts.tv_nsec;
-  srand(val);
 #else
-  srand(time(NULL));
+  unsigned val = time(NULL);
 #endif
+  return val;
+}
+
+void srand_random_set() {
+  unsigned val = get_random_seed();
+  srand(val);
 }
 
 std::string random_string_kernel(std::string const& strChoice, size_t length) {
