@@ -449,28 +449,36 @@ inline void QUO_INT(stc<Rational<Tint>> const &a, stc<Rational<Tint>> const &b, 
 
 // Overlying fields, the original motivation
 
-template <> struct overlying_field<int> {
-  typedef Rational<int> field_type;
+template <> struct overlying_field<int8_t> {
+  typedef Rational<int8_t> field_type;
 };
 
-template <> struct overlying_field<short> {
-  typedef Rational<short> field_type;
+template <> struct overlying_field<int16_t> {
+  typedef Rational<int16_t> field_type;
 };
 
-template <> struct overlying_field<long> {
-  typedef Rational<long> field_type;
+template <> struct overlying_field<int32_t> {
+  typedef Rational<int32_t> field_type;
 };
 
-template <> struct overlying_field<Rational<int>> {
-  typedef Rational<int> field_type;
+template <> struct overlying_field<int64_t> {
+  typedef Rational<int64_t> field_type;
 };
 
-template <> struct overlying_field<Rational<short>> {
-  typedef Rational<short> field_type;
+template <> struct overlying_field<Rational<int8_t>> {
+  typedef Rational<int8_t> field_type;
 };
 
-template <> struct overlying_field<Rational<long>> {
-  typedef Rational<long> field_type;
+template <> struct overlying_field<Rational<int16_t>> {
+  typedef Rational<int16_t> field_type;
+};
+
+template <> struct overlying_field<Rational<int32_t>> {
+  typedef Rational<int32_t> field_type;
+};
+
+template <> struct overlying_field<Rational<int64_t>> {
+  typedef Rational<int64_t> field_type;
 };
 
 // hashing function
