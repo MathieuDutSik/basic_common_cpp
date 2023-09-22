@@ -499,12 +499,6 @@ template <typename T> struct hash<Rational<T>> {
 }  // namespace std
 // clang-format on
 
-// The conversion tools (int)
-
-inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, Rational<int> &a2) {
-  a2 = a1.val;
-}
-
 template <typename T>
 void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
   const T &den = a1.val.get_const_den();
@@ -516,25 +510,59 @@ void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
   a2 = a1.val.get_const_num();
 }
 
-inline void TYPE_CONVERSION(stc<Rational<int>> const &a1, int &a2) {
-  TYPE_CONVERSION_Rational_T<int>(a1, a2);
-}
+// The conversion tools (int8_t)
 
-inline void TYPE_CONVERSION(stc<int> const &a1, Rational<int> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<int8_t>> const &a1, Rational<int8_t> &a2) {
   a2 = a1.val;
 }
 
-// The conversion tools (long)
+inline void TYPE_CONVERSION(stc<Rational<int8_t>> const &a1, int8_t &a2) {
+  TYPE_CONVERSION_Rational_T<int8_t>(a1, a2);
+}
 
-inline void TYPE_CONVERSION(stc<Rational<long>> const &a1, Rational<long> &a2) {
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, Rational<int8_t> &a2) {
   a2 = a1.val;
 }
 
-inline void TYPE_CONVERSION(stc<Rational<long>> const &a1, long &a2) {
-  TYPE_CONVERSION_Rational_T<long>(a1, a2);
+// The conversion tools (int16_t)
+
+inline void TYPE_CONVERSION(stc<Rational<int16_t>> const &a1, Rational<int16_t> &a2) {
+  a2 = a1.val;
 }
 
-inline void TYPE_CONVERSION(stc<long> const &a1, Rational<long> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<int16_t>> const &a1, int16_t &a2) {
+  TYPE_CONVERSION_Rational_T<int16_t>(a1, a2);
+}
+
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, Rational<int16_t> &a2) {
+  a2 = a1.val;
+}
+
+// The conversion tools (int32_t)
+
+inline void TYPE_CONVERSION(stc<Rational<int32_t>> const &a1, Rational<int32_t> &a2) {
+  a2 = a1.val;
+}
+
+inline void TYPE_CONVERSION(stc<Rational<int32_t>> const &a1, int32_t &a2) {
+  TYPE_CONVERSION_Rational_T<int32_t>(a1, a2);
+}
+
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, Rational<int32_t> &a2) {
+  a2 = a1.val;
+}
+
+// The conversion tools (int64_t)
+
+inline void TYPE_CONVERSION(stc<Rational<int64_t>> const &a1, Rational<int64_t> &a2) {
+  a2 = a1.val;
+}
+
+inline void TYPE_CONVERSION(stc<Rational<int64_t>> const &a1, int64_t &a2) {
+  TYPE_CONVERSION_Rational_T<int64_t>(a1, a2);
+}
+
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, Rational<int64_t> &a2) {
   a2 = a1.val;
 }
 
