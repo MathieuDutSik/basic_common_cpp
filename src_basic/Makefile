@@ -1,4 +1,4 @@
-PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Analysis_EmpiricalDistribution
+PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Analysis_EmpiricalDistribution Test_hash_table
 #PROGRAM		= Test_parse_split
 #PROGRAM		= test_hash
 #PROGRAM		= Test_String_Split
@@ -34,8 +34,9 @@ OUTPUTFLAG 	= -o
 
 CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src_comb -I../src_graph -I../src_latt -I../src_poly -I../src_perfect -I.
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(MPFR_INCDIR) -I$(EIGEN_PATH)
+CHASHMAP        = -I../sparse-map/include/tsl/ -I../robin-map/include/tsl/ -I../hopscotch-map/include/tsl/
 CDEBUG          = -DDEBUG -DDEBUG_LEDF
-CTOTAL 		= $(CLOCAL) $(CFLAGS) $(CDEBUG)
+CTOTAL 		= $(CLOCAL) $(CFLAGS) $(CDEBUG) $(CHASHMAP)
 
 
 LIBS		= -lm $(GMP_CXX_LINK) -pthread $(BOOST_LINK)
