@@ -469,9 +469,12 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
   std::string ErrFile = "/tmp/file" + strRand + ".err";
   std::string eOrder = "ls " + ThePrefix + " > " + TmpFile + " 2> " + ErrFile;
   int iret = system(eOrder.c_str());
-  std::cerr << "iret=" << iret << "\n";
   if (iret != -1) {
+    std::cerr << "iret=" << iret << "\n";
     std::cerr << "Error in ls_operation\n";
+    std::cerr << "eOrder=" << eOrder << "\n";
+    std::cerr << "TmpFile=" << TmpFile << "\n";
+    std::cerr << "ErrFile=" << ErrFile << "\n";
     std::cerr << "ThePrefix=" << ThePrefix << "\n";
     std::cerr << "unable to run the process\n";
     throw TerminalException{1};
