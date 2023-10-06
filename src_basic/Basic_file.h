@@ -469,8 +469,10 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
   std::string ErrFile = "/tmp/file" + strRand + ".err";
   std::string eOrder = "ls " + ThePrefix + " > " + TmpFile + " 2> " + ErrFile;
   int iret = system(eOrder.c_str());
+  std::cerr << "iret=" << iret << "\n";
+  // The iret appears not to be a reliable way to determine the success of an operation
+  /*
   if (iret != -1) {
-    std::cerr << "iret=" << iret << "\n";
     std::cerr << "Error in ls_operation\n";
     std::cerr << "eOrder=" << eOrder << "\n";
     std::cerr << "TmpFile=" << TmpFile << "\n";
@@ -479,6 +481,7 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
     std::cerr << "unable to run the process\n";
     throw TerminalException{1};
   }
+  */
   std::ifstream iserr(ErrFile);
   size_t nbCharErr = 0;
   while (!iserr.eof()) {
