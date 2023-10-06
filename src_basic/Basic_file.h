@@ -474,10 +474,6 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
   /*
   if (iret != -1) {
     std::cerr << "Error in ls_operation\n";
-    std::cerr << "eOrder=" << eOrder << "\n";
-    std::cerr << "TmpFile=" << TmpFile << "\n";
-    std::cerr << "ErrFile=" << ErrFile << "\n";
-    std::cerr << "ThePrefix=" << ThePrefix << "\n";
     std::cerr << "unable to run the process\n";
     throw TerminalException{1};
   }
@@ -509,7 +505,8 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
     }
     std::string eFile;
     is >> eFile;
-    ListFile.push_back(eFile);
+    if (eFile.size() > 0)
+      ListFile.push_back(eFile);
   }
 }
 
