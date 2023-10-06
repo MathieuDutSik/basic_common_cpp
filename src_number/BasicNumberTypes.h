@@ -3,6 +3,7 @@
 #define SRC_NUMBER_BASICNUMBERTYPES_H_
 
 #include <string>
+#include <cstdint>
 
 // STC: Singleton Type Conversion
 // We absolutely want to avoid a function with a signature "long"
