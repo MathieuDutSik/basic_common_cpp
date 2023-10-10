@@ -1,12 +1,12 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_QUADFIELD_H_
 #define SRC_NUMBER_QUADFIELD_H_
-
-//#include "NumberTheory.h"
+// clang-format off
 #include "Temp_common.h"
 #include "InputOutput.h"
 #include <limits>
 #include <string>
+// clang-format on
 
 template <typename Tinp, int d> class QuadField {
 public:

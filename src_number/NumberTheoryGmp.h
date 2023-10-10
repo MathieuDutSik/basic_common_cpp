@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERTHEORYGMP_H_
 #define SRC_NUMBER_NUMBERTHEORYGMP_H_
-
+// clang-format off
 #include "BasicNumberTypes.h"
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
@@ -11,6 +11,7 @@
 #include <limits>
 #include <string>
 #include <utility>
+// clang-format on
 
 // get_bit
 

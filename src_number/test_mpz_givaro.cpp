@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberGivaro.h"
+// clang-format on
 
 int main() {
   for (int i = 0; i < 100; i++) {

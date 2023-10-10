@@ -1,6 +1,8 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberTheoryBoostGmpInt.h"
 #include "ResidueQuotient.h"
+// clang-format on
 
 int main() {
 

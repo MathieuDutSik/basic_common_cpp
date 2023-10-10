@@ -2,9 +2,11 @@
 #ifndef SRC_NUMBER_FACTORIZATIONS_H_
 #define SRC_NUMBER_FACTORIZATIONS_H_
 
+// clang-format off
 #include <map>
 #include <utility>
 #include <vector>
+// clang-format on
 
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize(T const &number) {

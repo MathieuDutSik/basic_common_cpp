@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberTheoryGmp.h"
+// clang-format on
 
 int main() {
   std::cerr << "sizeof(short int)=" << sizeof(short int) << "\n";

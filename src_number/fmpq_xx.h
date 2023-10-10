@@ -2,9 +2,11 @@
 #ifndef SRC_NUMBER_FMPQ_XX_H_
 #define SRC_NUMBER_FMPQ_XX_H_
 
+// clang-format off
 #include "fmpq.h"
 #include "fmpz.h"
 #include <string>
+// clang-format on
 
 double fmpq_get_d(fmpq_t const &a) {
   mpq_t eQ;

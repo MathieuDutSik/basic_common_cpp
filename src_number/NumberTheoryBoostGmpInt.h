@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
 #define SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_
-
+// clang-format off
 #include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
@@ -12,6 +12,7 @@
 #include <limits>
 #include <string>
 #include <utility>
+// clang-format on
 
 template <> struct is_boost_mpz_int<boost::multiprecision::mpz_int> {
   static const bool value = true;

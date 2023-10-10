@@ -1,14 +1,15 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_FP_H_
 #define SRC_NUMBER_FP_H_
-
+// clang-format off
+#include "TemplateTraits.h"
 #include <iostream>
 #include <limits>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <boost/math/special_functions/round.hpp>
-#include "TemplateTraits.h"
+// clang-format on
 
 /*
   A finite prime field arithmetic class supposed.

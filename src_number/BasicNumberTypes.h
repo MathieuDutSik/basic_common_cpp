@@ -1,9 +1,10 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_BASICNUMBERTYPES_H_
 #define SRC_NUMBER_BASICNUMBERTYPES_H_
-
+// clang-format off
 #include <string>
 #include <cstdint>
+// clang-format on
 
 // STC: Singleton Type Conversion
 // We absolutely want to avoid a function with a signature "long"

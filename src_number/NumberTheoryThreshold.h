@@ -2,12 +2,14 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYTHRESHOLD_H_
 #define SRC_NUMBER_NUMBERTHEORYTHRESHOLD_H_
 
+// clang-format off
 #include "MAT_Matrix.h"
 #include "NumberTheory.h"
 #include "Temp_common.h"
 #include <map>
 #include <string>
 #include <vector>
+// clang-format on
 
 // For general real field.
 // We need to use more sophisticated and slower algorithms than quadratic

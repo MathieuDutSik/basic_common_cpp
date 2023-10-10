@@ -2,11 +2,7 @@
 #ifndef SRC_NUMBER_TYPECONVERSION_H_
 #define SRC_NUMBER_TYPECONVERSION_H_
 
-// All the definitions of special fields are in other include.
-// Nothing of this should depend on GMP or MPREAL or FLINT or whatever.
-//
-//  All mpreal are in mpreal_related.h
-
+// clang-format off
 #include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
@@ -17,6 +13,12 @@
 #include <utility>
 #include <vector>
 #include <optional>
+// clang-format on
+
+// All the definitions of special fields are in other include.
+// Nothing of this should depend on GMP or MPREAL or FLINT or whatever.
+//
+//  All mpreal are in mpreal_related.h
 
 //
 // UniversalScalarConversion and TYPE_CONVERSION

@@ -2,9 +2,11 @@
 #ifndef SRC_NUMBER_RESIDUEQUOTIENT_H_
 #define SRC_NUMBER_RESIDUEQUOTIENT_H_
 
+// clang-format off
 #include "BasicNumberTypes.h"
 #include <cstdint>
 #include <cstdlib>
+// clang-format on
 
 // The number of bits in integer
 

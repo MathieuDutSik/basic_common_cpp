@@ -1,9 +1,11 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryBoostGmpInt.h"
 #include "TypeConversion.h"
 #include "TypeConversionFinal.h"
+// clang-format on
 
 int main(int argc, char *argv[]) {
   using T1 = boost::multiprecision::cpp_int;

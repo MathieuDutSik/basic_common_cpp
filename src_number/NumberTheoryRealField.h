@@ -2,6 +2,7 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYREALFIELD_H_
 #define SRC_NUMBER_NUMBERTHEORYREALFIELD_H_
 
+// clang-format off
 #include "MAT_Matrix.h"
 #ifdef OSCAR_USE_BOOST_GMP_BINDINGS
 # include "NumberTheoryBoostGmpInt.h"
@@ -14,6 +15,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+// clang-format on
 
 // For general real field.
 // We need to use more sophisticated and slower algorithms than quadratic

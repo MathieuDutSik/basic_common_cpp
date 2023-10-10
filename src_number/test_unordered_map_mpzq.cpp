@@ -1,6 +1,8 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberTheory.h"
 #include "Temp_common.h"
+// clang-format on
 
 int main() {
   int n = 1000;

@@ -1,7 +1,9 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "approximation.h"
+// clang-format on
 
 // The quantity is 2*cos(2*pi/7)
 // The minimal polynomial is X^3 + X^2 - 2X - 1

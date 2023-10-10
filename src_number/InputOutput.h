@@ -1,12 +1,12 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_INPUTOUTPUT_H_
 #define SRC_NUMBER_INPUTOUTPUT_H_
-
-#include <vector>
-#include <iostream>
+// clang-format off
 #include "Basic_functions.h"
 #include "ExceptionsFunc.h"
-
+#include <vector>
+#include <iostream>
+// clang-format on
 
 template<typename T>
 void WriteVectorFromRealAlgebraicString(std::ostream& os, std::vector<T> const& V) {

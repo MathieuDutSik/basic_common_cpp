@@ -2,8 +2,10 @@
 #ifndef SRC_NUMBER_QUOINTFCTS_H_
 #define SRC_NUMBER_QUOINTFCTS_H_
 
-#include <iostream>
+// clang-format off
 #include "ExceptionsFunc.h"
+#include <iostream>
+// clang-format on
 
 template <typename T>
 T QuoInt(T const &a, T const& b) {

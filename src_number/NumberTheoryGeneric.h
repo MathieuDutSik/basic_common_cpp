@@ -1,11 +1,12 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERTHEORYGENERIC_H_
 #define SRC_NUMBER_NUMBERTHEORYGENERIC_H_
-
+// clang-format off
 #include "Basic_functions.h"
 #include <vector>
 #include <optional>
 #include <limits>
+// clang-format on
 
 template <typename T> T GenericGcd(T const &m, T const &n) {
   T h, q;

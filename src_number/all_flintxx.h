@@ -2,8 +2,10 @@
 #ifndef SRC_NUMBER_ALL_FLINTXX_H_
 #define SRC_NUMBER_ALL_FLINTXX_H_
 
+// clang-format off
 #include "fmpqxx.h"
 #include "fmpz_vecxx.h"
+// clang-format on
 
 /*
 flint::fmpqxx operator*(int const&x, flint::fmpqxx const&y)

@@ -2,9 +2,11 @@
 #ifndef SRC_NUMBER_APPROXIMATION_H_
 #define SRC_NUMBER_APPROXIMATION_H_
 
+// clang-format off
 #include <map>
 #include <utility>
 #include <vector>
+// clang-format on
 
 // This code is used for checking the numerics comparison code
 // It is not really useful since continued fractions work better

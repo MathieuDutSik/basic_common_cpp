@@ -1,7 +1,9 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+// clang-format off
 #include "NumberTheoryQuadField.h"
 #include "NumberTheory.h"
 #include "factorizations.h"
+// clang-format on
 
 int main(int argc, char *argv[]) {
   using Trat = mpq_class;

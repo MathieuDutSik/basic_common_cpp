@@ -1,17 +1,17 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERGIVARO_H_
 #define SRC_NUMBER_NUMBERGIVARO_H_
-
+// clang-format off
+#include "NumberTheory.h"
+#include <givaro/givinteger.h>
+#include <givaro/givrational.h>
+#include <vector>
+// clang-format on
 /*
   Some documentation
   https://casys.gricad-pages.univ-grenoble-alpes.fr/givaro/givaro-dev-html/class_givaro_1_1_integer.html
   https://casys.gricad-pages.univ-grenoble-alpes.fr/givaro/givaro-dev-html/class_givaro_1_1_rational.html
 */
-
-#include "NumberTheory.h"
-#include <givaro/givinteger.h>
-#include <givaro/givrational.h>
-#include <vector>
 
 Givaro::Integer GetGivaroInteger(mpz_class const &val) {
   //  mpz_t val_z(val.get_mpz_t());

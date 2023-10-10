@@ -2,17 +2,19 @@
 #ifndef SRC_NUMBER_RATIONAL_H_
 #define SRC_NUMBER_RATIONAL_H_
 
-#include <iostream>
-#include <limits>
-#include <sstream>
-#include <string>
-#include <utility>
-
+// clang-format off
 #include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "ResidueQuotient.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
+#include <iostream>
+#include <limits>
+#include <sstream>
+#include <string>
+#include <utility>
+// clang-format on
+
 
 /*
   A rational class supposed to build integers.

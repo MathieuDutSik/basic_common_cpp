@@ -2,6 +2,7 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYSAFEINT_H_
 #define SRC_NUMBER_NUMBERTHEORYSAFEINT_H_
 
+// clang-format off
 #include "BasicNumberTypes.h"
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
@@ -12,6 +13,7 @@
 #include <limits>
 #include <string>
 #include <utility>
+// clang-format on
 
 #define MAX_INT64_PROD 2147483647
 #define MAX_INT64_SUM  4611686018427387903

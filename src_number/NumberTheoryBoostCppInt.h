@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERTHEORYBOOSTCPPINT_H_
 #define SRC_NUMBER_NUMBERTHEORYBOOSTCPPINT_H_
-
+// clang-format off
 #include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
@@ -11,6 +11,7 @@
 #include <limits>
 #include <string>
 #include <utility>
+// clang-format on
 
 template <> struct is_boost_cpp_int<boost::multiprecision::cpp_int> {
   static const bool value = true;
