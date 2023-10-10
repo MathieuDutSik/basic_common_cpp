@@ -238,16 +238,19 @@ template <typename T> T ComputeLCM(std::vector<T> const &eVect) {
 
 template <typename T, typename Tint>
 MyVector<Tint> RescaleVec(MyVector<T> const &v) {
-  static_assert(is_implementation_of_Q<T>::value, "Requires T to be an implementation of Q");
-  static_assert(is_implementation_of_Q<Tint>::value || is_implementation_of_Z<Tint>::value, "Requires Tint to be an implementation of Z or Q");
+  static_assert(is_implementation_of_Q<T>::value,
+                "Requires T to be an implementation of Q");
+  static_assert(is_implementation_of_Q<Tint>::value ||
+                    is_implementation_of_Z<Tint>::value,
+                "Requires Tint to be an implementation of Z or Q");
   int cols = v.size();
-  std::vector<Tint> dens(cols,1);
+  std::vector<Tint> dens(cols, 1);
   MyVector<Tint> vret = MyVector<Tint>(cols);
-  for( int iCol = 0; iCol < cols; iCol++){
+  for (int iCol = 0; iCol < cols; iCol++) {
     dens[iCol] = v(iCol).get_den();
   }
   Tint scale = LCMlist(dens);
-  for( int iCol = 0; iCol < cols; iCol++) {
+  for (int iCol = 0; iCol < cols; iCol++) {
     vret(iCol) = (scale / v(iCol).get_den()) * v(iCol).get_num();
   }
   return vret;
@@ -255,24 +258,27 @@ MyVector<Tint> RescaleVec(MyVector<T> const &v) {
 
 template <typename T, typename Tint>
 MyMatrix<Tint> RescaleRows(MyMatrix<T> const &M) {
-  static_assert(is_implementation_of_Q<T>::value, "Requires T to be an implementation of Q");
-  static_assert(is_implementation_of_Q<Tint>::value || is_implementation_of_Z<Tint>::value, "Requires Tint to be an implementation of Z or Q"); 
+  static_assert(is_implementation_of_Q<T>::value,
+                "Requires T to be an implementation of Q");
+  static_assert(is_implementation_of_Q<Tint>::value ||
+                    is_implementation_of_Z<Tint>::value,
+                "Requires Tint to be an implementation of Z or Q");
   int rows = M.rows();
   int cols = M.cols();
-  std::vector<Tint> dens(cols,1);
+  std::vector<Tint> dens(cols, 1);
   MyMatrix<Tint> Mret = MyMatrix<Tint>(rows, cols);
-  for( int iRow = 0; iRow < rows; iRow++) {
-    for( int iCol = 0; iCol < cols; iCol++){
+  for (int iRow = 0; iRow < rows; iRow++) {
+    for (int iCol = 0; iCol < cols; iCol++) {
       dens[iCol] = M(iRow, iCol).get_den();
     }
     Tint scale = LCMlist(dens);
-    for( int iCol = 0; iCol < cols; iCol++) {
-      Mret(iRow, iCol) = (scale / M(iRow,iCol).get_den()) * M(iRow,iCol).get_num();
+    for (int iCol = 0; iCol < cols; iCol++) {
+      Mret(iRow, iCol) =
+          (scale / M(iRow, iCol).get_den()) * M(iRow, iCol).get_num();
     }
   }
   return Mret;
 }
-
 
 template <typename T> struct FractionMatrix {
   T TheMult;
@@ -317,7 +323,7 @@ CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
   };
   T the_sma = 1; // Just to shut up warnings. Will not be used
   bool IsAssigned = false;
-  auto f_insert=[&](T const&input) -> void {
+  auto f_insert = [&](T const &input) -> void {
     T val = get_abs(input);
     if (val > 0) {
       if (!IsAssigned) {
@@ -333,7 +339,8 @@ CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
     for (int iRow = 0; iRow < nbRow; iRow++)
       f_insert(M(iRow, iCol));
   if (!IsAssigned) {
-    std::cerr << "Failed to find a non-zero value for M, so impossible to canonicalize\n";
+    std::cerr << "Failed to find a non-zero value for M, so impossible to "
+                 "canonicalize\n";
     throw TerminalException{1};
   }
   MyMatrix<T> M2 = M / the_sma;
@@ -358,7 +365,7 @@ CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
   };
   T the_sma = 1; // Just to shut up warnings. Will not be used
   bool IsAssigned = false;
-  auto f_insert=[&](T const&input) -> void {
+  auto f_insert = [&](T const &input) -> void {
     T val = get_abs(input);
     if (val > 0) {
       if (!IsAssigned) {
@@ -373,7 +380,8 @@ CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
   for (int i = 0; i < n; i++)
     f_insert(V(i));
   if (!IsAssigned) {
-    std::cerr << "Failed to find a non-zero value for V, so impossible to canonicalize\n";
+    std::cerr << "Failed to find a non-zero value for V, so impossible to "
+                 "canonicalize\n";
     throw TerminalException{1};
   }
   MyVector<T> V2 = V / the_sma;
@@ -412,62 +420,65 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   return {TheMult, std::move(Vret)};
 }
 
-template<typename T>
-MyVector<typename underlying_ring<T>::ring_type> NonUniqueRescaleVecRing(MyVector<T> const& V) {
-  // It is non-unique because if we have V = (4, 6, 8) then we return (4, 6, 8) while for
-  // RemoveFraction it returns (2,3,4).
+template <typename T>
+MyVector<typename underlying_ring<T>::ring_type>
+NonUniqueRescaleVecRing(MyVector<T> const &V) {
+  // It is non-unique because if we have V = (4, 6, 8) then we return (4, 6, 8)
+  // while for RemoveFraction it returns (2,3,4).
   int n = V.size();
   using Tring = typename underlying_ring<T>::ring_type;
   std::vector<Tring> Lden(n);
-  for (int i=0; i<n; i++) {
+  for (int i = 0; i < n; i++) {
     Lden[i] = GetDenominator_z(V(i));
   }
   Tring scale = LCMlist(Lden);
   MyVector<Tring> Vret(n);
-  for (int i=0; i<n; i++) {
+  for (int i = 0; i < n; i++) {
     Vret(i) = (scale / Lden[i]) * GetNumerator_z(V(i));
   }
   return Vret;
 }
 
-template<typename T>
-MyMatrix<typename underlying_ring<T>::ring_type> NonUniqueRescaleRowsRing(MyMatrix<T> const& M) {
+template <typename T>
+MyMatrix<typename underlying_ring<T>::ring_type>
+NonUniqueRescaleRowsRing(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   using Tring = typename underlying_ring<T>::ring_type;
   MyMatrix<Tring> Mret(nbRow, nbCol);
   std::vector<Tring> dens(nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++) {
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      dens[iCol] = GetDenominator_z(M(iRow,iCol));
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      dens[iCol] = GetDenominator_z(M(iRow, iCol));
     }
     Tring scale = LCMlist(dens);
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      Mret(iRow,iCol) = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      Mret(iRow, iCol) = (scale / dens[iCol]) * GetNumerator_z(M(iRow, iCol));
     }
   }
   return Mret;
 }
 
-template<typename T>
-MyMatrix<typename underlying_ring<T>::ring_type> UniqueRescaleRowsRing(MyMatrix<T> const& M) {
+template <typename T>
+MyMatrix<typename underlying_ring<T>::ring_type>
+UniqueRescaleRowsRing(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   using Tring = typename underlying_ring<T>::ring_type;
   MyMatrix<Tring> Mret(nbRow, nbCol);
   std::vector<Tring> dens(nbCol), Vret(nbCol);
-  for (int iRow=0; iRow<nbRow; iRow++) {
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      dens[iCol] = GetDenominator_z(M(iRow,iCol));
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      dens[iCol] = GetDenominator_z(M(iRow, iCol));
     }
     Tring scale = LCMlist(dens);
-    for (int iCol=0; iCol<nbCol; iCol++) {
-      Vret[iCol] = (scale / dens[iCol]) * GetNumerator_z(M(iRow,iCol));
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      Vret[iCol] = (scale / dens[iCol]) * GetNumerator_z(M(iRow, iCol));
     }
     Tring eGCD = Vret[0];
-    for (int iCol=1; iCol<nbCol; iCol++)
+    for (int iCol = 1; iCol < nbCol; iCol++)
       eGCD = GcdPair(eGCD, Vret[iCol]);
-    for (int iCol=0; iCol<nbCol; iCol++) {
+    for (int iCol = 0; iCol < nbCol; iCol++) {
       Mret(iRow, iCol) = Vret[iCol] / eGCD;
     }
   }

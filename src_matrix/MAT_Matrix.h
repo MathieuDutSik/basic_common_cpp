@@ -147,11 +147,12 @@ MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const &M) {
 }
 
 template <typename T2, typename T1>
-std::vector<MyMatrix<T2>> UniversalStdVectorMatrixConversion(std::vector<MyMatrix<T1>> const &ListM) {
+std::vector<MyMatrix<T2>>
+UniversalStdVectorMatrixConversion(std::vector<MyMatrix<T1>> const &ListM) {
   size_t n_mat = ListM.size();
   std::vector<MyMatrix<T2>> ListM_ret(n_mat);
   for (size_t i_mat = 0; i_mat < n_mat; i_mat++)
-    ListM_ret[i_mat] = UniversalMatrixConversion<T2,T1>(ListM[i_mat]);
+    ListM_ret[i_mat] = UniversalMatrixConversion<T2, T1>(ListM[i_mat]);
   return ListM_ret;
 }
 
@@ -578,7 +579,6 @@ void WriteVectorGAP(std::ostream &os, MyVector<T> const &TheVec) {
   }
   os << " ]";
 }
-
 
 template <typename T>
 void WriteVectorFile(std::string const &eFile, MyVector<T> const &TheV) {
@@ -1217,7 +1217,8 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
 
 //
 template <typename T, typename F>
-MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol, size_t target_zero, F f) {
+MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol,
+                                        size_t target_zero, F f) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to be a field in NullspaceTrMat_Kernel");
   size_t target_rank = nbCol - target_zero;
@@ -1294,7 +1295,6 @@ MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol, size_t targe
   return NSP;
 }
 
-
 template <typename T, typename F>
 MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
   static_assert(is_ring_field<T>::value,
@@ -1357,7 +1357,7 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
   // The target was not achieved, we get a larger kernel than expected.
   // We select one vector and it has to be processed down the line
   MyVector<T> Vzero = ZeroVector<T>(nbCol);
-  auto set_vzero=[&]() -> void {
+  auto set_vzero = [&]() -> void {
     for (size_t iCol = 0; iCol < nbCol; iCol++) {
       if (ListColSelect01[iCol] == 0) {
         Vzero(iCol) = -1;
@@ -1372,9 +1372,6 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
   set_vzero();
   return Vzero;
 }
-
-
-
 
 template <typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
@@ -1588,26 +1585,25 @@ DeterminantMat(MyMatrix<T> const &Input) {
 // A significantly slower algorithm for computing the determinant.
 // It is good as a control for the above method and can also be used
 // for consistency checks of arithmetics.
-template <typename T>
-T DeterminantMatPermutation(MyMatrix<T> const& A) {
+template <typename T> T DeterminantMatPermutation(MyMatrix<T> const &A) {
   int n = A.rows();
   if (n == 0)
     return T(1);
   std::vector<int> s(n);
-  for (int i=0; i<n; i++)
+  for (int i = 0; i < n; i++)
     s[i] = i;
   T TheDet(0);
   do {
     T eProd(1);
-    for (int u=0; u<n; u++)
-      eProd *= A(u,s[u]);
+    for (int u = 0; u < n; u++)
+      eProd *= A(u, s[u]);
     int eSign = 1;
-    for (int i=0; i<n; i++)
-      for (int j=i+1; j<n; j++)
+    for (int i = 0; i < n; i++)
+      for (int j = i + 1; j < n; j++)
         if (s[j] < s[i])
           eSign = -eSign;
     TheDet += eSign * eProd;
-  } while(std::next_permutation(s.begin(), s.end()));
+  } while (std::next_permutation(s.begin(), s.end()));
   return TheDet;
 }
 
@@ -2679,8 +2675,8 @@ public:
     }
   }
   ContainerMatrix(MyMatrix<T> const &_mat)
-      : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()),
-        V1(n_cols), V2(n_cols) {
+      : mat(_mat), n_rows(mat.rows()), n_cols(mat.cols()), V1(n_cols),
+        V2(n_cols) {
     v_test = MyVector<T>(n_cols);
     std::function<size_t(size_t)> fct_hash = [&](size_t idx) -> size_t {
       set_v(V1, idx);
@@ -2709,13 +2705,12 @@ public:
     size_t idx = *iter;
     return idx;
   }
-  std::optional<size_t> GetIdx_v(MyVector<T> const& V) {
+  std::optional<size_t> GetIdx_v(MyVector<T> const &V) {
     v_test = V;
     return GetIdx();
   }
-  template<typename F>
-  std::optional<size_t> GetIdx_f(F f) {
-    for (size_t i=0; i<n_cols; i++) 
+  template <typename F> std::optional<size_t> GetIdx_f(F f) {
+    for (size_t i = 0; i < n_cols; i++)
       v_test(i) = f(i);
     return GetIdx();
   }
