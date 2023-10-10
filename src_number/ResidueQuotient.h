@@ -10,8 +10,7 @@
 
 // The number of bits in integer
 
-template<typename T>
-size_t get_bit_C(T const& a) {
+template <typename T> size_t get_bit_C(T const &a) {
   T val;
   if (a < 0) {
     val = -a;
@@ -19,25 +18,18 @@ size_t get_bit_C(T const& a) {
     val = a;
   }
   size_t targetlevel = 1;
-  while (val >>= 1) ++targetlevel;
+  while (val >>= 1)
+    ++targetlevel;
   return targetlevel;
 }
 
-inline size_t get_bit(int8_t const &a) {
-  return get_bit_C<int8_t>(a);
-}
+inline size_t get_bit(int8_t const &a) { return get_bit_C<int8_t>(a); }
 
-inline size_t get_bit(int16_t const &a) {
-  return get_bit_C<int16_t>(a);
-}
+inline size_t get_bit(int16_t const &a) { return get_bit_C<int16_t>(a); }
 
-inline size_t get_bit(int32_t const &a) {
-  return get_bit_C<int32_t>(a);
-}
+inline size_t get_bit(int32_t const &a) { return get_bit_C<int32_t>(a); }
 
-inline size_t get_bit(int64_t const &a) {
-  return get_bit_C<int64_t>(a);
-}
+inline size_t get_bit(int64_t const &a) { return get_bit_C<int64_t>(a); }
 
 // The remainder and quotient of integers
 
@@ -127,19 +119,19 @@ template <typename T> T QuoInt_Generic(T const &a, T const &b) {
   return (a - res) / b;
 }
 
-inline void QUO_INT(stc<int8_t> const &a, stc<int8_t> const &b, int8_t & q) {
+inline void QUO_INT(stc<int8_t> const &a, stc<int8_t> const &b, int8_t &q) {
   q = QuoInt_C_integer<int8_t>(a.val, b.val);
 }
 
-inline void QUO_INT(stc<int16_t> const &a, stc<int16_t> const &b, int16_t & q) {
+inline void QUO_INT(stc<int16_t> const &a, stc<int16_t> const &b, int16_t &q) {
   q = QuoInt_C_integer<int16_t>(a.val, b.val);
 }
 
-inline void QUO_INT(stc<int32_t> const &a, stc<int32_t> const &b, int32_t & q) {
+inline void QUO_INT(stc<int32_t> const &a, stc<int32_t> const &b, int32_t &q) {
   q = QuoInt_C_integer<int32_t>(a.val, b.val);
 }
 
-inline void QUO_INT(stc<int64_t> const &a, stc<int64_t> const &b, int64_t & q) {
+inline void QUO_INT(stc<int64_t> const &a, stc<int64_t> const &b, int64_t &q) {
   q = QuoInt_C_integer<int64_t>(a.val, b.val);
 }
 

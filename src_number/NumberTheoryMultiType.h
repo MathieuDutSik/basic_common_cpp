@@ -8,12 +8,8 @@
 #include "NumberTheoryQuadField.h"
 // clang-format on
 
-
-
-
-template<typename F, typename... Targs>
-void process_by_numeric_type(std::stirng const& arith, F f, Targs... args)
-{
+template <typename F, typename... Targs>
+void process_by_numeric_type(std::stirng const &arith, F f, Targs... args) {
   if (arith == "rational") {
     using T = mpq_class;
     return f<T>(args...);

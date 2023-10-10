@@ -15,9 +15,7 @@
 
 // get_bit
 
-size_t get_bit(mpz_class const& v) {
-  return mpz_sizeinbase(v.get_mpz_t(), 2);
-}
+size_t get_bit(mpz_class const &v) { return mpz_sizeinbase(v.get_mpz_t(), 2); }
 
 // The scheme for rank one reduction is some advanced scheme
 
@@ -293,9 +291,7 @@ inline mpz_class GetNumerator_z(mpq_class const &x) { return x.get_num(); }
 
 inline mpz_class GetDenominator_z(mpq_class const &x) { return x.get_den(); }
 
-inline mpz_class GetNumerator_z(mpz_class const &x) {
-  return x;
-}
+inline mpz_class GetNumerator_z(mpz_class const &x) { return x; }
 
 inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const &x) {
   return 1;
@@ -441,13 +437,13 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, mpz_class &a2) {
 
 // Conversion to mpz_class
 
-mpz_class convert_mpz_class_uint64_t(uint64_t const& val) {
+mpz_class convert_mpz_class_uint64_t(uint64_t const &val) {
   mpz_class ret = 0;
   uint64_t shift = 256;
   int32_t shift_i = 256;
   uint64_t work_val = val;
   mpz_class prod = 1;
-  while(true) {
+  while (true) {
     if (work_val == 0)
       return ret;
     uint64_t res = work_val % shift;
@@ -459,7 +455,7 @@ mpz_class convert_mpz_class_uint64_t(uint64_t const& val) {
   }
 }
 
-mpz_class convert_mpz_class_int64_t(int64_t const& val) {
+mpz_class convert_mpz_class_int64_t(int64_t const &val) {
   if (val > 0) {
     return convert_mpz_class_uint64_t(val);
   }
@@ -469,35 +465,55 @@ mpz_class convert_mpz_class_int64_t(int64_t const& val) {
 #ifdef __APPLE__
 // long as input (which is not the same as int64_t on APPLE platform)
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) {
+  a2 = convert_mpz_class_int64_t(a1.val);
+}
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) {
+  a2 = convert_mpz_class_int64_t(a1.val);
+}
 
 #endif
 
 // int64_t as input
 
-inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpq_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpq_class &a2) {
+  a2 = convert_mpz_class_int64_t(a1.val);
+}
 
-inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpz_class &a2) { a2 = convert_mpz_class_int64_t(a1.val); }
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpz_class &a2) {
+  a2 = convert_mpz_class_int64_t(a1.val);
+}
 
 // int32_t as input
 
-inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpq_class &a2) {
+  a2 = a1.val;
+}
 
-inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, mpz_class &a2) {
+  a2 = a1.val;
+}
 
 // int16_t as input
 
-inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpq_class &a2) {
+  a2 = a1.val;
+}
 
-inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, mpz_class &a2) {
+  a2 = a1.val;
+}
 
 // int8_t as input
 
-inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpq_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpq_class &a2) {
+  a2 = a1.val;
+}
 
-inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpz_class &a2) { a2 = a1.val; }
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, mpz_class &a2) {
+  a2 = a1.val;
+}
 
 // mpz_class as input
 

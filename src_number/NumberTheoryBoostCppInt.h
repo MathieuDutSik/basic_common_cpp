@@ -281,7 +281,8 @@ ResQuoInt_kernel(boost::multiprecision::cpp_rational const &a,
         q += sign;
       } else {
         if (res + q * b != a) {
-          std::cerr << "Error in ResQuoInt_kernel for boost::multiprecision::cpp_rational\n";
+          std::cerr << "Error in ResQuoInt_kernel for "
+                       "boost::multiprecision::cpp_rational\n";
           throw TerminalException{1};
         }
         return {res, q};
@@ -298,7 +299,7 @@ inline void ResInt_Kernel(boost::multiprecision::cpp_rational const &a,
 
 void QUO_INT(stc<boost::multiprecision::cpp_rational> const &a,
              stc<boost::multiprecision::cpp_rational> const &b,
-             boost::multiprecision::cpp_rational & q) {
+             boost::multiprecision::cpp_rational &q) {
   q = ResQuoInt_kernel(a.val, b.val).second;
 }
 
@@ -555,8 +556,8 @@ bool universal_square_root(boost::multiprecision::cpp_rational &ret,
   return true;
 }
 
-#include "TypeConversionFinal.h"
 #include "NumberTheoryGeneric.h"
+#include "TypeConversionFinal.h"
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYBOOSTCPPINT_H_

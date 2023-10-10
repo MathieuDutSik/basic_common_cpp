@@ -14,7 +14,7 @@ int main() {
   val2 = 5;
   T val = val1 / val2;
   std::cerr << "val=" << val << "\n";
-  Tint val_red = UniversalNearestScalarInteger<Tint,T>(val);
+  Tint val_red = UniversalNearestScalarInteger<Tint, T>(val);
   std::cerr << "val_red=" << val_red << "\n";
   //
   using Tlong = int64_t;

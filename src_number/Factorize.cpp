@@ -6,8 +6,7 @@
 #include "NumberTheorySafeInt.h"
 // clang-format on
 
-template<typename T>
-std::string test(std::string name_numeric) {
+template <typename T> std::string test(std::string name_numeric) {
   HumanTime time;
   std::stringstream os;
   for (int n = 1; n < 500; n++) {
@@ -23,12 +22,11 @@ std::string test(std::string name_numeric) {
       os << " " << val;
     os << "\n";
   }
-  std::cerr << "Result for numeric=" << name_numeric << " time=" << time << "\n";
+  std::cerr << "Result for numeric=" << name_numeric << " time=" << time
+            << "\n";
   std::string converted(os.str());
   return converted;
 }
-
-
 
 int main(int argc, char *argv[]) {
   SingletonTime time1;
@@ -41,7 +39,7 @@ int main(int argc, char *argv[]) {
       throw TerminalException{1};
     }
     std::string oper = argv[1];
-    auto eval=[&]() -> void {
+    auto eval = [&]() -> void {
       if (oper == "check") {
         std::unordered_map<std::string, std::string> map;
         map[test<mpz_class>("mpz_class")] = "mpz_class";

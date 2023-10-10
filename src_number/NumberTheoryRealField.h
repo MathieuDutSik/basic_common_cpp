@@ -291,7 +291,7 @@ public:
       }
     }
     std::cerr << "x =";
-    for (auto & eVal : x)
+    for (auto &eVal : x)
       std::cerr << " " << eVal;
     std::cerr << "\n";
     std::cerr << "Failed to find an approximant that allows to conclude, "
@@ -321,7 +321,6 @@ using Trat_real_field = boost::multiprecision::mpq_rational;
 #else
 using Trat_real_field = mpq_class;
 #endif
-
 
 std::map<int, HelperClassRealField<Trat_real_field>> list_helper;
 

@@ -16,7 +16,7 @@
 // clang-format on
 
 #define MAX_INT64_PROD 2147483647
-#define MAX_INT64_SUM  4611686018427387903
+#define MAX_INT64_SUM 4611686018427387903
 
 void check_prod_int64(int64_t val) {
   if (val > MAX_INT64_PROD || val < -MAX_INT64_PROD) {
@@ -46,8 +46,10 @@ void check_reasonableness(std::string oper, int64_t val) {
 struct SafeInt64 {
 public:
   using Tint = int64_t;
+
 private:
   Tint val;
+
 public:
   explicit SafeInt64() : val(0) {
 #ifdef CHECK_SAFETY_INTEGER
@@ -69,17 +71,15 @@ public:
     std::cerr << "SafeInt64 constructor for SafeInt64 val=" << x << "\n";
 #endif
   }
-  double get_d() const {
-    return static_cast<double>(val);
-  }
+  double get_d() const { return static_cast<double>(val); }
   // Assignment operators
   SafeInt64 operator=(SafeInt64 const &u) {
     // assignment operator from int
     val = u.val;
     return SafeInt64(val);
   }
-  Tint & get_val() { return val; }
-  const Tint & get_const_val() const { return val; }
+  Tint &get_val() { return val; }
+  const Tint &get_const_val() const { return val; }
   void operator+=(SafeInt64 const &x) {
     check_sum_int64(val);
     check_sum_int64(x.val);
@@ -190,8 +190,7 @@ public:
     check_reasonableness("operator*=()", val);
 #endif
   }
-  friend SafeInt64 operator*(SafeInt64 const &x,
-                             SafeInt64 const &y) {
+  friend SafeInt64 operator*(SafeInt64 const &x, SafeInt64 const &y) {
     check_prod_int64(x.val);
     check_prod_int64(y.val);
     SafeInt64 z;
@@ -201,8 +200,7 @@ public:
 #endif
     return z;
   }
-  friend SafeInt64 operator/(SafeInt64 const &x,
-                             SafeInt64 const &y) {
+  friend SafeInt64 operator/(SafeInt64 const &x, SafeInt64 const &y) {
     SafeInt64 z;
     z.val = x.val / y.val;
 #ifdef CHECK_SAFETY_INTEGER
@@ -210,8 +208,7 @@ public:
 #endif
     return z;
   }
-  friend SafeInt64 operator%(SafeInt64 const &x,
-                             SafeInt64 const &y) {
+  friend SafeInt64 operator%(SafeInt64 const &x, SafeInt64 const &y) {
     SafeInt64 z;
     z.val = x.val % y.val;
 #ifdef CHECK_SAFETY_INTEGER
@@ -296,25 +293,26 @@ public:
   }
 };
 
-inline void QUO_INT(stc<SafeInt64> const &a, stc<SafeInt64> const &b, SafeInt64 & q) {
+inline void QUO_INT(stc<SafeInt64> const &a, stc<SafeInt64> const &b,
+                    SafeInt64 &q) {
   using Tint = typename SafeInt64::Tint;
-  const Tint& a_int = a.val.get_const_val();
-  const Tint& b_int = b.val.get_const_val();
+  const Tint &a_int = a.val.get_const_val();
+  const Tint &b_int = b.val.get_const_val();
   Tint quot = QuoInt_C_integer<Tint>(a_int, b_int);
   q = SafeInt64(quot);
 }
 
-size_t get_bit(SafeInt64 const& x) {
-  int64_t const& val = x.get_const_val();
+size_t get_bit(SafeInt64 const &x) {
+  int64_t const &val = x.get_const_val();
   return get_bit(val);
 }
 
 #include "QuoIntFcts.h"
 
-void ResInt_Kernel(SafeInt64 const &a, SafeInt64 const &b, SafeInt64 & res) {
+void ResInt_Kernel(SafeInt64 const &a, SafeInt64 const &b, SafeInt64 &res) {
   using Tint = typename SafeInt64::Tint;
-  const Tint& a_int = a.get_const_val();
-  const Tint& b_int = b.get_const_val();
+  const Tint &a_int = a.get_const_val();
+  const Tint &b_int = b.get_const_val();
   res.get_val() = ResInt_C_integer<Tint>(a_int, b_int);
 }
 
@@ -399,52 +397,53 @@ struct underlying_totally_ordered_ring<int64_t> {
 // hash functionality
 
 namespace std {
-  // hash functionality
-  template <> struct hash<SafeInt64> {
-    std::size_t operator()(const SafeInt64 &val) const {
-      unsigned long int val_uli = val.get_const_val();
-      return val_uli;
-    }
-  };
-  template <> struct hash<Rational<SafeInt64>> {
-    std::size_t operator()(const Rational<SafeInt64> &val) const {
-      int64_t const& val_den = val.get_const_den().get_const_val();
-      int64_t const& val_num = val.get_const_num().get_const_val();
-      size_t hash1 = std::hash<int64_t>()(val_den);
-      size_t hash2 = std::hash<int64_t>()(val_num);
-      return hash1 + (hash2 << 6) + (hash2 >> 2);
-    }
-  };
-  // to_string functionality
-  std::string to_string(const SafeInt64 &val) {
-    std::stringstream s;
-    s << val;
-    std::string converted(s.str());
-    return converted;
+// hash functionality
+template <> struct hash<SafeInt64> {
+  std::size_t operator()(const SafeInt64 &val) const {
+    unsigned long int val_uli = val.get_const_val();
+    return val_uli;
   }
-  std::string to_string(const Rational<SafeInt64> &val) {
-    int64_t const& val_den = val.get_const_den().get_const_val();
-    int64_t const& val_num = val.get_const_num().get_const_val();
-    std::stringstream s;
-    if (val_den != 1) {
-      s << val_num << "/" << val_den;
-    } else {
-      s << val_num;
-    }
-    std::string converted(s.str());
-    return converted;
+};
+template <> struct hash<Rational<SafeInt64>> {
+  std::size_t operator()(const Rational<SafeInt64> &val) const {
+    int64_t const &val_den = val.get_const_den().get_const_val();
+    int64_t const &val_num = val.get_const_num().get_const_val();
+    size_t hash1 = std::hash<int64_t>()(val_den);
+    size_t hash2 = std::hash<int64_t>()(val_num);
+    return hash1 + (hash2 << 6) + (hash2 >> 2);
   }
+};
+// to_string functionality
+std::string to_string(const SafeInt64 &val) {
+  std::stringstream s;
+  s << val;
+  std::string converted(s.str());
+  return converted;
+}
+std::string to_string(const Rational<SafeInt64> &val) {
+  int64_t const &val_den = val.get_const_den().get_const_val();
+  int64_t const &val_num = val.get_const_num().get_const_val();
+  std::stringstream s;
+  if (val_den != 1) {
+    s << val_num << "/" << val_den;
+  } else {
+    s << val_num;
+  }
+  std::string converted(s.str());
+  return converted;
+}
 // clang-format off
 }  // namespace std
 // clang-format on
 
 //
-inline void ResInt_Kernel(Rational<SafeInt64> const &a, Rational<SafeInt64> const &b,
+inline void ResInt_Kernel(Rational<SafeInt64> const &a,
+                          Rational<SafeInt64> const &b,
                           Rational<SafeInt64> &res) {
-  SafeInt64 const& a_den = a.get_const_den();
-  SafeInt64 const& b_den = b.get_const_den();
-  SafeInt64 const& a_num = a.get_const_num();
-  SafeInt64 const& b_num = b.get_const_num();
+  SafeInt64 const &a_den = a.get_const_den();
+  SafeInt64 const &b_den = b.get_const_den();
+  SafeInt64 const &a_num = a.get_const_num();
+  SafeInt64 const &b_num = b.get_const_num();
   SafeInt64 gcd = KernelGcdPair(a_den, b_den);
   SafeInt64 a_mul = a_num * (b_den / gcd);
   SafeInt64 b_mul = b_num * (a_den / gcd);
@@ -460,23 +459,26 @@ inline SafeInt64 CanonicalizationUnit(SafeInt64 const &eVal) {
   return 1;
 }
 
-inline Rational<SafeInt64> CanonicalizationUnit(Rational<SafeInt64> const &eVal) {
+inline Rational<SafeInt64>
+CanonicalizationUnit(Rational<SafeInt64> const &eVal) {
   if (eVal < 0)
     return Rational<SafeInt64>(-1);
   return Rational<SafeInt64>(1);
 }
 
-inline Rational<SafeInt64> T_NormGen(Rational<SafeInt64> const &x) { return T_abs(x); }
+inline Rational<SafeInt64> T_NormGen(Rational<SafeInt64> const &x) {
+  return T_abs(x);
+}
 
 inline SafeInt64 T_NormGen(SafeInt64 const &x) { return T_abs(x); }
 
 inline bool IsInteger(Rational<SafeInt64> const &x) {
-  int64_t const& val = x.get_const_den().get_const_val();
+  int64_t const &val = x.get_const_den().get_const_val();
   return val == 1;
 }
 
 inline Rational<SafeInt64> GetDenominator(Rational<SafeInt64> const &x) {
-  SafeInt64 const& eDen = x.get_const_den();
+  SafeInt64 const &eDen = x.get_const_den();
   return Rational(eDen);
 }
 
@@ -488,19 +490,22 @@ inline SafeInt64 GetDenominator([[maybe_unused]] SafeInt64 const &x) {
   return 1;
 }
 
-inline SafeInt64 GetNumerator_z(Rational<SafeInt64> const &x) { return x.get_const_num(); }
-
-inline SafeInt64 GetDenominator_z(Rational<SafeInt64> const &x) { return x.get_const_den(); }
-
-inline SafeInt64 GetNumerator_z(SafeInt64 const &x) {
-  return x;
+inline SafeInt64 GetNumerator_z(Rational<SafeInt64> const &x) {
+  return x.get_const_num();
 }
+
+inline SafeInt64 GetDenominator_z(Rational<SafeInt64> const &x) {
+  return x.get_const_den();
+}
+
+inline SafeInt64 GetNumerator_z(SafeInt64 const &x) { return x; }
 
 inline SafeInt64 GetDenominator_z([[maybe_unused]] SafeInt64 const &x) {
   return 1;
 }
 
-inline void ScalingInteger_Kernel(stc<Rational<SafeInt64>> const &x, SafeInt64 &x_ret) {
+inline void ScalingInteger_Kernel(stc<Rational<SafeInt64>> const &x,
+                                  SafeInt64 &x_ret) {
   x_ret = x.val.get_const_den();
 }
 
@@ -511,13 +516,14 @@ inline void ScalingInteger_Kernel([[maybe_unused]] stc<SafeInt64> const &x,
 
 // Rational<SafeInt64> as input
 
-inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, Rational<SafeInt64> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1,
+                            Rational<SafeInt64> &a2) {
   a2 = a1.val;
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, double &a2) {
-  int64_t const& val_den = a1.val.get_const_den().get_const_val();
-  int64_t const& val_num = a1.val.get_const_num().get_const_val();
+  int64_t const &val_den = a1.val.get_const_den().get_const_val();
+  int64_t const &val_num = a1.val.get_const_num().get_const_val();
   double val_den_d = static_cast<double>(val_den);
   double val_num_d = static_cast<double>(val_num);
   a2 = val_num_d / val_den_d;
@@ -726,17 +732,17 @@ inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, Rational<SafeInt64> &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int16_t &a2) {
-  int64_t const& eVal = a1.val.get_const_val();
+  int64_t const &eVal = a1.val.get_const_val();
   a2 = static_cast<int16_t>(eVal);
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int32_t &a2) {
-  int64_t const& eVal = a1.val.get_const_val();
+  int64_t const &eVal = a1.val.get_const_val();
   a2 = static_cast<int32_t>(eVal);
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int64_t &a2) {
-  int64_t const& eVal = a1.val.get_const_val();
+  int64_t const &eVal = a1.val.get_const_val();
   a2 = static_cast<int64_t>(eVal);
 }
 
@@ -745,7 +751,7 @@ inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, double &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, T_uint64_t &a2) {
-  int64_t const& eVal = a1.val.get_const_val();
+  int64_t const &eVal = a1.val.get_const_val();
   a2 = static_cast<T_uint64_t>(eVal);
 }
 
@@ -755,13 +761,15 @@ inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, SafeInt64 &a2) {
   a2 = SafeInt64(val2);
 }
 
-inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1,
+                            T_uint64_t &a2) {
   Termination_rat_safeint_not_integer(a1);
   SafeInt64 a1_z = a1.val.get_const_num();
   a2 = static_cast<T_uint64_t>(a1_z.get_const_val());
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, Rational<SafeInt64> &a2) {
+inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1,
+                            Rational<SafeInt64> &a2) {
   T_uint64_t const &val1 = a1.val;
   int64_t val2 = static_cast<int64_t>(val1);
   SafeInt64 val3(val2);
@@ -769,7 +777,7 @@ inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, Rational<SafeInt64> &a2) 
 }
 
 bool universal_square_root(SafeInt64 &ret, SafeInt64 const &val) {
-  int64_t const& val_i = val.get_const_val();
+  int64_t const &val_i = val.get_const_val();
   if (val_i < 0) {
     return false;
   }
@@ -781,9 +789,10 @@ bool universal_square_root(SafeInt64 &ret, SafeInt64 const &val) {
   return eProd == val;
 }
 
-bool universal_square_root(Rational<SafeInt64> &ret, Rational<SafeInt64> const &val) {
-  SafeInt64 const& val_num = val.get_const_num();
-  SafeInt64 const& val_den = val.get_const_den();
+bool universal_square_root(Rational<SafeInt64> &ret,
+                           Rational<SafeInt64> const &val) {
+  SafeInt64 const &val_num = val.get_const_num();
+  SafeInt64 const &val_den = val.get_const_den();
   SafeInt64 ret_num, ret_den;
   if (!universal_square_root(ret_num, val_num))
     return false;
@@ -803,8 +812,8 @@ inline void set_to_infinity(Rational<SafeInt64> &x) {
 // Nearest integer and similar stuff.
 //
 inline Rational<SafeInt64> FractionalPart(Rational<SafeInt64> const &x) {
-  SafeInt64 const& eNum = x.get_const_num();
-  SafeInt64 const& eDen = x.get_const_den();
+  SafeInt64 const &eNum = x.get_const_num();
+  SafeInt64 const &eDen = x.get_const_den();
   SafeInt64 r(0);
   ResInt_Kernel(eNum, eDen, r);
   return Rational(r, eDen);
@@ -822,7 +831,8 @@ inline Rational<SafeInt64> Ceil_safe_rat(Rational<SafeInt64> const &x) {
   return 1 + x - eFrac;
 }
 
-inline void FloorInteger(Rational<SafeInt64> const &xI, Rational<SafeInt64> &xO) {
+inline void FloorInteger(Rational<SafeInt64> const &xI,
+                         Rational<SafeInt64> &xO) {
   xO = Floor_safe_rat(xI);
 }
 
@@ -841,7 +851,8 @@ inline void FloorInteger(Rational<SafeInt64> const &xI, long &xO) {
   xO = static_cast<long>(xO_q.get_const_num().get_const_val());
 }
 
-inline void CeilInteger(Rational<SafeInt64> const &xI, Rational<SafeInt64> &xO) {
+inline void CeilInteger(Rational<SafeInt64> const &xI,
+                        Rational<SafeInt64> &xO) {
   xO = Ceil_safe_rat(xI);
 }
 
@@ -874,7 +885,8 @@ inline Rational<SafeInt64> NearestInteger_rni(Rational<SafeInt64> const &x) {
   }
 }
 
-inline void NearestInteger(Rational<SafeInt64> const &xI, Rational<SafeInt64> &xO) {
+inline void NearestInteger(Rational<SafeInt64> const &xI,
+                           Rational<SafeInt64> &xO) {
   xO = NearestInteger_rni(xI);
 }
 

@@ -219,7 +219,7 @@ inline void ResInt_Kernel(boost::multiprecision::mpz_int const &a,
 
 void QUO_INT(stc<boost::multiprecision::mpz_int> const &a,
              stc<boost::multiprecision::mpz_int> const &b,
-             boost::multiprecision::mpz_int & q) {
+             boost::multiprecision::mpz_int &q) {
   q = a.val / b.val;
   if (a.val < 0 && b.val * q != a.val) {
     if (b.val > 0)
@@ -270,7 +270,8 @@ ResQuoInt_kernel(boost::multiprecision::mpq_rational const &a,
         q += sign;
       } else {
         if (res + q * b != a) {
-          std::cerr << "Error in ResQuoInt_kernel for boost::multiprecision::mpq_rational\n";
+          std::cerr << "Error in ResQuoInt_kernel for "
+                       "boost::multiprecision::mpq_rational\n";
           throw TerminalException{1};
         }
         return {res, q};
@@ -286,7 +287,7 @@ inline void ResInt_Kernel(boost::multiprecision::mpq_rational const &a,
 
 void QUO_INT(stc<boost::multiprecision::mpq_rational> const &a,
              stc<boost::multiprecision::mpq_rational> const &b,
-             boost::multiprecision::mpq_rational & q) {
+             boost::multiprecision::mpq_rational &q) {
   q = ResQuoInt_kernel(a.val, b.val).second;
 }
 
@@ -543,8 +544,8 @@ bool universal_square_root(boost::multiprecision::mpq_rational &ret,
   return true;
 }
 
-#include "TypeConversionFinal.h"
 #include "NumberTheoryGeneric.h"
+#include "TypeConversionFinal.h"
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYBOOSTGMPINT_H_

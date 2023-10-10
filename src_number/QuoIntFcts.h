@@ -7,8 +7,7 @@
 #include <iostream>
 // clang-format on
 
-template <typename T>
-T QuoInt(T const &a, T const& b) {
+template <typename T> T QuoInt(T const &a, T const &b) {
   T ret;
   try {
     stc<T> stc_a{a};
@@ -20,8 +19,6 @@ T QuoInt(T const &a, T const& b) {
   }
   return ret;
 }
-
-
 
 // clang-format off
 #endif  // SRC_NUMBER_QUOINTFCTS_H_

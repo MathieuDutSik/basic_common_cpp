@@ -8,8 +8,9 @@
 #include <iostream>
 // clang-format on
 
-template<typename T>
-void WriteVectorFromRealAlgebraicString(std::ostream& os, std::vector<T> const& V) {
+template <typename T>
+void WriteVectorFromRealAlgebraicString(std::ostream &os,
+                                        std::vector<T> const &V) {
   bool DoSomething = false;
   bool is_first = true;
   for (size_t u = 0; u < V.size(); u++) {
@@ -47,9 +48,9 @@ void WriteVectorFromRealAlgebraicString(std::ostream& os, std::vector<T> const& 
   }
 }
 
-
-template<typename T>
-std::vector<T> ReadVectorFromRealAlgebraicString(std::istream& is, size_t const& deg) {
+template <typename T>
+std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
+                                                 size_t const &deg) {
   char c;
   std::string s;
   // First skipping the spaces
@@ -71,7 +72,7 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream& is, size_t const&
       break;
     }
     if (c == ' ' || c == '\n') {
-        break;
+      break;
     }
     s += c;
   }
@@ -97,7 +98,7 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream& is, size_t const&
     std::string s1 = s_expo.substr(0, 2);
     if (s1 != "x^") {
       std::cerr << "We should have an expression of the form x^n with n the "
-        "exponent\n";
+                   "exponent\n";
       std::cerr << "s_expo=" << s_expo << " s1=" << s1 << "\n";
       throw TerminalException{1};
     }
@@ -114,14 +115,14 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream& is, size_t const&
         return {eval_coef(s_coef), eval_expo(s_expo)};
       }
     }
-    if (sb.substr(0,1) == "x") {
+    if (sb.substr(0, 1) == "x") {
       return {1, eval_expo(sb)};
     }
-    if (sb.substr(0,2) == "-x") {
-      return {-1, eval_expo(sb.substr(1,lenb-1))};
+    if (sb.substr(0, 2) == "-x") {
+      return {-1, eval_expo(sb.substr(1, lenb - 1))};
     }
-    if (sb.substr(0,2) == "+x") {
-      return {1, eval_expo(sb.substr(1,lenb-1))};
+    if (sb.substr(0, 2) == "+x") {
+      return {1, eval_expo(sb.substr(1, lenb - 1))};
     }
     return {eval_coef(sb), 0};
   };

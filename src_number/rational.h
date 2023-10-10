@@ -15,7 +15,6 @@
 #include <utility>
 // clang-format on
 
-
 /*
   A rational class supposed to build integers.
   Typical use would be for example Rational<long> which should be pretty fast.
@@ -71,20 +70,22 @@ private:
     num = num / gcd;
     den = den / gcd;
   }
-  void check(std::string const& str_test) const {
+  void check(std::string const &str_test) const {
     if (den < 0) {
       std::cerr << "Error occurred at " << str_test << "\n";
       std::cerr << "num=" << num << " den=" << den << "\n";
       throw TerminalException{1};
     }
   }
-  static void check_static(Rational<Tint> const& x, std::string const& str_test) {
+  static void check_static(Rational<Tint> const &x,
+                           std::string const &str_test) {
     if (x.den < 0) {
       std::cerr << "Error occurred at " << str_test << "\n";
       std::cerr << "x.num=" << x.num << " x.den=" << x.den << "\n";
       throw TerminalException{1};
     }
   }
+
 public:
   void operator/=(Rational<Tint> const &x) {
     if (x.num > 0) {
@@ -443,7 +444,8 @@ inline void ResInt_Kernel(Rational<Tint> const &a, Rational<Tint> const &b,
 }
 
 template <typename Tint>
-inline void QUO_INT(stc<Rational<Tint>> const &a, stc<Rational<Tint>> const &b, Rational<Tint> & q) {
+inline void QUO_INT(stc<Rational<Tint>> const &a, stc<Rational<Tint>> const &b,
+                    Rational<Tint> &q) {
   q = ResQuoInt_kernel(a.val, b.val).second;
 }
 
@@ -514,7 +516,8 @@ void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
 
 // The conversion tools (int8_t)
 
-inline void TYPE_CONVERSION(stc<Rational<int8_t>> const &a1, Rational<int8_t> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<int8_t>> const &a1,
+                            Rational<int8_t> &a2) {
   a2 = a1.val;
 }
 
@@ -528,7 +531,8 @@ inline void TYPE_CONVERSION(stc<int8_t> const &a1, Rational<int8_t> &a2) {
 
 // The conversion tools (int16_t)
 
-inline void TYPE_CONVERSION(stc<Rational<int16_t>> const &a1, Rational<int16_t> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<int16_t>> const &a1,
+                            Rational<int16_t> &a2) {
   a2 = a1.val;
 }
 
@@ -542,7 +546,8 @@ inline void TYPE_CONVERSION(stc<int16_t> const &a1, Rational<int16_t> &a2) {
 
 // The conversion tools (int32_t)
 
-inline void TYPE_CONVERSION(stc<Rational<int32_t>> const &a1, Rational<int32_t> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<int32_t>> const &a1,
+                            Rational<int32_t> &a2) {
   a2 = a1.val;
 }
 
@@ -556,7 +561,8 @@ inline void TYPE_CONVERSION(stc<int32_t> const &a1, Rational<int32_t> &a2) {
 
 // The conversion tools (int64_t)
 
-inline void TYPE_CONVERSION(stc<Rational<int64_t>> const &a1, Rational<int64_t> &a2) {
+inline void TYPE_CONVERSION(stc<Rational<int64_t>> const &a1,
+                            Rational<int64_t> &a2) {
   a2 = a1.val;
 }
 

@@ -387,11 +387,12 @@ std::optional<T1> UniversalScalarConversionCheck(T2 const &a) {
   return ret;
 }
 
-template <typename T1, typename T2> std::vector<T1> UniversalStdVectorScalarConversion(std::vector<T2> const &V) {
+template <typename T1, typename T2>
+std::vector<T1> UniversalStdVectorScalarConversion(std::vector<T2> const &V) {
   size_t len = V.size();
   std::vector<T1> V_ret(len);
-  for (size_t i=0; i<len; i++) {
-    V_ret[i] = UniversalScalarConversion<T1,T2>(V[i]);
+  for (size_t i = 0; i < len; i++) {
+    V_ret[i] = UniversalScalarConversion<T1, T2>(V[i]);
   }
   return V_ret;
 }
