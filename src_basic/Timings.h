@@ -25,22 +25,27 @@ std::chrono::time_point<std::chrono::system_clock> end_of_time;
 
 void set_of_time(int runtime) {
   if (runtime < 0) {
-    end_of_time = get_cpp_time(1,1,2060);
+    end_of_time = get_cpp_time(1, 1, 2060);
   } else {
-    std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
+    std::chrono::time_point<std::chrono::system_clock> time =
+        std::chrono::system_clock::now();
     std::chrono::duration dur = std::chrono::seconds(runtime);
     end_of_time = time + dur;
   }
 }
 
 int64_t seconds_till_end_of_time() {
-  std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
-  int64_t dur = std::chrono::duration_cast<std::chrono::seconds>(end_of_time - time).count();
+  std::chrono::time_point<std::chrono::system_clock> time =
+      std::chrono::system_clock::now();
+  int64_t dur =
+      std::chrono::duration_cast<std::chrono::seconds>(end_of_time - time)
+          .count();
   return dur;
 }
 
 bool pass_end_of_time() {
-  std::chrono::time_point<std::chrono::system_clock> time = std::chrono::system_clock::now();
+  std::chrono::time_point<std::chrono::system_clock> time =
+      std::chrono::system_clock::now();
   if (time > end_of_time)
     return true;
   return false;
@@ -127,8 +132,7 @@ struct SingletonTimeInc {
 
 // The TimeEval
 
-template<typename T>
-struct TimeEval {
+template <typename T> struct TimeEval {
   std::chrono::time_point<std::chrono::system_clock> time;
   TimeEval() { time = std::chrono::system_clock::now(); }
   int64_t const_eval_int64() const {
@@ -145,7 +149,7 @@ struct TimeEval {
   }
 };
 
-template<typename T>
+template <typename T>
 std::ostream &operator<<(std::ostream &os, TimeEval<T> &x) {
   os << x.eval();
   return os;
@@ -159,8 +163,6 @@ using MicrosecondTime = TimeEval<std::chrono::microseconds>;
 using NanosecondTime = TimeEval<std::chrono::nanoseconds>;
 
 // The HumanTime
-
-
 
 std::string nanoseconds_as_string(int64_t delta) {
   int64_t one_microsecond = 1000;
@@ -227,22 +229,24 @@ std::string nanoseconds_as_string(int64_t delta) {
   return reply;
 }
 
-
-
 struct HumanTime {
   std::chrono::time_point<std::chrono::system_clock> time;
   HumanTime() { time = std::chrono::system_clock::now(); }
   std::string eval() {
     std::chrono::time_point<std::chrono::system_clock> timeNew =
         std::chrono::system_clock::now();
-    int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time).count();
+    int64_t delta =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time)
+            .count();
     time = timeNew;
     return nanoseconds_as_string(delta);
   }
   std::string const_eval() const {
     std::chrono::time_point<std::chrono::system_clock> timeNew =
-      std::chrono::system_clock::now();
-    int64_t delta = std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time).count();
+        std::chrono::system_clock::now();
+    int64_t delta =
+        std::chrono::duration_cast<std::chrono::nanoseconds>(timeNew - time)
+            .count();
     return nanoseconds_as_string(delta);
   }
 };
@@ -252,9 +256,7 @@ std::ostream &operator<<(std::ostream &os, HumanTime &x) {
   return os;
 }
 
-void runtime(HumanTime & time) {
-  std::cerr << "runtime = " << time << "\n";
-}
+void runtime(HumanTime &time) { std::cerr << "runtime = " << time << "\n"; }
 
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_

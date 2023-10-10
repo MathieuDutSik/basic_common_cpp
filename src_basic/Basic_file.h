@@ -33,9 +33,9 @@ bool IsExistingFile(std::string const &eFile) {
   }
 }
 
-std::string FindAvailableFileFromPrefix(std::string const& prefix) {
+std::string FindAvailableFileFromPrefix(std::string const &prefix) {
   size_t iFile = 0;
-  while(true) {
+  while (true) {
     std::string FullFile = prefix + std::to_string(iFile);
     if (!IsExistingFile(FullFile)) {
       return FullFile;
@@ -470,7 +470,8 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
   std::string eOrder = "ls " + ThePrefix + " > " + TmpFile + " 2> " + ErrFile;
   int iret = system(eOrder.c_str());
   std::cerr << "iret=" << iret << "\n";
-  // The iret appears not to be a reliable way to determine the success of an operation
+  // The iret appears not to be a reliable way to determine the success of an
+  // operation
   /*
   if (iret != -1) {
     std::cerr << "Error in ls_operation\n";

@@ -109,7 +109,7 @@ private:
 
   void original_length_bits_to_m_array(std::uint64_t original_length_bits) {
     original_length_bits &= 0xffffffffffffffff;
-    *m_array_first_++ = (original_length_bits)&0x00000000ffffffff;
+    *m_array_first_++ = (original_length_bits) & 0x00000000ffffffff;
     *m_array_first_++ = (original_length_bits & 0xffffffff00000000) >> 32;
   }
 

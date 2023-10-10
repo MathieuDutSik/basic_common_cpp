@@ -36,10 +36,10 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <thread>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
-#include <thread>
 
 // Functional code
 
@@ -96,7 +96,7 @@ unsigned get_random_pid_seed() {
   // even though the pid is going to be a normal integer. So, instead
   // we use the hash.
   std::thread::id this_id = std::this_thread::get_id();
-  size_t hash =	std::hash<std::thread::id>()(this_id);
+  size_t hash = std::hash<std::thread::id>()(this_id);
   return static_cast<unsigned>(hash);
 }
 
@@ -111,7 +111,7 @@ void srand_random_set() {
   srand(val);
 }
 
-std::string random_string_kernel(std::string const& strChoice, size_t length) {
+std::string random_string_kernel(std::string const &strChoice, size_t length) {
   const size_t n_index = strChoice.size();
   auto randchar = [&]() -> char {
     size_t pos = size_t(random()) % n_index;
@@ -123,7 +123,8 @@ std::string random_string_kernel(std::string const& strChoice, size_t length) {
 }
 
 std::string random_string(size_t length) {
-  std::string strChoice = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  std::string strChoice =
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   return random_string_kernel(strChoice, length);
 }
 
