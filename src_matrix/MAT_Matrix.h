@@ -6,6 +6,7 @@
 // http://eigen.tuxfamily.org/dox/AsciiQuickReference.txt
 //
 
+// clang-format off
 #include "Basic_file.h"
 #include "Basic_string.h"
 #include "MatrixTypes.h"
@@ -20,6 +21,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+// clang-format on
 
 template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;

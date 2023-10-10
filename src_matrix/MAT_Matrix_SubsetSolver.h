@@ -2,9 +2,11 @@
 #ifndef SRC_MATRIX_MAT_MATRIX_FP_H_
 #define SRC_MATRIX_MAT_MATRIX_FP_H_
 
+// clang-format off
 #include "MAT_MatrixInt.h"
 #include "Boost_bitset.h"
 #include "Fp.h"
+// clang-format on
 
 template<typename T>
 struct SubsetRankOneSolver_Field {

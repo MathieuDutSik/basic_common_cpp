@@ -2,10 +2,12 @@
 #ifndef SRC_MATRIX_MATRIXTYPES_H_
 #define SRC_MATRIX_MATRIXTYPES_H_
 
+// clang-format off
 #include <Eigen/Dense>
 #include <Eigen/Eigenvalues>
 #include <Eigen/LU>
 #include <Eigen/Sparse>
+// clang-format on
 
 #if defined INCLUDE_NUMBER_THEORY_BOOST_GMP_INT ||                             \
     defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT

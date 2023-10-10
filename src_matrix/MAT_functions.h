@@ -2,8 +2,10 @@
 #ifndef SRC_MATRIX_MAT_FUNCTIONS_H_
 #define SRC_MATRIX_MAT_FUNCTIONS_H_
 
+// clang-format off
 #include "MAT_Matrix.h"
 #include <set>
+// clang-format on
 
 //
 // This routine is adequate for simplifying systems used

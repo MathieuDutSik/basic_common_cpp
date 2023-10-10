@@ -2,9 +2,11 @@
 #ifndef SRC_MATRIX_MAT_MATRIXFLT_H_
 #define SRC_MATRIX_MAT_MATRIXFLT_H_
 
+// clang-format off
 #include <stdio.h>
 #include <stdlib.h>
 #include <vector>
+// clang-format on
 
 template <typename T> int jacobi_kernel(T **a, int n, T *d, T **v) {
   auto ROTATE = [](T **a, int const &i, int const &j, int const &k,

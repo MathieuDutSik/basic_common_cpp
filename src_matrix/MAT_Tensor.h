@@ -2,9 +2,10 @@
 #ifndef SRC_MATRIX_MAT_TENSOR_H_
 #define SRC_MATRIX_MAT_TENSOR_H_
 
+// clang-format off
 #include "MAT_Matrix.h"
-
 #include <unsupported/Eigen/CXX11/Tensor>
+// clang-format on
 
 template <typename T>
 MyMatrix<T> DimensionExtraction(Eigen::Tensor<T, 3> const &eT,

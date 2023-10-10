@@ -2,8 +2,10 @@
 #ifndef SRC_MATRIX_MAT_MATRIXMOD_H_
 #define SRC_MATRIX_MAT_MATRIXMOD_H_
 
+// clang-format off
 #include "MAT_MatrixInt.h"
 #include <vector>
+// clang-format on
 
 template <typename T, typename Tmod>
 MyMatrix<Tmod> ModuloReductionMatrix(MyMatrix<T> const &M, T const &TheMod) {

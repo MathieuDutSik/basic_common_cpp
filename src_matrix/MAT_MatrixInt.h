@@ -2,6 +2,7 @@
 #ifndef SRC_MATRIX_MAT_MATRIXINT_H_
 #define SRC_MATRIX_MAT_MATRIXINT_H_
 
+// clang-format off
 #include "Boost_bitset.h"
 #include "MAT_Matrix.h"
 #include <algorithm>
@@ -9,6 +10,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+// clang-format on
 
 //  #undef TRACK_MAXIMUM_SIZE_COEFF
 //  #undef DEBUG_MATRIX_INT
