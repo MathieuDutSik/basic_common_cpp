@@ -8,15 +8,13 @@
 #include "MAT_Matrix.h"
 // clang-format on
 
-
-template<typename T>
-std::string full_process_type(MyMatrix<int> const& M) {
+template <typename T> std::string full_process_type(MyMatrix<int> const &M) {
   int n_row = M.rows();
   int n_col = M.cols();
-  MyMatrix<T> M_T(n_row,n_col);
-  for (int i=0; i<n_row; i++) {
-    for (int j=0; j<n_col; j++) {
-      M_T(i,j) = M(i,j);
+  MyMatrix<T> M_T(n_row, n_col);
+  for (int i = 0; i < n_row; i++) {
+    for (int j = 0; j < n_col; j++) {
+      M_T(i, j) = M(i, j);
     }
   }
   //  MyMatrix<T> M_T = UniversalMatrixConversion<T,int>(M);
@@ -28,8 +26,7 @@ std::string full_process_type(MyMatrix<int> const& M) {
   return converted;
 }
 
-
-std::string process(std::string const& arith, MyMatrix<int> const& M) {
+std::string process(std::string const &arith, MyMatrix<int> const &M) {
   /*
   if (arith == "Fp") {
     using T = Fp<long, 2147389441>;
@@ -59,7 +56,7 @@ std::string process(std::string const& arith, MyMatrix<int> const& M) {
     return full_process_type<T>(M);
   }
   std::optional<std::string> opt_realalgebraic =
-    get_postfix(arith, "RealAlgebraic=");
+      get_postfix(arith, "RealAlgebraic=");
   if (opt_realalgebraic) {
     std::string const &FileAlgebraicField = *opt_realalgebraic;
     if (!IsExistingFile(FileAlgebraicField)) {
@@ -78,20 +75,21 @@ std::string process(std::string const& arith, MyMatrix<int> const& M) {
   throw TerminalException{1};
 }
 
-
-void process_listm_listarith(std::vector<MyMatrix<int>> const& ListM, std::vector<std::string> const& ListArith) {
-  for (auto & eM : ListM) {
+void process_listm_listarith(std::vector<MyMatrix<int>> const &ListM,
+                             std::vector<std::string> const &ListArith) {
+  for (auto &eM : ListM) {
     std::unordered_map<std::string, std::vector<std::string>> map;
     std::cerr << "|eM|=" << eM.rows() << " / " << eM.cols() << "\n";
-    for (auto & arith : ListArith) {
+    for (auto &arith : ListArith) {
       std::string e_str = process(arith, eM);
       map[e_str].push_back(arith);
     }
     if (map.size() != 1) {
-      std::cerr << "inconsistency in the computation |map|=" << map.size() << "\n";
-      for (auto & kv : map) {
+      std::cerr << "inconsistency in the computation |map|=" << map.size()
+                << "\n";
+      for (auto &kv : map) {
         std::cerr << "Result=" << kv.first << " for arithmetics =";
-        for (auto & arith : kv.second)
+        for (auto &arith : kv.second)
           std::cerr << " " << arith;
         std::cerr << "\n";
       }
@@ -99,43 +97,43 @@ void process_listm_listarith(std::vector<MyMatrix<int>> const& ListM, std::vecto
   }
   for (auto arith : ListArith) {
     HumanTime time;
-    for (auto & eM : ListM)
+    for (auto &eM : ListM)
       process(arith, eM);
-    std::cerr << "Result for arithmetic arith=" << arith << " time=" << time << "\n";
+    std::cerr << "Result for arithmetic arith=" << arith << " time=" << time
+              << "\n";
   }
 }
 
-
 MyMatrix<int> get_random_matrix(int m, int n) {
   MyMatrix<int> M(m, n);
-  for (int i=0; i<m; i++) {
-    for (int j=0; j<n; j++) {
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++) {
       int val = rand() % 11 - 5;
-      M(i,j) = val;
+      M(i, j) = val;
     }
   }
   return M;
 }
 
-
-
 int main(int argc, char *argv[]) {
   SingletonTime time1;
   try {
-    //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>", "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
-    std::vector<std::string> ListArith = {"rational<SafeInt64>", "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
-
+    //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>",
+    //    "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
+    std::vector<std::string> ListArith = {"rational<SafeInt64>",
+                                          "rational<long>", "rational",
+                                          "Qsqrt5", "Qsqrt2"};
 
     std::vector<MyMatrix<int>> ListM;
-    auto insert=[&](int m, int n) -> void {
-      ListM.push_back(get_random_matrix(m,n));
-      ListM.push_back(get_random_matrix(n,m));
+    auto insert = [&](int m, int n) -> void {
+      ListM.push_back(get_random_matrix(m, n));
+      ListM.push_back(get_random_matrix(n, m));
     };
-    insert(4,3);
-    insert(5,3);
-    insert(6,2);
-    insert(4,2);
-    insert(6,7);
+    insert(4, 3);
+    insert(5, 3);
+    insert(6, 2);
+    insert(4, 2);
+    insert(6, 7);
     /*
     insert(8,9);
     insert(10,11);

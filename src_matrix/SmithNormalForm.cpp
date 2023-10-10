@@ -8,8 +8,7 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-template<typename T>
-void process(std::string const& FileI) {
+template <typename T> void process(std::string const &FileI) {
   MyMatrix<T> M = ReadMatrixFile<T>(FileI);
   // computing the Smith normal form
   std::pair<MyMatrix<T>, MyMatrix<T>> pair = SmithNormalForm(M);
@@ -23,7 +22,6 @@ void process(std::string const& FileI) {
   WriteMatrix(std::cerr, RedMat);
 }
 
-
 int main(int argc, char *argv[]) {
   try {
     if (argc != 2) {
@@ -33,7 +31,7 @@ int main(int argc, char *argv[]) {
     }
     std::string arith = argv[1];
     std::string FileI = argv[2];
-    auto f=[&]() -> void {
+    auto f = [&]() -> void {
       if (arith == "mpz_class")
         return process<mpz_class>(FileI);
       if (arith == "mpq_class")

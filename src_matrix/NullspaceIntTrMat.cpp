@@ -7,8 +7,7 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-template<typename T>
-void process(std::string const& FileI, std::ostream & os) {
+template <typename T> void process(std::string const &FileI, std::ostream &os) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(FileI);
   // computing the kernel
   MyMatrix<T> KerInt = NullspaceIntTrMat(TheMat);
@@ -16,7 +15,6 @@ void process(std::string const& FileI, std::ostream & os) {
   WriteMatrixGAP(os, KerInt);
   os << ";\n";
 }
-
 
 int main(int argc, char *argv[]) {
   try {

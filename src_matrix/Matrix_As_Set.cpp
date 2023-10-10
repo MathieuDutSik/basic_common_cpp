@@ -17,7 +17,7 @@ int main() {
   for (size_t i_col = 0; i_col < n_cols; i_col++)
     V(i_col) = 1;
   ContainerMatrix<T> Cont(M);
-  auto test_fct=[&](int case_call, MyVector<T> const& W) -> void {
+  auto test_fct = [&](int case_call, MyVector<T> const &W) -> void {
     std::optional<size_t> opt = Cont.GetIdx_v(V);
     if (opt) {
       std::cerr << "case_call=" << case_call << " pos=" << *opt << "\n";

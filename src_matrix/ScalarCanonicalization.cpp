@@ -8,14 +8,11 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-
-template<typename T>
-void process(std::string const& FileI, std::ostream & os) {
+template <typename T> void process(std::string const &FileI, std::ostream &os) {
   MyVector<T> V1 = ReadVectorFile<T>(FileI);
   MyVector<T> V2 = ScalarCanonicalizationVector(V1);
   WriteVector(os, V2);
 }
-
 
 int main(int argc, char *argv[]) {
   try {
@@ -27,7 +24,7 @@ int main(int argc, char *argv[]) {
     }
     std::string arith = argv[1];
     std::string FileI = argv[2];
-    auto f=[&](std::ostream & os) -> void {
+    auto f = [&](std::ostream &os) -> void {
       if (arith == "mpq_class") {
         using T = mpq_class;
         return process<T>(FileI, os);

@@ -7,8 +7,8 @@
 #include "MAT_Matrix.h"
 // clang-format on
 
-template<typename T>
-void full_process_type(std::string const& input, std::string const& output) {
+template <typename T>
+void full_process_type(std::string const &input, std::string const &output) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(input);
   std::cerr << "TheMat=\n";
   WriteMatrix(std::cerr, TheMat);
@@ -25,8 +25,8 @@ void full_process_type(std::string const& input, std::string const& output) {
   os << ";\n";
 }
 
-
-void process(std::string const& arith, std::string const& input, std::string const& output) {
+void process(std::string const &arith, std::string const &input,
+             std::string const &output) {
   if (arith == "safe_rational") {
     using T = Rational<SafeInt64>;
     return full_process_type<T>(input, output);
@@ -46,7 +46,7 @@ void process(std::string const& arith, std::string const& input, std::string con
     return full_process_type<T>(input, output);
   }
   std::optional<std::string> opt_realalgebraic =
-    get_postfix(arith, "RealAlgebraic=");
+      get_postfix(arith, "RealAlgebraic=");
   if (opt_realalgebraic) {
     std::string const &FileAlgebraicField = *opt_realalgebraic;
     if (!IsExistingFile(FileAlgebraicField)) {
@@ -64,8 +64,6 @@ void process(std::string const& arith, std::string const& input, std::string con
   std::cerr << "Failed to find a matching entry for arith\n";
   throw TerminalException{1};
 }
-
-
 
 int main(int argc, char *argv[]) {
   SingletonTime time1;

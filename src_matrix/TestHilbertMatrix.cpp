@@ -8,8 +8,7 @@
 #include "MAT_Matrix.h"
 // clang-format on
 
-template<typename T>
-void process(int n) {
+template <typename T> void process(int n) {
   //
   MyMatrix<T> eMat(n, n);
   for (int i = 0; i < n; i++) {
@@ -26,8 +25,6 @@ void process(int n) {
   WriteMatrix(std::cerr, eInv);
 }
 
-
-
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3) {
@@ -38,7 +35,7 @@ int main(int argc, char *argv[]) {
     std::string arith = argv[1];
     int n;
     sscanf(argv[2], "%d", &n);
-    auto f=[&]() -> void {
+    auto f = [&]() -> void {
       if (arith == "mpq_class")
         return process<mpq_class>(n);
       if (arith == "safe_rational")

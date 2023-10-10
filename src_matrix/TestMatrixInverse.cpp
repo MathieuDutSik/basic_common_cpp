@@ -7,8 +7,7 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-template<typename T>
-void process(int n) {
+template <typename T> void process(int n) {
   int nb = 100;
   for (int i = 0; i < nb; i++) {
     std::cerr << "i=" << i << "/" << nb << "\n";
@@ -29,7 +28,6 @@ void process(int n) {
   }
 }
 
-
 int main(int argc, char *argv[]) {
   try {
     if (argc != 3) {
@@ -39,7 +37,7 @@ int main(int argc, char *argv[]) {
     std::string arith = argv[1];
     int n;
     sscanf(argv[2], "%d", &n);
-    auto f=[&]() -> void {
+    auto f = [&]() -> void {
       if (arith == "mpz_class")
         return process<mpz_class>(n);
       if (arith == "mpq_class")

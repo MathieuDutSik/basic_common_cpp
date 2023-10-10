@@ -7,12 +7,11 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-
-template<typename T>
-void process(std::string const& FileI, std::string const& FileO) {
+template <typename T>
+void process(std::string const &FileI, std::string const &FileO) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(FileI);
   std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
-    ComputeColHermiteNormalForm(TheMat);
+      ComputeColHermiteNormalForm(TheMat);
   //
   std::ofstream os(FileO);
   os << "return [";
@@ -21,7 +20,6 @@ void process(std::string const& FileI, std::string const& FileO) {
   WriteMatrixGAP(os, ePair.second);
   os << "];\n";
 }
-
 
 int main(int argc, char *argv[]) {
   try {
@@ -33,7 +31,7 @@ int main(int argc, char *argv[]) {
     std::string arith = argv[1];
     std::string FileI = argv[2];
     std::string FileO = argv[3];
-    auto f=[&]() -> void {
+    auto f = [&]() -> void {
       if (arith == "mpz_class")
         return process<mpz_class>(FileI, FileO);
       if (arith == "mpq_class")

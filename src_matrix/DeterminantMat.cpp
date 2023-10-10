@@ -7,8 +7,8 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-template<typename T>
-void compute_determinant_kernel(std::string const& eFile) {
+template <typename T>
+void compute_determinant_kernel(std::string const &eFile) {
   MyMatrix<T> A = ReadMatrixFile<T>(eFile);
   std::cerr << "Computing determinant of matrix A=\n";
   WriteMatrix(std::cerr, A);
@@ -18,7 +18,8 @@ void compute_determinant_kernel(std::string const& eFile) {
   std::cerr << "TheDet_symm =" << TheDet_symm << "\n";
 }
 
-void compute_determinant(std::string const& arithmetic, std::string const& eFile) {
+void compute_determinant(std::string const &arithmetic,
+                         std::string const &eFile) {
   if (arithmetic == "safe_integer") {
     using T = SafeInt64;
     return compute_determinant_kernel<T>(eFile);
@@ -42,7 +43,7 @@ void compute_determinant(std::string const& arithmetic, std::string const& eFile
     return compute_determinant_kernel<T>(eFile);
   }
   std::optional<std::string> opt_realalgebraic =
-    get_postfix(arithmetic, "RealAlgebraic=");
+      get_postfix(arithmetic, "RealAlgebraic=");
   if (opt_realalgebraic) {
     std::string const &FileAlgebraicField = *opt_realalgebraic;
     if (!IsExistingFile(FileAlgebraicField)) {
@@ -60,7 +61,6 @@ void compute_determinant(std::string const& arithmetic, std::string const& eFile
   std::cerr << "Failed to find a matching arithmetic\n";
   throw TerminalException{1};
 }
-
 
 int main(int argc, char *argv[]) {
   try {
