@@ -372,6 +372,17 @@ std::vector<int> STRING_Split_Int(std::string const &eStrA,
   return LInt;
 }
 
+std::string DropSpace(std::string const& strI) {
+  std::string strO;
+  for (int u=0; u<strI.size(); u++) {
+    std::string eChar = strI.substr(u,1);
+    if (eChar != " ") {
+      strO += eChar;
+    }
+  }
+  return strO;
+}
+
 // Example of use eStrA="A B C D" and eStrB=" "
 // Difference with the above is that splitting ";;" gives you a list
 // of entries as {"", "", ""}, i.e. last and first entry and entry in the middle
