@@ -250,6 +250,20 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
   return RetStr;
 }
 
+bool startswith(std::string const& str1, std::string const& str2) {
+  size_t len1 = str1.size();
+  size_t len2 = str2.size();
+  if (len1 < len2) {
+    return false;
+  }
+  std::string str1_red = str1.substr(0,len2);
+  if (str1_red == str2) {
+    return true;
+  }
+  return false;
+}
+
+
 template <typename F>
 void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F f) {
   size_t lenA = eStrA.length();
