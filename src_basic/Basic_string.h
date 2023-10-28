@@ -374,7 +374,7 @@ std::vector<int> STRING_Split_Int(std::string const &eStrA,
 
 std::string DropSpace(std::string const& strI) {
   std::string strO;
-  for (int u=0; u<strI.size(); u++) {
+  for (size_t u=0; u<strI.size(); u++) {
     std::string eChar = strI.substr(u,1);
     if (eChar != " ") {
       strO += eChar;
