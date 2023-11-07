@@ -10,6 +10,7 @@
 
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize(T const &number) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T count;
   T x_fixed = 2, x = 2, size = 2, factor, diff;
   do {
@@ -32,6 +33,7 @@ std::pair<bool, T> rho_pollard_factorize(T const &number) {
 }
 
 template <typename T> std::vector<T> successive_division_factorize(T const &N) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T pos = 2;
   while (true) {
     T res = ResInt(N, pos);
@@ -52,6 +54,7 @@ template <typename T> std::vector<T> successive_division_factorize(T const &N) {
 }
 
 template <typename T> bool successive_division_isprime(T const &N) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T pos = 2;
   while (true) {
     T res = ResInt(N, pos);
@@ -65,6 +68,7 @@ template <typename T> bool successive_division_isprime(T const &N) {
 }
 
 template <typename T> bool IsPrime(const T &N) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::pair<bool, T> epair = rho_pollard_factorize(N);
   if (epair.first) {
     return false;
@@ -74,6 +78,7 @@ template <typename T> bool IsPrime(const T &N) {
 }
 
 template <typename T> std::vector<T> FactorsInt(T const &N) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   if (N == 1)
     return {};
   std::pair<bool, T> epair = rho_pollard_factorize(N);
@@ -91,6 +96,7 @@ template <typename T> std::vector<T> FactorsInt(T const &N) {
 
 template <typename T>
 std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::vector<T> LVal = {1};
   for (auto &kv : eMap) {
     std::vector<T> NewVal;
@@ -107,6 +113,7 @@ std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
 }
 
 template <typename T> std::vector<T> GetAllFactors(T const &N) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::vector<T> LFact = FactorsInt(N);
   std::map<T, int> eMap;
   for (auto &eVal : LFact)

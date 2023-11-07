@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
       if (oper == "check") {
         std::unordered_map<std::string, std::string> map;
         map[test<mpz_class>("mpz_class")] = "mpz_class";
-        map[test<mpq_class>("mpq_class")] = "mpq_class";
         map[test<SafeInt64>("SafeInt64")] = "SafeInt64";
         if (map.size() != 1) {
           std::cerr << "We have incoherent result for arithmetics\n";
@@ -54,7 +53,6 @@ int main(int argc, char *argv[]) {
       }
       if (oper == "print") {
         std::cerr << "mpz_class : " << test<mpz_class>("mpz_class") << "\n";
-        std::cerr << "mpq_class : " << test<mpq_class>("mpq_class") << "\n";
         std::cerr << "SafeInt64 : " << test<SafeInt64>("SafeInt64") << "\n";
         return;
       }
