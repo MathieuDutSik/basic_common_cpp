@@ -3,6 +3,7 @@
 #define SRC_NUMBER_FACTORIZATIONS_H_
 
 // clang-format off
+#include "TemplateTraits.h"
 #include <map>
 #include <utility>
 #include <vector>
