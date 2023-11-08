@@ -17,7 +17,8 @@ void process(int TheMod) {
   for (int u=0; u<TheMod; u++) {
     T u_T(u);
     bool test = is_quadratic_residue(u_T, TheMod_T);
-    if (test > 0) {
+    std::cerr << "u=" << u << " test=" << test << "\n";
+    if (test) {
       n_quad += 1;
     }
   }
@@ -37,8 +38,8 @@ int main(int argc, char *argv[]) {
     int TheMod = 23;
     process<mpz_class>(TheMod);
     process<SafeInt64>(TheMod);
-    process<boost::multiprecision::cpp_int>(TheMod);
-    process<boost::multiprecision::mpz_int>(TheMod);
+    //    process<boost::multiprecision::cpp_int>(TheMod);
+    //    process<boost::multiprecision::mpz_int>(TheMod);
     std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
     std::cerr << "Somethng went wrong in the computation\n";
