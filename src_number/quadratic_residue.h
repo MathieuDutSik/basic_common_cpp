@@ -13,13 +13,15 @@ template <typename T>
 std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T m = T_abs(m_in);
+  T two(2);
   T a_mod = QuoInt(a, m);
-  T res = ResInt(m, T(2));
+  T res = ResInt(m, two);
   T upper(0);
   if (res == 0) {
-    upper = QuoInt(m, T(2));
+    upper = QuoInt(m, two);
   } else {
-    upper = QuoInt(m+1, T(2));
+    T mP1 = m+1;
+    upper = QuoInt(mP1, two);
   }
   T x(0);
   T TwoXpOne(1);
@@ -39,7 +41,7 @@ std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
 template <typename T>
 bool is_quadratic_residue(T const& a, T const& m) {
   std::optional<T> opt = find_quadratic_residue(a, m);
-  return opt.is_some();
+  return opt.has_value();
 }
 
 // clang-format off

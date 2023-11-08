@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "MAT_MatrixInt.h"
+#include "quadratic_residue.h"
 #include <vector>
 // clang-format on
 
@@ -117,6 +118,88 @@ MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const &M1, MyMatrix<T> const &M2,
     for (int j = 0; j < n_row1; j++)
       NSP_red(i, j) = NSP(i, j);
   return NSP_red * M1;
+}
+
+template<typename T>
+T mod_inv(T const& a, T const& P) {
+  T t = 0;
+  T newt = 1;
+  T r = P;
+  T newr = m;
+  T q, tmp;
+  while (newr != 0) {
+    q = r / newr;
+    tmp = t;
+    t = newt;
+    newt = tmp - q * newt;
+      tmp = r;
+      r = newr;
+      newr = tmp - q * newr;
+  }
+  if (r > 1)
+    return 0;
+  if (t < 0)
+    t = t + P;
+  return t;
+}
+
+/*
+  Find isotropic vector
+  We follow here the paper "Quadratic equations in dimensions 4, 5 and more"
+  and in particular Lemma 1.
+*/
+MyVector<T> FindIsotropicVector(MyMatrix<T> const& M, T const& TheMod) {
+  int n = M.rows();
+  MyVector<T> V(n);
+  while(true) {
+    // We set up the first n-1 coordinates at random
+    // Then we solve the equation for finding the last one.
+    for (int i=0; i<n-1; i++) {
+      int val = rand();
+      T val_T(val);
+      V(i) = val_T;
+    }
+    T cst = 0;
+    for (int i=0; i<n-1; i++) {
+      for (int j=0; j<n-1; j++) {
+        cst += M(i,j) * V(i) * V(j);
+      }
+    }
+    T lin = 0;
+    for (int i=0; i<n-1; i++) {
+      lin += M(i,n-1) * V(i);
+    }
+    T C = M(n-1,n-1);
+    // The equation to be solved becomes
+    // 0 = cst + 2 lin x_n + C x_n^2
+    // If C = 0 then solution is obvious.
+    // Otherwise, divide by C and get
+    // 0 = cst + 2 lin x_n + x_n^2
+    // 0 = cst + (x_n + lin)^2 - lin^2
+    // lin^2 - cst = (x_n + lin)^2
+    T Cinv = mod_inv(C, TheMod);
+    lin *= Cinv;
+    cst *= Cinv;
+    T a = lin * lin - cst;
+    std::optional<T> opt = find_quadratic_residue(a, TheMod);
+    if (opt) {
+      T const& y = *opt;
+      T xn = y - lin;
+      V(n-1) = xn;
+#ifdef DEBUG_MOD_OPERATION
+      T sum = 0;
+      for (int i=0; i<n; i++)
+        for (int j=0; j<n; j++)
+          sum += M(i,j) * V(i) * V(j);
+      T res = ResInt(sum, TheMod);
+      if (res != 0) {
+        std::cerr << "We failed to find an isotropic vector\n";
+        throw TerminalExcpetion{1};
+      }
+#endif
+      return V;
+    }
+  }
 }
 
 // clang-format off
