@@ -17,7 +17,6 @@ void process(int TheMod) {
   for (int u=0; u<TheMod; u++) {
     T u_T(u);
     bool test = is_quadratic_residue(u_T, TheMod_T);
-    std::cerr << "u=" << u << " test=" << test << "\n";
     if (test) {
       n_quad += 1;
     }
@@ -36,6 +35,7 @@ void process(int TheMod) {
 int main(int argc, char *argv[]) {
   try {
     int TheMod = 23;
+    std::cerr << "TheMod=" << TheMod << "\n";
     process<mpz_class>(TheMod);
     process<SafeInt64>(TheMod);
     //    process<boost::multiprecision::cpp_int>(TheMod);

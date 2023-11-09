@@ -9,6 +9,7 @@
 #include <vector>
 // clang-format on
 
+// This is an exhaustive search that works even if m is not prime.
 template <typename T>
 std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
@@ -26,11 +27,8 @@ std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
   T x(0);
   T TwoXpOne(1);
   T xSqr(0);
-  //  std::cerr << "m=" << m << " a=" << a << " a_mod=" << a_mod << "\n";
   while (x != upper) {
-    //    std::cerr << "  x=" << x << " xSqr=" << xSqr << "\n";
     if (xSqr == a_mod) {
-      //      std::cerr << "Returning x=" << x << "\n";
       return x;
     }
     xSqr += TwoXpOne;

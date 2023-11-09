@@ -2766,6 +2766,22 @@ template <typename T> MyVector<T> SignCanonicalizeVector(const MyVector<T> &V) {
   throw TerminalException{1};
 }
 
+template<typename T>
+MyVector<T> GetDiagonal(MyMatrix<T> const& M) {
+  int n_col = M.cols();
+  int n_row = M.rows();
+  if (n_row != n_col) {
+    std::cerr << "The matrix is rectangular but not square, so diagonal is not defined\n";
+    throw TerminalException{1};
+  }
+  MyMatrix<T> V(n_row);
+  for (int i=0; i<n_row; i++) {
+    V(i) = M(i, i);
+  }
+  return V;
+}
+
+
 // clang-format off
 #endif  // SRC_MATRIX_MAT_MATRIX_H_
 // clang-format on

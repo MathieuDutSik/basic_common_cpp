@@ -68,6 +68,13 @@ template <typename T> T T_abs(T const &eVal) {
   return fVal;
 }
 
+template <typename T> T T_sign(T const &eVal) {
+  T fVal(1);
+  if (eVal < 0)
+    fVal = T(-1);
+  return fVal;
+}
+
 // use std::min for generic types (int, long, float, ...)
 template <typename T> T T_min(T const &eVal1, T const &eVal2) {
   if (eVal1 > eVal2)
