@@ -11,7 +11,7 @@
 
 // This is an exhaustive search that works even if m is not prime.
 template <typename T>
-std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
+std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T m = T_abs(m_in);
   T two(2);
@@ -21,7 +21,7 @@ std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
   if (res == 0) {
     upper = QuoInt(m, two);
   } else {
-    T mP1 = m+1;
+    T mP1 = m + 1;
     upper = QuoInt(mP1, two);
   }
   T x(0);
@@ -39,8 +39,7 @@ std::optional<T> find_quadratic_residue(T const& a, T const& m_in) {
   return {};
 }
 
-template <typename T>
-bool is_quadratic_residue(T const& a, T const& m) {
+template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
   std::optional<T> opt = find_quadratic_residue(a, m);
   return opt.has_value();
 }

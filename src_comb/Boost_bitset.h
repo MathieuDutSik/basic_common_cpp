@@ -249,7 +249,8 @@ Face UnsignedLongToFace(size_t const &len, ulong const &eVal) {
   return eFace;
 }
 
-void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit, int const& shift) {
+void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit,
+                              int const &shift) {
   size_t nbOrbit = ListOrbit.size();
   os << "[";
   for (size_t iOrbit = 0; iOrbit < nbOrbit; iOrbit++) {
@@ -269,7 +270,6 @@ void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit, int c
   }
   os << "]";
 }
-
 
 void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
   VectVectInt_Print_Kernel(os, ListOrbit, 0);

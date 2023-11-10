@@ -698,7 +698,8 @@ int L1_distance(std::vector<int> const &V1, std::vector<int> const &V2) {
 
 template <typename Tgr>
 std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
-                                             size_t const &MaxIter, size_t &iter) {
+                                             size_t const &MaxIter,
+                                             size_t &iter) {
   int s = static_cast<int>(s_sz);
   iter = 0;
   if (!IsSimpleGraph(GR)) {

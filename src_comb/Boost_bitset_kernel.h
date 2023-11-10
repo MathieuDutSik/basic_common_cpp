@@ -58,7 +58,8 @@ inline bool getbit_vector(std::vector<uint8_t> const &V, size_t const &pos) {
   return (V[pos >> 3] >> (pos & 0x07)) & 1;
 }
 
-inline void setbit_vector(std::vector<uint8_t> &V, size_t const &pos, bool val) {
+inline void setbit_vector(std::vector<uint8_t> &V, size_t const &pos,
+                          bool val) {
   V[pos / 8] ^= static_cast<uint8_t>(-static_cast<uint8_t>(val) ^ V[pos / 8]) &
                 kBitmask[pos % 8];
 }
@@ -130,7 +131,7 @@ public:
     // Setting the bits to 0 (could have been inserted and then pop_back)
     int n_bit = n * n_face;
     int rel_bit = rel_len * 8;
-    for (int i_bit=n_bit; i_bit<rel_bit; i_bit++)
+    for (int i_bit = n_bit; i_bit < rel_bit; i_bit++)
       setbit_vector(V, i_bit, false);
     // Now computing with a standard seed.
     uint32_t seed = 0x1b853560;
@@ -180,8 +181,9 @@ public:
     return f;
   }
 
-  // This exist because we did not manage to code a operator[] that allow modification.
-  void AssignEntry(Face const& f, size_t i_orb) {
+  // This exist because we did not manage to code a operator[] that allow
+  // modification.
+  void AssignEntry(Face const &f, size_t i_orb) {
     size_t pos = i_orb * n;
     for (size_t i = 0; i < n; i++) {
       bool val = f[i];
@@ -226,9 +228,7 @@ public:
     return true;
   }
 
-  bool operator!=(vectface const &vf) {
-    return !(*this == vf);
-  }
+  bool operator!=(vectface const &vf) { return !(*this == vf); }
 
   // non standard API
   template <typename F> void InsertFace(F fct) {
@@ -346,16 +346,16 @@ template <> struct std::iterator_traits<typename vectface::iterator> {
   using difference_type = std::ptrdiff_t;
 };
 
-vectface select_minimum_count(vectface const& vf) {
+vectface select_minimum_count(vectface const &vf) {
   size_t n = vf.n;
   size_t min_incd = std::numeric_limits<size_t>::max();
-  for (auto & eFace : vf) {
+  for (auto &eFace : vf) {
     size_t incd = eFace.count();
     if (incd < min_incd)
       min_incd = incd;
   }
   vectface vf_ret(n);
-  for (auto & eFace : vf) {
+  for (auto &eFace : vf) {
     size_t incd = eFace.count();
     if (incd == min_incd)
       vf_ret.push_back(eFace);
@@ -363,24 +363,20 @@ vectface select_minimum_count(vectface const& vf) {
   return vf_ret;
 }
 
-vectface sort_vectface(vectface const& vf) {
+vectface sort_vectface(vectface const &vf) {
   size_t n = vf.get_n();
   std::set<Face> set;
-  for (auto & f : vf) {
+  for (auto &f : vf) {
     set.insert(f);
   }
   vectface vf_ret(n);
-  for (auto & f : set) {
+  for (auto &f : set) {
     vf_ret.push_back(f);
   }
   return vf_ret;
 }
 
-vectface unicize_vectface(vectface const& vf) {
-  return sort_vectface(vf);
-}
-
-
+vectface unicize_vectface(vectface const &vf) { return sort_vectface(vf); }
 
 /*
 template<>

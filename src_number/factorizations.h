@@ -98,14 +98,12 @@ template <typename T> std::vector<T> FactorsInt(T const &N) {
 template <typename T> std::map<T, size_t> FactorsIntMap(T const &N) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::vector<T> vect = FactorsInt(N);
-  std::map<T,size_t> map;
-  for (auto & eV : vect) {
+  std::map<T, size_t> map;
+  for (auto &eV : vect) {
     map[eV] += 1;
   }
   return map;
 }
-
-
 
 template <typename T>
 std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {

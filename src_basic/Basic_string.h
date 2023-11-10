@@ -170,13 +170,6 @@ std::string StringVectorStringGAP(std::vector<std::string> const &LStr) {
   return ret;
 }
 
-std::string LongToString(long const &x) {
-  std::stringstream s;
-  s << x;
-  std::string converted(s.str());
-  return converted;
-}
-
 int GetNumberDigit(int const &eVal) {
   int nbDigit = 1;
   while (true) {
@@ -250,19 +243,18 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
   return RetStr;
 }
 
-bool startswith(std::string const& str1, std::string const& str2) {
+bool startswith(std::string const &str1, std::string const &str2) {
   size_t len1 = str1.size();
   size_t len2 = str2.size();
   if (len1 < len2) {
     return false;
   }
-  std::string str1_red = str1.substr(0,len2);
+  std::string str1_red = str1.substr(0, len2);
   if (str1_red == str2) {
     return true;
   }
   return false;
 }
-
 
 template <typename F>
 void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F f) {
@@ -372,10 +364,10 @@ std::vector<int> STRING_Split_Int(std::string const &eStrA,
   return LInt;
 }
 
-std::string DropSpace(std::string const& strI) {
+std::string DropSpace(std::string const &strI) {
   std::string strO;
-  for (size_t u=0; u<strI.size(); u++) {
-    std::string eChar = strI.substr(u,1);
+  for (size_t u = 0; u < strI.size(); u++) {
+    std::string eChar = strI.substr(u, 1);
     if (eChar != " ") {
       strO += eChar;
     }
