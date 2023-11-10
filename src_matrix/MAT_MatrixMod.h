@@ -201,6 +201,85 @@ MyVector<T> FindIsotropicVector(MyMatrix<T> const &M, T const &TheMod) {
   }
 }
 
+/*
+  We work with the matrix M with m rows and n cols.
+  We want to solve the equation x M = 0 modulo p. So, x has m cols.
+  We can rewrite the equation over Z as:
+  xM + y p I_n = 0 with y a vector with n columns.
+  This gets us
+  (x, y) / M     \
+         \ p I_n /
+  And so we can find the 
+ */
+template<typename T>
+MyMatrix<T> NullspaceMatMod(MyMatrix<T> const& M, T const& TheMod) {
+  int n_row = M.rows();
+  int n_col = M.cols();
+  MyMatrix<T> Mbig(n_row + n_col, n_col);
+  for (int i=0; i<n_row; i++) {
+    for (int j=0; j<n_col; j++) {
+      Mbig(i, j) = M(i, j);
+    }
+  }
+  for (int i=0; i<n_col; i++) {
+    for (int j=0; j<n_col; j++) {
+      T val(0);
+      if (i == j)
+        val = TheMod;
+      Mbig(i + n_row, j) = val;
+    }
+  }
+  // 1) compute the full null-space
+  MyMatrix<T> NSP = NullspaceIntMat(Mbig);
+  int dimNSP = NSP.rows();
+  if (dimNSP == n_row) {
+    return IdentityMat<T>(n_row);
+  }
+  if (dimNSP == 0) {
+    MyMatrix<T> Mret(0, n_row);
+    return Mret;
+  }
+  // 2) Compute the reduced null-space (but it could
+  MyMatrix<T> NSPred(dimNSP, n_row);
+  for (int i=0; i<dimNSP; i++) {
+    for (int j=0; j<n_row; j++) {
+      NSPred(i, j) = NSP(i, j);
+    }
+  }
+#ifdef DEBUG_MATRIX_MOD
+  dim rnkA = RankMat(NSPred);
+  if (rnkA != dimNSP) {
+    std::cerr << "We have rnkA=" << rnkA << " dimNSP=" << dimNSP << "\n";
+    std::cerr << "This is not what we expected\n";
+    throw TerminalException{1};
+  }
+#endif
+  // 3) Compute the orthogonal space and then 
+  MyMatrix<T> Morth = NullspaceMat(NSPred);
+  MyMatrix<T> NSPret = NullspaceIntMat(Morth);
+#ifdef DEBUG_MATRIX_MOD
+  dim rnkB = RankMat(NSPred);
+  if (rnkB != dimNSP) {
+    std::cerr << "We have rnkB=" << rnkB << " dimNSP=" << dimNSP << "\n";
+    std::cerr << "This is not what we expected\n";
+    throw TerminalException{1};
+  }
+  MyMatrix<T> prod = NSPret * M;
+  for (int i=0; i<prod.rows(); i++) {
+    for (int j=0; j<prod.cols(); j++) {
+      T res = ResInt(prod(i,j), TheMod);
+      if (res != 0) {
+        std::cerr << "The residue is not 0\n";
+        throw TerminalException{1};
+      }
+    }
+  }
+#endif
+  return NSPret;
+}
+
+
+
 // clang-format off
 #endif  // SRC_MATRIX_MAT_MATRIXMOD_H_
 // clang-format on
