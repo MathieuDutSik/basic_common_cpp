@@ -6,7 +6,8 @@
 #PROGRAM		= TestProdMat
 #PROGRAM		= ScalarCanonicalization
 #PROGRAM		= MatrixSubsetSolver
-PROGRAM		= UniqueRescaleRows
+#PROGRAM		= UniqueRescaleRows
+PROGRAM		= TestFindIsotropicMod
 #PROGRAM		= SmithNormalForm
 
 OBJECTS		= $(PROGRAM:%=%.o)

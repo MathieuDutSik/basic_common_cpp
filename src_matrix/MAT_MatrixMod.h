@@ -121,10 +121,10 @@ MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const &M1, MyMatrix<T> const &M2,
 }
 
 template <typename T> T mod_inv(T const &a, T const &P) {
-  T t = 0;
-  T newt = 1;
+  T t(0);
+  T newt(1);
   T r = P;
-  T newr = m;
+  T newr = a;
   T q, tmp;
   while (newr != 0) {
     q = r / newr;
@@ -136,7 +136,7 @@ template <typename T> T mod_inv(T const &a, T const &P) {
     newr = tmp - q * newr;
   }
   if (r > 1)
-    return 0;
+    return T(0);
   if (t < 0)
     t = t + P;
   return t;
@@ -144,18 +144,18 @@ template <typename T> T mod_inv(T const &a, T const &P) {
 
 
 template<typename T>
-bool Kernel_FindIsotropicVectorQuadResidue(MyMatrix<T> const &M, MyVector<T> & V, T const &TheMod) {
+bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M, MyVector<T> & V, T const &TheMod) {
   int n = M.rows();
-  T cst = 0;
+  T cst(0);
   for (int i = 0; i < n - 1; i++) {
     for (int j = 0; j < n - 1; j++) {
       cst += M(i, j) * V(i) * V(j);
     }
   }
-  T lin = 0;
+  T lin(0);
   for (int i = 0; i < n - 1; i++) {
     lin += M(i, n - 1) * V(i);
-    }
+  }
   T C = M(n - 1, n - 1);
   // The equation to be solved becomes
   // 0 = cst + 2 lin x_n + C x_n^2
@@ -195,7 +195,7 @@ bool Kernel_FindIsotropicVectorQuadResidue(MyMatrix<T> const &M, MyVector<T> & V
   and in particular Lemma 1.
 */
 template<typename T>
-MyVector<T> FindIsotropicVectorRandom(MyMatrix<T> const &M, T const &TheMod) {
+MyVector<T> FindIsotropicVectorModRandom(MyMatrix<T> const &M, T const &TheMod) {
   int n = M.rows();
   MyVector<T> V = ZeroVector<T>(n);
   for (int i=0; i<n; i++) {
@@ -212,7 +212,7 @@ MyVector<T> FindIsotropicVectorRandom(MyMatrix<T> const &M, T const &TheMod) {
       T val_T(val);
       V(i) = val_T;
     }
-    bool test = Kernel_FindIsotropicVectorQuadResidue(M, V, TheMod);
+    bool test = Kernel_FindIsotropicVectorModQuadResidue(M, V, TheMod);
     if (test) {
       return V;
     }
@@ -223,7 +223,7 @@ MyVector<T> FindIsotropicVectorRandom(MyMatrix<T> const &M, T const &TheMod) {
   About the solution for two-dimensional.
  */
 template<typename T>
-std::optional<MyVector<T>> FindIsotropicVectorTwoDim(MyMatrix<T> const &M, T const &TheMod) {
+std::optional<MyVector<T>> FindIsotropicVectorModTwoDim(MyMatrix<T> const &M, T const &TheMod) {
   MyVector<T> V(2);
   if (M(1,1) == 0) {
     V(0) = 0;
@@ -231,7 +231,7 @@ std::optional<MyVector<T>> FindIsotropicVectorTwoDim(MyMatrix<T> const &M, T con
     return V;
   }
   V(0) = 1;
-  bool test = Kernel_FindIsotropicVectorQuadResidue(M, V, TheMod);
+  bool test = Kernel_FindIsotropicVectorModQuadResidue(M, V, TheMod);
   if (test) {
     return V;
   }
@@ -239,7 +239,7 @@ std::optional<MyVector<T>> FindIsotropicVectorTwoDim(MyMatrix<T> const &M, T con
 }
 
 template<typename T>
-std::optional<MyVector<T>> FindIsotropicVector(MyMatrix<T> const &M, T const &TheMod) {
+std::optional<MyVector<T>> FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
   int n = M.rows();
   if (n == 1) {
     T val = M(0,0);
@@ -251,9 +251,9 @@ std::optional<MyVector<T>> FindIsotropicVector(MyMatrix<T> const &M, T const &Th
     return {};
   }
   if (n == 2) {
-    return FindIsotropicVectorTwoDim(M, TheMod);
+    return FindIsotropicVectorModTwoDim(M, TheMod);
   }
-  return FindIsotropicVectorRandom(M, TheMod);
+  return FindIsotropicVectorModRandom(M, TheMod);
 }
 
 
