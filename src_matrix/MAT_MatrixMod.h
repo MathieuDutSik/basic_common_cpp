@@ -197,12 +197,12 @@ bool Kernel_FindIsotropicVectorQuadResidue(MyMatrix<T> const &M, MyVector<T> & V
 template<typename T>
 MyVector<T> FindIsotropicVectorRandom(MyMatrix<T> const &M, T const &TheMod) {
   int n = M.rows();
-  MyVector<T> V(n);
-  if (M(n-1,n-1) == 0) {
-    for (int i=0; i<n-1; i++)
-      V(i) = 0;
-    V(n-1) = 1;
-    return true;
+  MyVector<T> V = ZeroVector<T>(n);
+  for (int i=0; i<n; i++) {
+    if (M(i,i) == 0) {
+      V(i) = 1;
+      return V;
+    }
   }
   while (true) {
     // We set up the first n-1 coordinates at random
