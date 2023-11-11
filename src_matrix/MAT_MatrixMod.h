@@ -305,11 +305,11 @@ ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const& M, T const& TheMod) {
   MyMatrix<T> NSP = NullspaceIntMat(Mbig);
   int dimNSP = NSP.rows();
   if (dimNSP == n_row) {
-    return IdentityMat<T>(n_row);
+    return {dimNSP, IdentityMat<T>(n_row)};
   }
   if (dimNSP == 0) {
     MyMatrix<T> Mret(0, n_row);
-    return Mret;
+    return {dimNSP, Mret};
   }
   // 2) Compute the reduced null-space (but it could
   MyMatrix<T> NSPred(dimNSP, n_row);
