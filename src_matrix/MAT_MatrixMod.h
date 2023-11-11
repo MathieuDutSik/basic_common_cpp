@@ -239,7 +239,8 @@ std::optional<MyVector<T>> FindIsotropicVectorModTwoDim(MyMatrix<T> const &M, T 
 }
 
 template<typename T>
-std::optional<MyVector<T>> FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
+std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M, T const &TheMod) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   int n = M.rows();
   if (n == 1) {
     T val = M(0,0);
@@ -256,9 +257,27 @@ std::optional<MyVector<T>> FindIsotropicVectorMod(MyMatrix<T> const &M, T const 
   return FindIsotropicVectorModRandom(M, TheMod);
 }
 
+template<typename T>
+inline typename std::enable_if<is_implementation_of_Q<T>::value, std::optional<MyVector<T>>>::type
+FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
+  using Tring = typename underlying_ring<T>::ring_type;
+  MyMatrix<T> M1 = RemoveFractionMatrix(M);
+  MyMatrix<Tring> M2 = UniversalMatrixConversion<Tring,T>(M1);
+  Tring TheMod_ring = UniversalScalarConversion<Tring,T>(TheMod);
+  std::optional<MyVector<Tring>> opt = FindIsotropicVectorMod_Z(M2, TheMod_ring);
+  if (opt) {
+    MyVector<Tring> const& eV = *opt;
+    MyVector<T> eV_T = UniversalVectorConversion<T,Tring>(eV);
+    return eV_T;
+  }
+  return {};
+}
 
-
-
+template<typename T>
+inline typename std::enable_if<!is_implementation_of_Q<T>::value, std::optional<MyVector<T>>>::type
+FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
+  return FindIsotropicVectorMod_Z(M, TheMod);
+}
 
 template<typename T>
 struct ResultNullspaceMod {
