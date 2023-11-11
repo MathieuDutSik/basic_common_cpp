@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_NUMBER_FACTORIZATIONS_H_
-#define SRC_NUMBER_FACTORIZATIONS_H_
+#ifndef SRC_NUMBER_QUADRATIC_RESIDUE_H_
+#define SRC_NUMBER_QUADRATIC_RESIDUE_H_
 
 // clang-format off
 #include "TemplateTraits.h"
@@ -45,5 +45,5 @@ template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
 }
 
 // clang-format off
-#endif  // SRC_NUMBER_FACTORIZATIONS_H_
+#endif  // SRC_NUMBER_QUADRATIC_RESIDUE_H_
 // clang-format on
