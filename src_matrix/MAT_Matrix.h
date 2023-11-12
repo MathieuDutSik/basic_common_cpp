@@ -2774,7 +2774,7 @@ template <typename T> MyVector<T> GetDiagonal(MyMatrix<T> const &M) {
                  "defined\n";
     throw TerminalException{1};
   }
-  MyMatrix<T> V(n_row);
+  MyVector<T> V(n_row);
   for (int i = 0; i < n_row; i++) {
     V(i) = M(i, i);
   }
