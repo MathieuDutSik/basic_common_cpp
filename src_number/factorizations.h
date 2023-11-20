@@ -78,7 +78,7 @@ template <typename T> bool IsPrime(const T &N) {
   }
 }
 
-template <typename T> std::vector<T> FactorsInt(T const &N) {
+template <typename T> std::vector<T> Kernel_FactorsInt(T const &N) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   if (N == 1)
     return {};
@@ -95,8 +95,27 @@ template <typename T> std::vector<T> FactorsInt(T const &N) {
   }
 }
 
+template <typename T>
+inline typename std::enable_if<is_implementation_of_Z<T>::value,std::vector<T>>::type
+FactorsInt(T const &N) {
+  return Kernel_FactorsInt(N);
+}
+
+template <typename T>
+inline typename std::enable_if<!is_implementation_of_Z<T>::value,std::vector<T>>::type
+FactorsInt(T const &N) {
+  using Tint = typename underlying_ring<T>::ring_type;
+  Tint N_int = UniversalScalarConversion<Tint,T>(N);
+  std::vector<Tint> LFact_int = Kernel_FactorsInt(N_int);
+  std::vector<T> LFact;
+  for (auto & val_i : LFact_int) {
+    T val = UniversalScalarConversion<T,Tint>(val_i);
+    LFact.push_back(val);
+  }
+  return LFact;
+}
+
 template <typename T> std::map<T, size_t> FactorsIntMap(T const &N) {
-  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::vector<T> vect = FactorsInt(N);
   std::map<T, size_t> map;
   for (auto &eV : vect) {
@@ -107,7 +126,6 @@ template <typename T> std::map<T, size_t> FactorsIntMap(T const &N) {
 
 template <typename T>
 std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
-  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::vector<T> LVal = {1};
   for (auto &kv : eMap) {
     std::vector<T> NewVal;
@@ -124,7 +142,6 @@ std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
 }
 
 template <typename T> std::vector<T> GetAllFactors(T const &N) {
-  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   std::vector<T> LFact = FactorsInt(N);
   std::map<T, int> eMap;
   for (auto &eVal : LFact)
