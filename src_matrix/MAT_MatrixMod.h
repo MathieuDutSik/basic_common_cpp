@@ -142,9 +142,9 @@ template <typename T> T mod_inv(T const &a, T const &P) {
   return t;
 }
 
-
-template<typename T>
-bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M, MyVector<T> & V, T const &TheMod) {
+template <typename T>
+bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M,
+                                              MyVector<T> &V, T const &TheMod) {
   int n = M.rows();
   T cst(0);
   for (int i = 0; i < n - 1; i++) {
@@ -194,12 +194,13 @@ bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M, MyVector<T> 
   We follow here the paper "Quadratic equations in dimensions 4, 5 and more"
   and in particular Lemma 1.
 */
-template<typename T>
-MyVector<T> FindIsotropicVectorModRandom(MyMatrix<T> const &M, T const &TheMod) {
+template <typename T>
+MyVector<T> FindIsotropicVectorModRandom(MyMatrix<T> const &M,
+                                         T const &TheMod) {
   int n = M.rows();
   MyVector<T> V = ZeroVector<T>(n);
-  for (int i=0; i<n; i++) {
-    if (M(i,i) == 0) {
+  for (int i = 0; i < n; i++) {
+    if (M(i, i) == 0) {
       V(i) = 1;
       return V;
     }
@@ -222,10 +223,11 @@ MyVector<T> FindIsotropicVectorModRandom(MyMatrix<T> const &M, T const &TheMod) 
 /*
   About the solution for two-dimensional.
  */
-template<typename T>
-std::optional<MyVector<T>> FindIsotropicVectorModTwoDim(MyMatrix<T> const &M, T const &TheMod) {
+template <typename T>
+std::optional<MyVector<T>> FindIsotropicVectorModTwoDim(MyMatrix<T> const &M,
+                                                        T const &TheMod) {
   MyVector<T> V(2);
-  if (M(1,1) == 0) {
+  if (M(1, 1) == 0) {
     V(0) = 0;
     V(1) = 1;
     return V;
@@ -238,12 +240,13 @@ std::optional<MyVector<T>> FindIsotropicVectorModTwoDim(MyMatrix<T> const &M, T 
   return {};
 }
 
-template<typename T>
-std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M, T const &TheMod) {
+template <typename T>
+std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M,
+                                                    T const &TheMod) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   int n = M.rows();
   if (n == 1) {
-    T val = M(0,0);
+    T val = M(0, 0);
     if (val == 0) {
       MyVector<T> V(1);
       V(0) = 1;
@@ -257,34 +260,35 @@ std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M, T cons
   return FindIsotropicVectorModRandom(M, TheMod);
 }
 
-template<typename T>
-inline typename std::enable_if<is_implementation_of_Q<T>::value, std::optional<MyVector<T>>>::type
+template <typename T>
+inline typename std::enable_if<is_implementation_of_Q<T>::value,
+                               std::optional<MyVector<T>>>::type
 FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
   using Tring = typename underlying_ring<T>::ring_type;
   MyMatrix<T> M1 = RemoveFractionMatrix(M);
-  MyMatrix<Tring> M2 = UniversalMatrixConversion<Tring,T>(M1);
-  Tring TheMod_ring = UniversalScalarConversion<Tring,T>(TheMod);
-  std::optional<MyVector<Tring>> opt = FindIsotropicVectorMod_Z(M2, TheMod_ring);
+  MyMatrix<Tring> M2 = UniversalMatrixConversion<Tring, T>(M1);
+  Tring TheMod_ring = UniversalScalarConversion<Tring, T>(TheMod);
+  std::optional<MyVector<Tring>> opt =
+      FindIsotropicVectorMod_Z(M2, TheMod_ring);
   if (opt) {
-    MyVector<Tring> const& eV = *opt;
-    MyVector<T> eV_T = UniversalVectorConversion<T,Tring>(eV);
+    MyVector<Tring> const &eV = *opt;
+    MyVector<T> eV_T = UniversalVectorConversion<T, Tring>(eV);
     return eV_T;
   }
   return {};
 }
 
-template<typename T>
-inline typename std::enable_if<!is_implementation_of_Q<T>::value, std::optional<MyVector<T>>>::type
+template <typename T>
+inline typename std::enable_if<!is_implementation_of_Q<T>::value,
+                               std::optional<MyVector<T>>>::type
 FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
   return FindIsotropicVectorMod_Z(M, TheMod);
 }
 
-template<typename T>
-struct ResultNullspaceMod {
+template <typename T> struct ResultNullspaceMod {
   int dimNSP;
   MyMatrix<T> BasisTot;
 };
-
 
 /*
   We work with the matrix M with m rows and n cols.
@@ -302,18 +306,18 @@ struct ResultNullspaceMod {
 
 
  */
-template<typename T>
-ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const& M, T const& TheMod) {
+template <typename T>
+ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
   MyMatrix<T> Mbig(n_row + n_col, n_col);
-  for (int i=0; i<n_row; i++) {
-    for (int j=0; j<n_col; j++) {
+  for (int i = 0; i < n_row; i++) {
+    for (int j = 0; j < n_col; j++) {
       Mbig(i, j) = M(i, j);
     }
   }
-  for (int i=0; i<n_col; i++) {
-    for (int j=0; j<n_col; j++) {
+  for (int i = 0; i < n_col; i++) {
+    for (int j = 0; j < n_col; j++) {
       T val(0);
       if (i == j)
         val = TheMod;
@@ -332,8 +336,8 @@ ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const& M, T const& TheMod) {
   }
   // 2) Compute the reduced null-space (but it could
   MyMatrix<T> NSPred(dimNSP, n_row);
-  for (int i=0; i<dimNSP; i++) {
-    for (int j=0; j<n_row; j++) {
+  for (int i = 0; i < dimNSP; i++) {
+    for (int j = 0; j < n_row; j++) {
       NSPred(i, j) = NSP(i, j);
     }
   }
@@ -345,9 +349,9 @@ ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const& M, T const& TheMod) {
     throw TerminalException{1};
   }
   MyMatrix<T> prod = NSPred * M;
-  for (int i=0; i<prod.rows(); i++) {
-    for (int j=0; j<prod.cols(); j++) {
-      T res = ResInt(prod(i,j), TheMod);
+  for (int i = 0; i < prod.rows(); i++) {
+    for (int j = 0; j < prod.cols(); j++) {
+      T res = ResInt(prod(i, j), TheMod);
       if (res != 0) {
         std::cerr << "The residue is not 0\n";
         throw TerminalException{1};
@@ -360,18 +364,18 @@ ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const& M, T const& TheMod) {
   return {dimNSP, std::move(FullMat)};
 }
 
-template<typename T>
-int DimensionKernelMod(MyMatrix<T> const& M, T const& TheMod) {
+template <typename T>
+int DimensionKernelMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
   MyMatrix<T> Mbig(n_row + n_col, n_col);
-  for (int i=0; i<n_row; i++) {
-    for (int j=0; j<n_col; j++) {
+  for (int i = 0; i < n_row; i++) {
+    for (int j = 0; j < n_col; j++) {
       Mbig(i, j) = M(i, j);
     }
   }
-  for (int i=0; i<n_col; i++) {
-    for (int j=0; j<n_col; j++) {
+  for (int i = 0; i < n_col; i++) {
+    for (int j = 0; j < n_col; j++) {
       T val(0);
       if (i == j)
         val = TheMod;
