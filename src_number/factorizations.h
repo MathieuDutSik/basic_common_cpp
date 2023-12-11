@@ -96,20 +96,22 @@ template <typename T> std::vector<T> Kernel_FactorsInt(T const &N) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_implementation_of_Z<T>::value,std::vector<T>>::type
+inline typename std::enable_if<is_implementation_of_Z<T>::value,
+                               std::vector<T>>::type
 FactorsInt(T const &N) {
   return Kernel_FactorsInt(N);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_implementation_of_Z<T>::value,std::vector<T>>::type
+inline typename std::enable_if<!is_implementation_of_Z<T>::value,
+                               std::vector<T>>::type
 FactorsInt(T const &N) {
   using Tint = typename underlying_ring<T>::ring_type;
-  Tint N_int = UniversalScalarConversion<Tint,T>(N);
+  Tint N_int = UniversalScalarConversion<Tint, T>(N);
   std::vector<Tint> LFact_int = Kernel_FactorsInt(N_int);
   std::vector<T> LFact;
-  for (auto & val_i : LFact_int) {
-    T val = UniversalScalarConversion<T,Tint>(val_i);
+  for (auto &val_i : LFact_int) {
+    T val = UniversalScalarConversion<T, Tint>(val_i);
     LFact.push_back(val);
   }
   return LFact;
