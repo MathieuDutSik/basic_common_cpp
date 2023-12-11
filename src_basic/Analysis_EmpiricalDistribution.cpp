@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     }
     std::string FileI = argv[1];
     std::vector<std::string> ListLines = ReadFullFile(FileI);
-    for (auto & eLine : ListLines) {
+    for (auto &eLine : ListLines) {
       std::vector<std::string> LStr = STRING_Split(eLine, "ListValWei = ");
       if (LStr.size() == 2) {
         std::string desc = LStr[1];

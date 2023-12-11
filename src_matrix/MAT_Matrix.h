@@ -1802,6 +1802,16 @@ MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
   return V;
 }
 
+template<typename T>
+MyMatrix<T> MatrixFromVector(MyVector<T> const& V) {
+  int n = V.size();
+  MyMatrix<T> M(1, n);
+  for (int i=0; i<n; i+) {
+    M(0, i) = V(i);
+  }
+  return M;
+}
+
 template <typename T>
 MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const &VF,
                                               MyMatrix<T> const &IVF) {
