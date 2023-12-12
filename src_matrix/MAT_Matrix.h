@@ -1531,7 +1531,7 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to be a field in DeterminantMatKernel");
   T hVal, alpha;
-  T eVal1, eVal2, nVal;
+  T eVal1;
   int n = TheMat.rows();
   MyMatrix<T> WorkMat = TheMat;
   std::vector<int> eVectPos(n, -1);
