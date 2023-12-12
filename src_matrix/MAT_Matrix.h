@@ -1806,7 +1806,7 @@ template<typename T>
 MyMatrix<T> MatrixFromVector(MyVector<T> const& V) {
   int n = V.size();
   MyMatrix<T> M(1, n);
-  for (int i=0; i<n; i+) {
+  for (int i=0; i<n; i++) {
     M(0, i) = V(i);
   }
   return M;
