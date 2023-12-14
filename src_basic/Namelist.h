@@ -308,6 +308,11 @@ struct FullNamelist {
   std::string FileName;
 };
 
+std::string GetNamelistStringEntry(FullNamelist const &eFull, std::string const& BlkName, std::string const& name) {
+  SingleBlock BlockDATA = eFull.ListBlock.at(BlkName);
+  return BlockDATA.ListStringValues.at(name);
+}
+
 std::vector<std::string> ExtractMatchingBool(SingleBlock const &eBlock) {
   std::vector<std::string> ListMatch;
   for (auto &kv : eBlock.ListBoolValues)
