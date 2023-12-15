@@ -48,9 +48,6 @@ public:
   ThresholdField(int const &u) { a = UniversalScalarConversion<T, int>(u); }
   Thresholdield(T const &u) { a = u; }
   ThresholdField(RealField<i_field> const &x) : a(x.a) {}
-  //  QuadField<T,d>& operator=(QuadField<T,d> const&); // assignment operator
-  //  QuadField<T,d>& operator=(T const&); // assignment operator from T
-  //  QuadField<T,d>& operator=(int const&); // assignment operator from T
   // assignment operator from int
   RealField<i_field> operator=(int const &u) {
     a = UniversalScalarConversion<T, int>(u);

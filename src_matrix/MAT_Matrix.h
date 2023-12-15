@@ -1050,12 +1050,12 @@ private:
 // The NSP array is assigned to NullspaceMat(TransposedMat(Input))
 // The function requires the matrix type to be a field.
 // After reflection this way is unavoidable as working only
-// with ring operation would complicate the code quie a lot
+// with ring operation would complicate the code quite a lot
 // and likely lead to explosion of coefficient.
 template <typename T, typename F>
 SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
   static_assert(is_ring_field<T>::value,
-                "Requires T to be a field in TMat_SelectRowCol");
+                "Requires T to be a field in TMat_SelectRowCol_Kernel");
   size_t maxRank = nbRow;
   if (nbCol < maxRank)
     maxRank = nbCol;
@@ -1114,6 +1114,104 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
     }
   return {eRank, std::move(NSP), std::move(ListColSelect),
           std::move(ListRowSelect)};
+}
+
+// The NSP array is assigned to NullspaceMat(TransposedMat(Input))
+// The function requires the matrix type to be a field.
+// This version uses the maximum pivot for selecting the pivot
+// which indicates that it should be used for floating point
+// arithmetics. The pivot has to be aboved a selected threshold
+// in order to be considered valid.
+template <typename T, typename F>
+SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol, F f, T const& threshold) {
+  static_assert(is_ring_field<T>::value,
+                "Requires T to be a field in TMat_SelectRowColMaxPivot_Kernel");
+  size_t maxRank = nbRow;
+  if (nbCol < maxRank)
+    maxRank = nbCol;
+  size_t sizMat = maxRank + 1;
+  MyMatrix<T> provMat(sizMat, nbCol);
+  std::vector<int> ListColSelect;
+  std::vector<int> ListRowSelect;
+  std::vector<uint8_t> ListColSelect01(nbCol, 0);
+  size_t eRank = 0;
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
+    f(provMat, eRank, iRow);
+    for (size_t iRank = 0; iRank < eRank; iRank++) {
+      int eCol = ListColSelect[iRank];
+      T eVal1 = provMat(eRank, eCol);
+      if (eVal1 != 0) {
+        for (size_t iCol = 0; iCol < nbCol; iCol++)
+          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+      }
+    }
+    auto get_firstnonzerocol_iife = [&]() -> size_t {
+      T MaxPivot = 0;
+      size_t selected_pivot = miss_val;
+      for (size_t iCol = 0; iCol < nbCol; iCol++) {
+        T abs_pivot = T_abs(provMat(eRank, iCol));
+        if (abs_pivot > threshold && abs_pivot > MaxPivot) {
+          MaxPivot = abs_pivot;
+          selected_pivot = iCol;
+        }
+      }
+      return selected_pivot;
+    };
+    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
+    if (FirstNonZeroCol != miss_val) {
+      ListColSelect.push_back(FirstNonZeroCol);
+      ListRowSelect.push_back(iRow);
+      ListColSelect01[size_t(FirstNonZeroCol)] = 1;
+      T eVal2 = 1 / provMat(eRank, FirstNonZeroCol);
+      for (size_t iCol = 0; iCol < nbCol; iCol++)
+        provMat(eRank, iCol) *= eVal2;
+      for (size_t iRank = 0; iRank < eRank; iRank++) {
+        T eVal1 = provMat(iRank, FirstNonZeroCol);
+        if (eVal1 != 0) {
+          for (size_t iCol = 0; iCol < nbCol; iCol++)
+            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+        }
+      }
+      eRank++;
+    }
+  }
+  size_t nbVectZero = nbCol - eRank;
+  MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, nbCol);
+  size_t nbVect = 0;
+  for (size_t iCol = 0; iCol < nbCol; iCol++)
+    if (ListColSelect01[iCol] == 0) {
+      NSP(nbVect, iCol) = 1;
+      for (size_t iRank = 0; iRank < eRank; iRank++) {
+        int eCol = ListColSelect[iRank];
+        NSP(nbVect, eCol) = -provMat(iRank, iCol);
+      }
+      nbVect++;
+    }
+  return {eRank, std::move(NSP), std::move(ListColSelect),
+          std::move(ListRowSelect)};
+}
+
+template <typename T>
+SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input, T const& threshold) {
+  size_t nbRow = Input.rows();
+  size_t nbCol = Input.cols();
+  auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
+    M.row(eRank) = Input.row(iRow);
+  };
+  return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f, threshold);
+}
+
+template <typename T>
+SelectionRowCol<T>
+TMat_SelectRowColMaxPivot_subset(MyMatrix<T> const &Input,
+                                 std::vector<size_t> const &Vsubset, T const& threshold) {
+  size_t nbRow = Vsubset.size();
+  size_t nbCol = Input.cols();
+  auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
+    M.row(eRank) = Input.row(Vsubset[iRow]);
+  };
+  return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f, threshold);
 }
 
 template <typename T>
