@@ -9,12 +9,13 @@
 #include <string>
 #include <vector>
 
-std::vector<int> FaceToVector(Face const &eSet) {
+template<typename Tidx>
+std::vector<Tidx> FaceToVector(Face const &eSet) {
   size_t nbVert = eSet.count();
   std::vector<int> eList(nbVert);
   boost::dynamic_bitset<>::size_type aRow = eSet.find_first();
   for (size_t i = 0; i < nbVert; i++) {
-    eList[i] = static_cast<int>(aRow);
+    eList[i] = static_cast<Tidx>(aRow);
     aRow = eSet.find_next(aRow);
   }
   return eList;
