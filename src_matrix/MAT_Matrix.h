@@ -1471,6 +1471,47 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
   return Vzero;
 }
 
+/*
+  This is for computing the kernel of a floating point matrix for which we know the
+  rank. We want to avoid finding an incorrect kernel.
+  ---
+  Iniial equation is xM = 0
+  Then we have xM M^T = 0
+  Then we compute the lower eigenvalues and this gets us the approximate kernel.
+ */
+template<typename T>
+MyMatrix<T> DominantKernel(MyMatrix<T> const& M, int const& k) {
+  MyMatrix<T> Mprod = M * M.transpose();
+  int dim_rel = Mprod.rows();
+  Eigen::SelfAdjointEigenSolver<MyMatrix<T>> eig(Mprod);
+  MyVector<T> ListEig = eig.eigenvalues();
+  MyMatrix<T> ListVect = eig.eigenvectors();
+#ifdef DEBUG
+  for (int i=1; i<dim_red; i++) {
+    if (ListEig(i-1) > ListEig(i)) {
+      std::cerr << "ListEig(i-1)=" << ListEig(i-1) << " ListEig(i)=" << ListEig(i) << "\n";
+      throw TerminalException{1};
+    }
+  }
+#endif
+  MyMatrix<T> NSP(k, dim_rel);
+  for (int u=0; u<k; u++) {
+    for (int i=0; i<dim_rel; i++) {
+      NSP(u, i) = ListVect(i, u);
+    }
+  }
+#ifdef DEBUG
+  MyMatrix<T> prod = NSP * M;
+  T error = L1_norm_mat(prod);
+  if (error > 0.1) {
+    std::cerr << "error=" << error << "\n";
+    throw TerminalException{1};
+  }
+#endif
+  return NSP;
+}
+
+
 template <typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
 NullspaceTrMat(MyMatrix<T> const &Input) {
