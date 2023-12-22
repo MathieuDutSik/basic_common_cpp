@@ -1487,7 +1487,7 @@ MyMatrix<T> DominantKernel(MyMatrix<T> const& M, int const& k) {
   MyVector<T> ListEig = eig.eigenvalues();
   MyMatrix<T> ListVect = eig.eigenvectors();
 #ifdef DEBUG
-  for (int i=1; i<dim_red; i++) {
+  for (int i=1; i<dim_rel; i++) {
     if (ListEig(i-1) > ListEig(i)) {
       std::cerr << "ListEig(i-1)=" << ListEig(i-1) << " ListEig(i)=" << ListEig(i) << "\n";
       throw TerminalException{1};
