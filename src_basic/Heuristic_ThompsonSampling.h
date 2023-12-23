@@ -688,15 +688,15 @@ struct LimitedEmpiricalDistributionFunction {
     bool IsFirst = true;
     auto iter = ListValWei.begin();
     while (true) {
+      if (iter == ListValWei.end()) {
+        break;
+      }
       if (!IsFirst)
         str_ret += " ";
       IsFirst = false;
       str_ret +=
           std::to_string(iter->first) + ":" + std::to_string(iter->second);
       iter++;
-      if (iter == ListValWei.end()) {
-        break;
-      }
     }
     return str_ret;
   }
