@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
     std::vector<Tidx> V;
     if (opt == 1) {
       std::cerr << "Running TRACES GetCanonicalOrdering\n";
-      V = TRACES_GetCanonicalOrdering<Tgr, Tidx>(eGR);
+      V = TRACES_GetCanonicalOrdering<Tgr, Tidx>(eGR, std::cerr);
     }
     if (opt == 2) {
       std::cerr << "Running TRACES GetCanonicalOrdering_Arr_Test\n";

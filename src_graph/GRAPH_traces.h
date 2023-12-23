@@ -20,7 +20,6 @@ public:
   sparsegraph sg1;
   sparsegraph cg1;
   DataTraces(size_t _n, size_t _nbAdjacent) : n(_n), nbAdjacent(_nbAdjacent) {
-    //    std::cerr << "Invoking DataTraces constructor\n";
     lab1 = reinterpret_cast<int *>(malloc(n * sizeof(int)));
     ptn = reinterpret_cast<int *>(malloc(n * sizeof(int)));
     orbits = reinterpret_cast<int *>(malloc(n * sizeof(int)));
@@ -49,7 +48,6 @@ public:
     cg1.wlen = 0;
   }
   ~DataTraces() {
-    //    std::cerr << "Invoking DataTraces destructor\n";
     free(lab1);
     free(ptn);
     free(orbits);
@@ -65,7 +63,6 @@ public:
   DataTraces() = delete;
   DataTraces(const DataTraces &) = delete;
   DataTraces(DataTraces &&x) {
-    //    std::cerr << "Invoking DataTraces && constructor\n";
     n = x.n;
     nbAdjacent = x.nbAdjacent;
     //
@@ -114,7 +111,7 @@ template <typename Tidx> void TRACES_LimitCheck(size_t n) {
 }
 
 template <typename Tidx>
-std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
+std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT, [[maybe_unused]] std::ostream& os) {
   size_t n = DT.n;
   TRACES_LimitCheck<Tidx>(n);
 #ifdef TIMINGS
@@ -131,7 +128,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr(DataTraces &DT) {
   for (size_t i = 0; i < n; i++)
     V[DT.lab1[i]] = Tidx(i);
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetCanonicalOrdering_Arr|=" << time << "\n";
+  os << "|TRACES_GetCanonicalOrdering_Arr|=" << time << "\n";
 #endif
   return V;
 }
@@ -205,7 +202,7 @@ template <typename Tgr> DataTraces *GetDataTraces_from_G(Tgr const &eGR) {
 }
 
 template <typename Tgr, typename Tidx>
-std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
+std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream & os) {
   size_t n = eGR.GetNbVert();
   TRACES_LimitCheck<Tidx>(n);
 #ifdef TIMINGS
@@ -256,7 +253,7 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetCanonicalOrdering|=" << time << "\n";
+  os << "|TRACES_GetCanonicalOrdering|=" << time << "\n";
 #endif
   return V;
 }
@@ -264,14 +261,14 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering(Tgr const &eGR) {
 template <typename Tgr, typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const &eGR) {
   DataTraces *DT = GetDataTraces_from_G(eGR);
-  std::vector<Tidx> V = TRACES_GetCanonicalOrdering_Arr<Tidx>(*DT);
+  std::vector<Tidx> V = TRACES_GetCanonicalOrdering_Arr<Tidx>(*DT, std::cerr);
   delete DT;
   return V;
 }
 
 template <typename Tidx>
 std::vector<std::vector<Tidx>>
-TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
+TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last, [[maybe_unused]] std::ostream & os) {
   TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS
   MicrosecondTime time;
@@ -303,7 +300,7 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last) {
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetListGenerators_Arr|=" << time << "\n";
+  os << "|TRACES_GetListGenerators_Arr|=" << time << "\n";
 #endif
   return ListGen;
 }
@@ -326,7 +323,7 @@ void ReadListGen(permnode *gens, std::vector<std::vector<Tidx>> &ListGen,
 
 template <typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
-                                                        size_t const &n_last) {
+                                                        size_t const &n_last, [[maybe_unused]] std::ostream & os) {
   TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS
   MicrosecondTime time;
@@ -387,7 +384,7 @@ std::vector<std::vector<Tidx>> TRACES_GetListGenerators(Tgr const &eGR,
   DYNFREE(orbits, orbits_sz);
   SG_FREE(sg1);
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetListGenerators|=" << time << "\n";
+  os << "|TRACES_GetListGenerators|=" << time << "\n";
 #endif
   return ListGen;
 }
@@ -397,7 +394,7 @@ std::vector<std::vector<Tidx>>
 TRACES_GetListGenerators_Arr_Test(Tgr const &eGR, size_t const &n_last) {
   DataTraces *DT = GetDataTraces_from_G(eGR);
   std::vector<std::vector<Tidx>> ret =
-      TRACES_GetListGenerators_Arr<Tidx>(*DT, n_last);
+    TRACES_GetListGenerators_Arr<Tidx>(*DT, n_last, std::cerr);
   delete DT;
   return ret;
 }
@@ -405,7 +402,7 @@ TRACES_GetListGenerators_Arr_Test(Tgr const &eGR, size_t const &n_last) {
 template <typename TidxC, typename TidxG>
 std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>>
 TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
-                                               size_t const &n_last) {
+                                               size_t const &n_last, [[maybe_unused]] std::ostream & os) {
   size_t n = size_t(DT.n);
   TRACES_LimitCheck<TidxC>(n);
   TRACES_LimitCheck<TidxG>(n_last);
@@ -431,15 +428,15 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(DataTraces &DT,
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time
-            << "\n";
+  os << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time
+     << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
 
 template <typename Tgr, typename TidxC, typename TidxG>
 std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>>
-TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
+TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last, [[maybe_unused]] std::ostream & os) {
   size_t n = eGR.GetNbVert();
   TRACES_LimitCheck<TidxC>(n);
   TRACES_LimitCheck<TidxG>(n_last);
@@ -524,7 +521,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last) {
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  std::cerr << "|TRACES_GetCanonicalOrdering_ListGenerators|=" << time << "\n";
+  os << "|TRACES_GetCanonicalOrdering_ListGenerators|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }

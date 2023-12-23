@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     std::vector<std::vector<Tidx>> ListGen;
     if (opt == 1) {
       std::cerr << "Running TRACES_GetListGenerators\n";
-      ListGen = TRACES_GetListGenerators<Tgr, Tidx>(eGR, nbRow);
+      ListGen = TRACES_GetListGenerators<Tgr, Tidx>(eGR, nbRow, std::cerr);
     }
     if (opt == 2) {
       std::cerr << "Running TRACES_GetListGenerators\n";
