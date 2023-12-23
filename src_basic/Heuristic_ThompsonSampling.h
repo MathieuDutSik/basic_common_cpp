@@ -14,6 +14,11 @@
 #include <utility>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_LEDF
+#define DEBUG_TS
+#endif
+
 template <typename T> struct SingleCondition {
   std::string eCond;
   std::string eType;
