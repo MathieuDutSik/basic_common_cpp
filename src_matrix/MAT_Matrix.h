@@ -1971,13 +1971,15 @@ MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const &VF,
 template <typename T> MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const &EXT) {
   int nbRow = EXT.rows();
   int nbCol = EXT.cols();
+  auto IsLineZero=[&](int const& iLine) -> bool {
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      if (EXT(iLine, iCol) != 0)
+        return false;
+    return true;
+  };
   std::vector<int> ListIdx;
   for (int iRow = 0; iRow < nbRow; iRow++) {
-    bool IsZero = true;
-    for (int iCol = 0; iCol < nbCol; iCol++)
-      if (EXT(iRow, iCol) != 0)
-        IsZero = false;
-    if (!IsZero)
+    if (!IsLineZero(iRow))
       ListIdx.push_back(iRow);
   }
   return SelectRow(EXT, ListIdx);
