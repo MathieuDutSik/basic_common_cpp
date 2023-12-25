@@ -86,8 +86,8 @@ template <typename T> std::vector<T> Kernel_FactorsInt(T const &N) {
   if (epair.first) {
     T fact1 = epair.second;
     T fact2 = QuoInt(N, fact1);
-    std::vector<T> ListPrime = FactorsInt(fact1);
-    std::vector<T> V2 = FactorsInt(fact2);
+    std::vector<T> ListPrime = Kernel_FactorsInt(fact1);
+    std::vector<T> V2 = Kernel_FactorsInt(fact2);
     ListPrime.insert(ListPrime.end(), V2.begin(), V2.end());
     return ListPrime;
   } else {
