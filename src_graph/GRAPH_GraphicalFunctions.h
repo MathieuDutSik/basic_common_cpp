@@ -291,6 +291,25 @@ template <typename Tgr> bool IsSimpleGraph(Tgr const &GR) {
   return true;
 }
 
+template <typename Tgr> bool IsSymmetricGraph(Tgr const &GR) {
+  size_t nbVert = GR.GetNbVert();
+  MyMatrix<int8_t> M=ZeroMatrix<int8_t>(nbVert,nbVert);
+  for (size_t iVert = 0; iVert < nbVert; iVert++) {
+    std::vector<size_t> LAdj = GR.Adjacency(iVert);
+    for (auto & eAdj : LAdj) {
+      M(iVert, eAdj) = 1;
+    }
+  }
+  for (size_t iVert=0; iVert<nbVert; iVert++) {
+    for (size_t jVert=iVert+1; jVert<nbVert; jVert++) {
+      if (M(iVert, jVert) != M(jVert, iVert)) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 template <typename Tgr>
 std::vector<std::vector<size_t>> GetEdgeSet(Tgr const &GR) {
   size_t nbVert = GR.GetNbVert();
