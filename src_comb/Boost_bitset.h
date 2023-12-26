@@ -33,6 +33,17 @@ std::vector<int> FaceTo01vector(Face const &eSet) {
   return eList;
 }
 
+template<typename Tidx>
+Face VectorToFace(std::vector<Tidx> const& V, size_t siz) {
+  Face f(siz);
+  for (auto & eVal : V) {
+    f[eVal] = 1;
+  }
+  return f;
+}
+
+
+
 std::string StringFace(Face const &f) {
   std::string str_ret;
   size_t len = f.size();
