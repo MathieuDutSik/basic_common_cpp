@@ -2866,6 +2866,27 @@ public:
   }
 };
 
+template<typename T>
+std::optional<int> get_position_m_v(MyMatrix<T> const& M, MyVector<T> const& V) {
+  int n_rows=M.rows();
+  int n_cols=M.cols();
+  auto is_in_row=[&](int i_row) -> bool {
+    for (int i=0; i<n_cols; i++) {
+      if (M(i_row,i) != V(i)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  for (int i_row=0; i_row<n_rows; i_row++) {
+    if (is_in_row(i_row)) {
+      return i_row;
+    }
+  }
+  return {};
+}
+
+
 /*
   G has to be non-degenerate so that we can define the projector.
   --- "G"         is a (n x n) matrix.
