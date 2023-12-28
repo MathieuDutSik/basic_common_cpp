@@ -307,6 +307,17 @@ inline int CanonicalizationUnit(int const &eVal) {
   return 1;
 }
 
+template<typename T>
+T unfold_opt(std::optional<T> const& opt, std::string const& str) {
+  if (!opt) {
+    std::cerr << "Error in unfold_opt at str=" << str << "\n";
+    throw TerminalException{1};
+  }
+  return *opt;
+}
+
+
+
 // clang-format off
 #endif  // SRC_BASIC_TEMP_COMMON_H_
 // clang-format on
