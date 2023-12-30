@@ -1,22 +1,4 @@
-PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix TestMatrixInverse TestPerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice TestHilbertMatrix TestProdMat Matrix_As_Set TestNullspaceComputation ScalarCanonicalization MatrixSubsetSolver DeterminantMat ComputePointer NonUniqueScaleToInteger NullspaceComputationExperiment SmithNormalForm TestSubspaceCompletion RemoveFractionMatrix
-#PROGRAM		= ComputePointer
-#PROGRAM		= RowHermiteNormalForm
-#PROGRAM		= TestMatrixInverse
-#PROGRAM		= TestHilbertMatrix
-#PROGRAM		= TestPerformanceHNF
-#PROGRAM		= IntersectionLattice
-#PROGRAM		= NullspaceComputationLinbox
-#PROGRAM		= RowHermiteNormalForm TestPerformanceHNF ColHermiteNormalForm
-#PROGRAM		= Matrix_As_Set
-#PROGRAM		= DeterminantMat
-#PROGRAM		= SerializeMatrix
-#PROGRAM		= NullspaceIntTrMat
-#PROGRAM		= NullspaceIntMat
-#PROGRAM		= SolutionIntMat
-#PROGRAM		= TestProdMat
-#PROGRAM		= test
-#PROGRAM		= NonUniqueScaleToInteger
-#PROGRAM		= NullspaceComputation
+PROGRAM		= AnalysisSingMat NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix TestMatrixInverse TestPerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice TestHilbertMatrix TestProdMat Matrix_As_Set TestNullspaceComputation ScalarCanonicalization MatrixSubsetSolver DeterminantMat ComputePointer NonUniqueScaleToInteger NullspaceComputationExperiment SmithNormalForm TestSubspaceCompletion RemoveFractionMatrix SolutionMatRepetitive
 #PROGRAM		= TestNullspaceComputation
 
 OBJECTS		= $(PROGRAM:%=%.o)

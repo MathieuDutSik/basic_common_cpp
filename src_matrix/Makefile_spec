@@ -7,8 +7,9 @@
 #PROGRAM		= ScalarCanonicalization
 #PROGRAM		= MatrixSubsetSolver
 #PROGRAM		= UniqueRescaleRows
-PROGRAM		= TestFindIsotropicMod
+#PROGRAM		= TestFindIsotropicMod
 #PROGRAM		= SmithNormalForm
+PROGRAM		= SolutionMatRepetitive
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

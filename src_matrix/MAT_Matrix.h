@@ -23,6 +23,11 @@
 #include <vector>
 // clang-format on
 
+#ifdef DEBUG
+#define DEBUG_MAT_MATRIX
+#endif
+
+
 template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;
 };
@@ -1909,6 +1914,41 @@ SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   }
   return {};
 }
+
+template<typename T>
+struct SolutionMatRepetitive {
+private:
+  MyMatrix<T> TheBasis;
+  std::vector<int> ListColSelect;
+  MyMatrix<T> InvMat;
+public:
+  SolutionMatRepetitive(MyMatrix<T> const& _TheBasis) : TheBasis(_TheBasis) {
+#ifdef DEBUG_MAT_MATRIX
+    if (RankMat(TheBasis) != TheBasis.rows()) {
+      std::cerr << "RankMat(TheBasis)=" << RankMat(TheBasis) << "\n";
+      std::cerr << "  TheBasis.rows()=" << TheBasis.rows() << "\n";
+      std::cerr << "Error in SolutionMatRepetitive\n";
+      throw TerminalException{1};
+    }
+#endif
+    SelectionRowCol<T> src = TMat_SelectRowCol(TheBasis);
+    ListColSelect = src.ListColSelect;
+    MyMatrix<T> SelMat = SelectColumn(TheBasis, ListColSelect);
+    InvMat = Inverse(SelMat);
+  }
+  std::optional<MyVector<T>> GetSolution(MyVector<T> const& eVect) {
+    int siz = ListColSelect.size();
+    MyVector<T> V(siz);
+    for (int u=0; u<siz; u++) {
+      V(u) = eVect(ListColSelect[u]);
+    }
+    MyVector<T> MySol = InvMat.transpose() * V;
+    if (MySol * TheBasis != eVect) {
+      return {};
+    }
+    return MySol;
+  }
+};
 
 /*
   We can actually do a little bit better for the solution to avoid repeating
