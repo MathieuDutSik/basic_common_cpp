@@ -232,6 +232,25 @@ template <typename T> MyMatrix<T> ReadMatrixFile(std::string const &file_name) {
   return ReadMatrix<T>(is);
 }
 
+template <typename T>
+std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
+  if (!IsExistingFile(eFile)) {
+    std::cerr << "Error in ReadListMatrixFile\n";
+    std::cerr << "eFile=" << eFile << " does not appear to exist\n";
+    throw TerminalException{1};
+  }
+  std::ifstream is(eFile);
+  int n_mat;
+  is >> n_mat;
+  std::vector<MyMatrix<T>> ListMat;
+  for (int i_mat = 0; i_mat < n_mat; i_mat++) {
+    MyMatrix<T> eMat = ReadMatrix<T>(is);
+    ListMat.push_back(eMat);
+  }
+  return ListMat;
+}
+
+
 template <typename T> std::pair<bool, T> ReadMatrixInfo(std::istream &is) {
   T eVal;
   int nbRow, nbCol;
