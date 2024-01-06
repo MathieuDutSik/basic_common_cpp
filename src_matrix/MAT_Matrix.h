@@ -232,14 +232,8 @@ template <typename T> MyMatrix<T> ReadMatrixFile(std::string const &file_name) {
   return ReadMatrix<T>(is);
 }
 
-template <typename T>
-std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
-  if (!IsExistingFile(eFile)) {
-    std::cerr << "Error in ReadListMatrixFile\n";
-    std::cerr << "eFile=" << eFile << " does not appear to exist\n";
-    throw TerminalException{1};
-  }
-  std::ifstream is(eFile);
+template<typename T>
+std::vector<MyMatrix<T>> ReadListMatrix(std::istream & is) {
   int n_mat;
   is >> n_mat;
   std::vector<MyMatrix<T>> ListMat;
@@ -250,6 +244,33 @@ std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
   return ListMat;
 }
 
+
+
+template <typename T>
+std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
+  if (!IsExistingFile(eFile)) {
+    std::cerr << "Error in ReadListMatrixFile\n";
+    std::cerr << "eFile=" << eFile << " does not appear to exist\n";
+    throw TerminalException{1};
+  }
+  std::ifstream is(eFile);
+  return ReadListMatrix<T>(is);
+}
+
+template<typename T>
+void WriteListMatrix(std::ostream &os, std::vector<MyMatrix<T>> const &ListMat) {
+  size_t n_mat = ListMat.size();
+  os << n_mat << "\n";
+  for (size_t i_mat=0; i_mat<n_mat; i_mat++) {
+    WriteMatrix(os, ListMat[i_mat]);
+  }
+}
+
+template<typename T>
+void WriteListMatrixFile(std::string const &eFile, std::vector<MyMatrix<T>> const &ListMat) {
+  std::ofstream os(eFile);
+  WriteListMatrix(os, ListMat);
+}
 
 template <typename T> std::pair<bool, T> ReadMatrixInfo(std::istream &is) {
   T eVal;
