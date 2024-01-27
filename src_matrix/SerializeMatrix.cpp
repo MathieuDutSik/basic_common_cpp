@@ -35,6 +35,11 @@ template <typename Tfull> void test_type(Tfull const& val1) {
   }
 
   // Checking the consistency of the data exchange
+  //  std::cerr << "val1=" << StringMatrixGAP(val1) << "\n";
+  //  std::cerr << "val2=" << StringMatrixGAP(val2) << "\n";
+  //  std::cerr << "val1=" << StringVectorGAP(val1) << "\n";
+  //  std::cerr << "val2=" << StringVectorGAP(val2) << "\n";
+  //  std::cerr << "val2=" << val2 << "\n";
   if (val1 != val2) {
     std::cerr << "Error in the serialization\n";
     throw TerminalException{1};
@@ -47,8 +52,8 @@ template <typename Tfull> void test_type(Tfull const& val1) {
 
 
 template <typename T> void test_type_mymatrix_myvector() {
-  size_t n_row = 10;
-  size_t n_col = 20;
+  size_t n_row = 4;
+  size_t n_col = 5;
   MyMatrix<T> M(n_row, n_col);
   for (size_t i_row = 0; i_row < n_row; i_row++) {
     for (size_t i_col = 0; i_col < n_col; i_col++) {

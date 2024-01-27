@@ -271,7 +271,12 @@ public:
         pos_slash = pos;
       pos++;
     }
-    //
+    // It seems the istringstream is not working properly in some cases.
+    // For example
+    // std::istringstream is("3")
+    // int test_val
+    // is >> test_val
+    // which gets us a value of 33 for test_val
     if (pos_slash == miss_val) {
       std::istringstream isN(s);
       isN >> v.num;

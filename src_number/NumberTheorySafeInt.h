@@ -921,55 +921,12 @@ inline void NearestInteger(Rational<SafeInt64> const &xI, long &xO) {
 
 namespace boost::serialization {
 
-// Rational<SafeInt64>
-
-template <class Archive>
-inline void load(Archive &ar, Rational<SafeInt64> &val,
-                 [[maybe_unused]] const unsigned int version) {
-  std::string str;
-  ar &make_nvp("safe_rat", str);
-  std::istringstream is(str);
-  is >> val;
-}
-
-template <class Archive>
-inline void save(Archive &ar, Rational<SafeInt64> const &val,
-                 [[maybe_unused]] const unsigned int version) {
-  std::ostringstream os;
-  os << val;
-  std::string str = os.str();
-  ar &make_nvp("safe_rat", str);
-}
-
-template <class Archive>
-inline void serialize(Archive &ar, Rational<SafeInt64> &val,
-                      [[maybe_unused]] const unsigned int version) {
-  split_free(ar, val, version);
-}
-
 // SafeInt64
 
 template <class Archive>
-inline void load(Archive &ar, SafeInt64 &val,
-                 [[maybe_unused]] const unsigned int version) {
-  std::string str;
-  ar &make_nvp("safe_int", str);
-  std::istringstream is(str);
-  is >> val;
-}
-
-template <class Archive>
-inline void save(Archive &ar, SafeInt64 const &val,
-                 [[maybe_unused]] const unsigned int version) {
-  std::ostringstream os;
-  os << val;
-  std::string str = os.str();
-  ar &make_nvp("safe_int", str);
-}
-
-template <class Archive>
-inline void serialize(Archive &ar, SafeInt64 &val, const unsigned int version) {
-  split_free(ar, val, version);
+inline void serialize(Archive &ar, SafeInt64 & x,
+                      [[maybe_unused]] const unsigned int version) {
+  ar &make_nvp("the_val", x.get_val());
 }
 
 // clang-format off
