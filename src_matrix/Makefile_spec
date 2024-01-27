@@ -9,7 +9,8 @@
 #PROGRAM		= UniqueRescaleRows
 #PROGRAM		= TestFindIsotropicMod
 #PROGRAM		= SmithNormalForm
-PROGRAM		= SolutionMatRepetitive
+#PROGRAM		= SolutionMatRepetitive
+PROGRAM		= SerializeMatrix
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -28,7 +29,7 @@ CDEFS           = -DDEBUG_MATRIX_INT
 
 CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(LIBSHORT_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(FLINT_INCLUDE)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LIBSHORT_LINK) $(FLINT_LINK)
+LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LIBSHORT_LINK) $(FLINT_LINK) $(BOOST_LINK)
 
 %.o: %.cpp
 	@echo

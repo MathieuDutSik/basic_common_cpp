@@ -35,6 +35,22 @@ template <typename T> struct is_mymatrix<MyMatrix<T>> {
 namespace boost::serialization {
 
 //
+// MyVector data type
+//
+
+template <class Archive, typename T>
+inline void serialize(Archive &ar, MyVector<T> &vect,
+                      [[maybe_unused]] const unsigned int version) {
+  int rows = vect.rows();
+  ar &make_nvp("rows", rows);
+  // matrix.resize is a no-op if size does not change!
+  vect.resize(rows, 1);
+  // always save/load row-major
+  for (int r = 0; r < rows; ++r)
+    ar &make_nvp("val", vect(r));
+}
+
+//
 // MyMatrix data type
 //
 

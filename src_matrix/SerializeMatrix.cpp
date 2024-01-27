@@ -7,16 +7,7 @@
 #include "MAT_Matrix.h"
 // clang-format off
 
-template <typename T> void test_type() {
-  size_t n_row = 10;
-  size_t n_col = 20;
-  MyMatrix<T> M1(n_row, n_col);
-  for (size_t i_row = 0; i_row < n_row; i_row++) {
-    for (size_t i_col = 0; i_col < n_col; i_col++) {
-      T val = UniversalScalarConversion<T,long>(random() % 20);
-      M1(i_row, i_col) = val;
-    }
-  }
+template <typename Tfull> void test_type(Tfull const& val1) {
   std::string filename = "/tmp/MAT_filename.boost_archive";
 
   //
@@ -28,35 +19,56 @@ template <typename T> void test_type() {
     std::ofstream ofs(filename);
     boost::archive::text_oarchive oa(ofs);
     // write class instance to archive
-    oa << M1;
+    oa << val1;
     // archive and stream closed when destructors are called
   }
 
-  MyMatrix<T> M2;
+  Tfull val2;
   // load data from archive
   {
     // create and open an archive for input
     std::ifstream ifs(filename);
     boost::archive::text_iarchive ia(ifs);
     // read class state from archive
-    ia >> M2;
+    ia >> val2;
     // archive and stream closed when destructors are called
   }
 
   // Checking the consistency of the data exchange
-  size_t hash1 = std::hash<MyMatrix<T>>()(M1);
-  size_t hash2 = std::hash<MyMatrix<T>>()(M2);
-  std::cerr << " hash1=" << hash1 << "\n";
-  std::cerr << " hash2=" << hash2 << "\n";
-  if (hash1 != hash2) {
+  if (val1 != val2) {
     std::cerr << "Error in the serialization\n";
     throw TerminalException{1};
   }
 }
 
+
+
+
+
+
+template <typename T> void test_type_mymatrix_myvector() {
+  size_t n_row = 10;
+  size_t n_col = 20;
+  MyMatrix<T> M(n_row, n_col);
+  for (size_t i_row = 0; i_row < n_row; i_row++) {
+    for (size_t i_col = 0; i_col < n_col; i_col++) {
+      T val = UniversalScalarConversion<T,long>(random() % 20);
+      M(i_row, i_col) = val;
+    }
+  }
+  test_type(M);
+  //
+  MyVector<T> V(n_row);
+  for (size_t i_row = 0; i_row < n_row; i_row++) {
+    T val = UniversalScalarConversion<T,long>(random() % 20);
+    V(i_row) = val;
+  }
+  test_type(V);
+}
+
 int main() {
-  test_type<mpz_class>();
-  test_type<mpq_class>();
-  test_type<SafeInt64>();
-  test_type<Rational<SafeInt64>>();
+  test_type_mymatrix_myvector<mpz_class>();
+  test_type_mymatrix_myvector<mpq_class>();
+  test_type_mymatrix_myvector<SafeInt64>();
+  test_type_mymatrix_myvector<Rational<SafeInt64>>();
 }
