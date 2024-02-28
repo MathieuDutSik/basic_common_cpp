@@ -234,6 +234,15 @@ GCD_dot<T> ComputeGcdDot(MyVector<T> const& x) {
   return {std::move(V), gcd};
 }
 
+template<typename T>
+GCD_dot<T> PositivityNormalizeGcdDot(GCD_dot<T> const& x) {
+  if (x.gcd > 0) {
+    return x;
+  }
+  return {-x.V, -x.gcd};
+}
+
+
 // This is the return type for the second extended GCD computations
 // In input a list of entries x=(x_0, ...., x_m)
 // In return we have:
