@@ -1740,7 +1740,7 @@ void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat,
   }
 }
 
-template <typename T> MyMatrix<T> TMat_CongrMap(MyMatrix<T> const &eMat) {
+template <typename T> MyMatrix<T> CongrMap(MyMatrix<T> const &eMat) {
   MyMatrix<T> TheInv = Inverse(eMat);
   return TransposedMat(TheInv);
 }
