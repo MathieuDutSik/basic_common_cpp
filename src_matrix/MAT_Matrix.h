@@ -210,6 +210,26 @@ MySparseMatrix<T2> ConvertSparseMatrix(MySparseMatrix<T1> const &M,
   return SpMat;
 }
 
+template <typename T>
+MyMatrix<T> DropColumn(MyMatrix<T> const &M, int const &idx_drop) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  MyMatrix<T> Mred(nbRow, nbCol - 1);
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    int pos = 0;
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      if (iCol != idx_drop) {
+        Mred(iRow, pos) = M(iRow, iCol);
+        pos++;
+      }
+    }
+  }
+  return Mred;
+}
+
+// Need to see which one is best by the ordering of the data.
+
+/*
 template<typename T>
 MyMatrix<T> DropColumn(MyMatrix<T> const& M, int const& col_drop) {
   int n_cols = M.cols();
@@ -226,7 +246,7 @@ MyMatrix<T> DropColumn(MyMatrix<T> const& M, int const& col_drop) {
   }
   return M_red;
 }
-
+*/
 
 //
 // ReadWriteMatrices and vectors
