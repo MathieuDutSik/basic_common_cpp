@@ -1293,6 +1293,27 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol, 
           std::move(ListRowSelect)};
 }
 
+template<typename T>
+MyMatrix<T> NullspaceMatSingleVector(MyVector<T> const& V) {
+  int n = V.size();
+  for (int i=0; i<n; i++) {
+    if (V(i) != 0) {
+      MyMatrix<T> NSP = ZeroMatrix<T>(n-1, n);
+      int pos = 0;
+      for (int j=0; j<n; j++) {
+        if (i != j) {
+          NSP(pos, i) = -V(j);
+          NSP(pos, j) = V(i);
+          pos++;
+        }
+      }
+      return NSP;
+    }
+  }
+  std::cerr << "Failed to find a non-zero index\n";
+  throw TerminalException{1};
+}
+
 template <typename T>
 SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input, T const& threshold) {
   size_t nbRow = Input.rows();
