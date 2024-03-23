@@ -831,6 +831,8 @@ template <typename T> MyMatrix<T> RankOneMatrix(MyVector<T> const &V) {
   return retMat;
 }
 
+// Use the companion matrix for computing the roots of a
+// polynomial.
 template <typename T>
 std::vector<T> RootPolynomial(std::vector<T> const &eVect) {
   int nbEnt = eVect.size();
@@ -2044,6 +2046,39 @@ public:
   }
 };
 
+template<typename T>
+bool TestEqualitySpannedSpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2) {
+#ifdef DEBUG_MAT_MATRIX
+  if (M1.cols() != M2.cols()) {
+    std::cerr << "That case is actually not allowed\n";
+    throw TerminalException{1};
+  }
+  if (RankMat(M1) != M1.rows()) {
+    std::cerr << "M1 number of rows should match its rank\n";
+    throw TerminalException{1};
+  }
+  if (RankMat(M2) != M2.rows()) {
+    std::cerr << "M2 number of rows should match its rank\n";
+    throw TerminalException{1};
+  }
+#endif
+  // We make the assumption that the input is valid, that is
+  // that the number of rows is equal to the rank.
+  if (M1.rows() != M2.rows()) {
+    return false;
+  }
+  SolutionMatRepetitive<T> smr(M1);
+  for (int irow=0; irow<M2.rows(); irow++) {
+    MyVector<T> V2 = GetMatrixRow(M2, irow);
+    std::optional<MyVector<T>> opt = smr.GetSolution(V2);
+    if (!opt) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
 /*
   We can actually do a little bit better for the solution to avoid repeating
   the preprocessing.
@@ -2463,17 +2498,17 @@ MyVector<T> SolveConjGrad(MyMatrix<T> const &A, MyVector<T> const &b) {
   double rsold, rsnew, alpha;
   r = b;
   p = r;
-  rsold = ScalarProduct(r, r);
+  rsold = r.dot(r);
   T eZer = 0;
   for (int i = 0; i < n; i++)
     x(i) = eZer;
   int nbOper = 4 * n;
   for (int i = 0; i < nbOper; i++) {
-    Ap = VectorMatrix(p, A);
-    alpha = rsold / ScalarProductQuadForm(A, p, p);
+    Ap = A * p;
+    alpha = rsold / EvaluationQuadForm(A, p);
     x += alpha * p;
     r -= alpha * Ap;
-    rsnew = ScalarProduct_Doubl(r, r);
+    rsnew = r.dot(r);
     p = r + (rsnew / rsold) * p;
     rsold = rsnew;
   }
