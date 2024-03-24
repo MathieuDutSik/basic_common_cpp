@@ -2576,7 +2576,7 @@ template <typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyVector<T>>::type
 CanonicalizeVector(MyVector<T> const &V) {
   int n = V.size();
-  T TheMin = 0;
+  T TheMin(0);
   int iSelect = -1;
   for (int i = 0; i < n; i++) {
     T eVal = V(i);
