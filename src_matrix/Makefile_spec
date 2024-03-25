@@ -10,7 +10,8 @@
 #PROGRAM		= TestFindIsotropicMod
 #PROGRAM		= SmithNormalForm
 #PROGRAM		= SolutionMatRepetitive
-PROGRAM		= SerializeMatrix
+#PROGRAM		= SerializeMatrix
+PROGRAM		= TestEquaSpace
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

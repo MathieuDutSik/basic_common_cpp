@@ -196,7 +196,7 @@ ComputePairGcdDot(T const &m, T const &n) {
   V(0) = s;
   V(1) = t;
 #ifdef DEBUG_MATRIX_INT
-  T diff1 = f - V(0) * m - V(1) * n;
+  T diff1 = eGCD - V(0) * m - V(1) * n;
   if (diff1 != 0) {
     std::cerr << "A: diff1=" << diff1 << "\n";
     throw TerminalException{1};
