@@ -2055,12 +2055,17 @@ public:
   }
   std::optional<MyVector<T>> GetSolution(MyVector<T> const& eVect) {
     int siz = ListColSelect.size();
+    //    std::cerr << "siz=" << siz << "\n";
     MyVector<T> V(siz);
     for (int u=0; u<siz; u++) {
+      //      std::cerr << "u=" << u << " ColSelect=" << ListColSelect[u] << "\n";
       V(u) = eVect(ListColSelect[u]);
     }
+    //    std::cerr << "InvMat=\n";
+    //    WriteMatrix(std::cerr, InvMat);
     MyVector<T> MySol = InvMat.transpose() * V;
-    if (MySol * TheBasis != eVect) {
+    //    std::cerr << "We have MySol\n";
+    if (TheBasis.transpose() * MySol != eVect) {
       return {};
     }
     return MySol;
@@ -2083,19 +2088,25 @@ bool TestEqualitySpannedSpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2) {
     throw TerminalException{1};
   }
 #endif
+  //  std::cerr << "TestEqualitySpannedSpaces, step 1\n";
   // We make the assumption that the input is valid, that is
   // that the number of rows is equal to the rank.
   if (M1.rows() != M2.rows()) {
     return false;
   }
+  //  std::cerr << "TestEqualitySpannedSpaces, step 1\n";
   SolutionMatRepetitive<T> smr(M1);
+  //  std::cerr << "TestEqualitySpannedSpaces, step 2\n";
   for (int irow=0; irow<M2.rows(); irow++) {
     MyVector<T> V2 = GetMatrixRow(M2, irow);
+    //    std::cerr << "Before GetSolution irow=" << irow << "\n";
     std::optional<MyVector<T>> opt = smr.GetSolution(V2);
+    //    std::cerr << "After GetSolution\n";
     if (!opt) {
       return false;
     }
   }
+  //  std::cerr << "TestEqualitySpannedSpaces, step 3\n";
   return true;
 }
 
