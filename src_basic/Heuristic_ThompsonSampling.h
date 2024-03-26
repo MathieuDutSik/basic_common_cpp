@@ -15,7 +15,7 @@
 #include <vector>
 
 #ifdef DEBUG
-#define DEBUG_LEDF
+#define DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
 #define DEBUG_TS
 #endif
 
@@ -476,7 +476,7 @@ struct LimitedEmpiricalDistributionFunction {
   }
   void clear_entry() {
     size_t len = ListValWei.size();
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: clear_entry, ListValWei =";
     for (size_t u = 0; u < len; u++)
       std::cerr << " " << ListValWei[u].first;
@@ -494,7 +494,7 @@ struct LimitedEmpiricalDistributionFunction {
         min_delta = delta;
       }
     }
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: clear_entry, pos_found=" << pos_found
               << " min_delta=" << min_delta << "\n";
 #endif
@@ -504,7 +504,7 @@ struct LimitedEmpiricalDistributionFunction {
     size_t w2 = ListValWei[pos_found + 1].second;
     double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
     size_t new_w = w1 + w2;
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: clear_entry w1=" << w1 << " w2=" << w2
               << " new_w=" << new_w << "\n";
     std::cerr << "LEDF: clear_entry val1=" << val1 << " val2=" << val2
@@ -512,13 +512,13 @@ struct LimitedEmpiricalDistributionFunction {
 #endif
     ListValWei[pos_found] = {new_val, new_w};
     ListValWei.erase(ListValWei.begin() + pos_found + 1);
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: clear_entry |ListValWei|=" << ListValWei.size()
               << " len=" << len << "\n";
 #endif
   }
   void insert_value(double new_val) {
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: ledf, insert_value new_val=" << new_val
               << " |ListValWei|=" << ListValWei.size() << " n_max=" << n_max
               << "\n";
@@ -555,7 +555,7 @@ struct LimitedEmpiricalDistributionFunction {
       throw TerminalException{1};
     }
     if (ListValWei.size() > n_max) {
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
       std::cerr << "LEDF: Before clear_entry\n";
 #endif
       clear_entry();
@@ -571,7 +571,7 @@ struct LimitedEmpiricalDistributionFunction {
   }
   double get_percentile(double const &alpha) const {
     size_t len = ListValWei.size();
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
     std::cerr << "LEDF: ListValWei =";
     size_t n_total = 0;
@@ -605,7 +605,7 @@ struct LimitedEmpiricalDistributionFunction {
       };
       double TheVal = alpha * f_d(n_ins);
       double weight = 0.5 * f_d(ListValWei[0].second);
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
       std::cerr << "LEDF: get_percentile, TheVal=" << TheVal
                 << " weight=" << weight << "\n";
 #endif
@@ -619,7 +619,7 @@ struct LimitedEmpiricalDistributionFunction {
         size_t w1 = ListValWei[u].second;
         size_t w2 = ListValWei[u + 1].second;
         weight = 0.5 * f_d(w1 + w2);
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
         std::cerr << "LEDF: get_percentile, TheVal=" << TheVal
                   << " weight=" << weight << "\n";
 #endif
@@ -639,14 +639,14 @@ struct LimitedEmpiricalDistributionFunction {
           // w1 delta] - TheVal * 2 delta^2 = 0 a = w2 - w1 b = 2 w1 delta c =
           // -TheVal * 2 * delta^2
           double delta = val2 - val1;
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
           std::cerr << "LEDF: get_percentile, delta=" << delta << "\n";
 #endif
           if (w1 == w2) {
             // It gets us
             // y w1 = TheVal * delta
             double y = TheVal * delta / f_d(w1);
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
             std::cerr << "LEDF: get_percentile, y=" << y << "\n";
 #endif
             return val1 + y;
@@ -658,7 +658,7 @@ struct LimitedEmpiricalDistributionFunction {
             double sqrt_Delta = sqrt(Delta);
             double y1 = (-b - sqrt_Delta) / (2 * a);
             double y2 = (-b + sqrt_Delta) / (2 * a);
-#ifdef DEBUG_LEDF
+#ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
             std::cerr << "LEDF: get_percentile, a=" << a << " b=" << b
                       << " c=" << c << "\n";
             std::cerr << "LEDF: get_percentile, y1=" << y1 << " y2=" << y2

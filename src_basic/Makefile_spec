@@ -1,4 +1,3 @@
-PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing_Heuristic_and_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Analysis_EmpiricalDistribution Test_hash_table Test_bool Test_face
 #PROGRAM		= Test_parse_split
 #PROGRAM		= test_hash
 #PROGRAM		= Test_String_Split
@@ -10,7 +9,7 @@ PROGRAM		= Convert_Heuristic_to_Thompson_sampling Test_Thompson_sampling Fuzzing
 #PROGRAM		= Test_serialization
 #PROGRAM		= Test_timing
 #PROGRAM		= Test_namelist
-#PROGRAM		= Test_PresenceProgram
+PROGRAM		= Test_PresenceProgram
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

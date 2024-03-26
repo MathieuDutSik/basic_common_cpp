@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_DUALDESC_BASIC_DATAFILE_H_
-#define SRC_DUALDESC_BASIC_DATAFILE_H_
+#ifndef SRC_BASIC_BASIC_DATAFILE_H_
+#define SRC_BASIC_BASIC_DATAFILE_H_
 
 #include "Basic_file.h"
 #include "Boost_bitset.h"
@@ -674,5 +674,5 @@ void SingleData_DebugWrite(std::string const& prefix, T const& obj) {
 }
 
 // clang-format off
-#endif  //  SRC_DUALDESC_BASIC_DATAFILE_H_
+#endif  //  SRC_BASIC_BASIC_DATAFILE_H_
 // clang-format on
