@@ -2106,7 +2106,7 @@ public:
     return n_vect;
   }
 private:
-  size_t IsInspace_priv(MyVector<T> const& v) {
+  size_t IsInspace_priv() {
     size_t pos = 0;
     for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
       size_t eCol = ListColSelect[i_vect];
