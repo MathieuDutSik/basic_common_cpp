@@ -2091,6 +2091,17 @@ public:
       pos++;
     }
   }
+  MyMatrix<T> GetBasis() const {
+    MyMatrix<T> Mret(n_vect, dim);
+    size_t pos = 0;
+    for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
+      for (size_t u=0; u<dim; u++) {
+        Mret(i_vect, u) = TheBasis[pos];
+        pos++;
+      }
+    }
+    return Mret;
+  }
   size_t get_n_vect() const {
     return n_vect;
   }
