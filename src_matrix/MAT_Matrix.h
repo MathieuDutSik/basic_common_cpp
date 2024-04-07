@@ -2072,6 +2072,107 @@ public:
   }
 };
 
+
+template<typename T>
+struct MutableSubspaceBelongingRepetitive {
+private:
+  size_t dim;
+  size_t n_vect;
+  std::vector<T> TheBasis;
+  std::vector<size_t> ListColSelect;
+  std::vector<T> Vins;
+public:
+  MutableSubspaceBelongingRepetitive(int const& _dim) : dim(_dim), n_vect(0), Vins(dim) {
+  }
+  void SetVectout(int i_vect, MyVector<T> & Vout) {
+    size_t pos = i_vect * dim;
+    for (size_t i=0; i<dim; i++) {
+      Vout(i) = TheBasis[pos];
+      pos++;
+    }
+  }
+  size_t get_n_vect() const {
+    return n_vect;
+  }
+private:
+  size_t IsInspace_priv(MyVector<T> const& v) {
+    size_t pos = 0;
+    for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
+      size_t eCol = ListColSelect[i_vect];
+      T coeff = Vins[eCol];
+      if (coeff != 0) {
+        for (size_t i=0; i<dim; i++) {
+          Vins[i] -= coeff * TheBasis[pos];
+          pos++;
+        }
+      } else {
+        pos += dim;
+      }
+    }
+    for (size_t i=0; i<dim; i++) {
+      if (Vins[i] != 0) {
+        return i;
+      }
+    }
+    return dim;
+  }
+public:
+  bool IsInspace(MyVector<T> const& v) {
+    for (size_t i=0; i<dim; i++) {
+      Vins[i] = v(i);
+    }
+    return IsInspace_priv() == dim;
+  }
+private:
+  bool InsertVector_priv() {
+    size_t idx = IsInspace_priv();
+    if (idx == dim) {
+      return true;
+    }
+    T coeff = Vins[idx];
+    for (size_t i=0; i<dim; i++) {
+      Vins[i] /= coeff;
+    }
+    for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
+      T coeff = TheBasis[i_vect * dim + idx];
+      if (coeff != 0) {
+        for (size_t i=0; i<dim; i++) {
+          TheBasis[i_vect * dim + i] -= coeff * Vins[i];
+        }
+      }
+    }
+    ListColSelect.push_back(idx);
+    n_vect++;
+    for (size_t u=0; u<dim; u++) {
+      TheBasis.push_back(Vins[u]);
+    }
+    return false;
+  }
+public:
+  bool InsertVector(MyVector<T> const& v) {
+    for (size_t i=0; i<dim; i++) {
+      Vins[i] = v(i);
+    }
+    return InsertVector_priv();
+  }
+  void InsertMatrix(MyMatrix<T> const& M) {
+    int n_row = M.rows();
+    for (int i_row=0; i_row<n_row; i_row++) {
+      for (size_t i=0; i<dim; i++) {
+        Vins[i] = M(i_row, i);
+      }
+      (void)InsertVector_priv();
+    }
+  }
+};
+
+
+
+
+
+
+
+
 template<typename T>
 bool TestEqualitySpannedSpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2) {
 #ifdef DEBUG_MAT_MATRIX
