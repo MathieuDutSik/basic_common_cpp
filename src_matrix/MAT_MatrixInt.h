@@ -192,7 +192,7 @@ ComputePairGcdDot(T const &m, T const &n) {
   mpz_class s, t;
   mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), m.get_mpz_t(),
              n.get_mpz_t());
-  MyMatrix<T> V(2);
+  MyVector<T> V(2);
   V(0) = s;
   V(1) = t;
 #ifdef DEBUG_MATRIX_INT
