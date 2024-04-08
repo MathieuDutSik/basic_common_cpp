@@ -377,6 +377,25 @@ template <typename T> std::size_t hash_from_stream(T const &val) {
   return std::hash<std::string>()(converted);
 }
 
+template<typename T>
+size_t ComputeHashTwoMap(size_t const& seed, std::map<T, size_t> const& ListDiagNorm, std::map<T, size_t> const& ListOffDiagNorm) {
+  auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+    seed ^= new_hash + 0x9e3779b8 + (seed << 6) + (seed >> 2);
+  };
+  size_t hash = seed;
+  auto update_from_map=[&](std::map<T, size_t> const& map) -> void {
+    for (auto & kv : map) {
+      size_t hash1 = std::hash<T>()(kv.first);
+      size_t hash2 = kv.second;
+      combine_hash(hash, hash1);
+      combine_hash(hash, hash2);
+    }
+  };
+  update_from_map(ListDiagNorm);
+  update_from_map(ListOffDiagNorm);
+  return hash;
+}
+
 namespace std {
 template <typename T> struct hash<std::vector<T>> {
   std::size_t operator()(const std::vector<T> &V) const {
