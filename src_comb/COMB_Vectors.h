@@ -62,6 +62,24 @@ bool IsSubset(std::vector<T> const &S1, std::vector<T> const &S2) {
   return true;
 }
 
+// V1 and V2 should have no repetition
+template<typename T>
+bool IsEqualSet(std::vector<T> const& V1, std::vector<T> const& V2) {
+  if (V1.size() != V2.size()) {
+    return false;
+  }
+  std::unordered_set<T> set;
+  for (auto &val : V1) {
+    set.insert(val);
+  }
+  for (auto & val : V2) {
+    if (set.count(val) == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 template <typename T> std::vector<T> VectorAsSet(std::vector<T> const &V) {
   std::unordered_set<T> eSet;
   for (auto &eVal : V)
