@@ -5,6 +5,8 @@ struct DataTest {
   std::vector<uint8_t> V;
   std::unordered_set<int> set;
   std::unordered_map<int, int> map;
+  std::optional<int> opt1;
+  std::optional<int> opt2;
 };
 
 namespace boost::serialization {
@@ -14,6 +16,8 @@ namespace boost::serialization {
     ar &make_nvp("V", eRec.V);
     ar &make_nvp("set", eRec.set);
     ar &make_nvp("map", eRec.map);
+    ar &make_nvp("opt1", eRec.opt1);
+    ar &make_nvp("opt2", eRec.opt2);
   }
 }
 
@@ -25,6 +29,12 @@ bool operator==(DataTest const &x, DataTest const &y) {
     return false;
   }
   if (x.map != y.map) {
+    return false;
+  }
+  if (x.opt1 != y.opt1) {
+    return false;
+  }
+  if (x.opt2 != y.opt2) {
     return false;
   }
   return true;
@@ -46,7 +56,9 @@ DataTest GenerateEntry() {
     set.insert(val1);
     map.insert(std::make_pair(val1, val2));
   }
-  return {eV, set, map};
+  std::optional<int> opt1;
+  std::optional<int> opt2(23);
+  return {eV, set, map, opt1, opt2};
 }
 
 
