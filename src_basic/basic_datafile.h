@@ -668,7 +668,7 @@ T SingleData_Read(std::string const& FileData) {
 }
 
 template<typename T>
-void SingleData_DebugWrite(std::string const& prefix, T const& obj) {
+void SingleData_IncrementalWrite(std::string const& prefix, T const& obj) {
   std::string FileData = FindAvailableFileFromPrefix(prefix);
   SingleData_Write(FileData, obj);
 }
