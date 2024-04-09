@@ -19,16 +19,75 @@
 
 namespace boost::serialization {
 
-template <class Archive, typename T>
-inline void serialize(Archive &ar, std::vector<T> &val,
-                      [[maybe_unused]] const unsigned int version) {
-  size_t len = val.size();
-  ar &make_nvp("len", len);
-  val.resize(len);
-  // always save/load row-major
-  for (size_t u = 0; u < len; u++)
-    ar &make_nvp("Vu", val[u]);
-}
+  template <class Archive, typename T>
+  inline void serialize(Archive &ar, std::vector<T> &val,
+                        [[maybe_unused]] const unsigned int version) {
+    size_t len = val.size();
+    ar &make_nvp("len", len);
+    val.resize(len);
+    // always save/load row-major
+    for (size_t u = 0; u < len; u++)
+      ar &make_nvp("Vu", val[u]);
+  }
+
+  template <class Archive, typename T>
+  inline void load(Archive &ar, std::unordered_set<T> &val,
+                   [[maybe_unused]] const unsigned int version) {
+    size_t n;
+    ar &make_nvp("n", n);
+    val.clear();
+    for (size_t u = 0; u < n; u++) {
+      T key;
+      ar &make_nvp("key", key);
+      val.insert(key);
+    }
+  }
+
+  template <class Archive, typename T>
+  inline void save(Archive &ar, std::unordered_set<T> const &val,
+                   [[maybe_unused]] const unsigned int version) {
+    size_t n = val.size();
+    ar &make_nvp("n", n);
+    for (auto& key : val) {
+      ar &make_nvp("key", key);
+    }
+  }
+
+  template <class Archive, typename T>
+  inline void serialize(Archive &ar, std::unordered_set<T> &val, const unsigned int version) {
+    split_free(ar, val, version);
+  }
+
+  template <class Archive, typename K, typename V>
+  inline void load(Archive &ar, std::unordered_map<K, V> &val,
+                   [[maybe_unused]] const unsigned int version) {
+    size_t n;
+    ar &make_nvp("n", n);
+    val.clear();
+    for (size_t u = 0; u < n; u++) {
+      K key;
+      V value;
+      ar &make_nvp("key", key);
+      ar &make_nvp("value", value);
+      val.insert(std::make_pair(key, value));
+    }
+  }
+
+  template <class Archive, typename K, typename V>
+  inline void save(Archive &ar, std::unordered_map<K, V> const &val,
+                   [[maybe_unused]] const unsigned int version) {
+    size_t n = val.size();
+    ar &make_nvp("n", n);
+    for (auto& kv : val) {
+      ar &make_nvp("key", kv.first);
+      ar &make_nvp("value", kv.second);
+    }
+  }
+
+  template <class Archive, typename K, typename V>
+  inline void serialize(Archive &ar, std::unordered_map<K, V> &val, const unsigned int version) {
+    split_free(ar, val, version);
+  }
 
 // clang-format off
 }  // namespace boost::serialization
