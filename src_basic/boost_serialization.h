@@ -19,6 +19,8 @@
 
 namespace boost::serialization {
 
+  // std::vector
+
   template <class Archive, typename T>
   inline void serialize(Archive &ar, std::vector<T> &val,
                         [[maybe_unused]] const unsigned int version) {
@@ -29,6 +31,8 @@ namespace boost::serialization {
     for (size_t u = 0; u < len; u++)
       ar &make_nvp("Vu", val[u]);
   }
+
+  // std::unordered_set
 
   template <class Archive, typename T>
   inline void load(Archive &ar, std::unordered_set<T> &val,
@@ -58,6 +62,8 @@ namespace boost::serialization {
     split_free(ar, val, version);
   }
 
+  // std::unordered_map
+
   template <class Archive, typename K, typename V>
   inline void load(Archive &ar, std::unordered_map<K, V> &val,
                    [[maybe_unused]] const unsigned int version) {
@@ -86,6 +92,35 @@ namespace boost::serialization {
 
   template <class Archive, typename K, typename V>
   inline void serialize(Archive &ar, std::unordered_map<K, V> &val, const unsigned int version) {
+    split_free(ar, val, version);
+  }
+
+  // std::optional
+
+  template <class Archive, typename T>
+  inline void load(Archive &ar, std::optional<T> &val,
+                   [[maybe_unused]] const unsigned int version) {
+    bool test;
+    ar &make_nvp("has_value", test);
+    if (test) {
+      T value;
+      ar &make_nvp("value", value);
+      val = value;
+    }
+  }
+
+  template <class Archive, typename T>
+  inline void save(Archive &ar, std::optional<T> const &val,
+                   [[maybe_unused]] const unsigned int version) {
+    bool test = val.has_value();
+    ar &make_nvp("has_value", test);
+    if (test) {
+      ar &make_nvp("value", *val);
+    }
+  }
+
+  template <class Archive, typename T>
+  inline void serialize(Archive &ar, std::optional<T> &val, const unsigned int version) {
     split_free(ar, val, version);
   }
 
