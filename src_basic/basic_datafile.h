@@ -673,6 +673,23 @@ void SingleData_DebugWrite(std::string const& prefix, T const& obj) {
   SingleData_Write(FileData, obj);
 }
 
+template<typename T>
+std::optional<T> SingleData_LoadLast(std::string const& prefix) {
+  std::string FullFile = prefix + "0";
+  if (!IsExistingFile(FullFile)) {
+    return {};
+  }
+  size_t iFile = 0;
+  while(true) {
+    std::string FullFile1 = prefix + std::to_string(iFile);
+    std::string FullFile2 = prefix + std::to_string(iFile + 1);
+    if (IsExistingFile(FullFile1) && !IsExistingFile(FullFile2)) {
+      return SingleData_Read<T>(FullFile1);
+    }
+    iFile += 1;
+  }
+}
+
 // clang-format off
 #endif  //  SRC_BASIC_BASIC_DATAFILE_H_
 // clang-format on
