@@ -3179,6 +3179,107 @@ public:
   }
 };
 
+template <typename T>
+T GetSmallestMatrixCoefficient(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  auto get_abs = [](T const &val) -> T {
+    if (val < 0)
+      return -val;
+    return val;
+  };
+  T the_sma = 1; // Just to shut up warnings. Will not be used
+  bool IsAssigned = false;
+  auto f_insert = [&](T const &input) -> void {
+    T val = get_abs(input);
+    if (val > 0) {
+      if (!IsAssigned) {
+        the_sma = val;
+        IsAssigned = true;
+      } else {
+        if (val < the_sma)
+          the_sma = val;
+      }
+    }
+  };
+  for (int iCol = 0; iCol < nbCol; iCol++)
+    for (int iRow = 0; iRow < nbRow; iRow++)
+      f_insert(M(iRow, iCol));
+  if (!IsAssigned) {
+    std::cerr << "Failed to find a non-zero value for M, so impossible to "
+                 "canonicalize\n";
+    throw TerminalException{1};
+  }
+  return the_sma;
+}
+
+template <typename T>
+T GetSmallestVectorCoefficient(MyVector<T> const &V) {
+  int n = V.size();
+  auto get_abs = [](T const &val) -> T {
+    if (val < 0)
+      return -val;
+    return val;
+  };
+  T the_sma = 1; // Just to shut up warnings. Will not be used
+  bool IsAssigned = false;
+  auto f_insert = [&](T const &input) -> void {
+    T val = get_abs(input);
+    if (val > 0) {
+      if (!IsAssigned) {
+        the_sma = val;
+        IsAssigned = true;
+      } else {
+        if (val < the_sma)
+          the_sma = val;
+      }
+    }
+  };
+  for (int i = 0; i < n; i++)
+    f_insert(V(i));
+  if (!IsAssigned) {
+    std::cerr << "Failed to find a non-zero value for V, so impossible to "
+                 "canonicalize\n";
+    throw TerminalException{1};
+  }
+  return the_sma;
+}
+
+template <typename T> struct ContainerMatrixPositiveScal {
+private:
+  int nbRow;
+  int nbCol;
+  std::unique_ptr<ContainerMatrix<T>> Cont;
+  MyMatrix<T> Mret;
+  MyVector<T> V;
+public:
+  ContainerMatrixPositiveScal(MyMatrix<T> const& M) : nbRow(M.rows()), nbCol(M.cols()) {
+    Mret = MyMatrix<T>(nbRow, nbCol);
+    V = MyVector<T>(nbCol);
+    for (int iRow = 0; iRow < nbRow; iRow++) {
+      MyVector<T> V = GetMatrixRow(M, iRow);
+      T the_sma = GetSmallestVectorCoefficient(V);
+      V /= the_sma;
+      AssignMatrixRow(Mret, iRow, V);
+    }
+    Cont = std::make_unique<ContainerMatrix<T>>(Mret);
+  }
+  template<typename F> std::optional<size_t> GetIdx_f(F f) {
+    for (int i = 0; i < nbCol; i++)
+      V(i) = f(i);
+    T the_sma = GetSmallestVectorCoefficient(V);
+    V /= the_sma;
+    return Cont->GetIdx_v(V);
+  }
+  std::optional<size_t> GetIdx_v(MyVector<T> const& Vin) {
+    for (int i = 0; i < nbCol; i++)
+      V(i) = Vin(i);
+    T the_sma = GetSmallestVectorCoefficient(V);
+    V /= the_sma;
+    return Cont->GetIdx_v(V);
+  }
+};
+
 template<typename T>
 std::optional<int> get_position_m_v(MyMatrix<T> const& M, MyVector<T> const& V) {
   int n_rows=M.rows();

@@ -446,35 +446,7 @@ template <typename T>
 FractionMatrix<T>
 CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
-  int nbRow = M.rows();
-  int nbCol = M.cols();
-  auto get_abs = [](T const &val) -> T {
-    if (val < 0)
-      return -val;
-    return val;
-  };
-  T the_sma = 1; // Just to shut up warnings. Will not be used
-  bool IsAssigned = false;
-  auto f_insert = [&](T const &input) -> void {
-    T val = get_abs(input);
-    if (val > 0) {
-      if (!IsAssigned) {
-        the_sma = val;
-        IsAssigned = true;
-      } else {
-        if (val < the_sma)
-          the_sma = val;
-      }
-    }
-  };
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      f_insert(M(iRow, iCol));
-  if (!IsAssigned) {
-    std::cerr << "Failed to find a non-zero value for M, so impossible to "
-                 "canonicalize\n";
-    throw TerminalException{1};
-  }
+  T the_sma = GetSmallestMatrixCoefficient(M);
   MyMatrix<T> M2 = M / the_sma;
   T TheMult = 1 / the_sma;
   return {TheMult, std::move(M2)};
@@ -489,33 +461,7 @@ template <typename T>
 FractionVector<T>
 CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
-  int n = V.size();
-  auto get_abs = [](T const &val) -> T {
-    if (val < 0)
-      return -val;
-    return val;
-  };
-  T the_sma = 1; // Just to shut up warnings. Will not be used
-  bool IsAssigned = false;
-  auto f_insert = [&](T const &input) -> void {
-    T val = get_abs(input);
-    if (val > 0) {
-      if (!IsAssigned) {
-        the_sma = val;
-        IsAssigned = true;
-      } else {
-        if (val < the_sma)
-          the_sma = val;
-      }
-    }
-  };
-  for (int i = 0; i < n; i++)
-    f_insert(V(i));
-  if (!IsAssigned) {
-    std::cerr << "Failed to find a non-zero value for V, so impossible to "
-                 "canonicalize\n";
-    throw TerminalException{1};
-  }
+  T the_sma = GetSmallestVectorCoefficient(V);
   MyVector<T> V2 = V / the_sma;
   T TheMult = 1 / the_sma;
   return {TheMult, std::move(V2)};
