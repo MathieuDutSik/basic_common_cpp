@@ -15,6 +15,9 @@
 #include <boost/serialization/split_free.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/serialization/utility.hpp>
+#include <unordered_set>
+#include <unordered_map>
+#include <optional>
 #include <vector>
 
 namespace boost::serialization {
