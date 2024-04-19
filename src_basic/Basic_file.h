@@ -11,6 +11,16 @@
 #include <sys/types.h>
 #include <vector>
 
+template <typename F>
+void print_stderr_stdout_file(std::string const &FileOut, F f) {
+  if (FileOut == "stderr")
+    return f(std::cerr);
+  if (FileOut == "stdout")
+    return f(std::cout);
+  std::ofstream os(FileOut);
+  return f(os);
+}
+
 void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
   std::string eComm = "cp " + SrcFile + " " + DstFile;
   int iret = system(eComm.c_str());
