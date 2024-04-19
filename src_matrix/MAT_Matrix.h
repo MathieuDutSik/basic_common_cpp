@@ -612,6 +612,19 @@ template <typename T> std::string StringMatrixGAP(MyMatrix<T> const &TheMat) {
   return os.str();
 }
 
+template<typename T>
+void WriteListMatrixGAP(std::ostream& os, std::vector<MyMatrix<T>> const& ListMat) {
+  os << "[";
+  bool IsFirst= true;
+  for (auto & eMat : ListMat) {
+    if (!IsFirst)
+      os << ",\n";
+    IsFirst = false;
+    WriteMatrixGAP(os, eMat);
+  }
+  os << "]";
+}
+
 template <typename T>
 std::string StringMatrixGAP_line(MyMatrix<T> const &TheMat) {
   std::ostringstream os;
