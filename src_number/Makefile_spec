@@ -11,7 +11,8 @@
 #PROGRAM		= RationalTest
 #PROGRAM		= TestTypeBoostGmp
 #PROGRAM		= TestGetBit
-PROGRAM		= test_sequence_approximant
+#PROGRAM		= test_sequence_approximant
+PROGRAM		= TestQuadraticResidue
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -25,8 +26,8 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC              = /home/mathieu/opt/gcc-6.3.0/bin/g++ -std=c++17 -O3
 #CC		= g++ -std=c++17 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
 #CC		= g++ -std=c++17 -Wall -O3 -g
-#CC		= g++ -std=c++17 -Wall -O3
-CC		= g++ -std=c++17 -Wall -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
+CC		= g++ -std=c++17 -Wall -O3
+#CC		= g++ -std=c++17 -Wall -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
 #CC		= g++ -std=c++17 -Wall -g -O2 -static-libgcc -static-libstdc++
 
 NOLINKFLAG 	= -c
@@ -35,9 +36,13 @@ OUTPUTFLAG 	= -o
 
 
 CLOCAL          = -I../src_basic -I../src_matrix -I.
+
 CFLAGS 		= -I$(GMP_INCDIR) -I$(EIGEN_PATH) -I$(BOOST_INCDIR)
-CDEBUG 		= -DCHECK_REAL_ALG_NUMERIC
+
+CDEBUG 		= -DDEBUG
+#CDEBUG 		= -DCHECK_REAL_ALG_NUMERIC
 #CDEBUG 		= -DCHECK_REAL_ALG_NUMERIC -DCHECK_SAFETY_INTEGER
+
 CTOTAL 		= $(CLOCAL) $(CFLAGS) $(CDEBUG)
 
 LIBS		= -lm $(GMP_CXX_LINK)

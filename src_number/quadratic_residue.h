@@ -9,6 +9,10 @@
 #include <vector>
 // clang-format on
 
+#ifdef DEBUG
+#define DEBUG_QUADRATIC_RESIDUE
+#endif
+
 // This is an exhaustive search that works even if m is not prime.
 template <typename T>
 std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
@@ -19,7 +23,7 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
   T res = ResInt(m, two);
   T upper(0);
   if (res == 0) {
-    upper = QuoInt(m, two);
+    upper = QuoInt(m, two) + 1;
   } else {
     T mP1 = m + 1;
     upper = QuoInt(mP1, two);
@@ -27,7 +31,13 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
   T x(0);
   T TwoXpOne(1);
   T xSqr(0);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  std::cerr << "QUADRES: upper=" << upper << "\n";
+#endif
   while (x != upper) {
+#ifdef DEBUG_QUADRATIC_RESIDUE
+    std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a_mod=" << a_mod << " m=" << m << "\n";
+#endif
     if (xSqr == a_mod) {
       return x;
     }

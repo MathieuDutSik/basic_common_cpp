@@ -28,6 +28,13 @@ void process(int TheMod) {
     std::cerr << "n_quad=" << n_quad << " n_quad_exact=" << n_quad_exact << "\n";
     throw TerminalException{1};
   }
+  T test_x(1);
+  T test_m(2);
+  bool test = is_quadratic_residue(test_x, test_m);
+  if (!test) {
+    std::cerr << "Failed to correctly resolve for x=1 m=2\n";
+    throw TerminalException{1};
+  }
 }
 
 
@@ -42,7 +49,7 @@ int main(int argc, char *argv[]) {
     //    process<boost::multiprecision::mpz_int>(TheMod);
     std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
-    std::cerr << "Somethng went wrong in the computation\n";
+    std::cerr << "There is a bug to be resolved in the code\n";
     exit(e.eVal);
   }
 }
