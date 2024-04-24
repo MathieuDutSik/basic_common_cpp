@@ -2190,11 +2190,20 @@ public:
   }
 };
 
-
-
-
-
-
+// Returns true if M1 is a subspace of M2
+template<typename T>
+bool IsSubspaceContained(MyMatrix<T> const&M1, MyMatrix<T> const& M2) {
+  int dim = M2.cols();
+  MutableSubspaceBelongingRepetitive<T> msbr(dim);
+  msbr.InsertMatrix(M2);
+  for (int iRow=0; iRow<M1.rows(); iRow++) {
+    MyVector<T> V = GetMatrixRow(M1, iRow);
+    if (!msbr.IsInspace(V)) {
+      return false;
+    }
+  }
+  return true;
+}
 
 
 template<typename T>
