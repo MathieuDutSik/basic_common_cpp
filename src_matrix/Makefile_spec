@@ -11,7 +11,8 @@
 #PROGRAM		= SmithNormalForm
 #PROGRAM		= SolutionMatRepetitive
 #PROGRAM		= SerializeMatrix
-PROGRAM		= TestEquaSpace
+#PROGRAM		= TestEquaSpace
+PROGRAM		= DeterminantMat
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

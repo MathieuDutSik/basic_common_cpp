@@ -1,6 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheory.h"
+#include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
 #include "NumberTheorySafeInt.h"
@@ -28,6 +29,11 @@ void compute_determinant(std::string const &arithmetic,
     using T = Rational<SafeInt64>;
     return compute_determinant_kernel<T>(eFile);
   }
+  if (arithmetic == "cpp_rational") {
+    using T = boost::multiprecision::cpp_rational;
+    return compute_determinant_kernel<T>(eFile);
+  }
+#ifndef DISABLE_GMP_ARITHMETIC
   if (arithmetic == "rational") {
     using T = mpq_class;
     return compute_determinant_kernel<T>(eFile);
@@ -58,6 +64,7 @@ void compute_determinant(std::string const &arithmetic,
     using T = RealField<idx_real_algebraic_field>;
     return compute_determinant_kernel<T>(eFile);
   }
+#endif
   std::cerr << "Failed to find a matching arithmetic\n";
   throw TerminalException{1};
 }
