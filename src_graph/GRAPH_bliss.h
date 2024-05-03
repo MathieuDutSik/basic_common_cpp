@@ -132,15 +132,15 @@ template <typename Tgr> std::string GetCanonicalForm_string(Tgr const &eGR) {
   return strRet;
 }
 
-template <typename Tgr, typename Tidx>
-std::vector<Tidx> BLISS_GetCanonicalOrdering(Tgr const &eGR) {
+template <typename Tgr, typename TidxC>
+std::vector<TidxC> BLISS_GetCanonicalOrdering(Tgr const &eGR) {
   size_t nof_vertices = eGR.GetNbVert();
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
   //
   const unsigned int *cl;
   cl = g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<Tidx> vectD(nof_vertices);
+  std::vector<TidxC> vectD(nof_vertices);
   for (size_t i = 0; i < nof_vertices; i++)
     vectD[i] = cl[i];
   return vectD;
@@ -165,8 +165,8 @@ static inline void report_aut_vectvectint(void *param,
   rec_param->LGen.push_back(eVect);
 }
 
-template <typename Tgr, typename Tidx>
-std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const &eGR,
+template <typename Tgr, typename TidxG>
+std::vector<std::vector<TidxG>> BLISS_GetListGenerators(Tgr const &eGR,
                                                        size_t const &n_last) {
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
@@ -175,9 +175,9 @@ std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const &eGR,
   RecParam *rec_param_ptr = &rec_param;
   g.find_automorphisms(stats, &report_aut_vectvectint,
                        reinterpret_cast<void *>(rec_param_ptr));
-  std::vector<std::vector<Tidx>> ListGen;
+  std::vector<std::vector<TidxG>> ListGen;
+  std::vector<TidxG> V(n_last);
   for (auto &eList : rec_param.LGen) {
-    std::vector<Tidx> V(n_last);
     for (size_t i = 0; i < n_last; i++)
       V[i] = eList[i];
     ListGen.push_back(V);
@@ -185,8 +185,8 @@ std::vector<std::vector<Tidx>> BLISS_GetListGenerators(Tgr const &eGR,
   return ListGen;
 }
 
-template <typename Tgr, typename Tidx>
-std::pair<std::vector<Tidx>, std::vector<std::vector<Tidx>>>
+template <typename Tgr, typename TidxC, typename TidxG>
+std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>>
 BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
                                           size_t const &n_last) {
   size_t nof_vertices = eGR.GetNbVert();
@@ -195,7 +195,7 @@ BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
   //
   const unsigned int *cl;
   cl = g.canonical_form(stats, &report_aut_void, stderr);
-  std::vector<Tidx> vectD(nof_vertices);
+  std::vector<TidxC> vectD(nof_vertices);
   for (size_t i = 0; i < nof_vertices; i++)
     vectD[i] = cl[i];
   //
@@ -204,9 +204,9 @@ BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
   RecParam *rec_param_ptr = &rec_param;
   g.find_automorphisms(stats, &report_aut_vectvectint,
                        reinterpret_cast<void *>(rec_param_ptr));
-  std::vector<std::vector<Tidx>> ListGen;
+  std::vector<std::vector<TidxG>> ListGen;
+  std::vector<TidxG> V(n_last);
   for (auto &eList : rec_param.LGen) {
-    std::vector<Tidx> V(n_last);
     for (size_t i = 0; i < n_last; i++)
       V[i] = eList[i];
     ListGen.push_back(V);
