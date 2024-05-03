@@ -237,7 +237,10 @@ std::string MD5_hash_string(std::string const &data) {
   return converted;
 }
 
+
 template <typename T> T ConvertHex_to_T(std::string const &data) {
+  // Be careful, the T could overflow if T is an "int" though not for
+  // a size_t.
   std::vector<std::string> LChar{"0", "1", "2", "3", "4", "5", "6", "7",
                                  "8", "9", "a", "b", "c", "d", "e", "f"};
   auto GetPosition = [&](std::string const &eChar) -> int {
