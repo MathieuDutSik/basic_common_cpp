@@ -626,7 +626,7 @@ void WriteListMatrixGAP(std::ostream& os, std::vector<MyMatrix<T>> const& ListMa
 }
 
 template<typename T>
-void WriteListMatrixGAP(std::string& eFile, std::vector<MyMatrix<T>> const& ListMat) {
+void WriteListMatrixFileGAP(std::string& eFile, std::vector<MyMatrix<T>> const& ListMat) {
   std::ofstream os_out(eFile);
   os_out << "return ";
   WriteListMatrixGAP(os_out, ListMat);
