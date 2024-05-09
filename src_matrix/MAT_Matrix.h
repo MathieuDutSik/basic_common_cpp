@@ -227,27 +227,6 @@ MyMatrix<T> DropColumn(MyMatrix<T> const &M, int const &idx_drop) {
   return Mred;
 }
 
-// Need to see which one is best by the ordering of the data.
-
-/*
-template<typename T>
-MyMatrix<T> DropColumn(MyMatrix<T> const& M, int const& col_drop) {
-  int n_cols = M.cols();
-  int n_rows = M.rows();
-  MyMatrix<T> M_red(n_rows, n_cols - 1);
-  int pos = 0;
-  for (int i_col=0; i_col<n_cols; i_col++) {
-    if (i_col != col_drop) {
-      for (int i_row=0; i_row<n_rows; i_row++) {
-        M_red(i_row, pos) = M(i_row, i_col);
-      }
-      pos++;
-    }
-  }
-  return M_red;
-}
-*/
-
 //
 // ReadWriteMatrices and vectors
 //
