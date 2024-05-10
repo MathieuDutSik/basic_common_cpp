@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_MATRIX_MAT_MATRIX_FP_H_
-#define SRC_MATRIX_MAT_MATRIX_FP_H_
+#ifndef SRC_MATRIX_MAT_MATRIX_SUBSETSOLVER_H_
+#define SRC_MATRIX_MAT_MATRIX_SUBSETSOLVER_H_
 
 // clang-format off
 #include "MAT_MatrixInt.h"
@@ -285,5 +285,5 @@ public:
 };
 
 // clang-format off
-#endif  // SRC_MATRIX_MAT_MATRIX_FP_H_
+#endif  // SRC_MATRIX_MAT_MATRIX_SUBSETSOLVER_H_
 // clang-format on

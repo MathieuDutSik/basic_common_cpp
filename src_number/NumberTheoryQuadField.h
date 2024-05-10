@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_NUMBER_QUADFIELD_H_
-#define SRC_NUMBER_QUADFIELD_H_
+#ifndef SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
+#define SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
 // clang-format off
 #include "Temp_common.h"
 #include "InputOutput.h"
@@ -341,5 +341,5 @@ void ScalingInteger_Kernel(stc<QuadField<T, d>> const &x, Tring &x_res) {
 }
 
 // clang-format off
-#endif  // SRC_NUMBER_QUADFIELD_H_
+#endif  // SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
 // clang-format on

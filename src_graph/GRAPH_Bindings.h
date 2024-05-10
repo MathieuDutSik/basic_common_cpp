@@ -1,6 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_GROUP_GRAPH_BINDINGS_H_
-#define SRC_GROUP_GRAPH_BINDINGS_H_
+#ifndef SRC_GRAPH_GRAPH_BINDINGS_H_
+#define SRC_GRAPH_GRAPH_BINDINGS_H_
 
 // This is bindings to the bliss or traces code.
 //
@@ -151,6 +151,6 @@ std::vector<std::vector<TidxG>> GRAPH_GetListGenerators(Tgr const& eGR, size_t c
 
 
 // clang-format off
-#endif  // SRC_GROUP_GRAPH_BINDINGS_H_
+#endif  // SRC_GRAPH_GRAPH_BINDINGS_H_
 // clang-format on
 
