@@ -70,13 +70,13 @@ public:
   }
 };
 
-size_t FileNumber_Read(std::string const& FileNb) {
+size_t FileNumber_Read(std::string const &FileNb) {
   bool overwrite = false;
   FileNumber fn(FileNb, overwrite);
   return fn.getval();
 }
 
-void FileNumber_Write(std::string const& FileNb, size_t const& val) {
+void FileNumber_Write(std::string const &FileNb, size_t const &val) {
   bool overwrite = true;
   FileNumber fn(FileNb, overwrite);
   fn.setval(val);
@@ -219,13 +219,15 @@ public:
 // Could we represent that by the Face type? (from dynamic_byteset)
 // The question is about the extendibility of the Face type.
 // Clearly, this is a technical debt to pay later one way or the other.
-std::vector<uint8_t> FileBool_FullRead(std::string const& eFile, size_t const& n_orbit, [[maybe_unused]] std::ostream& os) {
+std::vector<uint8_t> FileBool_FullRead(std::string const &eFile,
+                                       size_t const &n_orbit,
+                                       [[maybe_unused]] std::ostream &os) {
   FileBool fb(eFile, n_orbit);
   std::vector<uint8_t> l_status(n_orbit);
 #ifdef DEBUG_BASIC_DATAFILE
   int sum_status = 0;
 #endif
-  for (size_t i=0; i<n_orbit; i++) {
+  for (size_t i = 0; i < n_orbit; i++) {
     bool test = fb.getbit(i);
 #ifdef DEBUG_BASIC_DATAFILE
     sum_status += static_cast<int>(test);
@@ -239,17 +241,15 @@ std::vector<uint8_t> FileBool_FullRead(std::string const& eFile, size_t const& n
   return l_status;
 }
 
-void FileBool_FullWrite(std::string const& eFile, std::vector<uint8_t> const& l_status) {
+void FileBool_FullWrite(std::string const &eFile,
+                        std::vector<uint8_t> const &l_status) {
   FileBool fb(eFile);
   size_t n_obj = l_status.size();
-  for (size_t i=0; i<n_obj; i++) {
+  for (size_t i = 0; i < n_obj; i++) {
     bool test_done = static_cast<bool>(l_status[i]);
     fb.setbit(i, test_done);
   }
 }
-
-
-
 
 //
 // Storing a sequence of faces that can be extended
@@ -424,10 +424,10 @@ public:
 // Storing a sequence of data that can be extended
 //
 
-size_t read_size_t(std::FILE* fp, size_t pos) {
+size_t read_size_t(std::FILE *fp, size_t pos) {
   size_t ret_val;
-  size_t* ptr1 = &ret_val;
-  uint8_t* ptr2 = reinterpret_cast<uint8_t*>(ptr1);
+  size_t *ptr1 = &ret_val;
+  uint8_t *ptr2 = reinterpret_cast<uint8_t *>(ptr1);
   size_t pos_eff = pos * sizeof(size_t);
   std::fseek(fp, pos_eff, SEEK_SET);
   size_t n_read = std::fread(ptr2, sizeof(size_t), 1, fp);
@@ -439,9 +439,9 @@ size_t read_size_t(std::FILE* fp, size_t pos) {
   return ret_val;
 }
 
-void write_size_t(std::FILE* fp, size_t pos, size_t val) {
-  size_t* ptr1 = &val;
-  uint8_t* ptr2 = reinterpret_cast<uint8_t*>(ptr1);
+void write_size_t(std::FILE *fp, size_t pos, size_t val) {
+  size_t *ptr1 = &val;
+  uint8_t *ptr2 = reinterpret_cast<uint8_t *>(ptr1);
   size_t pos_eff = pos * sizeof(size_t);
   std::fseek(fp, pos_eff, SEEK_SET);
   size_t n_write = std::fwrite(ptr2, sizeof(size_t), 1, fp);
@@ -452,10 +452,7 @@ void write_size_t(std::FILE* fp, size_t pos, size_t val) {
   }
 }
 
-
-
-template<typename T>
-struct FileData {
+template <typename T> struct FileData {
 private:
   size_t n_ent;
   size_t shift;
@@ -470,9 +467,10 @@ private:
     std::FILE *fp_data;
     T read_state() {
 #ifdef DEBUG_BASIC_DATAFILE
-      std::cerr << "BASIC_DATAFILE: read_state, pos=" << pos << " n_ent=" << n_ent << "\n";
+      std::cerr << "BASIC_DATAFILE: read_state, pos=" << pos
+                << " n_ent=" << n_ent << "\n";
 #endif
-      size_t len = read_size_t(fp_number, pos+2);
+      size_t len = read_size_t(fp_number, pos + 2);
 #ifdef DEBUG_BASIC_DATAFILE
       std::cerr << "BASIC_DATAFILE: read_state, len=" << len << "\n";
 #endif
@@ -507,7 +505,7 @@ private:
       return val;
     }
     void single_increase() {
-      size_t len = read_size_t(fp_number, pos+2);
+      size_t len = read_size_t(fp_number, pos + 2);
       pos++;
       shift += len;
     }
@@ -521,12 +519,8 @@ private:
       single_increase();
       return tmp;
     }
-    bool operator!=(IteratorData const &iter) {
-      return iter.pos != pos;
-    }
-    bool operator==(IteratorData const &iter) {
-      return iter.pos == pos;
-    }
+    bool operator!=(IteratorData const &iter) { return iter.pos != pos; }
+    bool operator==(IteratorData const &iter) { return iter.pos == pos; }
   };
 
 public:
@@ -553,7 +547,8 @@ public:
       std::cerr << "BASIC_DATAFILE: FileData constructor ow=F step 1\n";
 #endif
       if (!IsExistingFile(file_number) || !IsExistingFile(file_data)) {
-        std::cerr << "FileData: The file " << file << " should not be missing\n";
+        std::cerr << "FileData: The file " << file
+                  << " should not be missing\n";
         throw TerminalException{1};
       }
 #ifdef DEBUG_BASIC_DATAFILE
@@ -578,19 +573,19 @@ public:
     std::fclose(fp_data);
   }
 
-  void push_back(T const& val) {
+  void push_back(T const &val) {
     std::ostringstream ofs;
     boost::archive::text_oarchive oa(ofs);
     oa << val;
     std::string strO = ofs.str();
     size_t len = strO.size();
-    write_size_t(fp_number, n_ent+2, len);
+    write_size_t(fp_number, n_ent + 2, len);
     std::fseek(fp_data, shift, SEEK_SET);
     shift += len;
     n_ent++;
     write_size_t(fp_number, 0, n_ent);
     write_size_t(fp_number, 1, shift);
-    char* ptr = strO.data();
+    char *ptr = strO.data();
     size_t n_write = std::fwrite(ptr, sizeof(uint8_t), len, fp_data);
     if (n_write != len) {
       std::cerr << "n_write=" << n_write << " len=" << len << "\n";
@@ -601,7 +596,7 @@ public:
 
   std::vector<size_t> read_all_sizes() {
     std::vector<size_t> l_sizes(n_ent);
-    for (size_t i=0; i<n_ent; i++) {
+    for (size_t i = 0; i < n_ent; i++) {
       size_t len = read_size_t(fp_number, i + 2);
       l_sizes[i] = len;
     }
@@ -617,8 +612,9 @@ public:
   const_iterator end() const { return {n_ent, n_ent, 0, fp_number, fp_data}; }
 };
 
-template<typename T>
-std::vector<T> FileData_FullRead(std::string const& FileDatabase, [[maybe_unused]] std::ostream& os) {
+template <typename T>
+std::vector<T> FileData_FullRead(std::string const &FileDatabase,
+                                 [[maybe_unused]] std::ostream &os) {
   bool overwrite = false;
   FileData<T> fdata(FileDatabase, overwrite);
   using Iterator = typename FileData<T>::iterator;
@@ -641,25 +637,25 @@ std::vector<T> FileData_FullRead(std::string const& FileDatabase, [[maybe_unused
   return l_obj;
 }
 
-template<typename T>
-void FileData_FullWrite(std::string const& FileDatabase, std::vector<T> const& l_obj) {
+template <typename T>
+void FileData_FullWrite(std::string const &FileDatabase,
+                        std::vector<T> const &l_obj) {
   bool overwrite = true;
   FileData<T> fdata(FileDatabase, overwrite);
-  for (auto & val : l_obj) {
+  for (auto &val : l_obj) {
     fdata.push_back(val);
   }
 }
 
-template<typename T>
-void SingleData_Write(std::string const& FileData, T const& obj) {
+template <typename T>
+void SingleData_Write(std::string const &FileData, T const &obj) {
   std::ofstream ofs(FileData);
   boost::archive::text_oarchive oa(ofs);
   // write class instance to archive
   oa << obj;
 }
 
-template<typename T>
-T SingleData_Read(std::string const& FileData) {
+template <typename T> T SingleData_Read(std::string const &FileData) {
   T obj;
   std::ifstream ifs(FileData);
   boost::archive::text_iarchive ia(ifs);
@@ -667,20 +663,20 @@ T SingleData_Read(std::string const& FileData) {
   return obj;
 }
 
-template<typename T>
-void SingleData_IncrementalWrite(std::string const& prefix, T const& obj) {
+template <typename T>
+void SingleData_IncrementalWrite(std::string const &prefix, T const &obj) {
   std::string FileData = FindAvailableFileFromPrefix(prefix);
   SingleData_Write(FileData, obj);
 }
 
-template<typename T>
-std::optional<T> SingleData_LoadLast(std::string const& prefix) {
+template <typename T>
+std::optional<T> SingleData_LoadLast(std::string const &prefix) {
   std::string FullFile = prefix + "0";
   if (!IsExistingFile(FullFile)) {
     return {};
   }
   size_t iFile = 0;
-  while(true) {
+  while (true) {
     std::string FullFile1 = prefix + std::to_string(iFile);
     std::string FullFile2 = prefix + std::to_string(iFile + 1);
     if (IsExistingFile(FullFile1) && !IsExistingFile(FullFile2)) {

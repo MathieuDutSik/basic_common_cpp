@@ -308,7 +308,9 @@ struct FullNamelist {
   std::string FileName;
 };
 
-std::string GetNamelistStringEntry(FullNamelist const &eFull, std::string const& BlkName, std::string const& name) {
+std::string GetNamelistStringEntry(FullNamelist const &eFull,
+                                   std::string const &BlkName,
+                                   std::string const &name) {
   SingleBlock BlockDATA = eFull.ListBlock.at(BlkName);
   return BlockDATA.ListStringValues.at(name);
 }

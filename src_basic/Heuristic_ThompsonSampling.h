@@ -1229,7 +1229,8 @@ public:
           BlockTHOMPSON.ListListStringValues.at("ListName");
       std::vector<std::string> const &ListDescription =
           BlockTHOMPSON.ListListStringValues.at("ListDescription");
-      if (ListAnswer.size() != ListName.size() || ListAnswer.size() != ListDescription.size()) {
+      if (ListAnswer.size() != ListName.size() ||
+          ListAnswer.size() != ListDescription.size()) {
         std::cerr << "Incorrect length\n";
         std::cerr << "|ListAnswer|=" << ListAnswer.size() << "\n";
         std::cerr << "|ListName|=" << ListName.size() << "\n";

@@ -15,13 +15,14 @@ template <typename T> std::string test(std::string name_numeric) {
     int num = rand() % 10000;
     int den = rand() % 10000;
     int choice = rand() % 2;
-    int sign = 2*choice - 1;
+    int sign = 2 * choice - 1;
     T num_T(num);
     T den_T(den);
     T val = sign * num_T / den_T;
-    std::vector<T> list_approx = get_sequence_continuous_fraction_approximant(val);
+    std::vector<T> list_approx =
+        get_sequence_continuous_fraction_approximant(val);
     os << "val=" << val << " list_approx =";
-    for (auto & approx : list_approx) {
+    for (auto &approx : list_approx) {
       os << " " << approx;
     }
     os << "\n";
@@ -52,9 +53,12 @@ int main(int argc, char *argv[]) {
       if (oper == "check") {
         std::unordered_map<std::string, std::string> map;
         map[test<mpq_class>("mpz_class")] = "mpq_class";
-        //        map[test<boost::multiprecision::mpq_rational>("mpq_rationql")] = "boost::mpq_rational";
-        //        map[test<boost::multiprecision::cpp_rational>("cpp_rational")] = "boost::cpp_rational";
-        map[test<Rational<SafeInt64>>("Rational<SafeInt64>")] = "Rational<SafeInt64>";
+        //        map[test<boost::multiprecision::mpq_rational>("mpq_rationql")]
+        //        = "boost::mpq_rational";
+        //        map[test<boost::multiprecision::cpp_rational>("cpp_rational")]
+        //        = "boost::cpp_rational";
+        map[test<Rational<SafeInt64>>("Rational<SafeInt64>")] =
+            "Rational<SafeInt64>";
         if (map.size() != 1) {
           std::cerr << "We have incoherent result for arithmetics\n";
           std::cerr << "|map|=" << map.size() << "\n";

@@ -237,7 +237,6 @@ std::string MD5_hash_string(std::string const &data) {
   return converted;
 }
 
-
 template <typename T> T ConvertHex_to_T(std::string const &data) {
   // Be careful, the T could overflow if T is an "int" though not for
   // a size_t.
@@ -380,14 +379,16 @@ template <typename T> std::size_t hash_from_stream(T const &val) {
   return std::hash<std::string>()(converted);
 }
 
-template<typename T>
-size_t ComputeHashTwoMap(size_t const& seed, std::map<T, size_t> const& ListDiagNorm, std::map<T, size_t> const& ListOffDiagNorm) {
+template <typename T>
+size_t ComputeHashTwoMap(size_t const &seed,
+                         std::map<T, size_t> const &ListDiagNorm,
+                         std::map<T, size_t> const &ListOffDiagNorm) {
   auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
     seed ^= new_hash + 0x9e3779b8 + (seed << 6) + (seed >> 2);
   };
   size_t hash = seed;
-  auto update_from_map=[&](std::map<T, size_t> const& map) -> void {
-    for (auto & kv : map) {
+  auto update_from_map = [&](std::map<T, size_t> const &map) -> void {
+    for (auto &kv : map) {
       size_t hash1 = std::hash<T>()(kv.first);
       size_t hash2 = kv.second;
       combine_hash(hash, hash1);

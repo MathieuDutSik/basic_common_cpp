@@ -924,7 +924,7 @@ namespace boost::serialization {
 // SafeInt64
 
 template <class Archive>
-inline void serialize(Archive &ar, SafeInt64 & x,
+inline void serialize(Archive &ar, SafeInt64 &x,
                       [[maybe_unused]] const unsigned int version) {
   ar &make_nvp("the_val", x.get_val());
 }

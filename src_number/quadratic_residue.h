@@ -36,7 +36,8 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
 #endif
   while (x != upper) {
 #ifdef DEBUG_QUADRATIC_RESIDUE
-    std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a_mod=" << a_mod << " m=" << m << "\n";
+    std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a_mod=" << a_mod
+              << " m=" << m << "\n";
 #endif
     if (xSqr == a_mod) {
       return x;

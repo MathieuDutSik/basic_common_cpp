@@ -8,13 +8,10 @@
 #include "quadratic_residue.h"
 // clang-format on
 
-
-
-template<typename T>
-void process(int TheMod) {
+template <typename T> void process(int TheMod) {
   T TheMod_T(TheMod);
   int n_quad = 0;
-  for (int u=0; u<TheMod; u++) {
+  for (int u = 0; u < TheMod; u++) {
     T u_T(u);
     bool test = is_quadratic_residue(u_T, TheMod_T);
     if (test) {
@@ -25,7 +22,8 @@ void process(int TheMod) {
   int n_quad_exact = 1 + p;
   if (n_quad != n_quad_exact) {
     std::cerr << "TheMod=" << TheMod << "\n";
-    std::cerr << "n_quad=" << n_quad << " n_quad_exact=" << n_quad_exact << "\n";
+    std::cerr << "n_quad=" << n_quad << " n_quad_exact=" << n_quad_exact
+              << "\n";
     throw TerminalException{1};
   }
   T test_x(1);
@@ -36,8 +34,6 @@ void process(int TheMod) {
     throw TerminalException{1};
   }
 }
-
-
 
 int main(int argc, char *argv[]) {
   try {
