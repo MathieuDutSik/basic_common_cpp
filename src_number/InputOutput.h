@@ -1,11 +1,14 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_INPUTOUTPUT_H_
 #define SRC_NUMBER_INPUTOUTPUT_H_
+
 // clang-format off
 #include "Basic_functions.h"
 #include "ExceptionsFunc.h"
 #include <vector>
 #include <iostream>
+#include <limits>
+#include <optional>
 // clang-format on
 
 template <typename T>
