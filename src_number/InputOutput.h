@@ -51,6 +51,7 @@ void WriteVectorFromRealAlgebraicString(std::ostream &os,
 template <typename T>
 std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
                                                  size_t const &deg) {
+  size_t miss_val = std::numeric_limits<size_t>::max();
   char c;
   std::string s;
   // First skipping the spaces
@@ -85,13 +86,6 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
       W.push_back(u);
     }
   }
-  auto eval_coef = [](std::string const &s_coef) -> T {
-    size_t s_len = s_coef.size();
-    if (s_coef.substr(0, 1) == "+") {
-      return ParseScalar<T>(s_coef.substr(1, s_len - 1));
-    }
-    return ParseScalar<T>(s_coef);
-  };
   auto eval_expo = [](std::string const &s_expo) -> size_t {
     if (s_expo == "x")
       return 1;
@@ -105,26 +99,64 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
     std::string s2 = s_expo.substr(2, s_expo.size() - 2);
     return ParseScalar<size_t>(s2);
   };
-  auto eval = [&](std::string const &sb) -> std::pair<T, size_t> {
-    size_t lenb = sb.size();
-    for (size_t ib = 0; ib < lenb; ib++) {
-      std::string echar = sb.substr(ib, 1);
-      if (echar == "*") {
-        std::string s_coef = sb.substr(0, ib);
-        std::string s_expo = sb.substr(ib + 1, lenb - 1 - ib);
-        return {eval_coef(s_coef), eval_expo(s_expo)};
+  auto get_position=[&](std::string const& s, std::string const& echar) -> size_t {
+    size_t len = s.size();
+    for (size_t u=0; u<len; u++) {
+      std::string c = s.substr(u,1);
+      if (c == echar) {
+        return u;
       }
     }
-    if (sb.substr(0, 1) == "x") {
-      return {1, eval_expo(sb)};
+    return miss_val;
+  };
+  auto eval_scalar=[](std::string const& sc) -> T {
+    if (sc == "") {
+      return T(1);
     }
-    if (sb.substr(0, 2) == "-x") {
-      return {-1, eval_expo(sb.substr(1, lenb - 1))};
+    if (sc == "-") {
+      return T(-1);
     }
-    if (sb.substr(0, 2) == "+x") {
-      return {1, eval_expo(sb.substr(1, lenb - 1))};
+    if (sc == "+") {
+      return T(1);
     }
-    return {eval_coef(sb), 0};
+    if (sc.substr(0, 1) == "+") {
+      size_t s_len = sc.size();
+      return ParseScalar<T>(sc.substr(1, s_len - 1));
+    }
+    return ParseScalar<T>(sc);
+  };
+  auto eval = [&](std::string const &sb) -> std::pair<T, size_t> {
+    size_t lenb = sb.size();
+    std::cerr << "X  :  sb=" << sb << "\n";
+    size_t pos_x = get_position(sb, "x");
+    if (pos_x == miss_val) {
+      return {eval_scalar(sb), 0};
+    }
+    size_t pos_mult = get_position(sb, "*");
+    size_t pos_div = get_position(sb, "/");
+    std::optional<T> div;
+    if (pos_div != miss_val && pos_div > pos_x) {
+      div = ParseScalar<T>(sb.substr(pos_div + 1, lenb - 1 - pos_div));
+    }
+    std::string sbred = sb.substr(0, pos_div);
+    auto get_coeff=[&]() -> T {
+      if (pos_mult == miss_val) {
+        return eval_scalar(sbred.substr(0, pos_x));
+      } else {
+        if (pos_mult + 1 != pos_x) {
+          std::cerr << "We expect the string to have a *x component\n";
+          throw TerminalException{1};
+        }
+        return eval_scalar(sbred.substr(0, pos_mult));
+      }
+    };
+    T coeff = get_coeff();
+    if (div) {
+      coeff /= *div;
+    }
+    size_t lenbred = sbred.size();
+    size_t expo = eval_expo(sbred.substr(pos_x, lenbred - pos_x));
+    return {coeff, expo};
   };
   for (size_t w = 0; w <= W.size(); w++) {
     size_t pos_first = 0, pos_last = s.size();

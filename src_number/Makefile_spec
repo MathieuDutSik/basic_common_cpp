@@ -12,7 +12,8 @@
 #PROGRAM		= TestTypeBoostGmp
 #PROGRAM		= TestGetBit
 #PROGRAM		= test_sequence_approximant
-PROGRAM		= TestQuadraticResidue
+#PROGRAM		= TestQuadraticResidue
+PROGRAM		= ReadValueString
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
