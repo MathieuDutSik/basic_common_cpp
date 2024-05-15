@@ -127,7 +127,6 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
   };
   auto eval = [&](std::string const &sb) -> std::pair<T, size_t> {
     size_t lenb = sb.size();
-    std::cerr << "X  :  sb=" << sb << "\n";
     size_t pos_x = get_position(sb, "x");
     if (pos_x == miss_val) {
       return {eval_scalar(sb), 0};
