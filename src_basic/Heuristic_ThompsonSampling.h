@@ -712,10 +712,10 @@ struct SingleThompsonSamplingState {
       std::map<std::string, LimitedEmpiricalDistributionFunction> const
           &map_name_ledf,
       std::ostream &os) {
-    os << "SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
-    os << "ledf = LimitedEmpiricalDistributionFunction\n";
+    os << "HTS: SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
+    os << "HTS: ledf = LimitedEmpiricalDistributionFunction\n";
     for (auto &kv : map_name_ledf)
-      os << "map_name_ledf key=" << kv.first << "\n";
+      os << "HTS:  map_name_ledf key=" << kv.first << "\n";
     n_insert = 0;
     if (desc.size() > 7) {
       if (desc.substr(0, 7) == "noprior") {
@@ -737,7 +737,7 @@ struct SingleThompsonSamplingState {
     }
     if (opt_noprior) {
       for (auto &ans : ListAnswer) {
-        os << "ans=" << ans << "\n";
+        os << "HRS: ans=" << ans << "\n";
         map_ans_ledf.try_emplace(ans, map_name_ledf.at("empty"));
       }
     } else {
@@ -813,13 +813,13 @@ struct SingleThompsonSamplingState {
     return strRet;
   }
   void print(std::ostream &os) const {
-    os << "ListAllowedOut =";
+    os << "HTS: ListAllowedOut =";
     for (auto &eStr : ListAllowedOut)
       os << " " << eStr;
     os << "\n";
-    os << "map_ans_ledf=\n";
+    os << "HTS: map_ans_ledf=\n";
     for (auto &kv : map_ans_ledf) {
-      os << "key=" << kv.first << " ledf=" << kv.second.string() << "\n";
+      os << "HTS:   key=" << kv.first << " ledf=" << kv.second.string() << "\n";
     }
   }
 };
@@ -1240,19 +1240,19 @@ public:
       for (size_t u = 0; u < ListName.size(); u++) {
         std::string const &name = ListName[u];
         std::string const &desc = ListDescription[u];
-        os << "name=" << name << " desc=" << desc << "\n";
+        os << "HTS: name=" << name << " desc=" << desc << "\n";
         m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf, os);
       }
-      os << "m_name_ts =";
+      os << "HTS: m_name_ts =";
       for (auto &kv : m_name_ts)
         os << " " << kv.first;
       os << "\n";
       // The terms like "noprior:70" will not show up in the description but may
       // occur in the output of heuristic and so have to be taken into account
       // separately.
-      os << "Heu=\n" << heu << "\n";
+      os << "HTS: Heu=\n" << heu << "\n";
       for (auto &eOutput : GetHeuristicOutput(heu)) {
-        os << "eOutput=" << eOutput << "\n";
+        os << "HTS:   eOutput=" << eOutput << "\n";
         if (m_name_ts.find(eOutput) == m_name_ts.end())
           m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf,
                                 os);
