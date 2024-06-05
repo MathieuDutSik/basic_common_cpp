@@ -17,11 +17,15 @@ void full_process_type(std::string const &matrix_file, std::string const& prime,
   //
   T p = ParseScalar<T>(prime);
   //
-  MyMatrix<T> NSP = NullspaceMatMod<T>(TheMat, p);
+  std::optional<MyVector<T>> opt = FindIsotropicVectorMod(TheMat, p);
   //
   if (OutFormat == "GAP") {
     os_out << "return ";
-    WriteMatrixGAP(os_out, NSP);
+    if (opt) {
+      WriteVectorGAP(os_out, *opt);
+    } else {
+      os_out << "fail";
+    }
     os_out << ";\n";
     return;
   }
@@ -49,9 +53,9 @@ int main(int argc, char *argv[]) {
   try {
     if (argc != 4 && argc != 6) {
       std::cerr << "This program is used as\n";
-      std::cerr << "NullspaceMatMod [arith] [matrix_file] [prime] [OutFormat] [OutFile]\n";
+      std::cerr << "IsotropicMatMod [arith] [matrix_file] [prime] [OutFormat] [OutFile]\n";
       std::cerr << "    or\n";
-      std::cerr << "NullspaceMatMod [arith] [matrix_file] [prime]\n";
+      std::cerr << "IsotropicMatMod [arith] [matrix_file] [prime]\n";
       std::cerr << "\n";
       std::cerr << "    where\n";
       std::cerr << "arith: The arithmetic type\n";

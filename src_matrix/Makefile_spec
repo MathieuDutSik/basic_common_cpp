@@ -13,7 +13,8 @@
 #PROGRAM		= SerializeMatrix
 #PROGRAM		= TestEquaSpace
 #PROGRAM		= DeterminantMat
-PROGRAM		= NullspaceMatMod
+#PROGRAM		= NullspaceMatMod
+PROGRAM		= IsotropicMatMod
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

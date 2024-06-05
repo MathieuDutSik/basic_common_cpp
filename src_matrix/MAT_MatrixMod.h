@@ -249,8 +249,14 @@ std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M,
                                                     T const &TheMod) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   int n = M.rows();
+  MyMatrix<T> Mred(n, n);
+  for (int i=0; i<n; i++) {
+    for (int j=0; j<n; j++) {
+      Mred(i,j) = ResInt(M(i,j), TheMod);
+    }
+  }
   if (n == 1) {
-    T val = M(0, 0);
+    T val = Mred(0, 0);
     if (val == 0) {
       MyVector<T> V(1);
       V(0) = 1;
@@ -259,9 +265,9 @@ std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M,
     return {};
   }
   if (n == 2) {
-    return FindIsotropicVectorModTwoDim(M, TheMod);
+    return FindIsotropicVectorModTwoDim(Mred, TheMod);
   }
-  return FindIsotropicVectorModRandom(M, TheMod);
+  return FindIsotropicVectorModRandom(Mred, TheMod);
 }
 
 template <typename T>
