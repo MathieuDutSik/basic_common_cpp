@@ -1313,7 +1313,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
   size_t nbRow = eMat.rows();
   for (size_t iVect = 0; iVect < dimSpace; iVect++)
     for (size_t iRow = 0; iRow < nbRow; iRow++) {
-      T eSum = 0;
+      T eSum(0);
       for (size_t iCol = 0; iCol < nbCol; iCol++)
         eSum += eMat(iRow, iCol) * retNSP(iVect, iCol);
       if (eSum != 0) {

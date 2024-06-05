@@ -12,7 +12,8 @@
 #PROGRAM		= SolutionMatRepetitive
 #PROGRAM		= SerializeMatrix
 #PROGRAM		= TestEquaSpace
-PROGRAM		= DeterminantMat
+#PROGRAM		= DeterminantMat
+PROGRAM		= NullspaceMatMod
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
