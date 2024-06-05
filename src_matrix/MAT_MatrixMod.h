@@ -315,7 +315,7 @@ template <typename T>
 MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
-  size_t maxRank = n_row;
+  int maxRank = n_row;
   if (n_col < maxRank)
     maxRank = n_col;
   size_t sizMat = maxRank + 1;
