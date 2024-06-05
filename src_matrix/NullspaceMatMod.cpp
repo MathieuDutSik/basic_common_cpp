@@ -17,11 +17,11 @@ void full_process_type(std::string const &matrix_file, std::string const& prime,
   //
   T p = ParseScalar<T>(prime);
   //
-  ResultNullspaceMod<T> res = NullspaceMatMod<T>(TheMat, p);
+  MyMatrix<T> NSP = NullspaceMatMod<T>(TheMat, p);
   //
   if (OutFormat == "GAP") {
-    os_out << "return rec(dim:=" << res.dimNSP << ", NSP:=";
-    WriteMatrixGAP(os_out, res.BasisTot);
+    os_out << "return ";
+    WriteMatrixGAP(os_out, NSP);
     os_out << ");\n";
     return;
   }

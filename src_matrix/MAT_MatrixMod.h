@@ -8,6 +8,10 @@
 #include <vector>
 // clang-format on
 
+#ifdef DEBUG
+#define DEBUG_MATRIX_MOD
+#endif
+
 template <typename T, typename Tmod>
 MyMatrix<Tmod> ModuloReductionMatrix(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
@@ -181,7 +185,7 @@ bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M,
     T res = ResInt(sum, TheMod);
     if (res != 0) {
       std::cerr << "We failed to find an isotropic vector\n";
-      throw TerminalExcpetion{1};
+      throw TerminalException{1};
     }
 #endif
     return true;
@@ -285,84 +289,129 @@ FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
   return FindIsotropicVectorMod_Z(M, TheMod);
 }
 
-template <typename T> struct ResultNullspaceMod {
-  int dimNSP;
-  MyMatrix<T> BasisTot;
-};
-
-/*
-  We work with the matrix M with m rows and n cols.
-  We want to solve the equation x M = 0 modulo p. So, x has m cols.
-  We can rewrite the equation over Z as:
-  xM + y p I_n = 0 with y a vector with n columns.
-  This gets us
-  (x, y) / M     \
-         \ p I_n /
-  And so we can find a basis of the kernel.
-
-  What we want to have is a Z-basis (x^1, ...., x^d, .... x^m)
-  with (x^1, ...., x^d) image in (F_p)^m is spanning the
-  kernel over Fp of M.
-
-
- */
-template <typename T>
-ResultNullspaceMod<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
+template<typename T>
+bool IsMatrixZeroMod(MyMatrix<T> const& M, T const& TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
-  MyMatrix<T> Mbig(n_row + n_col, n_col);
   for (int i = 0; i < n_row; i++) {
     for (int j = 0; j < n_col; j++) {
-      Mbig(i, j) = M(i, j);
-    }
-  }
-  for (int i = 0; i < n_col; i++) {
-    for (int j = 0; j < n_col; j++) {
-      T val(0);
-      if (i == j)
-        val = TheMod;
-      Mbig(i + n_row, j) = val;
-    }
-  }
-  // 1) compute the full null-space
-  MyMatrix<T> NSP = NullspaceIntMat(Mbig);
-  int dimNSP = NSP.rows();
-  if (dimNSP == n_row) {
-    return {dimNSP, IdentityMat<T>(n_row)};
-  }
-  if (dimNSP == 0) {
-    MyMatrix<T> Mret(0, n_row);
-    return {dimNSP, Mret};
-  }
-  // 2) Compute the reduced null-space (but it could
-  MyMatrix<T> NSPred(dimNSP, n_row);
-  for (int i = 0; i < dimNSP; i++) {
-    for (int j = 0; j < n_row; j++) {
-      NSPred(i, j) = NSP(i, j);
-    }
-  }
-#ifdef DEBUG_MATRIX_MOD
-  dim rnkA = RankMat(NSPred);
-  if (rnkA != dimNSP) {
-    std::cerr << "We have rnkA=" << rnkA << " dimNSP=" << dimNSP << "\n";
-    std::cerr << "This is not what we expected\n";
-    throw TerminalException{1};
-  }
-  MyMatrix<T> prod = NSPred * M;
-  for (int i = 0; i < prod.rows(); i++) {
-    for (int j = 0; j < prod.cols(); j++) {
-      T res = ResInt(prod(i, j), TheMod);
+      T res = ResInt(M(i, j), TheMod);
       if (res != 0) {
-        std::cerr << "The residue is not 0\n";
-        throw TerminalException{1};
+        return false;
       }
     }
   }
-#endif
-  MyMatrix<T> BasisComp = SubspaceCompletionInt(NSPred, n_row);
-  MyMatrix<T> FullMat = Concatenate(NSPred, BasisComp);
-  return {dimNSP, std::move(FullMat)};
+  return true;
 }
+
+/*
+  We want to find the solution of M x = 0
+  with the operation being modulo p.
+
+  We tried before a number of tricks by extending the matrix
+  but that seems not to work.
+ */
+template <typename T>
+MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
+  int n_row = M.rows();
+  int n_col = M.cols();
+  size_t maxRank = n_row;
+  if (n_col < maxRank)
+    maxRank = n_col;
+  size_t sizMat = maxRank + 1;
+  MyMatrix<T> Mwork(sizMat, n_col);
+  int miss_val = -1;
+  for (int i = 0; i < n_row; i++) {
+    for (int j = 0; j < n_col; j++) {
+      Mwork(i, j) = ResInt(M(i, j), TheMod);
+    }
+  }
+  std::vector<int> ListColSelect;
+  std::vector<uint8_t> ListColSelect01(n_col, 0);
+  int eRank = 0;
+  for (int iRow=0; iRow<n_row; iRow++) {
+    for (int iCol=0; iCol<n_col; iCol++) {
+      T res = ResInt(M(iRow, iCol), TheMod);
+      Mwork(eRank, iCol) = res;
+    }
+    for (int iRank=0; iRank<eRank; iRank++) {
+      int eCol = ListColSelect[iRank];
+      T eVal1 = Mwork(eRank, eCol);
+      if (eVal1 != 0) {
+        for (int iCol=0; iCol<n_col; iCol++) {
+          T val = Mwork(eRank, iCol) - eVal1 * Mwork(iRank, iCol);
+          Mwork(eRank, iCol) = ResInt(val, TheMod);
+        }
+      }
+    }
+    auto get_firstnonzero_iife=[&]() -> int {
+      for (int iCol=0; iCol<n_col; iCol++) {
+        if (Mwork(eRank, iCol) != 0) {
+          return iCol;
+        }
+      }
+      return miss_val;
+    };
+    int FirstNZ = get_firstnonzero_iife();
+    if (FirstNZ != miss_val) {
+      ListColSelect.push_back(FirstNZ);
+      ListColSelect01[FirstNZ] = 1;
+      T eVal1 = Mwork(eRank, FirstNZ);
+      T eVal2 = mod_inv(eVal1, TheMod);
+      for (int iCol=0; iCol<n_col; iCol++) {
+        T val = Mwork(eRank, iCol) * eVal2;
+        Mwork(eRank, iCol) = ResInt(val, TheMod);
+      }
+      for (int iRank=0; iRank<eRank; iRank++) {
+        T eVal1 = Mwork(iRank, FirstNZ);
+        if (eVal1 != 0) {
+          int StartCol = ListColSelect[iRank];
+          for (int iCol=StartCol; iCol<n_col; iCol++) {
+            T val = Mwork(iRank, iCol) - eVal1 * Mwork(eRank, iCol);
+            Mwork(iRank, iCol) = ResInt(val, TheMod);
+          }
+        }
+      }
+      eRank++;
+    }
+  }
+  int nbVectZero = n_col - eRank;
+  MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, n_col);
+  int nbVect = 0;
+  for (int iCol=0; iCol<n_col; iCol++) {
+    if (ListColSelect01[iCol] == 0) {
+      NSP(nbVect,iCol) = TheMod - 1;
+      for (int iRank=0; iRank<eRank; iRank++) {
+        int eCol = ListColSelect[iRank];
+        NSP(nbVect, eCol) = Mwork(iRank, iCol);
+      }
+      nbVect += 1;
+    }
+  }
+#ifdef DEBUG_MATRIX_MOD
+  MyMatrix<T> prod = M * NSP.transpose();
+  if (!IsMatrixZeroMod(prod, TheMod)) {
+    std::cerr << "NullspaceTrMatMod: The matrix prod is not zero\n";
+    throw TerminalException{1};
+  }
+#endif
+  return NSP;
+}
+
+template <typename T>
+MyMatrix<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
+  MyMatrix<T> Mtr = M.transpose();
+  MyMatrix<T> NSP = NullspaceTrMatMod(Mtr, TheMod);
+#ifdef DEBUG_MATRIX_MOD
+  MyMatrix<T> prod = NSP * M;
+  if (!IsMatrixZeroMod(prod, TheMod)) {
+    std::cerr << "NullspaceMatProd: The matrix prod is not zero\n";
+    throw TerminalException{1};
+  }
+#endif
+  return NSP;
+}
+
 
 template <typename T>
 int DimensionKernelMod(MyMatrix<T> const &M, T const &TheMod) {

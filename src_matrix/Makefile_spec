@@ -27,7 +27,8 @@ NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
 
 CLOCAL          = -I../src_basic -I../src_number -I../src_comb -I.
-CDEFS           = -DDEBUG_MATRIX_INT
+#CDEFS           = -DDEBUG_MATRIX_INT
+CDEFS           = -DDEBUG
 
 
 CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(LIBSHORT_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(FLINT_INCLUDE)
