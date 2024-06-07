@@ -124,28 +124,6 @@ MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const &M1, MyMatrix<T> const &M2,
   return NSP_red * M1;
 }
 
-template <typename T> T mod_inv(T const &a, T const &P) {
-  T t(0);
-  T newt(1);
-  T r = P;
-  T newr = a;
-  T q, tmp;
-  while (newr != 0) {
-    q = QuoInt(r, newr);
-    tmp = t;
-    t = newt;
-    newt = tmp - q * newt;
-    tmp = r;
-    r = newr;
-    newr = tmp - q * newr;
-  }
-  if (r > 1)
-    return T(0);
-  if (t < 0)
-    t = t + P;
-  return t;
-}
-
 template <typename T>
 bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M,
                                               MyVector<T> &V, T const &TheMod) {

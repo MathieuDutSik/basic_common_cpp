@@ -48,10 +48,7 @@
     (2 / P) = (-1)^{ (P^2 - 1)/8 }  See Suppelementary Laws in OB
   * We have (p / 2) = 1 for the odd case.
 
-  But maybe the best is to compute with Kronecker algorithm
-  Problem is conditions exposed in 
-
-  
+  Combined together that gets us an algorithm
  */
 
 
@@ -80,7 +77,7 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
   std::cerr << "QUADRES: upper=" << upper << "\n";
 #endif
   while (x != upper) {
-#ifdef DEBUG_QUADRATIC_RESIDUE
+#ifdef DEBUG_QUADRATIC_RESIDUE_DISABLE
     std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a_mod=" << a_mod
               << " m=" << m << "\n";
 #endif
@@ -95,9 +92,130 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
   return {};
 }
 
-template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
+template<typename T>
+std::pair<size_t, T> decompose_even_power_odd(T const& val) {
+  size_t power = 0;
+  T two(2);
+  T work_val = val;
+  while(true) {
+    std::pair<T, T> pair = ResQuoInt(work_val, two);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+    std::cerr << "work_val=" << work_val << " res=" << pair.first << " q=" << pair.second << "\n";
+#endif
+    if (pair.first > 0) {
+      return {power, work_val};
+    }
+    power += 1;
+    work_val = pair.second;
+  }
+}
+
+template<typename T>
+int get_legendre_symbol_power_two(size_t const& power, T const& P) {
+  T val = P * P - 1;
+  T eight(8);
+  T quot = QuoInt(val, eight);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  T res = ResInt(val, eight);
+  if (res != 0) {
+    std::cerr << "The residue is not what we expected\n";
+    throw TerminalException{1};
+  }
+#endif
+  T two(2);
+  T res2 = ResInt(quot, two);
+  if (res2 > 0) {
+    size_t power_res = power % 2;
+    if (power_res > 0) {
+      return -1;
+    } else {
+      return 1;
+    }
+  } else {
+    return 1;
+  }
+}
+
+template <typename T> bool is_quadratic_residue_quadratic_reciprocity(T const &a_in, T const &m) {
+  T gcd = T_abs(GenericGcd(a_in, m));
+  if (gcd != 1) {
+    std::cerr << "The algorithm is not working for gcd > 1 right now\n";
+    throw TerminalException{1};
+  }
+  if (m < 0) {
+    std::cerr << "We need a and b greater than 0\n";
+    throw TerminalException{1};
+  }
+  T a = ResInt(a_in, m);
+  if (a == 0) {
+    return true;
+  }
+  std::pair<size_t, T> pair_a = decompose_even_power_odd(a);
+  std::pair<size_t, T> pair_m = decompose_even_power_odd(m);
+  if (pair_a.first > 0 && pair_m.first > 0) {
+    std::cerr << "We should not reach that problem. Illogic\n";
+    throw TerminalException{1};
+  }
+  T two(2);
+  int symbol = get_legendre_symbol_power_two(pair_a.first, pair_m.second);
+  T P = pair_a.second;
+  T Q = pair_m.second;
+  while(true) {
+    // 0: termination test
+    if (P == 1) {
+      break;
+    }
+    // 1: Computing the term (-1)^( (P-1)/2 . (Q-1)/2 )
+    T Pm1 = P - 1;
+    T Qm1 = Q - 1;
+    T Pm1d2 = QuoInt(Pm1, two);
+    T Qm1d2 = QuoInt(Qm1, two);
+    T res2_P = ResInt(Pm1d2, two);
+    T res2_Q = ResInt(Qm1d2, two);
+    int sign = 1;
+    if (res2_P > 0 && res2_Q > 0) {
+      sign = -1;
+    }
+    symbol *= sign;
+    // 2: Computing the residue
+    T Qres = ResInt(Q, P);
+    Q = P;
+    // 3: Now decomposing the power of two
+    std::pair<size_t, T> pair = decompose_even_power_odd(Qres);
+    // 4: Computing the term from the power of two
+    int sign_two = get_legendre_symbol_power_two(pair.first, P);
+    // 5: Updating
+    symbol *= sign_two;
+    P = pair.second;
+    // 6: terminating if P equals 1
+  }
+  if (symbol == 1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+
+
+
+template <typename T> bool is_quadratic_residue_exhaustive(T const &a, T const &m) {
   std::optional<T> opt = find_quadratic_residue(a, m);
   return opt.has_value();
+}
+
+template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
+  bool test_quad_recip = is_quadratic_residue_quadratic_reciprocity(a, m);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  std::optional<T> opt = find_quadratic_residue(a, m);
+  bool test_exhaust = opt.has_value();
+  if (test_exhaust != test_quad_recip) {
+    std::cerr << "incoherency in the result\n";
+    throw TerminalException{1};
+  }
+#endif
+  return test_quad_recip;
 }
 
 // clang-format off

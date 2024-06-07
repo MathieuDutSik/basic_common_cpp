@@ -24,6 +24,28 @@ template <typename T> T GenericGcd(T const &m, T const &n) {
   return f;
 }
 
+template <typename T> T mod_inv(T const &a, T const &P) {
+  T t(0);
+  T newt(1);
+  T r = P;
+  T newr = a;
+  T q, tmp;
+  while (newr != 0) {
+    q = QuoInt(r, newr);
+    tmp = t;
+    t = newt;
+    newt = tmp - q * newt;
+    tmp = r;
+    r = newr;
+    newr = tmp - q * newr;
+  }
+  if (r > 1)
+    return T(0);
+  if (t < 0)
+    t = t + P;
+  return t;
+}
+
 template <typename T>
 inline typename std::enable_if<!is_mpz_class<T>::value, T>::type
 KernelGcdPair(T const &a, T const &b) {

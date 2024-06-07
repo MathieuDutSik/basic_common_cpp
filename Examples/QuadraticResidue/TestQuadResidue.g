@@ -7,6 +7,7 @@ TestQuadResidue:=function(eRec)
     eProg:="../../src_number/ComputeQuadraticResidue";
     a:=String(eRec[1]);
     p:=String(eRec[2]);
+    Print("a=", a, " p=", p, "\n");
     TheCommand:=Concatenation(eProg, " ", a, " ", p, " GAP ", FileOut);
     Exec(TheCommand);
     if IsExistingFile(FileOut)=false then
