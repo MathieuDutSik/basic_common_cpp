@@ -37,8 +37,8 @@ int main(int argc, char *argv[]) {
     std::string FileOut = "stderr";
     using T = mpz_class;
     if (argc == 5) {
-      std::string OutFormat = argv[3];
-      std::string FileOut = argv[4];
+      OutFormat = argv[3];
+      FileOut = argv[4];
     }
     if (FileOut == "stderr") {
       process<T>(a_str, p_str, OutFormat, std::cerr);
