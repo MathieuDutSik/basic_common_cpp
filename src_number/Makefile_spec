@@ -13,7 +13,8 @@
 #PROGRAM		= TestGetBit
 #PROGRAM		= test_sequence_approximant
 #PROGRAM		= TestQuadraticResidue
-PROGRAM		= ReadValueString
+#PROGRAM		= ReadValueString
+PROGRAM		= ComputeQuadraticResidue
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
