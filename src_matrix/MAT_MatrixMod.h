@@ -131,7 +131,7 @@ template <typename T> T mod_inv(T const &a, T const &P) {
   T newr = a;
   T q, tmp;
   while (newr != 0) {
-    q = r / newr;
+    q = QuoInt(r, newr);
     tmp = t;
     t = newt;
     newt = tmp - q * newt;
@@ -336,6 +336,9 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
   std::vector<uint8_t> ListColSelect01(n_col, 0);
   int eRank = 0;
   for (int iRow=0; iRow<n_row; iRow++) {
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "MATMOD: NullspaceTrMatMod iRow=" << iRow << "\n";
+#endif
     for (int iCol=0; iCol<n_col; iCol++) {
       T res = ResInt(M(iRow, iCol), TheMod);
       Mwork(eRank, iCol) = res;
@@ -364,6 +367,9 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
       ListColSelect01[FirstNZ] = 1;
       T eVal1 = Mwork(eRank, FirstNZ);
       T eVal2 = mod_inv(eVal1, TheMod);
+#ifdef DEBUG_MATRIX_MOD
+      std::cerr << "MATMOD: eVal1=" << eVal1 << " eVal2=" << eVal2 << "\n";
+#endif
       for (int iCol=0; iCol<n_col; iCol++) {
         T val = Mwork(eRank, iCol) * eVal2;
         Mwork(eRank, iCol) = ResInt(val, TheMod);
@@ -381,7 +387,18 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
       eRank++;
     }
   }
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "MATMOD: After the main loop\n";
+#endif
   int nbVectZero = n_col - eRank;
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "MATMOD: n_col=" << n_col << " eRank=" << eRank << " nbVectZero=" << nbVectZero << "\n";
+  std::cerr << "MATMOD: ListColSelect01=";
+  for (auto & k: ListColSelect01) {
+    std::cerr << static_cast<int>(k);
+  }
+  std::cerr << "\n";
+#endif
   MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, n_col);
   int nbVect = 0;
   for (int iCol=0; iCol<n_col; iCol++) {
@@ -395,6 +412,7 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
     }
   }
 #ifdef DEBUG_MATRIX_MOD
+  std::cerr << "MATMOD: NSP built\n";
   MyMatrix<T> prod = M * NSP.transpose();
   if (!IsMatrixZeroMod(prod, TheMod)) {
     std::cerr << "NullspaceTrMatMod: The matrix prod is not zero\n";
