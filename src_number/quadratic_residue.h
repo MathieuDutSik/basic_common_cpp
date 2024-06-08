@@ -48,7 +48,13 @@
     (2 / P) = (-1)^{ (P^2 - 1)/8 }  See Suppelementary Laws in OB
   * We have (p / 2) = 1 for the odd case.
 
-  Combined together that gets us an algorithm
+  Combined together that gets us an algorithm.
+
+  But what is computed is not the Legendre symbol but the Jacobi symbol.
+
+  For the Jacobi-symbol, we have (P / Q) = -1 implies that there is no
+  quadratic residue.
+  But for (P / Q) = 1, we cannot conclude.
  */
 
 
@@ -136,7 +142,7 @@ int get_legendre_symbol_power_two(size_t const& power, T const& P) {
   }
 }
 
-template <typename T> bool is_quadratic_residue_quadratic_reciprocity(T const &a_in, T const &m) {
+template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
   T gcd = T_abs(GenericGcd(a_in, m));
   if (gcd != 1) {
     std::cerr << "The algorithm is not working for gcd > 1 right now\n";
@@ -158,36 +164,48 @@ template <typename T> bool is_quadratic_residue_quadratic_reciprocity(T const &a
   }
   T two(2);
   int symbol = get_legendre_symbol_power_two(pair_a.first, pair_m.second);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  std::cerr << "power=" << pair_a.first << " P=" << pair_m.second << "\n";
+  std::cerr << "symbol=" << symbol << "\n";
+#endif
   T P = pair_a.second;
   T Q = pair_m.second;
   while(true) {
-    // 0: termination test
+    // 1: termination test
     if (P == 1) {
       break;
     }
-    // 1: Computing the term (-1)^( (P-1)/2 . (Q-1)/2 )
+    // 2: Computing the term (-1)^( (P-1)/2 . (Q-1)/2 )
     T Pm1 = P - 1;
     T Qm1 = Q - 1;
     T Pm1d2 = QuoInt(Pm1, two);
     T Qm1d2 = QuoInt(Qm1, two);
     T res2_P = ResInt(Pm1d2, two);
     T res2_Q = ResInt(Qm1d2, two);
-    int sign = 1;
+    int sign_pq = 1;
     if (res2_P > 0 && res2_Q > 0) {
-      sign = -1;
+      sign_pq = -1;
     }
-    symbol *= sign;
-    // 2: Computing the residue
+    symbol *= sign_pq;
+#ifdef DEBUG_QUADRATIC_RESIDUE
+    std::cerr << "Update 1: sign_pq=" << sign_pq << " Pm1d2=" << Pm1d2 << " Qm1d2=" << Qm1d2 << "\n";
+#endif
+    // 3: Computing the residue
     T Qres = ResInt(Q, P);
     Q = P;
-    // 3: Now decomposing the power of two
+    // 4: Now decomposing the power of two
     std::pair<size_t, T> pair = decompose_even_power_odd(Qres);
-    // 4: Computing the term from the power of two
+    // 5: Computing the term from the power of two
     int sign_two = get_legendre_symbol_power_two(pair.first, P);
-    // 5: Updating
+#ifdef DEBUG_QUADRATIC_RESIDUE
+    std::cerr << "Update 1: sign_two=" << sign_two << "\n";
+#endif
+    // 6: Updating
     symbol *= sign_two;
     P = pair.second;
-    // 6: terminating if P equals 1
+#ifdef DEBUG_QUADRATIC_RESIDUE
+    std::cerr << "Now P=" << P << " Q=" << Q << "\n";
+#endif
   }
   if (symbol == 1) {
     return true;
@@ -206,16 +224,23 @@ template <typename T> bool is_quadratic_residue_exhaustive(T const &a, T const &
 }
 
 template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
-  bool test_quad_recip = is_quadratic_residue_quadratic_reciprocity(a, m);
+  bool test_jacobi = compute_jacobi_symbol(a, m);
 #ifdef DEBUG_QUADRATIC_RESIDUE
-  std::optional<T> opt = find_quadratic_residue(a, m);
-  bool test_exhaust = opt.has_value();
-  if (test_exhaust != test_quad_recip) {
+  bool test_exhaust = is_quadratic_residue_exhaustive(a, m);
+  if (test_exhaust && !test_jacobi) {
+    std::cerr << "test_exhaust=" << test_exhaust << "\n";
+    std::cerr << "test_jacobi=" << test_jacobi << "\n";
+    std::cerr << "That is not what we expect from the Jacobi symbol\n";
     std::cerr << "incoherency in the result\n";
     throw TerminalException{1};
   }
+  return test_exhaust;
+#else
+  if (!test_jacobi) {
+    return false;
+  }
+  return is_quadratic_residue_exhaustive(a, m);
 #endif
-  return test_quad_recip;
 }
 
 // clang-format off

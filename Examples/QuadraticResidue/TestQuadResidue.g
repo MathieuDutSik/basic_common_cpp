@@ -18,6 +18,7 @@ TestQuadResidue:=function(eRec)
     if Length(eRec) = 3 then
         if U<>eRec[3] then
             Print("Inconsistency in the values\n");
+            Print("eRec=", eRec, "\n");
             return rec(is_correct:=false);
         fi;
     fi;
