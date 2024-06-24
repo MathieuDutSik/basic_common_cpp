@@ -133,6 +133,16 @@ struct Padic {
   std::vector<T> coefficients;
 };
 
+
+template<typename T>
+void Padic_debug_print(Padic<T> const& x, std::ostream& os) {
+  os << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision << " coefficients=";
+  for (auto & val : x.coefficients) {
+    os << " " << val;
+  }
+  os << "\n";
+}
+
 template<typename T>
 Padic<T> Padic_from_integer(T const& val, T const& p) {
   std::vector<T> coefficients;
@@ -158,7 +168,10 @@ Padic<T> Padic_from_integer(T const& val, T const& p) {
   }
   // We have a full integer as start so we have infinite precision.
   size_t precision = std::numeric_limits<size_t>::max();
-  return {eff_valuation, precision, coefficients};
+  Padic<T> x{eff_valuation, precision, coefficients};
+  //  std::cerr << "Padic_from_integer : ";
+  //  Padic_debug_print(x, std::cerr);
+  return x;
 }
 
 template<typename T>
@@ -202,7 +215,7 @@ T Padic_coeff(Padic<T> const& x, size_t const& index) {
     throw PadicPrecisionException{2};
   }
   size_t len = x.coefficients.size();
-  if (len < x.precision) {
+  if (index < len) {
     return x.coefficients[index];
   }
   return T(0);
@@ -268,7 +281,7 @@ Padic<T> Padic_product(Padic<T> const& x, Padic<T> const& y, T const& p) {
   size_t precision = std::min(x.precision, y.precision);
   int eff_valuation = x.eff_valuation + y.eff_valuation;
   T x_sum = Padic_T_sum(x, p, precision);
-  T y_sum = Padic_T_sum(x, p, precision);
+  T y_sum = Padic_T_sum(y, p, precision);
   T xy_sum = x_sum * y_sum;
   std::vector<T> coefficients = Padic_vec_T(xy_sum, p, precision);
   return {eff_valuation, precision, coefficients};
@@ -308,12 +321,13 @@ Padic<T> Padic_addition(Padic<T> const& x, Padic<T> const& y, T const& p) {
 template<typename T>
 bool Padic_is_square(Padic<T> const& x, T const& p) {
 #ifdef DEBUG_PADIC
-  if (x.coefficients[0] != 0) {
+  if (x.coefficients[0] == 0) {
     std::cerr << "First coefficient has to be non-zero\n";
     throw TerminalException{1};
   }
 #endif
-  int res = x.eff_valuation % 2;
+  int res = ResInt(x.eff_valuation, 2);
+  std::cerr << "   eff_valuation=" << x.eff_valuation << " res=" << res << "\n";
   if (res == 1) {
     return false;
   }
@@ -332,6 +346,7 @@ bool Padic_is_square(Padic<T> const& x, T const& p) {
 #endif
     T coeff1 = Padic_coeff(x, 1);
     T coeff2 = Padic_coeff(x, 2);
+    std::cerr << " coeff1=" << coeff1 << " coeff2=" << coeff2 << "\n";
     if (coeff1 != 0 || coeff2 != 0) {
       return false;
     }
