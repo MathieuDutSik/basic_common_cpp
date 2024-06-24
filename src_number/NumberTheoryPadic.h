@@ -158,6 +158,23 @@ Padic<T> Padic_from_integer(T const& val, T const& p) {
 }
 
 template<typename T>
+Padic<T> Padic_reduce_precision(T const& val, size_t const& new_precision) {
+#ifdef DEBUG_PADIC
+  if (x.precision < new_precision) {
+    std::cerr << "The precision can only be decreased\n";
+    throw TerminalException{1};
+  }
+#endif
+  size_t len = std::min(x.coefficients.size(), new_precision);
+  std::vector<T> coefficients;
+  for (size_t u=0; u<len; u++) {
+    coefficients.push_back(x.coefficients[u]);
+  }
+  return {x.eff_valuation, new_precision, coefficients};
+}
+
+
+template<typename T>
 int Padic_valuation(Padic<T> const& x) {
   size_t infinite_precision = std::numeric_limits<size_t>::max();
   if (precision == infinite_precision) {
@@ -213,27 +230,44 @@ Padic<T> Padic_reduction(Padic<T> const& x) {
     // We increase the valuation and drop the precision.
     int eff_valuation = x.eff_valuation + len;
     size_t precision = x.precision - len;
-    return {
+    return {eff_valuation, precision, {}};
   }
 }
+
+template<typename T>
+T Padic_T_sum(Padic<T> const& x, T const& p, size_t const& precision) {
+  size_t len = std::min(x.coefficients.size(), precision);
+  T sum(0);
+  T pow = 1;
+  for (size_t u=0; u<len; u++) {
+    sum += x.coefficients[u] * pow;
+    pow *= p;
+  }
+  return sum;
+}
+
+template<typename T>
+std::vector<T> Padic_vec_T(T const& x_sum, T const& p, size_t const& precision) {
+  std::vector<T> coefficients(precision);
+  T work_val = x_sum;
+  for (size_t u=0; u<precision; u++) {
+    std::pair<T, T> pair = ResQuoInt(work_val, p);
+    coefficients[u] = pair.first;
+    work_val = pair.second;
+  }
+  return coefficients;
+}
+
+
 
 template<typename T>
 Padic<T> Padic_product(Padic<T> const& x, Padic<T> const& y, T const& p) {
   size_t precision = std::min(x.precision, y.precision);
   int eff_valuation = x.eff_valuation + y.eff_valuation;
-  size_t len_x = x.coefficients.size();
-  size_t len_y = x.coefficients.size();
-  size_t len_xy = std::min(len_x + len_y-1, precision);
-  T zero(0);
-  std::vector<T> coefficients(len_xy, zero);
-  for (size_t i_x=0; i_x<len_x; i_x++) {
-    for (size_t i_y=0; i_y<len_y; i_y++) {
-      size_t pos = i_x + i_y;
-      if (pos < precision) {
-        coefficients[pos] += x.coefficients[i_x] * y.coefficients[i_y];
-      }
-    }
-  }
+  T x_sum = Padic_T_sum(x, p, precision);
+  T y_sum = Padic_T_sum(x, p, precision);
+  T xy_sum = x_sum * y_sum;
+  std::vector<T> coefficients = Padic_vec_T(xy_sum, p, precision);
   return {eff_valuation, precision, coefficients};
 }
 
@@ -246,26 +280,14 @@ Padic<T> Padic_inverse(Padic<T> const& x, T const& p) {
   if (x.precision == infinite_precision) {
     throw PadicPrecisionException{4};
   }
-  T sum(0);
-  T pow = 1;
-  size_t len = x.coefficients.size();
-  for (size_t u=0; u<len; u++) {
-    sum += x.coefficients[u] * pow;
-    pow *= p;
-  }
+  T sum = Padic_T_sum(x, p, x.precision);
   // full pow
   T full_pow = 1;
   for (size_t u=0; u<x.precision; u++) {
     full_pow *= p;
   }
   T inv_val = mod_inv(sum, full_pow);
-  std::vector<T> coefficients(x.precision);
-  T work_inv = inv_val;
-  for (size_t u=0; u<x.precision; u++) {
-    std::pair<T, T> pair = ResQuoInt(work_inv, p);
-    coefficients[u] = pair.first;
-    work_inv = pair.second;
-  }
+  std::vector<T> coefficients = Padic_vec_T(inv_val, p, x.precision);
   int eff_valuation = - x.eff_valuation;
   return {eff_valuation, precision, coefficients};
 }
