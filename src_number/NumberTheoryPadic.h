@@ -119,11 +119,11 @@
 // 5: square root test. For p=2 we need 3 coefficients to compute. Otherwise, just one number suffices.
 
 struct PadicPrecisionException {
-  std::string val;
+  int val;
 };
 
 template<typename T>
-sruct Padic {
+struct Padic {
   int eff_valuation;
   size_t precision;
   std::vector<T> coefficients;
@@ -158,7 +158,7 @@ Padic<T> Padic_from_integer(T const& val, T const& p) {
 }
 
 template<typename T>
-Padic<T> Padic_reduce_precision(T const& val, size_t const& new_precision) {
+Padic<T> Padic_reduce_precision(Padic<T> const& x, size_t const& new_precision) {
 #ifdef DEBUG_PADIC
   if (x.precision < new_precision) {
     std::cerr << "The precision can only be decreased\n";
@@ -177,11 +177,11 @@ Padic<T> Padic_reduce_precision(T const& val, size_t const& new_precision) {
 template<typename T>
 int Padic_valuation(Padic<T> const& x) {
   size_t infinite_precision = std::numeric_limits<size_t>::max();
-  if (precision == infinite_precision) {
+  if (x.precision == infinite_precision) {
     int infinite_valuation = std::numeric_limits<int>::max();
     return infinite_valuation;
   }
-  int valuation = eff_valuation;
+  int valuation = x.eff_valuation;
   for (size_t u=0; u<x.coefficients.size(); u++) {
     if (x.coefficients[u] == 0) {
       valuation += 1;
@@ -208,7 +208,6 @@ template<typename T>
 Padic<T> Padic_reduction(Padic<T> const& x) {
   size_t infinite_precision = std::numeric_limits<size_t>::max();
   size_t len = x.coefficients.size();
-  size_t shift = 0;
   for (size_t u=0; u<len; u++) {
     if (x.coefficients[u] != 0) {
       size_t precision = infinite_precision;
@@ -277,17 +276,18 @@ Padic<T> Padic_inverse(Padic<T> const& x, T const& p) {
     throw PadicPrecisionException{3};
   }
   size_t infinite_precision = std::numeric_limits<size_t>::max();
-  if (x.precision == infinite_precision) {
+  size_t precision = x.precision;
+  if (precision == infinite_precision) {
     throw PadicPrecisionException{4};
   }
-  T sum = Padic_T_sum(x, p, x.precision);
+  T sum = Padic_T_sum(x, p, precision);
   // full pow
   T full_pow = 1;
   for (size_t u=0; u<x.precision; u++) {
     full_pow *= p;
   }
   T inv_val = mod_inv(sum, full_pow);
-  std::vector<T> coefficients = Padic_vec_T(inv_val, p, x.precision);
+  std::vector<T> coefficients = Padic_vec_T(inv_val, p, precision);
   int eff_valuation = - x.eff_valuation;
   return {eff_valuation, precision, coefficients};
 }
