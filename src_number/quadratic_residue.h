@@ -143,6 +143,7 @@ int get_legendre_symbol_power_two(size_t const& power, T const& P) {
 }
 
 template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
+#ifdef DEBUG_QUADRATIC_RESIDUE
   T gcd = T_abs(GenericGcd(a_in, m));
   if (gcd != 1) {
     std::cerr << "The algorithm is not working for gcd > 1 right now\n";
@@ -152,6 +153,7 @@ template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
     std::cerr << "We need a and b greater than 0\n";
     throw TerminalException{1};
   }
+#endif
   T a = ResInt(a_in, m);
   if (a == 0) {
     return true;
@@ -223,7 +225,7 @@ template <typename T> bool is_quadratic_residue_exhaustive(T const &a, T const &
   return opt.has_value();
 }
 
-template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
+template <typename T> bool is_quadratic_residue_kernel(T const &a, T const &m) {
   bool test_jacobi = compute_jacobi_symbol(a, m);
 #ifdef DEBUG_QUADRATIC_RESIDUE
   bool test_exhaust = is_quadratic_residue_exhaustive(a, m);
@@ -241,6 +243,14 @@ template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
   }
   return is_quadratic_residue_exhaustive(a, m);
 #endif
+}
+
+template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
+  T gcd = T_abs(GenericGcd(a, m));
+  if (gcd == 1) {
+    return is_quadratic_residue_kernel(a, m);
+  }
+  return is_quadratic_residue_exhaustive(a, m);
 }
 
 // clang-format off
