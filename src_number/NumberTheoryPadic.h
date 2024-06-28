@@ -135,13 +135,22 @@ struct Padic {
 
 
 template<typename T>
-void Padic_debug_print(Padic<T> const& x, std::ostream& os) {
-  os << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision << " coefficients=";
+std::string Padic_to_string(Padic<T> const& x) {
+  std::stringstream s;
+  s << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision << " coefficients=";
   for (auto & val : x.coefficients) {
-    os << " " << val;
+    s << " " << val;
   }
-  os << "\n";
+  s << "\n";
+  std::string converted(s.str());
+  return converted;
 }
+
+template<typename T>
+void Padic_debug_print(Padic<T> const& x, std::ostream& os) {
+  os << Padic_to_string(x);
+}
+
 
 template<typename T>
 Padic<T> Padic_from_integer(T const& val, T const& p) {

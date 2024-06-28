@@ -7,9 +7,8 @@ OBJECTS		= $(PROGRAM:%=%.o)
 #CC		= clang++ -Weverything -std=c++17
 #CC		= clang++ -g -Weverything -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
 #CC		= clang++ -g -Weverything -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null -std=c++17
-#CC		= g++ -std=c++17 -Wall -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
-CC		= g++ -std=c++17 -Wall -Wextra -g -O3
-#CC		= clang++ -std=c++17 -Wall -Wconversion -g -O3
+#CC		= g++ -std=c++17 -Wall -Wextra -O2 -g -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
+CC		= g++ -std=c++17 -Wall -Wextra -O3 -g
 #CC		= clang++ -std=c++17 -Weverything -g -O3
 #CC		= g++ -std=c++17 -Wall -g -O3 -fsanitize=address -fsanitize=leak -fsanitize=undefined -fbounds-check
 #CC		= g++ -std=c++17 -Wall -g -O2 -static-libgcc -static-libstdc++
