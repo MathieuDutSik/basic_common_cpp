@@ -51,6 +51,7 @@
   Combined together that gets us an algorithm.
 
   But what is computed is not the Legendre symbol but the Jacobi symbol.
+  See for details: https://en.wikipedia.org/wiki/Jacobi_symbol
 
   For the Jacobi-symbol, we have (P / Q) = -1 implies that there is no
   quadratic residue.
@@ -63,11 +64,9 @@
 
 // This is an exhaustive search that works even if m is not prime.
 template <typename T>
-std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
+std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
-  T m = T_abs(m_in);
   T two(2);
-  T a_mod = ResInt(a, m);
   T res = ResInt(m, two);
   T upper(0);
   if (res == 0) {
@@ -84,10 +83,10 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
 #endif
   while (x != upper) {
 #ifdef DEBUG_QUADRATIC_RESIDUE_DISABLE
-    std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a_mod=" << a_mod
+    std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a=" << a
               << " m=" << m << "\n";
 #endif
-    if (xSqr == a_mod) {
+    if (xSqr == a) {
       return x;
     }
     xSqr += TwoXpOne;
@@ -97,6 +96,45 @@ std::optional<T> find_quadratic_residue(T const &a, T const &m_in) {
   }
   return {};
 }
+
+template<typename T, typename Tcomp>
+std::optional<T> find_quadratic_residue_Tcomp(T const &a, T const &m) {
+  Tcomp a_comp = UniversalScalarConversion<Tcomp,T>(a);
+  Tcomp m_comp = UniversalScalarConversion<Tcomp,T>(m);
+  std::optional<Tcomp> opt = find_quadratic_residue_kernel(a_comp, m_comp);
+  if (opt) {
+    Tcomp val_comp = *opt;
+    T val = UniversalScalarConversion<T,Tcomp>(val_comp);
+    return val;
+  } else {
+    return {};
+  }
+}
+
+template <typename T>
+std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
+  T m = T_abs(m_in);
+  T a = ResInt(a_in, m);
+  T max16_A = UniversalScalarConversion<T,int16_t>(std::numeric_limits<int16_t>::max());
+  T max32_A = UniversalScalarConversion<T,int32_t>(std::numeric_limits<int32_t>::max());
+  T max64_A = UniversalScalarConversion<T,int64_t>(std::numeric_limits<int64_t>::max());
+  T four(4);
+  T max16_B = QuoInt(max16_A, four);
+  T max32_B = QuoInt(max32_A, four);
+  T max64_B = QuoInt(max64_A, four);
+  if (m < max16_B) {
+    return find_quadratic_residue_Tcomp<T,int16_t>(a, m);
+  }
+  if (m < max32_B) {
+    return find_quadratic_residue_Tcomp<T,int32_t>(a, m);
+  }
+  if (m < max64_B) {
+    return find_quadratic_residue_Tcomp<T,int64_t>(a, m);
+  }
+  return find_quadratic_residue_kernel(a, m);
+}
+
+
 
 template<typename T>
 std::pair<size_t, T> decompose_even_power_odd(T const& val) {

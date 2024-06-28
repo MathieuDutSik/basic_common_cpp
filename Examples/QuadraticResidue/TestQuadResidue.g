@@ -27,7 +27,6 @@ end;
 
 ListRec:=ReadAsFunction("ListQuadTest")();;
 
-
 FullTest:=function()
     local n_error, iRec, eRec, RecReply;
     n_error:=0;
