@@ -66,7 +66,7 @@ template <typename T> void process() {
   }
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   try {
     process<mpz_class>();
     std::cerr << "Normal termination of the program\n";

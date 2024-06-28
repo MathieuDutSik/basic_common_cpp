@@ -312,7 +312,7 @@ Padic<T> Padic_inverse(Padic<T> const& x, T const& p) {
 
 
 template<typename T>
-Padic<T> Padic_addition(Padic<T> const& x, Padic<T> const& y, T const& p) {
+Padic<T> Padic_addition([[maybe_unused]] Padic<T> const& x, [[maybe_unused]] Padic<T> const& y, [[maybe_unused]] T const& p) {
   std::cerr << "Not yet implemented\n";
   throw TerminalException{1};
 }
