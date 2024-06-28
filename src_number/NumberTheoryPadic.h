@@ -141,14 +141,13 @@ std::string Padic_to_string(Padic<T> const& x) {
   for (auto & val : x.coefficients) {
     s << " " << val;
   }
-  s << "\n";
   std::string converted(s.str());
   return converted;
 }
 
 template<typename T>
 void Padic_debug_print(Padic<T> const& x, std::ostream& os) {
-  os << Padic_to_string(x);
+  os << Padic_to_string(x) << "\n";
 }
 
 
