@@ -153,7 +153,7 @@ void Padic_debug_print(Padic<T> const& x, std::ostream& os) {
 
 
 template<typename T>
-Padic<T> Padic_from_integer(T const& val, T const& p) {
+Padic<T> Padic_from_positive_integer(T const& val, T const& p) {
   std::vector<T> coefficients;
   T val_work = val;
   int eff_valuation = 0;
@@ -182,6 +182,39 @@ Padic<T> Padic_from_integer(T const& val, T const& p) {
   //  Padic_debug_print(x, std::cerr);
   return x;
 }
+
+
+template<typename T>
+Padic<T> Padic_from_integer(T const& val, T const& p, size_t const& precision) {
+  std::vector<T> coefficients;
+  T val_work = val;
+  int eff_valuation = 0;
+  bool has_nz = false;
+  while(true) {
+    if (val_work == 0) {
+      break;
+    }
+    std::pair<T, T> pair = ResQuoInt(val_work, p);
+    if (pair.first == 0) {
+      if (!has_nz) {
+        eff_valuation += 1;
+      } else {
+        coefficients.push_back(pair.first);
+      }
+    } else {
+      has_nz = true;
+      coefficients.push_back(pair.first);
+    }
+    if (coefficients.size() == precision) {
+      break;
+    }
+    val_work = pair.second;
+  }
+  return {eff_valuation, precision, coefficients};
+}
+
+
+
 
 template<typename T>
 Padic<T> Padic_reduce_precision(Padic<T> const& x, size_t const& new_precision) {

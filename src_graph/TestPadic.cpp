@@ -26,7 +26,7 @@ template <typename T> void process() {
     std::vector<Padic<T>> ListVal_adic;
     for (auto & eVal1 : ListVal) {
       std::cerr << "eVal1=" << eVal1 << "\n";
-      Padic<T> eVal2 = Padic_from_integer(eVal1, p);
+      Padic<T> eVal2 = Padic_from_positive_integer(eVal1, p);
       std::cerr << "  eVal2 : ";
       Padic_debug_print(eVal2, std::cerr);
       Padic<T> eVal3 = Padic_reduce_precision(eVal2, 3);

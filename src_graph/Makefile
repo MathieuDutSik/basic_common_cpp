@@ -1,4 +1,4 @@
-PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles GRAPH_TestCanonicComputation GRAPH_CanonicComputation GRAPH_ComputeAutGroup
+PROGRAM		= GRAPH_EnumerateDistanceSembedding GRAPH_EnumerateShortCycles GRAPH_TestCanonicComputation GRAPH_CanonicComputation GRAPH_ComputeAutGroup TestPadic
 #PROGRAM		= GRAPH_ComputeAutGroup
 
 OBJECTS		= $(PROGRAM:%=%.o)
