@@ -165,7 +165,7 @@ ComputePairGcdDot(T const &m, T const &n) {
     eCoeff1 = fm;
     eCoeff2 = (f - fm * m) / n;
   }
-  MyMatrix<T> V(2);
+  MyVector<T> V(2);
   V(0) = eCoeff1;
   V(1) = eCoeff2;
 #ifdef DEBUG_MATRIX_INT
