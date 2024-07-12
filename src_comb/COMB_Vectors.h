@@ -63,8 +63,8 @@ bool IsSubset(std::vector<T> const &S1, std::vector<T> const &S2) {
 }
 
 // V1 and V2 should have no repetition
-template<typename T>
-bool IsEqualSet(std::vector<T> const& V1, std::vector<T> const& V2) {
+template <typename T>
+bool IsEqualSet(std::vector<T> const &V1, std::vector<T> const &V2) {
   if (V1.size() != V2.size()) {
     return false;
   }
@@ -72,7 +72,7 @@ bool IsEqualSet(std::vector<T> const& V1, std::vector<T> const& V2) {
   for (auto &val : V1) {
     set.insert(val);
   }
-  for (auto & val : V2) {
+  for (auto &val : V2) {
     if (set.count(val) == 0) {
       return false;
     }

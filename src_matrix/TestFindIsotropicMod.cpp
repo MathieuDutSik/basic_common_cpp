@@ -7,8 +7,7 @@
 #include "MAT_MatrixMod.h"
 // clang-format on
 
-template <typename T>
-void find_isotropic_kernel(std::string const &FileI) {
+template <typename T> void find_isotropic_kernel(std::string const &FileI) {
   std::ifstream is(FileI);
   MyMatrix<T> M = ReadMatrix<T>(is);
   T TheMod;
@@ -16,16 +15,14 @@ void find_isotropic_kernel(std::string const &FileI) {
   //
   std::optional<MyVector<T>> opt = FindIsotropicVectorMod(M, TheMod);
   if (opt) {
-    MyVector<T> const& V = *opt;
+    MyVector<T> const &V = *opt;
     std::cerr << "Found mod isotropic vector V=" << StringVectorGAP(V) << "\n";
   } else {
     std::cerr << "Failed to find an isotropic vector\n";
   }
-
 }
 
-void find_isotropic(std::string const &arithmetic,
-                    std::string const &FileI) {
+void find_isotropic(std::string const &arithmetic, std::string const &FileI) {
   if (arithmetic == "safe_integer") {
     using T = SafeInt64;
     return find_isotropic_kernel<T>(FileI);

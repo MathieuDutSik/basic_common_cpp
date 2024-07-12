@@ -27,7 +27,6 @@
 #define DEBUG_MAT_MATRIX
 #endif
 
-
 template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;
 };
@@ -265,8 +264,8 @@ template <typename T> MyMatrix<T> ReadMatrixFile(std::string const &file_name) {
   return ReadMatrix<T>(is);
 }
 
-template<typename T>
-std::vector<MyMatrix<T>> ReadListMatrix(std::istream & is) {
+template <typename T>
+std::vector<MyMatrix<T>> ReadListMatrix(std::istream &is) {
   int n_mat;
   is >> n_mat;
   std::vector<MyMatrix<T>> ListMat;
@@ -276,8 +275,6 @@ std::vector<MyMatrix<T>> ReadListMatrix(std::istream & is) {
   }
   return ListMat;
 }
-
-
 
 template <typename T>
 std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
@@ -290,17 +287,19 @@ std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
   return ReadListMatrix<T>(is);
 }
 
-template<typename T>
-void WriteListMatrix(std::ostream &os, std::vector<MyMatrix<T>> const &ListMat) {
+template <typename T>
+void WriteListMatrix(std::ostream &os,
+                     std::vector<MyMatrix<T>> const &ListMat) {
   size_t n_mat = ListMat.size();
   os << n_mat << "\n";
-  for (size_t i_mat=0; i_mat<n_mat; i_mat++) {
+  for (size_t i_mat = 0; i_mat < n_mat; i_mat++) {
     WriteMatrix(os, ListMat[i_mat]);
   }
 }
 
-template<typename T>
-void WriteListMatrixFile(std::string const &eFile, std::vector<MyMatrix<T>> const &ListMat) {
+template <typename T>
+void WriteListMatrixFile(std::string const &eFile,
+                         std::vector<MyMatrix<T>> const &ListMat) {
   std::ofstream os(eFile);
   WriteListMatrix(os, ListMat);
 }
@@ -591,11 +590,12 @@ template <typename T> std::string StringMatrixGAP(MyMatrix<T> const &TheMat) {
   return os.str();
 }
 
-template<typename T>
-void WriteListMatrixGAP(std::ostream& os, std::vector<MyMatrix<T>> const& ListMat) {
+template <typename T>
+void WriteListMatrixGAP(std::ostream &os,
+                        std::vector<MyMatrix<T>> const &ListMat) {
   os << "[";
-  bool IsFirst= true;
-  for (auto & eMat : ListMat) {
+  bool IsFirst = true;
+  for (auto &eMat : ListMat) {
     if (!IsFirst)
       os << ",\n";
     IsFirst = false;
@@ -604,8 +604,9 @@ void WriteListMatrixGAP(std::ostream& os, std::vector<MyMatrix<T>> const& ListMa
   os << "]";
 }
 
-template<typename T>
-void WriteListMatrixFileGAP(std::string& eFile, std::vector<MyMatrix<T>> const& ListMat) {
+template <typename T>
+void WriteListMatrixFileGAP(std::string &eFile,
+                            std::vector<MyMatrix<T>> const &ListMat) {
   std::ofstream os_out(eFile);
   os_out << "return ";
   WriteListMatrixGAP(os_out, ListMat);
@@ -1224,7 +1225,8 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
 // arithmetics. The pivot has to be aboved a selected threshold
 // in order to be considered valid.
 template <typename T, typename F>
-SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol, F f, T const& threshold) {
+SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol,
+                                                    F f, T const &threshold) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to be a field in TMat_SelectRowColMaxPivot_Kernel");
   size_t maxRank = nbRow;
@@ -1293,14 +1295,14 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol, 
           std::move(ListRowSelect)};
 }
 
-template<typename T>
-MyMatrix<T> NullspaceMatSingleVector(MyVector<T> const& V) {
+template <typename T>
+MyMatrix<T> NullspaceMatSingleVector(MyVector<T> const &V) {
   int n = V.size();
-  for (int i=0; i<n; i++) {
+  for (int i = 0; i < n; i++) {
     if (V(i) != 0) {
-      MyMatrix<T> NSP = ZeroMatrix<T>(n-1, n);
+      MyMatrix<T> NSP = ZeroMatrix<T>(n - 1, n);
       int pos = 0;
-      for (int j=0; j<n; j++) {
+      for (int j = 0; j < n; j++) {
         if (i != j) {
           NSP(pos, i) = -V(j);
           NSP(pos, j) = V(i);
@@ -1315,7 +1317,8 @@ MyMatrix<T> NullspaceMatSingleVector(MyVector<T> const& V) {
 }
 
 template <typename T>
-SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input, T const& threshold) {
+SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input,
+                                             T const &threshold) {
   size_t nbRow = Input.rows();
   size_t nbCol = Input.cols();
   auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
@@ -1327,7 +1330,8 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input, T const& 
 template <typename T>
 SelectionRowCol<T>
 TMat_SelectRowColMaxPivot_subset(MyMatrix<T> const &Input,
-                                 std::vector<size_t> const &Vsubset, T const& threshold) {
+                                 std::vector<size_t> const &Vsubset,
+                                 T const &threshold) {
   size_t nbRow = Vsubset.size();
   size_t nbCol = Input.cols();
   auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
@@ -1594,31 +1598,32 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
 }
 
 /*
-  This is for computing the kernel of a floating point matrix for which we know the
-  rank. We want to avoid finding an incorrect kernel.
+  This is for computing the kernel of a floating point matrix for which we know
+  the rank. We want to avoid finding an incorrect kernel.
   ---
   Iniial equation is xM = 0
   Then we have xM M^T = 0
   Then we compute the lower eigenvalues and this gets us the approximate kernel.
  */
-template<typename T>
-MyMatrix<T> DominantKernel(MyMatrix<T> const& M, int const& k) {
+template <typename T>
+MyMatrix<T> DominantKernel(MyMatrix<T> const &M, int const &k) {
   MyMatrix<T> Mprod = M * M.transpose();
   int dim_rel = Mprod.rows();
   Eigen::SelfAdjointEigenSolver<MyMatrix<T>> eig(Mprod);
   MyVector<T> ListEig = eig.eigenvalues();
   MyMatrix<T> ListVect = eig.eigenvectors();
 #ifdef DEBUG
-  for (int i=1; i<dim_rel; i++) {
-    if (ListEig(i-1) > ListEig(i)) {
-      std::cerr << "ListEig(i-1)=" << ListEig(i-1) << " ListEig(i)=" << ListEig(i) << "\n";
+  for (int i = 1; i < dim_rel; i++) {
+    if (ListEig(i - 1) > ListEig(i)) {
+      std::cerr << "ListEig(i-1)=" << ListEig(i - 1)
+                << " ListEig(i)=" << ListEig(i) << "\n";
       throw TerminalException{1};
     }
   }
 #endif
   MyMatrix<T> NSP(k, dim_rel);
-  for (int u=0; u<k; u++) {
-    for (int i=0; i<dim_rel; i++) {
+  for (int u = 0; u < k; u++) {
+    for (int i = 0; i < dim_rel; i++) {
       NSP(u, i) = ListVect(i, u);
     }
   }
@@ -1632,7 +1637,6 @@ MyMatrix<T> DominantKernel(MyMatrix<T> const& M, int const& k) {
 #endif
   return NSP;
 }
-
 
 template <typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
@@ -2032,14 +2036,14 @@ SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   return {};
 }
 
-template<typename T>
-struct SolutionMatRepetitive {
+template <typename T> struct SolutionMatRepetitive {
 private:
   MyMatrix<T> TheBasis;
   std::vector<int> ListColSelect;
   MyMatrix<T> InvMat;
+
 public:
-  SolutionMatRepetitive(MyMatrix<T> const& _TheBasis) : TheBasis(_TheBasis) {
+  SolutionMatRepetitive(MyMatrix<T> const &_TheBasis) : TheBasis(_TheBasis) {
 #ifdef DEBUG_MAT_MATRIX
     if (RankMat(TheBasis) != TheBasis.rows()) {
       std::cerr << "RankMat(TheBasis)=" << RankMat(TheBasis) << "\n";
@@ -2053,12 +2057,13 @@ public:
     MyMatrix<T> SelMat = SelectColumn(TheBasis, ListColSelect);
     InvMat = Inverse(SelMat);
   }
-  std::optional<MyVector<T>> GetSolution(MyVector<T> const& eVect) {
+  std::optional<MyVector<T>> GetSolution(MyVector<T> const &eVect) {
     int siz = ListColSelect.size();
     //    std::cerr << "siz=" << siz << "\n";
     MyVector<T> V(siz);
-    for (int u=0; u<siz; u++) {
-      //      std::cerr << "u=" << u << " ColSelect=" << ListColSelect[u] << "\n";
+    for (int u = 0; u < siz; u++) {
+      //      std::cerr << "u=" << u << " ColSelect=" << ListColSelect[u] <<
+      //      "\n";
       V(u) = eVect(ListColSelect[u]);
     }
     //    std::cerr << "InvMat=\n";
@@ -2072,21 +2077,20 @@ public:
   }
 };
 
-
-template<typename T>
-struct MutableSubspaceBelongingRepetitive {
+template <typename T> struct MutableSubspaceBelongingRepetitive {
 private:
   size_t dim;
   size_t n_vect;
   std::vector<T> TheBasis;
   std::vector<size_t> ListColSelect;
   std::vector<T> Vins;
+
 public:
-  MutableSubspaceBelongingRepetitive(int const& _dim) : dim(_dim), n_vect(0), Vins(dim) {
-  }
-  void SetVectout(int i_vect, MyVector<T> & Vout) {
+  MutableSubspaceBelongingRepetitive(int const &_dim)
+      : dim(_dim), n_vect(0), Vins(dim) {}
+  void SetVectout(int i_vect, MyVector<T> &Vout) {
     size_t pos = i_vect * dim;
-    for (size_t i=0; i<dim; i++) {
+    for (size_t i = 0; i < dim; i++) {
       Vout(i) = TheBasis[pos];
       pos++;
     }
@@ -2094,25 +2098,24 @@ public:
   MyMatrix<T> GetBasis() const {
     MyMatrix<T> Mret(n_vect, dim);
     size_t pos = 0;
-    for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
-      for (size_t u=0; u<dim; u++) {
+    for (size_t i_vect = 0; i_vect < n_vect; i_vect++) {
+      for (size_t u = 0; u < dim; u++) {
         Mret(i_vect, u) = TheBasis[pos];
         pos++;
       }
     }
     return Mret;
   }
-  size_t get_n_vect() const {
-    return n_vect;
-  }
+  size_t get_n_vect() const { return n_vect; }
+
 private:
   size_t IsInspace_priv() {
     size_t pos = 0;
-    for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
+    for (size_t i_vect = 0; i_vect < n_vect; i_vect++) {
       size_t eCol = ListColSelect[i_vect];
       T coeff = Vins[eCol];
       if (coeff != 0) {
-        for (size_t i=0; i<dim; i++) {
+        for (size_t i = 0; i < dim; i++) {
           Vins[i] -= coeff * TheBasis[pos];
           pos++;
         }
@@ -2120,20 +2123,22 @@ private:
         pos += dim;
       }
     }
-    for (size_t i=0; i<dim; i++) {
+    for (size_t i = 0; i < dim; i++) {
       if (Vins[i] != 0) {
         return i;
       }
     }
     return dim;
   }
+
 public:
-  bool IsInspace(MyVector<T> const& v) {
-    for (size_t i=0; i<dim; i++) {
+  bool IsInspace(MyVector<T> const &v) {
+    for (size_t i = 0; i < dim; i++) {
       Vins[i] = v(i);
     }
     return IsInspace_priv() == dim;
   }
+
 private:
   bool InsertVector_priv() {
     size_t idx = IsInspace_priv();
@@ -2141,35 +2146,36 @@ private:
       return true;
     }
     T coeff = Vins[idx];
-    for (size_t i=0; i<dim; i++) {
+    for (size_t i = 0; i < dim; i++) {
       Vins[i] /= coeff;
     }
-    for (size_t i_vect=0; i_vect<n_vect; i_vect++) {
+    for (size_t i_vect = 0; i_vect < n_vect; i_vect++) {
       T coeff = TheBasis[i_vect * dim + idx];
       if (coeff != 0) {
-        for (size_t i=0; i<dim; i++) {
+        for (size_t i = 0; i < dim; i++) {
           TheBasis[i_vect * dim + i] -= coeff * Vins[i];
         }
       }
     }
     ListColSelect.push_back(idx);
     n_vect++;
-    for (size_t u=0; u<dim; u++) {
+    for (size_t u = 0; u < dim; u++) {
       TheBasis.push_back(Vins[u]);
     }
     return false;
   }
+
 public:
-  bool InsertVector(MyVector<T> const& v) {
-    for (size_t i=0; i<dim; i++) {
+  bool InsertVector(MyVector<T> const &v) {
+    for (size_t i = 0; i < dim; i++) {
       Vins[i] = v(i);
     }
     return InsertVector_priv();
   }
-  void InsertMatrix(MyMatrix<T> const& M) {
+  void InsertMatrix(MyMatrix<T> const &M) {
     int n_row = M.rows();
-    for (int i_row=0; i_row<n_row; i_row++) {
-      for (size_t i=0; i<dim; i++) {
+    for (int i_row = 0; i_row < n_row; i_row++) {
+      for (size_t i = 0; i < dim; i++) {
         Vins[i] = M(i_row, i);
       }
       (void)InsertVector_priv();
@@ -2178,12 +2184,12 @@ public:
 };
 
 // Returns true if M1 is a subspace of M2
-template<typename T>
-bool IsSubspaceContained(MyMatrix<T> const&M1, MyMatrix<T> const& M2) {
+template <typename T>
+bool IsSubspaceContained(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
   int dim = M2.cols();
   MutableSubspaceBelongingRepetitive<T> msbr(dim);
   msbr.InsertMatrix(M2);
-  for (int iRow=0; iRow<M1.rows(); iRow++) {
+  for (int iRow = 0; iRow < M1.rows(); iRow++) {
     MyVector<T> V = GetMatrixRow(M1, iRow);
     if (!msbr.IsInspace(V)) {
       return false;
@@ -2192,9 +2198,8 @@ bool IsSubspaceContained(MyMatrix<T> const&M1, MyMatrix<T> const& M2) {
   return true;
 }
 
-
-template<typename T>
-bool TestEqualitySpannedSpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2) {
+template <typename T>
+bool TestEqualitySpannedSpaces(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
 #ifdef DEBUG_MAT_MATRIX
   if (M1.cols() != M2.cols()) {
     std::cerr << "That case is actually not allowed\n";
@@ -2218,7 +2223,7 @@ bool TestEqualitySpannedSpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2) {
   //  std::cerr << "TestEqualitySpannedSpaces, step 1\n";
   SolutionMatRepetitive<T> smr(M1);
   //  std::cerr << "TestEqualitySpannedSpaces, step 2\n";
-  for (int irow=0; irow<M2.rows(); irow++) {
+  for (int irow = 0; irow < M2.rows(); irow++) {
     MyVector<T> V2 = GetMatrixRow(M2, irow);
     //    std::cerr << "Before GetSolution irow=" << irow << "\n";
     std::optional<MyVector<T>> opt = smr.GetSolution(V2);
@@ -2230,7 +2235,6 @@ bool TestEqualitySpannedSpaces(MyMatrix<T> const& M1, MyMatrix<T> const& M2) {
   //  std::cerr << "TestEqualitySpannedSpaces, step 3\n";
   return true;
 }
-
 
 /*
   We can actually do a little bit better for the solution to avoid repeating
@@ -2262,11 +2266,10 @@ MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
   return V;
 }
 
-template<typename T>
-MyMatrix<T> MatrixFromVector(MyVector<T> const& V) {
+template <typename T> MyMatrix<T> MatrixFromVector(MyVector<T> const &V) {
   int n = V.size();
   MyMatrix<T> M(1, n);
-  for (int i=0; i<n; i++) {
+  for (int i = 0; i < n; i++) {
     M(0, i) = V(i);
   }
   return M;
@@ -2293,7 +2296,7 @@ MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const &VF,
 template <typename T> MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const &EXT) {
   int nbRow = EXT.rows();
   int nbCol = EXT.cols();
-  auto IsLineZero=[&](int const& iLine) -> bool {
+  auto IsLineZero = [&](int const &iLine) -> bool {
     for (int iCol = 0; iCol < nbCol; iCol++)
       if (EXT(iLine, iCol) != 0)
         return false;
@@ -3188,8 +3191,7 @@ public:
   }
 };
 
-template <typename T>
-T GetSmallestMatrixCoefficient(MyMatrix<T> const &M) {
+template <typename T> T GetSmallestMatrixCoefficient(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   auto get_abs = [](T const &val) -> T {
@@ -3222,8 +3224,7 @@ T GetSmallestMatrixCoefficient(MyMatrix<T> const &M) {
   return the_sma;
 }
 
-template <typename T>
-T GetSmallestVectorCoefficient(MyVector<T> const &V) {
+template <typename T> T GetSmallestVectorCoefficient(MyVector<T> const &V) {
   int n = V.size();
   auto get_abs = [](T const &val) -> T {
     if (val < 0)
@@ -3261,8 +3262,10 @@ private:
   std::unique_ptr<ContainerMatrix<T>> Cont;
   MyMatrix<T> Mret;
   MyVector<T> V;
+
 public:
-  ContainerMatrixPositiveScal(MyMatrix<T> const& M) : nbRow(M.rows()), nbCol(M.cols()) {
+  ContainerMatrixPositiveScal(MyMatrix<T> const &M)
+      : nbRow(M.rows()), nbCol(M.cols()) {
     Mret = MyMatrix<T>(nbRow, nbCol);
     V = MyVector<T>(nbCol);
     for (int iRow = 0; iRow < nbRow; iRow++) {
@@ -3273,14 +3276,14 @@ public:
     }
     Cont = std::make_unique<ContainerMatrix<T>>(Mret);
   }
-  template<typename F> std::optional<size_t> GetIdx_f(F f) {
+  template <typename F> std::optional<size_t> GetIdx_f(F f) {
     for (int i = 0; i < nbCol; i++)
       V(i) = f(i);
     T the_sma = GetSmallestVectorCoefficient(V);
     V /= the_sma;
     return Cont->GetIdx_v(V);
   }
-  std::optional<size_t> GetIdx_v(MyVector<T> const& Vin) {
+  std::optional<size_t> GetIdx_v(MyVector<T> const &Vin) {
     for (int i = 0; i < nbCol; i++)
       V(i) = Vin(i);
     T the_sma = GetSmallestVectorCoefficient(V);
@@ -3289,26 +3292,26 @@ public:
   }
 };
 
-template<typename T>
-std::optional<int> get_position_m_v(MyMatrix<T> const& M, MyVector<T> const& V) {
-  int n_rows=M.rows();
-  int n_cols=M.cols();
-  auto is_in_row=[&](int i_row) -> bool {
-    for (int i=0; i<n_cols; i++) {
-      if (M(i_row,i) != V(i)) {
+template <typename T>
+std::optional<int> get_position_m_v(MyMatrix<T> const &M,
+                                    MyVector<T> const &V) {
+  int n_rows = M.rows();
+  int n_cols = M.cols();
+  auto is_in_row = [&](int i_row) -> bool {
+    for (int i = 0; i < n_cols; i++) {
+      if (M(i_row, i) != V(i)) {
         return false;
       }
     }
     return true;
   };
-  for (int i_row=0; i_row<n_rows; i_row++) {
+  for (int i_row = 0; i_row < n_rows; i_row++) {
     if (is_in_row(i_row)) {
       return i_row;
     }
   }
   return {};
 }
-
 
 /*
   G has to be non-degenerate so that we can define the projector.

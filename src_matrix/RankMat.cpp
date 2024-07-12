@@ -7,15 +7,13 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-template <typename T>
-void compute_rankmat_kernel(std::string const &eFile) {
+template <typename T> void compute_rankmat_kernel(std::string const &eFile) {
   MyMatrix<T> A = ReadMatrixFile<T>(eFile);
   int rnk = RankMat(A);
   std::cerr << "RankMat(A)=" << rnk << "\n";
 }
 
-void compute_rankmat(std::string const &arithmetic,
-                         std::string const &eFile) {
+void compute_rankmat(std::string const &arithmetic, std::string const &eFile) {
   if (arithmetic == "safe_integer") {
     using T = SafeInt64;
     return compute_rankmat_kernel<T>(eFile);

@@ -9,8 +9,7 @@
 #include <string>
 #include <vector>
 
-template<typename Tidx>
-std::vector<Tidx> FaceToVector(Face const &eSet) {
+template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   size_t nbVert = eSet.count();
   std::vector<int> eList(nbVert);
   boost::dynamic_bitset<>::size_type aRow = eSet.find_first();
@@ -33,16 +32,14 @@ std::vector<int> FaceTo01vector(Face const &eSet) {
   return eList;
 }
 
-template<typename Tidx>
-Face VectorToFace(std::vector<Tidx> const& V, size_t siz) {
+template <typename Tidx>
+Face VectorToFace(std::vector<Tidx> const &V, size_t siz) {
   Face f(siz);
-  for (auto & eVal : V) {
+  for (auto &eVal : V) {
     f[eVal] = 1;
   }
   return f;
 }
-
-
 
 std::string StringFace(Face const &f) {
   std::string str_ret;

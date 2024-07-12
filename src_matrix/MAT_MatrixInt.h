@@ -207,23 +207,22 @@ ComputePairGcdDot(T const &m, T const &n) {
 
 #endif
 
-template<typename T>
-GCD_dot<T> ComputeGcdDot(MyVector<T> const& x) {
+template <typename T> GCD_dot<T> ComputeGcdDot(MyVector<T> const &x) {
   int siz = x.size();
   T gcd = x(0);
   MyVector<T> V(siz);
   V(0) = 1;
-  for (int u=1; u<siz; u++) {
+  for (int u = 1; u < siz; u++) {
     GCD_dot<T> res = ComputePairGcdDot(gcd, x(u));
     gcd = res.gcd;
     V(u) = res.V(1);
-    for (int v=0; v<u; v++) {
+    for (int v = 0; v < u; v++) {
       V(v) = V(v) * res.V(0);
     }
   }
 #ifdef DEBUG_MATRIX_INT
   T sum = 0;
-  for (int u=0; u<siz; u++) {
+  for (int u = 0; u < siz; u++) {
     sum += V(u) * x(u);
   }
   if (sum != gcd) {
@@ -234,14 +233,13 @@ GCD_dot<T> ComputeGcdDot(MyVector<T> const& x) {
   return {std::move(V), gcd};
 }
 
-template<typename T>
-GCD_dot<T> PositivityNormalizeGcdDot(GCD_dot<T> const& x) {
+template <typename T>
+GCD_dot<T> PositivityNormalizeGcdDot(GCD_dot<T> const &x) {
   if (x.gcd > 0) {
     return x;
   }
   return {-x.V, -x.gcd};
 }
-
 
 // This is the return type for the second extended GCD computations
 // In input a list of entries x=(x_0, ...., x_m)

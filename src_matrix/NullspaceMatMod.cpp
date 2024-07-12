@@ -8,8 +8,8 @@
 // clang-format on
 
 template <typename T>
-void full_process_type(std::string const &matrix_file, std::string const& prime,
-                       std::string OutFormat, std::ostream & os_out) {
+void full_process_type(std::string const &matrix_file, std::string const &prime,
+                       std::string OutFormat, std::ostream &os_out) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(matrix_file);
   std::cerr << "TheMat=\n";
   WriteMatrix(std::cerr, TheMat);
@@ -29,9 +29,9 @@ void full_process_type(std::string const &matrix_file, std::string const& prime,
   throw TerminalException{1};
 }
 
-void process(std::string const &arith,
-             std::string const &matrix_file, std::string const& prime,
-             std::string OutFormat, std::ostream & os_out) {
+void process(std::string const &arith, std::string const &matrix_file,
+             std::string const &prime, std::string OutFormat,
+             std::ostream &os_out) {
   if (arith == "safe_rational") {
     using T = Rational<SafeInt64>;
     return full_process_type<T>(matrix_file, prime, OutFormat, os_out);
@@ -49,7 +49,8 @@ int main(int argc, char *argv[]) {
   try {
     if (argc != 4 && argc != 6) {
       std::cerr << "This program is used as\n";
-      std::cerr << "NullspaceMatMod [arith] [matrix_file] [prime] [OutFormat] [OutFile]\n";
+      std::cerr << "NullspaceMatMod [arith] [matrix_file] [prime] [OutFormat] "
+                   "[OutFile]\n";
       std::cerr << "    or\n";
       std::cerr << "NullspaceMatMod [arith] [matrix_file] [prime]\n";
       std::cerr << "\n";

@@ -228,9 +228,9 @@ std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M,
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   int n = M.rows();
   MyMatrix<T> Mred(n, n);
-  for (int i=0; i<n; i++) {
-    for (int j=0; j<n; j++) {
-      Mred(i,j) = ResInt(M(i,j), TheMod);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      Mred(i, j) = ResInt(M(i, j), TheMod);
     }
   }
   if (n == 1) {
@@ -273,8 +273,8 @@ FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
   return FindIsotropicVectorMod_Z(M, TheMod);
 }
 
-template<typename T>
-bool IsMatrixZeroMod(MyMatrix<T> const& M, T const& TheMod) {
+template <typename T>
+bool IsMatrixZeroMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
   for (int i = 0; i < n_row; i++) {
@@ -313,26 +313,26 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
   std::vector<int> ListColSelect;
   std::vector<uint8_t> ListColSelect01(n_col, 0);
   int eRank = 0;
-  for (int iRow=0; iRow<n_row; iRow++) {
+  for (int iRow = 0; iRow < n_row; iRow++) {
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "MATMOD: NullspaceTrMatMod iRow=" << iRow << "\n";
 #endif
-    for (int iCol=0; iCol<n_col; iCol++) {
+    for (int iCol = 0; iCol < n_col; iCol++) {
       T res = ResInt(M(iRow, iCol), TheMod);
       Mwork(eRank, iCol) = res;
     }
-    for (int iRank=0; iRank<eRank; iRank++) {
+    for (int iRank = 0; iRank < eRank; iRank++) {
       int eCol = ListColSelect[iRank];
       T eVal1 = Mwork(eRank, eCol);
       if (eVal1 != 0) {
-        for (int iCol=0; iCol<n_col; iCol++) {
+        for (int iCol = 0; iCol < n_col; iCol++) {
           T val = Mwork(eRank, iCol) - eVal1 * Mwork(iRank, iCol);
           Mwork(eRank, iCol) = ResInt(val, TheMod);
         }
       }
     }
-    auto get_firstnonzero_iife=[&]() -> int {
-      for (int iCol=0; iCol<n_col; iCol++) {
+    auto get_firstnonzero_iife = [&]() -> int {
+      for (int iCol = 0; iCol < n_col; iCol++) {
         if (Mwork(eRank, iCol) != 0) {
           return iCol;
         }
@@ -348,15 +348,15 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
 #ifdef DEBUG_MATRIX_MOD
       std::cerr << "MATMOD: eVal1=" << eVal1 << " eVal2=" << eVal2 << "\n";
 #endif
-      for (int iCol=0; iCol<n_col; iCol++) {
+      for (int iCol = 0; iCol < n_col; iCol++) {
         T val = Mwork(eRank, iCol) * eVal2;
         Mwork(eRank, iCol) = ResInt(val, TheMod);
       }
-      for (int iRank=0; iRank<eRank; iRank++) {
+      for (int iRank = 0; iRank < eRank; iRank++) {
         T eVal1 = Mwork(iRank, FirstNZ);
         if (eVal1 != 0) {
           int StartCol = ListColSelect[iRank];
-          for (int iCol=StartCol; iCol<n_col; iCol++) {
+          for (int iCol = StartCol; iCol < n_col; iCol++) {
             T val = Mwork(iRank, iCol) - eVal1 * Mwork(eRank, iCol);
             Mwork(iRank, iCol) = ResInt(val, TheMod);
           }
@@ -370,19 +370,20 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
 #endif
   int nbVectZero = n_col - eRank;
 #ifdef DEBUG_MATRIX_MOD
-  std::cerr << "MATMOD: n_col=" << n_col << " eRank=" << eRank << " nbVectZero=" << nbVectZero << "\n";
+  std::cerr << "MATMOD: n_col=" << n_col << " eRank=" << eRank
+            << " nbVectZero=" << nbVectZero << "\n";
   std::cerr << "MATMOD: ListColSelect01=";
-  for (auto & k: ListColSelect01) {
+  for (auto &k : ListColSelect01) {
     std::cerr << static_cast<int>(k);
   }
   std::cerr << "\n";
 #endif
   MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, n_col);
   int nbVect = 0;
-  for (int iCol=0; iCol<n_col; iCol++) {
+  for (int iCol = 0; iCol < n_col; iCol++) {
     if (ListColSelect01[iCol] == 0) {
-      NSP(nbVect,iCol) = TheMod - 1;
-      for (int iRank=0; iRank<eRank; iRank++) {
+      NSP(nbVect, iCol) = TheMod - 1;
+      for (int iRank = 0; iRank < eRank; iRank++) {
         int eCol = ListColSelect[iRank];
         NSP(nbVect, eCol) = Mwork(iRank, iCol);
       }
@@ -413,7 +414,6 @@ MyMatrix<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
 #endif
   return NSP;
 }
-
 
 template <typename T>
 int DimensionKernelMod(MyMatrix<T> const &M, T const &TheMod) {

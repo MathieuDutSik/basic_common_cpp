@@ -167,7 +167,7 @@ static inline void report_aut_vectvectint(void *param,
 
 template <typename Tgr, typename TidxG>
 std::vector<std::vector<TidxG>> BLISS_GetListGenerators(Tgr const &eGR,
-                                                       size_t const &n_last) {
+                                                        size_t const &n_last) {
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
   RecParam rec_param;
