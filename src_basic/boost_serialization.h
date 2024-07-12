@@ -2,13 +2,12 @@
 #ifndef SRC_BASIC_BOOST_SERIALIZATION_H_
 #define SRC_BASIC_BOOST_SERIALIZATION_H_
 
+// clang-format off
 #include <boost/archive/tmpdir.hpp>
-
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
-
 #include <boost/serialization/assume_abstract.hpp>
 #include <boost/serialization/base_object.hpp>
 #include <boost/serialization/list.hpp>
@@ -18,7 +17,9 @@
 #include <optional>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
+// clang-format on
 
 namespace boost::serialization {
 

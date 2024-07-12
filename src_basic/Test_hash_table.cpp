@@ -1,3 +1,5 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+
 // clang-format off
 #include "sparse_map.h"
 #include "robin_map.h"

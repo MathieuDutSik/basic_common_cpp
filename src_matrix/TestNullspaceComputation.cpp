@@ -37,8 +37,8 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
     using T = Rational<SafeInt64>;
     return full_process_type<T>(M);
   }
-  if (arith == "rational<long>") {
-    using T = Rational<long>;
+  if (arith == "rational<int64_t>") {
+    using T = Rational<int64_t>;
     return full_process_type<T>(M);
   }
   if (arith == "rational") {
@@ -115,7 +115,7 @@ MyMatrix<int> get_random_matrix(int m, int n) {
   return M;
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   SingletonTime time1;
   try {
     //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>",

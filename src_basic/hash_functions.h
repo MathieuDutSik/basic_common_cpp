@@ -2,13 +2,16 @@
 #ifndef SRC_BASIC_HASH_FUNCTIONS_H_
 #define SRC_BASIC_HASH_FUNCTIONS_H_
 
+// clang-format off
 #include "Temp_common.h"
 #include <array>
 #include <cstdint>
 #include <iterator>
+#include <map>
 #include <string>
 #include <utility>
 #include <vector>
+// clang-format on
 
 // Code copy pasted from
 // https://codereview.stackexchange.com/questions/163872/md5-implementation-in-c11

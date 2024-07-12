@@ -2,11 +2,14 @@
 #ifndef SRC_BASIC_BASIC_DATAFILE_H_
 #define SRC_BASIC_BASIC_DATAFILE_H_
 
+// clang-format off
 #include "Basic_file.h"
 #include "Boost_bitset.h"
 #include <algorithm>
 #include <string>
+#include <utility>
 #include <vector>
+// clang-format on
 
 #ifdef DEBUG
 #define DEBUG_BASIC_DATAFILE
@@ -198,7 +201,7 @@ public:
     // popcnt
     size_t curr_n_ints = n_ent / 32;
     size_t sm = 0;
-    uint32_t *ptr = (uint32_t *)(buffer.data());
+    uint32_t *ptr = reinterpret_cast<uint32_t*>(buffer.data());
     for (size_t i = 0; i < curr_n_ints; i++) {
       sm += __builtin_popcount(*(ptr + i));
     }

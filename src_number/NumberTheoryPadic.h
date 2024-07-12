@@ -8,6 +8,9 @@
 #include "quadratic_residue.h"
 #include <limits>
 #include <string>
+#include <algorithm>
+#include <utility>
+#include <vector>
 // clang-format on
 
 #ifdef DEBUG

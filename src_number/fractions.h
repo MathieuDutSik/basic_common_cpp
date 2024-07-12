@@ -54,7 +54,7 @@ template <typename T> T get_mid_val(T const &TheLow, T const &TheUpp) {
   }
   std::cerr << "We should not reach that state in GetMidVal\n";
   throw TerminalException{1};
-};
+}
 
 // clang-format off
 #endif  // SRC_NUMBER_FRACTIONS_H_

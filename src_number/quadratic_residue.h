@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "TemplateTraits.h"
+#include <limits>
 #include <map>
 #include <utility>
 #include <vector>

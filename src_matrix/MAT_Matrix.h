@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <functional>
 #include <limits>
+#include <memory>
 #include <set>
 #include <string>
 #include <unordered_set>

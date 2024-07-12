@@ -4,7 +4,7 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 
-int main(int argc, char *argv[]) {
+int main() {
   using T = int;
   int n = 5;
   int m = 7;

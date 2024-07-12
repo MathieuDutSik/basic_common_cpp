@@ -8,7 +8,7 @@
 template <typename T> struct StorageHistorical {
   struct FullRelInfo {
     bool status;
-    unsigned long long eTime;
+    uint64_t eTime;
     T eVal;
   };
 
@@ -39,7 +39,7 @@ public:
     return ListVal;
   }
 
-  void InsertOneValue(unsigned long long const &eTime, T const &eVal) {
+  void InsertOneValue(uint64_t const &eTime, T const &eVal) {
     if (ThePeriod < 0) {
       return;
     }

@@ -6,6 +6,9 @@
 #include "MAT_MatrixInt.h"
 #include "Boost_bitset.h"
 #include "Fp.h"
+#include <algorithm>
+#include <utility>
+#include <vector>
 // clang-format on
 
 template <typename T> struct SubsetRankOneSolver_Field {

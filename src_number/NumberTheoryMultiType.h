@@ -6,6 +6,7 @@
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
+#include <string>
 // clang-format on
 
 template <typename F, typename... Targs>

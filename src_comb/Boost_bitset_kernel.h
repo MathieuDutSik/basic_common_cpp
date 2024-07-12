@@ -2,14 +2,16 @@
 #ifndef SRC_COMB_BOOST_BITSET_KERNEL_H_
 #define SRC_COMB_BOOST_BITSET_KERNEL_H_
 
-// Boost libraries
 
+// clang-format off
 #include "boost_serialization.h"
 #include "hash_functions.h"
 #include <bitset>
 #include <boost/dynamic_bitset.hpp>
+#include <set>
 #include <utility>
 #include <vector>
+// clang-format on
 
 typedef boost::dynamic_bitset<> Face;
 

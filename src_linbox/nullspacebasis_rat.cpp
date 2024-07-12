@@ -1,3 +1,5 @@
+// Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+
 #include "linbox/algorithms/gauss.h"
 #include "linbox/matrix/dense-matrix.h"
 #include <givaro/gfq.h>

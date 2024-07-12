@@ -2,6 +2,11 @@
 #ifndef SRC_NUMBER_MATCHINGTYPES_H_
 #define SRC_NUMBER_MATCHINGTYPES_H_
 
+// clang-format off
+#include <limits>
+#include <string>
+// clang-format on
+
 template <typename T, typename Tinf> constexpr T get_signed_max_range() {
   T val_max = std::numeric_limits<T>::max();
   T val_min = std::numeric_limits<T>::min();

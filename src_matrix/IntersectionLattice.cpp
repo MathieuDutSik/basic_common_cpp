@@ -56,8 +56,8 @@ int main(int argc, char *argv[]) {
         return process<mpz_class>();
       if (arith == "mpq_class")
         return process<mpq_class>();
-      if (arith == "Rational<long long>")
-        return process<Rational<long long>>();
+      if (arith == "Rational<int64_t>")
+        return process<Rational<int64_t>>();
       if (arith == "safe_integer")
         return process<SafeInt64>();
       if (arith == "safe_rational")

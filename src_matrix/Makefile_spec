@@ -1,20 +1,21 @@
 #PROGRAM		= AnalysisSingMat
-#PROGRAM		= ZbasisComputation
-#PROGRAM		= RowHermiteNormalForm
-#PROGRAM		= RemoveFractionMatrix
-#PROGRAM		= TestSubspaceCompletion
-#PROGRAM		= TestProdMat
-#PROGRAM		= ScalarCanonicalization
+#PROGRAM		= DeterminantMat
 #PROGRAM		= MatrixSubsetSolver
-#PROGRAM		= UniqueRescaleRows
-#PROGRAM		= TestFindIsotropicMod
+#PROGRAM		= ZbasisComputation
+#PROGRAM		= RemoveFractionMatrix
+#PROGRAM		= RowHermiteNormalForm
+#PROGRAM		= ScalarCanonicalization
+#PROGRAM		= SerializeMatrix
 #PROGRAM		= SmithNormalForm
 #PROGRAM		= SolutionMatRepetitive
-#PROGRAM		= SerializeMatrix
 #PROGRAM		= TestEquaSpace
-#PROGRAM		= DeterminantMat
-PROGRAM		= NullspaceMatMod
+#PROGRAM		= NullspaceMatMod
+#PROGRAM		= TestFindIsotropicMod
+#PROGRAM		= TestSubspaceCompletion
+#PROGRAM		= TestProdMat
+#PROGRAM		= UniqueRescaleRows
 #PROGRAM		= IsotropicMatMod
+PROGRAM		= IntersectionLattice
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
