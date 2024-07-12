@@ -13,13 +13,10 @@
 #define DEBUG_QUADRATIC_RESIDUE
 #endif
 
-
-
-
 /*
   References used below:
-  OB: Oswald Baumgart, "The Quadratic Reciprocity Law: A collection of classical proofs"
-     Edited and translated by Franz Lemmermeyer
+  OB: Oswald Baumgart, "The Quadratic Reciprocity Law: A collection of classical
+  proofs" Edited and translated by Franz Lemmermeyer
 
   Th (OB[End of Chapter 2]): If P and Q are positive coprime integers
       then we have
@@ -58,10 +55,6 @@
   But for (P / Q) = 1, we cannot conclude.
  */
 
-
-
-
-
 // This is an exhaustive search that works even if m is not prime.
 template <typename T>
 std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
@@ -97,14 +90,14 @@ std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
   return {};
 }
 
-template<typename T, typename Tcomp>
+template <typename T, typename Tcomp>
 std::optional<T> find_quadratic_residue_Tcomp(T const &a, T const &m) {
-  Tcomp a_comp = UniversalScalarConversion<Tcomp,T>(a);
-  Tcomp m_comp = UniversalScalarConversion<Tcomp,T>(m);
+  Tcomp a_comp = UniversalScalarConversion<Tcomp, T>(a);
+  Tcomp m_comp = UniversalScalarConversion<Tcomp, T>(m);
   std::optional<Tcomp> opt = find_quadratic_residue_kernel(a_comp, m_comp);
   if (opt) {
     Tcomp val_comp = *opt;
-    T val = UniversalScalarConversion<T,Tcomp>(val_comp);
+    T val = UniversalScalarConversion<T, Tcomp>(val_comp);
     return val;
   } else {
     return {};
@@ -115,36 +108,38 @@ template <typename T>
 std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
   T m = T_abs(m_in);
   T a = ResInt(a_in, m);
-  T max16_A = UniversalScalarConversion<T,int16_t>(std::numeric_limits<int16_t>::max());
-  T max32_A = UniversalScalarConversion<T,int32_t>(std::numeric_limits<int32_t>::max());
-  T max64_A = UniversalScalarConversion<T,int64_t>(std::numeric_limits<int64_t>::max());
+  T max16_A = UniversalScalarConversion<T, int16_t>(
+      std::numeric_limits<int16_t>::max());
+  T max32_A = UniversalScalarConversion<T, int32_t>(
+      std::numeric_limits<int32_t>::max());
+  T max64_A = UniversalScalarConversion<T, int64_t>(
+      std::numeric_limits<int64_t>::max());
   T four(4);
   T max16_B = QuoInt(max16_A, four);
   T max32_B = QuoInt(max32_A, four);
   T max64_B = QuoInt(max64_A, four);
   if (m < max16_B) {
-    return find_quadratic_residue_Tcomp<T,int16_t>(a, m);
+    return find_quadratic_residue_Tcomp<T, int16_t>(a, m);
   }
   if (m < max32_B) {
-    return find_quadratic_residue_Tcomp<T,int32_t>(a, m);
+    return find_quadratic_residue_Tcomp<T, int32_t>(a, m);
   }
   if (m < max64_B) {
-    return find_quadratic_residue_Tcomp<T,int64_t>(a, m);
+    return find_quadratic_residue_Tcomp<T, int64_t>(a, m);
   }
   return find_quadratic_residue_kernel(a, m);
 }
 
-
-
-template<typename T>
-std::pair<size_t, T> decompose_even_power_odd(T const& val) {
+template <typename T>
+std::pair<size_t, T> decompose_even_power_odd(T const &val) {
   size_t power = 0;
   T two(2);
   T work_val = val;
-  while(true) {
+  while (true) {
     std::pair<T, T> pair = ResQuoInt(work_val, two);
 #ifdef DEBUG_QUADRATIC_RESIDUE
-    std::cerr << "work_val=" << work_val << " res=" << pair.first << " q=" << pair.second << "\n";
+    std::cerr << "work_val=" << work_val << " res=" << pair.first
+              << " q=" << pair.second << "\n";
 #endif
     if (pair.first > 0) {
       return {power, work_val};
@@ -154,8 +149,8 @@ std::pair<size_t, T> decompose_even_power_odd(T const& val) {
   }
 }
 
-template<typename T>
-int get_legendre_symbol_power_two(size_t const& power, T const& P) {
+template <typename T>
+int get_legendre_symbol_power_two(size_t const &power, T const &P) {
   T val = P * P - 1;
   T eight(8);
   T quot = QuoInt(val, eight);
@@ -210,7 +205,7 @@ template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
 #endif
   T P = pair_a.second;
   T Q = pair_m.second;
-  while(true) {
+  while (true) {
     // 1: termination test
     if (P == 1) {
       break;
@@ -228,7 +223,8 @@ template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
     }
     symbol *= sign_pq;
 #ifdef DEBUG_QUADRATIC_RESIDUE
-    std::cerr << "Update 1: sign_pq=" << sign_pq << " Pm1d2=" << Pm1d2 << " Qm1d2=" << Qm1d2 << "\n";
+    std::cerr << "Update 1: sign_pq=" << sign_pq << " Pm1d2=" << Pm1d2
+              << " Qm1d2=" << Qm1d2 << "\n";
 #endif
     // 3: Computing the residue
     T Qres = ResInt(Q, P);
@@ -254,11 +250,8 @@ template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
   }
 }
 
-
-
-
-
-template <typename T> bool is_quadratic_residue_exhaustive(T const &a, T const &m) {
+template <typename T>
+bool is_quadratic_residue_exhaustive(T const &a, T const &m) {
   std::optional<T> opt = find_quadratic_residue(a, m);
   return opt.has_value();
 }

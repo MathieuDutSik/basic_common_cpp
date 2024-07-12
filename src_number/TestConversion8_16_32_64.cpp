@@ -10,23 +10,21 @@
 
 // This is mostly a compilation test
 
-template<typename T, typename Tred>
-void process_A() {
+template <typename T, typename Tred> void process_A() {
   T val1(23);
-  Tred val2 = UniversalScalarConversion<Tred,T>(val1);
-  T val3 = UniversalScalarConversion<T,Tred>(val2);
+  Tred val2 = UniversalScalarConversion<Tred, T>(val1);
+  T val3 = UniversalScalarConversion<T, Tred>(val2);
   if (val1 != val3) {
     std::cerr << "Some incoherence\n";
     throw TerminalException{1};
   }
 }
 
-template<typename T>
-void process_B() {
-  process_A<T,int8_t>();
-  process_A<T,int16_t>();
-  process_A<T,int32_t>();
-  process_A<T,int64_t>();
+template <typename T> void process_B() {
+  process_A<T, int8_t>();
+  process_A<T, int16_t>();
+  process_A<T, int32_t>();
+  process_A<T, int64_t>();
 }
 
 int main(int argc, char *argv[]) {

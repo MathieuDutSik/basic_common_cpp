@@ -20,9 +20,8 @@
   ---
 
   Computing with p-adic numbers.
-  We have the degree and a vector of entries of length d with all coefficients between
-  0 and p-1.
-  Then:
+  We have the degree and a vector of entries of length d with all coefficients
+  between 0 and p-1. Then:
   * Addition looks trivial, but the question of relative exponent
     muddies things considerably.
   * Multiplication is two loops though we have to care about the
@@ -35,7 +34,8 @@
       1 = x y
         = (x_0 + p x_1) (y_0 + p y_1)
         = x_0 y_0 + p (x_0 y_1 + x_1 y_0)
-      Expressing x_0 y_0 = 1 + p h and expanding we can effectively find the inverse.
+      Expressing x_0 y_0 = 1 + p h and expanding we can effectively find the
+  inverse.
     - There is a more straightforward method. Expressing the two terms
       together we get
       xy = 1 + p^d h
@@ -60,9 +60,9 @@
           = 1 + 4 (u + u^2)
       So, the coefficient of 2 is zero, which gives another restriction.
     - Then the entry u + u^2 is always even, so that gives another factor 2.
-    Therefore, if we admit the result that R_2 has size 8, then we have an algorithm
-    for checking
-    See https://math.stackexchange.com/questions/473595/characterization-of-integers-which-has-a-2-adic-square-root
+    Therefore, if we admit the result that R_2 has size 8, then we have an
+  algorithm for checking See
+  https://math.stackexchange.com/questions/473595/characterization-of-integers-which-has-a-2-adic-square-root
   So, if we can compute in p-adic up to some level, then we can decide whether
   entries are trivial in R_p or not.
 
@@ -70,8 +70,8 @@
 
   We do not try to git the P-adic with other data types since a constructor
   Padic x(1);
-  would make sense if we were always working with the same p. In that case the "p"
-  would work the same way as the d in the quadratic field Q(sqrt(d)).
+  would make sense if we were always working with the same p. In that case the
+  "p" would work the same way as the d in the quadratic field Q(sqrt(d)).
 
   But that is precisely not our use case. So, instead we compute with the p put
   as argument.
@@ -87,77 +87,75 @@
 
   Thus a zero has an effective valuation of zero, an accuracy of infinity
   From that type, we can build the functions:
-  * valuation() that will be always greater than eff_valuation of possibly returns
-     std::numeric_limits<size_t>::max() if zero.
-   If there is not enough coefficients to conclude then throw a PadicPrecisionException{1};
-  * coeff(i) returns the coefficient. Throw a PadicPrecisionException{2} if not accessible.
+  * valuation() that will be always greater than eff_valuation of possibly
+  returns std::numeric_limits<size_t>::max() if zero. If there is not enough
+  coefficients to conclude then throw a PadicPrecisionException{1};
+  * coeff(i) returns the coefficient. Throw a PadicPrecisionException{2} if not
+  accessible.
 
   Now about implementation:
-  * We need a function accuracy_reduction that reduce the number of coefficients and the accuracy
-    if non-zero. For zero entries (ones with accuracy = MAX), the accuracy is not tested.
+  * We need a function accuracy_reduction that reduce the number of coefficients
+  and the accuracy if non-zero. For zero entries (ones with accuracy = MAX), the
+  accuracy is not tested.
   * We need a function is_zero that tests if a number is zero or not.
-  * The computation of product returns object whose accuracy is the minimum of both accuracies
-    the eff_valuation is computed as the sum of both accuracies.
+  * The computation of product returns object whose accuracy is the minimum of
+  both accuracies the eff_valuation is computed as the sum of both accuracies.
   * The inverse is done in the following way:
     - Same accuracy.
-    - Assumes that the first coefficient is non-zero (that is eff_valuation = valuation).
-      If zero, then throw a PadicPrecisionException{3}
+    - Assumes that the first coefficient is non-zero (that is eff_valuation =
+  valuation). If zero, then throw a PadicPrecisionException{3}
     - in return eff_valuation = - eff_valuation
   * The sum is the most problematic.
     - We need to take the eff_valuation and compute what can be computed.
 
-  We are not trying to be partically efficient, just something reasonable for computing.
-  The PadicPrecisionException allows for increase of precision if the user can solve his
-  problem.
+  We are not trying to be partically efficient, just something reasonable for
+  computing. The PadicPrecisionException allows for increase of precision if the
+  user can solve his problem.
  */
-
-
 
 // Running with P-adic number is always done for a precision that is finite
 // which is intrinsically a problem because sometimes that just does not work.
 // Possible values:
-// 1: Valuation exception. Cannot find a non-zero entry, so cannot get the valuation.
-// 2: Coefficient error. Cannot access the coefficient that is sought.
-// 3: Inverse error. The first coefficient has to be non-zero.
-// 4: precision error. Trying to compute inverse with infinite precision, which is impossible on a computer.
-// 5: square root test. For p=2 we need 3 coefficients to compute. Otherwise, just one number suffices.
+// 1: Valuation exception. Cannot find a non-zero entry, so cannot get the
+// valuation. 2: Coefficient error. Cannot access the coefficient that is
+// sought. 3: Inverse error. The first coefficient has to be non-zero. 4:
+// precision error. Trying to compute inverse with infinite precision, which is
+// impossible on a computer. 5: square root test. For p=2 we need 3 coefficients
+// to compute. Otherwise, just one number suffices.
 
 struct PadicPrecisionException {
   int val;
 };
 
-template<typename T>
-struct Padic {
+template <typename T> struct Padic {
   int eff_valuation;
   size_t precision;
   std::vector<T> coefficients;
 };
 
-
-template<typename T>
-std::string Padic_to_string(Padic<T> const& x) {
+template <typename T> std::string Padic_to_string(Padic<T> const &x) {
   std::stringstream s;
-  s << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision << " coefficients=";
-  for (auto & val : x.coefficients) {
+  s << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision
+    << " coefficients=";
+  for (auto &val : x.coefficients) {
     s << " " << val;
   }
   std::string converted(s.str());
   return converted;
 }
 
-template<typename T>
-void Padic_debug_print(Padic<T> const& x, std::ostream& os) {
+template <typename T>
+void Padic_debug_print(Padic<T> const &x, std::ostream &os) {
   os << Padic_to_string(x) << "\n";
 }
 
-
-template<typename T>
-Padic<T> Padic_from_positive_integer(T const& val, T const& p) {
+template <typename T>
+Padic<T> Padic_from_positive_integer(T const &val, T const &p) {
   std::vector<T> coefficients;
   T val_work = val;
   int eff_valuation = 0;
   bool has_nz = false;
-  while(true) {
+  while (true) {
     if (val_work == 0) {
       break;
     }
@@ -182,14 +180,13 @@ Padic<T> Padic_from_positive_integer(T const& val, T const& p) {
   return x;
 }
 
-
-template<typename T>
-Padic<T> Padic_from_integer(T const& val, T const& p, size_t const& precision) {
+template <typename T>
+Padic<T> Padic_from_integer(T const &val, T const &p, size_t const &precision) {
   std::vector<T> coefficients;
   T val_work = val;
   int eff_valuation = 0;
   bool has_nz = false;
-  while(true) {
+  while (true) {
     if (val_work == 0) {
       break;
     }
@@ -212,11 +209,9 @@ Padic<T> Padic_from_integer(T const& val, T const& p, size_t const& precision) {
   return {eff_valuation, precision, coefficients};
 }
 
-
-
-
-template<typename T>
-Padic<T> Padic_reduce_precision(Padic<T> const& x, size_t const& new_precision) {
+template <typename T>
+Padic<T> Padic_reduce_precision(Padic<T> const &x,
+                                size_t const &new_precision) {
 #ifdef DEBUG_PADIC
   if (x.precision < new_precision) {
     std::cerr << "The precision can only be decreased\n";
@@ -225,22 +220,20 @@ Padic<T> Padic_reduce_precision(Padic<T> const& x, size_t const& new_precision) 
 #endif
   size_t len = std::min(x.coefficients.size(), new_precision);
   std::vector<T> coefficients;
-  for (size_t u=0; u<len; u++) {
+  for (size_t u = 0; u < len; u++) {
     coefficients.push_back(x.coefficients[u]);
   }
   return {x.eff_valuation, new_precision, coefficients};
 }
 
-
-template<typename T>
-int Padic_valuation(Padic<T> const& x) {
+template <typename T> int Padic_valuation(Padic<T> const &x) {
   size_t infinite_precision = std::numeric_limits<size_t>::max();
   if (x.precision == infinite_precision) {
     int infinite_valuation = std::numeric_limits<int>::max();
     return infinite_valuation;
   }
   int valuation = x.eff_valuation;
-  for (size_t u=0; u<x.coefficients.size(); u++) {
+  for (size_t u = 0; u < x.coefficients.size(); u++) {
     if (x.coefficients[u] == 0) {
       valuation += 1;
     } else {
@@ -250,8 +243,7 @@ int Padic_valuation(Padic<T> const& x) {
   throw PadicPrecisionException{1};
 }
 
-template<typename T>
-T Padic_coeff(Padic<T> const& x, size_t const& index) {
+template <typename T> T Padic_coeff(Padic<T> const &x, size_t const &index) {
   if (index >= x.precision) {
     throw PadicPrecisionException{2};
   }
@@ -262,18 +254,17 @@ T Padic_coeff(Padic<T> const& x, size_t const& index) {
   return T(0);
 }
 
-template<typename T>
-Padic<T> Padic_reduction(Padic<T> const& x) {
+template <typename T> Padic<T> Padic_reduction(Padic<T> const &x) {
   size_t infinite_precision = std::numeric_limits<size_t>::max();
   size_t len = x.coefficients.size();
-  for (size_t u=0; u<len; u++) {
+  for (size_t u = 0; u < len; u++) {
     if (x.coefficients[u] != 0) {
       size_t precision = infinite_precision;
       if (x.precision < infinite_precision) {
         precision -= u;
       }
       std::vector<T> coefficients;
-      for (size_t v=u; v<len; v++) {
+      for (size_t v = u; v < len; v++) {
         coefficients.push_back(x.coefficients[v]);
       }
       int eff_valuation = x.eff_valuation + u;
@@ -291,23 +282,24 @@ Padic<T> Padic_reduction(Padic<T> const& x) {
   }
 }
 
-template<typename T>
-T Padic_T_sum(Padic<T> const& x, T const& p, size_t const& precision) {
+template <typename T>
+T Padic_T_sum(Padic<T> const &x, T const &p, size_t const &precision) {
   size_t len = std::min(x.coefficients.size(), precision);
   T sum(0);
   T pow = 1;
-  for (size_t u=0; u<len; u++) {
+  for (size_t u = 0; u < len; u++) {
     sum += x.coefficients[u] * pow;
     pow *= p;
   }
   return sum;
 }
 
-template<typename T>
-std::vector<T> Padic_vec_T(T const& x_sum, T const& p, size_t const& precision) {
+template <typename T>
+std::vector<T> Padic_vec_T(T const &x_sum, T const &p,
+                           size_t const &precision) {
   std::vector<T> coefficients(precision);
   T work_val = x_sum;
-  for (size_t u=0; u<precision; u++) {
+  for (size_t u = 0; u < precision; u++) {
     std::pair<T, T> pair = ResQuoInt(work_val, p);
     coefficients[u] = pair.first;
     work_val = pair.second;
@@ -315,10 +307,8 @@ std::vector<T> Padic_vec_T(T const& x_sum, T const& p, size_t const& precision) 
   return coefficients;
 }
 
-
-
-template<typename T>
-Padic<T> Padic_product(Padic<T> const& x, Padic<T> const& y, T const& p) {
+template <typename T>
+Padic<T> Padic_product(Padic<T> const &x, Padic<T> const &y, T const &p) {
   size_t precision = std::min(x.precision, y.precision);
   int eff_valuation = x.eff_valuation + y.eff_valuation;
   T x_sum = Padic_T_sum(x, p, precision);
@@ -328,8 +318,7 @@ Padic<T> Padic_product(Padic<T> const& x, Padic<T> const& y, T const& p) {
   return {eff_valuation, precision, coefficients};
 }
 
-template<typename T>
-Padic<T> Padic_inverse(Padic<T> const& x, T const& p) {
+template <typename T> Padic<T> Padic_inverse(Padic<T> const &x, T const &p) {
   if (x.coefficients[0] == 0) {
     throw PadicPrecisionException{3};
   }
@@ -341,26 +330,25 @@ Padic<T> Padic_inverse(Padic<T> const& x, T const& p) {
   T sum = Padic_T_sum(x, p, precision);
   // full pow
   T full_pow = 1;
-  for (size_t u=0; u<x.precision; u++) {
+  for (size_t u = 0; u < x.precision; u++) {
     full_pow *= p;
   }
   T inv_val = mod_inv(sum, full_pow);
   std::vector<T> coefficients = Padic_vec_T(inv_val, p, precision);
-  int eff_valuation = - x.eff_valuation;
+  int eff_valuation = -x.eff_valuation;
   return {eff_valuation, precision, coefficients};
 }
 
-
-
-template<typename T>
-Padic<T> Padic_addition([[maybe_unused]] Padic<T> const& x, [[maybe_unused]] Padic<T> const& y, [[maybe_unused]] T const& p) {
+template <typename T>
+Padic<T> Padic_addition([[maybe_unused]] Padic<T> const &x,
+                        [[maybe_unused]] Padic<T> const &y,
+                        [[maybe_unused]] T const &p) {
   std::cerr << "Not yet implemented\n";
   throw TerminalException{1};
 }
 
 // We assume that x is reduced
-template<typename T>
-bool Padic_is_square(Padic<T> const& x, T const& p) {
+template <typename T> bool Padic_is_square(Padic<T> const &x, T const &p) {
 #ifdef DEBUG_PADIC
   if (x.coefficients[0] == 0) {
     std::cerr << "First coefficient has to be non-zero\n";
@@ -397,10 +385,6 @@ bool Padic_is_square(Padic<T> const& x, T const& p) {
     return is_quadratic_residue(coeff0, p);
   }
 }
-
-
-
-
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYPADIC_H_

@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     size_t deg = 4;
     std::istringstream is(input);
     std::vector<T> v = ReadVectorFromRealAlgebraicString<T>(is, deg);
-    for (size_t u=0; u<deg; u++) {
+    for (size_t u = 0; u < deg; u++) {
       std::cerr << "u=" << u << " v[u]=" << v[u] << "\n";
     }
     std::cerr << "Normal termination of the program\n";

@@ -10,16 +10,16 @@ struct DataTest {
 };
 
 namespace boost::serialization {
-  template <class Archive>
-  inline void serialize(Archive &ar, DataTest &eRec,
-                        [[maybe_unused]] const unsigned int version) {
-    ar &make_nvp("V", eRec.V);
-    ar &make_nvp("set", eRec.set);
-    ar &make_nvp("map", eRec.map);
-    ar &make_nvp("opt1", eRec.opt1);
-    ar &make_nvp("opt2", eRec.opt2);
-  }
+template <class Archive>
+inline void serialize(Archive &ar, DataTest &eRec,
+                      [[maybe_unused]] const unsigned int version) {
+  ar &make_nvp("V", eRec.V);
+  ar &make_nvp("set", eRec.set);
+  ar &make_nvp("map", eRec.map);
+  ar &make_nvp("opt1", eRec.opt1);
+  ar &make_nvp("opt2", eRec.opt2);
 }
+} // namespace boost::serialization
 
 bool operator==(DataTest const &x, DataTest const &y) {
   if (x.V != y.V) {
@@ -40,9 +40,7 @@ bool operator==(DataTest const &x, DataTest const &y) {
   return true;
 }
 
-bool operator!=(DataTest const &x, DataTest const &y) {
-  return !(x == y);
-}
+bool operator!=(DataTest const &x, DataTest const &y) { return !(x == y); }
 
 DataTest GenerateEntry() {
   std::vector<uint8_t> eV;
@@ -51,8 +49,8 @@ DataTest GenerateEntry() {
   std::unordered_set<int> set;
   std::unordered_map<int, int> map;
   for (int u = 0; u < 10; u++) {
-    int val1 = 2*u + 1;
-    int val2 = 3*u + 4;
+    int val1 = 2 * u + 1;
+    int val2 = 3 * u + 4;
     set.insert(val1);
     map.insert(std::make_pair(val1, val2));
   }
@@ -60,7 +58,6 @@ DataTest GenerateEntry() {
   std::optional<int> opt2(23);
   return {eV, set, map, opt1, opt2};
 }
-
 
 int main() {
   DataTest test = GenerateEntry();

@@ -102,17 +102,18 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
     std::string s2 = s_expo.substr(2, s_expo.size() - 2);
     return ParseScalar<size_t>(s2);
   };
-  auto get_position=[&](std::string const& s, std::string const& echar) -> size_t {
+  auto get_position = [&](std::string const &s,
+                          std::string const &echar) -> size_t {
     size_t len = s.size();
-    for (size_t u=0; u<len; u++) {
-      std::string c = s.substr(u,1);
+    for (size_t u = 0; u < len; u++) {
+      std::string c = s.substr(u, 1);
       if (c == echar) {
         return u;
       }
     }
     return miss_val;
   };
-  auto eval_scalar=[](std::string const& sc) -> T {
+  auto eval_scalar = [](std::string const &sc) -> T {
     if (sc == "") {
       return T(1);
     }
@@ -141,7 +142,7 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
       div = ParseScalar<T>(sb.substr(pos_div + 1, lenb - 1 - pos_div));
     }
     std::string sbred = sb.substr(0, pos_div);
-    auto get_coeff=[&]() -> T {
+    auto get_coeff = [&]() -> T {
       if (pos_mult == miss_val) {
         return eval_scalar(sbred.substr(0, pos_x));
       } else {

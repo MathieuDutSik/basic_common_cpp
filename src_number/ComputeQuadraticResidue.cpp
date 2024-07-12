@@ -9,7 +9,8 @@
 // clang-format on
 
 template <typename T>
-void process(std::string const& a_str, std::string const& p_str, std::string const& OutFormat, std::ostream& os) {
+void process(std::string const &a_str, std::string const &p_str,
+             std::string const &OutFormat, std::ostream &os) {
   T a = ParseScalar<T>(a_str);
   T p = ParseScalar<T>(p_str);
 
