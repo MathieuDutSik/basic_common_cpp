@@ -9,8 +9,8 @@
 int main(int argc, char *argv[]) {
   SingletonTime time1;
   try {
-    if (argc != 2) {
-      std::cerr << "Factorize [N]\n";
+    if (argc <= 2) {
+      std::cerr << "Factorize [N] [help1] .... [helpK]\n";
       std::cerr << "\n";
       std::cerr << "N: check the \n";
       std::cerr << "print: output the data to the file\n";
@@ -19,7 +19,13 @@ int main(int argc, char *argv[]) {
     using T = mpz_class;
     std::string N_str = argv[1];
     T N = ParseScalar<T>(N_str);
-    std::map<T, size_t> map = FactorsIntMap(N);
+    std::vector<T> list_help;
+    for (int u=2; u<argc; u++) {
+      std::string help_str = argv[u];
+      T help = ParseScalar<T>(help_str);
+      list_help.push_back(help);
+    }
+    std::map<T, size_t> map = FactorsIntMap_help(N, list_help);
     for (auto & kv : map) {
       std::cerr << "p=" << kv.first << " mult=" << kv.second << "\n";
     }

@@ -1,4 +1,4 @@
-PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize PracticalInf TestQuoInt PrintStaticInfo RealCubicFieldTest QuadFieldTest RationalTest TestTypeBoostGmp TestGetBit TestQuadraticResidue test_sequence_approximant ReadValueString ComputeQuadraticResidue
+PROGRAM		= TestSquareRoot test_unordered_map_mpzq Factorize Factorize_help TestFactorize PracticalInf TestQuoInt PrintStaticInfo RealCubicFieldTest QuadFieldTest RationalTest TestTypeBoostGmp TestGetBit TestQuadraticResidue test_sequence_approximant ReadValueString ComputeQuadraticResidue
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize

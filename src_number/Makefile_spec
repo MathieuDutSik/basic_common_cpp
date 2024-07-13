@@ -1,6 +1,7 @@
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
+PROGRAM		= Factorize_help
 #PROGRAM		= PracticalInf
 #PROGRAM		= TestQuoInt
 #PROGRAM		= TestConversion
@@ -14,7 +15,7 @@
 #PROGRAM		= test_sequence_approximant
 #PROGRAM		= TestQuadraticResidue
 #PROGRAM		= ReadValueString
-PROGRAM		= ComputeQuadraticResidue
+#PROGRAM		= ComputeQuadraticResidue
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
