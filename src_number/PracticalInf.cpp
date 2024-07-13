@@ -4,7 +4,7 @@
 #include "factorizations.h"
 // clang-format on
 
-int main(int argc, char *argv[]) {
+int main() {
   try {
     std::cerr << "Inf(mpz_class)=" << practical_infinity<mpz_class>() << "\n";
     std::cerr << "Inf(mpq_class)=" << practical_infinity<mpq_class>() << "\n";

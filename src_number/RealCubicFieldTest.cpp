@@ -8,7 +8,7 @@
 // The quantity is 2*cos(2*pi/7)
 // The minimal polynomial is X^3 + X^2 - 2X - 1
 
-int main(int argc, char *argv[]) {
+int main() {
   try {
     using T_rat = mpq_class;
     std::string eFile = "../Examples/CubicField/CubicFieldDisc_49";

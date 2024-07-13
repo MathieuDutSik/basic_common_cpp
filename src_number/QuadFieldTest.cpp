@@ -5,7 +5,7 @@
 #include "factorizations.h"
 // clang-format on
 
-int main(int argc, char *argv[]) {
+int main() {
   using Trat = mpq_class;
   using T = QuadField<Trat, 5>;
   try {

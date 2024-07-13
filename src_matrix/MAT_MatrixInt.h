@@ -122,102 +122,17 @@ template <typename T> struct GCD_dot {
   T gcd;
 };
 
-template <typename T>
-inline typename std::enable_if<!is_mpz_class<T>::value, GCD_dot<T>>::type
-ComputePairGcdDot(T const &m, T const &n) {
-  static_assert(is_euclidean_domain<T>::value,
-                "Requires T to be an Euclidean domain in ComputePairGcd");
-  T f, g, h, fm, gm, hm, q;
-  if (n == 0 && m == 0) {
-    f = 0;
-    MyVector<T> V = ZeroVector<T>(2);
-    return {std::move(V), f};
-  }
-  if (m >= 0) {
-    f = m;
-    fm = 1;
-  } else {
-    f = -m;
-    fm = -1;
-  }
-  if (n >= 0) {
-    g = n;
-    gm = 0;
-  } else {
-    g = -n;
-    gm = 0;
-  }
-  while (g != 0) {
-    q = QuoInt(f, g);
-    //    std::cerr << "f=" << f << " g=" << g << " q=" << q << "\n";
-    h = g;
-    hm = gm;
-    g = f - q * g;
-    gm = fm - q * gm;
-    f = h;
-    fm = hm;
-  }
-  T eCoeff1, eCoeff2;
-  if (n == 0) {
-    eCoeff1 = fm;
-    eCoeff2 = 0;
-  } else {
-    eCoeff1 = fm;
-    eCoeff2 = (f - fm * m) / n;
-  }
-  MyVector<T> V(2);
-  V(0) = eCoeff1;
-  V(1) = eCoeff2;
-#ifdef DEBUG_MATRIX_INT
-  T diff1 = f - V(0) * m - V(1) * n;
-  if (diff1 != 0) {
-    std::cerr << "A: diff1=" << diff1 << "\n";
-    throw TerminalException{1};
-  }
-#endif
-  return {std::move(V), f};
-}
-
-#ifdef SRC_NUMBER_NUMBERTHEORYGMP_H_
-
-template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, GCD_dot<T>>::type
-ComputePairGcdDot(T const &m, T const &n) {
-  mpz_class eGCD;
-  if (n == 0 && m == 0) {
-    eGCD = 0;
-    MyVector<T> V = ZeroVector<T>(2);
-    return {std::move(V), eGCD};
-  }
-  mpz_class s, t;
-  mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), m.get_mpz_t(),
-             n.get_mpz_t());
-  MyVector<T> V(2);
-  V(0) = s;
-  V(1) = t;
-#ifdef DEBUG_MATRIX_INT
-  T diff1 = eGCD - V(0) * m - V(1) * n;
-  if (diff1 != 0) {
-    std::cerr << "A: diff1=" << diff1 << "\n";
-    throw TerminalException{1};
-  }
-#endif
-  return {std::move(V), eGCD};
-}
-
-#endif
-
 template <typename T> GCD_dot<T> ComputeGcdDot(MyVector<T> const &x) {
   int siz = x.size();
   T gcd = x(0);
   MyVector<T> V(siz);
   V(0) = 1;
   for (int u = 1; u < siz; u++) {
-    GCD_dot<T> res = ComputePairGcdDot(gcd, x(u));
+    PairGCD_dot<T> res = ComputePairGcdDot(gcd, x(u));
     gcd = res.gcd;
-    V(u) = res.V(1);
+    V(u) = res.b;
     for (int v = 0; v < u; v++) {
-      V(v) = V(v) * res.V(0);
+      V(v) = V(v) * res.a;
     }
   }
 #ifdef DEBUG_MATRIX_INT

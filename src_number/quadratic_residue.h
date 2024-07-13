@@ -196,7 +196,7 @@ int get_legendre_symbol_power_two(size_t const &power, T const &P) {
 
 template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
 #ifdef DEBUG_QUADRATIC_RESIDUE
-  T gcd = T_abs(GenericGcd(a_in, m));
+  T gcd = T_abs(GcdPair(a_in, m));
   if (gcd != 1) {
     std::cerr << "The algorithm is not working for gcd > 1 right now\n";
     throw TerminalException{1};
@@ -296,7 +296,7 @@ template <typename T> bool is_quadratic_residue_kernel(T const &a, T const &m) {
 }
 
 template <typename T> bool is_quadratic_residue(T const &a, T const &m) {
-  T gcd = T_abs(GenericGcd(a, m));
+  T gcd = T_abs(GcdPair(a, m));
   if (gcd == 1) {
     return is_quadratic_residue_kernel(a, m);
   }

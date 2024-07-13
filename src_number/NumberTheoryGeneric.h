@@ -47,6 +47,60 @@ template <typename T> T mod_inv(T const &a, T const &P) {
 }
 
 template <typename T>
+inline typename std::enable_if<!is_mpz_class<T>::value, PairGCD_dot<T>>::type
+ComputePairGcdDot(T const &m, T const &n) {
+  static_assert(is_euclidean_domain<T>::value,
+                "Requires T to be an Euclidean domain in ComputePairGcd");
+  T f, g, h, fm, gm, hm, q;
+  if (n == 0 && m == 0) {
+    f = 0;
+    T a(0);
+    T b(0);
+    return {a, b, f};
+  }
+  if (m >= 0) {
+    f = m;
+    fm = 1;
+  } else {
+    f = -m;
+    fm = -1;
+  }
+  if (n >= 0) {
+    g = n;
+    gm = 0;
+  } else {
+    g = -n;
+    gm = 0;
+  }
+  while (g != 0) {
+    q = QuoInt(f, g);
+    //    std::cerr << "f=" << f << " g=" << g << " q=" << q << "\n";
+    h = g;
+    hm = gm;
+    g = f - q * g;
+    gm = fm - q * gm;
+    f = h;
+    fm = hm;
+  }
+  T eCoeff1, eCoeff2;
+  if (n == 0) {
+    eCoeff1 = fm;
+    eCoeff2 = 0;
+  } else {
+    eCoeff1 = fm;
+    eCoeff2 = (f - fm * m) / n;
+  }
+#ifdef DEBUG_MATRIX_INT
+  T diff1 = f - eCoeff1 * m - eCoeff1 * n;
+  if (diff1 != 0) {
+    std::cerr << "A: diff1=" << diff1 << "\n";
+    throw TerminalException{1};
+  }
+#endif
+  return {eCoeff1, eCoeff2, f};
+}
+
+template <typename T>
 inline typename std::enable_if<!is_mpz_class<T>::value, T>::type
 KernelGcdPair(T const &a, T const &b) {
   return GenericGcd(a, b);

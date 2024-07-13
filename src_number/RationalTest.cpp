@@ -5,7 +5,7 @@
 #include "factorizations.h"
 // clang-format on
 
-int main(int argc, char *argv[]) {
+int main() {
   using T = Rational<mpz_class>;
   using Tidx_value = int;
   try {

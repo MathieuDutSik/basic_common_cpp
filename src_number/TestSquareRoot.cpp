@@ -5,7 +5,7 @@
 #include "TypeConversion.h"
 // clang-format on
 
-int main(int argc, char *argv[]) {
+int main() {
   //  using T=int;
   //  using T=long;
   //  using T=long;

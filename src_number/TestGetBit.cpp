@@ -37,7 +37,7 @@ template <typename T> void process_all() {
     process_single<T>(x);
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   try {
     process_all<int8_t>();
     process_all<int16_t>();

@@ -35,7 +35,7 @@ template <typename T> void process(int TheMod) {
   }
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   try {
     int TheMod = 23;
     std::cerr << "TheMod=" << TheMod << "\n";

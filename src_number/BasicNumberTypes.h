@@ -25,6 +25,12 @@ struct QuoIntException {
   std::string val;
 };
 
+template <typename T> struct PairGCD_dot {
+  T a;
+  T b;
+  T gcd;
+};
+
 // The problem we face is that we have
 // --- std::is_same_v<size_t,uint64_t> = T on the Linux X86
 // --- std::is_same_v<size_t,uint64_t> = F on the Macintosh X86
