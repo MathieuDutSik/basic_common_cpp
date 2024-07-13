@@ -56,7 +56,24 @@
   But for (P / Q) = 1, we cannot conclude.
  */
 
+/*
+  What about computing quadratic residue x^2 = a (mod m) if we know
+  the factorization of m.
+  If we have m = p1^m1 .... pk^mk
+  then we can resolve for each of the prime powers qi = pi^mi.
+  Then if for any of those powers there is no solution, then there is
+  no solution.
+  But if there is a solution for each of them then we can use the
+  Chinese remainder theorem to find a X such that
+  X = xi (mod qi) for all i.
+  Then we have for all i X^2 = a (mod qi) and so X^2 = a (mod m)
+  ---
+  Now for resolving the equation X^2 = a (mod qi) we can iteratively
+  solve mod pi and that will work.
+ */
+
 // This is an exhaustive search that works even if m is not prime.
+// The function returns a x such that x^2 = a (mod m) if it exists.
 template <typename T>
 std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
@@ -91,6 +108,7 @@ std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
   return {};
 }
 
+// Compute the quadratic residue by mapping to a faster numeric if available.
 template <typename T, typename Tcomp>
 std::optional<T> find_quadratic_residue_Tcomp(T const &a, T const &m) {
   Tcomp a_comp = UniversalScalarConversion<Tcomp, T>(a);
