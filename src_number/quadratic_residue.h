@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "TemplateTraits.h"
+#include "factorizations.h"
 #include <limits>
 #include <map>
 #include <utility>
@@ -75,7 +76,7 @@
 // This is an exhaustive search that works even if m is not prime.
 // The function returns a x such that x^2 = a (mod m) if it exists.
 template <typename T>
-std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
+std::optional<T> find_quadratic_residue_exhaustive_kernel(T const &a, T const &m) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T two(2);
   T res = ResInt(m, two);
@@ -110,10 +111,10 @@ std::optional<T> find_quadratic_residue_kernel(T const &a, T const &m) {
 
 // Compute the quadratic residue by mapping to a faster numeric if available.
 template <typename T, typename Tcomp>
-std::optional<T> find_quadratic_residue_Tcomp(T const &a, T const &m) {
+std::optional<T> find_quadratic_residue_exhaustive_Tcomp(T const &a, T const &m) {
   Tcomp a_comp = UniversalScalarConversion<Tcomp, T>(a);
   Tcomp m_comp = UniversalScalarConversion<Tcomp, T>(m);
-  std::optional<Tcomp> opt = find_quadratic_residue_kernel(a_comp, m_comp);
+  std::optional<Tcomp> opt = find_quadratic_residue_exhaustive_kernel(a_comp, m_comp);
   if (opt) {
     Tcomp val_comp = *opt;
     T val = UniversalScalarConversion<T, Tcomp>(val_comp);
@@ -124,7 +125,7 @@ std::optional<T> find_quadratic_residue_Tcomp(T const &a, T const &m) {
 }
 
 template <typename T>
-std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
+std::optional<T> find_quadratic_residue_exhaustive(T const &a_in, T const &m_in) {
   T m = T_abs(m_in);
   T a = ResInt(a_in, m);
   T max16_A = UniversalScalarConversion<T, int16_t>(
@@ -138,16 +139,80 @@ std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
   T max32_B = QuoInt(max32_A, four);
   T max64_B = QuoInt(max64_A, four);
   if (m < max16_B) {
-    return find_quadratic_residue_Tcomp<T, int16_t>(a, m);
+    return find_quadratic_residue_exhaustive_Tcomp<T, int16_t>(a, m);
   }
   if (m < max32_B) {
-    return find_quadratic_residue_Tcomp<T, int32_t>(a, m);
+    return find_quadratic_residue_exhaustive_Tcomp<T, int32_t>(a, m);
   }
   if (m < max64_B) {
-    return find_quadratic_residue_Tcomp<T, int64_t>(a, m);
+    return find_quadratic_residue_exhaustive_Tcomp<T, int64_t>(a, m);
   }
-  return find_quadratic_residue_kernel(a, m);
+  return find_quadratic_residue_exhaustive_kernel(a, m);
 }
+
+template <typename T>
+std::optional<T> find_quadratic_residue_map(T const &a_in, std::map<T,size_t> const &m_map) {
+  std::vector<T> a;
+  std::vector<T> m;
+  T m_prod(1);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  for (auto & kv: m_map) {
+    std::cerr << "QUADRES: p=" << kv.first << " mult=" << kv.second << "\n";
+  }
+#endif
+  for (auto & kv: m_map) {
+    T const& p = kv.first;
+    T prod = p;
+    for (size_t u=1; u<kv.second; u++) {
+      prod *= p;
+    }
+    std::optional<T> opt = find_quadratic_residue_exhaustive(a_in, prod);
+    if (opt) {
+      T val = *opt;
+      a.push_back(val);
+      m.push_back(prod);
+    } else {
+      return {};
+    }
+    m_prod *= prod;
+  }
+  T x = chinese_remainder_theorem(a, m);
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  T diff = x * x - a_in;
+  T res = ResInt(diff, m_prod);
+  if (res != 0) {
+    std::cerr << "QUADRES: a=";
+    for (auto & val : a) {
+      std::cerr << " " << val;
+    }
+    std::cerr << "\n";
+    std::cerr << "QUADRES: m=";
+    for (auto & val : m) {
+      std::cerr << " " << val;
+    }
+    std::cerr << "\n";
+    std::cerr << "QUADRES: x is not a solution\n";
+    throw TerminalException{1};
+  }
+#endif
+  return x;
+}
+
+
+
+template <typename T>
+std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
+#ifdef DEBUG_QUADRATIC_RESIDUE
+  std::cerr << "QUADRES: a_in=" << a_in << " m_in=" << m_in << "\n";
+#endif
+  if (T_abs(m_in) == 1) {
+    return 0;
+  }
+  std::map<T, size_t> map = FactorsIntMap(T_abs(m_in));
+  return find_quadratic_residue_map(a_in, map);
+}
+
+
 
 template <typename T>
 std::pair<size_t, T> decompose_even_power_odd(T const &val) {

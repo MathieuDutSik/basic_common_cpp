@@ -8,6 +8,11 @@
 #include <limits>
 // clang-format on
 
+#ifdef DEBUG
+#define DEBUG_NUMBER_THEORY_GENERIC
+#endif
+
+
 template <typename T> T GenericGcd(T const &m, T const &n) {
   T h, q;
   if (n == 0 && m == 0) {
@@ -163,6 +168,63 @@ template <typename T> std::optional<T> UniversalSquareRoot(T const &val) {
     return {};
   return ret;
 }
+
+/*
+  Given a vector of a and a vector of m find a x such that
+  x = a[i] mod m[i] for all i
+  the m[i] need to be coprime.
+  ---
+  We apply
+  https://en.wikipedia.org/wiki/Chinese_remainder_theorem
+ */
+template<typename T>
+T chinese_remainder_theorem(std::vector<T> const& a, std::vector<T> const& m) {
+  size_t siz = m.size();
+  T x = a[0];
+  T m_prod = m[0];
+  for (size_t i=1; i<siz; i++) {
+    PairGCD_dot<T> t = ComputePairGcdDot(m_prod, m[i]);
+#ifdef DEBUG_NUMBER_THEORY_GENERIC
+    if (t.gcd != 1) {
+      std::cerr << "The GCD should be equal to 1\n";
+      throw TerminalException{1};
+    }
+#endif
+    x = x * t.b * m[i] + a[i] * t.a * m_prod;
+#ifdef DEBUG_NUMBER_THEORY_GENERIC
+    T sum = t.b * m[i] + t.a * m_prod;
+    if (sum != 1) {
+      std::cerr << "The t is not correct\n";
+      throw TerminalException{1};
+    }
+#endif
+    m_prod *= m[i];
+  }
+#ifdef DEBUG_NUMBER_THEORY_GENERIC
+  for (size_t i=0; i<siz; i++) {
+    T diff = x - a[i];
+    T res = ResInt(diff, m[i]);
+    if (res != 0) {
+      std::cerr << "NTG: a=";
+      for (auto & val : a) {
+        std::cerr << " " << val;
+      }
+      std::cerr << "\n";
+      std::cerr << "NTG: m=";
+      for (auto & val : m) {
+        std::cerr << " " << val;
+      }
+      std::cerr << "\n";
+      std::cerr << "NTG: x=" << x << "\n";
+      std::cerr << "NTG: We do not have a solution of the Chinese Remainder Theorem\n";
+      throw TerminalException{1};
+    }
+  }
+#endif
+  return x;
+}
+
+
 
 template <typename T>
 inline typename std::enable_if<std::is_integral<T>::value, void>::type
