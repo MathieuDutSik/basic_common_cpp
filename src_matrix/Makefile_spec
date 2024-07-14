@@ -15,7 +15,8 @@
 #PROGRAM		= TestProdMat
 #PROGRAM		= UniqueRescaleRows
 #PROGRAM		= IsotropicMatMod
-PROGRAM		= IntersectionLattice
+#PROGRAM		= IntersectionLattice
+PROGRAM		= RescaleInverse
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

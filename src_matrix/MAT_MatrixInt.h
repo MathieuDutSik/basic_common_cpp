@@ -355,6 +355,23 @@ template <typename T> MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const &M) {
   return RemoveFractionMatrixPlusCoeff(M).TheMat;
 }
 
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
+ScaledInverse(MyMatrix<T> const& M) {
+  return Inverse(M);
+}
+
+template<typename T>
+inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
+ScaledInverse(MyMatrix<T> const& M) {
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> M_field = UniversalMatrixConversion<Tfield, T>(M);
+  MyMatrix<Tfield> Minv_field = Inverse(M_field);
+  MyMatrix<Tfield> MinvRescal_field = RemoveFractionMatrix(Minv_field);
+  MyMatrix<T> MinvRescal = UniversalMatrixConversion<T,Tfield>(MinvRescal_field);
+  return MinvRescal;
+}
+
 template <typename T>
 FractionMatrix<T>
 CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
