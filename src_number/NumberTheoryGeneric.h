@@ -179,6 +179,16 @@ template <typename T> std::optional<T> UniversalSquareRoot(T const &val) {
  */
 template<typename T>
 T chinese_remainder_theorem(std::vector<T> const& a, std::vector<T> const& m) {
+#ifdef DEBUG_NUMBER_THEORY_GENERIC
+  if (a.size() != m.size()) {
+    std::cerr << "a and m should be of equal lengths\n";
+    throw TerminalException{1};
+  }
+  if (a.size() == 0) {
+    std::cerr << "a should be of positive length\n";
+    throw TerminalException{1};
+  }
+#endif
   size_t siz = m.size();
   T x = a[0];
   T m_prod = m[0];
