@@ -176,9 +176,10 @@ std::optional<T> find_quadratic_residue_map(T const &a_in, std::map<T,size_t> co
     }
     m_prod *= prod;
   }
-  T x = chinese_remainder_theorem(a, m);
+  T x1 = chinese_remainder_theorem(a, m);
+  T x2 = ResInt(x1, m_prod);
 #ifdef DEBUG_QUADRATIC_RESIDUE
-  T diff = x * x - a_in;
+  T diff = x2 * x2 - a_in;
   T res = ResInt(diff, m_prod);
   if (res != 0) {
     std::cerr << "QUADRES: a=";
@@ -191,11 +192,11 @@ std::optional<T> find_quadratic_residue_map(T const &a_in, std::map<T,size_t> co
       std::cerr << " " << val;
     }
     std::cerr << "\n";
-    std::cerr << "QUADRES: x is not a solution\n";
+    std::cerr << "QUADRES: x2 is not a solution\n";
     throw TerminalException{1};
   }
 #endif
-  return x;
+  return x2;
 }
 
 
