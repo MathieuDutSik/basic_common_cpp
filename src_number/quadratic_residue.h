@@ -336,7 +336,7 @@ template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
 
 template <typename T>
 bool is_quadratic_residue_map(T const &a, std::map<T, size_t> const &m) {
-  if (m.len() == 0) {
+  if (m.size() == 0) {
     return true;
   }
   std::optional<T> opt = find_quadratic_residue_map(a, m);
