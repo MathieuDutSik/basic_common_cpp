@@ -389,6 +389,41 @@ template <typename T> bool Padic_is_square(Padic<T> const &x, T const &p) {
   }
 }
 
+template<typename T>
+std::vector<T> Padic_get_residue_classes(T const& p) {
+  T two(2);
+  std::vector<T> classes;
+  if (p == 2) {
+    std::vector<int> V{1, 3, 5, 7};
+    for (auto & val_i : V) {
+      T val1(val_i);
+      T val2 = p * val1;
+      classes.push_back(val1);
+      classes.push_back(val2);
+    }
+  } else {
+    auto get_non_residue=[&]() -> T {
+      T a(2);
+      while(true) {
+        bool test = is_quadratic_residue(a, p);
+        if (!test) {
+          return a;
+        }
+        a += 1;
+      }
+    };
+    std::vector<T> V{T(1), get_non_residue()};
+    for (auto & val : V) {
+      T val1 = val;
+      T val2 = p * val;
+      classes.push_back(val1);
+      classes.push_back(val2);
+    }
+  }
+  return classes;
+}
+
+
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYPADIC_H_
 // clang-format on
