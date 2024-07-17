@@ -423,6 +423,25 @@ std::vector<T> Padic_get_residue_classes(T const& p) {
   return classes;
 }
 
+// Separate the exponent from the residue.
+template<typename T>
+std::pair<size_t, T> Padic_decompose(T const& val, T const& p) {
+  if (val == 0) {
+    std::cerr << "val = 0 so we cannot decompose as p^m x\n";
+    throw TerminalException{1};
+  }
+  T val_work = val;
+  size_t expo = 0;
+  while (true) {
+    std::pair<T, T> pair = ResQuoInt(val_work, p);
+    if (pair.first == 0) {
+      expo += 1;
+      val_work = pair.second;
+    } else {
+      return {expo, val_work};
+    }
+  }
+}
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYPADIC_H_

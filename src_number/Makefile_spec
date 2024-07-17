@@ -12,10 +12,11 @@
 #PROGRAM		= RationalTest
 #PROGRAM		= TestTypeBoostGmp
 #PROGRAM		= TestGetBit
+PROGRAM		= TestPadic
 #PROGRAM		= test_sequence_approximant
 #PROGRAM		= TestQuadraticResidue
 #PROGRAM		= ReadValueString
-PROGRAM		= ComputeQuadraticResidue
+#PROGRAM		= ComputeQuadraticResidue
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
