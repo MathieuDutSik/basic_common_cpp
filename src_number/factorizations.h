@@ -16,6 +16,12 @@
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize(T const &number) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+#ifdef DEBUG_FACTORIZATION
+  if (number == 0) {
+    std::cerr << "FACT: Trying to factorize a number equal to zero is probably not what you had in mind\n";
+    throw TerminalException{1};
+  }
+#endif
   T count;
   T x_fixed = 2, x = 2, size = 2, factor, diff;
   do {

@@ -1,6 +1,6 @@
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
-#PROGRAM		= Factorize
+PROGRAM		= Factorize
 #PROGRAM		= Factorize_help
 #PROGRAM		= PracticalInf
 #PROGRAM		= TestQuoInt
@@ -12,7 +12,7 @@
 #PROGRAM		= RationalTest
 #PROGRAM		= TestTypeBoostGmp
 #PROGRAM		= TestGetBit
-PROGRAM		= TestPadic
+#PROGRAM		= TestPadic
 #PROGRAM		= test_sequence_approximant
 #PROGRAM		= TestQuadraticResidue
 #PROGRAM		= ReadValueString
