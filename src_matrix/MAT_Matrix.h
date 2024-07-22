@@ -2909,6 +2909,25 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   return M;
 }
 
+template<typename T>
+MyMatrix<T> MatrixFromPairVector(std::pair<MyVector<T>, MyVector<T>> const& pair) {
+  int n1 = pair.first.size();
+  int n2 = pair.second.size();
+  if (n1 != n2) {
+    std::cerr << "n1=" << n1 << " n2=" << n2 << "\n";
+    std::cerr << "Vector lengths are not homogeneous\n";
+    throw TerminalException{1};
+  }
+  int n = n1;
+  MyMatrix<T> M(2,n);
+  for (int i=0; i<n; i++) {
+    M(0, i) = pair.first(i);
+    M(1, i) = pair.second(i);
+  }
+  return M;
+}
+
+
 template <typename T>
 MyMatrix<T>
 MatrixFromVectorFamilyDim(int const &dim,
