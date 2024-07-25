@@ -1259,6 +1259,17 @@ template <typename T> MyMatrix<T> NullspaceIntMat(MyMatrix<T> const &eMat) {
   return NullspaceIntTrMat(TransposedMat(eMat));
 }
 
+template<typename T>
+MyMatrix<T> NullspaceIntVect(MyVector<T> const& V) {
+  int n = V.size();
+  MyMatrix<T> eMat(n,1);
+  for (int i=0; i<n; i++) {
+    eMat(i,0) = V(i);
+  }
+  return NullspaceIntTrMat(eMat);
+}
+
+
 // Given a vector v of T^n which is primitive
 // the function returns a family of vector v1, ...., v(n-1)
 // such that (v1, ...., v(n-1), v) is a T-basis of T^n
