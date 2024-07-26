@@ -2497,6 +2497,25 @@ FindBestIntegerApproximation(MyVector<Tfloat> const &V, int const &N) {
   return {MinErr, std::move(MinimalApprox)};
 }
 
+template<typename T>
+MyMatrix<T> GetZbasisColumn(MyMatrix<T> const& Amat) {
+  MyMatrix<T> AmatTr = Amat.transpose();
+  MyMatrix<T> Xmat = GetZbasis(AmatTr);
+  MyMatrix<T> XmatTr = Xmat.transpose();
+  return XmatTr;
+}
+
+// We want to consider the equation X A = B
+// The equation is potentially underdefined and B in Z^*
+// We look for the number d>0 such that for all B in Z^*
+// the equation has a solution in Z^* / d
+template<typename T>
+T GetDenominatorQuotientSolution(MyMatrix<T> conat& Amat) {
+  MyMatrix<T> AmatRed1 = GetZbasis(Amat);
+  MyMatrix<T> AmatRed2 = GetZbasisColumn(AmatRed1);
+  return T_abs(DeterminantMat(AmatRed2));
+}
+
 // clang-format off
 #endif  // SRC_MATRIX_MAT_MATRIXINT_H_
 // clang-format on
