@@ -2584,13 +2584,43 @@ MyVector<T> SymmetricMatrixToVector(MyMatrix<T> const &M) {
   int dim = (n * (n + 1)) / 2;
   MyVector<T> eVect(dim);
   int idx = 0;
-  for (int i = 0; i < n; i++)
+  for (int i = 0; i < n; i++) {
     for (int j = 0; j <= i; j++) {
       eVect(idx) = M(i, j);
       idx++;
     }
+  }
   return eVect;
 }
+
+template<typename T>
+MyVector<T> MatrixToVector(MyMatrix<T> const& M) {
+  int n = M.rows();
+  int dim = n * n;
+  MyVector<T> eVect(dim);
+  int idx = 0;
+  for (int i=0; i<n; i++) {
+    for (int j=0; j<n; j++) {
+      eVect(idx) = M(i,j);
+      idx += 1;
+    }
+  }
+  return eVect;
+}
+
+template<typename T>
+MyMatrix<T> VectorToMatrix(MyVector<T> const& V, int const& n) {
+  MyMatrix<T> M(n, n);
+  int idx=0;
+  for (int i=0; i<n; i++) {
+    for (int j=0; j<n; j++) {
+      M(i,j) = eVect(idx);
+      idx += 1;
+    }
+  }
+  return M;
+}
+
 
 template <typename T> MyVector<T> GetSymmetricMatrixWeightVector(int const &n) {
   int dim = (n * (n + 1)) / 2;
