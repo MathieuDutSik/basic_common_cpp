@@ -13,7 +13,10 @@
 // clang-format on
 
 //  #undef TRACK_MAXIMUM_SIZE_COEFF
-//  #undef DEBUG_MATRIX_INT
+
+#ifdef DEBUG
+#define DEBUG_MATRIX_INT
+#endif
 
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction
@@ -2514,6 +2517,27 @@ T GetDenominatorQuotientSolution(MyMatrix<T> conat& Amat) {
   MyMatrix<T> AmatRed1 = GetZbasis(Amat);
   MyMatrix<T> AmatRed2 = GetZbasisColumn(AmatRed1);
   return T_abs(DeterminantMat(AmatRed2));
+}
+
+template<typename T>
+MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const& TheSpace) {
+  int nbRow = TheSpace.rows();
+#ifdef DEBUG_MATRIX_INT
+  if (nbRow != RankMat(TheSpace)) {
+    std::cerr << "TheSpace should be full dimensional\n";
+    throw TerminalException{1};
+  }
+#endif
+  int nbCol = TheSpace.cols();
+  if (nbRow == 0) {
+    return MyMatrix<T>(0, nbCol);
+  }
+  if (nbRow == nbCol) {
+    return IdentityMat<T>(nbRow);
+  }
+  MyMatrix<T> eOrth = NullspaceTrMat(TheSpace);
+  MyMatrix<T> TheSpaceInt = NullspaceIntTrMat(eOrth);
+  return TheSpaceInt;
 }
 
 // clang-format off
