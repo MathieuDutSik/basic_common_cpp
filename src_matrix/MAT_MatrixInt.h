@@ -432,6 +432,11 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
 }
 
 template <typename T>
+MyVector<T> RemoveFractionVector(MyVector<T> const &V) {
+  return RemoveFractionVectorPlusCoeff(V).TheVect;
+}
+
+template <typename T>
 MyVector<typename underlying_ring<T>::ring_type>
 NonUniqueRescaleVecRing(MyVector<T> const &V) {
   // It is non-unique because if we have V = (4, 6, 8) then we return (4, 6, 8)
@@ -2538,6 +2543,72 @@ MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const& TheSpace) {
   MyMatrix<T> eOrth = NullspaceTrMat(TheSpace);
   MyMatrix<T> TheSpaceInt = NullspaceIntTrMat(eOrth);
   return TheSpaceInt;
+}
+
+template<typename T>
+MyMatrix<T> RemoveFractionMatrixRows(MyMatrix<T> const& M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  MyMatrix<T> Mret(nbRow, nbCol);
+  for (int u=0; u<nbRow; u++) {
+    MyVector<T> eV = GetMatrixRow(M, u);
+    MyVector<T> fV = RemoveFractionVector(eV);
+    AssignMatrixRow(Mret, u, fV);
+  }
+  return Mret;
+}
+
+
+/*
+  Given a vector eVect and a linear space W, we find
+  a vector w = v + W * t  such that w has the minimal
+  number of coefficients.
+ */
+template<typename T>
+MyVector<T> EliminateSuperfluousPrimeDenominators(MyVector<T> const& eVect, MyMatrix<T> const& ListVect) {
+  int dim = eVect.size();
+  if (ListVect.rows() == 0) {
+    // Nothing possible really
+    return eVect;
+  }
+  if (RankMat(ListVect) == dim) {
+    return ZeroVector<T>(dim);
+  }
+  int nVect = ListVect.rows();
+  MyMatrix<T> ListVect1 = RemoveFractionMatrixRows(ListVect);
+  MyMatrix<T> ListVect2 = NullspaceTrMat(ListVect1);
+  MyMatrix<T> ListVect3 = RemoveFractionMatrixRows(ListVect2);
+  MyMatrix<T> ListVect4 = NullspaceIntTrMat(ListVect3);
+  //
+  MyMatrix<T> TheCompl = SubspaceCompletionInt(ListVect4, dim);
+  MyMatrix<T> TheBasis = Concatenation(TheCompl, ListVect4);
+  MyMatrix<T> TheBasisInv = Inverse(TheBasis);
+  MyVector<T> eSol = TheBasisInv.transpose() * eVect;
+  int dimCompl = TheCompl.rows();
+  MyVector<T> eSolRed(dimCompl);
+  for (int u=0; u<dimCompl; u++) {
+    eSolRed(u) = eSol(u);
+  }
+  MyVector<T> TheRet = TheCompl.transpose() * eSolRed;
+  return TheRet;
+}
+
+template<typename T>
+MyMatrix<T> EliminateSuperfluousPrimeDenominators_Matrix(MyMatrix<T> const& eMat, std::vector<MyMatrix<T>> const& ListMat) {
+  if (ListMat.size() == 0) {
+    return eMat;
+  }
+  int dim = eMat.rows();
+  MyVector<T> eVect = MatrixToVector(eMat);
+  std::vector<MyVector<T>> ListVect;
+  for (auto & eMat : ListMat) {
+    MyVector<T> eV = MatrixToVector(eMat);
+    ListVect.push_back(eV);
+  }
+  MyMatrix<T> MatVect = MatrixFromVectorFamily(ListVect);
+  MyVector<T> TheVect = EliminateSuperfluousPrimeDenominators(eVect, MatVect);
+  MyMatrix<T> TheMat = VectorToMatrix(TheVect, dim);
+  return TheMat;
 }
 
 // clang-format off
