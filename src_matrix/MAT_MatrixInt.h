@@ -2523,7 +2523,7 @@ MyMatrix<T> GetZbasisColumn(MyMatrix<T> const& Amat) {
 // We look for the number d>0 such that for all B in Z^*
 // the equation has a solution in Z^* / d
 template<typename T>
-T GetDenominatorQuotientSolution(MyMatrix<T> conat& Amat) {
+T GetDenominatorQuotientSolution(MyMatrix<T> const& Amat) {
   MyMatrix<T> AmatRed1 = GetZbasis(Amat);
   MyMatrix<T> AmatRed2 = GetZbasisColumn(AmatRed1);
   return T_abs(DeterminantMat(AmatRed2));
@@ -2579,7 +2579,6 @@ MyVector<T> EliminateSuperfluousPrimeDenominators(MyVector<T> const& eVect, MyMa
   if (RankMat(ListVect) == dim) {
     return ZeroVector<T>(dim);
   }
-  int nVect = ListVect.rows();
   MyMatrix<T> ListVect1 = RemoveFractionMatrixRows(ListVect);
   MyMatrix<T> ListVect2 = NullspaceTrMat(ListVect1);
   MyMatrix<T> ListVect3 = RemoveFractionMatrixRows(ListVect2);
