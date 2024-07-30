@@ -354,6 +354,11 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
   return {TheMult, std::move(M2)};
 }
 
+template<typename T>
+T GetDenominatorMatrix(MyMatrix<T> const& M) {
+  return RemoveFractionMatrixPlusCoeff(M).TheMult;
+}
+
 template <typename T> MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const &M) {
   return RemoveFractionMatrixPlusCoeff(M).TheMat;
 }

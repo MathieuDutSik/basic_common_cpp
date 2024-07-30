@@ -2597,15 +2597,15 @@ template<typename T>
 MyVector<T> MatrixToVector(MyMatrix<T> const& M) {
   int n = M.rows();
   int dim = n * n;
-  MyVector<T> eVect(dim);
+  MyVector<T> V(dim);
   int idx = 0;
   for (int i=0; i<n; i++) {
     for (int j=0; j<n; j++) {
-      eVect(idx) = M(i,j);
+      V(idx) = M(i,j);
       idx += 1;
     }
   }
-  return eVect;
+  return V;
 }
 
 template<typename T>
@@ -2614,7 +2614,7 @@ MyMatrix<T> VectorToMatrix(MyVector<T> const& V, int const& n) {
   int idx=0;
   for (int i=0; i<n; i++) {
     for (int j=0; j<n; j++) {
-      M(i,j) = eVect(idx);
+      M(i,j) = V(idx);
       idx += 1;
     }
   }
