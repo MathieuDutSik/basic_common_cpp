@@ -437,11 +437,6 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
 }
 
 template <typename T>
-MyVector<T> RemoveFractionVector(MyVector<T> const &V) {
-  return RemoveFractionVectorPlusCoeff(V).TheVect;
-}
-
-template <typename T>
 MyVector<typename underlying_ring<T>::ring_type>
 NonUniqueRescaleVecRing(MyVector<T> const &V) {
   // It is non-unique because if we have V = (4, 6, 8) then we return (4, 6, 8)
