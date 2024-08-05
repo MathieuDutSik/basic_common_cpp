@@ -2580,7 +2580,7 @@ MyVector<T> EliminateSuperfluousPrimeDenominators(MyVector<T> const& eVect, MyMa
   MyMatrix<T> ListVect4 = NullspaceIntTrMat(ListVect3);
   //
   MyMatrix<T> TheCompl = SubspaceCompletionInt(ListVect4, dim);
-  MyMatrix<T> TheBasis = Concatenation(TheCompl, ListVect4);
+  MyMatrix<T> TheBasis = Concatenate(TheCompl, ListVect4);
   MyMatrix<T> TheBasisInv = Inverse(TheBasis);
   MyVector<T> eSol = TheBasisInv.transpose() * eVect;
   int dimCompl = TheCompl.rows();
