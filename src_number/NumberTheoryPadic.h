@@ -359,7 +359,6 @@ template <typename T> bool Padic_is_square(Padic<T> const &x, T const &p) {
   }
 #endif
   int res = ResInt(x.eff_valuation, 2);
-  std::cerr << "   eff_valuation=" << x.eff_valuation << " res=" << res << "\n";
   if (res == 1) {
     return false;
   }
@@ -378,7 +377,6 @@ template <typename T> bool Padic_is_square(Padic<T> const &x, T const &p) {
 #endif
     T coeff1 = Padic_coeff(x, 1);
     T coeff2 = Padic_coeff(x, 2);
-    std::cerr << " coeff1=" << coeff1 << " coeff2=" << coeff2 << "\n";
     if (coeff1 != 0 || coeff2 != 0) {
       return false;
     }
