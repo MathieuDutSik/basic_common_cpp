@@ -1270,9 +1270,9 @@ template <typename T> MyMatrix<T> NullspaceIntMat(MyMatrix<T> const &eMat) {
 template<typename T>
 MyMatrix<T> NullspaceIntVect(MyVector<T> const& V) {
   int n = V.size();
-  MyMatrix<T> eMat(n,1);
+  MyMatrix<T> eMat(1,n);
   for (int i=0; i<n; i++) {
-    eMat(i,0) = V(i);
+    eMat(0,i) = V(i);
   }
   return NullspaceIntTrMat(eMat);
 }
