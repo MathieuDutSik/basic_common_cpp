@@ -335,6 +335,9 @@ template <typename T> struct FractionMatrix {
 
 template <typename T>
 FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
+  if (IsZeroMatrix(M)) {
+    return {1, M};
+  }
   int nbRow = M.rows();
   int nbCol = M.cols();
   using Tring = typename underlying_ring<T>::ring_type;
@@ -422,6 +425,9 @@ MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
 
 template <typename T>
 FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
+  if (IsZeroVector(V)) {
+    return {1, V};
+  }
   int n = V.size();
   std::vector<T> eVect(n);
   T eLCM = GetDenominator(V(0));
