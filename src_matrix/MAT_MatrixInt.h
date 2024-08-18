@@ -336,7 +336,8 @@ template <typename T> struct FractionMatrix {
 template <typename T>
 FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
   if (IsZeroMatrix(M)) {
-    return {1, M};
+    T TheMult(1);
+    return {TheMult, M};
   }
   int nbRow = M.rows();
   int nbCol = M.cols();
@@ -426,7 +427,8 @@ MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
 template <typename T>
 FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   if (IsZeroVector(V)) {
-    return {1, V};
+    T TheMult(1);
+    return {TheMult, V};
   }
   int n = V.size();
   std::vector<T> eVect(n);
