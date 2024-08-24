@@ -137,17 +137,31 @@ inline void QUO_INT(stc<int64_t> const &a, stc<int64_t> const &b, int64_t &q) {
 
 #include "QuoIntFcts.h"
 
+//
+
 inline int GetDenominator([[maybe_unused]] int const &x) { return 1; }
 
 inline long GetDenominator([[maybe_unused]] long const &x) { return 1; }
+
+//
+
+inline int GetNumerator(int const &x) { return x; }
+
+inline long GetNumerator(long const &x) { return x; }
+
+//
 
 inline int GetNumerator_z(int const &x) { return x; }
 
 inline int GetDenominator_z([[maybe_unused]] int const &x) { return 1; }
 
+//
+
 inline long GetNumerator_z(long const &x) { return x; }
 
 inline long GetDenominator_z([[maybe_unused]] long const &x) { return 1; }
+
+//
 
 template <typename T> T ResInt(T const &a, T const &b) {
   T res;

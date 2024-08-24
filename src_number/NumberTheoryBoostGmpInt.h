@@ -299,6 +299,22 @@ inline bool IsInteger(boost::multiprecision::mpq_rational const &x) {
   return eDen == one;
 }
 
+//
+
+inline boost::multiprecision::mpz_int
+GetNumerator(boost::multiprecision::mpz_int const &x) {
+  return x;
+}
+
+inline boost::multiprecision::mpq_rational
+GetNumerator(boost::multiprecision::mpq_rational const &x) {
+  boost::multiprecision::mpz_int eNum = numerator(x);
+  boost::multiprecision::mpq_rational eNum_q = eNum;
+  return eNum_q;
+}
+
+//
+
 inline boost::multiprecision::mpz_int
 GetDenominator([[maybe_unused]] boost::multiprecision::mpz_int const &x) {
   return 1;
@@ -310,6 +326,32 @@ GetDenominator(boost::multiprecision::mpq_rational const &x) {
   boost::multiprecision::mpq_rational eDen_q = eDen;
   return eDen_q;
 }
+
+//
+
+inline boost::multiprecision::mpz_int
+GetNumerator_z(boost::multiprecision::mpq_rational const &x) {
+  return numerator(x);
+}
+
+inline boost::multiprecision::mpz_int
+GetNumerator_z(boost::multiprecision::mpz_int const &x) {
+  return x;
+}
+
+//
+
+inline boost::multiprecision::mpz_int
+GetDenominator_z(boost::multiprecision::mpq_rational const &x) {
+  return denominator(x);
+}
+
+inline boost::multiprecision::mpz_int
+GetDenominator_z([[maybe_unused]] boost::multiprecision::mpz_int const &x) {
+  return 1;
+}
+
+//
 
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             double &a2) {
@@ -377,26 +419,6 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             boost::multiprecision::mpq_rational &a2) {
   a2 = a1.val;
-}
-
-inline boost::multiprecision::mpz_int
-GetNumerator_z(boost::multiprecision::mpq_rational const &x) {
-  return numerator(x);
-}
-
-inline boost::multiprecision::mpz_int
-GetDenominator_z(boost::multiprecision::mpq_rational const &x) {
-  return denominator(x);
-}
-
-inline boost::multiprecision::mpz_int
-GetNumerator_z(boost::multiprecision::mpz_int const &x) {
-  return x;
-}
-
-inline boost::multiprecision::mpz_int
-GetDenominator_z([[maybe_unused]] boost::multiprecision::mpz_int const &x) {
-  return 1;
 }
 
 inline void

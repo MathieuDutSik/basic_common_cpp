@@ -579,7 +579,12 @@ inline void TYPE_CONVERSION(stc<int64_t> const &a1, Rational<int64_t> &a2) {
   a2 = a1.val;
 }
 
-// Obtention of denominators
+// Obtention of denominators / numerators
+
+template <typename Tint>
+inline Rational<Tint> GetNumerator(Rational<Tint> const &x) {
+  return x.get_const_num();
+}
 
 template <typename Tint>
 inline Rational<Tint> GetDenominator(Rational<Tint> const &x) {

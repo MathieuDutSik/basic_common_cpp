@@ -273,29 +273,39 @@ inline bool IsInteger(mpq_class const &x) {
   return eDen == 1;
 }
 
+//
+
 inline mpq_class GetDenominator(mpq_class const &x) {
   mpz_class eDen = x.get_den();
   mpq_class eDen_q = eDen;
   return eDen_q;
 }
 
-// We need to have nbRow as input for template reasons. But it is unused in the
-// symmetric case. So, pragma statement is needed to avoid a warning being
-// thrown.
-
 inline mpz_class GetDenominator([[maybe_unused]] mpz_class const &x) {
   return 1;
 }
 
-inline mpz_class GetNumerator_z(mpq_class const &x) { return x.get_num(); }
+//
+
+inline mpq_class GetNumerator(mpq_class const& x) { return x.get_num(); }
+
+inline mpz_class GetNumerator(mpz_class const& x) { return x; }
+
+//
 
 inline mpz_class GetDenominator_z(mpq_class const &x) { return x.get_den(); }
-
-inline mpz_class GetNumerator_z(mpz_class const &x) { return x; }
 
 inline mpz_class GetDenominator_z([[maybe_unused]] mpz_class const &x) {
   return 1;
 }
+
+//
+
+inline mpz_class GetNumerator_z(mpq_class const &x) { return x.get_num(); }
+
+inline mpz_class GetNumerator_z(mpz_class const &x) { return x; }
+
+//
 
 inline void ScalingInteger_Kernel(stc<mpq_class> const &x, mpz_class &x_ret) {
   x_ret = x.val.get_den();

@@ -482,9 +482,10 @@ inline Rational<SafeInt64> GetDenominator(Rational<SafeInt64> const &x) {
   return Rational(eDen);
 }
 
-// We need to have nbRow as input for template reasons. But it is unused in the
-// symmetric case. So, pragma statement is needed to avoid a warning being
-// thrown.
+inline Rational<SafeInt64> GetNumerator(Rational<SafeInt64> const &x) {
+  SafeInt64 const &eNum = x.get_const_num();
+  return Rational(eNum);
+}
 
 inline SafeInt64 GetDenominator([[maybe_unused]] SafeInt64 const &x) {
   return 1;
