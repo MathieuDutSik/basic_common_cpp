@@ -11,7 +11,7 @@
 
 template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   size_t nbVert = eSet.count();
-  std::vector<int> eList(nbVert);
+  std::vector<Tidx> eList(nbVert);
   boost::dynamic_bitset<>::size_type aRow = eSet.find_first();
   for (size_t i = 0; i < nbVert; i++) {
     eList[i] = static_cast<Tidx>(aRow);
