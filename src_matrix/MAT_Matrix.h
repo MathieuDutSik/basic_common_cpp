@@ -856,7 +856,7 @@ template <typename T>
 MyVector<T> VectorMatrix(MyVector<T> const &eVect, MyMatrix<T> const &eMat) {
   int nbCol = eMat.cols();
   int nbRow = eMat.rows();
-#ifdef SANITY_CHECK
+#ifdef DEBUG_MAT_MATRIX
   int n = eVect.size();
   if (n != nbRow) {
     std::cerr << "n should be equal to nbRow\n";
@@ -877,7 +877,7 @@ template <typename T>
 void AssignMatrixRow(MyMatrix<T> &eMat, int const &iRow,
                      MyVector<T> const &eVect) {
   int nbCol = eMat.cols();
-#ifdef SANITY_CHECK
+#ifdef DEBUG_MAT_MATRIX
   int n = eVect.size();
   if (n != nbCol) {
     std::cerr << "We should have eVect.size() = eMat.cols()\n";
