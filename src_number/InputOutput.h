@@ -13,6 +13,10 @@
 #include <utility>
 // clang-format on
 
+#ifdef DEBUG
+#define DEBUG_INPUT_OUTPUT
+#endif
+
 template <typename T>
 void WriteVectorFromRealAlgebraicString(std::ostream &os,
                                         std::vector<T> const &V) {
@@ -67,6 +71,9 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
       break;
     }
   }
+#ifdef DEBUG_INPUT_OUTPUT
+  std::cerr << "RVFRAS: 1: s=" << s << "\n";
+#endif
   // Second reading the data till a space or end.
   while (true) {
     if (is.eof()) {
@@ -82,6 +89,9 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
     }
     s += c;
   }
+#ifdef DEBUG_INPUT_OUTPUT
+  std::cerr << "RVFRAS: 2: s=" << s << "\n";
+#endif
   // Now parsing the data
   std::vector<T> V(deg, 0);
   std::vector<size_t> W;
@@ -89,6 +99,9 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
     std::string echar = s.substr(u, 1);
     if (echar == "+" || echar == "-") {
       W.push_back(u);
+#ifdef DEBUG_INPUT_OUTPUT
+      std::cerr << " pushing u=" << u << "\n";
+#endif
     }
   }
   auto eval_expo = [](std::string const &s_expo) -> size_t {
@@ -131,36 +144,61 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
     }
     return ParseScalar<T>(sc);
   };
-  auto eval = [&](std::string const &sb) -> std::pair<T, size_t> {
-    size_t lenb = sb.size();
-    size_t pos_x = get_position(sb, "x");
+  auto eval = [&](std::string const &sbA) -> std::pair<T, size_t> {
+    size_t lenb = sbA.size();
+    size_t pos_x = get_position(sbA, "x");
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "pos_x=" << pos_x << "\n";
+#endif
     if (pos_x == miss_val) {
-      return {eval_scalar(sb), 0};
+      return {eval_scalar(sbA), 0};
     }
-    size_t pos_mult = get_position(sb, "*");
-    size_t pos_div = get_position(sb, "/");
+    size_t pos_mult = get_position(sbA, "*");
+    size_t pos_div = get_position(sbA, "/");
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "pos_mult=" << pos_mult << "\n";
+    std::cerr << "pos_div=" << pos_div << "\n";
+#endif
     std::optional<T> div;
+    std::string sbC = sbA;
     if (pos_div != miss_val && pos_div > pos_x) {
-      div = ParseScalar<T>(sb.substr(pos_div + 1, lenb - 1 - pos_div));
+#ifdef DEBUG_INPUT_OUTPUT
+      std::cerr << "Extracting the div\n";
+#endif
+      std::string sbB = sbA.substr(pos_div + 1, lenb - 1 - pos_div);
+      div = ParseScalar<T>(sbB);
+      sbC = sbA.substr(0, pos_div);
     }
-    std::string sbred = sb.substr(0, pos_div);
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "sbC=" << sbC << "\n";
+#endif
     auto get_coeff = [&]() -> T {
       if (pos_mult == miss_val) {
-        return eval_scalar(sbred.substr(0, pos_x));
+        return eval_scalar(sbC.substr(0, pos_x));
       } else {
         if (pos_mult + 1 != pos_x) {
           std::cerr << "We expect the string to have a *x component\n";
           throw TerminalException{1};
         }
-        return eval_scalar(sbred.substr(0, pos_mult));
+        return eval_scalar(sbC.substr(0, pos_mult));
       }
     };
     T coeff = get_coeff();
     if (div) {
       coeff /= *div;
     }
-    size_t lenbred = sbred.size();
-    size_t expo = eval_expo(sbred.substr(pos_x, lenbred - pos_x));
+    size_t lenC = sbC.size();
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "lenC=" << lenC << "\n";
+#endif
+    std::string sbD = sbC.substr(pos_x, lenC - pos_x);
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "sbD=" << sbD << "\n";
+#endif
+    size_t expo = eval_expo(sbD);
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "expo=" << expo << "\n";
+#endif
     return {coeff, expo};
   };
   for (size_t w = 0; w <= W.size(); w++) {
@@ -172,7 +210,13 @@ std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
       pos_last = W[w];
     }
     std::string sb = s.substr(pos_first, pos_last - pos_first);
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "w=" << w << " sb=" << sb << "\n";
+#endif
     std::pair<T, size_t> ep = eval(sb);
+#ifdef DEBUG_INPUT_OUTPUT
+    std::cerr << "we have ep\n";
+#endif
     if (ep.second >= deg) {
       std::cerr << "sb=" << sb << "\n";
       std::cerr << "We found a term of the form x^{" << ep.second

@@ -14,10 +14,10 @@ int main(int argc, char *argv[]) {
       return -1;
     }
     // reading the matrix
-    std::ifstream is1(argv[1]);
-    std::ifstream is2(argv[2]);
-    MyMatrix<T> M1 = ReadMatrix<T>(is1);
-    MyMatrix<T> M2 = ReadMatrix<T>(is2);
+    std::string file1 = argv[1];
+    std::string file2 = argv[2];
+    MyMatrix<T> M1 = ReadMatrixFile<T>(file1);
+    MyMatrix<T> M2 = ReadMatrixFile<T>(file2);
     std::cerr << "M1=\n";
     WriteMatrix(std::cerr, M1);
     std::cerr << "M2=\n";

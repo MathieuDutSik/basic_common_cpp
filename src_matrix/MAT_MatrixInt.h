@@ -1937,7 +1937,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
     if (eCol == miss_val) {
       std::cerr << "This should not be selected\n";
       std::cerr << "nbCol=" << nbCol << "\n";
-      for (int iCol = 0; iCol < nbCol; iCol++) {
+      for (size_t iCol = 0; iCol < nbCol; iCol++) {
         std::cerr << " iCol=" << iCol << " stat=" << ColumnStatus[iCol]
                   << " val=" << EXTwork(iVect, iCol) << "\n";
       }

@@ -16,7 +16,8 @@
 #PROGRAM		= UniqueRescaleRows
 #PROGRAM		= IsotropicMatMod
 #PROGRAM		= IntersectionLattice
-PROGRAM		= RescaleInverse
+#PROGRAM		= RescaleInverse
+PROGRAM		= RankMat
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
