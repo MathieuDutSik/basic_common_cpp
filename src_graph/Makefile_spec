@@ -4,7 +4,8 @@
 #PROGRAM		= GRAPH_TestCanonicComputation
 #PROGRAM		= GRAPH_TestCanonicComputation GRAPH_CanonicComputation
 #PROGRAM		= GRAPH_ComputeAutGroup
-PROGRAM		= TestPadic
+#PROGRAM		= TestPadic
+PROGRAM		= GRAPH_Kconnectivity
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
