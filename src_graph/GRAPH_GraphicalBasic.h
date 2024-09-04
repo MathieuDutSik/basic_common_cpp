@@ -274,6 +274,74 @@ std::vector<size_t> ConnectedComponents_vector(Tgr const &GR) {
   return ListStatus;
 }
 
+template<typename Tgr>
+bool IsConnectedGraphMinusSubset(Tgr const &GR, std::vector<size_t> const& V) {
+  size_t nbVert = GR.GetNbVert();
+  size_t miss_val = std::numeric_limits<size_t>::max();
+  Face f_out(nbVert);
+  for (auto & eVert: V) {
+    f_out[eVert] = 1;
+  }
+  auto get_out_vert=[&]() -> size_t {
+    for (size_t u=0; u<nbVert; u++) {
+      if (f_out[u] == 0) {
+        return u;
+      }
+    }
+    return miss_val;
+  };
+  size_t out_vert = get_out_vert();
+  if (out_vert == miss_val) {
+    return true;
+  }
+  Face fatt(nbVert);
+  std::vector<size_t> Lvert(nbVert);
+  Lvert[0] = out_vert;
+  size_t vert_start = 0;
+  size_t vert_end = 1;
+  fatt[out_vert] = 1;
+  while(true) {
+    size_t pos_vert = vert_end;
+    for (size_t u=vert_start; u<vert_end; u++) {
+      for (auto & eAdj : GR.Adjacency(Lvert[u])) {
+        if (f_out[eAdj] == 0 && fatt[eAdj] == 0) {
+          Lvert[pos_vert] = eAdj;
+          fatt[eAdj] = 1;
+          pos_vert += 1;
+        }
+      }
+    }
+    vert_start = vert_end;
+    vert_end = pos_vert;
+    if (vert_start == vert_end) {
+      break;
+    }
+  }
+  size_t total_len = nbVert - V.size();
+  if (vert_start == total_len) {
+    return true;
+  }
+  return false;
+}
+
+template<typename Tgr>
+bool IsKConnectedGraph(Tgr const &GR, size_t const& k) {
+  size_t nbVert = GR.GetNbVert();
+  SetCppIterator set(nbVert, k-1);
+  for (auto & V : set) {
+    std::vector<size_t> V2;
+    for (auto & val : V) {
+      V2.push_back(val);
+    }
+    bool test = IsConnectedGraphMinusSubset(GR, V2);
+    if (!test) {
+      return false;
+    }
+  }
+  return true;
+}
+
+
 template <typename Tgr>
 std::vector<std::vector<size_t>> ConnectedComponents_set(Tgr const &GR) {
   size_t nbVert = GR.GetNbVert();
