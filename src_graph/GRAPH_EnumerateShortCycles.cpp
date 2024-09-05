@@ -13,8 +13,8 @@ int main(int argc, char *argv[]) {
       return -1;
     }
     //
-    std::ifstream GRAfs(argv[1]);
-    GraphBitset eGR = GRAPH_Read<GraphBitset>(GRAfs);
+    std::string FileGraph = argv[1];
+    GraphBitset eGR = GRAPH_ReadFile<GraphBitset>(FileGraph);
     GRAPH_PrintOutput(std::cerr, eGR);
     //
     std::vector<std::vector<size_t>> ListCycles = GRAPH_FindAllCycles(eGR);

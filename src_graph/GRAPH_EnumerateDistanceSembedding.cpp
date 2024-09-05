@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
     }
     std::cerr << "Reading input\n";
     //
-    std::ifstream GRAfs(argv[1]);
-    GraphBitset eGR = GRAPH_Read<GraphBitset>(GRAfs);
+    std::string FileGraph = argv[1];
+    GraphBitset eGR = GRAPH_ReadFile<GraphBitset>(FileGraph);
     //
     int sDist;
     sscanf(argv[2], "%d", &sDist);

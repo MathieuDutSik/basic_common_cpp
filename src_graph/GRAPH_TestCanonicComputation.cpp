@@ -16,8 +16,8 @@ int main(int argc, char *argv[]) {
     using Tgr = GraphBitset;
     using Tidx = unsigned int;
     //
-    std::ifstream GRAfs(argv[1]);
-    Tgr eGR = GRAPH_Read<Tgr>(GRAfs);
+    std::string FileGraph = argv[1];
+    Tgr eGR = GRAPH_ReadFile<Tgr>(FileGraph);
     GRAPH_Write(std::cerr, eGR);
     //
     int opt;
