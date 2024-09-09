@@ -35,9 +35,9 @@ CLOCAL          = -I../src_basic -I../src_number -I../src_comb -I.
 CDEFS           = -DDEBUG
 
 
-CFLAGS 		= -I$(GMP_INCDIR)  -I$(PERMLIB_INCDIR) -I$(LIBSHORT_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(FLINT_INCLUDE)
+CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(FLINT_INCLUDE)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread $(LIBSHORT_LINK) $(FLINT_LINK) $(BOOST_LINK)
+LIBS		= -lm $(GMP_CXX_LINK) -pthread $(FLINT_LINK) $(BOOST_LINK)
 
 %.o: %.cpp
 	@echo
