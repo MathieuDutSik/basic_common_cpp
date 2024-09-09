@@ -2,12 +2,15 @@
 #ifndef SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
 #define SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
 
+// clang-format off
 #include "MAT_Matrix.h"
 #include "Temp_common.h"
+#include "Boost_bitset.h"
 #include <limits>
 #include <string>
 #include <utility>
 #include <vector>
+// clang-format on
 
 struct GraphListAdj {
 public:
