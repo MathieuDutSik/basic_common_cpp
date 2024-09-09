@@ -6,6 +6,7 @@
 #include "MAT_Matrix.h"
 #include "Temp_common.h"
 #include "Boost_bitset.h"
+#include "COMB_Combinatorics_elem.h"
 #include <limits>
 #include <string>
 #include <utility>
