@@ -9,17 +9,6 @@
 #include <string>
 #include <vector>
 
-template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
-  size_t nbVert = eSet.count();
-  std::vector<Tidx> eList(nbVert);
-  boost::dynamic_bitset<>::size_type aRow = eSet.find_first();
-  for (size_t i = 0; i < nbVert; i++) {
-    eList[i] = static_cast<Tidx>(aRow);
-    aRow = eSet.find_next(aRow);
-  }
-  return eList;
-}
-
 std::vector<int> FaceTo01vector(Face const &eSet) {
   size_t nbVert = eSet.size();
   size_t siz = eSet.count();

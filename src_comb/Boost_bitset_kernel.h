@@ -380,6 +380,38 @@ vectface sort_vectface(vectface const &vf) {
 
 vectface unicize_vectface(vectface const &vf) { return sort_vectface(vf); }
 
+template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
+  size_t nbVert = eSet.count();
+  std::vector<Tidx> eList(nbVert);
+  boost::dynamic_bitset<>::size_type aRow = eSet.find_first();
+  for (size_t i = 0; i < nbVert; i++) {
+    eList[i] = static_cast<Tidx>(aRow);
+    aRow = eSet.find_next(aRow);
+  }
+  return eList;
+}
+
+void WriteVectfaceGAP(std::ostream& os, vectface const& vf) {
+  bool IsFirst = true;
+  os << "[";
+  for (auto &trig : vf) {
+    if (!IsFirst) {
+      os << ",\n";
+    }
+    IsFirst = false;
+    std::vector<size_t> eList = FaceToVector<size_t>(trig);
+    os << StringStdVectorGAP(eList);
+  }
+  os << "]";
+}
+
+std::string StringVectfaceGAP(vectface const& vf) {
+  std::ostringstream os;
+  WriteVectfaceGAP(os, vf);
+  return os.str();
+}
+
+
 /*
 template<>
 void std::swap(Face & x, Face & y)
