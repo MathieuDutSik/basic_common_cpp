@@ -8,11 +8,12 @@ int main() {
   MillisecondTime millist;
   MicrosecondTime microst;
 
-  for (int i = 0; i < 100; i++) {
+  for (int i = 0; i < 10; i++) {
     size_t delta = rand() % 10000;
     my_sleep(delta);
-    std::cerr << "delta=" << delta << " dateandtime=" << timeanddate() << "\n";
+    std::cerr << "i=" << i << " delta=" << delta << " dateandtime=" << timeanddate() << "\n";
     std::cerr << "  second=" << st << " millisecond=" << millist
               << " microsecond=" << microst << " human time=" << ht << "\n";
   }
+  runtime(ht);
 }

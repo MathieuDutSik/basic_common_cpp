@@ -111,7 +111,7 @@ double sd(SingletonTime const &s1) { return sd(s1, SingletonTime()); }
 
 void runtime(SingletonTime const &start) {
   SingletonTime end;
-  std::cerr << "runtime = " << s(start, end) << "\n";
+  std::cerr << "runtime = " << s(start, end) << " timeanddate=" << timeanddate() << "\n";
 }
 
 void timing(std::string const &strTime, SingletonTime const &s1,
@@ -256,7 +256,7 @@ std::ostream &operator<<(std::ostream &os, HumanTime &x) {
   return os;
 }
 
-void runtime(HumanTime &time) { std::cerr << "runtime = " << time << "\n"; }
+void runtime(HumanTime &time) { std::cerr << "runtime = " << time << " timeanddate=" << timeanddate() << "\n"; }
 
 // clang-format off
 #endif  // SRC_BASIC_TIMINGS_H_
