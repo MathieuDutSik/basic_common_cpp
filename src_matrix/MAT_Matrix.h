@@ -557,6 +557,27 @@ void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const &TheMat) {
 }
 
 template <typename T>
+void WriteMatrixPYTHON(std::ostream &os, MyMatrix<T> const &TheMat) {
+  size_t nbRow = TheMat.rows();
+  size_t nbCol = TheMat.cols();
+  os << "[";
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
+    if (iRow > 0) {
+      os << ",";
+    }
+    os << "[";
+    for (size_t iCol = 0; iCol < nbCol; iCol++) {
+      T eVal = TheMat(iRow, iCol);
+      if (iCol > 0)
+        os << ",";
+      os << eVal;
+    }
+    os << "]";
+  }
+  os << "]";
+}
+
+template <typename T>
 void WriteMatrixGAP_gen(std::ostream &os, MyMatrix<T> const &TheMat,
                         bool const &as_line) {
   size_t nbRow = TheMat.rows();
@@ -667,6 +688,18 @@ void WriteVectorNoDim(std::ostream &os, MyVector<T> const &TheVec) {
   for (int i = 0; i < n; i++)
     os << " " << TheVec(i);
   os << "\n";
+}
+
+template <typename T>
+void WriteVectorPYTHON(std::ostream &os, MyVector<T> const &TheVec) {
+  int n = TheVec.size();
+  os << "[";
+  for (int i = 0; i < n; i++) {
+    if (i > 0)
+      os << ",";
+    os << TheVec(i);
+  }
+  os << "]";
 }
 
 template <typename T>
