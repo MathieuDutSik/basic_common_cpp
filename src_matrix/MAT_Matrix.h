@@ -648,8 +648,7 @@ void WriteListMatrixPYTHON(std::ostream& os,
 }
 
 template<typename T>
-std::string StringListMatrixPYTHON(std::ostream& os,
-                                   std::vector<MyMatrix<T>> const &ListMat) {
+std::string StringListMatrixPYTHON(std::vector<MyMatrix<T>> const &ListMat) {
   std::ostringstream os;
   WriteListMatrixPYTHON(os, ListMat);
   return os.str();
