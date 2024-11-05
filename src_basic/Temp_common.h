@@ -139,6 +139,12 @@ std::string GAP_logical(bool const &x) {
   return "false";
 }
 
+std::string PYTHON_logical(bool const &x) {
+  if (x)
+    return "True";
+  return "False";
+}
+
 template <typename T>
 void WriteStdVectorStdVectorGAP(std::ostream &os,
                                 std::vector<std::vector<T>> const &ListVect) {
