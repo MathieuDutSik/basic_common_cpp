@@ -578,6 +578,13 @@ void WriteMatrixPYTHON(std::ostream &os, MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
+std::string StringMatrixPYTHON(MyMatrix<T> const& TheMat) {
+  std::ostringstream os;
+  WriteMatrixPYTHON(os, TheMat);
+  return os.str();
+}
+
+template <typename T>
 void WriteMatrixGAP_gen(std::ostream &os, MyMatrix<T> const &TheMat,
                         bool const &as_line) {
   size_t nbRow = TheMat.rows();
@@ -700,6 +707,13 @@ void WriteVectorPYTHON(std::ostream &os, MyVector<T> const &TheVec) {
     os << TheVec(i);
   }
   os << "]";
+}
+
+template <typename T>
+std::string StringVectorPYTHON(MyVector<T> const &TheVec) {
+  std::ostringstream os;
+  WriteVectorPYTHON(os, TheVec);
+  return os.str();
 }
 
 template <typename T>
