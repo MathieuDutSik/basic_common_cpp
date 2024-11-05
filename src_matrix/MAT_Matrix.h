@@ -633,6 +633,28 @@ void WriteListMatrixGAP(std::ostream &os,
   os << "]";
 }
 
+template<typename T>
+void WriteListMatrixPYTHON(std::ostream& os,
+                           std::vector<MyMatrix<T>> const &ListMat) {
+  os << "[";
+  bool IsFirst = true;
+  for (auto &eMat : ListMat) {
+    if (!IsFirst)
+      os << ",";
+    IsFirst = false;
+    WriteMatrixPYTHON(os, eMat);
+  }
+  os << "]";
+}
+
+template<typename T>
+std::string StringListMatrixPYTHON(std::ostream& os,
+                                   std::vector<MyMatrix<T>> const &ListMat) {
+  std::ostringstream os;
+  WriteListMatrixPYTHON(os, ListMat);
+  return os.str();
+}
+
 template <typename T>
 void WriteListMatrixFileGAP(std::string &eFile,
                             std::vector<MyMatrix<T>> const &ListMat) {
