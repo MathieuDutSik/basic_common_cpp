@@ -151,7 +151,7 @@ void WriteListFace(std::ostream &os, vectface const &ListFace) {
     WriteFace(os, ListFace[iFace]);
 }
 
-void WriteFaceGAP(std::ostream &os, Face const &f) {
+void WriteFaceBracket(std::ostream &os, Face const &f, int shift) {
   size_t nb = f.count();
   //  int siz=f.size();
   os << "[";
@@ -159,11 +159,21 @@ void WriteFaceGAP(std::ostream &os, Face const &f) {
   for (size_t i = 0; i < nb; i++) {
     if (i > 0)
       os << ",";
-    int eVal = static_cast<int>(aPos) + 1;
+    int eVal = static_cast<int>(aPos) + shift;
     os << eVal;
     aPos = f.find_next(aPos);
   }
   os << "]";
+}
+
+void WriteFaceGAP(std::ostream &os, Face const &f) {
+  int shift = 1;
+  WriteFaceBracket(os, f, shift);
+}
+
+void WriteFacePYTHON(std::ostream &os, Face const &f) {
+  int shift = 0;
+  WriteFaceBracket(os, f, shift);
 }
 
 void WriteListFaceGAP(std::ostream &os, vectface const &ListFace) {
@@ -174,6 +184,18 @@ void WriteListFaceGAP(std::ostream &os, vectface const &ListFace) {
       os << ",";
     IsFirst = false;
     WriteFaceGAP(os, eFace);
+  }
+  os << "]";
+}
+
+void WriteListFacePYTHON(std::ostream &os, vectface const &ListFace) {
+  os << "[";
+  bool IsFirst = true;
+  for (auto &eFace : ListFace) {
+    if (!IsFirst)
+      os << ",";
+    IsFirst = false;
+    WriteFacePYTHON(os, eFace);
   }
   os << "]";
 }
