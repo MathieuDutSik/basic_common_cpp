@@ -270,12 +270,16 @@ Face UnsignedLongToFace(size_t const &len, ulong const &eVal) {
 }
 
 void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit,
-                              int const &shift) {
+                              bool const&single_line, int const &shift) {
   size_t nbOrbit = ListOrbit.size();
   os << "[";
   for (size_t iOrbit = 0; iOrbit < nbOrbit; iOrbit++) {
-    if (iOrbit > 0)
-      os << ",\n";
+    if (iOrbit > 0) {
+      os << ",";
+      if (!single_line) {
+        os << "\n";
+      }
+    }
     Face eRepr = ListOrbit[iOrbit];
     size_t siz = eRepr.count();
     os << "[";
@@ -292,7 +296,7 @@ void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit,
 }
 
 void VectVectInt_Magma_Print(std::ostream &os, vectface const &ListOrbit) {
-  VectVectInt_Print_Kernel(os, ListOrbit, 0);
+  VectVectInt_Print_Kernel(os, ListOrbit, false, 0);
 }
 
 void VectVectInt_Magma_PrintFile(std::string const &eFile,
@@ -304,7 +308,11 @@ void VectVectInt_Magma_PrintFile(std::string const &eFile,
 }
 
 void VectVectInt_Gap_Print(std::ostream &os, vectface const &ListOrbit) {
-  VectVectInt_Print_Kernel(os, ListOrbit, 1);
+  VectVectInt_Print_Kernel(os, ListOrbit, false, 1);
+}
+
+void VectVectInt_Python_Print(std::ostream &os, vectface const &ListOrbit) {
+  VectVectInt_Print_Kernel(os, ListOrbit, true, 0);
 }
 
 void VectVectInt_Gap_PrintFile(std::string const &eFile,
