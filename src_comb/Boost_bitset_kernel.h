@@ -471,8 +471,8 @@ inline void serialize(Archive &ar, vectface &val, const unsigned int version) {
 
 template <typename T> T getsetasint(const Face &face) {
   size_t len = face.size();
-  T eSum = 0;
-  T pow = 1;
+  T eSum(0);
+  T pow(1);
   for (size_t i = 0; i < len; i++) {
     if (face[i] == 1)
       eSum += pow;

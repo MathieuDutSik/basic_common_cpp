@@ -187,6 +187,11 @@ void WriteStdVectorGAP(std::ostream &os, std::vector<T> const &V) {
 }
 
 template <typename T>
+void WriteStdVectorPYTHON(std::ostream &os, std::vector<T> const &V) {
+  return WriteStdVectorGAP(os, V);
+}
+
+template <typename T>
 std::string StringStdVectorGAP(std::vector<T> const &V) {
   std::ostringstream os;
   WriteStdVectorGAP(os, V);
