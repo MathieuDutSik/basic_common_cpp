@@ -16,7 +16,7 @@
 
 #ifdef DEBUG
 #define DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
-#define DEBUG_TS
+#define DEBUG_THOMPSON_SAMPLING
 #endif
 
 template <typename T> struct SingleCondition {
@@ -28,8 +28,8 @@ template <typename T> struct SingleCondition {
 void CheckEType(std::string const &eType) {
   std::vector<std::string> LTypes{">", ">=", "=", "<", "<="};
   if (PositionVect(LTypes, eType) == -1) {
-    std::cerr << "We found eType=" << eType << "\n";
-    std::cerr << "But the allowed types are";
+    std::cerr << "HTS: We found eType=" << eType << "\n";
+    std::cerr << "HTS: But the allowed types are";
     for (auto &eStr : LTypes)
       std::cerr << " " << eStr;
     std::cerr << "\n";
@@ -87,7 +87,7 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
   int nbFullCond;
   is >> nbFullCond;
   if (nbFullCond < 0) {
-    std::cerr << "We must have nbFullCond >= 0\n";
+    std::cerr << "HTS: We must have nbFullCond >= 0\n";
     throw TerminalException{1};
   }
   for (int iFullCond = 0; iFullCond < nbFullCond; iFullCond++) {
@@ -95,10 +95,10 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
     int nbCond;
     is >> nbCond;
     if (nbCond <= 0) {
-      std::cerr << "iFullCond=" << iFullCond << " nbFullCond=" << nbFullCond
+      std::cerr << "HTS: iFullCond=" << iFullCond << " nbFullCond=" << nbFullCond
                 << "\n";
-      std::cerr << "Error, we must have nbCond > 0\n";
-      std::cerr << "nbCond=" << nbCond << "\n";
+      std::cerr << "HTS: Error, we must have nbCond > 0\n";
+      std::cerr << "HTS: nbCond=" << nbCond << "\n";
       throw TerminalException{1};
     }
     for (int iCond = 0; iCond < nbCond; iCond++) {
@@ -109,8 +109,7 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
       is >> eNum;
       CheckEType(eType);
       if (eCond.size() == 0) {
-        std::cerr << "eCond must be nontrivial otherwise evaluation will be "
-                     "impossible\n";
+        std::cerr << "HTS: eCond must be nontrivial\n";
         throw TerminalException{1};
       }
       SingleCondition<T> eSingCond{eCond, eType, eNum};
@@ -119,8 +118,7 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
     std::string eResult;
     is >> eResult;
     if (eResult.size() == 0) {
-      std::cerr << "eResult must be nontrivial otherwise evaluation will be "
-                   "impossible\n";
+      std::cerr << "HTS: eResult must be nontrivial\n";
       throw TerminalException{1};
     }
     OneFullCondition<T> OneCond{ListSingleCond, eResult};
@@ -129,8 +127,7 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
   std::string DefaultResult;
   is >> DefaultResult;
   if (DefaultResult.size() == 0) {
-    std::cerr << "DefaultResult must be nontrivial otherwise evaluation will "
-                 "be impossible\n";
+    std::cerr << "HTS: DefaultResult must be nontrivial\n";
     throw TerminalException{1};
   }
   TheHeu.DefaultResult = DefaultResult;
@@ -140,13 +137,15 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
 template <typename T>
 void ReadHeuristicFileCond(std::string const &eFile, TheHeuristic<T> &eHeu) {
   if (eFile != "unset.heu") {
-    std::cerr << "eFile=" << eFile << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: eFile=" << eFile << "\n";
+#endif
     IsExistingFileDie(eFile);
     std::ifstream is(eFile);
     try {
       eHeu = ReadHeuristic<T>(is);
     } catch (TerminalException const &e) {
-      std::cerr << "Failed in reading the file eFile=" << eFile << "\n";
+      std::cerr << "HTS: Failed in reading the file eFile=" << eFile << "\n";
       throw TerminalException{1};
     }
   }
@@ -165,14 +164,14 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
         auto search = TheCand.find(eCond);
         if (search != TheCand.end())
           return search->second;
-        std::cerr << "Entry <<" << eCond << ">> is required by heuristic\n";
-        std::cerr << "Yet it is missing in the Candidate. TheCand=\n";
+        std::cerr << "HTS: Entry <<" << eCond << ">> is required by heuristic\n";
+        std::cerr << "HTS: Yet it is missing in the Candidate. TheCand=\n";
         for (auto &kv : TheCand) {
-          std::cerr << "  key=" << kv.first << " value=" << kv.second << "\n";
+          std::cerr << "HTS:  key=" << kv.first << " value=" << kv.second << "\n";
         }
-        std::cerr << "In out case we have TheHeu=\n";
+        std::cerr << "HTS: In out case we have TheHeu=\n";
         std::cerr << TheHeu << "\n";
-        std::cerr << "Please correct\n";
+        std::cerr << "HTS: Please correct\n";
         throw TerminalException{1};
       };
       T eValue = get_value();
@@ -222,7 +221,7 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
                       std::vector<std::string> const &ListConclusion) {
   std::vector<OneFullCondition<T>> AllTests;
   if (ListFullCond.size() != ListConclusion.size()) {
-    std::cerr << "ListCond length different from ListConclusion length\n";
+    std::cerr << "HTS: ListCond length different from ListConclusion length\n";
     throw TerminalException{1};
   }
   for (size_t i = 0; i < ListFullCond.size(); i++) {
@@ -233,7 +232,7 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
     for (size_t iC = 0; iC < len; iC++) {
       std::string eC = eFullCond.substr(iC, 1);
       if (eC == char1 || eC == char2) {
-        std::cerr << "Use of forbidden character eC=" << eC
+        std::cerr << "HTS: Use of forbidden character eC=" << eC
                   << " in the condition\n";
         throw TerminalException{1};
       }
@@ -243,7 +242,7 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
     for (auto &eStr : LStr) {
       std::vector<std::string> LStrB = STRING_Split(eStr, " ");
       if (LStrB.size() != 3) {
-        std::cerr << "|LStrB|=" << LStrB.size() << "\n";
+        std::cerr << "HTS: |LStrB|=" << LStrB.size() << " but should be 3\n";
         throw TerminalException{1};
       }
       std::string eCond = LStrB[0];
@@ -265,9 +264,9 @@ void CheckHeuristicInput(TheHeuristic<T> const &heu,
   for (auto &eFullCond : heu.AllTests) {
     for (auto &eSingCond : eFullCond.TheConditions) {
       if (PositionVect(ListAllowedInput, eSingCond.eCond) == -1) {
-        std::cerr << "The variable eCond=" << eSingCond.eCond
+        std::cerr << "HTS: The variable eCond=" << eSingCond.eCond
                   << " is not allowed on input\n";
-        std::cerr << "ListAlowedInput =";
+        std::cerr << "HTS: ListAlowedInput =";
         for (auto &eStr : ListAllowedInput)
           std::cerr << " " << eStr;
         std::cerr << "\n";
@@ -282,8 +281,8 @@ void CheckHeuristicOutput(TheHeuristic<T> const &heu,
                           std::vector<std::string> const &ListAllowedOutput) {
   auto check = [&](std::string const &output) -> void {
     if (PositionVect(ListAllowedOutput, output) == -1) {
-      std::cerr << "The possible output=" << output << " is not allowed\n";
-      std::cerr << "ListAlowedOutput =";
+      std::cerr << "HTS: The possible output=" << output << " is not allowed\n";
+      std::cerr << "HTS: ListAlowedOutput =";
       for (auto &eStr : ListAllowedOutput)
         std::cerr << " " << eStr;
       std::cerr << "\n";
@@ -401,8 +400,8 @@ std::pair<std::string, std::string> SplitByLastSep(std::string const &full_str,
                                                    std::string const &sep) {
   std::vector<std::string> LStrB = STRING_Split(full_str, sep);
   if (LStrB.size() < 2) {
-    std::cerr << "full_str=" << full_str << " sep=" << sep << "\n";
-    std::cerr << "The LStrB should have length at least 2\n";
+    std::cerr << "HTS: Full_str=" << full_str << " sep=" << sep << "\n";
+    std::cerr << "HTS: The LStrB should have length at least 2\n";
     throw TerminalException{1};
   }
   std::string ret_str = LStrB[0];
@@ -446,7 +445,7 @@ struct LimitedEmpiricalDistributionFunction {
       for (auto &eStr : LStr) {
         std::vector<std::string> LStrB = STRING_Split(eStr, "|");
         if (LStrB.size() != 2) {
-          std::cerr << "The string should be of the form val:mult\n";
+          std::cerr << "HTS: The string should be of the form val:mult\n";
           throw TerminalException{1};
         }
         double val = ParseScalar<double>(LStrB[0]);
@@ -458,20 +457,19 @@ struct LimitedEmpiricalDistributionFunction {
         n_start = totsum;
       }
       if (totsum != n_start) {
-        std::cerr << "Inconsistencies in the reading of the multiplicities\n";
-        std::cerr << "totsum=" << totsum << " n_start=" << n_start << "\n";
+        std::cerr << "HTS: Inconsistencies in the reading of the multiplicities\n";
+        std::cerr << "HTS: totsum=" << totsum << " n_start=" << n_start << "\n";
         throw TerminalException{1};
       }
       n_ins = n_start;
       return;
     }
     if (nature == "file_select" || nature == "file") {
-      std::cerr << "That option makes very little sense\n";
+      std::cerr << "HTS: That option makes very little sense\n";
       throw TerminalException{1};
     }
-    std::cerr << "Failed to find a matching entry for nature=" << nature
-              << "\n";
-    std::cerr << "Authorized values are dirac, sampled, file_select and file\n";
+    std::cerr << "HTS: Failed to find a matching for nature=" << nature << "\n";
+    std::cerr << "HTS: Authorized values are dirac, sampled, file_select and file\n";
     throw TerminalException{1};
   }
   void clear_entry() {
@@ -550,8 +548,8 @@ struct LimitedEmpiricalDistributionFunction {
     for (auto &kv : ListValWei)
       n_total += kv.second;
     if (n_ins != n_total) {
-      std::cerr << "n_ins=" << n_ins << " n_total=" << n_total << "\n";
-      std::cerr << "incoherency error in the code\n";
+      std::cerr << "LEDF: n_ins=" << n_ins << " n_total=" << n_total << "\n";
+      std::cerr << "LEDF: incoherency error in the code\n";
       throw TerminalException{1};
     }
     if (ListValWei.size() > n_max) {
@@ -670,7 +668,7 @@ struct LimitedEmpiricalDistributionFunction {
             if (0 <= y2 && y2 <= delta) {
               return val1 + y2;
             }
-            std::cerr << "Numerical error. Please reconsider\n";
+            std::cerr << "LEDF: Numerical error. Please reconsider\n";
             throw TerminalException{1};
           }
         } else {
@@ -679,7 +677,7 @@ struct LimitedEmpiricalDistributionFunction {
       }
       return ListValWei[len - 1].first;
     }
-    std::cerr << "Failing to have a matching for OptionSampling="
+    std::cerr << "LEDF: Failing to have a matching for OptionSampling="
               << OptionSampling << "\n";
     throw TerminalException{1};
   }
@@ -712,32 +710,38 @@ struct SingleThompsonSamplingState {
       std::map<std::string, LimitedEmpiricalDistributionFunction> const
           &map_name_ledf,
       std::ostream &os) {
+#ifdef DEBUG_THOMPSON_SAMPLING
     os << "HTS: SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
     os << "HTS: ledf = LimitedEmpiricalDistributionFunction\n";
     for (auto &kv : map_name_ledf)
       os << "HTS:  map_name_ledf key=" << kv.first << "\n";
+#endif
     n_insert = 0;
     if (desc.size() > 7) {
       if (desc.substr(0, 7) == "noprior") {
         std::vector<std::string> LStr = STRING_Split(desc, ":");
+#ifdef SANITY_CHECK_THOMPSON_SAMPLING
         if (LStr.size() != 2) {
-          std::cerr << "The desc should be of the form noprior:XX\n";
-          std::cerr << "XX being the number of entries used first\n";
-          std::cerr << "We have desc=" << desc << "\n";
+          std::cerr << "HTS: The desc should be of the form noprior:XX\n";
+          std::cerr << "HTS: XX being the number of entries used first\n";
+          std::cerr << "HTS: We have desc=" << desc << "\n";
           throw TerminalException{1};
         }
         if (LStr[0] != "noprior") {
-          std::cerr << "LStr[0]=" << LStr[0] << "\n";
-          std::cerr << "while it should be a noprior\n";
+          std::cerr << "LTS: LStr[0]=" << LStr[0] << "\n";
+          std::cerr << "HTS: while it should be a noprior\n";
           throw TerminalException{1};
         }
+#endif
         size_t siz_limit = ParseScalar<size_t>(LStr[1]);
         opt_noprior = siz_limit;
       }
     }
     if (opt_noprior) {
       for (auto &ans : ListAnswer) {
+#ifdef DEBUG_THOMPSON_SAMPLING
         os << "HRS: ans=" << ans << "\n";
+#endif
         map_ans_ledf.try_emplace(ans, map_name_ledf.at("empty"));
       }
     } else {
@@ -766,8 +770,8 @@ struct SingleThompsonSamplingState {
     for (auto &kv : map_ans_ledf) {
       double alpha = get_random();
       double val = kv.second.get_percentile(alpha);
-#ifdef DEBUG_TS
-      std::cerr << "TS: alpha=" << alpha << " kv.first=" << kv.first
+#ifdef DEBUG_THOMPSON_SAMPLING
+      std::cerr << "HTS: alpha=" << alpha << " kv.first=" << kv.first
                 << " val=" << val << "\n";
 #endif
       if (val < best_val) {
@@ -775,30 +779,30 @@ struct SingleThompsonSamplingState {
         best_val = val;
       }
     }
-#ifdef DEBUG_TS
-    std::cerr << "TS: get_lowest_sampling_raw, ret=" << ret << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: get_lowest_sampling_raw, ret=" << ret << "\n";
 #endif
     if (ret == "unset") {
-      std::cerr << "We failed to assign ret\n";
+      std::cerr << "HTS: We failed to assign ret\n";
       throw TerminalException{1};
     }
     return ret;
   }
   std::string get_lowest_sampling() {
-#ifdef DEBUG_TS
-    std::cerr << "TS: get_lowest_sampling |map_and_ledf|="
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: get_lowest_sampling |map_and_ledf|="
               << map_ans_ledf.size() << "\n";
 #endif
     if (!opt_noprior) {
-#ifdef DEBUG_TS
-      std::cerr << "TS: Exiting in case !opt_noprior\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+      std::cerr << "HTS: Exiting in case !opt_noprior\n";
 #endif
       return get_lowest_sampling_raw();
     }
     if (n_insert > *opt_noprior) {
-#ifdef DEBUG_TS
-      std::cerr << "TS: n_insert=" << n_insert << "\n";
-      std::cerr << "TS: Exiting in case n_insert > opt_noprior\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+      std::cerr << "HTS: n_insert=" << n_insert << "\n";
+      std::cerr << "HTS: Exiting in case n_insert > opt_noprior\n";
 #endif
       return get_lowest_sampling_raw();
     }
@@ -807,8 +811,8 @@ struct SingleThompsonSamplingState {
     for (size_t u = 0; u < res; u++)
       iter++;
     std::string strRet = iter->first;
-#ifdef DEBUG_TS
-    std::cerr << "TS: strRet=" << strRet << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: strRet=" << strRet << "\n";
 #endif
     return strRet;
   }
@@ -832,20 +836,18 @@ template <typename T> struct KeyCompression {
                  std::vector<std::string> const &ListDescription)
       : ListKey(ListKey) {
     if (ListKey.size() != ListDescription.size()) {
-      std::cerr << "KeyCompression: ListKey and ListDescription should have "
+      std::cerr << "HTS: KeyCompression: ListKey and ListDescription should have "
                    "the same length\n";
       throw TerminalException{1};
     }
     for (auto &eDesc : ListDescription) {
-      //      std::cerr << "eDesc=" << eDesc << "\n";
       std::vector<std::pair<size_t, size_t>> l_interval;
       if (eDesc != "superfine") {
         std::vector<std::string> LStr = STRING_Split(eDesc, ",");
         for (auto &eStr : LStr) {
-          //          std::cerr << "eStr=" << eStr << "\n";
           std::vector<std::string> LStrB = STRING_Split(eStr, "-");
           if (LStrB.size() != 1 && LStrB.size() != 2) {
-            std::cerr << "The possible format are XX or XX-YY not XX-YY-ZZ\n";
+            std::cerr << "HTS: The possible format are XX or XX-YY not XX-YY-ZZ\n";
             throw TerminalException{1};
           }
           auto get_value = [](std::string const &inp) -> size_t {
@@ -855,8 +857,8 @@ template <typename T> struct KeyCompression {
             size_t val_ret = ParseScalar<size_t>(inp);
             std::string inp2 = std::to_string(val_ret);
             if (inp2 != inp) {
-              std::cerr << "Parsing failed\n";
-              std::cerr << "inp=" << inp << " inp2=" << inp2 << "\n";
+              std::cerr << "HTS: Parsing failed\n";
+              std::cerr << "HTS: inp=" << inp << " inp2=" << inp2 << "\n";
               throw TerminalException{1};
             }
             return val_ret;
@@ -891,10 +893,10 @@ template <typename T> struct KeyCompression {
         return u;
     }
     for (size_t u = 0; u < len; u++)
-      std::cerr << "u=" << u << " interval=" << l_interval[u].first << " / "
+      std::cerr << "HTS: u=" << u << " interval=" << l_interval[u].first << " / "
                 << l_interval[u].second << "\n";
-    std::cerr << "val=" << val << "\n";
-    std::cerr << "Failed to find a matching index\n";
+    std::cerr << "HTS: val=" << val << "\n";
+    std::cerr << "HTS: Failed to find a matching index\n";
     throw TerminalException{1};
   }
   std::vector<size_t>
@@ -1231,18 +1233,21 @@ public:
           BlockTHOMPSON.ListListStringValues.at("ListDescription");
       if (ListAnswer.size() != ListName.size() ||
           ListAnswer.size() != ListDescription.size()) {
-        std::cerr << "Incorrect length\n";
-        std::cerr << "|ListAnswer|=" << ListAnswer.size() << "\n";
-        std::cerr << "|ListName|=" << ListName.size() << "\n";
-        std::cerr << "|ListDescription|=" << ListDescription.size() << "\n";
+        std::cerr << "HTS: Incorrect length\n";
+        std::cerr << "HTS: |ListAnswer|=" << ListAnswer.size() << "\n";
+        std::cerr << "HTS: |ListName|=" << ListName.size() << "\n";
+        std::cerr << "HTS: |ListDescription|=" << ListDescription.size() << "\n";
         throw TerminalException{1};
       }
       for (size_t u = 0; u < ListName.size(); u++) {
         std::string const &name = ListName[u];
         std::string const &desc = ListDescription[u];
+#ifdef DEBUG_THOMPSON_SAMPLING
         os << "HTS: name=" << name << " desc=" << desc << "\n";
+#endif
         m_name_ts.try_emplace(name, ListAnswer, desc, map_name_ledf, os);
       }
+#ifdef DEBUG_THOMPSON_SAMPLING
       os << "HTS: m_name_ts =";
       for (auto &kv : m_name_ts)
         os << " " << kv.first;
@@ -1251,11 +1256,15 @@ public:
       // occur in the output of heuristic and so have to be taken into account
       // separately.
       os << "HTS: Heu=\n" << heu << "\n";
+#endif
       for (auto &eOutput : GetHeuristicOutput(heu)) {
+#ifdef DEBUG_THOMPSON_SAMPLING
         os << "HTS:   eOutput=" << eOutput << "\n";
-        if (m_name_ts.find(eOutput) == m_name_ts.end())
+#endif
+        if (m_name_ts.find(eOutput) == m_name_ts.end()) {
           m_name_ts.try_emplace(eOutput, ListAnswer, eOutput, map_name_ledf,
                                 os);
+        }
       }
     }
 
@@ -1270,20 +1279,20 @@ public:
   }
   ~ThompsonSamplingHeuristic() {
     if (l_submission.size() > 0) {
-      std::cerr << "The SelfCorrectingHeuristic terminates with some "
+      std::cerr << "HTS: The SelfCorrectingHeuristic terminates with some "
                    "submission being uncompleted\n";
-      std::cerr << "Just so you know. Most likely, premature termination, "
+      std::cerr << "HTS: Just so you know. Most likely, premature termination, "
                    "otherwise a bug\n";
     }
     if (WriteLog) {
-      std::cerr << "map_name_ledf=\n";
+      std::cerr << "HTS: map_name_ledf=\n";
       for (auto &kv : map_name_ledf) {
-        std::cerr << "key=" << kv.first << " desc=" << kv.second.string()
+        std::cerr << "HTS:   key=" << kv.first << " desc=" << kv.second.string()
                   << "\n";
       }
-      std::cerr << "um_compress_ts\n";
+      std::cerr << "HTS: um_compress_ts\n";
       for (auto &kv : um_compress_ts) {
-        std::cerr << "key =";
+        std::cerr << "HTS:   key =";
         for (auto &val : kv.first)
           std::cerr << " " << val;
         std::cerr << " val=\n";
@@ -1309,8 +1318,8 @@ private:
   }
   void InsertCompletedInfo(std::string const &file) {
     if (!IsExistingFile(file)) {
-      std::cerr << "The file=" << file << " is missing.\n";
-      std::cerr << "Cannot parse it in SelfCorrectingHeuristic with name="
+      std::cerr << "HTS: The file=" << file << " is missing.\n";
+      std::cerr << "HTS: Cannot parse it in SelfCorrectingHeuristic with name="
                 << name << "\n";
       throw TerminalException{1};
     }
@@ -1325,14 +1334,14 @@ private:
     }
   }
   std::string Kernel_GetEvaluation(std::map<std::string, T> const &TheCand) {
-#ifdef DEBUG_TS
+#ifdef DEBUG_THOMPSON_SAMPLING
     for (auto &kv : TheCand) {
-      std::cerr << "TS: TheCand k=" << kv.first << " v=" << kv.second << "\n";
+      std::cerr << "HTS: TheCand k=" << kv.first << " v=" << kv.second << "\n";
     }
 #endif
     std::vector<size_t> vect_key = kc.get_key_compression(TheCand);
-#ifdef DEBUG_TS
-    std::cerr << "TS: vect_key =";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: vect_key =";
     for (auto &eVal : vect_key)
       std::cerr << " " << eVal;
     std::cerr << "\n";
@@ -1340,20 +1349,20 @@ private:
     auto iter = um_compress_ts.find(vect_key);
     if (iter != um_compress_ts.end()) {
       std::string strRet = iter->second.get_lowest_sampling();
-#ifdef DEBUG_TS
-      std::cerr << "TS: Returning fast strRet=" << strRet << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+      std::cerr << "HTS: Returning fast strRet=" << strRet << "\n";
 #endif
       return strRet;
     }
     std::string name = HeuristicEvaluation(TheCand, heu);
-#ifdef DEBUG_TS
-    std::cerr << "TS: Kernel_GetEvaluation, name=" << name << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: Kernel_GetEvaluation, name=" << name << "\n";
 #endif
     // Copy of SingleThompsonSamplingState is needed below
     SingleThompsonSamplingState ts = m_name_ts.at(name);
     std::string ret = ts.get_lowest_sampling();
-#ifdef DEBUG_TS
-    std::cerr << "TS: Kernel_GetEvaluation, ret=" << ret << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: Kernel_GetEvaluation, ret=" << ret << "\n";
 #endif
     um_compress_ts.try_emplace(vect_key, ts);
     return ret;
@@ -1370,8 +1379,8 @@ public:
     std::pair<TimingComputationAttempt<T>, SingletonTime> eback =
         l_submission.back();
     double result = sd(eback.second);
-#ifdef DEBUG_TS
-    std::cerr << "TS: pop, result=" << result << "\n";
+#ifdef DEBUG_THOMPSON_SAMPLING
+    std::cerr << "HTS: pop, result=" << result << "\n";
 #endif
     TimingComputationResult<T> eTCR{std::move(eback.first), result};
     push_complete_result(eTCR);
