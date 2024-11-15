@@ -7,7 +7,7 @@
 // clang-format on
 
 int main(int argc, char *argv[]) {
-  SingletonTime time1;
+  HumanTime time;
   try {
     if (argc <= 2) {
       std::cerr << "Factorize [N] [help1] .... [helpK]\n";
@@ -34,5 +34,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Something went wrong in the program\n";
     exit(e.eVal);
   }
-  runtime(time1);
+  runtime(time);
 }

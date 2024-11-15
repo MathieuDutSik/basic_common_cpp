@@ -3,7 +3,7 @@
 
 int main() {
   srand_random_set();
-  HumanTime time1;
+  HumanTime time;
   try {
     size_t n_max = 3;
     LimitedEmpiricalDistributionFunction ledf(n_max);
@@ -28,5 +28,5 @@ int main() {
     std::cerr << "Error in Test_EmpiricalDistridution\n";
     exit(e.eVal);
   }
-  runtime(time1);
+  runtime(time);
 }

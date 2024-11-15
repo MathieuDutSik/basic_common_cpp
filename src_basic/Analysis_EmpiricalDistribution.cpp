@@ -3,7 +3,7 @@
 
 int main(int argc, char *argv[]) {
   srand_random_set();
-  HumanTime time1;
+  HumanTime time;
   try {
     if (argc != 2) {
       std::cerr << "Analysis_EmpiricalDistribution [FileI]\n";
@@ -25,5 +25,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Error in Analysis_EmpiricalDistribution\n";
     exit(e.eVal);
   }
-  runtime(time1);
+  runtime(time);
 }

@@ -39,7 +39,7 @@ template <typename T> std::string test(std::string name_numeric) {
 }
 
 int main(int argc, char *argv[]) {
-  SingletonTime time1;
+  HumanTime time;
   try {
     if (argc != 2) {
       std::cerr << "test_sequence_approximant [oper]\n";
@@ -79,5 +79,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Something went wrong in the program\n";
     exit(e.eVal);
   }
-  runtime(time1);
+  runtime(time);
 }

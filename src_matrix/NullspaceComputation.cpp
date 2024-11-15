@@ -66,7 +66,7 @@ void process(std::string const &arith, std::string const &input,
 }
 
 int main(int argc, char *argv[]) {
-  SingletonTime time1;
+  HumanTime time;
   try {
     if (argc != 4) {
       std::cerr << "This program is used as\n";
@@ -89,5 +89,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Something wrong happened in the computation\n";
     exit(e.eVal);
   }
-  runtime(time1);
+  runtime(time);
 }

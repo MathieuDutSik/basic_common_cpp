@@ -116,7 +116,7 @@ MyMatrix<int> get_random_matrix(int m, int n) {
 }
 
 int main() {
-  SingletonTime time1;
+  HumanTime time;
   try {
     //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>",
     //    "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
@@ -149,5 +149,5 @@ int main() {
     std::cerr << "Something wrong happened in the computation\n";
     exit(e.eVal);
   }
-  runtime(time1);
+  runtime(time);
 }

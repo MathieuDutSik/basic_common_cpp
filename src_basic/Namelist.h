@@ -47,6 +47,8 @@ std::string NAMELIST_ConvertFortranStringToCppString(std::string const &eStr) {
   if (eFirstChar == "'" || eFirstChar == "\"") {
     RemovableEnding = 1;
     if (eFirstChar != eLastChar) {
+      std::cerr << "Error in NAMELIST_ConvertFortranStringToCppString\n";
+      std::cerr << "eStr=" << eStr << "\n";
       std::cerr << "eFirstChar = " << eFirstChar << "\n";
       std::cerr << " eLastChar = " << eLastChar << "\n";
       std::cerr << "The character used for noting beginning and end of string "
