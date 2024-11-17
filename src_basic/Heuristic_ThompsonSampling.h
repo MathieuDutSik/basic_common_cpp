@@ -709,7 +709,7 @@ struct SingleThompsonSamplingState {
       std::vector<std::string> const &ListAnswer, std::string const &desc,
       std::map<std::string, LimitedEmpiricalDistributionFunction> const
           &map_name_ledf,
-      std::ostream &os) {
+      [[maybe_unused]] std::ostream &os) {
 #ifdef DEBUG_THOMPSON_SAMPLING
     os << "HTS: SingleThompsonSamplingState, step 1 desc=" << desc << "\n";
     os << "HTS: ledf = LimitedEmpiricalDistributionFunction\n";
