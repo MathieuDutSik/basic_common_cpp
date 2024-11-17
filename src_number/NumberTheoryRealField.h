@@ -22,7 +22,11 @@
 // fields. (A) linear algebra is needed. (B) analysis is needed for deciding
 // signs.
 
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK
+#define SANITY_CHECK_REAL_ALG_NUMERIC
+#endif
+
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
 double threshold_real_alg_check = 0.0001;
 #endif
 
@@ -68,7 +72,7 @@ private:
                    "for you to correct\n";
       throw TerminalException{1};
     }
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
     double sum = 0;
     double expo = 1;
     for (size_t i = 0; i < Pminimal.size(); i++) {
@@ -155,7 +159,7 @@ public:
                               std::vector<T> const &den) const {
     MyMatrix<T> M(deg, deg);
     SetMatrix(M, den);
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
     std::vector<T> TheSol = GetSolution(M, num);
     double TheSol_d = evaluate_as_double(TheSol);
     double num_d = evaluate_as_double(num);
@@ -176,7 +180,7 @@ public:
     num_V[0] = num;
     MyMatrix<T> M(deg, deg);
     SetMatrix(M, den);
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
     std::vector<T> TheSol = GetSolution(M, num_V);
     double TheSol_d = evaluate_as_double(TheSol);
     double num_d = evaluate_as_double(num_V);
@@ -197,7 +201,7 @@ public:
     num_V[0] = 1;
     MyMatrix<T> M(deg, deg);
     SetMatrix(M, x);
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
     std::vector<T> TheSol = GetSolution(M, num_V);
     double TheSol_d = evaluate_as_double(TheSol);
     double x_d = evaluate_as_double(x);
@@ -228,7 +232,7 @@ public:
           curr[j] += val * ExprXdeg[j];
       }
     }
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
     double result_d = evaluate_as_double(result);
     double a_d = evaluate_as_double(a);
     double b_d = evaluate_as_double(b);
@@ -263,14 +267,14 @@ public:
       auto pair_bound = get_bounds(epair);
       T const &val_low = pair_bound.first;
       T const &val_upp = pair_bound.second;
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
       if (val_low > val_upp) {
         std::cerr << "The ordering of values is not respected\n";
         throw TerminalException{1};
       }
 #endif
       if (val_upp <= 0) {
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
         double val_upp_d = UniversalScalarConversion<double, T>(val_upp);
         if (val_upp_d > threshold_real_alg_check) {
           std::cerr << "Error in IsStrictlyPositive (it is negative)\n";
@@ -280,7 +284,7 @@ public:
         return false;
       }
       if (val_low >= 0) {
-#ifdef CHECK_REAL_ALG_NUMERIC
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
         double val_low_d = UniversalScalarConversion<double, T>(val_low);
         if (val_low_d < -threshold_real_alg_check) {
           std::cerr << "Error in IsStrictlyPositive (it is positive)\n";
