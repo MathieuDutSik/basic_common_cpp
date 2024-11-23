@@ -6,7 +6,6 @@
 
 // Only standard includes are allowed. Forbidden are:
 // ---any boost include
-// ---any TBB include
 // ---anything that requires a non-trivial installation
 
 // C-style includes

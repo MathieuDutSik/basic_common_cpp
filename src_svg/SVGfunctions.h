@@ -19,8 +19,8 @@ coor operator-(coor const &c1, coor const &c2) {
   return {c1.x - c2.x, c1.y - c2.y};
 }
 
-std::ostream &operator<<(std::ostream &os, coor const &obj) {
-  os << "(" << obj.x << "," << obj.y << ")";
+std::ostream &operator<<(std::ostream &os_out, coor const &obj) {
+  os_out << "(" << obj.x << "," << obj.y << ")";
   return os;
 }
 
@@ -346,71 +346,71 @@ void GeneralWriteSVGfile(std::string const &eFile,
   //
   // First the preamble
   //
-  std::ofstream os(eFile);
-  os << std::fixed;
-  os << std::setprecision(9);
-  os << "<svg height=\"" << height << "\" width=\"" << width << "\">\n";
+  std::ofstream os_out(eFile);
+  os_out << std::fixed;
+  os_out << std::setprecision(9);
+  os_out << "<svg height=\"" << height << "\" width=\"" << width << "\">\n";
   //
   // Now the major loop for the data printing
   //
   for (auto &eGeneral : eSVGplot.ListGeneral) {
     if (eGeneral.svgtype == SvgType::clip) {
-      os << "  <defs>\n";
-      os << "    <clipPath id=\"" << eGeneral.clip.name << "\">\n";
-      os << "      <rect x=\"" << eGeneral.clip.x << "\" y=\""
+      os_out << "  <defs>\n";
+      os_out << "    <clipPath id=\"" << eGeneral.clip.name << "\">\n";
+      os_out << "      <rect x=\"" << eGeneral.clip.x << "\" y=\""
          << eGeneral.clip.y << "\" width=\"" << eGeneral.clip.width
          << "\" height=\"" << eGeneral.clip.height << "\" />\n";
-      os << "    </clipPath>\n";
-      os << "  </defs>\n";
+      os_out << "    </clipPath>\n";
+      os_out << "  </defs>\n";
     }
     if (eGeneral.svgtype == SvgType::line) {
       coor ePt = eGeneral.line.ePt;
       coor fPt = eGeneral.line.fPt;
-      os << "  <line x1=\"" << GetStringValueX(ePt.x) << "\" y1=\""
+      os_out << "  <line x1=\"" << GetStringValueX(ePt.x) << "\" y1=\""
          << GetStringValueY(ePt.y) << "\" x2=\"" << GetStringValueX(fPt.x)
          << "\" y2=\"" << GetStringValueY(fPt.y) << "\" "
          << GetQualityString(eGeneral.line.eQual) << " />\n";
     }
     if (eGeneral.svgtype == SvgType::polyline) {
-      os << "<polyline points=\"";
+      os_out << "<polyline points=\"";
       bool IsFirst = true;
       for (auto &ePt : eGeneral.polyline.ListCoor) {
         if (!IsFirst)
-          os << " ";
+          os_out << " ";
         IsFirst = false;
-        os << GetStringValueX(ePt.x) << "," << GetStringValueY(ePt.y);
+        os_out << GetStringValueX(ePt.x) << "," << GetStringValueY(ePt.y);
       }
-      os << "\" " << GetQualityStringPolyline(eGeneral.polyline.eQual)
+      os_out << "\" " << GetQualityStringPolyline(eGeneral.polyline.eQual)
          << " />\n";
     }
     if (eGeneral.svgtype == SvgType::bezier) {
       auto eBez = eGeneral.bezier;
-      os << "  <path d=\"M" << GetStringPair(eBez.pointM) << " C "
+      os_out << "  <path d=\"M" << GetStringPair(eBez.pointM) << " C "
          << GetStringPair(eBez.pointC) << ", " << GetStringPair(eBez.point1)
          << ", " << GetStringPair(eBez.point2) << "\" fill=\"none\" "
          << GetQualityString(eBez.eQual) << " />\n";
     }
     if (eGeneral.svgtype == SvgType::ellipse) {
       auto eEll = eGeneral.ellipse;
-      os << "  <ellipse";
-      os << " cx=\"" << GetStringValueX(eEll.c.x) << "\"";
-      os << " cy=\"" << GetStringValueY(eEll.c.y) << "\"";
-      os << " rx=\"" << GetStringValue(eEll.r.x, 0) << "\"";
-      os << " ry=\"" << GetStringValue(eEll.r.y, 0) << "\"";
-      os << " " << GetQualityStringEllipse(eEll.eQual);
-      os << " />\n";
+      os_out << "  <ellipse";
+      os_out << " cx=\"" << GetStringValueX(eEll.c.x) << "\"";
+      os_out << " cy=\"" << GetStringValueY(eEll.c.y) << "\"";
+      os_out << " rx=\"" << GetStringValue(eEll.r.x, 0) << "\"";
+      os_out << " ry=\"" << GetStringValue(eEll.r.y, 0) << "\"";
+      os_out << " " << GetQualityStringEllipse(eEll.eQual);
+      os_out << " />\n";
     }
     if (eGeneral.svgtype == SvgType::text) {
       auto eText = eGeneral.text;
-      os << "  <text";
-      os << " x=\"" << GetStringValueX(eText.point.x) << "\"";
-      os << " y=\"" << GetStringValueY(eText.point.y) << "\"";
-      os << " font-size=\"" << eText.Size << "\"";
-      os << " fill=\"" << StringColor(eText.color) << "\">";
-      os << eText.string << "</text>\n";
+      os_out << "  <text";
+      os_out << " x=\"" << GetStringValueX(eText.point.x) << "\"";
+      os_out << " y=\"" << GetStringValueY(eText.point.y) << "\"";
+      os_out << " font-size=\"" << eText.Size << "\"";
+      os_out << " fill=\"" << StringColor(eText.color) << "\">";
+      os_out << eText.string << "</text>\n";
     }
   }
-  os << "</svg>\n";
+  os_out << "</svg>\n";
 }
 
 // clang-format off

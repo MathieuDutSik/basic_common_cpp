@@ -130,7 +130,7 @@ TRACES_GetCanonicalOrdering_Arr(DataTraces &DT,
   for (size_t i = 0; i < n; i++)
     V[DT.lab1[i]] = Tidx(i);
 #ifdef TIMINGS
-  os << "|TRACES_GetCanonicalOrdering_Arr|=" << time << "\n";
+  os << "|TRA: TRACES_GetCanonicalOrdering_Arr|=" << time << "\n";
 #endif
   return V;
 }
@@ -256,7 +256,7 @@ TRACES_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream &os) {
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  os << "|TRACES_GetCanonicalOrdering|=" << time << "\n";
+  os << "|TRA: TRACES_GetCanonicalOrdering|=" << time << "\n";
 #endif
   return V;
 }
@@ -304,7 +304,7 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  os << "|TRACES_GetListGenerators_Arr|=" << time << "\n";
+  os << "|TRA: TRACES_GetListGenerators_Arr|=" << time << "\n";
 #endif
   return ListGen;
 }
@@ -389,7 +389,7 @@ TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
   DYNFREE(orbits, orbits_sz);
   SG_FREE(sg1);
 #ifdef TIMINGS
-  os << "|TRACES_GetListGenerators|=" << time << "\n";
+  os << "|TRA: TRACES_GetListGenerators|=" << time << "\n";
 #endif
   return ListGen;
 }
@@ -433,7 +433,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS
-  os << "|TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time << "\n";
+  os << "|TRA: TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
@@ -526,7 +526,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last,
   SG_FREE(sg1);
   SG_FREE(cg1);
 #ifdef TIMINGS
-  os << "|TRACES_GetCanonicalOrdering_ListGenerators|=" << time << "\n";
+  os << "|TRA: TRACES_GetCanonicalOrdering_ListGenerators|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }
