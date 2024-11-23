@@ -18,6 +18,10 @@
 #define DEBUG_MATRIX_INT
 #endif
 
+#ifdef SANITY_CHECK
+#define SANITY_CHECK_MATRIX_INT
+#endif
+
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction
 // ring) of a factorial ring. Operations may work for fields and rings as well.
@@ -84,7 +88,7 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
     }
     if (IsFirst)
       return 0;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
     if (MinPivot == 0) {
       std::cerr << "Clear error in the code of IndexLattice\n";
       throw TerminalException{1};
@@ -138,8 +142,8 @@ template <typename T> GCD_dot<T> ComputeGcdDot(MyVector<T> const &x) {
       V(v) = V(v) * res.a;
     }
   }
-#ifdef DEBUG_MATRIX_INT
-  T sum = 0;
+#ifdef SANITY_CHECK_MATRIX_INT
+  T sum(0);
   for (int u = 0; u < siz; u++) {
     sum += V(u) * x(u);
   }
@@ -230,7 +234,7 @@ ComputePairGcd(T const &m, T const &n) {
   Pmat(1, 1) = m / f;
   //  std::cerr << "Pmat=\n";
   //  WriteMatrix(std::cerr, Pmat);
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   T diff1 = f - Pmat(0, 0) * m - Pmat(1, 0) * n;
   T diff2 = Pmat(0, 1) * m + Pmat(1, 1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -261,7 +265,7 @@ ComputePairGcd(T const &m, T const &n) {
   Pmat(1, 0) = t;
   Pmat(0, 1) = -n / eGCD;
   Pmat(1, 1) = m / eGCD;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   T diff1 = eGCD - Pmat(0, 0) * m - Pmat(1, 0) * n;
   T diff2 = Pmat(0, 1) * m + Pmat(1, 1) * n;
   if (diff1 != 0 || diff2 != 0) {
@@ -913,7 +917,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
   MyMatrix<T> H = M;
   MyMatrix<T> ROW = IdentityMat<T>(nbRow);
   MyMatrix<T> COL = IdentityMat<T>(nbCol);
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   auto check_consistency = [&](std::string const &mesg) -> void {
     MyMatrix<T> eProd = ROW * M * COL;
     if (eProd != H) {
@@ -968,7 +972,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
           T TheQ = QuoInt(eVal, ThePivot);
           H.row(iRow) -= TheQ * H.row(iRowF);
           ROW.row(iRow) -= TheQ * ROW.row(iRowF);
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
           mesg = "1 : Error_at iRowF=" + std::to_string(iRowF) +
                  " iColF=" + std::to_string(iColF) +
                  " iRpw=" + std::to_string(iRow) +
@@ -987,7 +991,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
           T TheQ = QuoInt(eVal, ThePivot);
           H.col(iCol) -= TheQ * H.col(iColF);
           COL.col(iCol) -= TheQ * COL.col(iColF);
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
           mesg = "2 : Error_at iRowF=" + std::to_string(iRowF) +
                  " iColF=" + std::to_string(iColF) +
                  " iCol=" + std::to_string(iCol) +
@@ -1004,7 +1008,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
         MyMatrix<T> Trans = TranspositionMatrix<T>(nbRow, posDone, iRowF);
         ROW = Trans * ROW;
         H = Trans * H;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
         mesg = "3 : Error_at iRowF=" + std::to_string(iRowF) +
                " posDone=" + std::to_string(posDone);
         check_consistency(mesg);
@@ -1014,7 +1018,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
         MyMatrix<T> Trans = TranspositionMatrix<T>(nbCol, posDone, iColF);
         COL = COL * Trans;
         H = H * Trans;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
         mesg = "4 : Error_at iColF=" + std::to_string(iColF) +
                " posDone=" + std::to_string(posDone);
         check_consistency(mesg);
@@ -1136,7 +1140,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
           nbFound++;
         }
       }
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
       if (nbFound == 0) {
         std::cerr << "The column is zero. No work possible\n";
         throw TerminalException{1};
@@ -1255,7 +1259,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
       idx++;
     }
   }
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   size_t nbRow = eMat.rows();
   for (size_t iVect = 0; iVect < dimSpace; iVect++)
     for (size_t iRow = 0; iRow < nbRow; iRow++) {
@@ -1319,14 +1323,14 @@ template <typename T> MyMatrix<T> ComplementToBasis(MyVector<T> const &TheV) {
           }
         }
       }
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
     if (idxSelect == -1) {
       std::cerr << "Inconsistency in computation of value\n";
       throw TerminalException{1};
     }
 #endif
     if (nbDiffZero == 1) {
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
       if (AbsVal != 1) {
         std::cerr << "Wrong value for AbsVal\n";
         throw TerminalException{1};
@@ -1370,7 +1374,7 @@ template <typename T> MyMatrix<T> ComplementToBasis(MyVector<T> const &TheV) {
     T eVal = TheVcopy(i2) + eCoeff * TheVcopy(i1);
     TheVcopy(i2) = eVal;
   }
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   if (!TestEquality(TheVcopy, TheV)) {
     std::cerr << "TheVcopy =";
     WriteVectorNoDim(std::cerr, TheVcopy);
@@ -1597,9 +1601,10 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
             }
           }
         }
-      if (nbDiff == 1 || nbDiff == 0)
+      if (nbDiff == 1 || nbDiff == 0) {
         break;
-#ifdef DEBUG_MATRIX_INT
+      }
+#ifdef SANITY_CHECK_MATRIX_INT
       if (MinValue == 0) {
         std::cerr << "MinValue should not be zero\n";
         throw TerminalException{1};
@@ -1617,7 +1622,7 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
         }
     }
     if (nbDiff == 1) {
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
         throw TerminalException{1};
@@ -1657,7 +1662,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
   int nbDiff;
   int nbRow = TheMat.rows();
   int nbCol = TheMat.cols();
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   if (nbRow == 0) {
     std::cerr << "Need to write the code here\n";
     throw TerminalException{1};
@@ -1693,7 +1698,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
         }
       if (nbDiff == 1 || nbDiff == 0)
         break;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
       if (MinValue == 0) {
         std::cerr << "MinValue should not be zero\n";
         throw TerminalException{1};
@@ -1713,7 +1718,7 @@ CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
     int eVal;
     if (nbDiff == 1) {
       eVal = iVectFound;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
       if (iVectFound == -1) {
         std::cerr << "Clear error in the program\n";
         throw TerminalException{1};
@@ -1932,8 +1937,7 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
       if (eCol == miss_val && EXTwork(iVect, iCol) != 0 &&
           ColumnStatus[iCol] == 1)
         eCol = iCol;
-#ifdef DEBUG_MATRIX_INT
-    std::cerr << "eCol=" << eCol << "\n";
+#ifdef SANITY_CHECK_MATRIX_INT
     if (eCol == miss_val) {
       std::cerr << "This should not be selected\n";
       std::cerr << "nbCol=" << nbCol << "\n";
@@ -2185,7 +2189,7 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
     //    std::cerr << "After TheRedMat construction\n";
     MyMatrix<T> NSP = NullspaceIntMat(TheRedMat);
     //    std::cerr << "We have NSP\n";
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
     if (NSP.rows() != 1) {
       std::cerr << "|NSP|=" << NSP.rows() << " when it should be 1\n";
       std::cerr << "TheRedMat:\n";
@@ -2286,15 +2290,12 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   };
   fComputeSpeed();
   int nbElt = ListElement.rows();
-  //  std::cerr << "nbElt=" << nbElt << "\n";
   for (int iElt = 0; iElt < nbElt; iElt++) {
-    //    std::cerr << "iElt=" << iElt << "\n";
     MyVector<T> eElt = GetMatrixRow(ListElement, iElt);
     fInsert(eElt);
-    //    std::cerr << "After fInsert\n";
   }
 
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   int DimSpace = TheBasis.rows();
   for (int iBas = 0; iBas < DimSpace; iBas++) {
     MyVector<T> eLine = GetMatrixRow(TheBasis, iBas);
@@ -2370,14 +2371,14 @@ MyMatrix<T> IntersectionLattice_VectorSpace(MyMatrix<T> const &Latt,
     V[i] = i + n_spa;
   MyMatrix<T> Latt3 = SelectColumn(Latt2, V);
   MyMatrix<T> NSP = NullspaceIntMat(Latt3);
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   if (!IsIntegralMatrix(NSP)) {
     std::cerr << "NSP should be integral\n";
     throw TerminalException{1};
   }
 #endif
   MyMatrix<T> IntBasis = NSP * Latt;
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   for (int i_s = 0; i_s < n_spa; i_s++) {
     MyVector<T> v = GetMatrixRow(IntBasis, i_s);
     std::optional<MyVector<T>> opt1 = SolutionIntMat(Latt, v);
@@ -2535,7 +2536,7 @@ T GetDenominatorQuotientSolution(MyMatrix<T> const& Amat) {
 template<typename T>
 MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const& TheSpace) {
   int nbRow = TheSpace.rows();
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   if (nbRow != RankMat(TheSpace)) {
     std::cerr << "TheSpace should be full dimensional\n";
     throw TerminalException{1};

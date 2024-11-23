@@ -28,6 +28,10 @@
 #define DEBUG_MAT_MATRIX
 #endif
 
+#ifdef SANITY_CHECK
+#define SANITY_CHECK_MAT_MATRIX
+#endif
+
 template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;
 };
@@ -936,7 +940,7 @@ template <typename T>
 MyVector<T> VectorMatrix(MyVector<T> const &eVect, MyMatrix<T> const &eMat) {
   int nbCol = eMat.cols();
   int nbRow = eMat.rows();
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
   int n = eVect.size();
   if (n != nbRow) {
     std::cerr << "n should be equal to nbRow\n";
@@ -957,7 +961,7 @@ template <typename T>
 void AssignMatrixRow(MyMatrix<T> &eMat, int const &iRow,
                      MyVector<T> const &eVect) {
   int nbCol = eMat.cols();
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
   int n = eVect.size();
   if (n != nbCol) {
     std::cerr << "We should have eVect.size() = eMat.cols()\n";
@@ -1073,10 +1077,10 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
   int nbRow = Input.rows();
   int nbCol = Input.cols();
   T prov1;
-#ifdef DEBUG_MAT_MATRIX
+#ifdef DEBUG_MAT_MATRIX_DISABLE
   std::cerr << "TMat_Inverse_destroy, step 1\n";
 #endif
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
   if (nbRow != nbCol) {
     std::cerr << "Error on nbRow, nbCol in TMat_Inverse_destroy";
     throw TerminalException{1};
@@ -1090,12 +1094,12 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
         prov1 = 0;
       Output(iRow, iCol) = prov1;
     }
-#ifdef DEBUG_MAT_MATRIX
+#ifdef DEBUG_MAT_MATRIX_DISABLE
   std::cerr << "TMat_Inverse_destroy, step 2\n";
 #endif
   int iColFound;
   for (iRow = 0; iRow < nbRow; iRow++) {
-#ifdef DEBUG_MAT_MATRIX
+#ifdef DEBUG_MAT_MATRIX_DISABLE
     std::cerr << "iRow=" << iRow << "\n";
     std::cerr << "Input=\n";
     WriteMatrix(std::cerr, Input);
@@ -1110,7 +1114,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
           prov1 = 1 / prov1;
         }
       }
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
     if (prov1 == 0) {
       std::cerr << "Error during the computation of the matrix inverse\n";
       throw TerminalException{1};
@@ -1137,7 +1141,7 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
         std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
     }
   }
-#ifdef DEBUG_MAT_MATRIX
+#ifdef DEBUG_MAT_MATRIX_DISABLE
   std::cerr << "TMat_Inverse_destroy, step 3\n";
 #endif
 }
@@ -2125,7 +2129,7 @@ private:
 
 public:
   SolutionMatRepetitive(MyMatrix<T> const &_TheBasis) : TheBasis(_TheBasis) {
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
     if (RankMat(TheBasis) != TheBasis.rows()) {
       std::cerr << "RankMat(TheBasis)=" << RankMat(TheBasis) << "\n";
       std::cerr << "  TheBasis.rows()=" << TheBasis.rows() << "\n";
@@ -2281,7 +2285,7 @@ bool IsSubspaceContained(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
 
 template <typename T>
 bool TestEqualitySpannedSpaces(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
   if (M1.cols() != M2.cols()) {
     std::cerr << "That case is actually not allowed\n";
     throw TerminalException{1};
