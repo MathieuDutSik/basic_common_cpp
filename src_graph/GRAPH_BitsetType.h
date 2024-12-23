@@ -6,13 +6,18 @@
 #include <limits>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_GRAPH_BITSET
+#endif
+
+
 struct GraphBitset {
 public:
   GraphBitset() = delete;
   GraphBitset(size_t const &inpNbVert) : nbVert(inpNbVert) {
     size_t eProd = nbVert * nbVert;
-#ifdef DEBUG
-    std::cerr << "nbVert=" << nbVert << " eProd=" << eProd << "\n";
+#ifdef DEBUG_GRAPH_BITSET
+    std::cerr << "GRABIT: nbVert=" << nbVert << " eProd=" << eProd << "\n";
 #endif
     LLAdj = boost::dynamic_bitset<>(eProd);
     HasVertexColor = false;
