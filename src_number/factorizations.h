@@ -66,6 +66,9 @@ template <typename T> std::vector<T> successive_division_factorize(T const &N) {
 
 template <typename T> bool successive_division_isprime(T const &N) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+  if (N == 2) {
+    return true;
+  }
   T pos = 2;
   while (true) {
     T res = ResInt(N, pos);
