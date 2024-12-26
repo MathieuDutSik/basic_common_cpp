@@ -1782,7 +1782,7 @@ public:
     MyMatrix<T> RetMat(n_row, nbRow);
     for (int i = 0; i < n_row; i++) {
       MyVector<T> V = GetMatrixRow(TheMat, i);
-      std::optional<MyVector<T>> opt = has_solution_v(V);
+      std::optional<MyVector<T>> opt = get_solution_v(V);
       if (!opt)
         return {};
       AssignMatrixRow(RetMat, i, *opt);
