@@ -1645,157 +1645,165 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
   return eSol;
 }
 
-template <typename T> struct CanSolIntMat {
+template <typename T>
+struct RecSolutionIntMat {
+private:
   int nbRow;
   int nbCol;
   std::vector<int> ListRow;
   MyMatrix<T> TheMatWork;
   MyMatrix<T> eEquivMat;
-};
-
-template <typename T>
-CanSolIntMat<T> ComputeCanonicalFormFastReduction(MyMatrix<T> const &TheMat) {
-  static_assert(is_euclidean_domain<T>::value,
-                "Requires T to be an Euclidean domain in "
-                "ComputeCanonicalFormFastReduction");
-  using Treal = typename underlying_totally_ordered_ring<T>::real_type;
-  int nbDiff;
-  int nbRow = TheMat.rows();
-  int nbCol = TheMat.cols();
+public:
+  RecSolutionIntMat(MyMatrix<T> const &TheMat) {
+    static_assert(is_euclidean_domain<T>::value,
+                  "Requires T to be an Euclidean domain in "
+                  "ComputeCanonicalFormFastReduction");
+    using Treal = typename underlying_totally_ordered_ring<T>::real_type;
+    int nbDiff;
+    nbRow = TheMat.rows();
+    nbCol = TheMat.cols();
+    ListRow = std::vector<int>(nbCol);
+    eEquivMat = IdentityMat<T>(nbRow);
+    TheMatWork = TheMat;
 #ifdef SANITY_CHECK_MATRIX_INT
-  if (nbRow == 0) {
-    std::cerr << "Need to write the code here\n";
-    throw TerminalException{1};
-  }
+    if (nbRow == 0) {
+      std::cerr << "Need to write the code here\n";
+      throw TerminalException{1};
+    }
 #endif
-  MyMatrix<T> eEquivMat = IdentityMat<T>(nbRow);
-  MyMatrix<T> TheMatWork = TheMat;
-  std::vector<int> VectStatus(nbRow, 1);
-  std::vector<int> ListRow(nbCol);
-  for (int i = 0; i < nbCol; i++) {
-    int iVectFound = -1;
-    while (true) {
-      bool IsFirst = true;
-      Treal MinValue(0);
-      nbDiff = 0;
-      for (int iVect = 0; iVect < nbRow; iVect++)
-        if (VectStatus[iVect] == 1) {
-          T prov1 = TheMatWork(iVect, i);
-          Treal eNorm = T_NormGen(prov1);
-          if (prov1 != 0) {
-            nbDiff++;
-            if (IsFirst) {
-              IsFirst = false;
-              MinValue = eNorm;
-              iVectFound = iVect;
-            } else {
-              if (eNorm < MinValue) {
+    std::vector<int> VectStatus(nbRow, 1);
+    for (int i = 0; i < nbCol; i++) {
+      int iVectFound = -1;
+      while (true) {
+        bool IsFirst = true;
+        Treal MinValue(0);
+        nbDiff = 0;
+        for (int iVect = 0; iVect < nbRow; iVect++) {
+          if (VectStatus[iVect] == 1) {
+            T prov1 = TheMatWork(iVect, i);
+            Treal eNorm = T_NormGen(prov1);
+            if (prov1 != 0) {
+              nbDiff++;
+              if (IsFirst) {
+                IsFirst = false;
                 MinValue = eNorm;
                 iVectFound = iVect;
+              } else {
+                if (eNorm < MinValue) {
+                  MinValue = eNorm;
+                  iVectFound = iVect;
+                }
               }
             }
           }
         }
-      if (nbDiff == 1 || nbDiff == 0)
-        break;
+        if (nbDiff == 1 || nbDiff == 0) {
+          break;
+        }
 #ifdef SANITY_CHECK_MATRIX_INT
-      if (MinValue == 0) {
-        std::cerr << "MinValue should not be zero\n";
-        throw TerminalException{1};
-      }
+        if (MinValue == 0) {
+          std::cerr << "MinValue should not be zero\n";
+          throw TerminalException{1};
+        }
 #endif
-      for (int iVect = 0; iVect < nbRow; iVect++)
-        if (VectStatus[iVect] == 1 && iVect != iVectFound) {
-          T prov1b = TheMatWork(iVectFound, i);
-          T prov2 = TheMatWork(iVect, i);
-          T TheQ = QuoInt(prov2, prov1b);
-          if (TheQ != 0) {
-            TheMatWork.row(iVect) -= TheQ * TheMatWork.row(iVectFound);
-            eEquivMat.row(iVect) -= TheQ * eEquivMat.row(iVectFound);
+        for (int iVect = 0; iVect < nbRow; iVect++)
+          if (VectStatus[iVect] == 1 && iVect != iVectFound) {
+            T prov1b = TheMatWork(iVectFound, i);
+            T prov2 = TheMatWork(iVect, i);
+            T TheQ = QuoInt(prov2, prov1b);
+            if (TheQ != 0) {
+              TheMatWork.row(iVect) -= TheQ * TheMatWork.row(iVectFound);
+              eEquivMat.row(iVect) -= TheQ * eEquivMat.row(iVectFound);
+            }
+          }
+      }
+      int eVal;
+      if (nbDiff == 1) {
+        eVal = iVectFound;
+#ifdef SANITY_CHECK_MATRIX_INT
+        if (iVectFound == -1) {
+          std::cerr << "Clear error in the program\n";
+          throw TerminalException{1};
+        }
+#endif
+        VectStatus[iVectFound] = 0;
+      } else {
+        eVal = -1;
+      }
+      ListRow[i] = eVal;
+    }
+  }
+  bool has_solution_v(MyVector<T> const &TheVect) const {
+    MyVector<T> TheVectWork = TheVect;
+    for (int i = 0; i < nbCol; i++) {
+      int iRow = ListRow[i];
+      if (iRow >= 0) {
+        T const& prov2 = TheMatWork(iRow, i);
+        T TheQ = QuoInt(TheVectWork(i), prov2);
+        if (TheQ != 0) {
+          for (int j = 0; j < nbCol; j++) {
+            TheVectWork(j) -= TheQ * TheMatWork(iRow, j);
           }
         }
-    }
-    int eVal;
-    if (nbDiff == 1) {
-      eVal = iVectFound;
-#ifdef SANITY_CHECK_MATRIX_INT
-      if (iVectFound == -1) {
-        std::cerr << "Clear error in the program\n";
-        throw TerminalException{1};
       }
-#endif
-      VectStatus[iVectFound] = 0;
-    } else {
-      eVal = -1;
-    }
-    ListRow[i] = eVal;
-  }
-  return {nbRow, nbCol, std::move(ListRow), std::move(TheMatWork),
-          std::move(eEquivMat)};
-}
-
-template <typename T>
-bool CanTestSolutionIntMat(CanSolIntMat<T> const &eCan,
-                           MyVector<T> const &TheVect) {
-  int nbCol = eCan.TheMatWork.cols();
-  MyVector<T> TheVectWork = TheVect;
-  for (int i = 0; i < nbCol; i++) {
-    int iRow = eCan.ListRow[i];
-    if (iRow >= 0) {
-      T prov1 = TheVectWork(i);
-      T prov2 = eCan.TheMatWork(iRow, i);
-      T TheQ = QuoInt(prov1, prov2);
-      if (TheQ != 0) {
-        for (int j = 0; j < nbCol; j++)
-          TheVectWork(j) -= TheQ * eCan.TheMatWork(iRow, j);
+      if (TheVectWork(i) != 0) {
+        return false;
       }
     }
-    if (TheVectWork(i) != 0)
-      return false;
+    return true;
   }
-  return true;
-}
-
-template <typename T>
-std::optional<MyVector<T>> CanSolutionIntMat(CanSolIntMat<T> const &eCan,
-                                             MyVector<T> const &TheVect) {
-  int nbVect = eCan.TheMatWork.rows();
-  int nbCol = eCan.TheMatWork.cols();
-  MyVector<T> TheVectWork = TheVect;
-  MyVector<T> eSol = ZeroVector<T>(nbVect);
-  for (int i = 0; i < nbCol; i++) {
-    int iRow = eCan.ListRow[i];
-    if (iRow >= 0) {
-      T prov1 = TheVectWork(i);
-      T prov2 = eCan.TheMatWork(iRow, i);
-      T TheQ = QuoInt(prov1, prov2);
-      if (TheQ != 0) {
-        for (int j = 0; j < nbCol; j++)
-          TheVectWork(j) -= TheQ * eCan.TheMatWork(iRow, j);
-        for (int iVect = 0; iVect < nbVect; iVect++)
-          eSol(iVect) += TheQ * eCan.eEquivMat(iRow, iVect);
+  std::optional<MyVector<T>> get_solution_v(MyVector<T> const &TheVect) const {
+    int nbVect = TheMatWork.rows();
+    int nbCol = TheMatWork.cols();
+    MyVector<T> TheVectWork = TheVect;
+    MyVector<T> eSol = ZeroVector<T>(nbVect);
+    for (int i = 0; i < nbCol; i++) {
+      int iRow = ListRow[i];
+      if (iRow >= 0) {
+        T const& prov2 = TheMatWork(iRow, i);
+        T TheQ = QuoInt(TheVectWork(i), prov2);
+        if (TheQ != 0) {
+          for (int j = 0; j < nbCol; j++) {
+            TheVectWork(j) -= TheQ * TheMatWork(iRow, j);
+          }
+          for (int iVect = 0; iVect < nbVect; iVect++) {
+            eSol(iVect) += TheQ * eEquivMat(iRow, iVect);
+          }
+        }
+      }
+      if (TheVectWork(i) != 0) {
+        return {};
       }
     }
-    if (TheVectWork(i) != 0)
-      return {};
+    return eSol;
   }
-  return eSol;
-}
-
-template <typename T>
-std::optional<MyMatrix<T>> CanSolutionIntMatMat(CanSolIntMat<T> const &eCan,
-                                                MyMatrix<T> const &TheMat) {
-  int n_row = TheMat.rows();
-  MyMatrix<T> RetMat(n_row, eCan.nbRow);
-  for (int i = 0; i < n_row; i++) {
-    MyVector<T> V = GetMatrixRow(TheMat, i);
-    std::optional<MyVector<T>> opt = CanSolutionIntMat(eCan, V);
-    if (!opt)
-      return {};
-    AssignMatrixRow(RetMat, i, *opt);
+  std::optional<MyMatrix<T>> get_solution_m(MyMatrix<T> const &TheMat) const {
+    int n_row = TheMat.rows();
+    MyMatrix<T> RetMat(n_row, nbRow);
+    for (int i = 0; i < n_row; i++) {
+      MyVector<T> V = GetMatrixRow(TheMat, i);
+      std::optional<MyVector<T>> opt = has_solution_v(V);
+      if (!opt)
+        return {};
+      AssignMatrixRow(RetMat, i, *opt);
+    }
+    return RetMat;
   }
-  return RetMat;
-}
+  bool is_containing_m(MyMatrix<T> const &TheMat) const {
+    int n_row = TheMat.rows();
+    MyVector<T> V(nbCol);
+    for (int i_row=0; i_row<n_row; i_row++) {
+      for (int i_col=0; i_col<nbCol; i_col++) {
+        V(i_col) = TheMat(i_row, i_col);
+      }
+      bool test = has_solution_v(V);
+      if (!test) {
+        return false;
+      }
+    }
+    return true;
+  }
+};
 
 template <typename T> struct BasisReduction {
   MyMatrix<T> TheBasisReduced;
