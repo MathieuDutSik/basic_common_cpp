@@ -44,13 +44,6 @@ bliss::Graph *ReadGraphFromFile(FILE *f, unsigned int &nof_vertices) {
   return g;
 }
 
-// We need to have nbRow as input for template reasons. But it is unused in the
-// symmetric case. So, pragma statement is needed to avoid a warning being
-// thrown.
-static inline void report_aut_void([[maybe_unused]] void *param,
-                                   [[maybe_unused]] const unsigned int n,
-                                   [[maybe_unused]] const unsigned int *aut) {}
-
 template <typename Tgr> bliss::Graph GetBlissGraphFromGraph(Tgr const &eGR) {
   using T_bliss = unsigned int;
   T_bliss nbVert = T_bliss(eGR.GetNbVert());
@@ -155,7 +148,7 @@ template<typename TidxG>
 std::vector<std::vector<TidxG>> get_generators(bliss::Graph& g, bliss::Stats& stats, size_t n_last) {
   std::vector<std::vector<TidxG>> ListGen;
   std::vector<TidxG> eGen(n_last);
-  std::function<void(unsigned int n, const unsigned int *aut)> report=[&](unsigned int n, const unsigned int *aut)-> void {
+  std::function<void(unsigned int n, const unsigned int *aut)> report=[&]([[maybe_unused]] unsigned int n, const unsigned int *aut)-> void {
     for (size_t i = 0; i < n_last; i++) {
       eGen[i] = aut[i];
     }
