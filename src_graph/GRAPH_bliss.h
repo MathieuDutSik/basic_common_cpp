@@ -79,9 +79,9 @@ bool IsIsomorphicGraph(Tgr const &eGR1, Tgr const &eGR2) {
   bliss::Stats stats;
   //
   const unsigned int *cl1;
-  cl1 = g1.canonical_form(stats, &report_aut_void, stderr);
+  cl1 = g1.canonical_form(stats);
   const unsigned int *cl2;
-  cl2 = g2.canonical_form(stats, &report_aut_void, stderr);
+  cl2 = g2.canonical_form(stats);
   std::vector<size_t> clR2(nof_vertices);
   for (size_t i = 0; i < nof_vertices; i++)
     clR2[cl2[i]] = i;
@@ -110,7 +110,7 @@ template <typename Tgr> std::string GetCanonicalForm_string(Tgr const &eGR) {
   bliss::Stats stats;
   //
   const unsigned int *cl;
-  cl = g.canonical_form(stats, &report_aut_void, stderr);
+  cl = g.canonical_form(stats);
   std::vector<size_t> clR(nof_vertices);
   for (size_t i = 0; i < nof_vertices; i++)
     clR[cl[i]] = i;
@@ -139,7 +139,7 @@ std::vector<TidxC> BLISS_GetCanonicalOrdering(Tgr const &eGR) {
   bliss::Stats stats;
   //
   const unsigned int *cl;
-  cl = g.canonical_form(stats, &report_aut_void, stderr);
+  cl = g.canonical_form(stats);
   std::vector<TidxC> vectD(nof_vertices);
   for (size_t i = 0; i < nof_vertices; i++)
     vectD[i] = cl[i];
@@ -151,18 +151,18 @@ struct RecParam {
   std::vector<std::vector<unsigned int>> LGen;
 };
 
-// We need to have nbRow as input for template reasons. But it is unused in the
-// symmetric case. So, pragma statement is needed to avoid a warning being
-// thrown.
-static inline void report_aut_vectvectint(void *param,
-                                          [[maybe_unused]] const unsigned int n,
-                                          const unsigned int *aut) {
-  RecParam *rec_param = reinterpret_cast<RecParam *>(param);
-  size_t n_last = rec_param->n_last;
-  std::vector<unsigned int> eVect(n_last);
-  for (size_t i = 0; i < n_last; i++)
-    eVect[i] = aut[i];
-  rec_param->LGen.push_back(eVect);
+template<typename TidxG>
+std::vector<std::vector<TidxG>> get_generators(bliss::Graph& g, bliss::Stats& stats, size_t n_last) {
+  std::vector<std::vector<TidxG>> ListGen;
+  std::vector<TidxG> eGen(n_last);
+  std::function<void(unsigned int n, const unsigned int *aut)> report=[&](unsigned int n, const unsigned int *aut)-> void {
+    for (size_t i = 0; i < n_last; i++) {
+      eGen[i] = aut[i];
+    }
+    ListGen.push_back(eGen);
+  };
+  g.find_automorphisms(stats, report);
+  return ListGen;
 }
 
 template <typename Tgr, typename TidxG>
@@ -170,19 +170,7 @@ std::vector<std::vector<TidxG>> BLISS_GetListGenerators(Tgr const &eGR,
                                                         size_t const &n_last) {
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
-  RecParam rec_param;
-  rec_param.n_last = n_last;
-  RecParam *rec_param_ptr = &rec_param;
-  g.find_automorphisms(stats, &report_aut_vectvectint,
-                       reinterpret_cast<void *>(rec_param_ptr));
-  std::vector<std::vector<TidxG>> ListGen;
-  std::vector<TidxG> V(n_last);
-  for (auto &eList : rec_param.LGen) {
-    for (size_t i = 0; i < n_last; i++)
-      V[i] = eList[i];
-    ListGen.push_back(V);
-  }
-  return ListGen;
+  return get_generators<TidxG>(g, stats, n_last);
 }
 
 template <typename Tgr, typename TidxC, typename TidxG>
@@ -194,23 +182,12 @@ BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
   bliss::Stats stats;
   //
   const unsigned int *cl;
-  cl = g.canonical_form(stats, &report_aut_void, stderr);
+  cl = g.canonical_form(stats);
   std::vector<TidxC> vectD(nof_vertices);
   for (size_t i = 0; i < nof_vertices; i++)
     vectD[i] = cl[i];
   //
-  RecParam rec_param;
-  rec_param.n_last = n_last;
-  RecParam *rec_param_ptr = &rec_param;
-  g.find_automorphisms(stats, &report_aut_vectvectint,
-                       reinterpret_cast<void *>(rec_param_ptr));
-  std::vector<std::vector<TidxG>> ListGen;
-  std::vector<TidxG> V(n_last);
-  for (auto &eList : rec_param.LGen) {
-    for (size_t i = 0; i < n_last; i++)
-      V[i] = eList[i];
-    ListGen.push_back(V);
-  }
+  std::vector<std::vector<TidxG>> ListGen = get_generators<TidxG>(g, stats, n_last);
   //
   return {std::move(vectD), std::move(ListGen)};
 }
