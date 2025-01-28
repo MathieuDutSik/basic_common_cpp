@@ -53,18 +53,23 @@ jobs:
           pwd
           echo "After pwd"
 
+          # NAUTY
           mkdir ExternalLib/nauty/build
           cd ExternalLib/nauty/build && cmake -DCMAKE_INSTALL_PREFIX:PATH=$NAUTY_PATH .. && make all install && cd ../../..
           pwd
           echo "After nauty compilation"
 
-          cd ExternalLib
-          unzip bliss-0.77.zip
-          mkdir bliss-0.77/bliss && cd bliss-0.77/bliss
-          cmake -DCMAKE_INSTALL_PREFIX:PATH=$LIBBLISS_PATH .. && make all install && cd ../../..
+          # BLISS
+          cd /home/runner && unzip work/basic_common_cpp/basic_common_cpp/ExternalLib/bliss-0.77.zip
+          mkdir /home/runner/opt/libbliss/lib
+          mkdir /home/runner/opt/libbliss/include
+          cd /home/runner/opt/libbliss/lib && cmake /home/runner/bliss-0.77 && make
+          cd /home/runner/opt/libbliss/include && cp /home/runner/bliss-0.77/src/*.hh .
+          cd /home/runner/work/basic_common_cpp/basic_common_cpp
           pwd
           echo "After bliss compilation"
 
+          # EIGEN
           # We need specific version 3.3.9 because of a bug in 3.4.0 for algebraic data types.
           wget -q https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
           tar -xzf eigen-3.3.9.tar.gz
