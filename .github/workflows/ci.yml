@@ -58,8 +58,10 @@ jobs:
           pwd
           echo "After nauty compilation"
 
-          mkdir ExternalLib/bliss/build
-          cd ExternalLib/bliss/build && cmake -DCMAKE_INSTALL_PREFIX:PATH=$LIBBLISS_PATH .. && make all install && cd ../../..
+          mkdir ExternalLib
+          unzip bliss-0.77.zip
+          mkdir bliss-0.77/bliss && cd bliss-0.77/bliss
+          cmake -DCMAKE_INSTALL_PREFIX:PATH=$LIBBLISS_PATH .. && make all install && cd ../../..
           pwd
           echo "After bliss compilation"
 
