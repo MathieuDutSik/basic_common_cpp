@@ -61,8 +61,8 @@ jobs:
 
           # BLISS
           cd /home/runner && unzip work/basic_common_cpp/basic_common_cpp/ExternalLib/bliss-0.77.zip
-          mkdir /home/runner/opt/libbliss/lib
-          mkdir /home/runner/opt/libbliss/include
+          mkdir -p /home/runner/opt/libbliss/lib
+          mkdir -p /home/runner/opt/libbliss/include
           cd /home/runner/opt/libbliss/lib && cmake /home/runner/bliss-0.77 && make
           cd /home/runner/opt/libbliss/include && cp /home/runner/bliss-0.77/src/*.hh .
           cd /home/runner/work/basic_common_cpp/basic_common_cpp
