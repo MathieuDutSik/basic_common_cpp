@@ -20,7 +20,7 @@
 #include "GRAPH_traces.h"
 #endif
 
-struct SimplifiedVectexColoredGraph {
+struct SimplifiedVertexColoredGraph {
   size_t nbVert;
   size_t nbAdjacent;
   std::vector<int> d;
@@ -28,7 +28,7 @@ struct SimplifiedVectexColoredGraph {
   std::vector<int> ListBlockSize;
 };
 
-SimplifiedVectexColoredGraph GetSimplifiedVertexColoredGraph(size_t nbVert,
+SimplifiedVertexColoredGraph GetSimplifiedVertexColoredGraph(size_t nbVert,
                                                              size_t nbAdjacent,
                                                              size_t nbBlock) {
   std::vector<int> d(nbVert);
@@ -40,7 +40,7 @@ SimplifiedVectexColoredGraph GetSimplifiedVertexColoredGraph(size_t nbVert,
 
 #ifdef USE_BLISS
 GraphListAdj
-GetGraphListAdj_from_simplified(SimplifiedVectexColoredGraph const &s) {
+GetGraphListAdj_from_simplified(SimplifiedVertexColoredGraph const &s) {
   size_t nbVert = s.nbVert;
   GraphListAdj eGR(nbVert);
   size_t pos = 0;
@@ -66,7 +66,7 @@ GetGraphListAdj_from_simplified(SimplifiedVectexColoredGraph const &s) {
 #endif
 
 #ifdef USE_TRACES
-DataTraces GetDataTraces(SimplifiedVectexColoredGraph const &x) {
+DataTraces GetDataTraces(SimplifiedVertexColoredGraph const &x) {
   size_t nbVert = x.nbVert;
   int nbAdjacent = x.nbAdjacent;
   DataTraces DT(nbVert, nbAdjacent);
@@ -96,7 +96,7 @@ DataTraces GetDataTraces(SimplifiedVectexColoredGraph const &x) {
 template <typename TidxC, typename TidxG>
 std::pair<std::vector<TidxC>, std::vector<std::vector<TidxG>>>
 GRAPH_GetCanonicalOrdering_ListGenerators_Simp(
-    SimplifiedVectexColoredGraph const &s, size_t const &nbRow,
+    SimplifiedVertexColoredGraph const &s, size_t const &nbRow,
     [[maybe_unused]] std::ostream &os) {
 #ifdef USE_BLISS
   GraphListAdj eGR = GetGraphListAdj_from_simplified(s);
@@ -112,7 +112,7 @@ GRAPH_GetCanonicalOrdering_ListGenerators_Simp(
 
 template <typename TidxG>
 std::vector<std::vector<TidxG>>
-GRAPH_GetListGenerators_Simp(SimplifiedVectexColoredGraph const &s,
+GRAPH_GetListGenerators_Simp(SimplifiedVertexColoredGraph const &s,
                              size_t const &nbRow,
                              [[maybe_unused]] std::ostream &os) {
 #ifdef USE_BLISS
