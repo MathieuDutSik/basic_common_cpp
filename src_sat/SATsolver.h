@@ -79,7 +79,6 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
       pos = -1 - x;
       val = false;
     }
-    //    std::cerr << "x=" << x << " pos=" << pos << "\n";
     return Minisat::mkLit(ListVar[pos], val);
   };
   std::cerr << "nbClause=" << eExpr.ListExpr.size() << "\n";
@@ -87,20 +86,15 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
   for (auto &eList : eExpr.ListExpr) {
     int siz = eList.size();
     TotalSiz += siz;
-    //    std::cerr << "siz=" << siz << "\n";
     if (siz == 2) {
       Minisat::Lit lit1 = GetLit(eList[0]);
       Minisat::Lit lit2 = GetLit(eList[1]);
-      //      std::cerr << "Before addClause 1\n";
       S.addClause(lit1, lit2);
-      //      std::cerr << "After addClause 1\n";
     } else {
       Minisat::vec<Minisat::Lit> ListLit(siz);
       for (int i = 0; i < siz; i++)
         ListLit[i] = GetLit(eList[i]);
-      //      std::cerr << "Before addClause 2\n";
       S.addClause_(ListLit);
-      //      std::cerr << "After addClause 2\n";
     }
   }
   std::cerr << "TotalSiz=" << TotalSiz << "\n";

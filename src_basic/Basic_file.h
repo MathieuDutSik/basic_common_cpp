@@ -173,7 +173,6 @@ bool FILE_IsRegularFile(std::string const &eFile) {
 
 std::vector<std::string>
 FILE_GetDirectoryFilesRecursively(std::string const &eDir) {
-  //  std::cerr << "Beginning of FILE_GetDirectoryFilesRecursively\n";
   std::vector<std::string> ListDir{eDir};
   std::vector<std::string> ListFile;
   while (true) {
@@ -194,7 +193,6 @@ FILE_GetDirectoryFilesRecursively(std::string const &eDir) {
       break;
     ListDir = NewListDir;
   }
-  //  std::cerr << "Ending of FILE_GetDirectoryFilesRecursively\n";
   return ListFile;
 }
 
@@ -411,7 +409,6 @@ std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
 bool FILE_CheckPrefix(std::string const &ePrefix) {
   size_t len = ePrefix.size();
   std::string LastChar = ePrefix.substr(len - 1, 1);
-  //  std::cerr << "LastChar=" << LastChar << "\n";
   if (LastChar == "/")
     return true;
   return false;
@@ -440,7 +437,6 @@ bool FILE_IsFileMakeable(std::string const &eFile) {
 }
 
 void CreateDirectory(std::string const &eDir) {
-  //  std::cerr << "eDir=" << eDir << "\n";
   const char *dir = eDir.c_str();
   char tmp[256];
   char *p = NULL;
@@ -452,11 +448,9 @@ void CreateDirectory(std::string const &eDir) {
   for (p = tmp + 1; *p; p++)
     if (*p == '/') {
       *p = 0;
-      //      std::cerr << "Before mkdir, tmp=" << tmp << "\n";
       mkdir(tmp, S_IRWXU);
       *p = '/';
     }
-  //  std::cerr << "Before mkdir, tmp=" << tmp << "\n";
   mkdir(tmp, S_IRWXU);
 }
 

@@ -131,7 +131,6 @@ public:
   //
   friend Rational<Tint> operator+(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
-    //    std::cerr << "operator+ 2\n";
     Rational<Tint> z;
     Tint gcd = Rational<Tint>::comp_gcd(x.den, y.den);
     z.den = y.den * x.den / gcd;

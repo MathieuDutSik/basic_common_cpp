@@ -184,7 +184,6 @@ void WriteGCD_int(std::ostream &os, GCD_int<T> const &eGCD) {
 template <typename T>
 inline typename std::enable_if<!is_mpz_class<T>::value, GCD_int<T>>::type
 ComputePairGcd(T const &m, T const &n) {
-  //  std::cerr << "m=" << m << " n=" << n << "\n";
   static_assert(is_euclidean_domain<T>::value,
                 "Requires T to be an Euclidean domain in ComputePairGcd");
   T f, g, h, fm, gm, hm, q;
@@ -209,7 +208,6 @@ ComputePairGcd(T const &m, T const &n) {
   }
   while (g != 0) {
     q = QuoInt(f, g);
-    //    std::cerr << "f=" << f << " g=" << g << " q=" << q << "\n";
     h = g;
     hm = gm;
     g = f - q * g;
@@ -225,15 +223,11 @@ ComputePairGcd(T const &m, T const &n) {
     eCoeff1 = fm;
     eCoeff2 = (f - fm * m) / n;
   }
-  //  std::cerr << "eCoeff1=" << eCoeff1 << " eCoeff2=" << eCoeff2 << " f=" << f
-  //  << "\n";
   MyMatrix<T> Pmat(2, 2);
   Pmat(0, 0) = eCoeff1;
   Pmat(1, 0) = eCoeff2;
   Pmat(0, 1) = -n / f;
   Pmat(1, 1) = m / f;
-  //  std::cerr << "Pmat=\n";
-  //  WriteMatrix(std::cerr, Pmat);
 #ifdef SANITY_CHECK_MATRIX_INT
   T diff1 = f - Pmat(0, 0) * m - Pmat(1, 0) * n;
   T diff2 = Pmat(0, 1) * m + Pmat(1, 1) * n;
@@ -259,7 +253,6 @@ ComputePairGcd(T const &m, T const &n) {
   mpz_class s, t;
   mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), m.get_mpz_t(),
              n.get_mpz_t());
-  //  std::cerr << "n=" << n << " m=" << m << " eGCD=" << eGCD << "\n";
   MyMatrix<T> Pmat(2, 2);
   Pmat(0, 0) = s;
   Pmat(1, 0) = t;
@@ -1114,8 +1107,6 @@ bool IsColumnNonEmpty(MyMatrix<T> const &eMat, int const &minAllowed,
 template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
   static_assert(is_euclidean_domain<T>::value,
                 "Requires T to be an Euclidean domain in NullspaceIntTrMat");
-  //  std::cerr << "eMat=\n";
-  //  WriteMatrixNice(std::cerr, eMat);
   auto INT_ClearColumn = [](MyMatrix<T> &eMat, size_t const &iCol,
                             size_t const &MinAllowedRow,
                             size_t &iRowFound) -> void {
@@ -1151,8 +1142,6 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
         if (iRow != iRowFound) {
           T eVal = eMat(iRow, iCol);
           T TheQ = QuoInt(eVal, ThePivot);
-          //          std::cerr << "eVal=" << eVal << " ThePivot=" << ThePivot
-          //          << " TheQ=" << TheQ << "\n";
           if (TheQ != 0)
             eMat.row(iRow) -= TheQ * eMat.row(iRowFound);
         }
@@ -1187,10 +1176,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
     } else {
       ListNonIndex.push_back(iCol);
     }
-  //  std::cerr << "eMatW=\n";
-  //  WriteMatrixNice(std::cerr, eMatW);
   size_t dimSpace = ListNonIndex.size();
-  //  std::cerr << "dimSpace=" << dimSpace << "\n";
   std::vector<std::vector<T>> TheBasis;
   for (size_t i = 0; i < dimSpace; i++) {
     std::vector<T> eVect;
@@ -2102,6 +2088,7 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
     if (IsFinished)
       break;
   }
+#ifdef SANITY_CHECK_MATRIX_INT
   T det = T_abs(DeterminantMat(M));
   T n_class = ListClasses.size();
   if (det != n_class) {
@@ -2111,6 +2098,7 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
     std::cerr << "This ought to be considered a bug\n";
     throw TerminalException{1};
   }
+#endif
   return ListClasses;
 }
 
@@ -2188,15 +2176,12 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   std::vector<int> eSet;
   auto fGetOneBasis = [&](MyVector<T> const &eSol) -> MyMatrix<T> {
     int DimLoc = TheBasis.rows();
-    //    std::cerr << "DimLoc=" << DimLoc << " |eSol|=" << eSol.size() << "\n";
     MyMatrix<T> TheRedMat = ZeroMatrix<T>(DimLoc + 1, DimLoc);
     for (int i = 0; i < DimLoc; i++)
       TheRedMat(i, i) = 1;
     for (int i = 0; i < DimLoc; i++)
       TheRedMat(DimLoc, i) = eSol(i);
-    //    std::cerr << "After TheRedMat construction\n";
     MyMatrix<T> NSP = NullspaceIntMat(TheRedMat);
-    //    std::cerr << "We have NSP\n";
 #ifdef SANITY_CHECK_MATRIX_INT
     if (NSP.rows() != 1) {
       std::cerr << "|NSP|=" << NSP.rows() << " when it should be 1\n";
@@ -2257,18 +2242,14 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
       ListEqua = IdentityMat<T>(TheDim);
       eSet = {};
     } else {
-      /*      std::cerr << "TheBasis=\n";
-              WriteMatrix(std::cerr, TheBasis);*/
       ListEqua = NullspaceTrMat(TheBasis);
       eSet = ColumnReductionSet(TheBasis);
-      //      std::cerr << "|eSet|=" << eSet.size() << "\n";
       InvMatrix = Inverse(SelectColumn(TheBasis, eSet));
       InvMatrixTr = InvMatrix.transpose();
     }
   };
   auto IsInSpace = [&](MyVector<T> const &eElt) -> bool {
     int nbEqua = ListEqua.rows();
-    //    std::cerr << "nbEqua=" << nbEqua << "\n";
     for (int iEqua = 0; iEqua < nbEqua; iEqua++) {
       T eSum = 0;
       for (int i = 0; i < TheDim; i++)
@@ -2280,7 +2261,6 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   };
   auto fInsert = [&](MyVector<T> const &eElt) -> void {
     bool test = IsInSpace(eElt);
-    //    std::cerr << "test=" << test << "\n";
     if (!test) {
       TheBasis = ConcatenateMatVec(TheBasis, eElt);
       fComputeSpeed();

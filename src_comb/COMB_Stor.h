@@ -138,8 +138,6 @@ public:
   }
   bool empty() const {
     Tint Maxp1 = MaxElement + 1;
-    //    std::cerr << "MaxElement=" << MaxElement << " Maxp1=" << Maxp1 << "
-    //    ListNext[]=" << ListNext[MaxElement] << "\n";
     if (ListNext[MaxElement] == Maxp1)
       return true;
     return false;

@@ -79,7 +79,6 @@ ComputePairGcdDot(T const &m, T const &n) {
   }
   while (g != 0) {
     q = QuoInt(f, g);
-    //    std::cerr << "f=" << f << " g=" << g << " q=" << q << "\n";
     h = g;
     hm = gm;
     g = f - q * g;

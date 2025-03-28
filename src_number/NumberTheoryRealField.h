@@ -330,8 +330,6 @@ std::map<int, HelperClassRealField<Trat_real_field>> list_helper;
 
 void insert_helper_real_algebraic_field(
     int i_field, HelperClassRealField<Trat_real_field> const &hcrf) {
-  //  std::cerr << "insert_helper deg=" << hcrf.deg << " |ExprXdeg|=" <<
-  //  hcrf.ExprXdeg.size() << "\n";
   list_helper.emplace(i_field, hcrf);
 }
 

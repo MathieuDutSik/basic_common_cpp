@@ -10,19 +10,12 @@
 #include <vector>
 
 std::string STRING_GETENV(std::string const &eStr) {
-  //  std::string ePrefixAlti;
-  //  std::cerr << "STRING_GETENV, step 1\n";
-  //  char eStrEnvVar[]="ALTIMETER_DIRECTORY";
-  //  std::cerr << "STRING_GETENV, step 2\n";
   char *ePre = std::getenv(eStr.c_str());
-  //  std::cerr << "STRING_GETENV, step 3\n";
   if (ePre == NULL) {
     std::cerr << "Error in reading the environment variable : " << eStr << "\n";
     throw TerminalException{1};
   }
-  //  std::cerr << "ePre=" << (void*)ePre << "\n";
   std::string eStrRet = ePre;
-  //  std::cerr << "STRING_GETENV, step 4\n";
   return eStrRet;
 }
 
@@ -264,7 +257,6 @@ void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F f) {
     return;
   }
   size_t lenB = eStrB.length();
-  //  std::cerr << "lenA=" << lenA << " lenB=" << lenB << "\n";
   std::vector<int> ListStatus(lenA, 1);
   if (lenA >= lenB) {
     for (size_t iA = 0; iA <= lenA - lenB; iA++)
@@ -479,7 +471,6 @@ std::vector<std::string> STRING_SplitCharNb(std::string const &str) {
       }
     }
   }
-  //  std::cerr << "TotStr=" << TotStr << "\n";
   return STRING_Split(TotStr, "WRK");
 }
 

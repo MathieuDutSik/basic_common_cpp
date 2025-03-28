@@ -178,8 +178,6 @@ Padic<T> Padic_from_positive_integer(T const &val, T const &p) {
   // We have a full integer as start so we have infinite precision.
   size_t precision = std::numeric_limits<size_t>::max();
   Padic<T> x{eff_valuation, precision, coefficients};
-  //  std::cerr << "Padic_from_integer : ";
-  //  Padic_debug_print(x, std::cerr);
   return x;
 }
 

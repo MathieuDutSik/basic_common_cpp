@@ -243,13 +243,11 @@ template <typename T> MyMatrix<T> ReadMatrix(std::istream &is) {
   T eVal;
   int nbRow, nbCol;
   is >> nbRow >> nbCol;
-  //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   if (nbRow < 0 || nbCol < 0) {
     std::cerr << "We should have nbRow > 0 and nbCol > 0\n";
     std::cerr << "But we have nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
     throw TerminalException{1};
   }
-  // std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
   MyMatrix<T> TheMat(nbRow, nbCol);
   for (int iRow = 0; iRow < nbRow; iRow++)
     for (int iCol = 0; iCol < nbCol; iCol++) {
@@ -419,7 +417,6 @@ template <typename T> MyVector<T> ReadVector(std::istream &is) {
   T eVal;
   size_t nbRow;
   is >> nbRow;
-  //  std::cerr << "nbRow=" << nbRow << "\n";
   MyVector<T> eVect = MyVector<T>(nbRow);
   for (size_t iRow = 0; iRow < nbRow; iRow++) {
     is >> eVal;
@@ -1786,10 +1783,6 @@ NullspaceTrMat(MyMatrix<T> const &Input) {
   }
   // CODE INCOMPLETE BELOW. SOMETHING IS NEEDED.
   size_t nbVectZero = nbCol - eRank;
-  //  std::cerr << "eRank=" << eRank << " nbVectZero=" << nbVectZero << "\n";
-  //  std::cerr << "provMat=\n";
-  //  WriteMatrixGAP(std::cerr, provMat);
-  //  std::cerr << "\n";
   MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, nbCol);
   size_t nbVect = 0;
   for (size_t iCol = 0; iCol < nbCol; iCol++)
@@ -2144,17 +2137,11 @@ public:
   }
   std::optional<MyVector<T>> GetSolution(MyVector<T> const &eVect) {
     int siz = ListColSelect.size();
-    //    std::cerr << "siz=" << siz << "\n";
     MyVector<T> V(siz);
     for (int u = 0; u < siz; u++) {
-      //      std::cerr << "u=" << u << " ColSelect=" << ListColSelect[u] <<
-      //      "\n";
       V(u) = eVect(ListColSelect[u]);
     }
-    //    std::cerr << "InvMat=\n";
-    //    WriteMatrix(std::cerr, InvMat);
     MyVector<T> MySol = InvMat.transpose() * V;
-    //    std::cerr << "We have MySol\n";
     if (TheBasis.transpose() * MySol != eVect) {
       return {};
     }
@@ -2299,25 +2286,19 @@ bool TestEqualitySpannedSpaces(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
     throw TerminalException{1};
   }
 #endif
-  //  std::cerr << "TestEqualitySpannedSpaces, step 1\n";
   // We make the assumption that the input is valid, that is
   // that the number of rows is equal to the rank.
   if (M1.rows() != M2.rows()) {
     return false;
   }
-  //  std::cerr << "TestEqualitySpannedSpaces, step 1\n";
   SolutionMatRepetitive<T> smr(M1);
-  //  std::cerr << "TestEqualitySpannedSpaces, step 2\n";
   for (int irow = 0; irow < M2.rows(); irow++) {
     MyVector<T> V2 = GetMatrixRow(M2, irow);
-    //    std::cerr << "Before GetSolution irow=" << irow << "\n";
     std::optional<MyVector<T>> opt = smr.GetSolution(V2);
-    //    std::cerr << "After GetSolution\n";
     if (!opt) {
       return false;
     }
   }
-  //  std::cerr << "TestEqualitySpannedSpaces, step 3\n";
   return true;
 }
 
@@ -2504,8 +2485,6 @@ MyMatrix<T> ConcatenateMatVec(MyMatrix<T> const &M, MyVector<T> const &V) {
       throw TerminalException{1};
     }
   }
-  //  std::cerr << "M(rows/cols)=" << M.rows() << "/" << M.cols() << "\n";
-  //  std::cerr << "V(size)=" << V.size() << "\n";
   MyMatrix<T> Mret(nbRow + 1, nbCol);
   for (int iCol = 0; iCol < nbCol; iCol++)
     for (int iRow = 0; iRow < nbRow; iRow++)
@@ -2546,8 +2525,6 @@ template <typename T> MySparseMatrix<T> ReadSparseMatrix(std::istream &is) {
   int nbRow, nbCol, nnz;
   int iRow, iCol;
   is >> nbRow >> nbCol >> nnz;
-  //  std::cerr << "nbRow=" << nbRow << " nbCol=" << nbCol << " nnz=" << nnz <<
-  //  "\n";
   using T2 = Eigen::Triplet<T>;
   std::vector<T2> tripletList(nnz);
   for (int iNNZ = 0; iNNZ < nnz; iNNZ++) {
@@ -2566,13 +2543,8 @@ template <typename T> MySparseMatrix<T> ReadSparseMatrix(std::istream &is) {
       throw TerminalException{1};
     }
   }
-  //  std::cerr << "After the tripletList assignment\n";
   MySparseMatrix<T> SpMat(nbRow, nbCol);
-  //  std::cerr << "Creation of the sparse matrix\n";
   SpMat.setFromTriplets(tripletList.begin(), tripletList.end());
-  //  std::cerr << "After the setFromTriplets\n";
-  //  std::cerr << "(rows/cols)SpMat = " << SpMat.rows() << " / " <<
-  //  SpMat.cols() << "\n";
   return SpMat;
 }
 
@@ -3472,9 +3444,7 @@ MyMatrix<T> GetProjectionMatrix(MyMatrix<T> const &G,
     std::cerr << "The matrix Gred should be invertible\n";
     throw TerminalException{1};
   }
-  //  std::cerr << "We have Gred\n";
   MyMatrix<T> RetMat = Basis.transpose() * Inverse(Gred) * Basis * G;
-  //  std::cerr << "We have RetMat\n";
   return RetMat;
 }
 

@@ -356,8 +356,6 @@ GetDenominator_z([[maybe_unused]] boost::multiprecision::mpz_int const &x) {
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
-  //  std::cerr << "Missing code, write here\n";
-  //  throw TerminalException{1};
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             int &a2) {
@@ -379,8 +377,6 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
-  //  std::cerr << "Missing code, write here\n";
-  //  throw TerminalException{1};
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             boost::multiprecision::mpz_int &a2) {

@@ -47,7 +47,6 @@ coor IsobarycenterPoint(std::vector<coor> const &ListPt) {
 
 coor RotateCoor(coor const &c, double const &eAngDeg) {
   double eAngRad = eAngDeg * (M_PI / static_cast<double>(180));
-  //  std::cerr << "eAngRad=" << eAngRad << "\n";
   double eCos = cos(eAngRad);
   double eSin = sin(eAngRad);
   double cX = c.x * eCos - c.y * eSin;

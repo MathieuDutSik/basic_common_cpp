@@ -427,10 +427,8 @@ template <typename T1, typename T2> T1 ScalingInteger(T2 const &a) {
 //
 
 void NearestInteger_double_int(double const &xI, int &xO) {
-  //  std::cerr << "Temp_common : NearestInteger\n";
   double xRnd_d = round(xI);
   int xRnd_z = static_cast<int>(xRnd_d);
-  //  std::cerr << "xI=" << xI << "\n";
   auto GetErr = [&](int const &u) -> double {
     double diff = static_cast<double>(u) - xI;
     if (diff < 0)
@@ -438,15 +436,12 @@ void NearestInteger_double_int(double const &xI, int &xO) {
     return diff;
   };
   double err = GetErr(xRnd_z);
-  //  std::cerr << "err=" << err << "\n";
   while (true) {
     bool IsOK = true;
     for (int i = 0; i < 2; i++) {
       int shift = 2 * i - 1;
       int xTest = xRnd_z + shift;
       double TheErr = GetErr(xTest);
-      //      std::cerr << "i=" << i << " shift=" << shift << " xTest=" << xTest
-      //      << " TheErr=" << TheErr << "\n";
       if (TheErr < err) {
         IsOK = false;
         xRnd_z = xTest;
@@ -459,11 +454,9 @@ void NearestInteger_double_int(double const &xI, int &xO) {
 }
 
 template <typename To> void NearestInteger_double_To(double const &xI, To &xO) {
-  //  std::cerr << "Temp_common : NearestInteger\n";
   double xRnd_d = round(xI);
   int xRnd_i = static_cast<int>(xRnd_d);
   To xRnd_To = xRnd_i;
-  //  std::cerr << "xI=" << xI << "\n";
   auto GetErr = [&](To const &u) -> double {
     double u_doubl = UniversalScalarConversion<double, To>(u);
     double diff = u_doubl - xI;
@@ -472,15 +465,12 @@ template <typename To> void NearestInteger_double_To(double const &xI, To &xO) {
     return diff;
   };
   double err = GetErr(xRnd_To);
-  //  std::cerr << "err=" << err << "\n";
   while (true) {
     bool IsOK = true;
     for (int i = 0; i < 2; i++) {
       int shift = 2 * i - 1;
       To xTest = xRnd_To + shift;
       double TheErr = GetErr(xTest);
-      //      std::cerr << "i=" << i << " shift=" << shift << " xTest=" << xTest
-      //      << " TheErr=" << TheErr << "\n";
       if (TheErr < err) {
         IsOK = false;
         xRnd_To = xTest;
