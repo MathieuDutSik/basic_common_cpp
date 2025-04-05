@@ -515,6 +515,19 @@ struct LimitedEmpiricalDistributionFunction {
               << " len=" << len << "\n";
 #endif
   }
+  void check_ordering(std::string const& context) const {
+    size_t len = ListValWei.size();
+    for (size_t u=0; u<len-1; u++) {
+      double val1 = ListValWei[u].first;
+      double val2 = ListValWei[u+1].first;
+      double delta = val2 - val1;
+      if (delta < 0) {
+        std::cerr << "LEDF: Incoherence at u=" << u << " in context=" << context << "\n";
+        std::cerr << "LEDF: val1=" << val1 << " val2=" << val2 << " delta=" << delta << "\n";
+        throw TerminalException{1};
+      }
+    }
+  }
   void insert_value(double new_val) {
 #ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: ledf, insert_value new_val=" << new_val
@@ -544,6 +557,7 @@ struct LimitedEmpiricalDistributionFunction {
       ListValWei.push_back(pair);
     };
     f_insert();
+    check_ordering("After f_insert");
     size_t n_total = 0;
     for (auto &kv : ListValWei)
       n_total += kv.second;
@@ -557,6 +571,7 @@ struct LimitedEmpiricalDistributionFunction {
       std::cerr << "LEDF: Before clear_entry\n";
 #endif
       clear_entry();
+      check_ordering("After clear_entry");
     }
   }
   double get_average() const {
