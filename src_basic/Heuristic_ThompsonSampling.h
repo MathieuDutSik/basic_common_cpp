@@ -522,6 +522,7 @@ struct LimitedEmpiricalDistributionFunction {
               << " len=" << len << "\n";
 #endif
   }
+#ifdef SANITY_CHECK_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
   void check_ordering(std::string const& context) const {
     size_t len = ListValWei.size();
     for (size_t u=0; u<len-1; u++) {
@@ -535,6 +536,7 @@ struct LimitedEmpiricalDistributionFunction {
       }
     }
   }
+#endif
   void insert_value(double new_val) {
 #ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: ledf, insert_value new_val=" << new_val
@@ -564,7 +566,9 @@ struct LimitedEmpiricalDistributionFunction {
       ListValWei.push_back(pair);
     };
     f_insert();
+#ifdef SANITY_CHECK_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     check_ordering("After f_insert");
+#endif
     size_t n_total = 0;
     for (auto &kv : ListValWei)
       n_total += kv.second;
@@ -578,7 +582,9 @@ struct LimitedEmpiricalDistributionFunction {
       std::cerr << "LEDF: Before clear_entry\n";
 #endif
       clear_entry();
+#ifdef SANITY_CHECK_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
       check_ordering("After clear_entry");
+#endif
     }
   }
   double get_average() const {
