@@ -668,6 +668,12 @@ struct LimitedEmpiricalDistributionFunction {
             if (0 <= y2 && y2 <= delta) {
               return val1 + y2;
             }
+            std::cerr << "LEDF: n_max=" << n_max << " n_ins=" << n_ins << "\n";
+            for (size_t v = 0; v < len; v++) {
+              std::cerr << "LEDF: v=" << v << " ListValWei[v]=" << ListValWei[v].first << " / " << ListValWei[v].second << "\n";
+            }
+            std::cerr << "LEDF: alpha=" << alpha << "\n";
+            std::cerr << "LEDF: u=" << u << " len=" << len << "\n";
             std::cerr << "LEDF: TheVal=" << TheVal << " weight=" << weight << "\n";
             std::cerr << "LEDF: val1=" << val1 << " val2=" << val2 << "\n";
             std::cerr << "LEDF: w1=" << w1 << " w2=" << w2 << "\n";
