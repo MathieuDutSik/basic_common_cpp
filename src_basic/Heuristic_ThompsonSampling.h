@@ -496,11 +496,18 @@ struct LimitedEmpiricalDistributionFunction {
     std::cerr << "LEDF: clear_entry, pos_found=" << pos_found
               << " min_delta=" << min_delta << "\n";
 #endif
+    auto f_d = [](size_t const &u) -> double {
+      return static_cast<double>(u);
+    };
     double val1 = ListValWei[pos_found].first;
     double val2 = ListValWei[pos_found + 1].first;
+    double delta = val2 - val1;
     size_t w1 = ListValWei[pos_found].second;
     size_t w2 = ListValWei[pos_found + 1].second;
-    double new_val = (val1 * w1 + val2 * w2) / (w1 + w2);
+    double frac = f_d(w2) / f_d(w1 + w2);
+    // The formula (val1 * w1 + val2 * w2) / (w1 + w2)
+    // seems numerically unstable.
+    double new_val = val1 + delta * frac;
     size_t new_w = w1 + w2;
 #ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: clear_entry w1=" << w1 << " w2=" << w2
