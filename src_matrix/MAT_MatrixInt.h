@@ -1058,6 +1058,14 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
 template <typename T>
 MyMatrix<T> SubspaceCompletionInt(MyMatrix<T> const &M, int const &n) {
   int nbRow = M.rows();
+#ifdef DEBUG_MATRIX_INT
+  if (nbRow > 0) {
+    if (M.cols() != n) {
+      std::cerr << "MAT_INT: We should have M.cols() = n\n";
+      throw TerminalException{1};
+    }
+  }
+#endif
   //  int nbCol = M.cols();
   if (nbRow == 0)
     return IdentityMat<T>(n);
