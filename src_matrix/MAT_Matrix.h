@@ -3067,7 +3067,13 @@ RemoveFractionVector(MyVector<T> const &V) {
 template <typename T, typename Tint>
 T EvaluationQuadForm(MyMatrix<T> const &eMat, MyVector<Tint> const &eVect) {
   size_t n = eVect.size();
-  T eSum = 0;
+#ifdef SANITY_CHECK_MAT_MATRIX
+  if (eMat.rows() != eVect.size() || eMat.cols() != eVect.size()) {
+    std::cerr << "MAT: We should have eMat a square matrix of size n x n with n the length of eVect\n";
+    throw TerminalException{1};
+  }
+#endif
+  T eSum(0);
   for (size_t i = 0; i < n; i++)
     for (size_t j = 0; j < n; j++)
       eSum += eVect(i) * eVect(j) * eMat(i, j);
