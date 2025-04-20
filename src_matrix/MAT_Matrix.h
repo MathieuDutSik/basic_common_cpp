@@ -1694,7 +1694,7 @@ MyMatrix<T> DominantKernel(MyMatrix<T> const &M, int const &k) {
   Eigen::SelfAdjointEigenSolver<MyMatrix<T>> eig(Mprod);
   MyVector<T> ListEig = eig.eigenvalues();
   MyMatrix<T> ListVect = eig.eigenvectors();
-#ifdef DEBUG
+#ifdef DEBUG_MAT_MATRIX
   for (int i = 1; i < dim_rel; i++) {
     if (ListEig(i - 1) > ListEig(i)) {
       std::cerr << "ListEig(i-1)=" << ListEig(i - 1)
@@ -1709,7 +1709,7 @@ MyMatrix<T> DominantKernel(MyMatrix<T> const &M, int const &k) {
       NSP(u, i) = ListVect(i, u);
     }
   }
-#ifdef DEBUG
+#ifdef DEBUG_MAT_MATRIX
   MyMatrix<T> prod = NSP * M;
   T error = L1_norm_mat(prod);
   if (error > 0.1) {

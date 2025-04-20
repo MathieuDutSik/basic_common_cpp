@@ -10,6 +10,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef TIMINGS
+#define TIMINGS_TRACES
+#endif
+
 struct DataTraces {
 public:
   size_t n;
@@ -116,7 +120,7 @@ TRACES_GetCanonicalOrdering_Arr(DataTraces &DT,
                                 [[maybe_unused]] std::ostream &os) {
   size_t n = DT.n;
   TRACES_LimitCheck<Tidx>(n);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
@@ -129,7 +133,7 @@ TRACES_GetCanonicalOrdering_Arr(DataTraces &DT,
   std::vector<Tidx> V(n);
   for (size_t i = 0; i < n; i++)
     V[DT.lab1[i]] = Tidx(i);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetCanonicalOrdering_Arr|=" << time << "\n";
 #endif
   return V;
@@ -208,7 +212,7 @@ std::vector<Tidx>
 TRACES_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream &os) {
   size_t n = eGR.GetNbVert();
   TRACES_LimitCheck<Tidx>(n);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   DYNALLSTAT(int, lab1, lab1_sz);
@@ -255,7 +259,7 @@ TRACES_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream &os) {
   DYNFREE(orbits, orbits_sz);
   SG_FREE(sg1);
   SG_FREE(cg1);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetCanonicalOrdering|=" << time << "\n";
 #endif
   return V;
@@ -274,7 +278,7 @@ std::vector<std::vector<Tidx>>
 TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
                              [[maybe_unused]] std::ostream &os) {
   TRACES_LimitCheck<Tidx>(n_last);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
@@ -303,7 +307,7 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
   }
   freeschreier(NULL, &gens);
   schreier_freedyn();
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetListGenerators_Arr|=" << time << "\n";
 #endif
   return ListGen;
@@ -330,7 +334,7 @@ std::vector<std::vector<Tidx>>
 TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
                          [[maybe_unused]] std::ostream &os) {
   TRACES_LimitCheck<Tidx>(n_last);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   DYNALLSTAT(int, lab1, lab1_sz);
@@ -388,7 +392,7 @@ TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
   DYNFREE(ptn, ptn_sz);
   DYNFREE(orbits, orbits_sz);
   SG_FREE(sg1);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetListGenerators|=" << time << "\n";
 #endif
   return ListGen;
@@ -411,7 +415,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(
   size_t n = size_t(DT.n);
   TRACES_LimitCheck<TidxC>(n);
   TRACES_LimitCheck<TidxG>(n_last);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
@@ -432,7 +436,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(
   ReadListGen(gens, ListGen, n_last);
   freeschreier(NULL, &gens);
   schreier_freedyn();
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
@@ -445,7 +449,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last,
   size_t n = eGR.GetNbVert();
   TRACES_LimitCheck<TidxC>(n);
   TRACES_LimitCheck<TidxG>(n_last);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   DYNALLSTAT(int, lab1, lab1_sz);
@@ -525,7 +529,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last,
   DYNFREE(orbits, orbits_sz);
   SG_FREE(sg1);
   SG_FREE(cg1);
-#ifdef TIMINGS
+#ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetCanonicalOrdering_ListGenerators|=" << time << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
