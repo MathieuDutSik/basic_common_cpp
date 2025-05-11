@@ -889,6 +889,23 @@ MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const &M) {
   return H;
 }
 
+
+template<typename T>
+void flip_rows(MyMatrix<T>& M, int row1, int row2) {
+  int nbCol = M.cols();
+  for (int iCol=0; iCol<nbCol; iCol++) {
+    std::swap(M(row1,iCol), M(row2,iCol));
+  }
+}
+
+template<typename T>
+void flip_cols(MyMatrix<T>& M, int col1, int col2) {
+  int nbRow = M.rows();
+  for (int iRow=0; iRow<nbRow; iRow++) {
+    std::swap(M(iRow,col1), M(iRow, col2));
+  }
+}
+
 /*
   Smith Normal form is needed for a number of applications.
   We apply here a fairly naive algorithm by acting on rows and columns.
@@ -897,39 +914,12 @@ MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const &M) {
   ---
   Action on rows correspond to multiplying on the left (by A)
   Action on columns correspond to multiplying on the right (by B)
-
-
-
-
-
  */
-template <typename T>
-std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
+template <typename T, typename Frow_oper, typename Frow_flip, typename Fcol_oper, typename Fcol_flip>
+MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper, Frow_flip f_row_flip, Fcol_oper f_col_oper, Fcol_flip f_col_flip) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   MyMatrix<T> H = M;
-  MyMatrix<T> ROW = IdentityMat<T>(nbRow);
-  MyMatrix<T> COL = IdentityMat<T>(nbCol);
-#ifdef SANITY_CHECK_MATRIX_INT
-  auto check_consistency = [&](std::string const &mesg) -> void {
-    MyMatrix<T> eProd = ROW * M * COL;
-    if (eProd != H) {
-      std::cerr << "ROW=\n";
-      WriteMatrix(std::cerr, ROW);
-      std::cerr << "COL=\n";
-      WriteMatrix(std::cerr, COL);
-      std::cerr << "M=\n";
-      WriteMatrix(std::cerr, M);
-      std::cerr << "eProd=\n";
-      WriteMatrix(std::cerr, eProd);
-      std::cerr << "H=\n";
-      WriteMatrix(std::cerr, H);
-      std::cerr << "Error at stage mesg=" << mesg << "\n";
-      throw TerminalException{1};
-    }
-  };
-  std::string mesg;
-#endif
   int posDone = 0;
   while (true) {
     struct choice {
@@ -952,8 +942,9 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
         }
       }
     }
-    if (!opt)
+    if (!opt) {
       break;
+    }
     int iRowF = opt->iRow;
     int iColF = opt->iCol;
     T ThePivot = H(iRowF, iColF);
@@ -964,14 +955,7 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
         if (eVal != 0) {
           T TheQ = QuoInt(eVal, ThePivot);
           H.row(iRow) -= TheQ * H.row(iRowF);
-          ROW.row(iRow) -= TheQ * ROW.row(iRowF);
-#ifdef SANITY_CHECK_MATRIX_INT
-          mesg = "1 : Error_at iRowF=" + std::to_string(iRowF) +
-                 " iColF=" + std::to_string(iColF) +
-                 " iRpw=" + std::to_string(iRow) +
-                 " TheQ=" + std::to_string(TheQ);
-          check_consistency(mesg);
-#endif
+          f_row_oper(iRow, iRowF, TheQ);
           if (H(iRow, iColF) != 0)
             NonZeroResidue = true;
         }
@@ -983,49 +967,75 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
         if (eVal != 0) {
           T TheQ = QuoInt(eVal, ThePivot);
           H.col(iCol) -= TheQ * H.col(iColF);
-          COL.col(iCol) -= TheQ * COL.col(iColF);
-#ifdef SANITY_CHECK_MATRIX_INT
-          mesg = "2 : Error_at iRowF=" + std::to_string(iRowF) +
-                 " iColF=" + std::to_string(iColF) +
-                 " iCol=" + std::to_string(iCol) +
-                 " TheQ=" + std::to_string(TheQ);
-          check_consistency(mesg);
-#endif
-          if (H(iRowF, iCol) != 0)
+          f_col_oper(iCol, iColF, TheQ);
+          if (H(iRowF, iCol) != 0) {
             NonZeroResidue = true;
+          }
         }
       }
     }
     if (!NonZeroResidue) {
       if (iRowF != posDone) {
-        MyMatrix<T> Trans = TranspositionMatrix<T>(nbRow, posDone, iRowF);
-        ROW = Trans * ROW;
-        H = Trans * H;
-#ifdef SANITY_CHECK_MATRIX_INT
-        mesg = "3 : Error_at iRowF=" + std::to_string(iRowF) +
-               " posDone=" + std::to_string(posDone);
-        check_consistency(mesg);
-#endif
+        f_row_flip(posDone, iRowF);
+        flip_rows(H, posDone, iRowF);
       }
       if (iColF != posDone) {
-        MyMatrix<T> Trans = TranspositionMatrix<T>(nbCol, posDone, iColF);
-        COL = COL * Trans;
-        H = H * Trans;
-#ifdef SANITY_CHECK_MATRIX_INT
-        mesg = "4 : Error_at iColF=" + std::to_string(iColF) +
-               " posDone=" + std::to_string(posDone);
-        check_consistency(mesg);
-#endif
+        f_col_flip(posDone, iColF);
+        flip_cols(H, posDone, iColF);
       }
       T CanUnit = CanonicalizationUnit(H(posDone, posDone));
       if (CanUnit != 1) {
-        ROW.row(posDone) = CanUnit * ROW.row(posDone);
+        f_row_oper(posDone, posDone, 1 - CanUnit);
         H.row(posDone) = CanUnit * H.row(posDone);
       }
       posDone++;
     }
   }
-#ifdef DEBUG_MATRIX_INT
+  return H;
+}
+
+template<typename T>
+MyVector<T> GetDiagonalInvariant(MyMatrix<T> const& M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  int minDim = nbRow;
+  if (nbCol < nbRow) {
+    minDim = nbCol;
+  }
+  MyVector<T> VectInv(minDim);
+  for (int i=0; i<minDim; i++) {
+    VectInv(i) = M(i,i);
+  }
+  return VectInv;
+}
+
+template<typename T>
+struct ResultSmithNormalForm {
+  MyMatrix<T> ROW;
+  MyMatrix<T> COL;
+  MyVector<T> Invariant;
+};
+
+template<typename T>
+ResultSmithNormalForm<T> SmithNormalForm(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  MyMatrix<T> ROW = IdentityMat<T>(nbRow);
+  MyMatrix<T> COL = IdentityMat<T>(nbCol);
+  auto f_row_oper=[&](int row1, int row2, T val) -> void {
+    ROW.row(row1) -= val * ROW.row(row2);
+  };
+  auto f_row_flip=[&](int row1, int row2) -> void {
+    flip_rows(ROW, row1, row2);
+  };
+  auto f_col_oper=[&](int col1, int col2, T val) -> void {
+    COL.col(col1) -= val * COL.col(col2);
+  };
+  auto f_col_flip=[&](int col1, int col2) -> void {
+    flip_cols(COL, col1, col2);
+  };
+  MyMatrix<T> H = SmithNormalFormKernel<T, decltype(f_row_oper), decltype(f_row_flip), decltype(f_col_oper), decltype(f_col_flip)>(M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
+#ifdef SANITY_CHECK_MATRIX_INT
   MyMatrix<T> Test = ROW * M * COL;
   auto show_res = [&]() -> void {
     std::cerr << "Test=\n";
@@ -1047,24 +1057,23 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
         show_res();
     }
 #endif
-  return {ROW, COL};
+  MyVector<T> Invariant = GetDiagonalInvariant(H);
+  return {ROW, COL, Invariant};
 }
 
 template<typename T>
 MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
-  std::pair<MyMatrix<T>, MyMatrix<T>> pair = SmithNormalForm(M);
-  MyMatrix<T> RedMat = pair.first * M * pair.second;
-  int nbRow = M.rows();
-  int nbCol = M.cols();
-  int minDim = nbRow;
-  if (nbCol < nbRow) {
-    minDim = nbCol;
-  }
-  MyVector<T> VectInv(minDim);
-  for (int i=0; i<minDim; i++) {
-    VectInv(i) = RedMat(i,i);
-  }
-  return VectInv;
+  auto f_row_oper=[&]([[maybe_unused]] int row1, [[maybe_unused]] int row2, [[maybe_unused]] T val) -> void {
+  };
+  auto f_row_flip=[&]([[maybe_unused]] int row1, [[maybe_unused]] int row2) -> void {
+  };
+  auto f_col_oper=[&]([[maybe_unused]] int col1, [[maybe_unused]] int col2, [[maybe_unused]] T val) -> void {
+  };
+  auto f_col_flip=[&]([[maybe_unused]] int col1, [[maybe_unused]] int col2) -> void {
+  };
+  MyMatrix<T> H = SmithNormalFormKernel<T, decltype(f_row_oper), decltype(f_row_flip), decltype(f_col_oper), decltype(f_col_flip)>(M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
+  MyVector<T> Invariant = GetDiagonalInvariant(H);
+  return Invariant;
 }
 
 /*

@@ -17,7 +17,8 @@
 #PROGRAM		= IsotropicMatMod
 #PROGRAM		= IntersectionLattice
 #PROGRAM		= RescaleInverse
-PROGRAM		= RankMat
+#PROGRAM		= RankMat
+PROGRAM		= SmithNormalForm SmithNormalFormInvariant
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

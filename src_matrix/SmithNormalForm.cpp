@@ -11,15 +11,14 @@
 template <typename T> void process(std::string const &FileI) {
   MyMatrix<T> M = ReadMatrixFile<T>(FileI);
   // computing the Smith normal form
-  std::pair<MyMatrix<T>, MyMatrix<T>> pair = SmithNormalForm(M);
+  ResultSmithNormalForm<T> result = SmithNormalForm(M);
   std::cerr << "ROW=\n";
-  WriteMatrix(std::cerr, pair.first);
+  WriteMatrix(std::cerr, result.ROW);
   std::cerr << "COL=\n";
-  WriteMatrix(std::cerr, pair.second);
+  WriteMatrix(std::cerr, result.COL);
   //
-  MyMatrix<T> RedMat = pair.first * M * pair.second;
-  std::cerr << "RedMat=\n";
-  WriteMatrix(std::cerr, RedMat);
+  std::cerr << "Invariant=\n";
+  WriteVector(std::cerr, result.Invariant);
 }
 
 int main(int argc, char *argv[]) {
