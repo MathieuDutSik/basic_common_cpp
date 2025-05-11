@@ -5,6 +5,7 @@
 // clang-format on
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   //  using T=mpq_class;
   using T = mpz_class;
   //  using T=int;
@@ -39,4 +40,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Something wrong happened\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

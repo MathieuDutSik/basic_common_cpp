@@ -5,6 +5,7 @@
 // clang-format on
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3 && argc != 2) {
       std::cerr << "This program is used as\n";
@@ -35,7 +36,10 @@ int main(int argc, char *argv[]) {
       std::ofstream os(argv[2]);
       Prt(os);
     }
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

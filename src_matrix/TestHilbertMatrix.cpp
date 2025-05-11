@@ -26,6 +26,7 @@ template <typename T> void process(int n) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "TestHilbertMatrix is used as\n";
@@ -49,4 +50,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

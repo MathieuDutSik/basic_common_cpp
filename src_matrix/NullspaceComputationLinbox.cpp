@@ -5,6 +5,7 @@
 // clang-format off
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   using T = mpq_class;
   try {
     if (argc != 3) {
@@ -25,4 +26,5 @@ int main(int argc, char *argv[]) {
   } catch (TerminalException const &e) {
     exit(e.eVal);
   }
+  runtime(time);
 }

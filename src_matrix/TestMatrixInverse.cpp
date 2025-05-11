@@ -29,6 +29,7 @@ template <typename T> void process(int n) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "TestMatrixInverse [arith] [n]\n";
@@ -55,4 +56,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of TestMatrixInverse\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

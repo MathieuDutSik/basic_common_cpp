@@ -22,6 +22,7 @@ void process(std::string const &FileI, std::string const &FileO) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 4) {
       std::cerr << "This program is used as\n";
@@ -51,4 +52,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Something went wrong\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

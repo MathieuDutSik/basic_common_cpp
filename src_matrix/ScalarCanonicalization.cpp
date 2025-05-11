@@ -15,6 +15,7 @@ template <typename T> void process(std::string const &FileI, std::ostream &os) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "Number of argument is = " << argc << "\n";
@@ -54,4 +55,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

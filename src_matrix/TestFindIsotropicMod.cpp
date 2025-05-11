@@ -40,6 +40,7 @@ void find_isotropic(std::string const &arithmetic, std::string const &FileI) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "This program is used as\n";
@@ -49,7 +50,10 @@ int main(int argc, char *argv[]) {
     std::string arithmetic = argv[1];
     std::string FileI = argv[2];
     find_isotropic(arithmetic, FileI);
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

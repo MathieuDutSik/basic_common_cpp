@@ -17,6 +17,7 @@ template <typename T> void process(std::string const &FileI, std::ostream &os) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 4 && argc != 3) {
       std::cerr << "This program is used as\n";
@@ -53,4 +54,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Something went wrong for NullspaceIntTrMat\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

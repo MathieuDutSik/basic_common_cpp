@@ -45,6 +45,7 @@ void process() {
 
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 2) {
       std::cerr << "IntersectionLattice [arithmetic]\n";
@@ -71,4 +72,5 @@ int main(int argc, char *argv[]) {
     exit(e.eVal);
     std::cerr << "Erroneous termination of the program\n";
   }
+  runtime(time);
 }

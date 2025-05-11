@@ -18,8 +18,9 @@ template <typename T> void process(std::string const &FileI) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
-    if (argc != 2) {
+    if (argc != 3) {
       std::cerr << "This program is used as\n";
       std::cerr << "SmithNormalForm [arith] [inputMat]\n";
       return -1;
@@ -44,4 +45,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

@@ -5,6 +5,7 @@
 // clang-format off
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "This program is used as\n";
@@ -20,7 +21,10 @@ int main(int argc, char *argv[]) {
     MyMatrix<T> M2 = ReadMatrixFile<T>(File2);
     bool test = TestEqualitySpannedSpaces(M1, M2);
     std::cerr << "test=" << test << "\n";
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

@@ -70,6 +70,7 @@ void compute_determinant(std::string const &arithmetic,
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "This program is used as\n";
@@ -79,7 +80,10 @@ int main(int argc, char *argv[]) {
     std::string arithmetic = argv[1];
     std::string eFile = argv[2];
     compute_determinant(arithmetic, eFile);
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

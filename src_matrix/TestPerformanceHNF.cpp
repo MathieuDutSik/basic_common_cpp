@@ -5,6 +5,7 @@
 // clang-format on
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   //  using T=mpq_class;
   using T = mpz_class;
   //  using T=int;
@@ -30,7 +31,10 @@ int main(int argc, char *argv[]) {
       std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
           ComputeRowHermiteNormalForm(eMat);
     }
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

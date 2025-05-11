@@ -23,6 +23,7 @@ void process(std::string const& FileI) {
 
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 2) {
       std::cerr << "This program is used as\n";
@@ -45,4 +46,5 @@ int main(int argc, char *argv[]) {
     std::cerr << "Erroneous termination of RemoveFractionMatrix\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

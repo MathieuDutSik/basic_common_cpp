@@ -1095,9 +1095,9 @@ MyMatrix<T> SubspaceCompletionInt(MyMatrix<T> const &M, int const &n) {
   //  int nbCol = M.cols();
   if (nbRow == 0)
     return IdentityMat<T>(n);
-  std::pair<MyMatrix<T>, MyMatrix<T>> PairRed = SmithNormalForm(M);
-  MyMatrix<T> const &A1 = PairRed.first;
-  MyMatrix<T> const &A2 = PairRed.second;
+  ResultSmithNormalForm<T> rec = SmithNormalForm(M);
+  MyMatrix<T> const &A1 = rec.ROW;
+  MyMatrix<T> const &A2 = rec.COL;
   MyMatrix<T> TheProd = A1 * M * A2;
   for (int iRow = 0; iRow < nbRow; iRow++) {
     if (TheProd(iRow, iRow) != 1) {

@@ -57,6 +57,7 @@ void compute_rankmat(std::string const &arithmetic, std::string const &eFile) {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   try {
     if (argc != 3) {
       std::cerr << "This program is used as\n";
@@ -69,4 +70,5 @@ int main(int argc, char *argv[]) {
   } catch (TerminalException const &e) {
     exit(e.eVal);
   }
+  runtime(time);
 }

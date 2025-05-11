@@ -41,6 +41,7 @@ FullNamelist NAMELIST_GetStandardAnalysis() {
 }
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   std::cerr << std::setprecision(20);
   try {
     FullNamelist eFull = NAMELIST_GetStandardAnalysis();
@@ -171,4 +172,5 @@ int main(int argc, char *argv[]) {
   } catch (TerminalException const &e) {
     exit(e.eVal);
   }
+  runtime(time);
 }

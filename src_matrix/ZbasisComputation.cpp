@@ -5,6 +5,7 @@
 // clang-format off
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   using T = mpq_class;
   try {
     if (argc != 3) {
@@ -23,7 +24,10 @@ int main(int argc, char *argv[]) {
     os << "return ";
     WriteMatrixGAP(os, TheBasis);
     os << ";\n";
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }

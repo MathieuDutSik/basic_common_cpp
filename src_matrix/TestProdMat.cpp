@@ -6,6 +6,7 @@
 // clang-format on
 
 int main(int argc, char *argv[]) {
+  HumanTime time;
   //  using T=mpq_class;
   using T = Rational<int64_t>;
   try {
@@ -26,7 +27,10 @@ int main(int argc, char *argv[]) {
     MyMatrix<T> eProd = M1 * M2;
     std::cerr << "eProd=\n";
     WriteMatrix(std::cerr, eProd);
+    std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
+    std::cerr << "Erroneous termination of the program\n";
     exit(e.eVal);
   }
+  runtime(time);
 }
