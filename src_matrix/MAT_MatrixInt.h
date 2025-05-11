@@ -1050,6 +1050,23 @@ std::pair<MyMatrix<T>, MyMatrix<T>> SmithNormalForm(MyMatrix<T> const &M) {
   return {ROW, COL};
 }
 
+template<typename T>
+MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
+  std::pair<MyMatrix<T>, MyMatrix<T>> pair = SmithNormalForm(M);
+  MyMatrix<T> RedMat = pair.first * M * pair.second;
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  int minDim = nbRow;
+  if (nbCol < nbRow) {
+    minDim = nbCol;
+  }
+  MyVector<T> VectInv(minDim);
+  for (int i=0; i<minDim; i++) {
+    VectInv(i) = RedMat(i,i);
+  }
+  return VectInv;
+}
+
 /*
   After thinking, it would seem that we need to use the
   SmithNormalForm in order to do those SubspaceCompletionInt
