@@ -181,6 +181,7 @@ T get_key_value(std::map<std::string, T> const& map, std::string const& context,
       std::cerr << " " << kv.first;
     }
     std::cerr << "\n";
+    std::cerr << "NamelistError: key=" << key << "\n";
     throw TerminalException{1};
   }
   return map.at(key);
@@ -348,6 +349,10 @@ public:
 struct FullNamelist {
   std::map<std::string, SingleBlock> ListBlock;
   std::string FileName;
+
+  SingleBlock get_block(std::string const& key) {
+    return get_key_value(ListBlock, "ListBlock", key);
+  }
 };
 
 std::string GetNamelistStringEntry(FullNamelist const &eFull,
