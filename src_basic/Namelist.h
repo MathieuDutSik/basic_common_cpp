@@ -168,6 +168,25 @@ std::optional<std::string> get_default(std::string const &strin) {
   return strin.substr(prefix_s, n_char - prefix_s);
 }
 
+template<typename T>
+T get_key_value(std::map<std::string, T> const& map, std::string const& context, std::string const& key) {
+  if (map.count(key) == 0) {
+    std::cerr << "NamelistError: " << context << ".keys() =";
+    bool IsFirst = true;
+    for (auto & kv: map) {
+      if (!IsFirst) {
+        std::cerr << ",";
+      }
+      IsFirst = false;
+      std::cerr << " " << kv.first;
+    }
+    std::cerr << "\n";
+    throw TerminalException{1};
+  }
+  return map.at(key);
+}
+
+
 struct SingleBlock {
 public:
   std::map<std::string, int> ListIntValues;
@@ -185,6 +204,27 @@ public:
   std::map<std::string, std::string> ListStringValues_doc;
   std::map<std::string, std::string> ListListStringValues_doc;
   std::vector<std::string> ListNoDefault;
+  int get_int(std::string const& key) {
+    return get_key_value(ListIntValues, "ListIntValues", key);
+  }
+  bool get_bool(std::string const& key) {
+    return get_key_value(ListBoolValues, "ListBoolValues", key);
+  }
+  double get_double(std::string const& key) {
+    return get_key_value(ListDoubleValues, "ListDoubleValues", key);
+  }
+  std::vector<double> get_list_double(std::string const& key) {
+    return get_key_value(ListListDoubleValues, "ListListDoubleValues", key);
+  }
+  std::vector<int> get_list_int(std::string const& key) {
+    return get_key_value(ListListIntValues, "ListListIntValues", key);
+  }
+  std::string get_string(std::string const& key) {
+    return get_key_value(ListStringValues, "ListStringValues", key);
+  }
+  std::vector<std::string> get_list_string(std::string const& key) {
+    return get_key_value(ListListStringValues, "ListListStringValues", key);
+  }
   void setListIntValues(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListIntValues_doc[kv.first] = kv.second;
