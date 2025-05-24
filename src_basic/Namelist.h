@@ -205,25 +205,25 @@ public:
   std::map<std::string, std::string> ListStringValues_doc;
   std::map<std::string, std::string> ListListStringValues_doc;
   std::vector<std::string> ListNoDefault;
-  int get_int(std::string const& key) {
+  int get_int(std::string const& key) const {
     return get_key_value(ListIntValues, "ListIntValues", key);
   }
-  bool get_bool(std::string const& key) {
+  bool get_bool(std::string const& key) const {
     return get_key_value(ListBoolValues, "ListBoolValues", key);
   }
-  double get_double(std::string const& key) {
+  double get_double(std::string const& key) const {
     return get_key_value(ListDoubleValues, "ListDoubleValues", key);
   }
-  std::vector<double> get_list_double(std::string const& key) {
+  std::vector<double> get_list_double(std::string const& key) const {
     return get_key_value(ListListDoubleValues, "ListListDoubleValues", key);
   }
-  std::vector<int> get_list_int(std::string const& key) {
+  std::vector<int> get_list_int(std::string const& key) const {
     return get_key_value(ListListIntValues, "ListListIntValues", key);
   }
-  std::string get_string(std::string const& key) {
+  std::string get_string(std::string const& key) const {
     return get_key_value(ListStringValues, "ListStringValues", key);
   }
-  std::vector<std::string> get_list_string(std::string const& key) {
+  std::vector<std::string> get_list_string(std::string const& key) const {
     return get_key_value(ListListStringValues, "ListListStringValues", key);
   }
   void setListIntValues(std::map<std::string, std::string> const &m) {
@@ -350,7 +350,7 @@ struct FullNamelist {
   std::map<std::string, SingleBlock> ListBlock;
   std::string FileName;
 
-  SingleBlock get_block(std::string const& key) {
+  SingleBlock get_block(std::string const& key) const {
     return get_key_value(ListBlock, "ListBlock", key);
   }
 };
