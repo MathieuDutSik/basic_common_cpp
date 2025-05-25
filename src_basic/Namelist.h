@@ -149,6 +149,64 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
   return eListRetInt;
 }
 
+
+std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
+                                            std::string const &eChar) {
+  bool WeFound = false;
+  std::string RetStr;
+  int len = eStr.size();
+  for (int i = 0; i < len; i++) {
+    std::string fChar = eStr.substr(i, 1);
+    if (fChar == eChar)
+      WeFound = true;
+    if (!WeFound)
+      RetStr += eStr.at(i);
+  }
+  return RetStr;
+}
+
+std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
+                                         std::string const &eLastChar) {
+  int iPos = -1;
+  int len = eStr.size();
+  for (int i = 0; i < len; i++) {
+    int j = len - 1 - i;
+    if (iPos == -1) {
+      std::string eChar = eStr.substr(j, 1);
+      if (eChar == eLastChar)
+        iPos = j;
+    }
+  }
+  if (iPos == -1)
+    return eStr;
+  return eStr.substr(0, iPos);
+}
+
+std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
+  std::string eCharCommentB = "!";
+  std::string eStr3 = NAMELIST_RemoveAfterLastChar(eStr, eCharCommentB);
+  //
+  int iPos = -1;
+  int len = eStr3.size();
+  std::string eLastChar = ",";
+  for (int i = 0; i < len; i++) {
+    int j = len - 1 - i;
+    if (iPos == -1) {
+      std::string eChar = eStr3.substr(j, 1);
+      if (eChar == eLastChar)
+        iPos = j;
+    }
+  }
+  if (iPos == -1)
+    return eStr3;
+  std::string eStrPrior = eStr3.substr(0, iPos);
+  std::string eStrPosterior = eStr3.substr(iPos + 1, len - iPos - 1);
+  bool test = STRING_IsStringReduceToSpace(eStrPosterior);
+  if (test)
+    return eStrPrior;
+  return eStr3;
+}
+
 std::optional<std::string> get_default(std::string const &strin) {
   std::string prefix = "Default: ";
   size_t prefix_s = prefix.size();
@@ -168,8 +226,12 @@ std::optional<std::string> get_default(std::string const &strin) {
   return strin.substr(prefix_s, n_char - prefix_s);
 }
 
+
+
+
+
 template<typename T>
-T get_key_value(std::map<std::string, T> const& map, std::string const& context, std::string const& key) {
+void check_key_value(std::map<std::string, T> const& map, std::string const& context, std::string const& key) {
   if (map.count(key) == 0) {
     std::cerr << "NamelistError: " << context << ".keys() =";
     bool IsFirst = true;
@@ -184,12 +246,38 @@ T get_key_value(std::map<std::string, T> const& map, std::string const& context,
     std::cerr << "NamelistError: key=" << key << "\n";
     throw TerminalException{1};
   }
+}
+
+template<typename T>
+T const& get_key_value(std::map<std::string, T> const& map, std::string const& context, std::string const& key) {
+  check_key_value(map, context, key);
   return map.at(key);
 }
 
+template<typename T>
+T& get_key_value_mut(std::map<std::string, T> & map, std::string const& context, std::string const& key) {
+  check_key_value(map, context, key);
+  return map[key];
+}
+
+void print_key_doc(std::ostream &os, std::string const &key,
+                   std::string const &doc) {
+  size_t shift = 5 + key.size();
+  os << "  " << key << " : ";
+  size_t n_char = doc.size();
+  for (size_t i_char = 0; i_char < n_char; i_char++) {
+    std::string e_char = doc.substr(i_char, 1);
+    os << e_char;
+    if (e_char == "\n") {
+      for (size_t u = 0; u < shift; u++)
+        os << " ";
+    }
+  }
+  os << "\n";
+}
 
 struct SingleBlock {
-public:
+private:
   std::map<std::string, int> ListIntValues;
   std::map<std::string, bool> ListBoolValues;
   std::map<std::string, double> ListDoubleValues;
@@ -205,27 +293,58 @@ public:
   std::map<std::string, std::string> ListStringValues_doc;
   std::map<std::string, std::string> ListListStringValues_doc;
   std::vector<std::string> ListNoDefault;
-  int get_int(std::string const& key) const {
+public:
+  //
+  // The access functions
+  //
+  int const& get_int(std::string const& key) const {
     return get_key_value(ListIntValues, "ListIntValues", key);
   }
-  bool get_bool(std::string const& key) const {
+  bool const& get_bool(std::string const& key) const {
     return get_key_value(ListBoolValues, "ListBoolValues", key);
   }
-  double get_double(std::string const& key) const {
+  double const& get_double(std::string const& key) const {
     return get_key_value(ListDoubleValues, "ListDoubleValues", key);
   }
-  std::vector<double> get_list_double(std::string const& key) const {
+  std::vector<double> const& get_list_double(std::string const& key) const {
     return get_key_value(ListListDoubleValues, "ListListDoubleValues", key);
   }
-  std::vector<int> get_list_int(std::string const& key) const {
+  std::vector<int> const& get_list_int(std::string const& key) const {
     return get_key_value(ListListIntValues, "ListListIntValues", key);
   }
-  std::string get_string(std::string const& key) const {
+  std::string const& get_string(std::string const& key) const {
     return get_key_value(ListStringValues, "ListStringValues", key);
   }
-  std::vector<std::string> get_list_string(std::string const& key) const {
+  std::vector<std::string> const& get_list_string(std::string const& key) const {
     return get_key_value(ListListStringValues, "ListListStringValues", key);
   }
+  //
+  // The mut access functions
+  //
+  int& get_int_mut(std::string const& key) {
+    return get_key_value_mut(ListIntValues, "ListIntValues", key);
+  }
+  bool& get_bool_mut(std::string const& key) {
+    return get_key_value_mut(ListBoolValues, "ListBoolValues", key);
+  }
+  double& get_double_mut(std::string const& key) {
+    return get_key_value_mut(ListDoubleValues, "ListDoubleValues", key);
+  }
+  std::vector<double>& get_list_double_mut(std::string const& key) {
+    return get_key_value_mut(ListListDoubleValues, "ListListDoubleValues", key);
+  }
+  std::vector<int>& get_list_int_mut(std::string const& key) {
+    return get_key_value_mut(ListListIntValues, "ListListIntValues", key);
+  }
+  std::string& get_string_mut(std::string const& key) {
+    return get_key_value_mut(ListStringValues, "ListStringValues", key);
+  }
+  std::vector<std::string>& get_list_string_mut(std::string const& key) {
+    return get_key_value_mut(ListListStringValues, "ListListStringValues", key);
+  }
+  //
+  // The set* functions
+  //
   void setListIntValues(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListIntValues_doc[kv.first] = kv.second;
@@ -344,430 +463,8 @@ public:
       }
     }
   }
-};
-
-struct FullNamelist {
-  std::map<std::string, SingleBlock> ListBlock;
-  std::string FileName;
-
-  SingleBlock get_block(std::string const& key) const {
-    return get_key_value(ListBlock, "ListBlock", key);
-  }
-};
-
-std::string GetNamelistStringEntry(FullNamelist const &eFull,
-                                   std::string const &BlkName,
-                                   std::string const &name) {
-  SingleBlock BlockDATA = eFull.ListBlock.at(BlkName);
-  return BlockDATA.ListStringValues.at(name);
-}
-
-std::vector<std::string> ExtractMatchingBool(SingleBlock const &eBlock) {
-  std::vector<std::string> ListMatch;
-  for (auto &kv : eBlock.ListBoolValues)
-    if (kv.second)
-      ListMatch.push_back(kv.first);
-  return ListMatch;
-}
-
-std::string
-NAMELIST_FindPositionVariableInBlock(std::string const &FullVarName,
-                                     SingleBlock const &eSingleBlock) {
-  std::vector<std::string> LStr = STRING_Split(FullVarName, ":");
-  std::string eVarName = LStr[0];
-  if (eSingleBlock.ListIntValues.count(eVarName) > 0)
-    return "int";
-  if (eSingleBlock.ListBoolValues.count(eVarName) > 0)
-    return "bool";
-  if (eSingleBlock.ListDoubleValues.count(eVarName) > 0)
-    return "double";
-  if (eSingleBlock.ListListDoubleValues.count(eVarName) > 0)
-    return "listdouble";
-  if (eSingleBlock.ListListIntValues.count(eVarName) > 0)
-    return "listint";
-  if (eSingleBlock.ListStringValues.count(eVarName) > 0)
-    return "string";
-  if (eSingleBlock.ListListStringValues.count(eVarName) > 0)
-    return "liststring";
-  return "not found";
-}
-
-std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
-                                            std::string const &eChar) {
-  bool WeFound = false;
-  std::string RetStr;
-  int len = eStr.size();
-  for (int i = 0; i < len; i++) {
-    std::string fChar = eStr.substr(i, 1);
-    if (fChar == eChar)
-      WeFound = true;
-    if (!WeFound)
-      RetStr += eStr.at(i);
-  }
-  return RetStr;
-}
-
-std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
-                                         std::string const &eLastChar) {
-  int iPos = -1;
-  int len = eStr.size();
-  for (int i = 0; i < len; i++) {
-    int j = len - 1 - i;
-    if (iPos == -1) {
-      std::string eChar = eStr.substr(j, 1);
-      if (eChar == eLastChar)
-        iPos = j;
-    }
-  }
-  if (iPos == -1)
-    return eStr;
-  return eStr.substr(0, iPos);
-}
-
-std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
-  std::string eCharCommentB = "!";
-  std::string eStr3 = NAMELIST_RemoveAfterLastChar(eStr, eCharCommentB);
-  //
-  int iPos = -1;
-  int len = eStr3.size();
-  std::string eLastChar = ",";
-  for (int i = 0; i < len; i++) {
-    int j = len - 1 - i;
-    if (iPos == -1) {
-      std::string eChar = eStr3.substr(j, 1);
-      if (eChar == eLastChar)
-        iPos = j;
-    }
-  }
-  if (iPos == -1)
-    return eStr3;
-  std::string eStrPrior = eStr3.substr(0, iPos);
-  std::string eStrPosterior = eStr3.substr(iPos + 1, len - iPos - 1);
-  bool test = STRING_IsStringReduceToSpace(eStrPosterior);
-  if (test)
-    return eStrPrior;
-  return eStr3;
-}
-
-void print_key_doc(std::ostream &os, std::string const &key,
-                   std::string const &doc) {
-  size_t shift = 5 + key.size();
-  os << "  " << key << " : ";
-  size_t n_char = doc.size();
-  for (size_t i_char = 0; i_char < n_char; i_char++) {
-    std::string e_char = doc.substr(i_char, 1);
-    os << e_char;
-    if (e_char == "\n") {
-      for (size_t u = 0; u < shift; u++)
-        os << " ";
-    }
-  }
-  os << "\n";
-}
-
-void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
-                         SingleBlock const &eBlock, bool const &WithDoc) {
-  os << "&" << eBlockName << "\n";
-  //
-  // Integer values
-  //
-  for (auto &kv : eBlock.ListIntValues) {
-    auto iter = eBlock.ListIntValues_doc.find(kv.first);
-    if (iter == eBlock.ListIntValues_doc.end() || !WithDoc) {
-      os << "  " << kv.first << " = " << kv.second << "\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  //
-  // Bool values
-  //
-  for (auto &kv : eBlock.ListBoolValues) {
-    auto iter = eBlock.ListBoolValues_doc.find(kv.first);
-    if (iter == eBlock.ListBoolValues_doc.end() || !WithDoc) {
-      bool eVal = kv.second;
-      std::string eValStr;
-      if (!eVal)
-        eValStr = "F";
-      else
-        eValStr = "T";
-      os << "  " << kv.first << " = " << eValStr << "\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  //
-  // Double values
-  //
-  for (auto &kv : eBlock.ListDoubleValues) {
-    auto iter = eBlock.ListDoubleValues_doc.find(kv.first);
-    if (iter == eBlock.ListDoubleValues_doc.end() || !WithDoc) {
-      os << "  " << kv.first << " = " << kv.second << "\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  //
-  // ListDouble values
-  //
-  for (auto &kv : eBlock.ListListDoubleValues) {
-    auto iter = eBlock.ListListDoubleValues_doc.find(kv.first);
-    if (iter == eBlock.ListListDoubleValues_doc.end() || !WithDoc) {
-      os << "  " << kv.first << " = ";
-      std::vector<double> const &eListDoubl = kv.second;
-      int nbDoubl = eListDoubl.size();
-      for (int iDoubl = 0; iDoubl < nbDoubl; iDoubl++) {
-        if (iDoubl > 0)
-          os << ", ";
-        os << eListDoubl[iDoubl];
-      }
-      os << "\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  //
-  // ListInt values
-  //
-  for (auto &kv : eBlock.ListListIntValues) {
-    auto iter = eBlock.ListListIntValues_doc.find(kv.first);
-    if (iter == eBlock.ListListIntValues_doc.end() || !WithDoc) {
-      os << "  " << kv.first << " = ";
-      std::vector<int> const &eListInt = kv.second;
-      int nbInt = eListInt.size();
-      for (int iInt = 0; iInt < nbInt; iInt++) {
-        if (iInt > 0)
-          os << ", ";
-        os << eListInt[iInt];
-      }
-      os << "\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  //
-  // String values
-  //
-  for (auto &kv : eBlock.ListStringValues) {
-    auto iter = eBlock.ListStringValues_doc.find(kv.first);
-    if (iter == eBlock.ListStringValues_doc.end() || !WithDoc) {
-      os << "  " << kv.first << " = \"" << kv.second << "\"\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  //
-  // ListString values
-  //
-  for (auto &kv : eBlock.ListListStringValues) {
-    auto iter = eBlock.ListListStringValues_doc.find(kv.first);
-    if (iter == eBlock.ListListStringValues_doc.end() || !WithDoc) {
-      os << "  " << kv.first << " = ";
-      std::vector<std::string> const &eListStr = kv.second;
-      int nbString = eListStr.size();
-      for (int iString = 0; iString < nbString; iString++) {
-        if (iString > 0)
-          os << ", ";
-        os << "\"" << eListStr[iString] << "\"";
-      }
-      os << "\n";
-    } else {
-      print_key_doc(os, kv.first, iter->second);
-    }
-  }
-  os << "/\n";
-}
-
-void NAMELIST_WriteNamelistFile(std::ostream &os, FullNamelist const &eFull,
-                                bool const &WithDoc) {
-  int iBlock = 0;
-  for (auto &kv : eFull.ListBlock) {
-    std::string const &eBlockName = kv.first;
-    SingleBlock const &eBlock = kv.second;
-    if (iBlock > 0)
-      os << "\n\n";
-    NAMELIST_WriteBlock(os, eBlockName, eBlock, WithDoc);
-    iBlock++;
-  }
-}
-
-std::vector<std::string>
-NAMELIST_ListTrueEntryBool(FullNamelist const &eFull,
-                           std::string const &eBlockName) {
-  std::vector<std::string> ListString;
-  for (auto &kv : eFull.ListBlock.at(eBlockName).ListBoolValues)
-    if (kv.second)
-      ListString.push_back(kv.first);
-  return ListString;
-}
-
-void NAMELIST_ReadNamelistStream(std::istream &is, FullNamelist &eFull) {
-  std::unordered_set<std::pair<std::string, std::string>> ListInsertValues;
-  auto parsing_error_end = [&](std::string const &eBlockName,
-                               std::string const &eVarName,
-                               std::string const &TypeVar) -> void {
-    std::cerr << "Error reading in the block " << eBlockName << "\n";
-    std::cerr << "Variable eVarName=" << eVarName << " should be a " << TypeVar
-              << "\n";
-    std::cerr << "Please correct your input file\n";
-    throw TerminalException{1};
-  };
-  bool InBlock = false;
-  std::string eBlockName;
-  std::map<std::string, std::set<std::string>> ls_string;
-  while (!is.eof()) {
-    std::string Ampersand = "&";
-    std::string strTab = "\t";
-    std::string PreStr;
-    std::getline(is, PreStr);
-    std::string eCharComment = "!";
-    std::string PreStrB = NAMELIST_RemoveAfterCommentChar(PreStr, eCharComment);
-    std::string eStr = STRING_RemoveSpacesBeginningEnd(PreStrB);
-    int len = eStr.length();
-    if (eStr.find(strTab) != std::string::npos) {
-      std::cerr << "Tabs are not allowed\n";
-      std::cerr << "LINE=" << eStr << "\n";
-      throw TerminalException{1};
-    }
-    if (len > 0) {
-      if (eStr.find(Ampersand) != std::string::npos) {
-        std::string eFirstChar = eStr.substr(0, 1);
-        if (eFirstChar != "&") {
-          std::cerr << "Error while processing stream\n";
-          std::cerr
-              << "Error, Ampersand (&) should be only in the first character\n";
-          std::cerr << "LINE=" << eStr << "\n";
-          throw TerminalException{1};
-        }
-        std::string strRed = eStr.substr(1, len - 1);
-        if (!InBlock) {
-          eBlockName = strRed;
-          if (eFull.ListBlock.count(eBlockName) == 0) {
-            std::cerr << "Find BlockName = " << eBlockName << "\n";
-            std::cerr << "which is not in the authorized list\n";
-            std::cerr << "LINE=" << eStr << "\n";
-            std::cerr << "List of authorized block names:\n";
-            for (auto &eBlock : eFull.ListBlock)
-              std::cerr << "Block name=" << eBlock.first << "\n";
-            throw TerminalException{1};
-          }
-          InBlock = true;
-        } else {
-          if (strRed != "END") {
-            std::cerr << "Ampersand detected. We should leave with a END\n";
-            std::cerr << "LINE=" << eStr << "\n";
-            throw TerminalException{1};
-          }
-          InBlock = false;
-        }
-      } else {
-        if (eStr != "/") {
-          std::string eStr3 = NAMELIST_ClearEndOfLine(eStr);
-          std::string strEqual = "=";
-          int posEqual = STRING_GetCharPositionInString(eStr3, strEqual);
-          if (posEqual != -1) {
-            int len3 = eStr3.length();
-            std::string eStrPrior = eStr3.substr(0, posEqual);
-            std::string eStrPosterior =
-                eStr3.substr(posEqual + 1, len3 - posEqual - 1);
-            std::string eVarName = STRING_RemoveSpacesBeginningEnd(eStrPrior);
-            std::pair<std::string, std::string> ePair{eBlockName, eVarName};
-            if (ListInsertValues.count(ePair) > 0) {
-              std::cerr << "In the block " << eBlockName << "\n";
-              std::cerr << "the entry " << eVarName << "\n";
-              std::cerr << "is defined two times\n";
-              throw TerminalException{1};
-            }
-            ListInsertValues.insert(ePair);
-            //
-            std::string eVarValue =
-                STRING_RemoveSpacesBeginningEnd(eStrPosterior);
-            std::string eVarNature = NAMELIST_FindPositionVariableInBlock(
-                eVarName, eFull.ListBlock[eBlockName]);
-            if (eVarNature == "not found") {
-              NAMELIST_WriteBlock(std::cerr, eBlockName,
-                                  eFull.ListBlock[eBlockName], true);
-              std::cerr << "Error in reading the NAMELIST file. See above "
-                           "allowed entries\n";
-              std::cerr << "The variable " << eVarName << "\n";
-              std::cerr << "is in block " << eBlockName << "\n";
-              std::cerr << "but it is not allowed for the chosen application\n";
-              throw TerminalException{1};
-            }
-            if (eVarNature == "int") {
-              int eVal = ParseScalar<int>(eVarValue);
-              eFull.ListBlock[eBlockName].ListIntValues[eVarName] = eVal;
-              ls_string[eBlockName].insert(eVarName);
-            }
-            if (eVarNature == "bool") {
-              try {
-                bool eVal = NAMELIST_ReadBoolValue(eVarValue);
-                eFull.ListBlock[eBlockName].ListBoolValues[eVarName] = eVal;
-                ls_string[eBlockName].insert(eVarName);
-              } catch (NamelistException &e) {
-                parsing_error_end(eBlockName, eVarName, "bool");
-              }
-            }
-            if (eVarNature == "double") {
-              double eVal = ParseScalar<double>(eVarValue);
-              eFull.ListBlock[eBlockName].ListDoubleValues[eVarName] = eVal;
-              ls_string[eBlockName].insert(eVarName);
-            }
-            if (eVarNature == "string") {
-              try {
-                std::string eVal =
-                    NAMELIST_ConvertFortranStringToCppString(eVarValue);
-                eFull.ListBlock[eBlockName].ListStringValues[eVarName] = eVal;
-                ls_string[eBlockName].insert(eVarName);
-              } catch (NamelistException &e) {
-                parsing_error_end(eBlockName, eVarName, "string");
-              }
-            }
-            if (eVarNature == "listdouble") {
-              std::vector<double> eVal =
-                  NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(
-                      eVarValue);
-              eFull.ListBlock[eBlockName].ListListDoubleValues[eVarName] = eVal;
-              ls_string[eBlockName].insert(eVarName);
-            }
-            if (eVarNature == "listint") {
-              std::vector<int> eVal =
-                  NAMELIST_ConvertFortranStringListIntToCppVectorInt(eVarValue);
-              eFull.ListBlock[eBlockName].ListListIntValues[eVarName] = eVal;
-              ls_string[eBlockName].insert(eVarName);
-            }
-            if (eVarNature == "liststring") {
-              try {
-                std::vector<std::string> eVal =
-                    NAMELIST_ConvertFortranListStringToCppListString(eVarValue);
-                eFull.ListBlock[eBlockName].ListListStringValues[eVarName] =
-                    eVal;
-                ls_string[eBlockName].insert(eVarName);
-              } catch (NamelistException &e) {
-                parsing_error_end(eBlockName, eVarName, "liststring");
-              }
-            }
-          } else {
-            if (eStr3.size() != 0) {
-              std::cerr << "If lines has no = sign then it should be empty\n";
-              std::cerr << "str=" << PreStr << "\n";
-              throw TerminalException{1};
-            }
-          }
-        } else {
-          InBlock = false;
-        }
-      }
-    }
-  }
-  if (InBlock) {
-    std::cerr
-        << "Error. When leaving namelist reading, we should be out of block\n";
-    throw TerminalException{1};
-  }
-  for (auto &kv : eFull.ListBlock) {
-    auto the_set = ls_string[kv.first];
-    for (auto &KeyNotDefault : kv.second.ListNoDefault) {
+  void check_no_default(std::set<std::string> const& the_set) const {
+    for (auto &KeyNotDefault : ListNoDefault) {
       auto iter = the_set.find(KeyNotDefault);
       if (iter == the_set.end()) {
         std::cerr << "The key " << KeyNotDefault << " has not been assigned\n";
@@ -776,6 +473,356 @@ void NAMELIST_ReadNamelistStream(std::istream &is, FullNamelist &eFull) {
       }
     }
   }
+  //
+  // The general functions
+  //
+  std::string NAMELIST_FindPositionVariableInBlock(std::string const &FullVarName) {
+    std::vector<std::string> LStr = STRING_Split(FullVarName, ":");
+    std::string eVarName = LStr[0];
+    if (ListIntValues.count(eVarName) > 0)
+      return "int";
+    if (ListBoolValues.count(eVarName) > 0)
+      return "bool";
+    if (ListDoubleValues.count(eVarName) > 0)
+      return "double";
+    if (ListListDoubleValues.count(eVarName) > 0)
+      return "listdouble";
+    if (ListListIntValues.count(eVarName) > 0)
+      return "listint";
+    if (ListStringValues.count(eVarName) > 0)
+      return "string";
+    if (ListListStringValues.count(eVarName) > 0)
+      return "liststring";
+    return "not found";
+  }
+  std::vector<std::string> ExtractMatchingBool() const {
+    std::vector<std::string> ListKeyMatch;
+    for (auto &kv : ListBoolValues)
+      if (kv.second)
+        ListKeyMatch.push_back(kv.first);
+    return ListKeyMatch;
+  }
+  void NAMELIST_WriteBlock(std::ostream &os, std::string const &eBlockName,
+                           bool const &WithDoc) const {
+    os << "&" << eBlockName << "\n";
+    //
+    // Integer values
+    //
+    for (auto &kv : ListIntValues) {
+      auto iter = ListIntValues_doc.find(kv.first);
+      if (iter == ListIntValues_doc.end() || !WithDoc) {
+        os << "  " << kv.first << " = " << kv.second << "\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    //
+    // Bool values
+    //
+    for (auto &kv : ListBoolValues) {
+      auto iter = ListBoolValues_doc.find(kv.first);
+      if (iter == ListBoolValues_doc.end() || !WithDoc) {
+        bool eVal = kv.second;
+        std::string eValStr;
+        if (!eVal)
+          eValStr = "F";
+        else
+          eValStr = "T";
+        os << "  " << kv.first << " = " << eValStr << "\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    //
+    // Double values
+    //
+    for (auto &kv : ListDoubleValues) {
+      auto iter = ListDoubleValues_doc.find(kv.first);
+      if (iter == ListDoubleValues_doc.end() || !WithDoc) {
+        os << "  " << kv.first << " = " << kv.second << "\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    //
+    // ListDouble values
+    //
+    for (auto &kv : ListListDoubleValues) {
+      auto iter = ListListDoubleValues_doc.find(kv.first);
+      if (iter == ListListDoubleValues_doc.end() || !WithDoc) {
+        os << "  " << kv.first << " = ";
+        std::vector<double> const &eListDoubl = kv.second;
+        int nbDoubl = eListDoubl.size();
+        for (int iDoubl = 0; iDoubl < nbDoubl; iDoubl++) {
+          if (iDoubl > 0)
+            os << ", ";
+          os << eListDoubl[iDoubl];
+        }
+        os << "\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    //
+    // ListInt values
+    //
+    for (auto &kv : ListListIntValues) {
+      auto iter = ListListIntValues_doc.find(kv.first);
+      if (iter == ListListIntValues_doc.end() || !WithDoc) {
+        os << "  " << kv.first << " = ";
+        std::vector<int> const &eListInt = kv.second;
+        int nbInt = eListInt.size();
+        for (int iInt = 0; iInt < nbInt; iInt++) {
+          if (iInt > 0)
+            os << ", ";
+          os << eListInt[iInt];
+        }
+        os << "\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    //
+    // String values
+    //
+    for (auto &kv : ListStringValues) {
+      auto iter = ListStringValues_doc.find(kv.first);
+      if (iter == ListStringValues_doc.end() || !WithDoc) {
+        os << "  " << kv.first << " = \"" << kv.second << "\"\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    //
+    // ListString values
+    //
+    for (auto &kv : ListListStringValues) {
+      auto iter = ListListStringValues_doc.find(kv.first);
+      if (iter == ListListStringValues_doc.end() || !WithDoc) {
+        os << "  " << kv.first << " = ";
+        std::vector<std::string> const &eListStr = kv.second;
+        int nbString = eListStr.size();
+        for (int iString = 0; iString < nbString; iString++) {
+          if (iString > 0)
+            os << ", ";
+          os << "\"" << eListStr[iString] << "\"";
+        }
+        os << "\n";
+      } else {
+        print_key_doc(os, kv.first, iter->second);
+      }
+    }
+    os << "/\n";
+  }
+
+};
+
+struct FullNamelist {
+private:
+  std::map<std::string, SingleBlock> ListBlock;
+public:
+  std::string FileName;
+  SingleBlock const& get_block(std::string const& key) const {
+    return get_key_value(ListBlock, "ListBlock", key);
+  }
+  SingleBlock& get_block_mut(std::string const& key) {
+    return get_key_value_mut(ListBlock, "ListBlock", key);
+  }
+  //
+  // Some general functions
+  //
+  void NAMELIST_WriteNamelistFile(std::ostream &os, bool const &WithDoc) const {
+    int iBlock = 0;
+    for (auto &kv : ListBlock) {
+      std::string const &eBlockName = kv.first;
+      SingleBlock const &eBlock = kv.second;
+      if (iBlock > 0)
+        os << "\n\n";
+      eBlock.NAMELIST_WriteBlock(os, eBlockName, WithDoc);
+      iBlock++;
+    }
+  }
+  std::vector<std::string> NAMELIST_ListTrueEntryBool(std::string const &eBlockName) {
+    std::vector<std::string> ListString;
+    SingleBlock const& eBlock = get_block(eBlockName);
+    return eBlock.ExtractMatchingBool();
+  }
+  void NAMELIST_ReadNamelistStream(std::istream &is) {
+    std::unordered_set<std::pair<std::string, std::string>> ListInsertValues;
+    auto parsing_error_end = [&](std::string const &eBlockName,
+                                 std::string const &eVarName,
+                                 std::string const &TypeVar) -> void {
+      std::cerr << "Error reading in the block " << eBlockName << "\n";
+      std::cerr << "Variable eVarName=" << eVarName << " should be a " << TypeVar
+                << "\n";
+      std::cerr << "Please correct your input file\n";
+      throw TerminalException{1};
+    };
+    bool InBlock = false;
+    std::string eBlockName;
+    std::map<std::string, std::set<std::string>> ls_string;
+    while (!is.eof()) {
+      std::string Ampersand = "&";
+      std::string strTab = "\t";
+      std::string PreStr;
+      std::getline(is, PreStr);
+      std::string eCharComment = "!";
+      std::string PreStrB = NAMELIST_RemoveAfterCommentChar(PreStr, eCharComment);
+      std::string eStr = STRING_RemoveSpacesBeginningEnd(PreStrB);
+      int len = eStr.length();
+      if (eStr.find(strTab) != std::string::npos) {
+        std::cerr << "Tabs are not allowed\n";
+        std::cerr << "LINE=" << eStr << "\n";
+        throw TerminalException{1};
+      }
+      if (len > 0) {
+        if (eStr.find(Ampersand) != std::string::npos) {
+          std::string eFirstChar = eStr.substr(0, 1);
+          if (eFirstChar != "&") {
+            std::cerr << "Error while processing stream\n";
+            std::cerr
+              << "Error, Ampersand (&) should be only in the first character\n";
+            std::cerr << "LINE=" << eStr << "\n";
+            throw TerminalException{1};
+          }
+          std::string strRed = eStr.substr(1, len - 1);
+          if (!InBlock) {
+            eBlockName = strRed;
+            if (ListBlock.count(eBlockName) == 0) {
+              std::cerr << "Find BlockName = " << eBlockName << "\n";
+              std::cerr << "which is not in the authorized list\n";
+              std::cerr << "LINE=" << eStr << "\n";
+              std::cerr << "List of authorized block names:\n";
+              for (auto &eBlock : ListBlock)
+                std::cerr << "Block name=" << eBlock.first << "\n";
+              throw TerminalException{1};
+            }
+            InBlock = true;
+          } else {
+            if (strRed != "END") {
+              std::cerr << "Ampersand detected. We should leave with a END\n";
+              std::cerr << "LINE=" << eStr << "\n";
+              throw TerminalException{1};
+            }
+            InBlock = false;
+          }
+        } else {
+          if (eStr != "/") {
+            std::string eStr3 = NAMELIST_ClearEndOfLine(eStr);
+            std::string strEqual = "=";
+            int posEqual = STRING_GetCharPositionInString(eStr3, strEqual);
+            if (posEqual != -1) {
+              int len3 = eStr3.length();
+              std::string eStrPrior = eStr3.substr(0, posEqual);
+              std::string eStrPosterior =
+                eStr3.substr(posEqual + 1, len3 - posEqual - 1);
+              std::string eVarName = STRING_RemoveSpacesBeginningEnd(eStrPrior);
+              std::pair<std::string, std::string> ePair{eBlockName, eVarName};
+              if (ListInsertValues.count(ePair) > 0) {
+                std::cerr << "In the block " << eBlockName << "\n";
+                std::cerr << "the entry " << eVarName << "\n";
+                std::cerr << "is defined two times\n";
+                throw TerminalException{1};
+              }
+              ListInsertValues.insert(ePair);
+              //
+              std::string eVarValue =
+                STRING_RemoveSpacesBeginningEnd(eStrPosterior);
+              SingleBlock& eBlock = get_block_mut(eBlockName);
+              std::string eVarNature = eBlock.NAMELIST_FindPositionVariableInBlock(eVarName);
+              if (eVarNature == "not found") {
+                eBlock.NAMELIST_WriteBlock(std::cerr, eBlockName, true);
+                std::cerr << "Error in reading the NAMELIST file. See above "
+                  "allowed entries\n";
+                std::cerr << "The variable " << eVarName << "\n";
+                std::cerr << "is in block " << eBlockName << "\n";
+                std::cerr << "but it is not allowed for the chosen application\n";
+                throw TerminalException{1};
+              }
+              if (eVarNature == "int") {
+                int eVal = ParseScalar<int>(eVarValue);
+                eBlock.get_int_mut(eVarName) = eVal;
+                ls_string[eBlockName].insert(eVarName);
+              }
+              if (eVarNature == "bool") {
+                try {
+                  bool eVal = NAMELIST_ReadBoolValue(eVarValue);
+                  eBlock.get_bool_mut(eVarName) = eVal;
+                  ls_string[eBlockName].insert(eVarName);
+                } catch (NamelistException &e) {
+                  parsing_error_end(eBlockName, eVarName, "bool");
+                }
+              }
+              if (eVarNature == "double") {
+                double eVal = ParseScalar<double>(eVarValue);
+                eBlock.get_double_mut(eVarName) = eVal;
+                ls_string[eBlockName].insert(eVarName);
+              }
+              if (eVarNature == "string") {
+                try {
+                  std::string eVal =
+                    NAMELIST_ConvertFortranStringToCppString(eVarValue);
+                  eBlock.get_string_mut(eVarName) = eVal;
+                  ls_string[eBlockName].insert(eVarName);
+                } catch (NamelistException &e) {
+                  parsing_error_end(eBlockName, eVarName, "string");
+                }
+              }
+              if (eVarNature == "listdouble") {
+                std::vector<double> eVal =
+                  NAMELIST_ConvertFortranStringListDoubleToCppVectorDouble(
+                                                                           eVarValue);
+                eBlock.get_list_double_mut(eVarName) = eVal;
+                ls_string[eBlockName].insert(eVarName);
+              }
+              if (eVarNature == "listint") {
+                std::vector<int> eVal =
+                  NAMELIST_ConvertFortranStringListIntToCppVectorInt(eVarValue);
+                eBlock.get_list_int_mut(eVarName) = eVal;
+                ls_string[eBlockName].insert(eVarName);
+              }
+              if (eVarNature == "liststring") {
+                try {
+                  std::vector<std::string> eVal =
+                    NAMELIST_ConvertFortranListStringToCppListString(eVarValue);
+                  eBlock.get_list_string_mut(eVarName) = eVal;
+                  ls_string[eBlockName].insert(eVarName);
+                } catch (NamelistException &e) {
+                  parsing_error_end(eBlockName, eVarName, "liststring");
+                }
+              }
+            } else {
+              if (eStr3.size() != 0) {
+                std::cerr << "If lines has no = sign then it should be empty\n";
+                std::cerr << "str=" << PreStr << "\n";
+                throw TerminalException{1};
+              }
+            }
+          } else {
+            InBlock = false;
+          }
+        }
+      }
+    }
+    if (InBlock) {
+      std::cerr
+        << "Error. When leaving namelist reading, we should be out of block\n";
+      throw TerminalException{1};
+    }
+    for (auto &kv : ListBlock) {
+      auto the_set = ls_string[kv.first];
+      kv.second.check_no_default(the_set);
+    }
+  }
+
+
+};
+
+std::string GetNamelistStringEntry(FullNamelist const &eFull,
+                                   std::string const &BlkName,
+                                   std::string const &name) {
+  SingleBlock BlockDATA = eFull.get_block(BlkName);
+  return BlockDATA.get_string(name);
 }
 
 void NAMELIST_ReadNamelistFile(std::string const &eFileName,
@@ -786,7 +833,7 @@ void NAMELIST_ReadNamelistFile(std::string const &eFileName,
     throw TerminalException{1};
   }
   std::ifstream INfs(eFileName);
-  NAMELIST_ReadNamelistStream(INfs, eFull);
+  eFull.NAMELIST_ReadNamelistStream(INfs);
 }
 
 void NAMELIST_ReadListString(FullNamelist &eFull,
@@ -797,7 +844,7 @@ void NAMELIST_ReadListString(FullNamelist &eFull,
     str_tot += "\n";
   }
   std::istringstream is(str_tot);
-  NAMELIST_ReadNamelistStream(is, eFull);
+  eFull.NAMELIST_ReadNamelistStream(is);
 }
 
 // clang-format off
