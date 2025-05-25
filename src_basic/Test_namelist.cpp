@@ -6,5 +6,5 @@ int main() {
   ListBoolValues1_doc["AdvancedTerminationCriterion"] = "Default: F\n\
 This is about whether to used the advanced Balinski termination criterion";
   SingleBlock BlockDATA;
-  BlockDATA.setListBoolValues(ListBoolValues1_doc);
+  BlockDATA.setListBoolValues_doc(ListBoolValues1_doc);
 }

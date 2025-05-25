@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
     FullNamelist eFull = ConvertHeuristicToFullNamelist(heu);
     //
     std::ofstream os(FileO);
-    NAMELIST_WriteNamelistFile(os, eFull, false);
+    eFull.NAMELIST_WriteNamelistFile(os, false);
     std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
     std::cerr << "Erroneous termination of the program\n";

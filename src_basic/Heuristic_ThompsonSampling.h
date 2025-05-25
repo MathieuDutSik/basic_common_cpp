@@ -967,8 +967,8 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
         "145.3", "130.2:50 145.87:30 150.34:20", "InputA_key1_val1_key2_val2",
         "InputB"};
     SingleBlock BlockPROBA;
-    BlockPROBA.ListListStringValues = ListListStringValues;
-    BlockPROBA.ListListIntValues = ListListIntValues;
+    BlockPROBA.setListListStringValues(ListListStringValues);
+    BlockPROBA.setListListIntValues(ListListIntValues);
     ListBlock["PROBABILITY_DISTRIBUTIONS"] = BlockPROBA;
   }
   // SINGLE THOMPSON STATE
@@ -979,7 +979,7 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
     ListListStringValues["ListDescription"] = {"cdd:distri1 lrs:distri2",
                                                "cdd:distri1 lrs:distri3"};
     SingleBlock BlockTHOMPSON;
-    BlockTHOMPSON.ListListStringValues = ListListStringValues;
+    BlockTHOMPSON.setListListStringValues(ListListStringValues);
     ListBlock["THOMPSON_PRIOR"] = BlockTHOMPSON;
   }
   // KEY_COMPRESSION
@@ -989,7 +989,7 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
     ListListStringValues["ListDescription"] = {"superfine",
                                                "1-10,11-20,21-infinity"};
     SingleBlock BlockCOMPRESSION;
-    BlockCOMPRESSION.ListListStringValues = ListListStringValues;
+    BlockCOMPRESSION.setListListStringValues(ListListStringValues);
     ListBlock["KEY_COMPRESSION"] = BlockCOMPRESSION;
   }
   // HEURISTIC PRIOR
@@ -1002,9 +1002,9 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
                                             "incidence GroupEXT"};
     ListListStringValues["ListConclusion"] = {"state1", "state2"};
     SingleBlock BlockHEU;
-    BlockHEU.ListBoolValues = ListBoolValues;
-    BlockHEU.ListStringValues = ListStringValues;
-    BlockHEU.ListListStringValues = ListListStringValues;
+    BlockHEU.setListBoolValues(ListBoolValues);
+    BlockHEU.setListStringValues(ListStringValues);
+    BlockHEU.setListListStringValues(ListListStringValues);
     ListBlock["HEURISTIC_PRIOR"] = BlockHEU;
   }
   // IO
@@ -1016,12 +1016,12 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
     ListBoolValues["ProcessExistingDataIfExist"] = false;
     ListStringValues["LogFileToProcess"] = "irrelevant";
     SingleBlock BlockIO;
-    BlockIO.ListBoolValues = ListBoolValues;
-    BlockIO.ListStringValues = ListStringValues;
+    BlockIO.setListBoolValues(ListBoolValues);
+    BlockIO.setListStringValues(ListStringValues);
     ListBlock["IO"] = BlockIO;
   }
   // Merging all data
-  return {std::move(ListBlock), "undefined"};
+  return FullNamelist(ListBlock);
 }
 
 template <typename T>
@@ -1029,23 +1029,17 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const &heu) {
   FullNamelist eFull = NAMELIST_ThompsonSamplingRuntime();
   // PROBAS
   {
-    SingleBlock &BlockPROBA = eFull.ListBlock["PROBABILITY_DISTRIBUTIONS"];
-    std::map<std::string, std::vector<std::string>> &ListListStringValues =
-        BlockPROBA.ListListStringValues;
-    std::map<std::string, std::vector<int>> &ListListIntValues =
-        BlockPROBA.ListListIntValues;
+    SingleBlock &BlockPROBA = eFull.get_block_mut("PROBABILITY_DISTRIBUTIONS");
     //
-    ListListStringValues["ListName"] = {"distri1"};
-    ListListStringValues["ListNature"] = {"dirac"};
-    ListListStringValues["ListDescription"] = {"145.3"};
-    ListListIntValues["ListNmax"] = {100};
-    ListListIntValues["ListNstart"] = {100};
+    BlockPROBA.get_list_string_mut("ListName") = {"distri1"};
+    BlockPROBA.get_list_string_mut("ListNature") = {"dirac"};
+    BlockPROBA.get_list_string_mut("ListDescription") = {"145.3"};
+    BlockPROBA.get_list_int_mut("ListNmax") = {100};
+    BlockPROBA.get_list_int_mut("ListNstart") = {100};
   }
   // SINGLE THOMPSON STATE
   {
-    SingleBlock &BlockTHOMPSON = eFull.ListBlock["THOMPSON_PRIOR"];
-    std::map<std::string, std::vector<std::string>> &ListListStringValues =
-        BlockTHOMPSON.ListListStringValues;
+    SingleBlock &BlockTHOMPSON = eFull.get_block_mut("THOMPSON_PRIOR");
     std::vector<std::string> l_output = GetHeuristicOutput(heu);
     std::vector<std::string> l_name;
     std::vector<std::string> l_desc;
@@ -1055,29 +1049,23 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const &heu) {
       l_name.push_back(e_name);
       l_desc.push_back(e_desc);
     }
-    ListListStringValues["ListAnswer"] = l_output;
-    ListListStringValues["ListName"] = l_name;
-    ListListStringValues["ListDescription"] = l_desc;
+    BlockTHOMPSON.get_list_string_mut("ListAnswer") = l_output;
+    BlockTHOMPSON.get_list_string_mut("ListName") = l_name;
+    BlockTHOMPSON.get_list_string_mut("ListDescription") = l_desc;
   }
   // KEY COMPRESSION
   {
-    SingleBlock &BlockCOMPRESSION = eFull.ListBlock["KEY_COMPRESSION"];
-    std::map<std::string, std::vector<std::string>> &ListListStringValues =
-        BlockCOMPRESSION.ListListStringValues;
+    SingleBlock &BlockCOMPRESSION = eFull.get_block_mut("KEY_COMPRESSION");
     std::vector<std::string> l_input = GetHeuristicInput(heu);
     std::vector<std::string> l_desc;
     for (size_t i = 0; i < l_input.size(); i++)
       l_desc.push_back("superfine");
-    ListListStringValues["ListKey"] = l_input;
-    ListListStringValues["ListDescription"] = l_desc;
+    BlockCOMPRESSION.get_list_string_mut("ListKey") = l_input;
+    BlockCOMPRESSION.get_list_string_mut("ListDescription") = l_desc;
   }
   // HEURISTIC PRIOR
   {
-    SingleBlock &BlockHEU = eFull.ListBlock["HEURISTIC_PRIOR"];
-    std::map<std::string, std::vector<std::string>> &ListListStringValues =
-        BlockHEU.ListListStringValues;
-    std::map<std::string, std::string> &ListStringValues =
-        BlockHEU.ListStringValues;
+    SingleBlock &BlockHEU = eFull.get_block_mut("HEURISTIC_PRIOR");
     std::vector<std::string> l_fullcond, l_conclusion;
     for (auto &eFullCond : heu.AllTests) {
       std::string fullcond;
@@ -1094,20 +1082,17 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const &heu) {
       l_conclusion.push_back(e_conclusion);
     }
     std::string new_default = "state_" + heu.DefaultResult;
-    ListStringValues["DefaultPrior"] = new_default;
-    ListListStringValues["ListFullCond"] = l_fullcond;
-    ListListStringValues["ListConclusion"] = l_conclusion;
+    BlockHEU.get_string_mut("DefaultPrior") = new_default;
+    BlockHEU.get_list_string_mut("ListFullCond") = l_fullcond;
+    BlockHEU.get_list_string_mut("ListConclusion") = l_conclusion;
   }
   // IO (nothing set)
   {
-    SingleBlock &BlockIO = eFull.ListBlock["IO"];
-    std::map<std::string, std::string> &ListStringValues =
-        BlockIO.ListStringValues;
-    std::map<std::string, bool> &ListBoolValues = BlockIO.ListBoolValues;
-    ListStringValues["name"] = "unset";
-    ListBoolValues["WriteLog"] = false;
-    ListBoolValues["ProcessExistingDataIfExist"] = false;
-    ListStringValues["LogFileToProcess"] = "irrelevant";
+    SingleBlock &BlockIO = eFull.get_block_mut("IO");
+    BlockIO.get_string_mut("name") = "unset";
+    BlockIO.get_string_mut("LogFileToProcess") = "irrelevant";
+    BlockIO.get_bool_mut("WriteLog") = false;
+    BlockIO.get_bool_mut("ProcessExistingDataIfExist") = false;
   }
   return eFull;
 }
@@ -1205,37 +1190,28 @@ private:
 
 public:
   ThompsonSamplingHeuristic(FullNamelist const &TS, std::ostream &os) : TS(TS) {
-    SingleBlock const &BlockPROBA =
-        TS.ListBlock.at("PROBABILITY_DISTRIBUTIONS");
-    SingleBlock const &BlockTHOMPSON = TS.ListBlock.at("THOMPSON_PRIOR");
-    SingleBlock const &BlockCOMPRESSION = TS.ListBlock.at("KEY_COMPRESSION");
-    SingleBlock const &BlockHEU = TS.ListBlock.at("HEURISTIC_PRIOR");
-    SingleBlock const &BlockIO = TS.ListBlock.at("IO");
-    name = BlockIO.ListStringValues.at("name");
-    WriteLog = BlockIO.ListBoolValues.at("WriteLog");
+    SingleBlock const &BlockPROBA = TS.get_block("PROBABILITY_DISTRIBUTIONS");
+    SingleBlock const &BlockTHOMPSON = TS.get_block("THOMPSON_PRIOR");
+    SingleBlock const &BlockCOMPRESSION = TS.get_block("KEY_COMPRESSION");
+    SingleBlock const &BlockHEU = TS.get_block("HEURISTIC_PRIOR");
+    SingleBlock const &BlockIO = TS.get_block("IO");
+    name = BlockIO.get_string("name");
+    WriteLog = BlockIO.get_bool("WriteLog");
     // Reading the basic heuristic (that gives the prior from the parameters)
     {
-      std::string const &DefaultPrior =
-          BlockHEU.ListStringValues.at("DefaultPrior");
-      std::vector<std::string> const &ListFullCond =
-          BlockHEU.ListListStringValues.at("ListFullCond");
-      std::vector<std::string> const &ListConclusion =
-          BlockHEU.ListListStringValues.at("ListConclusion");
+      std::string const &DefaultPrior = BlockHEU.get_string("DefaultPrior");
+      std::vector<std::string> const &ListFullCond = BlockHEU.get_list_string("ListFullCond");
+      std::vector<std::string> const &ListConclusion = BlockHEU.get_list_string("ListConclusion");
       heu =
           HeuristicFrom_LS_LS_S<T>(DefaultPrior, ListFullCond, ListConclusion);
     }
     // Reading the initial distributions used in the prior
     {
-      std::vector<std::string> const &ListName =
-          BlockPROBA.ListListStringValues.at("ListName");
-      std::vector<int> const &ListNmax =
-          BlockPROBA.ListListIntValues.at("ListNmax");
-      std::vector<int> const &ListNstart =
-          BlockPROBA.ListListIntValues.at("ListNstart");
-      std::vector<std::string> const &ListNature =
-          BlockPROBA.ListListStringValues.at("ListNature");
-      std::vector<std::string> const &ListDescription =
-          BlockPROBA.ListListStringValues.at("ListDescription");
+      std::vector<std::string> const &ListName = BlockPROBA.get_list_string("ListName");
+      std::vector<int> const &ListNmax = BlockPROBA.get_list_int("ListNmax");
+      std::vector<int> const &ListNstart = BlockPROBA.get_list_int("ListNstart");
+      std::vector<std::string> const &ListNature = BlockPROBA.get_list_string("ListNature");
+      std::vector<std::string> const &ListDescription = BlockPROBA.get_list_string("ListDescription");
       for (size_t i = 0; i < ListName.size(); i++) {
         std::string name = ListName[i];
         size_t n_max = ListNmax[i];
@@ -1256,21 +1232,16 @@ public:
     }
     // Reading and assigning the key_compression
     {
-      std::vector<std::string> const &ListKey =
-          BlockCOMPRESSION.ListListStringValues.at("ListKey");
-      std::vector<std::string> const &ListDescription =
-          BlockCOMPRESSION.ListListStringValues.at("ListDescription");
+      std::vector<std::string> const &ListKey = BlockCOMPRESSION.get_list_string("ListKey");
+      std::vector<std::string> const &ListDescription = BlockCOMPRESSION.get_list_string("ListDescription");
       kc = KeyCompression<T>(ListKey, ListDescription);
       CheckHeuristicInput(heu, ListKey);
     }
     // Reading the initial thompson samplings
     {
-      std::vector<std::string> const &ListAnswer =
-          BlockTHOMPSON.ListListStringValues.at("ListAnswer");
-      std::vector<std::string> const &ListName =
-          BlockTHOMPSON.ListListStringValues.at("ListName");
-      std::vector<std::string> const &ListDescription =
-          BlockTHOMPSON.ListListStringValues.at("ListDescription");
+      std::vector<std::string> const &ListAnswer = BlockTHOMPSON.get_list_string("ListAnswer");
+      std::vector<std::string> const &ListName = BlockTHOMPSON.get_list_string("ListName");
+      std::vector<std::string> const &ListDescription = BlockTHOMPSON.get_list_string("ListDescription");
       if (ListAnswer.size() != ListName.size() ||
           ListAnswer.size() != ListDescription.size()) {
         std::cerr << "HTS: Incorrect length\n";
@@ -1310,10 +1281,10 @@ public:
 
     // Reading existing data from log if present
     bool ProcessExistingDataIfExist =
-        BlockIO.ListBoolValues.at("ProcessExistingDataIfExist");
+      BlockIO.get_bool("ProcessExistingDataIfExist");
     if (ProcessExistingDataIfExist) {
       std::string const &LogFileToProcess =
-          BlockIO.ListStringValues.at("LogFileToProcess");
+        BlockIO.get_string("LogFileToProcess");
       InsertCompletedInfo(LogFileToProcess);
     }
   }

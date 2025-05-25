@@ -343,9 +343,33 @@ public:
     return get_key_value_mut(ListListStringValues, "ListListStringValues", key);
   }
   //
-  // The set* functions
+  // The set* functions for values
   //
-  void setListIntValues(std::map<std::string, std::string> const &m) {
+  void setListIntValues(std::map<std::string, int> const &m) {
+    ListIntValues = m;
+  }
+  void setListBoolValues(std::map<std::string, bool> const &m) {
+    ListBoolValues = m;
+  }
+  void setListDoubleValues(std::map<std::string, double> const &m) {
+    ListDoubleValues = m;
+  }
+  void setListListDoubleValues(std::map<std::string, std::vector<double>> const &m) {
+    ListListDoubleValues = m;
+  }
+  void setListListIntValues(std::map<std::string, std::vector<int>> const &m) {
+    ListListIntValues = m;
+  }
+  void setListStringValues(std::map<std::string, std::string> const &m) {
+    ListStringValues = m;
+  }
+  void setListListStringValues(std::map<std::string, std::vector<std::string>> const &m) {
+    ListListStringValues = m;
+  }
+  //
+  // The set* functions for documentation
+  //
+  void setListIntValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListIntValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -357,7 +381,7 @@ public:
       }
     }
   }
-  void setListBoolValues(std::map<std::string, std::string> const &m) {
+  void setListBoolValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListBoolValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -375,7 +399,7 @@ public:
       }
     }
   }
-  void setListDoubleValues(std::map<std::string, std::string> const &m) {
+  void setListDoubleValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListDoubleValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -387,7 +411,7 @@ public:
       }
     }
   }
-  void setListStringValues(std::map<std::string, std::string> const &m) {
+  void setListStringValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListStringValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -406,7 +430,7 @@ public:
       }
     }
   }
-  void setListListDoubleValues(std::map<std::string, std::string> const &m) {
+  void setListListDoubleValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListListDoubleValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -425,7 +449,7 @@ public:
       }
     }
   }
-  void setListListIntValues(std::map<std::string, std::string> const &m) {
+  void setListListIntValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListListIntValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -444,7 +468,7 @@ public:
       }
     }
   }
-  void setListListStringValues(std::map<std::string, std::string> const &m) {
+  void setListListStringValues_doc(std::map<std::string, std::string> const &m) {
     for (auto &kv : m) {
       ListListStringValues_doc[kv.first] = kv.second;
       std::optional<std::string> opt = get_default(kv.second);
@@ -627,6 +651,10 @@ public:
   }
   SingleBlock& get_block_mut(std::string const& key) {
     return get_key_value_mut(ListBlock, "ListBlock", key);
+  }
+  FullNamelist(std::map<std::string, SingleBlock> const& _ListBlock) {
+    ListBlock = _ListBlock;
+    FileName = "undefined";
   }
   //
   // Some general functions
@@ -814,8 +842,6 @@ public:
       kv.second.check_no_default(the_set);
     }
   }
-
-
 };
 
 std::string GetNamelistStringEntry(FullNamelist const &eFull,

@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "Program is used as\n";
       std::cerr << "Test_Thompson_Sampling [FileI]\n";
       std::cerr << "File format is\n";
-      NAMELIST_WriteNamelistFile(std::cerr, eFull, true);
+      eFull.NAMELIST_WriteNamelistFile(std::cerr, true);
       throw TerminalException{1};
     }
     std::string filename = argv[1];
