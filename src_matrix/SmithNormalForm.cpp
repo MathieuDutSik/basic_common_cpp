@@ -10,6 +10,7 @@
 
 template <typename T> void process(std::string const &FileI) {
   MyMatrix<T> M = ReadMatrixFile<T>(FileI);
+  std::cerr << "|M|=" << M.rows() << " / " << M.cols() << "\n";
   // computing the Smith normal form
   ResultSmithNormalForm<T> result = SmithNormalForm(M);
   std::cerr << "ROW=\n";
@@ -27,6 +28,8 @@ int main(int argc, char *argv[]) {
     if (argc != 3) {
       std::cerr << "This program is used as\n";
       std::cerr << "SmithNormalForm [arith] [inputMat]\n";
+      std::cerr << "---\n";
+      std::cerr << "arith: mpz_class, mpq_class, safe_integer, safe_rational\n";
       return -1;
     }
     std::string arith = argv[1];

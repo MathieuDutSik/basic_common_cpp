@@ -10,11 +10,24 @@
 
 template <typename T> void process(std::string const &FileI) {
   MyMatrix<T> M = ReadMatrixFile<T>(FileI);
+  std::cerr << "|M|=" << M.rows() << " / " << M.cols() << "\n";
   // computing the Smith normal form
   MyVector<T> VectInv = SmithNormalFormInvariant(M);
   //
-  std::cerr << "VectInv=\n";
-  WriteVector(std::cerr, VectInv);
+  //  std::cerr << "VectInv=\n";
+  //  WriteVector(std::cerr, VectInv);
+  //
+  std::map<T, size_t> MultInv;
+  int len = VectInv.size();
+  for (int u=0; u<len; u++) {
+    T val = VectInv(u);
+    MultInv[val] += 1;
+  }
+  std::cerr << "MultInv =";
+  for (auto & kv: MultInv) {
+    std::cerr << " [" << kv.first << "," << kv.second << "]";
+  }
+  std::cerr << "\n";
 }
 
 int main(int argc, char *argv[]) {
@@ -23,6 +36,8 @@ int main(int argc, char *argv[]) {
     if (argc != 3) {
       std::cerr << "This program is used as\n";
       std::cerr << "SmithNormalForm [arith] [inputMat]\n";
+      std::cerr << "---\n";
+      std::cerr << "arith: mpz_class, mpq_class, safe_integer, safe_rational\n";
       return -1;
     }
     std::string arith = argv[1];
