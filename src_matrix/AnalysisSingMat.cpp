@@ -18,6 +18,7 @@ FullNamelist NAMELIST_GetStandardAnalysis() {
   std::map<std::string, std::vector<int>> ListListIntValues1;
   std::map<std::string, std::vector<double>> ListListDoubleValues1;
   ListStringValues1["InputFile"] = "unset";
+  ListStringValues1["PrimalDualPairFile"] = "unset";
   ListDoubleValues1["thrEigenvalueZero"] = 0.0001;
   ListIntValues1["MaximumValueIntSearch"] = 500;
   ListBoolValues1["SearchKernel"] = false;
@@ -26,18 +27,14 @@ FullNamelist NAMELIST_GetStandardAnalysis() {
   ListBoolValues1["ShowKernel"] = false;
   ListBoolValues1["CanonicalizeByMinValue"] = false;
   ListBoolValues1["CheckPrimalDualCancellation"] = false;
-  ListStringValues1["PrimalDualPairFile"] = "unset";
   SingleBlock BlockPROC;
-  BlockPROC.ListIntValues = ListIntValues1;
-  BlockPROC.ListBoolValues = ListBoolValues1;
-  BlockPROC.ListDoubleValues = ListDoubleValues1;
-  BlockPROC.ListStringValues = ListStringValues1;
-  BlockPROC.ListListStringValues = ListListStringValues1;
-  BlockPROC.ListListIntValues = ListListIntValues1;
-  BlockPROC.ListListDoubleValues = ListListDoubleValues1;
+  BlockPROC.setListIntValues(ListIntValues1);
+  BlockPROC.setListBoolValues(ListBoolValues1);
+  BlockPROC.setListDoubleValues(ListDoubleValues1);
+  BlockPROC.setListStringValues(ListStringValues1);
   ListBlock["PROC"] = BlockPROC;
   // Final part
-  return {ListBlock, "undefined"};
+  return FullNamelist(ListBlock);
 }
 
 int main(int argc, char *argv[]) {
@@ -48,26 +45,22 @@ int main(int argc, char *argv[]) {
     if (argc != 2) {
       std::cerr << "This program is used as\n";
       std::cerr << "AnalysisSingMat [Namelist]\n";
-      NAMELIST_WriteNamelistFile(std::cerr, eFull, true);
+      eFull.NAMELIST_WriteNamelistFile(std::cerr, true);
       return -1;
     }
     std::string eFileName = argv[1];
     NAMELIST_ReadNamelistFile(eFileName, eFull);
-    SingleBlock BlPROC = eFull.ListBlock.at("PROC");
-    std::string InputFile = BlPROC.ListStringValues.at("InputFile");
-    double thrEigenvalueZero = BlPROC.ListDoubleValues.at("thrEigenvalueZero");
-    double MaximumValueIntSearch =
-        BlPROC.ListIntValues.at("MaximumValueIntSearch");
-    bool SearchKernel = BlPROC.ListBoolValues.at("SearchKernel");
-    bool SearchOrthKernel = BlPROC.ListBoolValues.at("SearchOrthKernel");
-    bool ShowOrthKernel = BlPROC.ListBoolValues.at("ShowOrthKernel");
-    bool ShowKernel = BlPROC.ListBoolValues.at("ShowKernel");
-    bool CanonicalizeByMinValue =
-        BlPROC.ListBoolValues.at("CanonicalizeByMinValue");
-    bool CheckPrimalDualCancellation =
-        BlPROC.ListBoolValues.at("CheckPrimalDualCancellation");
-    std::string PrimalDualPairFile =
-        BlPROC.ListStringValues.at("PrimalDualPairFile");
+    SingleBlock const& BlPROC = eFull.get_block("PROC");
+    std::string InputFile = BlPROC.get_string("InputFile");
+    double thrEigenvalueZero = BlPROC.get_double("thrEigenvalueZero");
+    double MaximumValueIntSearch = BlPROC.get_int("MaximumValueIntSearch");
+    bool SearchKernel = BlPROC.get_bool("SearchKernel");
+    bool SearchOrthKernel = BlPROC.get_bool("SearchOrthKernel");
+    bool ShowOrthKernel = BlPROC.get_bool("ShowOrthKernel");
+    bool ShowKernel = BlPROC.get_bool("ShowKernel");
+    bool CanonicalizeByMinValue = BlPROC.get_bool("CanonicalizeByMinValue");
+    bool CheckPrimalDualCancellation = BlPROC.get_bool("CheckPrimalDualCancellation");
+    std::string PrimalDualPairFile = BlPROC.get_string("PrimalDualPairFile");
     // reading the matrix
     if (!IsExistingFile(InputFile)) {
       std::cerr << "The InputFile=" << InputFile << " is missing\n";
