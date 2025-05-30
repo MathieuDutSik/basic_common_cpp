@@ -21,7 +21,7 @@ coor operator-(coor const &c1, coor const &c2) {
 
 std::ostream &operator<<(std::ostream &os_out, coor const &obj) {
   os_out << "(" << obj.x << "," << obj.y << ")";
-  return os;
+  return os_out;
 }
 
 double scal(coor const &v1, coor const &v2) {
