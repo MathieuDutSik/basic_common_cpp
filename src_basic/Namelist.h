@@ -260,6 +260,17 @@ T& get_key_value_mut(std::map<std::string, T> & map, std::string const& context,
   return map[key];
 }
 
+
+template<typename T>
+bool has_key_value(std::map<std::string, T> const& map, std::string const& key) {
+  if (map.count(key) == 0) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+
 void print_key_doc(std::ostream &os, std::string const &key,
                    std::string const &doc) {
   size_t shift = 5 + key.size();
@@ -341,6 +352,30 @@ public:
   }
   std::vector<std::string>& get_list_string_mut(std::string const& key) {
     return get_key_value_mut(ListListStringValues, "ListListStringValues", key);
+  }
+  //
+  // The existence functions
+  //
+  bool get_int(std::string const& key) {
+    return has_key_value(ListIntValues, key);
+  }
+  bool has_bool(std::string const& key) {
+    return has_key_value(ListBoolValues, key);
+  }
+  bool has_double(std::string const& key) {
+    return has_key_value(ListDoubleValues, key);
+  }
+  bool has_list_double(std::string const& key) {
+    return has_key_value(ListListDoubleValues, key);
+  }
+  bool has_list_int(std::string const& key) {
+    return has_key_value(ListListIntValues, key);
+  }
+  bool has_string(std::string const& key) {
+    return has_key_value(ListStringValues, key);
+  }
+  bool has_list_string(std::string const& key) {
+    return has_key_value(ListListStringValues, key);
   }
   //
   // The set* functions for values
@@ -670,7 +705,7 @@ public:
       iBlock++;
     }
   }
-  std::vector<std::string> NAMELIST_ListTrueEntryBool(std::string const &eBlockName) {
+  std::vector<std::string> NAMELIST_ListTrueEntryBool(std::string const &eBlockName) const {
     std::vector<std::string> ListString;
     SingleBlock const& eBlock = get_block(eBlockName);
     return eBlock.ExtractMatchingBool();
