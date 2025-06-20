@@ -22,6 +22,10 @@
 #define SANITY_CHECK_MATRIX_INT
 #endif
 
+#ifdef SANITY_CHECK_EXTENSIVE
+#define SANITY_CHECK_EXTENSIVE_MATRIX_INT
+#endif
+
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction
 // ring) of a factorial ring. Operations may work for fields and rings as well.
@@ -2318,7 +2322,8 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   }
 
   // That check is just too expensive. Skipping it.
-#ifdef SANITY_CHECK_MATRIX_INT_DISABLE
+#ifdef SANITY_CHECK_EXTENSIVE_MATRIX_INT
+  std::cerr << "Before SANITY_CHECK_EXTENSIVE_MATRIX_INT of GetZbasis\n";
   int DimSpace = TheBasis.rows();
   for (int iBas = 0; iBas < DimSpace; iBas++) {
     MyVector<T> eLine = GetMatrixRow(TheBasis, iBas);
@@ -2336,6 +2341,7 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
       throw TerminalException{1};
     }
   }
+  std::cerr << "After SANITY_CHECK_EXTENSIVE_MATRIX_INT of GetZbasis\n";
 #endif
   return TheBasis;
 }
