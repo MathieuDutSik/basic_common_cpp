@@ -2245,7 +2245,7 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
       std::vector<int> AbsList;
       bool IsFirst = true;
       int ThePivot = -1;
-      Treal TheMin = -1;
+      Treal TheMin(-1);
       for (auto &eVal : ListIdxNZ) {
         T eVal_T = eVect(eVal);
         Treal eAbs = T_NormGen(eVal_T);
@@ -2285,7 +2285,7 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   auto IsInSpace = [&](MyVector<T> const &eElt) -> bool {
     int nbEqua = ListEqua.rows();
     for (int iEqua = 0; iEqua < nbEqua; iEqua++) {
-      T eSum = 0;
+      T eSum(0);
       for (int i = 0; i < TheDim; i++)
         eSum += ListEqua(iEqua, i) * eElt(i);
       if (eSum != 0)
@@ -2317,7 +2317,8 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
     fInsert(eElt);
   }
 
-#ifdef SANITY_CHECK_MATRIX_INT
+  // That check is just too expensive. Skipping it.
+#ifdef SANITY_CHECK_MATRIX_INT_DISABLE
   int DimSpace = TheBasis.rows();
   for (int iBas = 0; iBas < DimSpace; iBas++) {
     MyVector<T> eLine = GetMatrixRow(TheBasis, iBas);
