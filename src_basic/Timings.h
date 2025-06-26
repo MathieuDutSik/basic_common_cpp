@@ -140,11 +140,15 @@ template <typename T> struct TimeEval {
         std::chrono::system_clock::now();
     return std::chrono::duration_cast<T>(timeNew - time).count();
   }
-  std::string eval() {
+  int64_t eval_int64() {
     std::chrono::time_point<std::chrono::system_clock> timeNew =
         std::chrono::system_clock::now();
     int64_t delta = std::chrono::duration_cast<T>(timeNew - time).count();
     time = timeNew;
+    return delta;
+  }
+  std::string eval() {
+    int64_t delta = eval_int64();
     return std::to_string(delta);
   }
 };
