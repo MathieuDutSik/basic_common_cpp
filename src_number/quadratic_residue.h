@@ -11,10 +11,6 @@
 #include <vector>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_QUADRATIC_RESIDUE
-#endif
-
 /*
   References used below:
   OB: Oswald Baumgart, "The Quadratic Reciprocity Law: A collection of classical

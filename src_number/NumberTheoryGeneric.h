@@ -8,11 +8,6 @@
 #include <limits>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_NUMBER_THEORY_GENERIC
-#endif
-
-
 template <typename T> T GenericGcd(T const &m, T const &n) {
   T h, q;
   if (n == 0 && m == 0) {

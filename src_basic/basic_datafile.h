@@ -11,10 +11,6 @@
 #include <vector>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_BASIC_DATAFILE
-#endif
-
 //
 // Storing a single number to file
 //

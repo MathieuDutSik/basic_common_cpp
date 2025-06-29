@@ -18,10 +18,6 @@
 #define MAX_INT64_PROD 2147483647
 #define MAX_INT64_SUM 4611686018427387903
 
-#ifdef SANITY_CHECK
-#define SANITY_CHECK_SAFETY_INTEGER
-#endif
-
 void check_prod_int64(int64_t val) {
   if (val > MAX_INT64_PROD || val < -MAX_INT64_PROD) {
     std::cerr << "Safety check triggerred for product operation of int64_t\n";

@@ -22,10 +22,6 @@
 // fields. (A) linear algebra is needed. (B) analysis is needed for deciding
 // signs.
 
-#ifdef SANITY_CHECK
-#define SANITY_CHECK_REAL_ALG_NUMERIC
-#endif
-
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
 double threshold_real_alg_check = 0.0001;
 #endif

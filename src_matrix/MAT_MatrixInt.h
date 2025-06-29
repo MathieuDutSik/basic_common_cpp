@@ -12,20 +12,6 @@
 #include <vector>
 // clang-format on
 
-//  #undef TRACK_MAXIMUM_SIZE_COEFF
-
-#ifdef DEBUG
-#define DEBUG_MATRIX_INT
-#endif
-
-#ifdef SANITY_CHECK
-#define SANITY_CHECK_MATRIX_INT
-#endif
-
-#ifdef SANITY_CHECK_EXTENSIVE
-#define SANITY_CHECK_EXTENSIVE_MATRIX_INT
-#endif
-
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction
 // ring) of a factorial ring. Operations may work for fields and rings as well.

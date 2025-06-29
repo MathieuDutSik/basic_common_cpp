@@ -24,14 +24,6 @@
 #include <vector>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_MAT_MATRIX
-#endif
-
-#ifdef SANITY_CHECK
-#define SANITY_CHECK_MAT_MATRIX
-#endif
-
 template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;
 };

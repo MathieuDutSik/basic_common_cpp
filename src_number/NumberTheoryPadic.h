@@ -13,10 +13,6 @@
 #include <vector>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_PADIC
-#endif
-
 /*
   Computation with p-adic numbers.
 

@@ -14,11 +14,6 @@
 #include <utility>
 #include <vector>
 
-#ifdef DEBUG
-#define DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
-#define DEBUG_THOMPSON_SAMPLING
-#endif
-
 template <typename T> struct SingleCondition {
   std::string eCond;
   std::string eType;

@@ -6,10 +6,6 @@
 #include <limits>
 #include <vector>
 
-#ifdef DEBUG
-#define DEBUG_GRAPH_BITSET
-#endif
-
 
 struct GraphBitset {
 public:

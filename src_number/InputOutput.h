@@ -13,10 +13,6 @@
 #include <utility>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_INPUT_OUTPUT
-#endif
-
 template <typename T>
 void WriteVectorFromRealAlgebraicString(std::ostream &os,
                                         std::vector<T> const &V) {

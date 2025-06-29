@@ -9,10 +9,6 @@
 #include <vector>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_FACTORIZATION
-#endif
-
 template <typename T>
 std::pair<bool, T> rho_pollard_factorize(T const &number) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");

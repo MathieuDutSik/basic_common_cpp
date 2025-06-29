@@ -8,10 +8,6 @@
 #include <vector>
 // clang-format on
 
-#ifdef DEBUG
-#define DEBUG_MATRIX_MOD
-#endif
-
 template <typename T, typename Tmod>
 MyMatrix<Tmod> ModuloReductionMatrix(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
