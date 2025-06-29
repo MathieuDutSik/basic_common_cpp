@@ -26,6 +26,12 @@ Forran provides a quite powerful system for doing input files. It is named Namel
 and the extension of those files are *nml*. We provide this functionality in C++ with
 a more rigorous way: An entry can be defined only one time for example.
 
+## DEBUG statements
+
+There are a number of debug statements. In contrast to "polyhedral_common", they have
+to be selected one by one like "DEBUG_MATRIX_INT". This is because we do not
+transmit the "std::ostream& os" accross libraries.
+
 ## Scalar types
 
 By scalar types we mean the one used for matrices, vectors, etc. Example could be integer,
