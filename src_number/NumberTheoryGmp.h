@@ -103,6 +103,10 @@ template <> struct is_exact_arithmetic<mpq_class> {
 // but we need some ways to convert from one setting to another
 //
 
+template <> struct underlying_ring<mpz_class> {
+  typedef mpz_class ring_type;
+};
+
 template <> struct underlying_ring<mpq_class> {
   typedef mpz_class ring_type;
 };
