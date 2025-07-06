@@ -153,6 +153,23 @@ MyVector<T2> UniversalVectorConversion(MyVector<T1> const &V) {
 }
 
 template <typename T2, typename T1>
+std::optional<MyVector<T2>> UniversalVectorConversionCheck(MyVector<T1> const &V) {
+  int n = V.size();
+  MyVector<T2> V_ret(n);
+  try {
+    T2 ret;
+    for (int i = 0; i < n; i++) {
+      stc<T1> stc_a{V(i)};
+      TYPE_CONVERSION(stc_a, ret);
+      V_ret(i) = ret;
+    }
+  } catch (ConversionException &e) {
+    return {};
+  }
+  return V_ret;
+}
+
+template <typename T2, typename T1>
 MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const &M) {
   int n_rows = M.rows();
   int n_cols = M.cols();
@@ -161,6 +178,26 @@ MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const &M) {
     for (int i = 0; i < n_rows; i++)
       eRet(i, j) = UniversalScalarConversion<T2, T1>(M(i, j));
   return eRet;
+}
+
+template <typename T2, typename T1>
+std::optional<MyMatrix<T2>> UniversalMatrixConversionCheck(MyMatrix<T1> const &M) {
+  int n_rows = M.rows();
+  int n_cols = M.cols();
+  MyMatrix<T2> M_ret(n_rows, n_cols);
+  try {
+    T2 ret;
+    for (int j = 0; j < n_cols; j++) {
+      for (int i = 0; i < n_rows; i++) {
+        stc<T1> stc_a{M(i,j)};
+        TYPE_CONVERSION(stc_a, ret);
+        M_ret(i, j) = ret;
+      }
+    }
+  } catch (ConversionException &e) {
+    return {};
+  }
+  return M_ret;
 }
 
 template <typename T2, typename T1>
