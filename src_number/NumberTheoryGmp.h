@@ -565,9 +565,19 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int16_t &a2) {
   a2 = static_cast<int16_t>(eVal_long);
 }
 
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint16_t &a2) {
+  long eVal_long = a1.val.get_si();
+  a2 = static_cast<uint16_t>(eVal_long);
+}
+
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int32_t &a2) {
   long eVal_long = a1.val.get_si();
   a2 = static_cast<int32_t>(eVal_long);
+}
+
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint32_t &a2) {
+  long eVal_long = a1.val.get_si();
+  a2 = static_cast<uint32_t>(eVal_long);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int64_t &a2) {
