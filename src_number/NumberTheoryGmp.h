@@ -560,6 +560,16 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, mpq_class &a2) {
   a2 = a1.val;
 }
 
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int8_t &a2) {
+  long eVal_long = a1.val.get_si();
+  a2 = static_cast<int8_t>(eVal_long);
+}
+
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint8_t &a2) {
+  long eVal_long = a1.val.get_si();
+  a2 = static_cast<uint8_t>(eVal_long);
+}
+
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int16_t &a2) {
   long eVal_long = a1.val.get_si();
   a2 = static_cast<int16_t>(eVal_long);
