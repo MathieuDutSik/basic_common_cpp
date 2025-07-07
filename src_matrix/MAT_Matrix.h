@@ -210,6 +210,22 @@ UniversalStdVectorMatrixConversion(std::vector<MyMatrix<T1>> const &ListM) {
   return ListM_ret;
 }
 
+template <typename T2, typename T1>
+std::optional<std::vector<MyMatrix<T2>>>
+UniversalStdVectorMatrixConversionCheck(std::vector<MyMatrix<T1>> const &ListM) {
+  size_t n_mat = ListM.size();
+  std::vector<MyMatrix<T2>> ListM_ret(n_mat);
+  for (size_t i_mat = 0; i_mat < n_mat; i_mat++) {
+    std::optional<MyMatrix<T2>> opt = UniversalMatrixConversionCheck<T2, T1>(ListM[i_mat]);
+    if (opt) {
+      ListM_ret[i_mat] = *opt;
+    } else {
+      return {};
+    }
+  }
+  return ListM_ret;
+}
+
 template <typename T>
 MyVector<T> VectorWithIdenticalEntries(int const &len, T const &val) {
   MyVector<T> V(len);
