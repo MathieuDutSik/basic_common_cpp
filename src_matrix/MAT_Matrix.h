@@ -1454,6 +1454,9 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input,
   return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f, threshold);
 }
 
+
+
+
 template <typename T>
 SelectionRowCol<T>
 TMat_SelectRowColMaxPivot_subset(MyMatrix<T> const &Input,
@@ -1489,6 +1492,20 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const &Input) {
     M.row(eRank) = Input.row(iRow);
   };
   return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f);
+}
+
+template <typename T>
+inline typename std::enable_if<is_ring_field<T>::value, std::vector<int>>::type
+TMat_ListRowSelect(MyMatrix<T> const &Input) {
+  return TMat_SelectRowCol(Input).ListRowSelect;
+}
+
+template <typename T>
+inline typename std::enable_if<!is_ring_field<T>::value, std::vector<int>>::type
+TMat_ListRowSelect(MyMatrix<T> const &Input) {
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
+  return TMat_SelectRowCol(InputF).ListRowSelect;
 }
 
 template <typename T>

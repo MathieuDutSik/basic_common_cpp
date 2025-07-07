@@ -2634,6 +2634,23 @@ MyMatrix<T> EliminateSuperfluousPrimeDenominators_Matrix(MyMatrix<T> const& eMat
   return TheMat;
 }
 
+template<typename T>
+inline typename std::enable_if<is_ring_field<T>::value, SelectionRowCol<T>>::type
+TMat_SelectRowColRing(MyMatrix<T> const &Input) {
+  return TMat_SelectRowCol(Input);
+}
+
+template<typename T>
+inline typename std::enable_if<!is_ring_field<T>::value, SelectionRowCol<T>>::type
+TMat_SelectRowColRing(MyMatrix<T> const &Input) {
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
+  SelectionRowCol<Tfield> src = TMat_SelectRowColRing(InputF);
+  MyMatrix<Tfield> NSP2 = RemoveFractionMatrix(src.NSP);
+  MyMatrix<T> NSP3 = UniversalMatrixConversion<T,Tfield>(NSP2);
+  return {src.TheRank, NSP3, src.ListColSelect, src.ListRowSelect};
+}
+
 // clang-format off
 #endif  // SRC_MATRIX_MAT_MATRIXINT_H_
 // clang-format on
