@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <unordered_set>
 
 std::string STRING_GETENV(std::string const &eStr) {
   char *ePre = std::getenv(eStr.c_str());
@@ -92,21 +93,18 @@ std::string StringSubstitution(
 }
 
 bool IsFullyNumeric(std::string const &eStr) {
-  std::string eLS = " 0123456789.";
-  size_t nbChar = eStr.size();
-  for (size_t uChar = 0; uChar < nbChar; uChar++) {
-    std::string eChar = eStr.substr(uChar, 1);
-    auto TheFind = [&](std::string const &eCharIn) -> bool {
-      size_t nbCase = eLS.size();
-      for (size_t iCase = 0; iCase < nbCase; iCase++) {
-        std::string eCase = eLS.substr(iCase, 1);
-        if (eCase == eCharIn)
-          return true;
-      }
+  static const std::unordered_set<char> numeric_chars = {' ', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'};
+  size_t n_dot = 0;
+  for (char c : eStr) {
+    if (c == '.') {
+      n_dot += 1;
+    }
+    if (numeric_chars.count(c) == 0) {
       return false;
-    };
-    if (TheFind(eChar) == false)
-      return false;
+    }
+  }
+  if (n_dot > 1) {
+    return false;
   }
   return true;
 }
@@ -448,23 +446,21 @@ std::string STRING_Replace(std::string const &eStrA, std::string const &eStrB,
 }
 
 std::vector<std::string> STRING_SplitCharNb(std::string const &str) {
-  auto IsNumber = [](std::string const &eChar) {
-    std::vector<std::string> ListCharNb{"-", "0", "1", "2", "3", "4",
-                                        "5", "6", "7", "8", "9"};
-    for (auto &fCharNb : ListCharNb)
-      if (fCharNb == eChar)
-        return true;
-    return false;
+  static const std::unordered_set<char> number_chars = {'-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+  
+  auto IsNumber = [&](char c) {
+    return number_chars.count(c) > 0;
   };
+  
   size_t len = str.size();
   std::vector<bool> ListStat(len);
   for (size_t i = 0; i < len; i++) {
-    std::string eChar = str.substr(i, 1);
-    ListStat[i] = IsNumber(eChar);
+    ListStat[i] = IsNumber(str[i]);
   }
+  
   std::string TotStr;
   for (size_t i = 0; i < len; i++) {
-    TotStr += str.substr(i, 1);
+    TotStr += str[i];
     if (i < len - 1) {
       if (ListStat[i] != ListStat[i + 1]) {
         TotStr += "WRK";
