@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 #include <unordered_set>
+#include <iomanip>
+#include <sstream>
 
 std::string STRING_GETENV(std::string const &eStr) {
   char *ePre = std::getenv(eStr.c_str());
@@ -111,42 +113,28 @@ bool IsFullyNumeric(std::string const &eStr) {
 
 std::string DoubleTo4dot2f(double const &x) {
   std::stringstream s;
-  s << std::fixed;
-  s << std::setprecision(2);
-  s << x;
-  std::string converted(s.str());
-  return converted;
+  s << std::fixed << std::setprecision(2) << x;
+  return s.str();
 }
 
 std::string DoubleTo4dot1f(double const &x) {
   std::stringstream s;
-  s << std::fixed;
-  s << std::setprecision(1);
-  s << x;
-  std::string converted(s.str());
-  return converted;
+  s << std::fixed << std::setprecision(1) << x;
+  return s.str();
 }
 
 std::string DoubleToString(double const &x) {
   std::stringstream s;
-  s << std::fixed;
-  s << std::setprecision(9);
-  s << x;
-  std::string converted(s.str());
-  return converted;
+  s << std::fixed << std::setprecision(9) << x;
+  return s.str();
 }
 
 std::string IntToString(int const &x) {
-  std::stringstream s;
-  s << x;
-  std::string converted(s.str());
-  return converted;
+  return std::to_string(x);
 }
 
 int StringToInt(std::string const &str) {
-  int val;
-  std::istringstream(str) >> val;
-  return val;
+  return std::stoi(str);
 }
 
 std::string StringVectorStringGAP(std::vector<std::string> const &LStr) {
