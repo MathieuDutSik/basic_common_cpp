@@ -3234,8 +3234,8 @@ template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
-Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
+inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
+Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
   if (M.size() == 0) return seed;
 
   size_t result = seed;
@@ -3252,15 +3252,15 @@ Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_arithmetic<T>::value, uint32_t>::type
-Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
+inline typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type
+Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
   if (M.size() == 0) return seed;
   return hash_utils::hash_arithmetic_array(M.data(), M.size(), seed);
 }
 
 template <typename T>
-inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
-Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
+inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
+Vector_Hash(MyVector<T> const &V, size_t const &seed) {
   if (V.size() == 0) return seed;
   
   size_t result = seed;
@@ -3272,8 +3272,8 @@ Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_arithmetic<T>::value, uint32_t>::type
-Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
+inline typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type
+Vector_Hash(MyVector<T> const &V, size_t const &seed) {
   if (V.size() == 0) return seed;
   return hash_utils::hash_arithmetic_array(V.data(), V.size(), seed);
 }
@@ -3281,13 +3281,13 @@ Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
 namespace std {
 template <typename T> struct hash<MyVector<T>> {
   std::size_t operator()(const MyVector<T> &e_val) const {
-    uint32_t seed = 0x1b873540;
+    size_t seed = 0x1b873540;
     return Vector_Hash(e_val, seed);
   }
 };
 template <typename T> struct hash<MyMatrix<T>> {
   std::size_t operator()(const MyMatrix<T> &e_val) const {
-    uint32_t seed = 0x1b873540;
+    size_t seed = 0x1b873540;
     return Matrix_Hash(e_val, seed);
   }
 };
@@ -3297,8 +3297,8 @@ template <typename T> struct hash<MyMatrix<T>> {
 
 template <typename T>
 int IntegerDiscriminantInvariant(MyMatrix<T> const &NewMat, int const &n_pes) {
-  uint32_t seed = 0x1b873540;
-  uint32_t e_hash = Matrix_Hash(NewMat, seed);
+  size_t seed = 0x1b873540;
+  size_t e_hash = Matrix_Hash(NewMat, seed);
   int residue = static_cast<int>(e_hash % n_pes);
   return residue;
 }
