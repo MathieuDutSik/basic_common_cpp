@@ -3237,14 +3237,14 @@ template <typename T>
 inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
 Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
   if (M.size() == 0) return seed;
-  
-  uint32_t result = seed;
+
+  size_t result = seed;
   int nbRow = M.rows();
   int nbCol = M.cols();
   
   for (int iRow = 0; iRow < nbRow; iRow++) {
     for (int iCol = 0; iCol < nbCol; iCol++) {
-      uint32_t elem_hash = std::hash<T>{}(M(iRow, iCol));
+      size_t elem_hash = std::hash<T>{}(M(iRow, iCol));
       hash_utils::hash_combine(result, elem_hash);
     }
   }
@@ -3263,9 +3263,9 @@ inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
 Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
   if (V.size() == 0) return seed;
   
-  uint32_t result = seed;
+  size_t result = seed;
   for (int i = 0; i < V.size(); i++) {
-    uint32_t elem_hash = std::hash<T>{}(V(i));
+    size_t elem_hash = std::hash<T>{}(V(i));
     hash_utils::hash_combine(result, elem_hash);
   }
   return result;
