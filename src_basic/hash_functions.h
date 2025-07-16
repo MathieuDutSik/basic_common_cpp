@@ -278,6 +278,10 @@ static inline uint32_t murmur_32_scramble(uint32_t k) {
 }
 
 uint32_t murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
+  // Add null pointer check
+  if (key == nullptr) return seed;
+  if (len == 0) return seed;
+  
   uint32_t h = seed;
   uint32_t k;
   /* Read in groups of 4. */
@@ -313,6 +317,9 @@ uint32_t murmur3_32(const uint8_t *key, size_t len, uint32_t seed) {
 template <typename T> inline T unaligned_load(void const *ptr) noexcept {
   // using memcpy so we don't get into unaligned load problems.
   // compiler should optimize this very well anyways.
+  static_assert(std::is_trivially_copyable_v<T>, "T must be trivially copyable");
+  if (ptr == nullptr) return T{};
+  
   T t;
   std::memcpy(&t, ptr, sizeof(T));
   return t;
@@ -382,58 +389,77 @@ template <typename T> std::size_t hash_from_stream(T const &val) {
   return std::hash<std::string>()(converted);
 }
 
+// Safe hash combining function
+namespace hash_utils {
+    inline void hash_combine(std::size_t& seed, std::size_t hash) noexcept {
+        seed ^= hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    }
+    
+    // Safe wrapper for murmur3_32 with bounds checking
+    inline uint32_t safe_murmur3_32(const void* data, size_t len, uint32_t seed) {
+        if (len == 0 || data == nullptr) return seed;
+        return murmur3_32(static_cast<const uint8_t*>(data), len, seed);
+    }
+    
+    // Type-safe memory hashing for arithmetic types
+    template<typename T>
+    inline uint32_t hash_arithmetic_array(const T* data, size_t count, uint32_t seed) {
+        static_assert(std::is_arithmetic_v<T>, "T must be arithmetic type");
+        if (count == 0 || data == nullptr) return seed;
+        
+        const size_t byte_size = sizeof(T) * count;
+        const uint8_t* byte_data = reinterpret_cast<const uint8_t*>(data);
+        return safe_murmur3_32(byte_data, byte_size, seed);
+    }
+}
+
 template <typename T>
 size_t ComputeHashTwoMap(size_t const &seed,
                          std::map<T, size_t> const &ListDiagNorm,
                          std::map<T, size_t> const &ListOffDiagNorm) {
-  auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
-    seed ^= new_hash + 0x9e3779b8 + (seed << 6) + (seed >> 2);
-  };
   size_t hash = seed;
-  auto update_from_map = [&](std::map<T, size_t> const &map) -> void {
-    for (auto &kv : map) {
-      size_t hash1 = std::hash<T>()(kv.first);
+  
+  auto update_from_map = [&](const std::map<T, size_t>& map) {
+    for (const auto& kv : map) {
+      size_t hash1 = std::hash<T>{}(kv.first);
       size_t hash2 = kv.second;
-      combine_hash(hash, hash1);
-      combine_hash(hash, hash2);
+      hash_utils::hash_combine(hash, hash1);
+      hash_utils::hash_combine(hash, hash2);
     }
   };
+  
   update_from_map(ListDiagNorm);
   update_from_map(ListOffDiagNorm);
   return hash;
 }
 
 namespace std {
-template <typename T> struct hash<std::vector<T>> {
-  std::size_t operator()(const std::vector<T> &V) const {
-    if constexpr (!std::is_arithmetic<T>::value) {
-      auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
-        seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-      };
-      size_t seed = 0;
-      for (size_t i = 0; i < V.size(); i++) {
-        size_t e_hash = std::hash<T>()(V[i]);
-        combine_hash(seed, e_hash);
+template <typename T> 
+struct hash<std::vector<T>> {
+  std::size_t operator()(const std::vector<T>& V) const {
+    if (V.empty()) return 0;
+    
+    if constexpr (std::is_arithmetic_v<T>) {
+      // Use safe arithmetic hashing
+      uint32_t seed = 0x1b873540;
+      return hash_utils::hash_arithmetic_array(V.data(), V.size(), seed);
+    } else {
+      // Use proper hash combining for non-arithmetic types
+      std::size_t seed = 0;
+      for (const auto& elem : V) {
+        std::size_t elem_hash = std::hash<T>{}(elem);
+        hash_utils::hash_combine(seed, elem_hash);
       }
       return seed;
     }
-    if constexpr (std::is_arithmetic<T>::value) {
-      const T *ptr_T = V.data();
-      const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(ptr_T);
-      size_t len = sizeof(T) * V.size();
-      uint32_t seed = 0x1b873540;
-      return murmur3_32(ptr_i, len, seed);
-    }
   }
 };
-template <typename T1, typename T2> struct hash<std::pair<T1, T2>> {
-  std::size_t operator()(const std::pair<T1, T2> &ePair) const {
-    auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
-      seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    };
-    size_t seed = std::hash<T1>()(ePair.first);
-    size_t e_hash = std::hash<T2>()(ePair.second);
-    combine_hash(seed, e_hash);
+template <typename T1, typename T2> 
+struct hash<std::pair<T1, T2>> {
+  std::size_t operator()(const std::pair<T1, T2>& ePair) const {
+    std::size_t seed = std::hash<T1>{}(ePair.first);
+    std::size_t hash2 = std::hash<T2>{}(ePair.second);
+    hash_utils::hash_combine(seed, hash2);
     return seed;
   }
 };

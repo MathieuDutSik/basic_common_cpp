@@ -3236,45 +3236,46 @@ template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {
 template <typename T>
 inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
 Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
-  std::stringstream s;
+  if (M.size() == 0) return seed;
+  
+  uint32_t result = seed;
   int nbRow = M.rows();
   int nbCol = M.cols();
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      s << " " << M(iRow, iCol);
-  std::string converted(s.str());
-  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(converted.c_str());
-  return murmur3_32(ptr_i, converted.size(), seed);
+  
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      uint32_t elem_hash = std::hash<T>{}(M(iRow, iCol));
+      hash_utils::hash_combine(result, elem_hash);
+    }
+  }
+  return result;
 }
 
 template <typename T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, uint32_t>::type
 Matrix_Hash(MyMatrix<T> const &M, uint32_t const &seed) {
-  const T *ptr_T = M.data();
-  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(ptr_T);
-  size_t len = sizeof(T) * M.size();
-  return murmur3_32(ptr_i, len, seed);
+  if (M.size() == 0) return seed;
+  return hash_utils::hash_arithmetic_array(M.data(), M.size(), seed);
 }
 
 template <typename T>
 inline typename std::enable_if<!std::is_arithmetic<T>::value, uint32_t>::type
 Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
-  std::stringstream s;
-  int n = V.size();
-  for (int i = 0; i < n; i++)
-    s << " " << V(i);
-  std::string converted(s.str());
-  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(converted.c_str());
-  return murmur3_32(ptr_i, converted.size(), seed);
+  if (V.size() == 0) return seed;
+  
+  uint32_t result = seed;
+  for (int i = 0; i < V.size(); i++) {
+    uint32_t elem_hash = std::hash<T>{}(V(i));
+    hash_utils::hash_combine(result, elem_hash);
+  }
+  return result;
 }
 
 template <typename T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, uint32_t>::type
 Vector_Hash(MyVector<T> const &V, uint32_t const &seed) {
-  const T *ptr_T = V.data();
-  const uint8_t *ptr_i = reinterpret_cast<const uint8_t *>(ptr_T);
-  size_t len = sizeof(T) * V.size();
-  return murmur3_32(ptr_i, len, seed);
+  if (V.size() == 0) return seed;
+  return hash_utils::hash_arithmetic_array(V.data(), V.size(), seed);
 }
 
 namespace std {
