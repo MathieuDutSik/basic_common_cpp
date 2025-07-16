@@ -204,34 +204,22 @@ std::string UpperCaseToLowerCase(std::string const &dataIn) {
 }
 
 std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
-  size_t len = eStr.size();
-  std::vector<int> ListIsSpace(len, 0);
-  std::string eSpace = " ";
-  for (size_t i = 0; i < len; i++) {
-    std::string eChar = eStr.substr(i, 1);
-    if (eChar == eSpace)
-      ListIsSpace[i] = 1;
+  if (eStr.empty()) {
+    return "";
   }
-  size_t miss_val = std::numeric_limits<size_t>::max();
-  size_t PosLow = miss_val;
-  for (size_t i = 0; i < len; i++)
-    if (PosLow == miss_val)
-      if (ListIsSpace[i] == 0)
-        PosLow = i;
-  size_t PosUpp = miss_val;
-  for (size_t i = 0; i < len; i++) {
-    size_t j = len - 1 - i;
-    if (PosUpp == miss_val)
-      if (ListIsSpace[j] == 0)
-        PosUpp = j;
+  
+  // Find first non-space character
+  size_t start = eStr.find_first_not_of(' ');
+  if (start == std::string::npos) {
+    // String contains only spaces
+    return "";
   }
-  std::string RetStr;
-  if (PosLow == miss_val) {
-    return RetStr;
-  }
-  for (size_t iPos = PosLow; iPos <= PosUpp; iPos++)
-    RetStr += eStr.at(iPos);
-  return RetStr;
+  
+  // Find last non-space character
+  size_t end = eStr.find_last_not_of(' ');
+  
+  // Return substring from start to end (inclusive)
+  return eStr.substr(start, end - start + 1);
 }
 
 bool startswith(std::string const &str1, std::string const &str2) {
