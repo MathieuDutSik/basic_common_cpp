@@ -41,10 +41,10 @@ std::string NAMELIST_ConvertFortranStringToCppString(std::string const &eStr) {
   int len = eStr.length();
   if (len == 0)
     return "";
-  std::string eFirstChar = eStr.substr(0, 1);
-  std::string eLastChar = eStr.substr(len - 1, 1);
+  char eFirstChar = eStr[0];
+  char eLastChar = eStr[len - 1];
   int RemovableEnding = 0;
-  if (eFirstChar == "'" || eFirstChar == "\"") {
+  if (eFirstChar == '\'' || eFirstChar == '\"') {
     RemovableEnding = 1;
     if (eFirstChar != eLastChar) {
       std::cerr << "Error in NAMELIST_ConvertFortranStringToCppString\n";
@@ -58,7 +58,7 @@ std::string NAMELIST_ConvertFortranStringToCppString(std::string const &eStr) {
   }
   if (RemovableEnding == 1) {
     for (int i = 1; i < len - 1; i++) {
-      std::string eChar = eStr.substr(i, 1);
+      char eChar = eStr[i];
       if (eChar == eFirstChar) {
         std::cerr << "It is illegal to have \" or ' character in the middle\n";
         throw TerminalException{1};
@@ -74,15 +74,15 @@ NAMELIST_ConvertFortranListStringToCppListString(std::string const &eStr) {
   int len = eStr.length();
   if (len == 0)
     return {};
-  std::string eFirstChar = eStr.substr(0, 1);
-  std::string eLastChar = eStr.substr(len - 1, 1);
-  if (eFirstChar != "'" && eFirstChar != "\"") {
+  char eFirstChar = eStr[0];
+  char eLastChar = eStr[len - 1];
+  if (eFirstChar != '\'' && eFirstChar != '\"') {
     std::cerr << "eStr=" << eStr << "\n";
     std::cerr
         << "For list of strings, one should use string \"  \"   or '    '   \n";
     throw NamelistException{1};
   }
-  if (eLastChar != "'" && eLastChar != "\"") {
+  if (eLastChar != '\'' && eLastChar != '\"') {
     std::cerr << "eStr=" << eStr << "\n";
     std::cerr
         << "For list of strings, one should use string \"  \"   or '    '   \n";
@@ -95,12 +95,12 @@ NAMELIST_ConvertFortranListStringToCppListString(std::string const &eStr) {
     std::cerr << "No coherency in endings\n";
     throw NamelistException{1};
   }
-  std::string eSepChar = eFirstChar;
+  char eSepChar = eFirstChar;
   int IsInString = 0;
   std::string eFound = "";
   std::vector<std::string> eListStr;
   for (int i = 0; i < len; i++) {
-    std::string eChar = eStr.substr(i, 1);
+    char eChar = eStr[i];
     if (eChar == eSepChar) {
       eFound += eChar;
       if (IsInString == 1) {
@@ -151,12 +151,12 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
 
 
 std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
-                                            std::string const &eChar) {
+                                            char const &eChar) {
   bool WeFound = false;
   std::string RetStr;
   int len = eStr.size();
   for (int i = 0; i < len; i++) {
-    std::string fChar = eStr.substr(i, 1);
+    char fChar = eStr[i];
     if (fChar == eChar)
       WeFound = true;
     if (!WeFound)
@@ -166,13 +166,13 @@ std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
 }
 
 std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
-                                         std::string const &eLastChar) {
+                                         char const &eLastChar) {
   int iPos = -1;
   int len = eStr.size();
   for (int i = 0; i < len; i++) {
     int j = len - 1 - i;
     if (iPos == -1) {
-      std::string eChar = eStr.substr(j, 1);
+      char eChar = eStr[j];
       if (eChar == eLastChar)
         iPos = j;
     }
@@ -183,16 +183,16 @@ std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
 }
 
 std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
-  std::string eCharCommentB = "!";
+  char eCharCommentB = '!';
   std::string eStr3 = NAMELIST_RemoveAfterLastChar(eStr, eCharCommentB);
   //
   int iPos = -1;
   int len = eStr3.size();
-  std::string eLastChar = ",";
+  char eLastChar = ',';
   for (int i = 0; i < len; i++) {
     int j = len - 1 - i;
     if (iPos == -1) {
-      std::string eChar = eStr3.substr(j, 1);
+      char eChar = eStr3[j];
       if (eChar == eLastChar)
         iPos = j;
     }
@@ -218,8 +218,8 @@ std::optional<std::string> get_default(std::string const &strin) {
   }
   size_t n_char = strin.size();
   for (size_t i_char = 0; i_char < n_char; i_char++) {
-    std::string e_char = strin.substr(i_char, 1);
-    if (e_char == "\n") {
+    char e_char = strin[i_char];
+    if (e_char == '\n') {
       return strin.substr(prefix_s, i_char - prefix_s);
     }
   }
@@ -277,9 +277,9 @@ void print_key_doc(std::ostream &os, std::string const &key,
   os << "  " << key << " : ";
   size_t n_char = doc.size();
   for (size_t i_char = 0; i_char < n_char; i_char++) {
-    std::string e_char = doc.substr(i_char, 1);
+    char e_char = doc[i_char];
     os << e_char;
-    if (e_char == "\n") {
+    if (e_char == '\n') {
       for (size_t u = 0; u < shift; u++)
         os << " ";
     }
@@ -729,7 +729,7 @@ public:
       std::string strTab = "\t";
       std::string PreStr;
       std::getline(is, PreStr);
-      std::string eCharComment = "!";
+      char eCharComment = '!';
       std::string PreStrB = NAMELIST_RemoveAfterCommentChar(PreStr, eCharComment);
       std::string eStr = STRING_RemoveSpacesBeginningEnd(PreStrB);
       int len = eStr.length();
@@ -740,8 +740,8 @@ public:
       }
       if (len > 0) {
         if (eStr.find(Ampersand) != std::string::npos) {
-          std::string eFirstChar = eStr.substr(0, 1);
-          if (eFirstChar != "&") {
+          char eFirstChar = eStr[0];
+          if (eFirstChar != '&') {
             std::cerr << "Error while processing stream\n";
             std::cerr
               << "Error, Ampersand (&) should be only in the first character\n";
