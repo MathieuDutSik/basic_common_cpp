@@ -85,9 +85,9 @@ std::string FILE_GetNakedFilename(std::string const &eFileFull) {
 std::string FILE_RemoveExtension(std::string const &eFileIn) {
   std::ptrdiff_t pos = -1;
   size_t len = eFileIn.size();
-  std::string eChar = ".";
+  char eChar = '.';
   for (size_t i = 0; i < len; i++) {
-    if (eFileIn.substr(i, 1) == eChar) {
+    if (eFileIn[i] == eChar) {
       pos = i;
     }
   }
@@ -103,8 +103,8 @@ std::string FILE_GetDirectoryOfFileName(std::string const &eFileFull) {
   size_t len = eFileFull.size();
   std::ptrdiff_t posfound = -1;
   for (size_t u = 0; u < len; u++) {
-    std::string eChar = eFileFull.substr(u, 1);
-    if (eChar == "/")
+    char eChar = eFileFull[u];
+    if (eChar == '/')
       posfound = std::ptrdiff_t(u);
   }
   if (posfound == -1) {
@@ -149,8 +149,8 @@ bool FILE_IsDirectoryEmpty(std::string const &eDir) {
 
 bool FILE_CheckFinalShashDirectory(std::string const &eDir) {
   size_t len = eDir.size();
-  std::string eChar = eDir.substr(len - 1, 1);
-  if (eChar == "/")
+  char eChar = eDir[len - 1];
+  if (eChar == '/')
     return true;
   return false;
 }
@@ -246,8 +246,8 @@ std::vector<std::string>
 FILE_DirectoryFilesSpecificExtension_Gen(std::string const &ePrefix,
                                          std::string const &eExtension) {
   size_t len = ePrefix.size();
-  std::string LastChar = ePrefix.substr(len - 1, 1);
-  if (LastChar == std::string("/"))
+  char LastChar = ePrefix[len - 1];
+  if (LastChar == '/')
     return FILE_DirectoryFilesSpecificExtension(ePrefix, eExtension);
   //
   return FILE_DirectoryMatchingPrefixExtension(ePrefix, eExtension);
@@ -307,8 +307,8 @@ std::string FILE_RemoveEndingExtension(std::string const &FileName,
   size_t len = FileName.size();
   std::ptrdiff_t iCharLast = -1;
   for (size_t iChar = 0; iChar < len; iChar++) {
-    std::string eChar = FileName.substr(iChar, 1);
-    if (eChar == ".")
+    char eChar = FileName[iChar];
+    if (eChar == '.')
       iCharLast = std::ptrdiff_t(iChar);
   }
   if (iCharLast == -1)
@@ -396,8 +396,8 @@ std::string GetCurrentDirectory() {
 
 #ifndef WINDOWS
 std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
-  std::string FirstChar = ePrefix.substr(0, 1);
-  if (FirstChar == "/") {
+  char FirstChar = ePrefix[0];
+  if (FirstChar == '/') {
     return ePrefix;
   } else {
     std::string ePWD = GetCurrentDirectory();
@@ -408,8 +408,8 @@ std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
 
 bool FILE_CheckPrefix(std::string const &ePrefix) {
   size_t len = ePrefix.size();
-  std::string LastChar = ePrefix.substr(len - 1, 1);
-  if (LastChar == "/")
+  char LastChar = ePrefix[len - 1];
+  if (LastChar == '/')
     return true;
   return false;
 }
@@ -418,8 +418,8 @@ std::string ExtractDirectoryFromFileString(std::string const &eFile) {
   size_t len = eFile.size();
   std::ptrdiff_t iCharFinal = -1;
   for (size_t iChar = 0; iChar < len; iChar++) {
-    std::string eChar = eFile.substr(iChar, 1);
-    if (eChar == "/")
+    char eChar = eFile[iChar];
+    if (eChar == '/')
       iCharFinal = std::ptrdiff_t(iChar);
   }
   if (iCharFinal == -1) {
