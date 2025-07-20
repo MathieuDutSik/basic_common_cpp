@@ -24,9 +24,9 @@ std::string STRING_GETENV(std::string const &eStr) {
 
 bool STRING_IsStringReduceToSpace(std::string const &eStr) {
   size_t len = eStr.length();
-  std::string eChar = " ";
+  char eChar = ' ';
   for (size_t i = 0; i < len; i++) {
-    std::string eSubChar = eStr.substr(i, 1);
+    char eSubChar = eStr[i];
     if (eSubChar != eChar)
       return false;
   }
@@ -34,10 +34,10 @@ bool STRING_IsStringReduceToSpace(std::string const &eStr) {
 }
 
 int STRING_GetCharPositionInString(std::string const &eStr,
-                                   std::string const &eChar) {
+                                   char eChar) {
   size_t len = eStr.length();
   for (size_t i = 0; i < len; i++) {
-    std::string eSubChar = eStr.substr(i, 1);
+    char eSubChar = eStr[i];
     if (eSubChar == eChar)
       return static_cast<int>(i);
   }
@@ -50,7 +50,7 @@ std::string StringSubstitution(
   std::string retStr;
   size_t len = FileIN.size();
   size_t pos = 0;
-  std::string CharDollar = "$";
+  char CharDollar = '$';
   size_t miss_val = std::numeric_limits<size_t>::max();
   auto GetIPair = [&](size_t const &pos_inp) -> size_t {
     std::vector<size_t> ListMatch;
@@ -76,7 +76,7 @@ std::string StringSubstitution(
   while (true) {
     if (pos == len)
       break;
-    std::string eChar = FileIN.substr(pos, 1);
+    char eChar = FileIN[pos];
     if (eChar == CharDollar) {
       pos++;
       size_t iPair = GetIPair(pos);
@@ -195,17 +195,17 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
   if (eStr.empty()) {
     return "";
   }
-  
+
   // Find first non-space character
   size_t start = eStr.find_first_not_of(' ');
   if (start == std::string::npos) {
     // String contains only spaces
     return "";
   }
-  
+
   // Find last non-space character
   size_t end = eStr.find_last_not_of(' ');
-  
+
   // Return substring from start to end (inclusive)
   return eStr.substr(start, end - start + 1);
 }
@@ -333,8 +333,8 @@ std::vector<int> STRING_Split_Int(std::string const &eStrA,
 std::string DropSpace(std::string const &strI) {
   std::string strO;
   for (size_t u = 0; u < strI.size(); u++) {
-    std::string eChar = strI.substr(u, 1);
-    if (eChar != " ") {
+    char eChar = strI[u];
+    if (eChar != ' ') {
       strO += eChar;
     }
   }
@@ -357,8 +357,8 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
     if (sumEnt == 0) {
       bool IsMatch = true;
       for (size_t iB = 0; iB < lenB; iB++) {
-        std::string eCharA = eStrA.substr(iA + iB, 1);
-        std::string eCharB = eStrB.substr(iB, 1);
+        char eCharA = eStrA[iA + iB];
+        char eCharB = eStrB[iB];
         if (eCharA != eCharB)
           IsMatch = false;
       }
@@ -401,6 +401,9 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
       }
     }
     if (posFirst == miss_val || posLast == miss_val) {
+      std::cerr << "iEnt=" << iEnt << "\n";
+      std::cerr << "eStrA=" << eStrA << "\n";
+      std::cerr << "eStrB=" << eStrB << "\n";
       std::cerr << "posFirst = " << posFirst << "  posLast = " << posLast
                 << "\n";
       std::cerr << "Positions have not been found\n";
@@ -413,7 +416,7 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
 
 std::string STRING_Replace(std::string const &eStrA, std::string const &eStrB,
                            std::string const &eStrC) {
-  std::vector<std::string> LStr = STRING_Split(eStrA, eStrB);
+  std::vector<std::string> LStr = STRING_Split_Strict(eStrA, eStrB);
   std::string str = LStr[0];
   size_t len = LStr.size();
   for (size_t i = 1; i < len; i++)
@@ -423,17 +426,17 @@ std::string STRING_Replace(std::string const &eStrA, std::string const &eStrB,
 
 std::vector<std::string> STRING_SplitCharNb(std::string const &str) {
   static const std::unordered_set<char> number_chars = {'-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
-  
+
   auto IsNumber = [&](char c) {
     return number_chars.count(c) > 0;
   };
-  
+
   size_t len = str.size();
   std::vector<bool> ListStat(len);
   for (size_t i = 0; i < len; i++) {
     ListStat[i] = IsNumber(str[i]);
   }
-  
+
   std::string TotStr;
   for (size_t i = 0; i < len; i++) {
     TotStr += str[i];

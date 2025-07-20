@@ -9,7 +9,8 @@
 #PROGRAM		= Test_serialization
 #PROGRAM		= Test_timing
 #PROGRAM		= Test_namelist
-PROGRAM		= Test_PresenceProgram
+#PROGRAM		= Test_PresenceProgram
+PROGRAM		= Test_Basic_string_Optimizations
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

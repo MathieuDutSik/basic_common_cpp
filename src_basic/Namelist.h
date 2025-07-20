@@ -772,7 +772,7 @@ public:
         } else {
           if (eStr != "/") {
             std::string eStr3 = NAMELIST_ClearEndOfLine(eStr);
-            std::string strEqual = "=";
+            char strEqual = '=';
             int posEqual = STRING_GetCharPositionInString(eStr3, strEqual);
             if (posEqual != -1) {
               int len3 = eStr3.length();
