@@ -348,9 +348,16 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
                                              std::string const &eStrB) {
   size_t lenA = eStrA.length();
   size_t lenB = eStrB.length();
+  if (lenB > lenA) {
+    std::vector<std::string> LStr = {eStrA};
+    return LStr;
+  }
+#ifdef DEBUG_STRING
+  std::cerr << "STRING_Split_Strict: lenA=" << lenA << " lenB=" << lenB << "\n";
+#endif
   std::vector<size_t> ListStatus(lenA, 0);
   size_t idx = 0;
-  for (size_t iA = 0; iA < lenA - lenB; iA++) {
+  for (size_t iA = 0; iA <= lenA - lenB; iA++) {
     size_t sumEnt = 0;
     for (size_t iB = 0; iB < lenB; iB++)
       sumEnt += ListStatus[iA + iB];
@@ -362,6 +369,9 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
         if (eCharA != eCharB)
           IsMatch = false;
       }
+#ifdef DEBUG_STRING
+      std::cerr << "STRING_Split_Strict: iA=" << iA << " sub=" << eStrA.substr(iA, lenB) << "\n";
+#endif
       if (IsMatch) {
         idx++;
         for (size_t iB = 0; iB < lenB; iB++)
@@ -369,7 +379,17 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
       }
     }
   }
+#ifdef DEBUG_STRING
+  std::cerr << "STRING_Split_Strict: ListStatus=[";
+  for (size_t iA=0; iA<lenA; iA++) {
+    std::cerr << " " << ListStatus[iA];
+  }
+  std::cerr << " ]\n";
+#endif
   size_t nbEnt = idx + 1;
+#ifdef DEBUG_STRING
+  std::cerr << "STRING_Split_Strict: nbEnt=" << nbEnt << "\n";
+#endif
   std::vector<std::string> RetList(nbEnt);
   size_t miss_val = std::numeric_limits<size_t>::max();
   for (size_t iEnt = 0; iEnt < nbEnt; iEnt++) {
@@ -388,28 +408,35 @@ std::vector<std::string> STRING_Split_Strict(std::string const &eStrA,
       }
     }
     if (iEnt == nbEnt - 1) {
-      posLast = lenA - 1;
+      posLast = lenA;
     } else {
       bool WeFound = false;
       for (size_t iA = 0; iA < lenA; iA++) {
         if (!WeFound) {
           if (ListStatus[iA] == iEnt + 1) {
             WeFound = true;
-            posLast = iA - 1;
+            posLast = iA;
           }
         }
       }
     }
+#ifdef DEBUG_STRING
+    std::cerr << "STRING_Split_Strict: posFirst = " << posFirst << "  posLast = " << posLast << "\n";
+#endif
     if (posFirst == miss_val || posLast == miss_val) {
-      std::cerr << "iEnt=" << iEnt << "\n";
-      std::cerr << "eStrA=" << eStrA << "\n";
-      std::cerr << "eStrB=" << eStrB << "\n";
-      std::cerr << "posFirst = " << posFirst << "  posLast = " << posLast
-                << "\n";
+      std::cerr << "STRING_Split_Strict: ------------------------------------\n";
+      std::cerr << "STRING_Split_Strict: iEnt=" << iEnt << "\n";
+      std::cerr << "STRING_Split_Strict: eStrA=" << eStrA << "\n";
+      std::cerr << "STRING_Split_Strict: eStrB=" << eStrB << "\n";
+      std::cerr << "STRING_Split_Strict: lenA=" << lenA << " lenB=" << lenB << "\n";
       std::cerr << "Positions have not been found\n";
       throw TerminalException{1};
     }
-    RetList[iEnt] += eStrA.substr(posFirst, 1 + posLast - posFirst);
+    std::string block = eStrA.substr(posFirst, posLast - posFirst);
+#ifdef DEBUG_STRING
+    std::cerr << "STRING_Split_Strict: |block|=" << block.size() << " block=" << block << "\n";
+#endif
+    RetList[iEnt] += block;
   }
   return RetList;
 }

@@ -35,7 +35,10 @@ OUTPUTFLAG 	= -o
 CLOCAL          = -I../src_basic -I../src_number -I../src_matrix -I../src_comb -I../src_graph -I../src_latt -I../src_poly -I../src_perfect -I.
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(MPFR_INCDIR) -I$(EIGEN_PATH)
 CHASHMAP        = -I../sparse-map/include/tsl/ -I../robin-map/include/tsl/ -I../hopscotch-map/include/tsl/
-CDEBUG          = -DDEBUG -DDEBUG_LEDF
+
+CDEBUG          = -DDEBUG_STRING -DDEBUG_LEDF
+
+
 CTOTAL 		= $(CLOCAL) $(CFLAGS) $(CDEBUG) $(CHASHMAP)
 
 
