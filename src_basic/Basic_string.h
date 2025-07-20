@@ -226,11 +226,13 @@ bool startswith(std::string const &str1, std::string const &str2) {
 template <typename F>
 void STRING_Split_f(std::string const &eStrA, std::string const &eStrB, F f) {
   size_t lenA = eStrA.length();
-  if (lenA == 0) {
-    // Nothing can be found so we exit right away
+  size_t lenB = eStrB.length();
+  if (lenA < lenB) {
+    if (lenA > 0) {
+      f(eStrA);
+    }
     return;
   }
-  size_t lenB = eStrB.length();
   std::vector<int> ListStatus(lenA, 1);
   if (lenA >= lenB) {
     for (size_t iA = 0; iA <= lenA - lenB; iA++)

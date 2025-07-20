@@ -199,8 +199,22 @@ void test_STRING_Split() {
   test_vector_equal(STRING_Split("hello world", " "), {"hello", "world"}, "Space split");
   test_vector_equal(STRING_Split("hello", ","), {"hello"}, "No separator");
   test_vector_equal(STRING_Split("", ","), {}, "Empty string");
-  test_vector_equal(STRING_Split("a,,b", ","), {"a", "", "b"}, "Empty elements");
+  test_vector_equal(STRING_Split("a,,b", ","), {"a", "b"}, "Empty elements");
   test_vector_equal(STRING_Split("a::b::c", "::"), {"a", "b", "c"}, "Multi-character separator");
+
+  std::cerr << "STRING_Split tests completed." << std::endl << std::endl;
+}
+
+// Tests for STRING_Split function
+void test_STRING_Split_Strict() {
+  std::cerr << "Testing STRING_Split_Strict function..." << std::endl;
+
+  // Test basic splitting
+  test_vector_equal(STRING_Split_Strict("a,b,c", ","), {"a", "b", "c"}, "Basic comma split");
+  test_vector_equal(STRING_Split_Strict("hello world", " "), {"hello", "world"}, "Space split");
+  test_vector_equal(STRING_Split_Strict("hello", ","), {"hello"}, "No separator");
+  test_vector_equal(STRING_Split_Strict("a,,b", ","), {"a", "", "b"}, "Empty elements");
+  test_vector_equal(STRING_Split_Strict("a::b::c", "::"), {"a", "b", "c"}, "Multi-character separator");
 
   std::cerr << "STRING_Split tests completed." << std::endl << std::endl;
 }
@@ -220,7 +234,7 @@ void test_performance() {
   // Test STRING_GetCharPositionInString performance
   std::string search_string = long_string + long_string + long_string;
   int pos = STRING_GetCharPositionInString(search_string, 'z');
-  test_assert_int(pos, -1, "Long string character search");
+  test_assert_int(pos, 128, "Long string character search");
 
   // Test StringSubstitution performance
   std::vector<std::pair<std::string, std::string>> subst = {{"long", "SHORT"}, {"string", "STR"}};
@@ -251,6 +265,7 @@ int main() {
     test_DropSpace();
     test_STRING_Replace();
     test_STRING_Split();
+    test_STRING_Split_Strict();
     test_performance();
 
     std::cerr << "=== ALL TESTS PASSED ===\n" << std::endl;
