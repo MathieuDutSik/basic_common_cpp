@@ -292,7 +292,7 @@ bool IsMatrixZeroMod(MyMatrix<T> const &M, T const &TheMod) {
   but that seems not to work.
  */
 template <typename T>
-MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
+SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
   int maxRank = n_row;
@@ -308,6 +308,7 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
   }
   std::vector<int> ListColSelect;
   std::vector<uint8_t> ListColSelect01(n_col, 0);
+  std::vector<int> ListRowSelect;
   int eRank = 0;
   for (int iRow = 0; iRow < n_row; iRow++) {
 #ifdef DEBUG_MATRIX_MOD
@@ -339,6 +340,7 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
     if (FirstNZ != miss_val) {
       ListColSelect.push_back(FirstNZ);
       ListColSelect01[FirstNZ] = 1;
+      ListRowSelect.push_back(iRow);
       T eVal1 = Mwork(eRank, FirstNZ);
       T eVal2 = mod_inv(eVal1, TheMod);
 #ifdef DEBUG_MATRIX_MOD
@@ -390,11 +392,17 @@ MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
   std::cerr << "MATMOD: NSP built\n";
   MyMatrix<T> prod = M * NSP.transpose();
   if (!IsMatrixZeroMod(prod, TheMod)) {
-    std::cerr << "NullspaceTrMatMod: The matrix prod is not zero\n";
+    std::cerr << "SelectRowColMatMod: The matrix prod is not zero\n";
     throw TerminalException{1};
   }
 #endif
-  return NSP;
+  return {static_cast<size_t>(eRank), NSP, ListColSelect, ListRowSelect};
+}
+
+template <typename T>
+MyMatrix<T> NullspaceTrMatMod(MyMatrix<T> const &M, T const &TheMod) {
+  SelectionRowCol<T> result = SelectRowColMatMod(M, TheMod);
+  return result.NSP;
 }
 
 template <typename T>
