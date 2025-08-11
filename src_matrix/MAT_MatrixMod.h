@@ -420,6 +420,79 @@ MyMatrix<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
 }
 
 template <typename T>
+T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
+  int n = TheMat.rows();
+  if (n != TheMat.cols()) {
+    std::cerr << "DeterminantMatMod: Matrix must be square\n";
+    throw TerminalException{1};
+  }
+  
+  if (n == 0) {
+    return T(1);
+  }
+  
+  if (n == 1) {
+    return ResInt(TheMat(0, 0), TheMod);
+  }
+  
+  MyMatrix<T> M(n, n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      M(i, j) = ResInt(TheMat(i, j), TheMod);
+    }
+  }
+  
+  T det = T(1);
+  for (int i = 0; i < n; i++) {
+    // Find pivot
+    int pivot_row = -1;
+    for (int k = i; k < n; k++) {
+      if (M(k, i) != 0) {
+        pivot_row = k;
+        break;
+      }
+    }
+    
+    if (pivot_row == -1) {
+      // No pivot found, determinant is zero
+      return T(0);
+    }
+    
+    // Swap rows if needed
+    if (pivot_row != i) {
+      for (int j = 0; j < n; j++) {
+        T temp = M(i, j);
+        M(i, j) = M(pivot_row, j);
+        M(pivot_row, j) = temp;
+      }
+      det = TheMod - det;
+    }
+
+    T pivot = M(i, i);
+    det *= pivot;
+    det = ResInt(det, TheMod);
+    
+    // Get multiplicative inverse of pivot
+    T pivot_inv = mod_inv(pivot, TheMod);
+    
+    // Eliminate column
+    for (int k = i + 1; k < n; k++) {
+      if (M(k, i) != 0) {
+        T val = M(k, i) * pivot_inv;
+        T factor = ResInt(val, TheMod);
+        for (int j = i; j < n; j++) {
+          T val1 = factor * M(i, j);
+          T val = M(k, j) - ResInt(val1, TheMod);
+          M(k, j) = ResInt(val, TheMod);
+        }
+      }
+    }
+  }
+  
+  return det;
+}
+
+template <typename T>
 int DimensionKernelMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
