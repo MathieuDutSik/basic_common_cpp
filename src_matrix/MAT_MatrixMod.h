@@ -426,22 +426,22 @@ T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
     std::cerr << "DeterminantMatMod: Matrix must be square\n";
     throw TerminalException{1};
   }
-  
+
   if (n == 0) {
     return T(1);
   }
-  
+
   if (n == 1) {
     return ResInt(TheMat(0, 0), TheMod);
   }
-  
+
   MyMatrix<T> M(n, n);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       M(i, j) = ResInt(TheMat(i, j), TheMod);
     }
   }
-  
+
   T det = T(1);
   for (int i = 0; i < n; i++) {
     // Find pivot
@@ -452,12 +452,12 @@ T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
         break;
       }
     }
-    
+
     if (pivot_row == -1) {
       // No pivot found, determinant is zero
       return T(0);
     }
-    
+
     // Swap rows if needed
     if (pivot_row != i) {
       for (int j = 0; j < n; j++) {
@@ -471,10 +471,10 @@ T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
     T pivot = M(i, i);
     det *= pivot;
     det = ResInt(det, TheMod);
-    
+
     // Get multiplicative inverse of pivot
     T pivot_inv = mod_inv(pivot, TheMod);
-    
+
     // Eliminate column
     for (int k = i + 1; k < n; k++) {
       if (M(k, i) != 0) {
@@ -488,8 +488,133 @@ T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
       }
     }
   }
-  
+
   return det;
+}
+
+template <typename T>
+MyMatrix<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
+  static_assert(is_ring_field<T>::value || is_euclidean_domain<T>::value,
+                "Requires T to be a ring or euclidean domain");
+
+  int n = TheMat.rows();
+  int m = TheMat.cols();
+
+  if (n == 0 || m == 0) {
+    return TheMat;
+  }
+
+  MyMatrix<T> A = TheMat;
+  int rank = 0;
+  int minDim = std::min(n, m);
+
+  for (int k = 0; k < minDim; k++) {
+    // Find pivot with smallest non-zero norm
+    int pivot_row = -1;
+    int pivot_col = -1;
+    T min_norm = T(0);
+    bool found_pivot = false;
+
+    for (int i = k; i < n; i++) {
+      for (int j = k; j < m; j++) {
+        if (A(i, j) != 0) {
+          T norm = T_abs(A(i, j));
+          if (!found_pivot || norm < min_norm) {
+            min_norm = norm;
+            pivot_row = i;
+            pivot_col = j;
+            found_pivot = true;
+          }
+        }
+      }
+    }
+
+    if (!found_pivot) {
+      break; // No more pivots
+    }
+
+    // Move pivot to position (k, k)
+    if (pivot_row != k) {
+      for (int j = 0; j < m; j++) {
+        T temp = A(k, j);
+        A(k, j) = A(pivot_row, j);
+        A(pivot_row, j) = temp;
+      }
+    }
+    if (pivot_col != k) {
+      for (int i = 0; i < n; i++) {
+        T temp = A(i, k);
+        A(i, k) = A(i, pivot_col);
+        A(i, pivot_col) = temp;
+      }
+    }
+
+    // Make pivot positive
+    if (A(k, k) < 0) {
+      for (int j = k; j < m; j++) {
+        A(k, j) = -A(k, j);
+      }
+    }
+
+    // Clear column k below diagonal
+    for (int i = k + 1; i < n; i++) {
+      if (A(i, k) != 0) {
+        T g = GcdPair(A(k, k), A(i, k));
+        T u = A(k, k) / g;
+        T v = A(i, k) / g;
+
+        for (int j = k; j < m; j++) {
+          T temp = u * A(i, j) - v * A(k, j);
+          A(k, j) = A(k, j) + A(i, j);
+          A(i, j) = temp;
+        }
+      }
+    }
+
+    // Clear row k to the right of diagonal
+    for (int j = k + 1; j < m; j++) {
+      if (A(k, j) != 0) {
+        T g = GcdPair(A(k, k), A(k, j));
+        T u = A(k, k) / g;
+        T v = A(k, j) / g;
+
+        for (int i = k; i < n; i++) {
+          T temp = u * A(i, j) - v * A(i, k);
+          A(i, k) = A(i, k) + A(i, j);
+          A(i, j) = temp;
+        }
+      }
+    }
+
+    rank++;
+
+    // Check if we need to continue (if off-diagonal elements were created)
+    bool need_continue = false;
+    for (int i = k + 1; i < n && !need_continue; i++) {
+      if (A(i, k) != 0) need_continue = true;
+    }
+    for (int j = k + 1; j < m && !need_continue; j++) {
+      if (A(k, j) != 0) need_continue = true;
+    }
+
+    if (need_continue) {
+      k--; // Redo this step
+    }
+  }
+
+  // Ensure divisibility condition: d[i] divides d[i+1]
+  for (int i = 0; i < rank - 1; i++) {
+    if (A(i, i) != 0 && A(i + 1, i + 1) != 0) {
+      T g = GcdPair(A(i, i), A(i + 1, i + 1));
+      if (g != A(i, i)) {
+        // Need to adjust to maintain divisibility
+        A(i, i) = g;
+        A(i + 1, i + 1) = (A(i, i) * A(i + 1, i + 1)) / g;
+      }
+    }
+  }
+
+  return A;
 }
 
 template <typename T>
