@@ -289,6 +289,48 @@ template <typename T> std::vector<T> GetAllFactors(T const &N) {
   return GetAllFactors(eMap);
 }
 
+template <typename T>
+class PrimeGenerator {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+
+private:
+  T current;
+  std::vector<T> small_primes;
+
+  bool is_divisible_by_small_primes(T const &N) const {
+    for (const T &p : small_primes) {
+      if (ResInt(N, p) == 0 && N != p) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+public:
+  PrimeGenerator() : current(T(10001)) {
+    small_primes.push_back(T(3));
+    small_primes.push_back(T(5));
+    small_primes.push_back(T(7));
+    small_primes.push_back(T(11));
+    small_primes.push_back(T(13));
+  }
+
+  T get_prime() {
+    while (true) {
+      // Quick check: skip if divisible by small primes
+      if (!is_divisible_by_small_primes(current)) {
+        // Use the full primality test
+        if (IsPrime(current)) {
+          T result = current;
+          current += 2; // Move to next odd number
+          return result;
+        }
+      }
+      current += 2; // Always move to next odd number
+    }
+  }
+};
+
 // clang-format off
 #endif  // SRC_NUMBER_FACTORIZATIONS_H_
 // clang-format on

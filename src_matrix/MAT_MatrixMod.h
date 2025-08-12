@@ -618,6 +618,43 @@ MyMatrix<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
+double HadamardUpperBound(MyMatrix<T> const &TheMat) {
+  int n = TheMat.rows();
+  if (n != TheMat.cols()) {
+    std::cerr << "HadamardUpperBound: Matrix must be square\n";
+    throw TerminalException{1};
+  }
+  
+  if (n == 0) {
+    return 1.0;
+  }
+  
+  if (n == 1) {
+    return UniversalScalarConversion<double, T>(T_abs(TheMat(0, 0)));
+  }
+  
+  double bound = 1.0;
+  
+  for (int i = 0; i < n; i++) {
+    double row_norm_squared = 0.0;
+    
+    // Compute squared Euclidean norm of row i
+    for (int j = 0; j < n; j++) {
+      double val = UniversalScalarConversion<double, T>(TheMat(i, j));
+      row_norm_squared += val * val;
+    }
+    
+    // Take square root to get the actual norm
+    double row_norm = std::sqrt(row_norm_squared);
+    
+    // Multiply to the bound
+    bound *= row_norm;
+  }
+  
+  return bound;
+}
+
+template <typename T>
 int DimensionKernelMod(MyMatrix<T> const &M, T const &TheMod) {
   int n_row = M.rows();
   int n_col = M.cols();
