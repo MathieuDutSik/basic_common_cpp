@@ -5,7 +5,10 @@
 // clang-format off
 #include "MAT_MatrixInt.h"
 #include "quadratic_residue.h"
+#include "factorizations.h"
+#include "NumberTheoryGeneric.h"
 #include <vector>
+#include <cmath>
 // clang-format on
 
 template <typename T, typename Tmod>
@@ -652,6 +655,76 @@ double HadamardUpperBound(MyMatrix<T> const &TheMat) {
   }
   
   return bound;
+}
+
+template <typename T>
+T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+  
+  int n = TheMat.rows();
+  if (n != TheMat.cols()) {
+    std::cerr << "DeterminantMatHadamard: Matrix must be square\n";
+    throw TerminalException{1};
+  }
+  
+  if (n == 0) {
+    return T(1);
+  }
+  
+  if (n == 1) {
+    return TheMat(0, 0);
+  }
+  
+  // Step 1: Compute Hadamard upper bound
+  double bound = HadamardUpperBound(TheMat);
+  T target_product = T(3) * T(static_cast<long long>(std::ceil(bound)));
+  
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "DETHADAMARD: Hadamard bound = " << bound << "\n";
+  std::cerr << "DETHADAMARD: Target product = " << target_product << "\n";
+#endif
+  
+  // Step 2: Generate primes and compute determinants modulo primes
+  PrimeGenerator<T> prime_gen;
+  std::vector<T> primes;
+  std::vector<T> det_mods;
+  T product(1);
+  
+  while (product < target_product) {
+    T prime = prime_gen.get_prime();
+    primes.push_back(prime);
+    
+    T det_mod = DeterminantMatMod(TheMat, prime);
+    det_mods.push_back(det_mod);
+    
+    product *= prime;
+    
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "DETHADAMARD: Prime = " << prime << ", det mod = " << det_mod << ", product = " << product << "\n";
+#endif
+  }
+  
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "DETHADAMARD: Used " << primes.size() << " primes\n";
+  std::cerr << "DETHADAMARD: Final product = " << product << "\n";
+#endif
+  
+  // Step 3: Use Chinese Remainder Theorem to find determinant mod product
+  T det_crt = chinese_remainder_theorem(det_mods, primes);
+  
+  // Step 4: Find the value nearest to 0
+  T half_product = product / T(2);
+  
+  // If det_crt > product/2, then det_crt - product is closer to 0
+  if (det_crt > half_product) {
+    det_crt = det_crt - product;
+  }
+  
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "DETHADAMARD: Final determinant = " << det_crt << "\n";
+#endif
+  
+  return det_crt;
 }
 
 template <typename T>
