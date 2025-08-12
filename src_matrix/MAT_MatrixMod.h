@@ -308,20 +308,21 @@ SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
   if (n_col < maxRank)
     maxRank = n_col;
   size_t sizMat = maxRank + 1;
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "MATMOD: We have sizMat\n";
+#endif
   MyMatrix<T> Mwork(sizMat, n_col);
   int miss_val = -1;
-  for (int i = 0; i < n_row; i++) {
-    for (int j = 0; j < n_col; j++) {
-      Mwork(i, j) = ResInt(M(i, j), TheMod);
-    }
-  }
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "MATMOD: We have Mwork\n";
+#endif
   std::vector<int> ListColSelect;
   std::vector<uint8_t> ListColSelect01(n_col, 0);
   std::vector<int> ListRowSelect;
   int eRank = 0;
   for (int iRow = 0; iRow < n_row; iRow++) {
 #ifdef DEBUG_MATRIX_MOD
-    std::cerr << "MATMOD: NullspaceTrMatMod iRow=" << iRow << "\n";
+    std::cerr << "MATMOD: NullspaceTrMatMod iRow=" << iRow << " eRank=" << eRank << "\n";
 #endif
     for (int iCol = 0; iCol < n_col; iCol++) {
       T res = ResInt(M(iRow, iCol), TheMod);
@@ -352,9 +353,6 @@ SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
       ListRowSelect.push_back(iRow);
       T eVal1 = Mwork(eRank, FirstNZ);
       T eVal2 = mod_inv(eVal1, TheMod);
-#ifdef DEBUG_MATRIX_MOD
-      std::cerr << "MATMOD: eVal1=" << eVal1 << " eVal2=" << eVal2 << "\n";
-#endif
       for (int iCol = 0; iCol < n_col; iCol++) {
         T val = Mwork(eRank, iCol) * eVal2;
         Mwork(eRank, iCol) = ResInt(val, TheMod);
@@ -826,7 +824,13 @@ SelectionRowColData<T> SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
   while (true) {
     T prime = prime_gen.get_prime();
 
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "prime=" << prime << " before\n";
+#endif
     SelectionRowCol<T> src_result = SelectRowColMatMod(TheMat, prime);
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "prime=" << prime << " after\n";
+#endif
 
     SelectionRowColData<T> data;
     data.ListColSelect = src_result.ListColSelect;
