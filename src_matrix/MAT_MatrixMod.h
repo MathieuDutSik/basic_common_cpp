@@ -9,7 +9,13 @@
 #include "NumberTheoryGeneric.h"
 #include <vector>
 #include <cmath>
+#include <map>
+#include <algorithm>
 // clang-format on
+
+#ifdef DEBUG
+#define DEBUG_MATRIX_MOD
+#endif
 
 template <typename T, typename Tmod>
 MyMatrix<Tmod> ModuloReductionMatrix(MyMatrix<T> const &M, T const &TheMod) {
@@ -620,111 +626,235 @@ MyMatrix<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
   return A;
 }
 
+// We must have n_row >= n_col.
 template <typename T>
-double HadamardUpperBound(MyMatrix<T> const &TheMat) {
-  int n = TheMat.rows();
-  if (n != TheMat.cols()) {
-    std::cerr << "HadamardUpperBound: Matrix must be square\n";
-    throw TerminalException{1};
+T HadamardUpperBoundRectangularKernel(MyMatrix<T> const &TheMat) {
+  int n_row = TheMat.rows();
+  int n_col = TheMat.cols();
+
+  if (n_row == 0 || n_col == 0) {
+    return T(1);
   }
-  
-  if (n == 0) {
-    return 1.0;
-  }
-  
-  if (n == 1) {
-    return UniversalScalarConversion<double, T>(T_abs(TheMat(0, 0)));
-  }
-  
-  double bound = 1.0;
-  
-  for (int i = 0; i < n; i++) {
-    double row_norm_squared = 0.0;
-    
-    // Compute squared Euclidean norm of row i
-    for (int j = 0; j < n; j++) {
-      double val = UniversalScalarConversion<double, T>(TheMat(i, j));
+
+  std::multimap<T, int> row_norms_squared; // Use multimap to handle duplicates
+
+  for (int i = 0; i < n_row; i++) {
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "DETHADAMARD: i=" << i << " begin\n";
+#endif
+    T row_norm_squared(0);
+    for (int j = 0; j < n_col; j++) {
+      T val = TheMat(i, j);
       row_norm_squared += val * val;
     }
-    
-    // Take square root to get the actual norm
-    double row_norm = std::sqrt(row_norm_squared);
-    
-    // Multiply to the bound
-    bound *= row_norm;
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "DETHADAMARD: i=" << i << " row_norm_squared=" << row_norm_squared << "\n";
+#endif
+    row_norms_squared.insert({row_norm_squared, i});
   }
-  
+
+  // Take product of the n_col largest row norms squared
+  T bound(1);
+  auto it = row_norms_squared.rbegin(); // Start from largest
+  for (int count = 0; count < n_col && it != row_norms_squared.rend(); ++count, ++it) {
+    T val = it->first;
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "count=" << count << " val=" << val << "\n";
+#endif
+    if (val != 0) {
+      bound *= val;
+    }
+  }
+
+  return bound;
+}
+
+template <typename T>
+T HadamardUpperBoundRectangular(MyMatrix<T> const &TheMat) {
+  int n_row = TheMat.rows();
+  int n_col = TheMat.cols();
+
+  if (n_row <= n_col) {
+    return HadamardUpperBoundRectangularKernel(TheMat);
+  } else {
+    MyMatrix<T> TheMatTr = TransposedMat(TheMat);
+    return HadamardUpperBoundRectangularKernel(TheMatTr);
+  }
+}
+
+
+
+template <typename T>
+T SquareHadamardUpperBound(MyMatrix<T> const &TheMat) {
+  int n = TheMat.rows();
+  if (n != TheMat.cols()) {
+    std::cerr << "SquareHadamardUpperBound: Matrix must be square\n";
+    throw TerminalException{1};
+  }
+
+  if (n == 0) {
+    return T(1);
+  }
+
+  T bound = T(1);
+
+  for (int i = 0; i < n; i++) {
+    T row_norm_squared(0);
+
+    // Compute squared Euclidean norm of row i
+    for (int j = 0; j < n; j++) {
+      T val = TheMat(i, j);
+      row_norm_squared += val * val;
+    }
+
+    // Multiply to the bound
+    bound *= row_norm_squared;
+  }
+
   return bound;
 }
 
 template <typename T>
 T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
-  
+
   int n = TheMat.rows();
   if (n != TheMat.cols()) {
     std::cerr << "DeterminantMatHadamard: Matrix must be square\n";
     throw TerminalException{1};
   }
-  
+
   if (n == 0) {
     return T(1);
   }
-  
+
   if (n == 1) {
     return TheMat(0, 0);
   }
-  
+
   // Step 1: Compute Hadamard upper bound
-  double bound = HadamardUpperBound(TheMat);
-  T target_product = T(3) * T(static_cast<long long>(std::ceil(bound)));
-  
+  T bound = SquareHadamardUpperBound(TheMat);
+  T target_product = T(9) * bound;
+
 #ifdef DEBUG_MATRIX_MOD
   std::cerr << "DETHADAMARD: Hadamard bound = " << bound << "\n";
   std::cerr << "DETHADAMARD: Target product = " << target_product << "\n";
 #endif
-  
+
   // Step 2: Generate primes and compute determinants modulo primes
   PrimeGenerator<T> prime_gen;
   std::vector<T> primes;
   std::vector<T> det_mods;
   T product(1);
-  
-  while (product < target_product) {
+
+  while (product * product < target_product) {
     T prime = prime_gen.get_prime();
     primes.push_back(prime);
-    
+
     T det_mod = DeterminantMatMod(TheMat, prime);
     det_mods.push_back(det_mod);
-    
+
     product *= prime;
-    
+
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "DETHADAMARD: Prime = " << prime << ", det mod = " << det_mod << ", product = " << product << "\n";
 #endif
   }
-  
+
 #ifdef DEBUG_MATRIX_MOD
   std::cerr << "DETHADAMARD: Used " << primes.size() << " primes\n";
   std::cerr << "DETHADAMARD: Final product = " << product << "\n";
 #endif
-  
+
   // Step 3: Use Chinese Remainder Theorem to find determinant mod product
   T det_crt = chinese_remainder_theorem(det_mods, primes);
-  
+
   // Step 4: Find the value nearest to 0
-  T half_product = product / T(2);
-  
   // If det_crt > product/2, then det_crt - product is closer to 0
-  if (det_crt > half_product) {
+  if (2 * det_crt > product) {
     det_crt = det_crt - product;
   }
-  
+
 #ifdef DEBUG_MATRIX_MOD
   std::cerr << "DETHADAMARD: Final determinant = " << det_crt << "\n";
 #endif
-  
+
   return det_crt;
+}
+
+template <typename T>
+struct SelectionRowColData {
+  std::vector<int> ListColSelect;
+  std::vector<int> ListRowSelect;
+  size_t TheRank;
+
+  bool operator<(const SelectionRowColData& other) const {
+    if (TheRank != other.TheRank) return TheRank < other.TheRank;
+    if (ListColSelect != other.ListColSelect) return ListColSelect < other.ListColSelect;
+    return ListRowSelect < other.ListRowSelect;
+  }
+};
+
+template <typename T>
+SelectionRowColData<T> SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+
+  int n = TheMat.rows();
+  int m = TheMat.cols();
+
+  std::map<SelectionRowColData<T>, T> results;
+
+  if (n == 0 || m == 0) {
+    SelectionRowColData<T> data;
+    data.TheRank = 0;
+    return data;
+  }
+
+  // Step 1: Compute Hadamard upper bound
+  T bound = HadamardUpperBoundRectangular(TheMat);
+
+  T target_product = T(9) * bound;
+
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "SELECTHADAMARD: Hadamard bound = " << bound << "\n";
+  std::cerr << "SELECTHADAMARD: Target product = " << target_product << "\n";
+#endif
+
+  // Step 2: Generate primes and compute SelectRowColMatMod results
+  PrimeGenerator<T> prime_gen;
+
+  while (true) {
+    T prime = prime_gen.get_prime();
+
+    SelectionRowCol<T> src_result = SelectRowColMatMod(TheMat, prime);
+
+    SelectionRowColData<T> data;
+    data.ListColSelect = src_result.ListColSelect;
+    data.ListRowSelect = src_result.ListRowSelect;
+    data.TheRank = src_result.TheRank;
+    T &value = results[data];
+
+    // Update the product for this data entry
+    if (value == 0) {
+      value = prime;
+    } else {
+      value *= prime;
+    }
+
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "SELECTHADAMARD: Prime = " << prime << ", rank = " << src_result.TheRank
+              << ", product = " << value << "\n";
+#endif
+
+    // Step 4: Check if this entry has product larger than Hadamard bound
+    if (value * value > target_product) {
+#ifdef DEBUG_MATRIX_MOD
+      std::cerr << "SELECTHADAMARD: Product " << value << " exceeds target " << target_product << "\n";
+      std::cerr << "SELECTHADAMARD: Returning first qualifying entry\n";
+#endif
+      return data;
+    }
+  }
 }
 
 template <typename T>

@@ -21,13 +21,13 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
   T det_hadamard = DeterminantMatHadamard<T>(TheMat);
   //
   std::cerr << "DeterminantMatHadamard=" << det_hadamard << "\n";
-  
+
   // Compare with standard determinant computation for verification
   if (TheMat.rows() <= 10) { // Only for small matrices to avoid overflow
     std::cerr << "Computing determinant using standard method for comparison\n";
     T det_standard = DeterminantMat(TheMat);
     std::cerr << "DeterminantMat=" << det_standard << "\n";
-    
+
     if (det_hadamard == det_standard) {
       std::cerr << "SUCCESS: Both methods agree!\n";
     } else {

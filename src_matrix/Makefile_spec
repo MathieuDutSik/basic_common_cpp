@@ -18,7 +18,8 @@
 #PROGRAM		= IntersectionLattice
 #PROGRAM		= RescaleInverse
 #PROGRAM		= RankMat
-PROGRAM		= SmithNormalForm SmithNormalFormInvariant
+#PROGRAM		= SmithNormalForm SmithNormalFormInvariant
+PROGRAM		= SelectRowColMatModHadamard
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
