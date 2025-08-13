@@ -11,11 +11,24 @@
 #include <cmath>
 #include <map>
 #include <algorithm>
+#include <limits>
 // clang-format on
 
 #ifdef DEBUG
 #define DEBUG_MATRIX_MOD
 #endif
+
+struct SelectionRowColData {
+  std::vector<int> ListColSelect;
+  std::vector<int> ListRowSelect;
+  size_t TheRank;
+  
+  bool operator<(const SelectionRowColData& other) const {
+    if (TheRank != other.TheRank) return TheRank < other.TheRank;
+    if (ListColSelect != other.ListColSelect) return ListColSelect < other.ListColSelect;
+    return ListRowSelect < other.ListRowSelect;
+  }
+};
 
 template <typename T, typename Tmod>
 MyMatrix<Tmod> ModuloReductionMatrix(MyMatrix<T> const &M, T const &TheMod) {
@@ -637,17 +650,14 @@ T HadamardUpperBoundRectangularKernel(MyMatrix<T> const &TheMat) {
   std::multimap<T, int> row_norms_squared; // Use multimap to handle duplicates
 
   for (int i = 0; i < n_row; i++) {
-#ifdef DEBUG_MATRIX_MOD
-    std::cerr << "DETHADAMARD: i=" << i << " begin\n";
-#endif
     T row_norm_squared(0);
     for (int j = 0; j < n_col; j++) {
       T val = TheMat(i, j);
       row_norm_squared += val * val;
     }
-#ifdef DEBUG_MATRIX_MOD
-    std::cerr << "DETHADAMARD: i=" << i << " row_norm_squared=" << row_norm_squared << "\n";
-#endif
+    //#ifdef DEBUG_MATRIX_MOD
+    //    std::cerr << "DETHADAMARD: i=" << i << " row_norm_squared=" << row_norm_squared << "\n";
+    //#endif
     row_norms_squared.insert({row_norm_squared, i});
   }
 
@@ -656,9 +666,9 @@ T HadamardUpperBoundRectangularKernel(MyMatrix<T> const &TheMat) {
   auto it = row_norms_squared.rbegin(); // Start from largest
   for (int count = 0; count < n_col && it != row_norms_squared.rend(); ++count, ++it) {
     T val = it->first;
-#ifdef DEBUG_MATRIX_MOD
-    std::cerr << "count=" << count << " val=" << val << "\n";
-#endif
+    //#ifdef DEBUG_MATRIX_MOD
+    //    std::cerr << "count=" << count << " val=" << val << "\n";
+    //#endif
     if (val != 0) {
       bound *= val;
     }
@@ -781,29 +791,78 @@ T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
-struct SelectionRowColData {
-  std::vector<int> ListColSelect;
-  std::vector<int> ListRowSelect;
-  size_t TheRank;
-
-  bool operator<(const SelectionRowColData& other) const {
-    if (TheRank != other.TheRank) return TheRank < other.TheRank;
-    if (ListColSelect != other.ListColSelect) return ListColSelect < other.ListColSelect;
-    return ListRowSelect < other.ListRowSelect;
-  }
-};
+SelectionRowColData SelectRowColDataMatMod_inner(MyMatrix<T> const &TheMat, T const &TheMod) {
+  SelectionRowCol<T> result = SelectRowColMatMod(TheMat, TheMod);
+  
+  SelectionRowColData data;
+  data.ListColSelect = result.ListColSelect;
+  data.ListRowSelect = result.ListRowSelect;
+  data.TheRank = result.TheRank;
+  
+  return data;
+}
 
 template <typename T>
-SelectionRowColData<T> SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
+SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+  
+  // Compute TheMod * TheMod for comparison
+  T mod_squared = TheMod * TheMod;
+  
+  // Check if we can use int16_t
+  int16_t val_16 = std::numeric_limits<int16_t>::max();
+  T max_int16 = UniversalScalarConversion<T,int16_t>(val_16);
+  if (mod_squared < max_int16) {
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "SELECTMOD: Using int16_t optimization\n";
+#endif
+    int16_t mod_small = UniversalScalarConversion<int16_t, T>(TheMod);
+    MyMatrix<int16_t> mat_small = UniversalMatrixConversion<int16_t, T>(TheMat);
+    return SelectRowColDataMatMod_inner(mat_small, mod_small);
+  }
+  
+  // Check if we can use int32_t
+  int32_t val_32 = std::numeric_limits<int32_t>::max();
+  T max_int32 = UniversalScalarConversion<T,int32_t>(val_32);
+  if (mod_squared < max_int32) {
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "SELECTMOD: Using int32_t optimization\n";
+#endif
+    int32_t mod_small = UniversalScalarConversion<int32_t, T>(TheMod);
+    MyMatrix<int32_t> mat_small = UniversalMatrixConversion<int32_t, T>(TheMat);
+    return SelectRowColDataMatMod_inner(mat_small, mod_small);
+  }
+  
+  // Check if we can use int64_t
+  int64_t val_64 = std::numeric_limits<int64_t>::max();
+  T max_int64 = UniversalScalarConversion<T,int64_t>(val_64);
+  if (mod_squared < max_int64) {
+#ifdef DEBUG_MATRIX_MOD
+    std::cerr << "SELECTMOD: Using int64_t optimization\n";
+#endif
+    int64_t mod_small = UniversalScalarConversion<int64_t, T>(TheMod);
+    MyMatrix<int64_t> mat_small = UniversalMatrixConversion<int64_t, T>(TheMat);
+    return SelectRowColDataMatMod_inner(mat_small, mod_small);
+  }
+  
+  // No optimization possible, use original type
+#ifdef DEBUG_MATRIX_MOD
+  std::cerr << "SELECTMOD: No optimization, using original type\n";
+#endif
+  return SelectRowColDataMatMod_inner(TheMat, TheMod);
+}
+
+template <typename T>
+SelectionRowColData SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
 
   int n = TheMat.rows();
   int m = TheMat.cols();
 
-  std::map<SelectionRowColData<T>, T> results;
+  std::map<SelectionRowColData, T> results;
 
   if (n == 0 || m == 0) {
-    SelectionRowColData<T> data;
+    SelectionRowColData data;
     data.TheRank = 0;
     return data;
   }
@@ -827,15 +886,10 @@ SelectionRowColData<T> SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "prime=" << prime << " before\n";
 #endif
-    SelectionRowCol<T> src_result = SelectRowColMatMod(TheMat, prime);
+    SelectionRowColData data = SelectRowColDataMatMod(TheMat, prime);
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "prime=" << prime << " after\n";
 #endif
-
-    SelectionRowColData<T> data;
-    data.ListColSelect = src_result.ListColSelect;
-    data.ListRowSelect = src_result.ListRowSelect;
-    data.TheRank = src_result.TheRank;
     T &value = results[data];
 
     // Update the product for this data entry
@@ -846,7 +900,7 @@ SelectionRowColData<T> SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
     }
 
 #ifdef DEBUG_MATRIX_MOD
-    std::cerr << "SELECTHADAMARD: Prime = " << prime << ", rank = " << src_result.TheRank
+    std::cerr << "SELECTHADAMARD: Prime = " << prime << ", rank = " << data.TheRank
               << ", product = " << value << "\n";
 #endif
 

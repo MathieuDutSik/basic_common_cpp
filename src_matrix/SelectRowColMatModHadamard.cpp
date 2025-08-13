@@ -16,7 +16,7 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
   //
   std::cerr << "Computing SelectRowColMatModHadamard\n";
   //
-  SelectionRowColData<T> result = SelectRowColMatModHadamard<T>(TheMat);
+  SelectionRowColData result = SelectRowColMatModHadamard<T>(TheMat);
   //
   std::cerr << "SelectRowColMatModHadamard result:\n";
   std::cerr << "  TheRank = " << result.TheRank << "\n";
@@ -100,10 +100,12 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
 
 void process(std::string const &arith, std::string const &matrix_file,
              std::string OutFormat, std::ostream &os_out) {
+  /*
   if (arith == "safe_integer") {
     using T = SafeInt64;
     return full_process_type<T>(matrix_file, OutFormat, os_out);
   }
+  */
   if (arith == "mpz") {
     using T = mpz_class;
     return full_process_type<T>(matrix_file, OutFormat, os_out);
