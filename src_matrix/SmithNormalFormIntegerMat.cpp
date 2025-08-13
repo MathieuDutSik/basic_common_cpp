@@ -15,20 +15,16 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
   //
   std::cerr << "Computing Smith Normal Form\n";
   //
-  MyMatrix<T> SNF = SmithNormalFormIntegerMat<T>(TheMat);
-  //
-  std::cerr << "SmithNormalForm=\n";
-  WriteMatrix(std::cerr, SNF);
-  std::cerr << "\n";
+  MyVector<T> SNF = SmithNormalFormIntegerMat<T>(TheMat);
   //
   if (OutFormat == "GAP") {
     os_out << "return ";
-    WriteMatrixGAP(os_out, SNF);
+    WriteVectorGAP(os_out, SNF);
     os_out << ";\n";
     return;
   }
   if (OutFormat == "simple") {
-    WriteMatrix(os_out, SNF);
+    WriteVector(os_out, SNF);
     return;
   }
   std::cerr << "Failed to find a matching entry for OutFormat\n";

@@ -513,7 +513,7 @@ T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
 }
 
 template <typename T>
-MyMatrix<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
+MyVector<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
   static_assert(is_ring_field<T>::value || is_euclidean_domain<T>::value,
                 "Requires T to be a ring or euclidean domain");
 
@@ -634,7 +634,11 @@ MyMatrix<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
     }
   }
 
-  return A;
+  MyVector<T> Vret(minDim);
+  for (int i=0; i<minDim; i++) {
+    Vret(i) = A(i,i);
+  }
+  return Vret;
 }
 
 // We must have n_row >= n_col.
