@@ -514,131 +514,131 @@ T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
 
 template <typename T>
 MyVector<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
-  static_assert(is_ring_field<T>::value || is_euclidean_domain<T>::value,
-                "Requires T to be a ring or euclidean domain");
+  static_assert(is_euclidean_domain<T>::value,
+                "Requires T to be an Euclidean domain");
 
   int n = TheMat.rows();
   int m = TheMat.cols();
+  int minDim = std::min(n, m);
 
+  MyVector<T> empty_result(minDim);
   if (n == 0 || m == 0) {
-    return TheMat;
+    return empty_result;
   }
 
   MyMatrix<T> A = TheMat;
-  int rank = 0;
-  int minDim = std::min(n, m);
 
+  int rank = 0;
   for (int k = 0; k < minDim; k++) {
-    // Find pivot with smallest non-zero norm
+    // Find pivot with smallest non-zero absolute value in A[k..n-1, k..m-1]
     int pivot_row = -1;
     int pivot_col = -1;
-    T min_norm = T(0);
-    bool found_pivot = false;
+    T min_val = T(0);
 
     for (int i = k; i < n; i++) {
       for (int j = k; j < m; j++) {
         if (A(i, j) != 0) {
-          T norm = T_abs(A(i, j));
-          if (!found_pivot || norm < min_norm) {
-            min_norm = norm;
+          T current_abs = T_abs(A(i, j));
+          if (pivot_row == -1 || current_abs < min_val) {
+            min_val = current_abs;
             pivot_row = i;
             pivot_col = j;
-            found_pivot = true;
           }
         }
       }
     }
 
-    if (!found_pivot) {
-      break; // No more pivots
+    if (pivot_row == -1) {
+      // The rest of the matrix is zero
+      break;
     }
+    rank++;
 
-    // Move pivot to position (k, k)
+    // Swap pivot to (k, k)
     if (pivot_row != k) {
       for (int j = 0; j < m; j++) {
-        T temp = A(k, j);
-        A(k, j) = A(pivot_row, j);
-        A(pivot_row, j) = temp;
+        std::swap(A(k, j), A(pivot_row, j));
       }
     }
     if (pivot_col != k) {
       for (int i = 0; i < n; i++) {
-        T temp = A(i, k);
-        A(i, k) = A(i, pivot_col);
-        A(i, pivot_col) = temp;
+        std::swap(A(i, k), A(i, pivot_col));
       }
     }
 
-    // Make pivot positive
+    // Ensure pivot is positive
     if (A(k, k) < 0) {
       for (int j = k; j < m; j++) {
         A(k, j) = -A(k, j);
       }
     }
 
-    // Clear column k below diagonal
+    // Eliminate entries in column k
     for (int i = k + 1; i < n; i++) {
       if (A(i, k) != 0) {
-        T g = GcdPair(A(k, k), A(i, k));
-        T u = A(k, k) / g;
-        T v = A(i, k) / g;
+        PairGCD_dot<T> res = ComputePairGcdDot(A(k, k), A(i, k));
+        T s = res.a;
+        T t = res.b;
+        T g = res.gcd;
+
+        T Akk_over_g = A(k,k) / g;
+        T Aik_over_g = A(i,k) / g;
 
         for (int j = k; j < m; j++) {
-          T temp = u * A(i, j) - v * A(k, j);
-          A(k, j) = A(k, j) + A(i, j);
-          A(i, j) = temp;
+          T val_k = A(k,j);
+          T val_i = A(i,j);
+          A(k, j) = s * val_k + t * val_i;
+          A(i, j) = -Aik_over_g * val_k + Akk_over_g * val_i;
         }
       }
     }
 
-    // Clear row k to the right of diagonal
+    // Eliminate entries in row k
     for (int j = k + 1; j < m; j++) {
       if (A(k, j) != 0) {
-        T g = GcdPair(A(k, k), A(k, j));
-        T u = A(k, k) / g;
-        T v = A(k, j) / g;
+        PairGCD_dot<T> res = ComputePairGcdDot(A(k, k), A(k, j));
+        T s = res.a;
+        T t = res.b;
+        T g = res.gcd;
+
+        T Akk_over_g = A(k,k) / g;
+        T Akj_over_g = A(k,j) / g;
 
         for (int i = k; i < n; i++) {
-          T temp = u * A(i, j) - v * A(i, k);
-          A(i, k) = A(i, k) + A(i, j);
-          A(i, j) = temp;
+          T val_k = A(i,k);
+          T val_j = A(i,j);
+          A(i, k) = s * val_k + t * val_j;
+          A(i, j) = -Akj_over_g * val_k + Akk_over_g * val_j;
         }
       }
     }
 
-    rank++;
-
-    // Check if we need to continue (if off-diagonal elements were created)
-    bool need_continue = false;
-    for (int i = k + 1; i < n && !need_continue; i++) {
-      if (A(i, k) != 0) need_continue = true;
-    }
-    for (int j = k + 1; j < m && !need_continue; j++) {
-      if (A(k, j) != 0) need_continue = true;
-    }
-
-    if (need_continue) {
-      k--; // Redo this step
-    }
-  }
-
-  // Ensure divisibility condition: d[i] divides d[i+1]
-  for (int i = 0; i < rank - 1; i++) {
-    if (A(i, i) != 0 && A(i + 1, i + 1) != 0) {
-      T g = GcdPair(A(i, i), A(i + 1, i + 1));
-      if (g != A(i, i)) {
-        // Need to adjust to maintain divisibility
-        A(i, i) = g;
-        A(i + 1, i + 1) = (A(i, i) * A(i + 1, i + 1)) / g;
+    // Ensure divisibility
+    for (int i = k + 1; i < n; i++) {
+      for (int j = k + 1; j < m; j++) {
+        if (ResInt(A(i, j), A(k, k)) != 0) {
+          // Add column j to column k to introduce a non-divisible element
+          for(int row_idx=0; row_idx<n; row_idx++) {
+            A(row_idx, k) += A(row_idx, j);
+          }
+          // Restart process for this pivot
+          k--;
+          goto next_pivot;
+        }
       }
     }
+    next_pivot:;
   }
 
-  MyVector<T> Vret(minDim);
-  for (int i=0; i<minDim; i++) {
-    Vret(i) = A(i,i);
+  MyVector<T> diagonal(minDim);
+  for (int i = 0; i < rank; i++) {
+      diagonal(i) = A(i, i);
   }
-  return Vret;
+  for (int i = rank; i < minDim; i++) {
+      diagonal(i) = 0;
+  }
+
+  return diagonal;
 }
 
 // We must have n_row >= n_col.
