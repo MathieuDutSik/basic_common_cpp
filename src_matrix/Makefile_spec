@@ -19,7 +19,8 @@
 #PROGRAM		= RescaleInverse
 #PROGRAM		= RankMat
 #PROGRAM		= SmithNormalForm SmithNormalFormInvariant
-PROGRAM		= SelectRowColMatModHadamard
+#PROGRAM		= SelectRowColMatModHadamard
+PROGRAM		= SmithNormalFormIntegerMat
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

@@ -22,7 +22,7 @@ struct SelectionRowColData {
   std::vector<int> ListColSelect;
   std::vector<int> ListRowSelect;
   size_t TheRank;
-  
+
   bool operator<(const SelectionRowColData& other) const {
     if (TheRank != other.TheRank) return TheRank < other.TheRank;
     if (ListColSelect != other.ListColSelect) return ListColSelect < other.ListColSelect;
@@ -793,22 +793,22 @@ T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
 template <typename T>
 SelectionRowColData SelectRowColDataMatMod_inner(MyMatrix<T> const &TheMat, T const &TheMod) {
   SelectionRowCol<T> result = SelectRowColMatMod(TheMat, TheMod);
-  
+
   SelectionRowColData data;
   data.ListColSelect = result.ListColSelect;
   data.ListRowSelect = result.ListRowSelect;
   data.TheRank = result.TheRank;
-  
+
   return data;
 }
 
 template <typename T>
 SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
-  
+
   // Compute TheMod * TheMod for comparison
   T mod_squared = TheMod * TheMod;
-  
+
   // Check if we can use int16_t
   int16_t val_16 = std::numeric_limits<int16_t>::max();
   T max_int16 = UniversalScalarConversion<T,int16_t>(val_16);
@@ -820,7 +820,7 @@ SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &T
     MyMatrix<int16_t> mat_small = UniversalMatrixConversion<int16_t, T>(TheMat);
     return SelectRowColDataMatMod_inner(mat_small, mod_small);
   }
-  
+
   // Check if we can use int32_t
   int32_t val_32 = std::numeric_limits<int32_t>::max();
   T max_int32 = UniversalScalarConversion<T,int32_t>(val_32);
@@ -832,7 +832,7 @@ SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &T
     MyMatrix<int32_t> mat_small = UniversalMatrixConversion<int32_t, T>(TheMat);
     return SelectRowColDataMatMod_inner(mat_small, mod_small);
   }
-  
+
   // Check if we can use int64_t
   int64_t val_64 = std::numeric_limits<int64_t>::max();
   T max_int64 = UniversalScalarConversion<T,int64_t>(val_64);
@@ -844,7 +844,7 @@ SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &T
     MyMatrix<int64_t> mat_small = UniversalMatrixConversion<int64_t, T>(TheMat);
     return SelectRowColDataMatMod_inner(mat_small, mod_small);
   }
-  
+
   // No optimization possible, use original type
 #ifdef DEBUG_MATRIX_MOD
   std::cerr << "SELECTMOD: No optimization, using original type\n";

@@ -11,9 +11,7 @@ template <typename T>
 void full_process_type(std::string const &matrix_file, std::string OutFormat,
                        std::ostream &os_out) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(matrix_file);
-  std::cerr << "TheMat=\n";
-  WriteMatrix(std::cerr, TheMat);
-  std::cerr << "\n";
+  std::cerr << "TheMat=" << TheMat.rows() << " / " << TheMat.cols() << "\n";
   //
   std::cerr << "Computing Smith Normal Form\n";
   //
@@ -43,8 +41,12 @@ void process(std::string const &arith, std::string const &matrix_file,
     using T = Rational<SafeInt64>;
     return full_process_type<T>(matrix_file, OutFormat, os_out);
   }
-  if (arith == "rational") {
+  if (arith == "mpq_class") {
     using T = mpq_class;
+    return full_process_type<T>(matrix_file, OutFormat, os_out);
+  }
+  if (arith == "mpz_class") {
+    using T = mpz_class;
     return full_process_type<T>(matrix_file, OutFormat, os_out);
   }
   if (arith == "safe_integer") {
@@ -66,7 +68,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "SmithNormalFormIntegerMat [arith] [matrix_file]\n";
       std::cerr << "\n";
       std::cerr << "    where\n";
-      std::cerr << "arith: The arithmetic type (safe_rational, rational, safe_integer)\n";
+      std::cerr << "arith: The arithmetic type (safe_rational, mpq_class, mpz_class, safe_integer)\n";
       std::cerr << "matrix_file: The input matrix file\n";
       std::cerr << "OutFormat: GAP or simple (optional)\n";
       std::cerr << "OutFile: Output file or stderr/stdout (optional)\n";
