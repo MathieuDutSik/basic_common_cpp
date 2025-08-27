@@ -118,6 +118,10 @@ public:
     //    check("+=");
     gcd_reduction();
   }
+  void operator+=(Tint const &x) {
+    num += x * den;
+    gcd_reduction();
+  }
   void operator-=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint part_prod = x.den / gcd;
