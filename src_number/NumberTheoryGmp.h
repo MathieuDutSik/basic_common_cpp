@@ -339,11 +339,36 @@ ComputePairGcdDot(T const &m, T const &n) {
   mpz_class s, t;
   mpz_gcdext(eGCD.get_mpz_t(), s.get_mpz_t(), t.get_mpz_t(), m.get_mpz_t(),
              n.get_mpz_t());
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_NB_THEORY_GMP
   T diff1 = eGCD - s * m - t * n;
   if (diff1 != 0) {
     std::cerr << "A: diff1=" << diff1 << "\n";
     throw TerminalException{1};
+  }
+  // Check that coefficients are "small enough"
+  // For Extended Euclidean Algorithm, coefficients should satisfy |eCoeff1| <= |n/gcd|
+  // and |eCoeff2| <= |m/gcd| when both inputs are non-zero
+  if (m != 0 && n != 0 && eGCD != 0) {
+    T abs_m = T_abs(m);
+    T abs_n = T_abs(n);
+    T abs_eCoeff1 = T_abs(s);
+    T abs_eCoeff2 = T_abs(t);
+    T abs_gcd = T_abs(eGCD);
+
+    T bound1 = abs_n / abs_gcd;
+    T bound2 = abs_m / abs_gcd;
+
+    if (abs_eCoeff1 > bound1) {
+      std::cerr << "ERROR: |eCoeff1| = " << abs_eCoeff1 << " > " << bound1 << " = |n|/|gcd|\n";
+      std::cerr << "m=" << m << ", n=" << n << ", gcd=" << eGCD << "\n";
+      throw TerminalException{1};
+    }
+
+    if (abs_eCoeff2 > bound2) {
+      std::cerr << "ERROR: |eCoeff2| = " << abs_eCoeff2 << " > " << bound2 << " = |m|/|gcd|\n";
+      std::cerr << "m=" << m << ", n=" << n << ", gcd=" << eGCD << "\n";
+      throw TerminalException{1};
+    }
   }
 #endif
   return {s, t, eGCD};
