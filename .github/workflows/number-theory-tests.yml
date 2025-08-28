@@ -21,84 +21,58 @@ jobs:
     - name: Build number theory tests
       run: |
         cd src_number
-        make Test_SquareRoot Test_Factorize Test_QuoInt Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational
+        make Test_SquareRoot Test_Factorize Test_QuoInt Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo
     
-    - name: Run Test_SquareRoot
-      run: |
-        cd src_number
-        ./Test_SquareRoot
+    - name: Test_SquareRoot
+      run: cd src_number && ./Test_SquareRoot
     
-    - name: Run Test_Factorize
-      run: |
-        cd src_number
-        ./Test_Factorize
+    - name: Test_Factorize
+      run: cd src_number && ./Test_Factorize
     
-    - name: Run Test_QuoInt
-      run: |
-        cd src_number
-        ./Test_QuoInt
+    - name: Test_QuoInt
+      run: cd src_number && ./Test_QuoInt
     
-    - name: Run Test_TypeBoostGmp
-      run: |
-        cd src_number
-        ./Test_TypeBoostGmp
+    - name: Test_TypeBoostGmp
+      run: cd src_number && ./Test_TypeBoostGmp
     
-    - name: Run Test_GetBit
-      run: |
-        cd src_number
-        ./Test_GetBit
+    - name: Test_GetBit
+      run: cd src_number && ./Test_GetBit
     
-    - name: Run Test_QuadraticResidue
-      run: |
-        cd src_number
-        ./Test_QuadraticResidue
+    - name: Test_QuadraticResidue
+      run: cd src_number && ./Test_QuadraticResidue
     
-    - name: Run Test_PrimeGenerator
-      run: |
-        cd src_number
-        ./Test_PrimeGenerator
+    - name: Test_PrimeGenerator
+      run: cd src_number && ./Test_PrimeGenerator
     
-    - name: Run Test_SequenceApproximant
-      run: |
-        cd src_number
-        ./Test_SequenceApproximant
+    - name: Test_SequenceApproximant
+      run: cd src_number && ./Test_SequenceApproximant
     
-    - name: Run Test_UnorderedMapMpzq
-      run: |
-        cd src_number
-        ./Test_UnorderedMapMpzq
+    - name: Test_UnorderedMapMpzq
+      run: cd src_number && ./Test_UnorderedMapMpzq
     
-    - name: Run Test_ComputePairGcdDot with int64_t
-      run: |
-        cd src_number
-        ./Test_ComputePairGcdDot int64_t
+    - name: Test_ComputePairGcdDot int64_t
+      run: cd src_number && ./Test_ComputePairGcdDot int64_t
     
-    - name: Run Test_ComputePairGcdDot with mpz_class
-      run: |
-        cd src_number
-        ./Test_ComputePairGcdDot mpz_class
+    - name: Test_ComputePairGcdDot mpz_class
+      run: cd src_number && ./Test_ComputePairGcdDot mpz_class
     
-    - name: Run Test_ComputePairGcdDot with SafeInt64
-      run: |
-        cd src_number
-        ./Test_ComputePairGcdDot SafeInt64
+    - name: Test_ComputePairGcdDot SafeInt64
+      run: cd src_number && ./Test_ComputePairGcdDot SafeInt64
     
-    - name: Run Test_ComputePairGcdDot with boost_cpp_int
-      run: |
-        cd src_number
-        ./Test_ComputePairGcdDot boost_cpp_int
+    - name: Test_ComputePairGcdDot boost_cpp_int
+      run: cd src_number && ./Test_ComputePairGcdDot boost_cpp_int
     
-    - name: Run Test_RealCubicField
-      run: |
-        cd src_number
-        ./Test_RealCubicField
+    - name: Test_RealCubicField
+      run: cd src_number && ./Test_RealCubicField
     
-    - name: Run Test_QuadField
-      run: |
-        cd src_number
-        ./Test_QuadField
+    - name: Test_QuadField
+      run: cd src_number && ./Test_QuadField
     
-    - name: Run Test_Rational
-      run: |
-        cd src_number
-        ./Test_Rational
+    - name: Test_Rational
+      run: cd src_number && ./Test_Rational
+    
+    - name: Test_PracticalInf
+      run: cd src_number && ./Test_PracticalInf
+    
+    - name: Test_PrintStaticInfo
+      run: cd src_number && ./Test_PrintStaticInfo
