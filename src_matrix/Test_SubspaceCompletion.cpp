@@ -12,8 +12,8 @@ int main(int argc, char *argv[]) {
   //  using T=long;
   try {
     if (argc != 3) {
-      std::cerr << "TestPerformanceHNF is used as\n";
-      std::cerr << "TestPerformanceHNF [n] [m]\n";
+      std::cerr << "Test_SubspaceCompletion is used as\n";
+      std::cerr << "Test_SubspaceCompletion [n] [m]\n";
       return -1;
     }
     // reading the matrix
