@@ -10,70 +10,90 @@ on:
 jobs:
   number-theory-tests:
     runs-on: ubuntu-latest
-    
+    env:
+      GMP_INCDIR: /usr/include
+      GMP_CXX_LINK: "-lm -lgmp -lgmpxx"
+      BOOST_INCDIR: "/usr/include"
+      BOOST_LINK: "/usr/lib/x86_64-linux-gnu/libboost_serialization.a"
+      EIGEN_PATH: /home/runner/work/opt/eigen
+
+
+
+
+
+
     steps:
     - uses: actions/checkout@v4
-    
-    - name: Install dependencies
+
+    - name: Install standard dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential libgmp-dev libeigen3-dev libboost-all-dev
-    
+
+    - name: Install non-standard dependencies
+      run: |
+        # We need specific version 3.3.9 because of a bug in 3.4.0 for algebraic data types.
+        wget -q https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
+        tar -xzf eigen-3.3.9.tar.gz
+        mv eigen-3.3.9 /home/runner/work/opt/eigen
+        pwd
+        echo "After eigen-3.3.9 set up"
+
     - name: Build number theory tests
       run: |
         cd src_number
         make Test_SquareRoot Test_Factorize Test_QuoInt Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo
-    
+
     - name: Test_SquareRoot
       run: cd src_number && ./Test_SquareRoot
-    
+
     - name: Test_Factorize
       run: cd src_number && ./Test_Factorize
-    
+
     - name: Test_QuoInt
       run: cd src_number && ./Test_QuoInt
-    
+
     - name: Test_TypeBoostGmp
       run: cd src_number && ./Test_TypeBoostGmp
-    
+
     - name: Test_GetBit
       run: cd src_number && ./Test_GetBit
-    
+
     - name: Test_QuadraticResidue
       run: cd src_number && ./Test_QuadraticResidue
-    
+
     - name: Test_PrimeGenerator
       run: cd src_number && ./Test_PrimeGenerator
-    
+
     - name: Test_SequenceApproximant
       run: cd src_number && ./Test_SequenceApproximant
-    
+
     - name: Test_UnorderedMapMpzq
       run: cd src_number && ./Test_UnorderedMapMpzq
-    
+
     - name: Test_ComputePairGcdDot int64_t
       run: cd src_number && ./Test_ComputePairGcdDot int64_t
-    
+
     - name: Test_ComputePairGcdDot mpz_class
       run: cd src_number && ./Test_ComputePairGcdDot mpz_class
-    
+
     - name: Test_ComputePairGcdDot SafeInt64
       run: cd src_number && ./Test_ComputePairGcdDot SafeInt64
-    
+
     - name: Test_ComputePairGcdDot boost_cpp_int
       run: cd src_number && ./Test_ComputePairGcdDot boost_cpp_int
-    
+
     - name: Test_RealCubicField
       run: cd src_number && ./Test_RealCubicField
-    
+
     - name: Test_QuadField
       run: cd src_number && ./Test_QuadField
-    
+
     - name: Test_Rational
       run: cd src_number && ./Test_Rational
-    
+
     - name: Test_PracticalInf
       run: cd src_number && ./Test_PracticalInf
-    
+
     - name: Test_PrintStaticInfo
       run: cd src_number && ./Test_PrintStaticInfo
