@@ -1,0 +1,70 @@
+name: Basic Tests
+
+on:
+  # Every 15th of the month at midnight
+  schedule:
+    - cron: "0 0 15 * *"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  basic-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libgmp-dev libeigen3-dev libboost-all-dev
+    
+    - name: Build basic tests
+      run: |
+        cd src_basic
+        make Test_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Test_hash_table Test_bool Test_face Test_String_Optimization Test_String_Trim Test_String_Conversion Test_Namelist_Substr Test_Basic_string_Optimizations
+    
+    - name: Test_Thompson_sampling
+      run: cd src_basic && ./Test_Thompson_sampling
+    
+    - name: Test_timing
+      run: cd src_basic && ./Test_timing
+    
+    - name: Test_PresenceProgram
+      run: cd src_basic && ./Test_PresenceProgram
+    
+    - name: Test_namelist
+      run: cd src_basic && ./Test_namelist
+    
+    - name: Test_String_Split
+      run: cd src_basic && ./Test_String_Split
+    
+    - name: Test_serialization
+      run: cd src_basic && ./Test_serialization
+    
+    - name: Test_EmpiricalDistribution
+      run: cd src_basic && ./Test_EmpiricalDistribution
+    
+    - name: Test_hash_table
+      run: cd src_basic && ./Test_hash_table
+    
+    - name: Test_bool
+      run: cd src_basic && ./Test_bool
+    
+    - name: Test_face
+      run: cd src_basic && ./Test_face
+    
+    - name: Test_String_Optimization
+      run: cd src_basic && ./Test_String_Optimization
+    
+    - name: Test_String_Trim
+      run: cd src_basic && ./Test_String_Trim
+    
+    - name: Test_String_Conversion
+      run: cd src_basic && ./Test_String_Conversion
+    
+    - name: Test_Namelist_Substr
+      run: cd src_basic && ./Test_Namelist_Substr
+    
+    - name: Test_Basic_string_Optimizations
+      run: cd src_basic && ./Test_Basic_string_Optimizations
