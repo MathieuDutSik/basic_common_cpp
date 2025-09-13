@@ -139,6 +139,12 @@ public:
     uint32_t seed = 0x1b853560;
     return robin_hood_hash_bytes(V.data(), rel_len, seed);
   }
+  vectface clone() const {
+    vectface vf;
+    std::vector<uint8_t> V_copy = V;
+    vf.build_vectface(n, n_face, std::move(V_copy));
+    return vf;
+  }
 
   vectface &operator=(const vectface &&vf) {
     n = vf.n;

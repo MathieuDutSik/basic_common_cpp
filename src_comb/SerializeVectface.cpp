@@ -12,6 +12,7 @@ int main() {
       f[i] = random() % 2;
     vf1.push_back(f);
   }
+  vectface vf_clone = vf1.clone();
   std::string filename = "/tmp/VF_filename.boost_archive";
 
   //
