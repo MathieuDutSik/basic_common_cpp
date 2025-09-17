@@ -27,6 +27,7 @@ jobs:
 
     - name: Install non-standard dependencies
       run: |
+        mkdir -p /home/runner/work/opt
         # We need specific version 3.3.9 because of a bug in 3.4.0 for algebraic data types.
         wget -q https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
         tar -xzf eigen-3.3.9.tar.gz
