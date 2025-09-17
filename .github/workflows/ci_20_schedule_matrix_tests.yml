@@ -1,0 +1,55 @@
+name: Matrix Tests
+
+on:
+  # Every 20th of the month at midnight
+  schedule:
+    - cron: "0 0 20 * *"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  matrix-tests:
+    runs-on: ubuntu-latest
+    env:
+      GMP_INCDIR: /usr/include
+      GMP_CXX_LINK: "-lm -lgmp -lgmpxx"
+      BOOST_INCDIR: "/usr/include"
+      BOOST_LINK: "/usr/lib/x86_64-linux-gnu/libboost_serialization.a"
+      EIGEN_PATH: /home/runner/work/opt/eigen
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install standard dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libgmp-dev libeigen3-dev libboost-all-dev
+
+    - name: Install non-standard dependencies
+      run: |
+        # We need specific version 3.3.9 because of a bug in 3.4.0 for algebraic data types.
+        wget -q https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
+        tar -xzf eigen-3.3.9.tar.gz
+        mv eigen-3.3.9 /home/runner/work/opt/eigen
+        pwd
+        echo "After eigen-3.3.9 set up"
+
+    - name: Build matrix tests
+      run: |
+        cd src_matrix
+        make Test_MatrixInverse Test_PerformanceHNF Test_HilbertMatrix Test_NullspaceComputation Test_SubspaceCompletion Test_FindIsotropicMod
+
+    - name: Test_MatrixInverse
+      run: cd src_matrix && ./Test_MatrixInverse mpz_class 10
+
+    - name: Test_PerformanceHNF
+      run: cd src_matrix && ./Test_PerformanceHNF 10 10
+
+    - name: Test_HilbertMatrix
+      run: cd src_matrix && ./Test_HilbertMatrix mpq_class 10
+
+    - name: Test_NullspaceComputation
+      run: cd src_matrix && ./Test_NullspaceComputation
+
+    - name: Test_SubspaceCompletion
+      run: cd src_matrix && ./Test_SubspaceCompletion 15 10
