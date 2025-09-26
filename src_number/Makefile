@@ -1,11 +1,11 @@
-PROGRAM		= Test_SquareRoot Test_UnorderedMapMpzq Factorize Factorize_help Test_Factorize Test_PracticalInf Test_QuoInt Test_PrintStaticInfo Test_RealCubicField Test_QuadField Test_Rational Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant ReadValueString ComputeQuadraticResidue Test_ComputePairGcdDot
+PROGRAM		= Test_SquareRoot Test_UnorderedMapMpzq Factorize Factorize_help Test_Factorize Test_PracticalInf Test_QuoInt Test_PrintStaticInfo Test_RealCubicField Test_QuadField Test_Rational Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant ReadValueString ComputeQuadraticResidue Test_ComputePairGcdDot Test_Conversion
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
 #PROGRAM		= PracticalInf
 #PROGRAM		= TestQuoInt
-#PROGRAM		= TestConversion
-#PROGRAM		= TestSquareRoot
+#PROGRAM		= Test_Conversion
+#PROGRAM		= Test_SquareRoot
 #PROGRAM		= PrintStaticInfo
 #PROGRAM		= QuadFieldTest
 #PROGRAM		= RealCubicFieldTest

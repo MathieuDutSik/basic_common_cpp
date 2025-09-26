@@ -535,6 +535,16 @@ inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) {
 
 #endif
 
+// double as input
+
+// This conversion could be improved upon. But that would slow it
+// and in any case the conversion from double has inherent issues
+// that have to be addressed in other parts of the code.
+inline void TYPE_CONVERSION(stc<double> const &a1, mpz_class &a2) {
+  uint64_t a1_b = static_cast<int64_t>(a1.val);
+  a2 = convert_mpz_class_int64_t(a1_b);
+}
+
 // int64_t as input
 
 inline void TYPE_CONVERSION(stc<int64_t> const &a1, mpq_class &a2) {
