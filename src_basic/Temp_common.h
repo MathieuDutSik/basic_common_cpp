@@ -197,7 +197,12 @@ std::string StringStdVectorGAP(std::vector<T> const &V) {
   return os.str();
 }
 
-
+template <typename T>
+std::string StringStdVectorPYTHON(std::vector<T> const &V) {
+  std::ostringstream os;
+  WriteStdVectorPYTHON(os, V);
+  return os.str();
+}
 
 template <typename T>
 std::istream &operator>>(std::istream &is, std::vector<T> &obj) {
