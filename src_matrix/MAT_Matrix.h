@@ -3234,48 +3234,85 @@ template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
+size_t hash_matrix_sizes(MyMatrix<T> const& M, size_t const& seed) {
+  size_t ret_hash = seed;
+  size_t hash_nrow = std::hash<int>{}(M.rows());
+  size_t hash_ncol = std::hash<int>{}(M.cols());
+  hash_utils::hash_combine(ret_hash, hash_nrow);
+  hash_utils::hash_combine(ret_hash, hash_ncol);
+  return ret_hash;
+}
+
+template <typename T>
+size_t hash_vector_size(MyVector<T> const& V, size_t const& seed) {
+  size_t ret_hash = seed;
+  size_t hash_size = std::hash<int>{}(V.size());
+  hash_utils::hash_combine(ret_hash, hash_size);
+  return ret_hash;
+}
+
+
+
+template <typename T>
 inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
 Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
-  if (M.size() == 0) return seed;
-
-  size_t result = seed;
+  size_t ret_hash = hash_matrix_sizes(M, seed);
   int nbRow = M.rows();
   int nbCol = M.cols();
-  
+
   for (int iRow = 0; iRow < nbRow; iRow++) {
     for (int iCol = 0; iCol < nbCol; iCol++) {
-      size_t elem_hash = std::hash<T>{}(M(iRow, iCol));
-      hash_utils::hash_combine(result, elem_hash);
+      size_t hash_elem = std::hash<T>{}(M(iRow, iCol));
+      hash_utils::hash_combine(ret_hash, hash_elem);
     }
   }
-  return result;
+  return ret_hash;
+}
+
+// The type independent hash.
+// That is if a matrix can be represented in in16_t, int32_t, int64_t, mpz_class
+// then it has the same hash however it is represented.
+// In practice this is done via writing to a string.
+template<typename T>
+size_t matrix_type_independent_hash(MyMatrix<T> const& M, size_t const& seed) {
+  size_t ret_hash = hash_matrix_sizes(M, seed);
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  std::stringstream s;
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      s << " " << M(iRow,iCol);
+    }
+  }
+  std::string stro = s.str();
+  size_t hash_stro = std::hash<std::string>()(stro);
+  hash_utils::hash_combine(ret_hash, hash_stro);
+  return ret_hash;
 }
 
 template <typename T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type
 Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
-  if (M.size() == 0) return seed;
-  return hash_utils::hash_arithmetic_array(M.data(), M.size(), seed);
+  size_t ret_hash = hash_matrix_sizes(M, seed);
+  return hash_utils::hash_arithmetic_array(M.data(), M.size(), ret_hash);
 }
 
 template <typename T>
 inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
 Vector_Hash(MyVector<T> const &V, size_t const &seed) {
-  if (V.size() == 0) return seed;
-  
-  size_t result = seed;
+  size_t ret_hash = hash_vector_size(V, seed);
   for (int i = 0; i < V.size(); i++) {
     size_t elem_hash = std::hash<T>{}(V(i));
-    hash_utils::hash_combine(result, elem_hash);
+    hash_utils::hash_combine(ret_hash, elem_hash);
   }
-  return result;
+  return ret_hash;
 }
 
 template <typename T>
 inline typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type
 Vector_Hash(MyVector<T> const &V, size_t const &seed) {
-  if (V.size() == 0) return seed;
-  return hash_utils::hash_arithmetic_array(V.data(), V.size(), seed);
+  size_t ret_hash = hash_vector_size(V, seed);
+  return hash_utils::hash_arithmetic_array(V.data(), V.size(), ret_hash);
 }
 
 namespace std {
@@ -3285,12 +3322,14 @@ template <typename T> struct hash<MyVector<T>> {
     return Vector_Hash(e_val, seed);
   }
 };
+
 template <typename T> struct hash<MyMatrix<T>> {
-  std::size_t operator()(const MyMatrix<T> &e_val) const {
+std::size_t operator()(const MyMatrix<T> &e_val) const {
     size_t seed = 0x1b873540;
     return Matrix_Hash(e_val, seed);
   }
 };
+
 // clang-format off
 }  // namespace std
 // clang-format on
