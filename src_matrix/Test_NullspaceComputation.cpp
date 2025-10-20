@@ -71,7 +71,7 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
     using T = RealField<idx_real_algebraic_field>;
     return full_process_type<T>(M);
   }
-  std::cerr << "Failed to find a matching entry for arith\n";
+  std::cerr << "Failed to find a matching entry for arith=" << arith << "\n";
   throw TerminalException{1};
 }
 
@@ -121,7 +121,7 @@ int main() {
     //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>",
     //    "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
     std::vector<std::string> ListArith = {"rational<SafeInt64>",
-                                          "rational<long>", "rational",
+                                          "rational<int64_t>", "rational",
                                           "Qsqrt5", "Qsqrt2"};
 
     std::vector<MyMatrix<int>> ListM;
