@@ -235,6 +235,30 @@ inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &x1, double &x2) {
   x2 = a2 + sqrt(d) * b2;
 }
 
+template<typename T, int d>
+inline void NearestInteger(QuadField<T,d> const& xI, QuadField<T,d> & xO) {
+  using Teff = QuadField<T,d>;
+  xO = 0;
+  while(true) {
+    Teff err = T_abs(xI - xO);
+    auto get_move=[&]() -> Teff {
+      if (xI > xO) {
+        return Teff(1);
+      } else {
+        return Teff(-1);
+      }
+    };
+    Teff delta = get_move();
+    Teff xB = xO + delta;
+    Teff err_B = T_abs(xB - xI);
+    if (err_B >= err) {
+      return;
+    }
+    xO = xB;
+  }
+}
+
+
 template <typename T, int d> struct is_totally_ordered<QuadField<T, d>> {
   static const bool value = true;
 };

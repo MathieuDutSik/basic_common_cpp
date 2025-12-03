@@ -19,6 +19,8 @@ int main() {
       std::cerr << "i=" << i << " pow=" << pow << "\n";
       pow *= phi;
     }
+    T near = UniversalNearestScalarInteger<T, T>(x);
+    std::cerr << "near=" << near << "\n";
   } catch (TerminalException const &e) {
     exit(e.eVal);
   }
