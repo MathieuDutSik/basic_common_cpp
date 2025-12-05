@@ -31,6 +31,7 @@ jobs:
         # We need specific version 3.3.9 because of a bug in 3.4.0 for algebraic data types.
         wget -q https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
         tar -xzf eigen-3.3.9.tar.gz
+        mkdir -p /home/runner/work/opt
         mv eigen-3.3.9 /home/runner/work/opt/eigen
         pwd
         echo "After eigen-3.3.9 set up"

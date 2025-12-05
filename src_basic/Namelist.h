@@ -687,6 +687,13 @@ public:
   SingleBlock& get_block_mut(std::string const& key) {
     return get_key_value_mut(ListBlock, "ListBlock", key);
   }
+  bool has_block(std::string const& key) const {
+    if (ListBlock.count(key) == 0) {
+      return false;
+    } else {
+      return true;
+    }
+  }
   FullNamelist(std::map<std::string, SingleBlock> const& _ListBlock) {
     ListBlock = _ListBlock;
     FileName = "undefined";
