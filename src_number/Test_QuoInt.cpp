@@ -1,8 +1,8 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryCommon.h"
 #include "NumberTheorySafeInt.h"
-#include "TypeConversion.h"
 #include "NumberTheory.h"
 // clang-format on
 
