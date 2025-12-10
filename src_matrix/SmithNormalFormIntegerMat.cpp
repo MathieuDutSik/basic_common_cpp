@@ -58,13 +58,15 @@ int main(int argc, char *argv[]) {
   try {
     if (argc != 3 && argc != 5) {
       std::cerr << "This program is used as\n";
-      std::cerr << "SmithNormalFormIntegerMat [arith] [matrix_file] [OutFormat] "
-                   "[OutFile]\n";
+      std::cerr
+          << "SmithNormalFormIntegerMat [arith] [matrix_file] [OutFormat] "
+             "[OutFile]\n";
       std::cerr << "    or\n";
       std::cerr << "SmithNormalFormIntegerMat [arith] [matrix_file]\n";
       std::cerr << "\n";
       std::cerr << "    where\n";
-      std::cerr << "arith: The arithmetic type (safe_rational, mpq_class, mpz_class, safe_integer)\n";
+      std::cerr << "arith: The arithmetic type (safe_rational, mpq_class, "
+                   "mpz_class, safe_integer)\n";
       std::cerr << "matrix_file: The input matrix file\n";
       std::cerr << "OutFormat: GAP or simple (optional)\n";
       std::cerr << "OutFile: Output file or stderr/stdout (optional)\n";

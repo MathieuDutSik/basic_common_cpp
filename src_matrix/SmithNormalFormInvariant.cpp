@@ -19,12 +19,12 @@ template <typename T> void process(std::string const &FileI) {
   //
   std::map<T, size_t> MultInv;
   int len = VectInv.size();
-  for (int u=0; u<len; u++) {
+  for (int u = 0; u < len; u++) {
     T val = VectInv(u);
     MultInv[val] += 1;
   }
   std::cerr << "MultInv =";
-  for (auto & kv: MultInv) {
+  for (auto &kv : MultInv) {
     std::cerr << " [" << kv.first << "," << kv.second << "]";
   }
   std::cerr << "\n";

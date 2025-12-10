@@ -6,7 +6,6 @@
 #include <limits>
 #include <vector>
 
-
 struct GraphBitset {
 public:
   GraphBitset() = delete;

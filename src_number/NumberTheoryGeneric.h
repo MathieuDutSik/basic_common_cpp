@@ -96,8 +96,8 @@ ComputePairGcdDot(T const &m, T const &n) {
     throw TerminalException{1};
   }
   // Check that coefficients are "small enough"
-  // For Extended Euclidean Algorithm, coefficients should satisfy |eCoeff1| <= |n/gcd|
-  // and |eCoeff2| <= |m/gcd| when both inputs are non-zero
+  // For Extended Euclidean Algorithm, coefficients should satisfy |eCoeff1| <=
+  // |n/gcd| and |eCoeff2| <= |m/gcd| when both inputs are non-zero
   if (m != 0 && n != 0 && f != 0) {
     T abs_m = T_abs(m);
     T abs_n = T_abs(n);
@@ -109,13 +109,15 @@ ComputePairGcdDot(T const &m, T const &n) {
     T bound2 = abs_m / abs_gcd;
 
     if (abs_eCoeff1 > bound1) {
-      std::cerr << "ERROR: |eCoeff1| = " << abs_eCoeff1 << " > " << bound1 << " = |n|/|gcd|\n";
+      std::cerr << "ERROR: |eCoeff1| = " << abs_eCoeff1 << " > " << bound1
+                << " = |n|/|gcd|\n";
       std::cerr << "m=" << m << ", n=" << n << ", gcd=" << f << "\n";
       throw TerminalException{1};
     }
 
     if (abs_eCoeff2 > bound2) {
-      std::cerr << "ERROR: |eCoeff2| = " << abs_eCoeff2 << " > " << bound2 << " = |m|/|gcd|\n";
+      std::cerr << "ERROR: |eCoeff2| = " << abs_eCoeff2 << " > " << bound2
+                << " = |m|/|gcd|\n";
       std::cerr << "m=" << m << ", n=" << n << ", gcd=" << f << "\n";
       throw TerminalException{1};
     }
@@ -196,8 +198,8 @@ template <typename T> std::optional<T> UniversalSquareRoot(T const &val) {
   We apply
   https://en.wikipedia.org/wiki/Chinese_remainder_theorem
  */
-template<typename T>
-T chinese_remainder_theorem(std::vector<T> const& a, std::vector<T> const& m) {
+template <typename T>
+T chinese_remainder_theorem(std::vector<T> const &a, std::vector<T> const &m) {
 #ifdef DEBUG_NUMBER_THEORY_GENERIC
   if (a.size() != m.size()) {
     std::cerr << "a and m should be of equal lengths\n";
@@ -211,7 +213,7 @@ T chinese_remainder_theorem(std::vector<T> const& a, std::vector<T> const& m) {
   size_t siz = m.size();
   T x = a[0];
   T m_prod = m[0];
-  for (size_t i=1; i<siz; i++) {
+  for (size_t i = 1; i < siz; i++) {
     PairGCD_dot<T> t = ComputePairGcdDot(m_prod, m[i]);
 #ifdef DEBUG_NUMBER_THEORY_GENERIC
     if (t.gcd != 1) {
@@ -230,30 +232,29 @@ T chinese_remainder_theorem(std::vector<T> const& a, std::vector<T> const& m) {
     m_prod *= m[i];
   }
 #ifdef DEBUG_NUMBER_THEORY_GENERIC
-  for (size_t i=0; i<siz; i++) {
+  for (size_t i = 0; i < siz; i++) {
     T diff = x - a[i];
     T res = ResInt(diff, m[i]);
     if (res != 0) {
       std::cerr << "NTG: a=";
-      for (auto & val : a) {
+      for (auto &val : a) {
         std::cerr << " " << val;
       }
       std::cerr << "\n";
       std::cerr << "NTG: m=";
-      for (auto & val : m) {
+      for (auto &val : m) {
         std::cerr << " " << val;
       }
       std::cerr << "\n";
       std::cerr << "NTG: x=" << x << "\n";
-      std::cerr << "NTG: We do not have a solution of the Chinese Remainder Theorem\n";
+      std::cerr << "NTG: We do not have a solution of the Chinese Remainder "
+                   "Theorem\n";
       throw TerminalException{1};
     }
   }
 #endif
   return x;
 }
-
-
 
 template <typename T>
 inline typename std::enable_if<std::is_integral<T>::value, void>::type

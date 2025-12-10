@@ -8,8 +8,7 @@
 #include <iostream>
 // clang-format on
 
-template <typename T>
-void test_prime_generator(int num_primes) {
+template <typename T> void test_prime_generator(int num_primes) {
   PrimeGenerator<T> gen;
 
   std::cerr << "Generating " << num_primes << " primes starting from 10001:\n";
@@ -49,7 +48,8 @@ int main(int argc, char *argv[]) {
       std::cerr << "TestPrimeGenerator [arith] [num_primes]\n";
       std::cerr << "\n";
       std::cerr << "    where\n";
-      std::cerr << "arith: The arithmetic type (safe_integer, int, long, mpz)\n";
+      std::cerr
+          << "arith: The arithmetic type (safe_integer, int, long, mpz)\n";
       std::cerr << "num_primes: The number of primes to generate\n";
       std::cerr << "\n";
       std::cerr << "Example: TestPrimeGenerator safe_integer 10\n";

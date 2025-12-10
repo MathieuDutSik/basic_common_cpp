@@ -2,7 +2,6 @@
 #ifndef SRC_COMB_BOOST_BITSET_KERNEL_H_
 #define SRC_COMB_BOOST_BITSET_KERNEL_H_
 
-
 // clang-format off
 #include "boost_serialization.h"
 #include "hash_functions.h"
@@ -397,7 +396,7 @@ template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   return eList;
 }
 
-void WriteVectfaceGAP(std::ostream& os, vectface const& vf) {
+void WriteVectfaceGAP(std::ostream &os, vectface const &vf) {
   bool IsFirst = true;
   os << "[";
   for (auto &trig : vf) {
@@ -411,12 +410,11 @@ void WriteVectfaceGAP(std::ostream& os, vectface const& vf) {
   os << "]";
 }
 
-std::string StringVectfaceGAP(vectface const& vf) {
+std::string StringVectfaceGAP(vectface const &vf) {
   std::ostringstream os;
   WriteVectfaceGAP(os, vf);
   return os.str();
 }
-
 
 /*
 template<>

@@ -437,7 +437,8 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(
   freeschreier(NULL, &gens);
   schreier_freedyn();
 #ifdef TIMINGS_TRACES
-  os << "|TRA: TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time << "\n";
+  os << "|TRA: TRACES_GetCanonicalOrdering_ListGenerators_Arr|=" << time
+     << "\n";
 #endif
   return {std::move(V), std::move(ListGen)};
 }

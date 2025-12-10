@@ -278,16 +278,16 @@ std::vector<size_t> ConnectedComponents_vector(Tgr const &GR) {
   return ListStatus;
 }
 
-template<typename Tgr>
-bool IsConnectedGraphMinusSubset(Tgr const &GR, std::vector<size_t> const& V) {
+template <typename Tgr>
+bool IsConnectedGraphMinusSubset(Tgr const &GR, std::vector<size_t> const &V) {
   size_t nbVert = GR.GetNbVert();
   size_t miss_val = std::numeric_limits<size_t>::max();
   Face f_out(nbVert);
-  for (auto & eVert: V) {
+  for (auto &eVert : V) {
     f_out[eVert] = 1;
   }
-  auto get_out_vert=[&]() -> size_t {
-    for (size_t u=0; u<nbVert; u++) {
+  auto get_out_vert = [&]() -> size_t {
+    for (size_t u = 0; u < nbVert; u++) {
       if (f_out[u] == 0) {
         return u;
       }
@@ -304,10 +304,10 @@ bool IsConnectedGraphMinusSubset(Tgr const &GR, std::vector<size_t> const& V) {
   size_t vert_start = 0;
   size_t vert_end = 1;
   fatt[out_vert] = 1;
-  while(true) {
+  while (true) {
     size_t pos_vert = vert_end;
-    for (size_t u=vert_start; u<vert_end; u++) {
-      for (auto & eAdj : GR.Adjacency(Lvert[u])) {
+    for (size_t u = vert_start; u < vert_end; u++) {
+      for (auto &eAdj : GR.Adjacency(Lvert[u])) {
         if (f_out[eAdj] == 0 && fatt[eAdj] == 0) {
           Lvert[pos_vert] = eAdj;
           fatt[eAdj] = 1;
@@ -328,13 +328,12 @@ bool IsConnectedGraphMinusSubset(Tgr const &GR, std::vector<size_t> const& V) {
   return false;
 }
 
-template<typename Tgr>
-bool IsKConnectedGraph(Tgr const &GR, size_t const& k) {
+template <typename Tgr> bool IsKConnectedGraph(Tgr const &GR, size_t const &k) {
   size_t nbVert = GR.GetNbVert();
-  SetCppIterator set(nbVert, k-1);
-  for (auto & V : set) {
+  SetCppIterator set(nbVert, k - 1);
+  for (auto &V : set) {
     std::vector<size_t> V2;
-    for (auto & val : V) {
+    for (auto &val : V) {
       V2.push_back(val);
     }
     bool test = IsConnectedGraphMinusSubset(GR, V2);
@@ -344,7 +343,6 @@ bool IsKConnectedGraph(Tgr const &GR, size_t const& k) {
   }
   return true;
 }
-
 
 template <typename Tgr>
 std::vector<std::vector<size_t>> ConnectedComponents_set(Tgr const &GR) {

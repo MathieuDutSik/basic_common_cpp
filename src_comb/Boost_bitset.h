@@ -270,7 +270,7 @@ Face UnsignedLongToFace(size_t const &len, ulong const &eVal) {
 }
 
 void VectVectInt_Print_Kernel(std::ostream &os, vectface const &ListOrbit,
-                              bool const&single_line, int const &shift) {
+                              bool const &single_line, int const &shift) {
   size_t nbOrbit = ListOrbit.size();
   os << "[";
   for (size_t iOrbit = 0; iOrbit < nbOrbit; iOrbit++) {

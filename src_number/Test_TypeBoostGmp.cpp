@@ -7,8 +7,7 @@
 #include "ResidueQuotient.h"
 // clang-format on
 
-template<typename Trat, typename Tint>
-void test_trat_tint() {
+template <typename Trat, typename Tint> void test_trat_tint() {
   Trat val1, val2;
   val1 = 2;
   val2 = 5;
@@ -24,18 +23,16 @@ void test_trat_tint() {
   std::cerr << "lcm=" << lcm << "\n";
 }
 
-
-
 int main() {
   {
     using Trat = boost::multiprecision::mpq_rational;
     using Tint = boost::multiprecision::mpz_int;
-    test_trat_tint<Trat,Tint>();
+    test_trat_tint<Trat, Tint>();
   }
   //
   {
     using Trat = boost::multiprecision::cpp_rational;
     using Tint = boost::multiprecision::cpp_int;
-    test_trat_tint<Trat,Tint>();
+    test_trat_tint<Trat, Tint>();
   }
 }

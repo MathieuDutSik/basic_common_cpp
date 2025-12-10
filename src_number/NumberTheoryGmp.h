@@ -291,9 +291,9 @@ inline mpz_class GetDenominator([[maybe_unused]] mpz_class const &x) {
 
 //
 
-inline mpq_class GetNumerator(mpq_class const& x) { return x.get_num(); }
+inline mpq_class GetNumerator(mpq_class const &x) { return x.get_num(); }
 
-inline mpz_class GetNumerator(mpz_class const& x) { return x; }
+inline mpz_class GetNumerator(mpz_class const &x) { return x; }
 
 //
 
@@ -346,8 +346,8 @@ ComputePairGcdDot(T const &m, T const &n) {
     throw TerminalException{1};
   }
   // Check that coefficients are "small enough"
-  // For Extended Euclidean Algorithm, coefficients should satisfy |eCoeff1| <= |n/gcd|
-  // and |eCoeff2| <= |m/gcd| when both inputs are non-zero
+  // For Extended Euclidean Algorithm, coefficients should satisfy |eCoeff1| <=
+  // |n/gcd| and |eCoeff2| <= |m/gcd| when both inputs are non-zero
   if (m != 0 && n != 0 && eGCD != 0) {
     T abs_m = T_abs(m);
     T abs_n = T_abs(n);
@@ -359,13 +359,15 @@ ComputePairGcdDot(T const &m, T const &n) {
     T bound2 = abs_m / abs_gcd;
 
     if (abs_eCoeff1 > bound1) {
-      std::cerr << "ERROR: |eCoeff1| = " << abs_eCoeff1 << " > " << bound1 << " = |n|/|gcd|\n";
+      std::cerr << "ERROR: |eCoeff1| = " << abs_eCoeff1 << " > " << bound1
+                << " = |n|/|gcd|\n";
       std::cerr << "m=" << m << ", n=" << n << ", gcd=" << eGCD << "\n";
       throw TerminalException{1};
     }
 
     if (abs_eCoeff2 > bound2) {
-      std::cerr << "ERROR: |eCoeff2| = " << abs_eCoeff2 << " > " << bound2 << " = |m|/|gcd|\n";
+      std::cerr << "ERROR: |eCoeff2| = " << abs_eCoeff2 << " > " << bound2
+                << " = |m|/|gcd|\n";
       std::cerr << "m=" << m << ", n=" << n << ", gcd=" << eGCD << "\n";
       throw TerminalException{1};
     }

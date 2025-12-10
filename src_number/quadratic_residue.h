@@ -72,7 +72,8 @@
 // This is an exhaustive search that works even if m is not prime.
 // The function returns a x such that x^2 = a (mod m) if it exists.
 template <typename T>
-std::optional<T> find_quadratic_residue_exhaustive_kernel(T const &a, T const &m) {
+std::optional<T> find_quadratic_residue_exhaustive_kernel(T const &a,
+                                                          T const &m) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
   T two(2);
   T res = ResInt(m, two);
@@ -107,10 +108,12 @@ std::optional<T> find_quadratic_residue_exhaustive_kernel(T const &a, T const &m
 
 // Compute the quadratic residue by mapping to a faster numeric if available.
 template <typename T, typename Tcomp>
-std::optional<T> find_quadratic_residue_exhaustive_Tcomp(T const &a, T const &m) {
+std::optional<T> find_quadratic_residue_exhaustive_Tcomp(T const &a,
+                                                         T const &m) {
   Tcomp a_comp = UniversalScalarConversion<Tcomp, T>(a);
   Tcomp m_comp = UniversalScalarConversion<Tcomp, T>(m);
-  std::optional<Tcomp> opt = find_quadratic_residue_exhaustive_kernel(a_comp, m_comp);
+  std::optional<Tcomp> opt =
+      find_quadratic_residue_exhaustive_kernel(a_comp, m_comp);
   if (opt) {
     Tcomp val_comp = *opt;
     T val = UniversalScalarConversion<T, Tcomp>(val_comp);
@@ -121,7 +124,8 @@ std::optional<T> find_quadratic_residue_exhaustive_Tcomp(T const &a, T const &m)
 }
 
 template <typename T>
-std::optional<T> find_quadratic_residue_exhaustive(T const &a_in, T const &m_in) {
+std::optional<T> find_quadratic_residue_exhaustive(T const &a_in,
+                                                   T const &m_in) {
   T m = T_abs(m_in);
   T a = ResInt(a_in, m);
   T max16_A = UniversalScalarConversion<T, int16_t>(
@@ -147,19 +151,20 @@ std::optional<T> find_quadratic_residue_exhaustive(T const &a_in, T const &m_in)
 }
 
 template <typename T>
-std::optional<T> find_quadratic_residue_map(T const &a_in, std::map<T,size_t> const &m_map) {
+std::optional<T> find_quadratic_residue_map(T const &a_in,
+                                            std::map<T, size_t> const &m_map) {
   std::vector<T> a;
   std::vector<T> m;
   T m_prod(1);
 #ifdef DEBUG_QUADRATIC_RESIDUE
-  for (auto & kv: m_map) {
+  for (auto &kv : m_map) {
     std::cerr << "QUADRES: p=" << kv.first << " mult=" << kv.second << "\n";
   }
 #endif
-  for (auto & kv: m_map) {
-    T const& p = kv.first;
+  for (auto &kv : m_map) {
+    T const &p = kv.first;
     T prod = p;
-    for (size_t u=1; u<kv.second; u++) {
+    for (size_t u = 1; u < kv.second; u++) {
       prod *= p;
     }
     std::optional<T> opt = find_quadratic_residue_exhaustive(a_in, prod);
@@ -179,12 +184,12 @@ std::optional<T> find_quadratic_residue_map(T const &a_in, std::map<T,size_t> co
   T res = ResInt(diff, m_prod);
   if (res != 0) {
     std::cerr << "QUADRES: a=";
-    for (auto & val : a) {
+    for (auto &val : a) {
       std::cerr << " " << val;
     }
     std::cerr << "\n";
     std::cerr << "QUADRES: m=";
-    for (auto & val : m) {
+    for (auto &val : m) {
       std::cerr << " " << val;
     }
     std::cerr << "\n";
@@ -194,8 +199,6 @@ std::optional<T> find_quadratic_residue_map(T const &a_in, std::map<T,size_t> co
 #endif
   return x2;
 }
-
-
 
 template <typename T>
 std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
@@ -208,8 +211,6 @@ std::optional<T> find_quadratic_residue(T const &a_in, T const &m_in) {
   std::map<T, size_t> map = FactorsIntMap(T_abs(m_in));
   return find_quadratic_residue_map(a_in, map);
 }
-
-
 
 template <typename T>
 std::pair<size_t, T> decompose_even_power_odd(T const &val) {

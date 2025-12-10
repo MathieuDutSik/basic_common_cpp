@@ -144,11 +144,13 @@ struct RecParam {
   std::vector<std::vector<unsigned int>> LGen;
 };
 
-template<typename TidxG>
-std::vector<std::vector<TidxG>> get_generators(bliss::Graph& g, bliss::Stats& stats, size_t n_last) {
+template <typename TidxG>
+std::vector<std::vector<TidxG>>
+get_generators(bliss::Graph &g, bliss::Stats &stats, size_t n_last) {
   std::vector<std::vector<TidxG>> ListGen;
   std::vector<TidxG> eGen(n_last);
-  std::function<void(unsigned int n, const unsigned int *aut)> report=[&]([[maybe_unused]] unsigned int n, const unsigned int *aut)-> void {
+  std::function<void(unsigned int n, const unsigned int *aut)> report =
+      [&]([[maybe_unused]] unsigned int n, const unsigned int *aut) -> void {
     for (size_t i = 0; i < n_last; i++) {
       eGen[i] = aut[i];
     }
@@ -180,7 +182,8 @@ BLISS_GetCanonicalOrdering_ListGenerators(Tgr const &eGR,
   for (size_t i = 0; i < nof_vertices; i++)
     vectD[i] = cl[i];
   //
-  std::vector<std::vector<TidxG>> ListGen = get_generators<TidxG>(g, stats, n_last);
+  std::vector<std::vector<TidxG>> ListGen =
+      get_generators<TidxG>(g, stats, n_last);
   //
   return {std::move(vectD), std::move(ListGen)};
 }

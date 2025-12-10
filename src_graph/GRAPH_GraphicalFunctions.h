@@ -208,7 +208,7 @@ template <typename Tgr> Tgr GRAPH_Read(std::istream &is) {
   return eGR;
 }
 
-template <typename Tgr> Tgr GRAPH_ReadFile(std::string const&file) {
+template <typename Tgr> Tgr GRAPH_ReadFile(std::string const &file) {
   std::ifstream GRAfs(file);
   return GRAPH_Read<Tgr>(GRAfs);
 }

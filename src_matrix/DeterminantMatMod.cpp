@@ -58,13 +58,15 @@ int main(int argc, char *argv[]) {
   try {
     if (argc != 4 && argc != 6) {
       std::cerr << "This program is used as\n";
-      std::cerr << "DeterminantMatMod [arith] [matrix_file] [prime] [OutFormat] "
-                   "[OutFile]\n";
+      std::cerr
+          << "DeterminantMatMod [arith] [matrix_file] [prime] [OutFormat] "
+             "[OutFile]\n";
       std::cerr << "    or\n";
       std::cerr << "DeterminantMatMod [arith] [matrix_file] [prime]\n";
       std::cerr << "\n";
       std::cerr << "    where\n";
-      std::cerr << "arith: The arithmetic type (safe_rational, rational, safe_integer)\n";
+      std::cerr << "arith: The arithmetic type (safe_rational, rational, "
+                   "safe_integer)\n";
       std::cerr << "matrix_file: The input matrix file\n";
       std::cerr << "prime: The modulus (prime number)\n";
       std::cerr << "OutFormat: GAP or simple (optional)\n";

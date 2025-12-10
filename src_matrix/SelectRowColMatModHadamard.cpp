@@ -23,41 +23,47 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
   std::cerr << "  ListColSelect = [";
   for (size_t i = 0; i < result.ListColSelect.size(); i++) {
     std::cerr << result.ListColSelect[i];
-    if (i < result.ListColSelect.size() - 1) std::cerr << ", ";
+    if (i < result.ListColSelect.size() - 1)
+      std::cerr << ", ";
   }
   std::cerr << "]\n";
   std::cerr << "  ListRowSelect = [";
   for (size_t i = 0; i < result.ListRowSelect.size(); i++) {
     std::cerr << result.ListRowSelect[i];
-    if (i < result.ListRowSelect.size() - 1) std::cerr << ", ";
+    if (i < result.ListRowSelect.size() - 1)
+      std::cerr << ", ";
   }
   std::cerr << "]\n";
-  
+
   // Compare with standard SelectRowCol computation for verification
   if (TheMat.rows() <= 10) { // Only for small matrices
-    std::cerr << "Computing SelectRowCol using standard method for comparison\n";
+    std::cerr
+        << "Computing SelectRowCol using standard method for comparison\n";
     SelectionRowCol<T> standard_result = TMat_SelectRowColRing(TheMat);
     std::cerr << "Standard result:\n";
     std::cerr << "  TheRank = " << standard_result.TheRank << "\n";
     std::cerr << "  ListColSelect = [";
     for (size_t i = 0; i < standard_result.ListColSelect.size(); i++) {
       std::cerr << standard_result.ListColSelect[i];
-      if (i < standard_result.ListColSelect.size() - 1) std::cerr << ", ";
+      if (i < standard_result.ListColSelect.size() - 1)
+        std::cerr << ", ";
     }
     std::cerr << "]\n";
     std::cerr << "  ListRowSelect = [";
     for (size_t i = 0; i < standard_result.ListRowSelect.size(); i++) {
       std::cerr << standard_result.ListRowSelect[i];
-      if (i < standard_result.ListRowSelect.size() - 1) std::cerr << ", ";
+      if (i < standard_result.ListRowSelect.size() - 1)
+        std::cerr << ", ";
     }
     std::cerr << "]\n";
-    
+
     if (result.TheRank == standard_result.TheRank &&
         result.ListColSelect == standard_result.ListColSelect &&
         result.ListRowSelect == standard_result.ListRowSelect) {
       std::cerr << "SUCCESS: Both methods agree!\n";
     } else {
-      std::cerr << "INFO: Methods may differ (this is expected with modular arithmetic)\n";
+      std::cerr << "INFO: Methods may differ (this is expected with modular "
+                   "arithmetic)\n";
     }
   }
   //
@@ -67,13 +73,15 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
     os_out << "ListColSelect := [";
     for (size_t i = 0; i < result.ListColSelect.size(); i++) {
       os_out << result.ListColSelect[i] + 1; // GAP uses 1-based indexing
-      if (i < result.ListColSelect.size() - 1) os_out << ", ";
+      if (i < result.ListColSelect.size() - 1)
+        os_out << ", ";
     }
     os_out << "], ";
     os_out << "ListRowSelect := [";
     for (size_t i = 0; i < result.ListRowSelect.size(); i++) {
       os_out << result.ListRowSelect[i] + 1; // GAP uses 1-based indexing
-      if (i < result.ListRowSelect.size() - 1) os_out << ", ";
+      if (i < result.ListRowSelect.size() - 1)
+        os_out << ", ";
     }
     os_out << "]);\n";
     return;
@@ -83,13 +91,15 @@ void full_process_type(std::string const &matrix_file, std::string OutFormat,
     os_out << "ColSelect: ";
     for (size_t i = 0; i < result.ListColSelect.size(); i++) {
       os_out << result.ListColSelect[i];
-      if (i < result.ListColSelect.size() - 1) os_out << " ";
+      if (i < result.ListColSelect.size() - 1)
+        os_out << " ";
     }
     os_out << "\n";
     os_out << "RowSelect: ";
     for (size_t i = 0; i < result.ListRowSelect.size(); i++) {
       os_out << result.ListRowSelect[i];
-      if (i < result.ListRowSelect.size() - 1) os_out << " ";
+      if (i < result.ListRowSelect.size() - 1)
+        os_out << " ";
     }
     os_out << "\n";
     return;
@@ -119,8 +129,9 @@ int main(int argc, char *argv[]) {
   try {
     if (argc != 3 && argc != 5) {
       std::cerr << "This program is used as\n";
-      std::cerr << "SelectRowColMatModHadamard [arith] [matrix_file] [OutFormat] "
-                   "[OutFile]\n";
+      std::cerr
+          << "SelectRowColMatModHadamard [arith] [matrix_file] [OutFormat] "
+             "[OutFile]\n";
       std::cerr << "    or\n";
       std::cerr << "SelectRowColMatModHadamard [arith] [matrix_file]\n";
       std::cerr << "\n";

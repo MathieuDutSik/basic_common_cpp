@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     }
     std::string eFileName = argv[1];
     NAMELIST_ReadNamelistFile(eFileName, eFull);
-    SingleBlock const& BlPROC = eFull.get_block("PROC");
+    SingleBlock const &BlPROC = eFull.get_block("PROC");
     std::string InputFile = BlPROC.get_string("InputFile");
     double thrEigenvalueZero = BlPROC.get_double("thrEigenvalueZero");
     double MaximumValueIntSearch = BlPROC.get_int("MaximumValueIntSearch");
@@ -59,7 +59,8 @@ int main(int argc, char *argv[]) {
     bool ShowOrthKernel = BlPROC.get_bool("ShowOrthKernel");
     bool ShowKernel = BlPROC.get_bool("ShowKernel");
     bool CanonicalizeByMinValue = BlPROC.get_bool("CanonicalizeByMinValue");
-    bool CheckPrimalDualCancellation = BlPROC.get_bool("CheckPrimalDualCancellation");
+    bool CheckPrimalDualCancellation =
+        BlPROC.get_bool("CheckPrimalDualCancellation");
     std::string PrimalDualPairFile = BlPROC.get_string("PrimalDualPairFile");
     // reading the matrix
     if (!IsExistingFile(InputFile)) {

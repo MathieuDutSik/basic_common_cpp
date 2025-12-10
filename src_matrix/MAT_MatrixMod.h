@@ -23,9 +23,11 @@ struct SelectionRowColData {
   std::vector<int> ListRowSelect;
   size_t TheRank;
 
-  bool operator<(const SelectionRowColData& other) const {
-    if (TheRank != other.TheRank) return TheRank < other.TheRank;
-    if (ListColSelect != other.ListColSelect) return ListColSelect < other.ListColSelect;
+  bool operator<(const SelectionRowColData &other) const {
+    if (TheRank != other.TheRank)
+      return TheRank < other.TheRank;
+    if (ListColSelect != other.ListColSelect)
+      return ListColSelect < other.ListColSelect;
     return ListRowSelect < other.ListRowSelect;
   }
 };
@@ -335,7 +337,8 @@ SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
   int eRank = 0;
   for (int iRow = 0; iRow < n_row; iRow++) {
 #ifdef DEBUG_MATRIX_MOD
-    std::cerr << "MATMOD: NullspaceTrMatMod iRow=" << iRow << " eRank=" << eRank << "\n";
+    std::cerr << "MATMOD: NullspaceTrMatMod iRow=" << iRow << " eRank=" << eRank
+              << "\n";
 #endif
     for (int iCol = 0; iCol < n_col; iCol++) {
       T res = ResInt(M(iRow, iCol), TheMod);
@@ -581,12 +584,12 @@ MyVector<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
         T t = res.b;
         T g = res.gcd;
 
-        T Akk_over_g = A(k,k) / g;
-        T Aik_over_g = A(i,k) / g;
+        T Akk_over_g = A(k, k) / g;
+        T Aik_over_g = A(i, k) / g;
 
         for (int j = k; j < m; j++) {
-          T val_k = A(k,j);
-          T val_i = A(i,j);
+          T val_k = A(k, j);
+          T val_i = A(i, j);
           A(k, j) = s * val_k + t * val_i;
           A(i, j) = -Aik_over_g * val_k + Akk_over_g * val_i;
         }
@@ -601,12 +604,12 @@ MyVector<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
         T t = res.b;
         T g = res.gcd;
 
-        T Akk_over_g = A(k,k) / g;
-        T Akj_over_g = A(k,j) / g;
+        T Akk_over_g = A(k, k) / g;
+        T Akj_over_g = A(k, j) / g;
 
         for (int i = k; i < n; i++) {
-          T val_k = A(i,k);
-          T val_j = A(i,j);
+          T val_k = A(i, k);
+          T val_j = A(i, j);
           A(i, k) = s * val_k + t * val_j;
           A(i, j) = -Akj_over_g * val_k + Akk_over_g * val_j;
         }
@@ -618,7 +621,7 @@ MyVector<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
       for (int j = k + 1; j < m; j++) {
         if (ResInt(A(i, j), A(k, k)) != 0) {
           // Add column j to column k to introduce a non-divisible element
-          for(int row_idx=0; row_idx<n; row_idx++) {
+          for (int row_idx = 0; row_idx < n; row_idx++) {
             A(row_idx, k) += A(row_idx, j);
           }
           // Restart process for this pivot
@@ -627,15 +630,15 @@ MyVector<T> SmithNormalFormIntegerMat(MyMatrix<T> const &TheMat) {
         }
       }
     }
-    next_pivot:;
+  next_pivot:;
   }
 
   MyVector<T> diagonal(minDim);
   for (int i = 0; i < rank; i++) {
-      diagonal(i) = A(i, i);
+    diagonal(i) = A(i, i);
   }
   for (int i = rank; i < minDim; i++) {
-      diagonal(i) = 0;
+    diagonal(i) = 0;
   }
 
   return diagonal;
@@ -659,20 +662,22 @@ T HadamardUpperBoundRectangularKernel(MyMatrix<T> const &TheMat) {
       T val = TheMat(i, j);
       row_norm_squared += val * val;
     }
-    //#ifdef DEBUG_MATRIX_MOD
-    //    std::cerr << "DETHADAMARD: i=" << i << " row_norm_squared=" << row_norm_squared << "\n";
-    //#endif
+    // #ifdef DEBUG_MATRIX_MOD
+    //     std::cerr << "DETHADAMARD: i=" << i << " row_norm_squared=" <<
+    //     row_norm_squared << "\n";
+    // #endif
     row_norms_squared.insert({row_norm_squared, i});
   }
 
   // Take product of the n_col largest row norms squared
   T bound(1);
   auto it = row_norms_squared.rbegin(); // Start from largest
-  for (int count = 0; count < n_col && it != row_norms_squared.rend(); ++count, ++it) {
+  for (int count = 0; count < n_col && it != row_norms_squared.rend();
+       ++count, ++it) {
     T val = it->first;
-    //#ifdef DEBUG_MATRIX_MOD
-    //    std::cerr << "count=" << count << " val=" << val << "\n";
-    //#endif
+    // #ifdef DEBUG_MATRIX_MOD
+    //     std::cerr << "count=" << count << " val=" << val << "\n";
+    // #endif
     if (val != 0) {
       bound *= val;
     }
@@ -694,10 +699,7 @@ T HadamardUpperBoundRectangular(MyMatrix<T> const &TheMat) {
   }
 }
 
-
-
-template <typename T>
-T SquareHadamardUpperBound(MyMatrix<T> const &TheMat) {
+template <typename T> T SquareHadamardUpperBound(MyMatrix<T> const &TheMat) {
   int n = TheMat.rows();
   if (n != TheMat.cols()) {
     std::cerr << "SquareHadamardUpperBound: Matrix must be square\n";
@@ -726,8 +728,7 @@ T SquareHadamardUpperBound(MyMatrix<T> const &TheMat) {
   return bound;
 }
 
-template <typename T>
-T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
+template <typename T> T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
 
   int n = TheMat.rows();
@@ -769,7 +770,8 @@ T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
     product *= prime;
 
 #ifdef DEBUG_MATRIX_MOD
-    std::cerr << "DETHADAMARD: Prime = " << prime << ", det mod = " << det_mod << ", product = " << product << "\n";
+    std::cerr << "DETHADAMARD: Prime = " << prime << ", det mod = " << det_mod
+              << ", product = " << product << "\n";
 #endif
   }
 
@@ -795,7 +797,8 @@ T DeterminantMatHadamard(MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
-SelectionRowColData SelectRowColDataMatMod_inner(MyMatrix<T> const &TheMat, T const &TheMod) {
+SelectionRowColData SelectRowColDataMatMod_inner(MyMatrix<T> const &TheMat,
+                                                 T const &TheMod) {
   SelectionRowCol<T> result = SelectRowColMatMod(TheMat, TheMod);
 
   SelectionRowColData data;
@@ -807,7 +810,8 @@ SelectionRowColData SelectRowColDataMatMod_inner(MyMatrix<T> const &TheMat, T co
 }
 
 template <typename T>
-SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
+SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat,
+                                           T const &TheMod) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
 
   // Compute TheMod * TheMod for comparison
@@ -815,7 +819,7 @@ SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &T
 
   // Check if we can use int16_t
   int16_t val_16 = std::numeric_limits<int16_t>::max();
-  T max_int16 = UniversalScalarConversion<T,int16_t>(val_16);
+  T max_int16 = UniversalScalarConversion<T, int16_t>(val_16);
   if (mod_squared < max_int16) {
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "SELECTMOD: Using int16_t optimization\n";
@@ -827,7 +831,7 @@ SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &T
 
   // Check if we can use int32_t
   int32_t val_32 = std::numeric_limits<int32_t>::max();
-  T max_int32 = UniversalScalarConversion<T,int32_t>(val_32);
+  T max_int32 = UniversalScalarConversion<T, int32_t>(val_32);
   if (mod_squared < max_int32) {
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "SELECTMOD: Using int32_t optimization\n";
@@ -839,7 +843,7 @@ SelectionRowColData SelectRowColDataMatMod(MyMatrix<T> const &TheMat, T const &T
 
   // Check if we can use int64_t
   int64_t val_64 = std::numeric_limits<int64_t>::max();
-  T max_int64 = UniversalScalarConversion<T,int64_t>(val_64);
+  T max_int64 = UniversalScalarConversion<T, int64_t>(val_64);
   if (mod_squared < max_int64) {
 #ifdef DEBUG_MATRIX_MOD
     std::cerr << "SELECTMOD: Using int64_t optimization\n";
@@ -904,14 +908,15 @@ SelectionRowColData SelectRowColMatModHadamard(MyMatrix<T> const &TheMat) {
     }
 
 #ifdef DEBUG_MATRIX_MOD
-    std::cerr << "SELECTHADAMARD: Prime = " << prime << ", rank = " << data.TheRank
-              << ", product = " << value << "\n";
+    std::cerr << "SELECTHADAMARD: Prime = " << prime
+              << ", rank = " << data.TheRank << ", product = " << value << "\n";
 #endif
 
     // Step 4: Check if this entry has product larger than Hadamard bound
     if (value * value > target_product) {
 #ifdef DEBUG_MATRIX_MOD
-      std::cerr << "SELECTHADAMARD: Product " << value << " exceeds target " << target_product << "\n";
+      std::cerr << "SELECTHADAMARD: Product " << value << " exceeds target "
+                << target_product << "\n";
       std::cerr << "SELECTHADAMARD: Returning first qualifying entry\n";
 #endif
       return data;

@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
     std::string N_str = argv[1];
     T N = ParseScalar<T>(N_str);
     std::map<T, size_t> map = FactorsIntMap(N);
-    for (auto & kv : map) {
+    for (auto &kv : map) {
       std::cerr << "p=" << kv.first << " mult=" << kv.second << "\n";
     }
     std::cerr << "Normal termination of the program\n";

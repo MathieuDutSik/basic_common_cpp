@@ -153,7 +153,8 @@ MyVector<T2> UniversalVectorConversion(MyVector<T1> const &V) {
 }
 
 template <typename T2, typename T1>
-std::optional<MyVector<T2>> UniversalVectorConversionCheck(MyVector<T1> const &V) {
+std::optional<MyVector<T2>>
+UniversalVectorConversionCheck(MyVector<T1> const &V) {
   int n = V.size();
   MyVector<T2> V_ret(n);
   try {
@@ -181,7 +182,8 @@ MyMatrix<T2> UniversalMatrixConversion(MyMatrix<T1> const &M) {
 }
 
 template <typename T2, typename T1>
-std::optional<MyMatrix<T2>> UniversalMatrixConversionCheck(MyMatrix<T1> const &M) {
+std::optional<MyMatrix<T2>>
+UniversalMatrixConversionCheck(MyMatrix<T1> const &M) {
   int n_rows = M.rows();
   int n_cols = M.cols();
   MyMatrix<T2> M_ret(n_rows, n_cols);
@@ -189,7 +191,7 @@ std::optional<MyMatrix<T2>> UniversalMatrixConversionCheck(MyMatrix<T1> const &M
     T2 ret;
     for (int j = 0; j < n_cols; j++) {
       for (int i = 0; i < n_rows; i++) {
-        stc<T1> stc_a{M(i,j)};
+        stc<T1> stc_a{M(i, j)};
         TYPE_CONVERSION(stc_a, ret);
         M_ret(i, j) = ret;
       }
@@ -212,11 +214,13 @@ UniversalStdVectorMatrixConversion(std::vector<MyMatrix<T1>> const &ListM) {
 
 template <typename T2, typename T1>
 std::optional<std::vector<MyMatrix<T2>>>
-UniversalStdVectorMatrixConversionCheck(std::vector<MyMatrix<T1>> const &ListM) {
+UniversalStdVectorMatrixConversionCheck(
+    std::vector<MyMatrix<T1>> const &ListM) {
   size_t n_mat = ListM.size();
   std::vector<MyMatrix<T2>> ListM_ret(n_mat);
   for (size_t i_mat = 0; i_mat < n_mat; i_mat++) {
-    std::optional<MyMatrix<T2>> opt = UniversalMatrixConversionCheck<T2, T1>(ListM[i_mat]);
+    std::optional<MyMatrix<T2>> opt =
+        UniversalMatrixConversionCheck<T2, T1>(ListM[i_mat]);
     if (opt) {
       ListM_ret[i_mat] = *opt;
     } else {
@@ -624,7 +628,7 @@ void WriteMatrixPYTHON(std::ostream &os, MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
-std::string StringMatrixPYTHON(MyMatrix<T> const& TheMat) {
+std::string StringMatrixPYTHON(MyMatrix<T> const &TheMat) {
   std::ostringstream os;
   WriteMatrixPYTHON(os, TheMat);
   return os.str();
@@ -679,8 +683,8 @@ void WriteListMatrixGAP(std::ostream &os,
   os << "]";
 }
 
-template<typename T>
-void WriteListMatrixPYTHON(std::ostream& os,
+template <typename T>
+void WriteListMatrixPYTHON(std::ostream &os,
                            std::vector<MyMatrix<T>> const &ListMat) {
   os << "[";
   bool IsFirst = true;
@@ -693,7 +697,7 @@ void WriteListMatrixPYTHON(std::ostream& os,
   os << "]";
 }
 
-template<typename T>
+template <typename T>
 std::string StringListMatrixPYTHON(std::vector<MyMatrix<T>> const &ListMat) {
   std::ostringstream os;
   WriteListMatrixPYTHON(os, ListMat);
@@ -1453,9 +1457,6 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input,
   };
   return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f, threshold);
 }
-
-
-
 
 template <typename T>
 SelectionRowCol<T>
@@ -2711,34 +2712,32 @@ MyVector<T> SymmetricMatrixToVector(MyMatrix<T> const &M) {
   return eVect;
 }
 
-template<typename T>
-MyVector<T> MatrixToVector(MyMatrix<T> const& M) {
+template <typename T> MyVector<T> MatrixToVector(MyMatrix<T> const &M) {
   int n = M.rows();
   int dim = n * n;
   MyVector<T> V(dim);
   int idx = 0;
-  for (int i=0; i<n; i++) {
-    for (int j=0; j<n; j++) {
-      V(idx) = M(i,j);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      V(idx) = M(i, j);
       idx += 1;
     }
   }
   return V;
 }
 
-template<typename T>
-MyMatrix<T> VectorToMatrix(MyVector<T> const& V, int const& n) {
+template <typename T>
+MyMatrix<T> VectorToMatrix(MyVector<T> const &V, int const &n) {
   MyMatrix<T> M(n, n);
-  int idx=0;
-  for (int i=0; i<n; i++) {
-    for (int j=0; j<n; j++) {
-      M(i,j) = V(idx);
+  int idx = 0;
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      M(i, j) = V(idx);
       idx += 1;
     }
   }
   return M;
 }
-
 
 template <typename T> MyVector<T> GetSymmetricMatrixWeightVector(int const &n) {
   int dim = (n * (n + 1)) / 2;
@@ -3057,8 +3056,9 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   return M;
 }
 
-template<typename T>
-MyMatrix<T> MatrixFromPairVector(std::pair<MyVector<T>, MyVector<T>> const& pair) {
+template <typename T>
+MyMatrix<T>
+MatrixFromPairVector(std::pair<MyVector<T>, MyVector<T>> const &pair) {
   int n1 = pair.first.size();
   int n2 = pair.second.size();
   if (n1 != n2) {
@@ -3067,14 +3067,13 @@ MyMatrix<T> MatrixFromPairVector(std::pair<MyVector<T>, MyVector<T>> const& pair
     throw TerminalException{1};
   }
   int n = n1;
-  MyMatrix<T> M(2,n);
-  for (int i=0; i<n; i++) {
+  MyMatrix<T> M(2, n);
+  for (int i = 0; i < n; i++) {
     M(0, i) = pair.first(i);
     M(1, i) = pair.second(i);
   }
   return M;
 }
-
 
 template <typename T>
 MyMatrix<T>
@@ -3131,7 +3130,8 @@ T EvaluationQuadForm(MyMatrix<T> const &eMat, MyVector<Tint> const &eVect) {
   size_t n = eVect.size();
 #ifdef SANITY_CHECK_MAT_MATRIX
   if (eMat.rows() != eVect.size() || eMat.cols() != eVect.size()) {
-    std::cerr << "MAT: We should have eMat a square matrix of size n x n with n the length of eVect\n";
+    std::cerr << "MAT: We should have eMat a square matrix of size n x n with "
+                 "n the length of eVect\n";
     throw TerminalException{1};
   }
 #endif
@@ -3234,7 +3234,7 @@ template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-size_t hash_matrix_sizes(MyMatrix<T> const& M, size_t const& seed) {
+size_t hash_matrix_sizes(MyMatrix<T> const &M, size_t const &seed) {
   size_t ret_hash = seed;
   size_t hash_nrow = std::hash<int>{}(M.rows());
   size_t hash_ncol = std::hash<int>{}(M.cols());
@@ -3244,14 +3244,12 @@ size_t hash_matrix_sizes(MyMatrix<T> const& M, size_t const& seed) {
 }
 
 template <typename T>
-size_t hash_vector_size(MyVector<T> const& V, size_t const& seed) {
+size_t hash_vector_size(MyVector<T> const &V, size_t const &seed) {
   size_t ret_hash = seed;
   size_t hash_size = std::hash<int>{}(V.size());
   hash_utils::hash_combine(ret_hash, hash_size);
   return ret_hash;
 }
-
-
 
 template <typename T>
 inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
@@ -3273,15 +3271,15 @@ Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
 // That is if a matrix can be represented in in16_t, int32_t, int64_t, mpz_class
 // then it has the same hash however it is represented.
 // In practice this is done via writing to a string.
-template<typename T>
-size_t matrix_type_independent_hash(MyMatrix<T> const& M, size_t const& seed) {
+template <typename T>
+size_t matrix_type_independent_hash(MyMatrix<T> const &M, size_t const &seed) {
   size_t ret_hash = hash_matrix_sizes(M, seed);
   int nbRow = M.rows();
   int nbCol = M.cols();
   std::stringstream s;
   for (int iRow = 0; iRow < nbRow; iRow++) {
     for (int iCol = 0; iCol < nbCol; iCol++) {
-      s << " " << M(iRow,iCol);
+      s << " " << M(iRow, iCol);
     }
   }
   std::string stro = s.str();
@@ -3324,7 +3322,7 @@ template <typename T> struct hash<MyVector<T>> {
 };
 
 template <typename T> struct hash<MyMatrix<T>> {
-std::size_t operator()(const MyMatrix<T> &e_val) const {
+  std::size_t operator()(const MyMatrix<T> &e_val) const {
     size_t seed = 0x1b873540;
     return Matrix_Hash(e_val, seed);
   }

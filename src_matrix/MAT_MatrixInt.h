@@ -345,8 +345,7 @@ FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
   return {TheMult, std::move(M2)};
 }
 
-template<typename T>
-T GetDenominatorMatrix(MyMatrix<T> const& M) {
+template <typename T> T GetDenominatorMatrix(MyMatrix<T> const &M) {
   return RemoveFractionMatrixPlusCoeff(M).TheMult;
 }
 
@@ -354,20 +353,21 @@ template <typename T> MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const &M) {
   return RemoveFractionMatrixPlusCoeff(M).TheMat;
 }
 
-template<typename T>
+template <typename T>
 inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
-ScaledInverse(MyMatrix<T> const& M) {
+ScaledInverse(MyMatrix<T> const &M) {
   return Inverse(M);
 }
 
-template<typename T>
+template <typename T>
 inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
-ScaledInverse(MyMatrix<T> const& M) {
+ScaledInverse(MyMatrix<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> M_field = UniversalMatrixConversion<Tfield, T>(M);
   MyMatrix<Tfield> Minv_field = Inverse(M_field);
   MyMatrix<Tfield> MinvRescal_field = RemoveFractionMatrix(Minv_field);
-  MyMatrix<T> MinvRescal = UniversalMatrixConversion<T,Tfield>(MinvRescal_field);
+  MyMatrix<T> MinvRescal =
+      UniversalMatrixConversion<T, Tfield>(MinvRescal_field);
   return MinvRescal;
 }
 
@@ -879,20 +879,17 @@ MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const &M) {
   return H;
 }
 
-
-template<typename T>
-void flip_rows(MyMatrix<T>& M, int row1, int row2) {
+template <typename T> void flip_rows(MyMatrix<T> &M, int row1, int row2) {
   int nbCol = M.cols();
-  for (int iCol=0; iCol<nbCol; iCol++) {
-    std::swap(M(row1,iCol), M(row2,iCol));
+  for (int iCol = 0; iCol < nbCol; iCol++) {
+    std::swap(M(row1, iCol), M(row2, iCol));
   }
 }
 
-template<typename T>
-void flip_cols(MyMatrix<T>& M, int col1, int col2) {
+template <typename T> void flip_cols(MyMatrix<T> &M, int col1, int col2) {
   int nbRow = M.rows();
-  for (int iRow=0; iRow<nbRow; iRow++) {
-    std::swap(M(iRow,col1), M(iRow, col2));
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    std::swap(M(iRow, col1), M(iRow, col2));
   }
 }
 
@@ -905,8 +902,11 @@ void flip_cols(MyMatrix<T>& M, int col1, int col2) {
   Action on rows correspond to multiplying on the left (by A)
   Action on columns correspond to multiplying on the right (by B)
  */
-template <typename T, typename Frow_oper, typename Frow_flip, typename Fcol_oper, typename Fcol_flip>
-MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper, Frow_flip f_row_flip, Fcol_oper f_col_oper, Fcol_flip f_col_flip) {
+template <typename T, typename Frow_oper, typename Frow_flip,
+          typename Fcol_oper, typename Fcol_flip>
+MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper,
+                                  Frow_flip f_row_flip, Fcol_oper f_col_oper,
+                                  Fcol_flip f_col_flip) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   MyMatrix<T> H = M;
@@ -984,8 +984,7 @@ MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper, Fr
   return H;
 }
 
-template<typename T>
-MyVector<T> GetDiagonalInvariant(MyMatrix<T> const& M) {
+template <typename T> MyVector<T> GetDiagonalInvariant(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   int minDim = nbRow;
@@ -993,38 +992,40 @@ MyVector<T> GetDiagonalInvariant(MyMatrix<T> const& M) {
     minDim = nbCol;
   }
   MyVector<T> VectInv(minDim);
-  for (int i=0; i<minDim; i++) {
-    VectInv(i) = M(i,i);
+  for (int i = 0; i < minDim; i++) {
+    VectInv(i) = M(i, i);
   }
   return VectInv;
 }
 
-template<typename T>
-struct ResultSmithNormalForm {
+template <typename T> struct ResultSmithNormalForm {
   MyMatrix<T> ROW;
   MyMatrix<T> COL;
   MyVector<T> Invariant;
 };
 
-template<typename T>
+template <typename T>
 ResultSmithNormalForm<T> SmithNormalForm(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   MyMatrix<T> ROW = IdentityMat<T>(nbRow);
   MyMatrix<T> COL = IdentityMat<T>(nbCol);
-  auto f_row_oper=[&](int row1, int row2, T val) -> void {
+  auto f_row_oper = [&](int row1, int row2, T val) -> void {
     ROW.row(row1) -= val * ROW.row(row2);
   };
-  auto f_row_flip=[&](int row1, int row2) -> void {
+  auto f_row_flip = [&](int row1, int row2) -> void {
     flip_rows(ROW, row1, row2);
   };
-  auto f_col_oper=[&](int col1, int col2, T val) -> void {
+  auto f_col_oper = [&](int col1, int col2, T val) -> void {
     COL.col(col1) -= val * COL.col(col2);
   };
-  auto f_col_flip=[&](int col1, int col2) -> void {
+  auto f_col_flip = [&](int col1, int col2) -> void {
     flip_cols(COL, col1, col2);
   };
-  MyMatrix<T> H = SmithNormalFormKernel<T, decltype(f_row_oper), decltype(f_row_flip), decltype(f_col_oper), decltype(f_col_flip)>(M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
+  MyMatrix<T> H =
+      SmithNormalFormKernel<T, decltype(f_row_oper), decltype(f_row_flip),
+                            decltype(f_col_oper), decltype(f_col_flip)>(
+          M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
 #ifdef SANITY_CHECK_MATRIX_INT
   MyMatrix<T> Test = ROW * M * COL;
   auto show_res = [&]() -> void {
@@ -1051,17 +1052,20 @@ ResultSmithNormalForm<T> SmithNormalForm(MyMatrix<T> const &M) {
   return {ROW, COL, Invariant};
 }
 
-template<typename T>
+template <typename T>
 MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
-  auto f_row_oper=[&]([[maybe_unused]] int row1, [[maybe_unused]] int row2, [[maybe_unused]] T val) -> void {
-  };
-  auto f_row_flip=[&]([[maybe_unused]] int row1, [[maybe_unused]] int row2) -> void {
-  };
-  auto f_col_oper=[&]([[maybe_unused]] int col1, [[maybe_unused]] int col2, [[maybe_unused]] T val) -> void {
-  };
-  auto f_col_flip=[&]([[maybe_unused]] int col1, [[maybe_unused]] int col2) -> void {
-  };
-  MyMatrix<T> H = SmithNormalFormKernel<T, decltype(f_row_oper), decltype(f_row_flip), decltype(f_col_oper), decltype(f_col_flip)>(M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
+  auto f_row_oper = [&]([[maybe_unused]] int row1, [[maybe_unused]] int row2,
+                        [[maybe_unused]] T val) -> void {};
+  auto f_row_flip = [&]([[maybe_unused]] int row1,
+                        [[maybe_unused]] int row2) -> void {};
+  auto f_col_oper = [&]([[maybe_unused]] int col1, [[maybe_unused]] int col2,
+                        [[maybe_unused]] T val) -> void {};
+  auto f_col_flip = [&]([[maybe_unused]] int col1,
+                        [[maybe_unused]] int col2) -> void {};
+  MyMatrix<T> H =
+      SmithNormalFormKernel<T, decltype(f_row_oper), decltype(f_row_flip),
+                            decltype(f_col_oper), decltype(f_col_flip)>(
+          M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
   MyVector<T> Invariant = GetDiagonalInvariant(H);
   return Invariant;
 }
@@ -1289,16 +1293,14 @@ template <typename T> MyMatrix<T> NullspaceIntMat(MyMatrix<T> const &eMat) {
   return NullspaceIntTrMat(TransposedMat(eMat));
 }
 
-template<typename T>
-MyMatrix<T> NullspaceIntVect(MyVector<T> const& V) {
+template <typename T> MyMatrix<T> NullspaceIntVect(MyVector<T> const &V) {
   int n = V.size();
-  MyMatrix<T> eMat(1,n);
-  for (int i=0; i<n; i++) {
-    eMat(0,i) = V(i);
+  MyMatrix<T> eMat(1, n);
+  for (int i = 0; i < n; i++) {
+    eMat(0, i) = V(i);
   }
   return NullspaceIntTrMat(eMat);
 }
-
 
 // Given a vector v of T^n which is primitive
 // the function returns a family of vector v1, ...., v(n-1)
@@ -1655,14 +1657,14 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
   return eSol;
 }
 
-template <typename T>
-struct RecSolutionIntMat {
+template <typename T> struct RecSolutionIntMat {
 private:
   int nbRow;
   int nbCol;
   std::vector<int> ListRow;
   MyMatrix<T> TheMatWork;
   MyMatrix<T> eEquivMat;
+
 public:
   RecSolutionIntMat(MyMatrix<T> const &TheMat) {
     static_assert(is_euclidean_domain<T>::value,
@@ -1748,7 +1750,7 @@ public:
     for (int i = 0; i < nbCol; i++) {
       int iRow = ListRow[i];
       if (iRow >= 0) {
-        T const& prov2 = TheMatWork(iRow, i);
+        T const &prov2 = TheMatWork(iRow, i);
         T TheQ = QuoInt(TheVectWork(i), prov2);
         if (TheQ != 0) {
           for (int j = 0; j < nbCol; j++) {
@@ -1770,7 +1772,7 @@ public:
     for (int i = 0; i < nbCol; i++) {
       int iRow = ListRow[i];
       if (iRow >= 0) {
-        T const& prov2 = TheMatWork(iRow, i);
+        T const &prov2 = TheMatWork(iRow, i);
         T TheQ = QuoInt(TheVectWork(i), prov2);
         if (TheQ != 0) {
           for (int j = 0; j < nbCol; j++) {
@@ -1802,8 +1804,8 @@ public:
   bool is_containing_m(MyMatrix<T> const &TheMat) const {
     int n_row = TheMat.rows();
     MyVector<T> V(nbCol);
-    for (int i_row=0; i_row<n_row; i_row++) {
-      for (int i_col=0; i_col<nbCol; i_col++) {
+    for (int i_row = 0; i_row < n_row; i_row++) {
+      for (int i_col = 0; i_col < nbCol; i_col++) {
         V(i_col) = TheMat(i_row, i_col);
       }
       bool test = has_solution_v(V);
@@ -2529,8 +2531,7 @@ FindBestIntegerApproximation(MyVector<Tfloat> const &V, int const &N) {
   return {MinErr, std::move(MinimalApprox)};
 }
 
-template<typename T>
-MyMatrix<T> GetZbasisColumn(MyMatrix<T> const& Amat) {
+template <typename T> MyMatrix<T> GetZbasisColumn(MyMatrix<T> const &Amat) {
   MyMatrix<T> AmatTr = Amat.transpose();
   MyMatrix<T> Xmat = GetZbasis(AmatTr);
   MyMatrix<T> XmatTr = Xmat.transpose();
@@ -2541,15 +2542,15 @@ MyMatrix<T> GetZbasisColumn(MyMatrix<T> const& Amat) {
 // The equation is potentially underdefined and B in Z^*
 // We look for the number d>0 such that for all B in Z^*
 // the equation has a solution in Z^* / d
-template<typename T>
-T GetDenominatorQuotientSolution(MyMatrix<T> const& Amat) {
+template <typename T>
+T GetDenominatorQuotientSolution(MyMatrix<T> const &Amat) {
   MyMatrix<T> AmatRed1 = GetZbasis(Amat);
   MyMatrix<T> AmatRed2 = GetZbasisColumn(AmatRed1);
   return T_abs(DeterminantMat(AmatRed2));
 }
 
-template<typename T>
-MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const& TheSpace) {
+template <typename T>
+MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const &TheSpace) {
   int nbRow = TheSpace.rows();
 #ifdef SANITY_CHECK_MATRIX_INT
   if (nbRow != RankMat(TheSpace)) {
@@ -2569,12 +2570,12 @@ MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const& TheSpace) {
   return TheSpaceInt;
 }
 
-template<typename T>
-MyMatrix<T> RemoveFractionMatrixRows(MyMatrix<T> const& M) {
+template <typename T>
+MyMatrix<T> RemoveFractionMatrixRows(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   MyMatrix<T> Mret(nbRow, nbCol);
-  for (int u=0; u<nbRow; u++) {
+  for (int u = 0; u < nbRow; u++) {
     MyVector<T> eV = GetMatrixRow(M, u);
     MyVector<T> fV = RemoveFractionVector(eV);
     AssignMatrixRow(Mret, u, fV);
@@ -2582,14 +2583,14 @@ MyMatrix<T> RemoveFractionMatrixRows(MyMatrix<T> const& M) {
   return Mret;
 }
 
-
 /*
   Given a vector eVect and a linear space W, we find
   a vector w = v + W * t  such that w has the minimal
   number of coefficients.
  */
-template<typename T>
-MyVector<T> EliminateSuperfluousPrimeDenominators(MyVector<T> const& eVect, MyMatrix<T> const& ListVect) {
+template <typename T>
+MyVector<T> EliminateSuperfluousPrimeDenominators(MyVector<T> const &eVect,
+                                                  MyMatrix<T> const &ListVect) {
   int dim = eVect.size();
   if (ListVect.rows() == 0) {
     // Nothing possible really
@@ -2609,22 +2610,23 @@ MyVector<T> EliminateSuperfluousPrimeDenominators(MyVector<T> const& eVect, MyMa
   MyVector<T> eSol = TheBasisInv.transpose() * eVect;
   int dimCompl = TheCompl.rows();
   MyVector<T> eSolRed(dimCompl);
-  for (int u=0; u<dimCompl; u++) {
+  for (int u = 0; u < dimCompl; u++) {
     eSolRed(u) = eSol(u);
   }
   MyVector<T> TheRet = TheCompl.transpose() * eSolRed;
   return TheRet;
 }
 
-template<typename T>
-MyMatrix<T> EliminateSuperfluousPrimeDenominators_Matrix(MyMatrix<T> const& eMat, std::vector<MyMatrix<T>> const& ListMat) {
+template <typename T>
+MyMatrix<T> EliminateSuperfluousPrimeDenominators_Matrix(
+    MyMatrix<T> const &eMat, std::vector<MyMatrix<T>> const &ListMat) {
   if (ListMat.size() == 0) {
     return eMat;
   }
   int dim = eMat.rows();
   MyVector<T> eVect = MatrixToVector(eMat);
   std::vector<MyVector<T>> ListVect;
-  for (auto & eMat : ListMat) {
+  for (auto &eMat : ListMat) {
     MyVector<T> eV = MatrixToVector(eMat);
     ListVect.push_back(eV);
   }
@@ -2634,20 +2636,22 @@ MyMatrix<T> EliminateSuperfluousPrimeDenominators_Matrix(MyMatrix<T> const& eMat
   return TheMat;
 }
 
-template<typename T>
-inline typename std::enable_if<is_ring_field<T>::value, SelectionRowCol<T>>::type
-TMat_SelectRowColRing(MyMatrix<T> const &Input) {
+template <typename T>
+inline
+    typename std::enable_if<is_ring_field<T>::value, SelectionRowCol<T>>::type
+    TMat_SelectRowColRing(MyMatrix<T> const &Input) {
   return TMat_SelectRowCol(Input);
 }
 
-template<typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, SelectionRowCol<T>>::type
-TMat_SelectRowColRing(MyMatrix<T> const &Input) {
+template <typename T>
+inline
+    typename std::enable_if<!is_ring_field<T>::value, SelectionRowCol<T>>::type
+    TMat_SelectRowColRing(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   SelectionRowCol<Tfield> src = TMat_SelectRowColRing(InputF);
   MyMatrix<Tfield> NSP2 = RemoveFractionMatrix(src.NSP);
-  MyMatrix<T> NSP3 = UniversalMatrixConversion<T,Tfield>(NSP2);
+  MyMatrix<T> NSP3 = UniversalMatrixConversion<T, Tfield>(NSP2);
   return {src.TheRank, NSP3, src.ListColSelect, src.ListRowSelect};
 }
 

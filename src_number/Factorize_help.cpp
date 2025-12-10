@@ -20,13 +20,13 @@ int main(int argc, char *argv[]) {
     std::string N_str = argv[1];
     T N = ParseScalar<T>(N_str);
     std::vector<T> list_help;
-    for (int u=2; u<argc; u++) {
+    for (int u = 2; u < argc; u++) {
       std::string help_str = argv[u];
       T help = ParseScalar<T>(help_str);
       list_help.push_back(help);
     }
     std::map<T, size_t> map = FactorsIntMap_help(N, list_help);
-    for (auto & kv : map) {
+    for (auto &kv : map) {
       std::cerr << "p=" << kv.first << " mult=" << kv.second << "\n";
     }
     std::cerr << "Normal termination of the program\n";

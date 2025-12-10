@@ -14,7 +14,8 @@ std::pair<bool, T> rho_pollard_factorize(T const &number) {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
 #ifdef DEBUG_FACTORIZATION
   if (number == 0) {
-    std::cerr << "FACT: Trying to factorize a number equal to zero is probably not what you had in mind\n";
+    std::cerr << "FACT: Trying to factorize a number equal to zero is probably "
+                 "not what you had in mind\n";
     throw TerminalException{1};
   }
 #endif
@@ -135,20 +136,23 @@ template <typename T> std::map<T, size_t> FactorsIntMap(T const &N) {
   return map;
 }
 
-// 389258285913703137976972453410674957488110405 2265346989680430163430848057126071 10374024096391
-// Factorizing is expensive, so if you know some number that could get you some factors, then use them.
-template<typename T> std::map<T, size_t> FactorsIntMap_help(T const& N, std::vector<T> const& list_help) {
+// 389258285913703137976972453410674957488110405
+// 2265346989680430163430848057126071 10374024096391 Factorizing is expensive,
+// so if you know some number that could get you some factors, then use them.
+template <typename T>
+std::map<T, size_t> FactorsIntMap_help(T const &N,
+                                       std::vector<T> const &list_help) {
   std::vector<T> ListN{N};
 #ifdef DEBUG_FACTORIZATION
   std::cerr << "FACT: N=" << N << "\n";
 #endif
   // Using the helper factors to break N into some factors,
-  for (auto & help : list_help) {
+  for (auto &help : list_help) {
 #ifdef DEBUG_FACTORIZATION
     std::cerr << "help=" << help << "\n";
 #endif
     std::vector<T> NewListN;
-    for (auto & eN : ListN) {
+    for (auto &eN : ListN) {
       T gcd = GcdPair(eN, help);
 #ifdef DEBUG_FACTORIZATION
       std::cerr << "  eN=" << eN << " gcd=" << gcd << "\n";
@@ -164,7 +168,7 @@ template<typename T> std::map<T, size_t> FactorsIntMap_help(T const& N, std::vec
   }
 #ifdef DEBUG_FACTORIZATION
   std::cerr << "FACT: ListN=";
-  for (auto & eN: ListN) {
+  for (auto &eN : ListN) {
     std::cerr << " " << eN;
   }
   std::cerr << "\n";
@@ -175,35 +179,38 @@ template<typename T> std::map<T, size_t> FactorsIntMap_help(T const& N, std::vec
     T gcd;
   };
   std::map<T, size_t> MapN;
-  for (auto & val : ListN) {
+  for (auto &val : ListN) {
     MapN[val] += 1;
   }
 #ifdef DEBUG_FACTORIZATION
   std::cerr << "FACT: 1 : MapN=";
-  for (auto & kv: MapN) {
+  for (auto &kv : MapN) {
     std::cerr << " (" << kv.first << "," << kv.second << ")";
   }
   std::cerr << "\n";
 #endif
-  auto get_list=[](std::map<T, size_t> const& m) -> std::vector<std::pair<T,size_t>> {
+  auto get_list =
+      [](std::map<T, size_t> const &m) -> std::vector<std::pair<T, size_t>> {
     std::vector<std::pair<T, size_t>> v;
-    for (auto & kv: m) {
+    for (auto &kv : m) {
       v.push_back({kv.first, kv.second});
     }
     return v;
   };
-  auto get_map=[](std::vector<std::pair<T, size_t>> const& v) -> std::map<T,size_t> {
+  auto get_map =
+      [](std::vector<std::pair<T, size_t>> const &v) -> std::map<T, size_t> {
     std::map<T, size_t> m;
-    for (auto & pair: v) {
+    for (auto &pair : v) {
       m[pair.first] += pair.second;
     }
     return m;
   };
   // Detect some factors
-  auto get_pair=[](std::vector<std::pair<T,size_t>> const& V) -> std::optional<result> {
+  auto get_pair =
+      [](std::vector<std::pair<T, size_t>> const &V) -> std::optional<result> {
     size_t len = V.size();
-    for (size_t u=0; u<len; u++) {
-      for (size_t v=u+1; v<len; v++) {
+    for (size_t u = 0; u < len; u++) {
+      for (size_t v = u + 1; v < len; v++) {
         T gcd = GcdPair(V[u].first, V[v].first);
         if (gcd != 1) {
           result res{u, v, gcd};
@@ -213,22 +220,22 @@ template<typename T> std::map<T, size_t> FactorsIntMap_help(T const& N, std::vec
     }
     return {};
   };
-  while(true) {
-    std::vector<std::pair<T,size_t>> NewListN = get_list(MapN);
+  while (true) {
+    std::vector<std::pair<T, size_t>> NewListN = get_list(MapN);
     std::optional<result> opt = get_pair(NewListN);
     if (opt) {
       result res = *opt;
-      std::vector<std::pair<T,size_t>> NewListN2;
+      std::vector<std::pair<T, size_t>> NewListN2;
       size_t u = res.u;
       size_t v = res.v;
       T gcd = res.gcd;
-      for (size_t i=0; i<NewListN.size(); i++) {
+      for (size_t i = 0; i < NewListN.size(); i++) {
         if (i != u && i != v) {
           NewListN2.push_back(NewListN[i]);
         } else {
           T val1 = NewListN[i].first / gcd;
           std::vector<T> V{gcd, val1};
-          for (auto & val : V) {
+          for (auto &val : V) {
             if (val != 1) {
               NewListN2.push_back({val, NewListN[i].second});
             }
@@ -238,7 +245,7 @@ template<typename T> std::map<T, size_t> FactorsIntMap_help(T const& N, std::vec
       MapN = get_map(NewListN2);
 #ifdef DEBUG_FACTORIZATION
       std::cerr << "FACT: 2 : MapN=";
-      for (auto & kv: MapN) {
+      for (auto &kv : MapN) {
         std::cerr << " (" << kv.first << "," << kv.second << ")";
       }
       std::cerr << "\n";
@@ -248,21 +255,19 @@ template<typename T> std::map<T, size_t> FactorsIntMap_help(T const& N, std::vec
     }
   }
   std::map<T, size_t> map_ret;
-  for (auto & kv1 : MapN) {
-    T const& eN = kv1.first;
-    size_t const& mult = kv1.second;
+  for (auto &kv1 : MapN) {
+    T const &eN = kv1.first;
+    size_t const &mult = kv1.second;
 #ifdef DEBUG_FACTORIZATION
     std::cerr << "FACT: eN=" << eN << " mult=" << mult << "\n";
 #endif
     std::map<T, size_t> map = FactorsIntMap(eN);
-    for (auto & kv2 : map) {
+    for (auto &kv2 : map) {
       map_ret[kv2.first] += kv2.second * mult;
     }
   }
   return map_ret;
 }
-
-
 
 template <typename T>
 std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
@@ -289,8 +294,7 @@ template <typename T> std::vector<T> GetAllFactors(T const &N) {
   return GetAllFactors(eMap);
 }
 
-template <typename T>
-class PrimeGenerator {
+template <typename T> class PrimeGenerator {
   static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
 
 private:
