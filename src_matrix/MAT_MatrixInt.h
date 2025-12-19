@@ -688,8 +688,9 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
         ListIdx.push_back(iRow);
         T eVal = H(iRow, iCol);
         ListX.push_back(eVal);
-        if (eVal != 0)
+        if (eVal != 0) {
           HasNonZero = true;
+        }
       }
     if (HasNonZero) {
       //
@@ -766,6 +767,19 @@ ComputeRowHermiteNormalForm(MyMatrix<T> const &M) {
 }
 
 template <typename T>
+MyMatrix<T> ComputeRowHermiteNormalForm_first(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  MyMatrix<T> H = M;
+  MyMatrix<T> U = IdentityMat<T>(nbRow);
+  auto f = [&](auto g) -> void {
+    g(H); // We need to update H because that is what we work on
+    g(U);
+  };
+  ComputeRowHermiteNormalForm_Kernel(H, f);
+  return U;
+}
+
+template <typename T>
 MyMatrix<T> ComputeRowHermiteNormalForm_second(MyMatrix<T> const &M) {
   MyMatrix<T> H = M;
   auto f = [&](auto g) -> void { g(H); };
@@ -794,8 +808,9 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
         ListIdx.push_back(iCol);
         T eVal = H(iRow, iCol);
         ListX.push_back(eVal);
-        if (eVal != 0)
+        if (eVal != 0) {
           HasNonZero = true;
+        }
       }
     if (HasNonZero) {
       //
