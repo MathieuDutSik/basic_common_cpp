@@ -3047,7 +3047,7 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   MyMatrix<T> M(nbVect, dim_i);
   for (int iVect = 0; iVect < nbVect; iVect++) {
     if (ListVect[iVect].size() != dim_i) {
-      std::cerr << "Vector lengths are not homogeneous\n";
+      std::cerr << "Vector lengths are not coherent\n";
       throw TerminalException{1};
     }
     for (int i = 0; i < dim_i; i++)
@@ -3055,6 +3055,49 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
   }
   return M;
 }
+
+template <typename T>
+MyMatrix<T> MatrixFromUnorderedSetFamilyDim(int const& dim, std::unordered_set<MyVector<T>> const &SetVect) {
+  int nbVect = SetVect.size();
+  MyMatrix<T> M(nbVect, dim);
+  int iVect = 0;
+  for (auto & eVect: SetVect) {
+    if (eVect.size() != dim) {
+      std::cerr << "Vector lengths are not coherent\n";
+      throw TerminalException{1};
+    }
+    for (int i=0; i<dim; i++) {
+      M(iVect, i) = eVect(i);
+    }
+    iVect += 1;
+  }
+  return M;
+}
+
+template <typename T>
+MyMatrix<T> MatrixFromUnorderedSetFamily(std::unordered_set<MyVector<T>> const &SetVect) {
+  auto iter = SetVect.begin();
+  if (iter == SetVect.end()) {
+    std::cerr << "SetVect should be non-empty in MatrixFromUnorderedSetFamily\n";
+    throw TerminalException{1};
+  }
+  int dim = iter->size();
+  return MatrixFromUnorderedSetFamilyDim(dim, SetVect);
+}
+
+template <typename T>
+MyMatrix<T>
+MatrixFromVectorFamilyDim(int const &dim,
+                          std::vector<MyVector<T>> const &ListVect) {
+  int nbVect = ListVect.size();
+  MyMatrix<T> M(nbVect, dim);
+  for (int iVect = 0; iVect < nbVect; iVect++) {
+    for (int i = 0; i < dim; i++)
+      M(iVect, i) = ListVect[iVect](i);
+  }
+  return M;
+}
+
 
 template <typename T>
 MyMatrix<T>
@@ -3071,19 +3114,6 @@ MatrixFromPairVector(std::pair<MyVector<T>, MyVector<T>> const &pair) {
   for (int i = 0; i < n; i++) {
     M(0, i) = pair.first(i);
     M(1, i) = pair.second(i);
-  }
-  return M;
-}
-
-template <typename T>
-MyMatrix<T>
-MatrixFromVectorFamilyDim(int const &dim,
-                          std::vector<MyVector<T>> const &ListVect) {
-  int nbVect = ListVect.size();
-  MyMatrix<T> M(nbVect, dim);
-  for (int iVect = 0; iVect < nbVect; iVect++) {
-    for (int i = 0; i < dim; i++)
-      M(iVect, i) = ListVect[iVect](i);
   }
   return M;
 }
