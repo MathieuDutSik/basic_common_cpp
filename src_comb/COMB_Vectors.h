@@ -62,6 +62,16 @@ bool IsSubset(std::vector<T> const &S1, std::vector<T> const &S2) {
   return true;
 }
 
+template <typename T>
+bool IsSubsetUnorderedSet(std::unordered_set<T> const &S1, std::unordered_set<T> const &S2) {
+  for (auto &eVal : S2) {
+    if (S1.count(eVal) == 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // V1 and V2 should have no repetition
 template <typename T>
 bool IsEqualSet(std::vector<T> const &V1, std::vector<T> const &V2) {
