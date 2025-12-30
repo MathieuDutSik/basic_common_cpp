@@ -39,8 +39,7 @@ std::string StringFace(Face const &f) {
 }
 
 std::string SignatureFace(Face const &f) {
-  std::string str_ret =
-      std::to_string(f.count()) + "/" + std::to_string(f.size());
+  std::string str_ret = std::to_string(f.size()) + "/" + std::to_string(f.count());
   return str_ret;
 }
 
