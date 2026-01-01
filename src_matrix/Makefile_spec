@@ -20,7 +20,8 @@
 #PROGRAM		= RankMat
 #PROGRAM		= SmithNormalForm SmithNormalFormInvariant
 #PROGRAM		= SelectRowColMatModHadamard
-PROGRAM		= SmithNormalFormIntegerMat
+#PROGRAM		= SmithNormalFormIntegerMat
+PROGRAM		= Test_ReadListMat
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

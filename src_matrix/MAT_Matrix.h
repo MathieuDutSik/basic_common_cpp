@@ -320,9 +320,19 @@ template <typename T>
 std::vector<MyMatrix<T>> ReadListMatrix(std::istream &is) {
   int n_mat;
   is >> n_mat;
+#ifdef DEBUG_MAT_MATRIX
+  std::cerr << "MAT: ReadListMatrix n_mat=" << n_mat << "\n";
+#endif
   std::vector<MyMatrix<T>> ListMat;
   for (int i_mat = 0; i_mat < n_mat; i_mat++) {
+#ifdef DEBUG_MAT_MATRIX
+    std::cerr << "MAT: ReadListMatrix i_mat=" << i_mat << " / " << n_mat << "\n";
+#endif
     MyMatrix<T> eMat = ReadMatrix<T>(is);
+#ifdef DEBUG_MAT_MATRIX
+    std::cerr << "MAT: ReadListMatrix eMat=\n";
+    WriteMatrix(std::cerr, eMat);
+#endif
     ListMat.push_back(eMat);
   }
   return ListMat;
