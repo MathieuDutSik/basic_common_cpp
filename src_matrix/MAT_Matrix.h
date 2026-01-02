@@ -3067,6 +3067,17 @@ MyMatrix<T> MatrixFromVectorFamily(std::vector<MyVector<T>> const &ListVect) {
 }
 
 template <typename T>
+std::vector<MyVector<T>> VectorFamilyFromMatrix(MyMatrix<T> const& M) {
+  int nbRow = M.rows();
+  std::vector<MyVector<T>> list_v;
+  for (int iRow=0; iRow<nbRow; iRow++) {
+    MyVector<T> V = GetMatrixRow(M, iRow);
+    list_v.emplace_back(std::move(V));
+  }
+  return list_v;
+}
+
+template <typename T>
 MyMatrix<T> MatrixFromUnorderedSetFamilyDim(int const& dim, std::unordered_set<MyVector<T>> const &SetVect) {
   int nbVect = SetVect.size();
   MyMatrix<T> M(nbVect, dim);
