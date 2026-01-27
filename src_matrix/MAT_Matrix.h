@@ -3396,7 +3396,7 @@ private:
   MyMatrix<T> const &mat;
   const size_t n_rows;
   const size_t n_cols;
-  MyVector<T> v_test;
+  mutable MyVector<T> v_test;
   std::vector<T> V1, V2;
   std::unordered_set<size_t, std::function<size_t(size_t)>,
                      std::function<bool(size_t, size_t)>>
@@ -3436,18 +3436,18 @@ public:
     for (size_t i_row = 0; i_row < n_rows; i_row++)
       set.insert(i_row);
   }
-  std::optional<size_t> GetIdx() {
+  std::optional<size_t> GetIdx() const {
     auto iter = set.find(n_rows);
     if (iter == set.end())
       return {};
     size_t idx = *iter;
     return idx;
   }
-  std::optional<size_t> GetIdx_v(MyVector<T> const &V) {
+  std::optional<size_t> GetIdx_v(MyVector<T> const &V) const {
     v_test = V;
     return GetIdx();
   }
-  template <typename F> std::optional<size_t> GetIdx_f(F f) {
+  template <typename F> std::optional<size_t> GetIdx_f(F f) const {
     for (size_t i = 0; i < n_cols; i++)
       v_test(i) = f(i);
     return GetIdx();
