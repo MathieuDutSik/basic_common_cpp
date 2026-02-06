@@ -45,7 +45,7 @@ jobs:
       run: cd src_number && ./Test_SquareRoot
 
     - name: Test_Factorize
-      run: cd src_number && ./Test_Factorize
+      run: cd src_number && ./Test_Factorize check
 
     - name: Test_QuoInt
       run: cd src_number && ./Test_QuoInt
@@ -60,10 +60,10 @@ jobs:
       run: cd src_number && ./Test_QuadraticResidue
 
     - name: Test_PrimeGenerator
-      run: cd src_number && ./Test_PrimeGenerator
+      run: cd src_number && ./Test_PrimeGenerator mpz 4000
 
     - name: Test_SequenceApproximant
-      run: cd src_number && ./Test_SequenceApproximant
+      run: cd src_number && ./Test_SequenceApproximant print
 
     - name: Test_UnorderedMapMpzq
       run: cd src_number && ./Test_UnorderedMapMpzq
