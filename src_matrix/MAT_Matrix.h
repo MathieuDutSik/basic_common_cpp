@@ -123,6 +123,15 @@ inline void serialize(Archive &ar, MySparseMatrix<T> &val,
 }  // namespace boost::serialization
 // clang-format on
 
+template <typename T>
+MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
+  int nbCol = M.cols();
+  MyVector<T> V(nbCol);
+  for (int iCol = 0; iCol < nbCol; iCol++)
+    V(iCol) = M(iRow, iCol);
+  return V;
+}
+
 template <typename T> bool IsIdentity(MyMatrix<T> const &M) {
   int len = M.rows();
   for (int i = 0; i < len; i++) {
@@ -2394,15 +2403,6 @@ std::optional<MyMatrix<T>> ListSolutionMat(MyMatrix<T> const &eMat,
     AssignMatrixRow(TheSol, i_vect, V2);
   }
   return TheSol;
-}
-
-template <typename T>
-MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
-  int nbCol = M.cols();
-  MyVector<T> V(nbCol);
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    V(iCol) = M(iRow, iCol);
-  return V;
 }
 
 template <typename T> MyMatrix<T> MatrixFromVector(MyVector<T> const &V) {
