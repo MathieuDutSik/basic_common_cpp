@@ -3448,9 +3448,25 @@ public:
     return GetIdx();
   }
   template <typename F> std::optional<size_t> GetIdx_f(F f) const {
-    for (size_t i = 0; i < n_cols; i++)
+    for (size_t i = 0; i < n_cols; i++) {
       v_test(i) = f(i);
+    }
     return GetIdx();
+  }
+  bool contains(MyVector<T> const &V) const {
+    return GetIdx_v(V).has_value();
+  }
+  bool contains_mat(MyMatrix<T> const &M) const {
+    int n_row = M.rows();
+    for (int i_row=0; i_row<n_row; i_row++) {
+      for (size_t i = 0; i < n_cols; i++) {
+        v_test(i) = M(i_row, i);
+      }
+      if (!GetIdx().has_value()) {
+        return false;
+      }
+    }
+    return true;
   }
 };
 
