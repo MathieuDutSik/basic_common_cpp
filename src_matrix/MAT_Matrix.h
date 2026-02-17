@@ -254,7 +254,7 @@ MySparseMatrix<T2> UniversalSparseMatrixConversion(MySparseMatrix<T1> const &M) 
   int nnz = M.nonZeros();
   using Ttrip = Eigen::Triplet<T2>;
   std::vector<Ttrip> tripletList(nnz);
-  int nb = 0;
+  int pos = 0;
   for (int k = 0; k < M.outerSize(); ++k)
     for (typename MySparseMatrix<T1>::InnerIterator it(M, k); it; ++it) {
       T1 eVal1 = it.value();
@@ -263,13 +263,44 @@ MySparseMatrix<T2> UniversalSparseMatrixConversion(MySparseMatrix<T1> const &M) 
       int iRow = it.row();
       // col index (here it is equal to k)
       int iCol = it.col();
-      tripletList[nb] = Ttrip(iRow, iCol, eVal2);
-      nb++;
+      tripletList[pos] = Ttrip(iRow, iCol, eVal2);
+      pos++;
     }
   MySparseMatrix<T2> SpMat = MySparseMatrix<T2>(nbRow, nbCol);
   SpMat.setFromTriplets(tripletList.begin(), tripletList.end());
   return SpMat;
 }
+
+template <typename T>
+MySparseMatrix<T> SparseMatrixSelectRows(MySparseMatrix<T> const &M, std::vector<int> const& l_rows) {
+  int nbRow_orig = M.rows();
+  int nbRow = l_rows.size();
+  std::vector<int> map(nbRow_orig,-1);
+  for (int i=0; i<nbRow; i++) {
+    map[l_rows[i]] = i;
+  }
+  int nbCol = M.cols();
+  using Ttrip = Eigen::Triplet<T>;
+  std::vector<Ttrip> tripletList;
+  for (int k = 0; k < M.outerSize(); ++k)
+    for (typename MySparseMatrix<T>::InnerIterator it(M, k); it; ++it) {
+      // row index
+      int iRow_orig = it.row();
+      int iRow = map[iRow_orig];
+      if (iRow >= 0) {
+        T eVal = it.value();
+        int iCol = it.col();
+        Ttrip ent(iRow, iCol, eVal);
+        tripletList.push_back(ent);
+      }
+    }
+  MySparseMatrix<T> SpMat = MySparseMatrix<T>(nbRow, nbCol);
+  SpMat.setFromTriplets(tripletList.begin(), tripletList.end());
+  return SpMat;
+}
+
+
+
 
 template <typename T>
 MyMatrix<T> DropColumn(MyMatrix<T> const &M, int const &idx_drop) {
