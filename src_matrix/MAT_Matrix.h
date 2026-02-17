@@ -247,9 +247,8 @@ MyVector<T> VectorWithIdenticalEntries(int const &len, T const &val) {
   return V;
 }
 
-template <typename T1, typename T2>
-MySparseMatrix<T2> ConvertSparseMatrix(MySparseMatrix<T1> const &M,
-                                       std::function<T2(T1)> const &f) {
+template <typename T2, typename T1>
+MySparseMatrix<T2> UniversalSparseMatrixConversion(MySparseMatrix<T1> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
   int nnz = M.nonZeros();
@@ -259,7 +258,7 @@ MySparseMatrix<T2> ConvertSparseMatrix(MySparseMatrix<T1> const &M,
   for (int k = 0; k < M.outerSize(); ++k)
     for (typename MySparseMatrix<T1>::InnerIterator it(M, k); it; ++it) {
       T1 eVal1 = it.value();
-      T2 eVal2 = f(eVal1);
+      T2 eVal2 = UniversalScalarConversion<T2,T1>(eVal1);
       // row index
       int iRow = it.row();
       // col index (here it is equal to k)
