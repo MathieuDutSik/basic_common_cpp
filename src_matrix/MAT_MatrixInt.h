@@ -2093,7 +2093,7 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
                           MyVector<Tout> const &fV) -> bool {
     MyVector<Tout> diff = eV - fV;
     for (int i = 0; i < n; i++) {
-      T eVal = 0;
+      T eVal(0);
       for (int j = 0; j < n; j++)
         eVal += diff(j) * eInv(j, i);
       if (!IsInteger(eVal))
