@@ -3500,6 +3500,28 @@ public:
   }
 };
 
+template<typename T>
+int get_position_vec_in_mat(MyMatrix<T> const& M, MyVector<T> const& V) {
+  int n_row = M.rows();
+  int dim = M.cols();
+  auto f_is_equal=[&](int const& j_row) -> bool {
+    for (int i=0; i<dim; i++) {
+      if (M(j_row, i) != V(i)) {
+        return false;
+      }
+    }
+    return true;
+  };
+  for (int i_row=0; i_row<n_row; i_row++) {
+    if (f_is_equal(i_row)) {
+      return i_row;
+    }
+  }
+  return -1;
+}
+
+
+
 template <typename T> T GetSmallestMatrixCoefficient(MyMatrix<T> const &M) {
   int nbRow = M.rows();
   int nbCol = M.cols();
