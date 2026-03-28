@@ -15,18 +15,18 @@ PROGRAM		= Test_SquareRoot Test_UnorderedMapMpzq Factorize Factorize_help Test_F
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
-#CC		= clang++ -Wall -std=c++17
-#CC		= clang++ -g -Wall -std=c++17 -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null
-#CC		= clang++ -g -Wall -std=c++17
-#CC		= clang++ -g -Wall -std=c++17 -fsanitize=bounds -fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins
-#CC		= clang++ -O2 -Wall -std=c++17 -DDEBUG
-#CC              = /usr/share/clang/scan-build-3.8/libexec/c++-analyzer -std=c++17 -O2
-#CC              = /home/mathieu/opt/gcc-6.3.0/bin/g++ -std=c++17 -O3
-#CC		= g++ -std=c++17 -Wall -Wextra -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
-#CC		= g++ -std=c++17 -Wall -Wextra -O3 -g
-CC		= g++ -std=c++17 -Wall -Wextra -O3
-#CC		= g++ -std=c++17 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
-#CC		= g++ -std=c++17 -Wall -Wextra -O2 -g -static-libgcc -static-libstdc++
+#CC		= clang++ -Wall -std=c++20
+#CC		= clang++ -g -Wall -std=c++20 -fsanitize=thread -fsanitize=undefined -fsanitize=bool -fsanitize=bounds -fsanitize=bounds -fsanitize=return -fsanitize=null
+#CC		= clang++ -g -Wall -std=c++20
+#CC		= clang++ -g -Wall -std=c++20 -fsanitize=bounds -fsanitize-memory-use-after-dtor -fsanitize-memory-track-origins
+#CC		= clang++ -O2 -Wall -std=c++20 -DDEBUG
+#CC              = /usr/share/clang/scan-build-3.8/libexec/c++-analyzer -std=c++20 -O2
+#CC              = /home/mathieu/opt/gcc-6.3.0/bin/g++ -std=c++20 -O3
+#CC		= g++ -std=c++20 -Wall -Wextra -g -O2 -ftemplate-backtrace-limit=0 -fsanitize=float-divide-by-zero -fsignaling-nans
+#CC		= g++ -std=c++20 -Wall -Wextra -O3 -g
+CC		= g++ -std=c++20 -Wall -Wextra -O3
+#CC		= g++ -std=c++20 -Wall -Wextra -O3 -g -fsanitize=address -fsanitize=pointer-subtract -fsanitize=undefined -fsanitize=null -fsanitize=bounds -fsanitize=alignment
+#CC		= g++ -std=c++20 -Wall -Wextra -O2 -g -static-libgcc -static-libstdc++
 
 NOLINKFLAG 	= -c
 OUTPUTFLAG 	= -o
