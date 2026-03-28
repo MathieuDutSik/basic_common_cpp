@@ -232,7 +232,7 @@ std::optional<std::string> get_default(std::string const &strin) {
 
 template<typename T>
 void check_key_value(std::map<std::string, T> const& map, std::string const& context, std::string const& key) {
-  if (map.count(key) == 0) {
+  if (!map.contains(key)) {
     std::cerr << "NamelistError: " << context << ".keys() =";
     bool IsFirst = true;
     for (auto & kv: map) {
@@ -263,7 +263,7 @@ T& get_key_value_mut(std::map<std::string, T> & map, std::string const& context,
 
 template<typename T>
 bool has_key_value(std::map<std::string, T> const& map, std::string const& key) {
-  if (map.count(key) == 0) {
+  if (!map.contains(key)) {
     return false;
   } else {
     return true;
@@ -538,19 +538,19 @@ public:
   std::string NAMELIST_FindPositionVariableInBlock(std::string const &FullVarName) {
     std::vector<std::string> LStr = STRING_Split(FullVarName, ":");
     std::string eVarName = LStr[0];
-    if (ListIntValues.count(eVarName) > 0)
+    if (ListIntValues.contains(eVarName))
       return "int";
-    if (ListBoolValues.count(eVarName) > 0)
+    if (ListBoolValues.contains(eVarName))
       return "bool";
-    if (ListDoubleValues.count(eVarName) > 0)
+    if (ListDoubleValues.contains(eVarName))
       return "double";
-    if (ListListDoubleValues.count(eVarName) > 0)
+    if (ListListDoubleValues.contains(eVarName))
       return "listdouble";
-    if (ListListIntValues.count(eVarName) > 0)
+    if (ListListIntValues.contains(eVarName))
       return "listint";
-    if (ListStringValues.count(eVarName) > 0)
+    if (ListStringValues.contains(eVarName))
       return "string";
-    if (ListListStringValues.count(eVarName) > 0)
+    if (ListListStringValues.contains(eVarName))
       return "liststring";
     return "not found";
   }
@@ -688,7 +688,7 @@ public:
     return get_key_value_mut(ListBlock, "ListBlock", key);
   }
   bool has_block(std::string const& key) const {
-    if (ListBlock.count(key) == 0) {
+    if (!ListBlock.contains(key)) {
       return false;
     } else {
       return true;
@@ -758,7 +758,7 @@ public:
           std::string strRed = eStr.substr(1, len - 1);
           if (!InBlock) {
             eBlockName = strRed;
-            if (ListBlock.count(eBlockName) == 0) {
+            if (!ListBlock.contains(eBlockName)) {
               std::cerr << "Find BlockName = " << eBlockName << "\n";
               std::cerr << "which is not in the authorized list\n";
               std::cerr << "LINE=" << eStr << "\n";
@@ -788,7 +788,7 @@ public:
                 eStr3.substr(posEqual + 1, len3 - posEqual - 1);
               std::string eVarName = STRING_RemoveSpacesBeginningEnd(eStrPrior);
               std::pair<std::string, std::string> ePair{eBlockName, eVarName};
-              if (ListInsertValues.count(ePair) > 0) {
+              if (ListInsertValues.contains(ePair)) {
                 std::cerr << "In the block " << eBlockName << "\n";
                 std::cerr << "the entry " << eVarName << "\n";
                 std::cerr << "is defined two times\n";
