@@ -90,16 +90,16 @@ inline To UniversalCeilScalarInteger(Ti const &a) {
 }
 
 template <typename To, typename Ti>
-inline typename std::enable_if<!std::is_same_v<Ti, double>, To>::type
-UniversalNearestScalarInteger(Ti const &a) {
+requires (!std::is_same_v<Ti, double>)
+inline To UniversalNearestScalarInteger(Ti const &a) {
   To ret;
   NearestInteger(a, ret);
   return ret;
 }
 
 template <typename To, typename Ti>
-inline typename std::enable_if<std::is_same_v<Ti, double>, To>::type
-UniversalNearestScalarInteger(Ti const &a) {
+requires std::is_same_v<Ti, double>
+inline To UniversalNearestScalarInteger(Ti const &a) {
   To ret;
   NearestInteger_double_To<To>(a, ret);
   return ret;

@@ -100,8 +100,8 @@ template <> struct is_graphbitset_class<GraphBitset> {
 };
 
 template <typename Tret, typename Tgr>
-inline typename std::enable_if<is_graphbitset_class<Tret>::value, Tret>::type
-InducedSubgraph(Tgr const &GR, std::vector<size_t> const &eList) {
+requires is_graphbitset_class<Tret>::value
+inline Tret InducedSubgraph(Tgr const &GR, std::vector<size_t> const &eList) {
   size_t nbVert = GR.GetNbVert();
   std::vector<size_t> ListStat(nbVert, std::numeric_limits<size_t>::max());
   size_t nbVertRed = eList.size();

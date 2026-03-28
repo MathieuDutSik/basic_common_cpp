@@ -47,8 +47,8 @@ template <typename T> T mod_inv(T const &a, T const &P) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_mpz_class<T>::value, PairGCD_dot<T>>::type
-ComputePairGcdDot(T const &m, T const &n) {
+requires (!is_mpz_class<T>::value)
+inline PairGCD_dot<T> ComputePairGcdDot(T const &m, T const &n) {
   static_assert(is_euclidean_domain<T>::value,
                 "Requires T to be an Euclidean domain in ComputePairGcd");
   T f, g, h, fm, gm, hm, q;
@@ -127,14 +127,14 @@ ComputePairGcdDot(T const &m, T const &n) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_mpz_class<T>::value, T>::type
-KernelGcdPair(T const &a, T const &b) {
+requires (!is_mpz_class<T>::value)
+inline T KernelGcdPair(T const &a, T const &b) {
   return GenericGcd(a, b);
 }
 
 template <typename T>
-inline typename std::enable_if<is_totally_ordered<T>::value, T>::type
-GcdPair(T const &a, T const &b) {
+requires is_totally_ordered<T>::value
+inline T GcdPair(T const &a, T const &b) {
   T eGCD = KernelGcdPair(a, b);
   if (eGCD > 0)
     return eGCD;
@@ -142,14 +142,14 @@ GcdPair(T const &a, T const &b) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_totally_ordered<T>::value, T>::type
-GcdPair(T const &a, T const &b) {
+requires (!is_totally_ordered<T>::value)
+inline T GcdPair(T const &a, T const &b) {
   return KernelGcdPair(a, b);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_mpz_class<T>::value, T>::type
-KernelLCMpair(T const &a, T const &b) {
+requires (!is_mpz_class<T>::value)
+inline T KernelLCMpair(T const &a, T const &b) {
   if (a == 0)
     return b;
   if (b == 0)
@@ -158,14 +158,14 @@ KernelLCMpair(T const &a, T const &b) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_totally_ordered<T>::value, T>::type
-LCMpair(T const &a, T const &b) {
+requires (!is_totally_ordered<T>::value)
+inline T LCMpair(T const &a, T const &b) {
   return KernelLCMpair(a, b);
 }
 
 template <typename T>
-inline typename std::enable_if<is_totally_ordered<T>::value, T>::type
-LCMpair(T const &a, T const &b) {
+requires is_totally_ordered<T>::value
+inline T LCMpair(T const &a, T const &b) {
   T eLCM = KernelLCMpair(a, b);
   if (eLCM > 0)
     return eLCM;
@@ -257,8 +257,8 @@ T chinese_remainder_theorem(std::vector<T> const &a, std::vector<T> const &m) {
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_integral<T>::value, void>::type
-set_to_infinity(T &x) {
+requires std::is_integral<T>::value
+inline void set_to_infinity(T &x) {
   x = std::numeric_limits<T>::max();
 }
 

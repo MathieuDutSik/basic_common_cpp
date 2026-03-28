@@ -321,16 +321,16 @@ inline void ScalingInteger_Kernel([[maybe_unused]] stc<mpz_class> const &x,
 }
 
 template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, T>::type
-KernelGcdPair(T const &a, T const &b) {
+requires is_mpz_class<T>::value
+inline T KernelGcdPair(T const &a, T const &b) {
   mpz_class eGCD;
   mpz_gcd(eGCD.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
   return eGCD;
 }
 
 template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, PairGCD_dot<T>>::type
-ComputePairGcdDot(T const &m, T const &n) {
+requires is_mpz_class<T>::value
+inline PairGCD_dot<T> ComputePairGcdDot(T const &m, T const &n) {
   mpz_class eGCD;
   if (n == 0 && m == 0) {
     eGCD = 0;
@@ -377,8 +377,8 @@ ComputePairGcdDot(T const &m, T const &n) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, T>::type
-KernelLCMpair(T const &a, T const &b) {
+requires is_mpz_class<T>::value
+inline T KernelLCMpair(T const &a, T const &b) {
   mpz_class eLCM;
   mpz_lcm(eLCM.get_mpz_t(), a.get_mpz_t(), b.get_mpz_t());
   return eLCM;

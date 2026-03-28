@@ -358,9 +358,8 @@ std::vector<std::vector<size_t>> ConnectedComponents_set(Tgr const &GR) {
 }
 
 template <typename Tret, typename Tgr>
-inline typename std::enable_if<is_graphsparseimmutable_class<Tret>::value,
-                               Tret>::type
-InducedSubgraph(Tgr const &GR, std::vector<int> const &eList) {
+requires is_graphsparseimmutable_class<Tret>::value
+inline Tret InducedSubgraph(Tgr const &GR, std::vector<int> const &eList) {
   size_t nbVert = GR.GetNbVert();
   size_t miss_val = std::numeric_limits<size_t>::max();
   std::vector<size_t> ListStat(nbVert, miss_val);

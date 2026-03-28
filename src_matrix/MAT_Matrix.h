@@ -1257,14 +1257,14 @@ template <typename T> MyMatrix<T> Inverse_destroy(MyMatrix<T> &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
-Inverse(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
   return InverseKernel(Input);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
-Inverse(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   MyMatrix<Tfield> OutputF = InverseKernel(InputF);
@@ -1545,14 +1545,14 @@ SelectionRowCol<T> TMat_SelectRowCol(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, std::vector<int>>::type
-TMat_ListRowSelect(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline std::vector<int> TMat_ListRowSelect(MyMatrix<T> const &Input) {
   return TMat_SelectRowCol(Input).ListRowSelect;
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, std::vector<int>>::type
-TMat_ListRowSelect(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline std::vector<int> TMat_ListRowSelect(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   return TMat_SelectRowCol(InputF).ListRowSelect;
@@ -1833,8 +1833,8 @@ MyMatrix<T> DominantKernel(MyMatrix<T> const &M, int const &k) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
-NullspaceTrMat(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
   size_t nbRow = Input.rows();
   size_t nbCol = Input.cols();
   auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
@@ -1844,8 +1844,8 @@ NullspaceTrMat(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
-NullspaceTrMat(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
   // No division allowed. Maybe faster if we can allow for it using mpz_class.
   size_t nbRow = Input.rows();
   size_t nbCol = Input.cols();
@@ -1930,14 +1930,14 @@ template <typename T> int RankMatKernel(MyMatrix<T> const &Input) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, int>::type
-RankMat(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline int RankMat(MyMatrix<T> const &Input) {
   return RankMatKernel(Input);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, int>::type
-RankMat(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline int RankMat(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   return RankMatKernel(InputF);
@@ -2022,14 +2022,14 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, T>::type
-DeterminantMat(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline T DeterminantMat(MyMatrix<T> const &Input) {
   return DeterminantMatKernel(Input);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, T>::type
-DeterminantMat(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline T DeterminantMat(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   Tfield eDet_field = DeterminantMatKernel(InputF);
@@ -2203,16 +2203,16 @@ template <typename T> bool IsIntegerVector(MyVector<T> const &V) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value,
-                               std::optional<MyVector<T>>>::type
-SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
+requires is_ring_field<T>::value
+inline std::optional<MyVector<T>> SolutionMat(MyMatrix<T> const &eMat,
+                                              MyVector<T> const &eVect) {
   return SolutionMatKernel(eMat, eVect);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value,
-                               std::optional<MyVector<T>>>::type
-SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
+requires (!is_ring_field<T>::value)
+inline std::optional<MyVector<T>> SolutionMat(MyMatrix<T> const &eMat,
+                                              MyVector<T> const &eVect) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> eMatF = UniversalMatrixConversion<Tfield, T>(eMat);
   MyVector<Tfield> eVectF = UniversalVectorConversion<Tfield, T>(eVect);
@@ -2487,14 +2487,14 @@ std::vector<int> ColumnReductionSet_Kernel(MyMatrix<T> const &eMatIn) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, std::vector<int>>::type
-ColumnReductionSet(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline std::vector<int> ColumnReductionSet(MyMatrix<T> const &Input) {
   return ColumnReductionSet_Kernel(Input);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, std::vector<int>>::type
-ColumnReductionSet(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline std::vector<int> ColumnReductionSet(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   return ColumnReductionSet_Kernel(InputF);
@@ -2896,8 +2896,8 @@ template <typename T> bool IsZeroMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, MyVector<T>>::type
-CanonicalizeVector(MyVector<T> const &V) {
+requires is_ring_field<T>::value
+inline MyVector<T> CanonicalizeVector(MyVector<T> const &V) {
   int n = V.size();
   T TheMin(0);
   int iSelect = -1;
@@ -3201,8 +3201,8 @@ MyVector<T> VectorFromStdVector(std::vector<T> const &eList) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_float_arithmetic<T>::value, MyVector<T>>::type
-RemoveFractionVector(MyVector<T> const &V) {
+requires is_float_arithmetic<T>::value
+inline MyVector<T> RemoveFractionVector(MyVector<T> const &V) {
   return V;
 }
 
@@ -3333,8 +3333,8 @@ size_t hash_vector_size(MyVector<T> const &V, size_t const &seed) {
 }
 
 template <typename T>
-inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
-Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
+requires (!std::is_arithmetic<T>::value)
+inline size_t Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
   size_t ret_hash = hash_matrix_sizes(M, seed);
   int nbRow = M.rows();
   int nbCol = M.cols();
@@ -3370,15 +3370,15 @@ size_t matrix_type_independent_hash(MyMatrix<T> const &M, size_t const &seed) {
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type
-Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
+requires std::is_arithmetic<T>::value
+inline size_t Matrix_Hash(MyMatrix<T> const &M, size_t const &seed) {
   size_t ret_hash = hash_matrix_sizes(M, seed);
   return hash_utils::hash_arithmetic_array(M.data(), M.size(), ret_hash);
 }
 
 template <typename T>
-inline typename std::enable_if<!std::is_arithmetic<T>::value, size_t>::type
-Vector_Hash(MyVector<T> const &V, size_t const &seed) {
+requires (!std::is_arithmetic<T>::value)
+inline size_t Vector_Hash(MyVector<T> const &V, size_t const &seed) {
   size_t ret_hash = hash_vector_size(V, seed);
   for (int i = 0; i < V.size(); i++) {
     size_t elem_hash = std::hash<T>{}(V(i));
@@ -3388,8 +3388,8 @@ Vector_Hash(MyVector<T> const &V, size_t const &seed) {
 }
 
 template <typename T>
-inline typename std::enable_if<std::is_arithmetic<T>::value, size_t>::type
-Vector_Hash(MyVector<T> const &V, size_t const &seed) {
+requires std::is_arithmetic<T>::value
+inline size_t Vector_Hash(MyVector<T> const &V, size_t const &seed) {
   size_t ret_hash = hash_vector_size(V, seed);
   return hash_utils::hash_arithmetic_array(V.data(), V.size(), ret_hash);
 }

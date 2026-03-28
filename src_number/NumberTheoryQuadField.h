@@ -328,8 +328,8 @@ inline void TYPE_CONVERSION(stc<QuadField<T1, d>> const &x1,
 }
 
 template <typename T1, typename T2, int d>
-inline typename std::enable_if<not is_quad_field<T2>::value, void>::type
-TYPE_CONVERSION(stc<QuadField<T1, d>> const &x1, T2 &x2) {
+requires (!is_quad_field<T2>::value)
+inline void TYPE_CONVERSION(stc<QuadField<T1, d>> const &x1, T2 &x2) {
   if (x1.val.b != 0) {
     std::string str = "Conversion error for quadratic field";
     throw ConversionException{str};

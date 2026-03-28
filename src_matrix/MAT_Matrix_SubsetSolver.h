@@ -258,22 +258,14 @@ public:
   }
 };
 
-template <typename T, typename T2 = void> struct subsetsolver_type;
-
 template <typename T>
-struct subsetsolver_type<
-    T, typename std::enable_if<has_reduction_subset_solver<T>::value>::type> {
-  typedef SubsetRankOneSolver_Acceleration<T> type;
-};
-
-template <typename T>
-struct subsetsolver_type<
-    T, typename std::enable_if<!has_reduction_subset_solver<T>::value>::type> {
-  typedef SubsetRankOneSolver_Field<T> type;
-};
+using subsetsolver_type =
+    std::conditional_t<has_reduction_subset_solver<T>::value,
+                       SubsetRankOneSolver_Acceleration<T>,
+                       SubsetRankOneSolver_Field<T>>;
 
 template <typename T> class SubsetRankOneSolver {
-  using T_solver = typename subsetsolver_type<T>::type;
+  using T_solver = subsetsolver_type<T>;
   T_solver subsetsolver;
 
 public:

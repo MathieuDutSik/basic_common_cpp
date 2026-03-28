@@ -665,9 +665,8 @@ template <int i_field> bool IsInteger(RealField<i_field> const &x) {
 // The conversion tools (int)
 
 template <typename T2, int i_field>
-inline
-    typename std::enable_if<not is_real_algebraic_field<T2>::value, void>::type
-    TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
+requires (!is_real_algebraic_field<T2>::value)
+inline void TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
   std::vector<Trat_real_field> const &V = x1.val.get_const_seq();
   size_t len = V.size();
   for (size_t u = 1; u < len; u++) {

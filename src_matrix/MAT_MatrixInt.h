@@ -172,8 +172,8 @@ void WriteGCD_int(std::ostream &os, GCD_int<T> const &eGCD) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_mpz_class<T>::value, GCD_int<T>>::type
-ComputePairGcd(T const &m, T const &n) {
+requires (!is_mpz_class<T>::value)
+inline GCD_int<T> ComputePairGcd(T const &m, T const &n) {
   static_assert(is_euclidean_domain<T>::value,
                 "Requires T to be an Euclidean domain in ComputePairGcd");
   T f, g, h, fm, gm, hm, q;
@@ -232,8 +232,8 @@ ComputePairGcd(T const &m, T const &n) {
 #ifdef SRC_NUMBER_NUMBERTHEORYGMP_H_
 
 template <typename T>
-inline typename std::enable_if<is_mpz_class<T>::value, GCD_int<T>>::type
-ComputePairGcd(T const &m, T const &n) {
+requires is_mpz_class<T>::value
+inline GCD_int<T> ComputePairGcd(T const &m, T const &n) {
   mpz_class eGCD;
   if (n == 0 && m == 0) {
     eGCD = 0;
@@ -354,14 +354,14 @@ template <typename T> MyMatrix<T> RemoveFractionMatrix(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
-ScaledInverse(MyMatrix<T> const &M) {
+requires is_ring_field<T>::value
+inline MyMatrix<T> ScaledInverse(MyMatrix<T> const &M) {
   return Inverse(M);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
-ScaledInverse(MyMatrix<T> const &M) {
+requires (!is_ring_field<T>::value)
+inline MyMatrix<T> ScaledInverse(MyMatrix<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> M_field = UniversalMatrixConversion<Tfield, T>(M);
   MyMatrix<Tfield> Minv_field = Inverse(M_field);
@@ -541,24 +541,22 @@ MyVector<T> NonUniqueScaleToIntegerVector(MyVector<T> const &V) {
 }
 
 template <typename T>
-inline
-    typename std::enable_if<is_implementation_of_Z<T>::value, MyVector<T>>::type
-    CanonicalizeVector(MyVector<T> const &V) {
+requires is_implementation_of_Z<T>::value
+inline MyVector<T> CanonicalizeVector(MyVector<T> const &V) {
   return RemoveFractionVectorPlusCoeff(V).TheVect;
 }
 
 template <typename T>
-inline
-    typename std::enable_if<!is_float_arithmetic<T>::value, MyVector<T>>::type
-    RemoveFractionVector(MyVector<T> const &V) {
+requires (!is_float_arithmetic<T>::value)
+inline MyVector<T> RemoveFractionVector(MyVector<T> const &V) {
   return RemoveFractionVectorPlusCoeff(V).TheVect;
 }
 
 // In this function we do not care about the invertible elements of the ring
 // Below is the Z-case where we just have +1, -1.
 template <typename T>
-inline typename std::enable_if<is_totally_ordered<T>::value, MyVector<T>>::type
-CanonicalizeVectorToInvertible(MyVector<T> const &V) {
+requires is_totally_ordered<T>::value
+inline MyVector<T> CanonicalizeVectorToInvertible(MyVector<T> const &V) {
   MyVector<T> eVect = CanonicalizeVector(V);
   int len = eVect.size();
   int FirstNZ = -1;
@@ -2144,16 +2142,16 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
 }
 
 template <typename T, typename Tout>
-inline typename std::enable_if<is_ring_field<T>::value,
-                               std::vector<MyVector<Tout>>>::type
-ComputeTranslationClasses(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline std::vector<MyVector<Tout>> ComputeTranslationClasses(
+    MyMatrix<T> const &Input) {
   return Kernel_ComputeTranslationClasses<T, Tout>(Input);
 }
 
 template <typename T, typename Tout>
-inline typename std::enable_if<!is_ring_field<T>::value,
-                               std::vector<MyVector<Tout>>>::type
-ComputeTranslationClasses(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline std::vector<MyVector<Tout>> ComputeTranslationClasses(
+    MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> Input_field = UniversalMatrixConversion<Tfield, T>(Input);
   return Kernel_ComputeTranslationClasses<Tfield, Tout>(Input_field);
@@ -2501,14 +2499,14 @@ MyMatrix<T> CanonicalizeOrderedMatrix_Kernel(const MyMatrix<T> &M) {
 }
 
 template <typename T>
-inline typename std::enable_if<is_ring_field<T>::value, MyMatrix<T>>::type
-CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline MyMatrix<T> CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
   return CanonicalizeOrderedMatrix_Kernel(Input);
 }
 
 template <typename T>
-inline typename std::enable_if<!is_ring_field<T>::value, MyMatrix<T>>::type
-CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline MyMatrix<T> CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   MyMatrix<Tfield> OutputF = CanonicalizeOrderedMatrix_Kernel(InputF);
@@ -2652,16 +2650,14 @@ MyMatrix<T> EliminateSuperfluousPrimeDenominators_Matrix(
 }
 
 template <typename T>
-inline
-    typename std::enable_if<is_ring_field<T>::value, SelectionRowCol<T>>::type
-    TMat_SelectRowColRing(MyMatrix<T> const &Input) {
+requires is_ring_field<T>::value
+inline SelectionRowCol<T> TMat_SelectRowColRing(MyMatrix<T> const &Input) {
   return TMat_SelectRowCol(Input);
 }
 
 template <typename T>
-inline
-    typename std::enable_if<!is_ring_field<T>::value, SelectionRowCol<T>>::type
-    TMat_SelectRowColRing(MyMatrix<T> const &Input) {
+requires (!is_ring_field<T>::value)
+inline SelectionRowCol<T> TMat_SelectRowColRing(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
   SelectionRowCol<Tfield> src = TMat_SelectRowColRing(InputF);

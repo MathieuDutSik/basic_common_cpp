@@ -269,9 +269,9 @@ std::optional<MyVector<T>> FindIsotropicVectorMod_Z(MyMatrix<T> const &M,
 }
 
 template <typename T>
-inline typename std::enable_if<is_implementation_of_Q<T>::value,
-                               std::optional<MyVector<T>>>::type
-FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
+requires is_implementation_of_Q<T>::value
+inline std::optional<MyVector<T>> FindIsotropicVectorMod(MyMatrix<T> const &M,
+                                                         T const &TheMod) {
   using Tring = typename underlying_ring<T>::ring_type;
   MyMatrix<T> M1 = RemoveFractionMatrix(M);
   MyMatrix<Tring> M2 = UniversalMatrixConversion<Tring, T>(M1);
@@ -287,9 +287,9 @@ FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
 }
 
 template <typename T>
-inline typename std::enable_if<!is_implementation_of_Q<T>::value,
-                               std::optional<MyVector<T>>>::type
-FindIsotropicVectorMod(MyMatrix<T> const &M, T const &TheMod) {
+requires (!is_implementation_of_Q<T>::value)
+inline std::optional<MyVector<T>> FindIsotropicVectorMod(MyMatrix<T> const &M,
+                                                         T const &TheMod) {
   return FindIsotropicVectorMod_Z(M, TheMod);
 }
 

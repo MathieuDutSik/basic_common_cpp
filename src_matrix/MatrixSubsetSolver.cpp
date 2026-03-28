@@ -9,10 +9,9 @@
 // clang-format on
 
 template <typename T>
-inline
-    typename std::enable_if<!has_reduction_subset_solver<T>::value, void>::type
-    process(std::string const &FileI,
-            [[maybe_unused]] std::string const &FileO) {
+requires (!has_reduction_subset_solver<T>::value)
+inline void process(std::string const &FileI,
+                    [[maybe_unused]] std::string const &FileO) {
   MyMatrix<T> TheMat = ReadMatrixFile<T>(FileI);
   int n_row = TheMat.rows();
   int n_col = TheMat.cols();
@@ -44,10 +43,9 @@ inline
 }
 
 template <typename T>
-inline
-    typename std::enable_if<has_reduction_subset_solver<T>::value, void>::type
-    process(std::string const &FileI,
-            [[maybe_unused]] std::string const &FileO) {
+requires has_reduction_subset_solver<T>::value
+inline void process(std::string const &FileI,
+                    [[maybe_unused]] std::string const &FileO) {
   using Tint = typename SubsetRankOneSolver_Acceleration<T>::Tint;
   MyMatrix<Tint> TheMat = ReadMatrixFile<Tint>(FileI);
   int n_row = TheMat.rows();
