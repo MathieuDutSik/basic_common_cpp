@@ -18,15 +18,13 @@ public:
   GraphListAdj() = delete;
   GraphListAdj(size_t const &inpNbVert) : nbVert(inpNbVert) {
     HasVertexColor = false;
-    for (size_t iVert = 0; iVert < nbVert; iVert++)
-      ListListAdj.push_back({});
+    ListListAdj.resize(nbVert);
   }
   GraphListAdj(std::vector<std::pair<size_t, size_t>> const &ListEdge,
                size_t const &inpNbVert) {
     HasVertexColor = false;
     nbVert = inpNbVert;
-    for (size_t iVert = 0; iVert < nbVert; iVert++)
-      ListListAdj.push_back({});
+    ListListAdj.resize(nbVert);
     //
     for (auto &eEdge : ListEdge) {
       size_t eVert1 = eEdge.first;
@@ -38,9 +36,7 @@ public:
   GraphListAdj(MyMatrix<size_t> const &ListEdge, size_t const &inpNbVert) {
     HasVertexColor = false;
     nbVert = inpNbVert;
-    for (size_t iVert = 0; iVert < nbVert; iVert++)
-      ListListAdj.push_back({});
-    //
+    ListListAdj.resize(nbVert);
     size_t nbEdge = ListEdge.rows();
     for (size_t iEdge = 0; iEdge < nbEdge; iEdge++) {
       size_t eVert1 = ListEdge(iEdge, 0);
@@ -49,7 +45,7 @@ public:
       ListListAdj[eVert2].push_back(eVert1);
     }
   }
-  ~GraphListAdj() {}
+  ~GraphListAdj() = default;
   GraphListAdj(GraphListAdj const &eG) {
     nbVert = eG.GetNbVert();
     ListListAdj = eG.GetListListAdj();
@@ -96,12 +92,7 @@ public:
     ListListAdj[iVert].push_back(jVert);
   }
   void RemoveAdjacent(size_t const &iVert, size_t const &jVert) {
-    // Not sure to find the right simple code for removing entry in std::vector
-    std::vector<size_t> NewList;
-    for (auto &eVert : ListListAdj[iVert])
-      if (size_t(eVert) != jVert)
-        NewList.push_back(eVert);
-    ListListAdj[iVert] = NewList;
+    std::erase(ListListAdj[iVert], jVert);
   }
   bool IsAdjacent(size_t const &iVert, size_t const &jVert) const {
     for (auto &eVert : ListListAdj[iVert])
