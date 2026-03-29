@@ -101,7 +101,7 @@ bool IsFullyNumeric(std::string const &eStr) {
     if (c == '.') {
       n_dot += 1;
     }
-    if (numeric_chars.count(c) == 0) {
+    if (!numeric_chars.contains(c)) {
       return false;
     }
   }

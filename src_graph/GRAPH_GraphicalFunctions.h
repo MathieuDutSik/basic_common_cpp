@@ -21,7 +21,7 @@ public:
       : nbVert(inpNbVert), f(eFct) {
     HasVertexColor = false;
   }
-  ~GraphFunctional() {}
+  ~GraphFunctional() = default;
   GraphFunctional(GraphFunctional const &eG) {
     nbVert = eG.GetNbVert();
     f = eG.GetFCT();

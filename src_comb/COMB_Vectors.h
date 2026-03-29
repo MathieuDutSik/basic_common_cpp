@@ -20,13 +20,13 @@ std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {
 }
 template <typename T>
 std::vector<T> DiffIntVect(std::vector<T> const &V1, std::vector<T> const &V2,
-                           int n_int) {
+                           bool const& expected) {
   std::unordered_set<T> eSet2;
   for (auto &eVal : V2)
     eSet2.insert(eVal);
   std::vector<T> eV;
   for (auto &eVal : V1) {
-    if (eSet2.count(eVal) == static_cast<size_t>(n_int))
+    if (eSet2.contains(eVal) == expected)
       eV.push_back(eVal);
   }
   return eV;
@@ -36,20 +36,19 @@ std::vector<T> DiffIntVect(std::vector<T> const &V1, std::vector<T> const &V2,
 template <typename T>
 std::vector<T> DifferenceVect(std::vector<T> const &V1,
                               std::vector<T> const &V2) {
-  return DiffIntVect(V1, V2, 0);
+  return DiffIntVect(V1, V2, false);
 }
 
 // The intersection V1 \cap V2
 template <typename T>
 std::vector<T> IntersectionVect(std::vector<T> const &V1,
                                 std::vector<T> const &V2) {
-  return DiffIntVect(V1, V2, 1);
+  return DiffIntVect(V1, V2, true);
 }
 
 template <typename T>
 void AppendVect(std::vector<T> &V1, std::vector<T> const &V2) {
-  for (auto &eVal : V2)
-    V1.push_back(eVal);
+  V1.insert(V1.end(), V2.begin(), V2.end());
 }
 
 template <typename T>
@@ -65,7 +64,7 @@ bool IsSubset(std::vector<T> const &S1, std::vector<T> const &S2) {
 template <typename T>
 bool IsSubsetUnorderedSet(std::unordered_set<T> const &S1, std::unordered_set<T> const &S2) {
   for (auto &eVal : S2) {
-    if (S1.count(eVal) == 0) {
+    if (!S1.contains(eVal)) {
       return false;
     }
   }
@@ -83,7 +82,7 @@ bool IsEqualSet(std::vector<T> const &V1, std::vector<T> const &V2) {
     set.insert(val);
   }
   for (auto &val : V2) {
-    if (set.count(val) == 0) {
+    if (!set.contains(val)) {
       return false;
     }
   }

@@ -44,11 +44,7 @@ int64_t seconds_till_end_of_time() {
 }
 
 bool pass_end_of_time() {
-  std::chrono::time_point<std::chrono::system_clock> time =
-      std::chrono::system_clock::now();
-  if (time > end_of_time)
-    return true;
-  return false;
+  return std::chrono::system_clock::now() > end_of_time;
 }
 
 // The sleep function
@@ -169,12 +165,12 @@ using NanosecondTime = TimeEval<std::chrono::nanoseconds>;
 // The HumanTime
 
 std::string nanoseconds_as_string(int64_t delta) {
-  int64_t one_microsecond = 1000;
-  int64_t one_millisecond = 1000 * one_microsecond;
-  int64_t one_second = 1000 * one_millisecond;
-  int64_t one_minute = 60 * one_second;
-  int64_t one_hour = 60 * one_minute;
-  int64_t one_day = 24 * one_hour;
+  constexpr int64_t one_microsecond = 1000;
+  constexpr int64_t one_millisecond = 1000 * one_microsecond;
+  constexpr int64_t one_second = 1000 * one_millisecond;
+  constexpr int64_t one_minute = 60 * one_second;
+  constexpr int64_t one_hour = 60 * one_minute;
+  constexpr int64_t one_day = 24 * one_hour;
   if (delta < one_microsecond) {
     std::string reply = std::to_string(delta) + "ns";
     return reply;

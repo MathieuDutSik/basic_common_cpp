@@ -33,14 +33,7 @@ void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
 }
 
 bool IsExistingFile(std::string const &eFile) {
-  std::ifstream f(eFile.c_str());
-  if (f.good()) {
-    f.close();
-    return true;
-  } else {
-    f.close();
-    return false;
-  }
+  return std::ifstream(eFile).good();
 }
 
 std::string FindAvailableFileFromPrefix(std::string const &prefix) {

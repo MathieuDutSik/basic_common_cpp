@@ -144,8 +144,8 @@ template <typename T>
 void WriteStdVectorStdVectorGAP(std::ostream &os,
                                 std::vector<std::vector<T>> const &ListVect) {
   os << "[";
-  int IsFirstVect = true;
-  for (std::vector<int> const &eVect : ListVect) {
+  bool IsFirstVect = true;
+  for (std::vector<T> const &eVect : ListVect) {
     if (!IsFirstVect)
       os << ",\n";
     IsFirstVect = false;

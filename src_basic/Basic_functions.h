@@ -45,12 +45,7 @@ template <typename T>
 void ShowAttainmentVector(std::ostream &os, std::vector<T> const &eVect) {
   std::map<T, int> TheMap;
   for (auto &eVal : eVect) {
-    auto search = TheMap.find(eVal);
-    if (search == TheMap.end()) {
-      TheMap[eVal] = 1;
-    } else {
-      TheMap[eVal]++;
-    }
+    TheMap[eVal] += 1;
   }
   for (auto &ePair : TheMap)
     os << "Value " << ePair.first << " attained " << ePair.second << " times\n";
