@@ -141,18 +141,11 @@ std::vector<std::string> FILE_GetDirectoryListFile(std::string const &eDir) {
 }
 
 bool FILE_IsDirectoryEmpty(std::string const &eDir) {
-  std::vector<std::string> TheList = FILE_GetDirectoryListFile(eDir);
-  if (TheList.size() == 0)
-    return true;
-  return false;
+  return FILE_GetDirectoryListFile(eDir).empty();
 }
 
 bool FILE_CheckFinalShashDirectory(std::string const &eDir) {
-  size_t len = eDir.size();
-  char eChar = eDir[len - 1];
-  if (eChar == '/')
-    return true;
-  return false;
+  return eDir.ends_with('/');
 }
 
 bool FILE_IsRegularFile(std::string const &eFile) {
@@ -189,7 +182,7 @@ FILE_GetDirectoryFilesRecursively(std::string const &eDir) {
         }
       }
     }
-    if (NewListDir.size() == 0)
+    if (NewListDir.empty())
       break;
     ListDir = NewListDir;
   }
@@ -202,14 +195,9 @@ FILE_DirectoryFilesSpecificExtension(std::string const &ePrefix,
   std::vector<std::string> ListFile =
       FILE_GetDirectoryFilesRecursively(ePrefix);
   std::vector<std::string> RetListFile;
-  size_t lenExt = eExtension.size();
   for (auto &eFile : ListFile) {
-    size_t len = eFile.size();
-    if (len > lenExt) {
-      std::string eEnd = eFile.substr(len - lenExt, lenExt);
-      if (eEnd == eExtension)
-        RetListFile.push_back(eFile);
-    }
+    if (eFile.ends_with(eExtension))
+      RetListFile.push_back(eFile);
   }
   return RetListFile;
 }
@@ -221,19 +209,11 @@ FILE_DirectoryMatchingPrefixExtension(std::string const &ePrefix,
   std::string eBeginStr = FILE_GetNakedFilename(ePrefix);
   std::cerr << "ePrefix=" << ePrefix << "\n";
   std::cerr << "eDir=" << eDir << " eBeginStr=" << eBeginStr << "\n";
-  size_t lenExt = eExtension.size();
-  size_t lenBegin = eBeginStr.size();
   std::vector<std::string> ListFile = FILE_GetDirectoryListFile(eDir);
   std::vector<std::string> ListFile_RET;
   for (auto &eFile : ListFile) {
-    size_t len = eFile.size();
-    if (len > lenBegin && len > lenExt) {
-      std::string str1 = eFile.substr(0, lenBegin);
-      std::string str2 = eFile.substr(len - lenExt, lenExt);
-      if (str1 == eBeginStr && str2 == eExtension) {
-        std::string NewFile = eDir + eFile;
-        ListFile_RET.push_back(NewFile);
-      }
+    if (eFile.starts_with(eBeginStr) && eFile.ends_with(eExtension)) {
+      ListFile_RET.push_back(eDir + eFile);
     }
   }
   return ListFile_RET;
@@ -327,15 +307,10 @@ void RemoveFileSpecificExtension(std::string const &ThePrefix,
   if (!test)
     return;
   std::vector<std::string> ListFile = FILE_GetDirectoryListFile(ThePrefix);
-  size_t nbCharEnd = TheExtension.size();
   for (auto &eFile : ListFile) {
-    size_t len = eFile.size();
-    if (len > nbCharEnd) {
-      std::string TheEnd = eFile.substr(len - nbCharEnd, nbCharEnd);
-      if (TheEnd == TheExtension) {
-        std::string eFileTot = ThePrefix + eFile;
-        RemoveFile(eFileTot);
-      }
+    if (eFile.ends_with(TheExtension)) {
+      std::string eFileTot = ThePrefix + eFile;
+      RemoveFile(eFileTot);
     }
   }
 }
@@ -407,11 +382,7 @@ std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
 #endif
 
 bool FILE_CheckPrefix(std::string const &ePrefix) {
-  size_t len = ePrefix.size();
-  char LastChar = ePrefix[len - 1];
-  if (LastChar == '/')
-    return true;
-  return false;
+  return ePrefix.ends_with('/');
 }
 
 std::string ExtractDirectoryFromFileString(std::string const &eFile) {
