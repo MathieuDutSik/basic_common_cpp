@@ -223,7 +223,8 @@ public:
     TheSize--;
     return val;
   }
-  size_t size() { return TheSize; }
+  size_t size() const { return TheSize; }
+  bool empty() const { return TheSize == 0; }
 
 private:
   std::vector<T> ListElt;
