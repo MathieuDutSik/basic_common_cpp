@@ -63,11 +63,11 @@ template <> struct is_euclidean_domain<int8_t> {
 template <typename T> struct overlying_field {};
 
 template <> struct overlying_field<double> {
-  typedef double field_type;
+  using field_type = double;
 };
 
 template <> struct overlying_field<float> {
-  typedef float field_type;
+  using field_type = float;
 };
 
 // underlying_ring
@@ -75,19 +75,19 @@ template <> struct overlying_field<float> {
 template <typename T> struct underlying_ring {};
 
 template <> struct underlying_ring<int64_t> {
-  typedef int64_t ring_type;
+  using ring_type = int64_t;
 };
 
 template <> struct underlying_ring<int32_t> {
-  typedef int32_t ring_type;
+  using ring_type = int32_t;
 };
 
 template <> struct underlying_ring<int16_t> {
-  typedef int16_t ring_type;
+  using ring_type = int16_t;
 };
 
 template <> struct underlying_ring<int8_t> {
-  typedef int8_t ring_type;
+  using ring_type = int8_t;
 };
 
 // Trait definition for subset of integers
@@ -235,19 +235,19 @@ template <> struct is_float_arithmetic<double> {
 template <typename T> struct underlying_totally_ordered_ring {};
 
 template <> struct underlying_totally_ordered_ring<int64_t> {
-  typedef int64_t real_type;
+  using real_type = int64_t;
 };
 
 template <> struct underlying_totally_ordered_ring<int32_t> {
-  typedef int32_t real_type;
+  using real_type = int32_t;
 };
 
 template <> struct underlying_totally_ordered_ring<int16_t> {
-  typedef int16_t real_type;
+  using real_type = int16_t;
 };
 
 template <> struct underlying_totally_ordered_ring<int8_t> {
-  typedef int8_t real_type;
+  using real_type = int8_t;
 };
 
 // clang-format off
