@@ -55,27 +55,26 @@ void ShowAttainmentVector(std::ostream &os, std::vector<T> const &eVect) {
 }
 
 // use std::max for generic types (int, long, float, ...)
-template <typename T> T T_max(T const &eVal1, T const &eVal2) {
+template <typename T> constexpr T T_max(T const &eVal1, T const &eVal2) {
   if (eVal1 > eVal2)
     return eVal1;
   return eVal2;
 }
 
-template <typename T> T T_abs(T const &eVal) {
+template <typename T> constexpr T T_abs(T const &eVal) {
   if (eVal > 0)
     return eVal;
-  T fVal = -eVal;
-  return fVal;
+  return -eVal;
 }
 
 // use std::min for generic types (int, long, float, ...)
-template <typename T> T T_min(T const &eVal1, T const &eVal2) {
+template <typename T> constexpr T T_min(T const &eVal1, T const &eVal2) {
   if (eVal1 > eVal2)
     return eVal2;
   return eVal1;
 }
 
-template <typename T> int T_sign(T const &eVal) {
+template <typename T> constexpr int T_sign(T const &eVal) {
   if (eVal > 0)
     return 1;
   if (eVal < 0)
@@ -83,19 +82,19 @@ template <typename T> int T_sign(T const &eVal) {
   return 0;
 }
 
-template <typename T> inline T NextIdx(T const &len, T const &i) {
+template <typename T> constexpr T NextIdx(T const &len, T const &i) {
   if (i == len - 1)
     return 0;
   return i + 1;
 }
 
-template <typename T> inline T PrevIdx(T const &len, T const &i) {
+template <typename T> constexpr T PrevIdx(T const &len, T const &i) {
   if (i == 0)
     return len - 1;
   return i - 1;
 }
 
-template <typename T> T MyPow(T const &eVal, int const &n) {
+template <typename T> constexpr T MyPow(T const &eVal, int const &n) {
   T eRet = 1;
   for (int i = 0; i < n; i++)
     eRet *= eVal;

@@ -14,7 +14,7 @@
 
 std::string STRING_GETENV(std::string const &eStr) {
   char *ePre = std::getenv(eStr.c_str());
-  if (ePre == NULL) {
+  if (ePre == nullptr) {
     std::cerr << "Error in reading the environment variable : " << eStr << "\n";
     throw TerminalException{1};
   }
@@ -324,13 +324,8 @@ std::vector<int> STRING_Split_Int(std::string const &eStrA,
 }
 
 std::string DropSpace(std::string const &strI) {
-  std::string strO;
-  for (size_t u = 0; u < strI.size(); u++) {
-    char eChar = strI[u];
-    if (eChar != ' ') {
-      strO += eChar;
-    }
-  }
+  std::string strO = strI;
+  std::erase(strO, ' ');
   return strO;
 }
 

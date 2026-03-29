@@ -11,19 +11,15 @@
 // C-style includes
 
 #include <chrono>
-#include <ctime>
-#include <ctype.h>
-#include <getopt.h>
-#include <unistd.h>
-
-#include <math.h>
-
+#include <cctype>
+#include <cmath>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <stdio.h>
-#include <stdlib.h>
+#include <ctime>
+#include <getopt.h>
 #include <string>
+#include <unistd.h>
 
 // Basic C++
 
@@ -64,8 +60,8 @@
 
 // synonyms
 
-typedef unsigned long ulong;
-typedef unsigned int uint;
+using ulong = unsigned long;
+using uint = unsigned int;
 
 template <typename T> struct is_graphsparseimmutable_class {
   static const bool value = false;
@@ -85,7 +81,7 @@ unsigned get_random_time_seed() {
   std::timespec_get(&ts, TIME_UTC);
   unsigned val = ts.tv_nsec;
 #else
-  unsigned val = time(NULL);
+  unsigned val = time(nullptr);
 #endif
   return val;
 }
