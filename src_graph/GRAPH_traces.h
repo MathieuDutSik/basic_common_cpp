@@ -34,7 +34,7 @@ public:
     sg1.v = reinterpret_cast<size_t *>(malloc(n * sizeof(size_t)));
     sg1.d = reinterpret_cast<int *>(malloc(n * sizeof(int)));
     sg1.e = reinterpret_cast<int *>(malloc(nbAdjacent * sizeof(int)));
-    sg1.w = NULL;
+    sg1.w = nullptr;
     sg1.vlen = static_cast<int>(n);
     sg1.dlen = static_cast<int>(n);
     sg1.elen = static_cast<int>(nbAdjacent);
@@ -42,11 +42,11 @@ public:
     // We imitate SG_DECL here
     cg1.nv = 0;
     cg1.nde = 0;
-    // set to NULL, but it may or may not be expanded.
-    cg1.d = NULL;
-    cg1.v = NULL;
-    cg1.e = NULL;
-    cg1.w = NULL;
+    // set to nullptr, but it may or may not be expanded.
+    cg1.d = nullptr;
+    cg1.v = nullptr;
+    cg1.e = nullptr;
+    cg1.w = nullptr;
     cg1.vlen = 0;
     cg1.dlen = 0;
     cg1.elen = 0;
@@ -74,9 +74,9 @@ public:
     lab1 = x.lab1;
     ptn = x.ptn;
     orbits = x.orbits;
-    x.lab1 = NULL;
-    x.ptn = NULL;
-    x.orbits = NULL;
+    x.lab1 = nullptr;
+    x.ptn = nullptr;
+    x.orbits = nullptr;
     //
     sg1.nv = x.sg1.nv;
     sg1.nde = x.sg1.nde;
@@ -86,9 +86,9 @@ public:
     sg1.d = x.sg1.d;
     sg1.v = x.sg1.v;
     sg1.e = x.sg1.e;
-    x.sg1.d = NULL;
-    x.sg1.v = NULL;
-    x.sg1.e = NULL;
+    x.sg1.d = nullptr;
+    x.sg1.v = nullptr;
+    x.sg1.e = nullptr;
     //
     //
     cg1.nv = x.cg1.nv;
@@ -99,9 +99,9 @@ public:
     cg1.d = x.cg1.d;
     cg1.v = x.cg1.v;
     cg1.e = x.cg1.e;
-    x.cg1.d = NULL;
-    x.cg1.v = NULL;
-    x.cg1.e = NULL;
+    x.cg1.d = nullptr;
+    x.cg1.v = nullptr;
+    x.cg1.e = nullptr;
   }
   DataTraces &operator=(const DataTraces &) = delete;
 };

@@ -117,7 +117,7 @@ std::string FILE_GetDirectoryOfFileName(std::string const &eFileFull) {
 std::vector<std::string> FILE_GetDirectoryListFile(std::string const &eDir) {
   std::string ePath = eDir + ".";
   DIR *dirp = opendir(ePath.c_str());
-  if (dirp == NULL) {
+  if (dirp == nullptr) {
     std::cerr << "Error in routine FILE_GetDirectoryListFile\n";
     std::cerr << "Error in call to opendir\n";
     std::cerr << "eDir = " << eDir << "\n";
@@ -125,7 +125,7 @@ std::vector<std::string> FILE_GetDirectoryListFile(std::string const &eDir) {
   }
   struct dirent *dp;
   std::vector<std::string> ListFile;
-  while ((dp = readdir(dirp)) != NULL) {
+  while ((dp = readdir(dirp)) != nullptr) {
     std::string eName = dp->d_name;
     //    free(dp); // not sure this is portable
     if (eName != ".." && eName != ".")
@@ -352,13 +352,13 @@ std::string GetCurrentDirectory() {
   size_t size = pathconf(".", _PC_PATH_MAX);
   std::vector<char> buf(size);
   char *ptr = getcwd(buf.data(), size);
-  if (ptr == NULL && errno != ERANGE) {
+  if (ptr == nullptr && errno != ERANGE) {
     std::cerr << "Error while trying to use getcwd\n";
     throw TerminalException{1};
   }
   std::string eRet = buf.data();
   eRet = eRet + "/";
-  if (ptr != NULL) {
+  if (ptr != nullptr) {
     if (ptr != buf.data()) {
       std::cerr << "Before ptr freeing\n";
       std::free(ptr);
@@ -410,7 +410,7 @@ bool FILE_IsFileMakeable(std::string const &eFile) {
 void CreateDirectory(std::string const &eDir) {
   const char *dir = eDir.c_str();
   char tmp[256];
-  char *p = NULL;
+  char *p = nullptr;
   size_t len;
   snprintf(tmp, sizeof(tmp), "%s", dir);
   len = strlen(tmp);
