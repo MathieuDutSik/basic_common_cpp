@@ -211,16 +211,7 @@ std::string STRING_RemoveSpacesBeginningEnd(std::string const &eStr) {
 }
 
 bool startswith(std::string const &str1, std::string const &str2) {
-  size_t len1 = str1.size();
-  size_t len2 = str2.size();
-  if (len1 < len2) {
-    return false;
-  }
-  std::string str1_red = str1.substr(0, len2);
-  if (str1_red == str2) {
-    return true;
-  }
-  return false;
+  return str1.starts_with(str2);
 }
 
 template <typename F>
@@ -487,26 +478,16 @@ std::string FILE_GetExtension(std::string const &eFile) {
 
 std::optional<std::string> get_postfix(std::string const &full_str,
                                        std::string const &prefix) {
-  size_t len_full = full_str.size();
-  size_t len_prefix = prefix.size();
-  if (len_full < len_prefix)
+  if (!full_str.starts_with(prefix))
     return {};
-  std::string first_part = full_str.substr(0, len_prefix);
-  if (first_part != prefix)
-    return {};
-  return full_str.substr(len_prefix, len_full - len_prefix);
+  return full_str.substr(prefix.size());
 }
 
 std::optional<std::string> get_prefix(std::string const &full_str,
                                       std::string const &postfix) {
-  size_t len_full = full_str.size();
-  size_t len_postfix = postfix.size();
-  if (len_full < len_postfix)
+  if (!full_str.ends_with(postfix))
     return {};
-  std::string last_part = full_str.substr(len_full - len_postfix, len_postfix);
-  if (last_part != postfix)
-    return {};
-  return full_str.substr(0, len_full - len_postfix);
+  return full_str.substr(0, full_str.size() - postfix.size());
 }
 
 // clang-format off
