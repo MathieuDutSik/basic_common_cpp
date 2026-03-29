@@ -7,6 +7,7 @@
 #include "traces.h"
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <utility>
 #include <vector>
 
@@ -267,10 +268,8 @@ TRACES_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream &os) {
 
 template <typename Tgr, typename Tidx>
 std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const &eGR) {
-  DataTraces *DT = GetDataTraces_from_G(eGR);
-  std::vector<Tidx> V = TRACES_GetCanonicalOrdering_Arr<Tidx>(*DT, std::cerr);
-  delete DT;
-  return V;
+  std::unique_ptr<DataTraces> DT(GetDataTraces_from_G(eGR));
+  return TRACES_GetCanonicalOrdering_Arr<Tidx>(*DT, std::cerr);
 }
 
 template <typename Tidx>
@@ -401,11 +400,8 @@ TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
 template <typename Tgr, typename Tidx>
 std::vector<std::vector<Tidx>>
 TRACES_GetListGenerators_Arr_Test(Tgr const &eGR, size_t const &n_last) {
-  DataTraces *DT = GetDataTraces_from_G(eGR);
-  std::vector<std::vector<Tidx>> ret =
-      TRACES_GetListGenerators_Arr<Tidx>(*DT, n_last, std::cerr);
-  delete DT;
-  return ret;
+  std::unique_ptr<DataTraces> DT(GetDataTraces_from_G(eGR));
+  return TRACES_GetListGenerators_Arr<Tidx>(*DT, n_last, std::cerr);
 }
 
 template <typename TidxC, typename TidxG>
