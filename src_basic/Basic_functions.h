@@ -2,8 +2,10 @@
 #ifndef SRC_BASIC_BASIC_FUNCTIONS_H_
 #define SRC_BASIC_BASIC_FUNCTIONS_H_
 
+#include <algorithm>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -102,22 +104,16 @@ template <typename T> constexpr T MyPow(T const &eVal, int const &n) {
 }
 
 template <typename T> int PositionVect(std::vector<T> const &V, T const &eVal) {
-  size_t len = V.size();
-  for (size_t i = 0; i < len; i++)
-    if (V[i] == eVal)
-      return static_cast<int>(i);
-  return -1;
+  auto it = std::ranges::find(V, eVal);
+  if (it == V.end())
+    return -1;
+  return static_cast<int>(it - V.begin());
 }
 
 template <typename T> bool IsVectorConstant(std::vector<T> const &V) {
-  if (V.size() == 0)
+  if (V.empty())
     return true;
-  T eVal = V[0];
-  for (auto &fVal : V) {
-    if (eVal != fVal)
-      return false;
-  }
-  return true;
+  return std::ranges::all_of(V, [&](auto const &x) { return x == V[0]; });
 }
 
 template <typename T>
@@ -168,15 +164,9 @@ int PositionProperty(std::vector<T> const &V, UnaryPredicate const &f) {
   return -1;
 }
 
-// Actually there is a version all_of in <algorithm> but it uses iterators
-// which is kind of painful.
-
 template <typename T, class UnaryPredicate>
 bool ForAll(std::vector<T> const &V, UnaryPredicate const &f) {
-  for (auto &eVal : V)
-    if (!f(eVal))
-      return false;
-  return true;
+  return std::ranges::all_of(V, f);
 }
 
 template <typename T, class UnaryPredicate>

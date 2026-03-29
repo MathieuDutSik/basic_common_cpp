@@ -201,6 +201,8 @@ public:
 
   size_t size() const { return n_face; }
 
+  bool empty() const { return n_face == 0; }
+
   size_t get_n() const { return n; }
 
   void pop_back() { n_face--; }
