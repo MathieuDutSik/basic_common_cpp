@@ -70,41 +70,29 @@ std::vector<std::string> ReadFullFile(std::string const &eFile) {
 }
 
 std::string FILE_GetNakedFilename(std::string const &eFileFull) {
-  std::vector<std::string> LStr = STRING_Split(eFileFull, "/");
-  std::string eLast = LStr[LStr.size() - 1];
-  return eLast;
+  size_t pos = eFileFull.rfind('/');
+  if (pos == std::string::npos)
+    return eFileFull;
+  return eFileFull.substr(pos + 1);
 }
 
 std::string FILE_RemoveExtension(std::string const &eFileIn) {
-  std::ptrdiff_t pos = -1;
-  size_t len = eFileIn.size();
-  char eChar = '.';
-  for (size_t i = 0; i < len; i++) {
-    if (eFileIn[i] == eChar) {
-      pos = i;
-    }
-  }
-  if (pos == -1) {
+  size_t pos = eFileIn.rfind('.');
+  if (pos == std::string::npos) {
     std::cerr << "Failed to find the dot .\n";
     std::cerr << "eFileIn=" << eFileIn << "\n";
     throw TerminalException{1};
   }
-  return eFileIn.substr(0, size_t(pos));
+  return eFileIn.substr(0, pos);
 }
 
 std::string FILE_GetDirectoryOfFileName(std::string const &eFileFull) {
-  size_t len = eFileFull.size();
-  std::ptrdiff_t posfound = -1;
-  for (size_t u = 0; u < len; u++) {
-    char eChar = eFileFull[u];
-    if (eChar == '/')
-      posfound = std::ptrdiff_t(u);
-  }
-  if (posfound == -1) {
+  size_t pos = eFileFull.rfind('/');
+  if (pos == std::string::npos) {
     std::cerr << "The file has no / so cannot find the directory\n";
     throw TerminalException{1};
   }
-  return eFileFull.substr(0, size_t(posfound + 1));
+  return eFileFull.substr(0, pos + 1);
 }
 
 std::vector<std::string> FILE_GetDirectoryListFile(std::string const &eDir) {
@@ -379,18 +367,12 @@ bool FILE_CheckPrefix(std::string const &ePrefix) {
 }
 
 std::string ExtractDirectoryFromFileString(std::string const &eFile) {
-  size_t len = eFile.size();
-  std::ptrdiff_t iCharFinal = -1;
-  for (size_t iChar = 0; iChar < len; iChar++) {
-    char eChar = eFile[iChar];
-    if (eChar == '/')
-      iCharFinal = std::ptrdiff_t(iChar);
-  }
-  if (iCharFinal == -1) {
+  size_t pos = eFile.rfind('/');
+  if (pos == std::string::npos) {
     std::cerr << "Error in ExtractDirectoryFromFileString\n";
     throw TerminalException{1};
   }
-  return eFile.substr(0, size_t(iCharFinal + 1));
+  return eFile.substr(0, pos + 1);
 }
 
 bool FILE_IsFileMakeable(std::string const &eFile) {

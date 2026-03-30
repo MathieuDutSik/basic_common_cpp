@@ -152,34 +152,18 @@ std::vector<int> NAMELIST_ConvertFortranStringListIntToCppVectorInt(
 
 std::string NAMELIST_RemoveAfterCommentChar(std::string const &eStr,
                                             char const &eChar) {
-  bool WeFound = false;
-  std::string RetStr;
-  int len = eStr.size();
-  for (int i = 0; i < len; i++) {
-    char fChar = eStr[i];
-    if (fChar == eChar)
-      WeFound = true;
-    if (!WeFound)
-      RetStr += eStr.at(i);
-  }
-  return RetStr;
+  size_t pos = eStr.find(eChar);
+  if (pos == std::string::npos)
+    return eStr;
+  return eStr.substr(0, pos);
 }
 
 std::string NAMELIST_RemoveAfterLastChar(std::string const &eStr,
                                          char const &eLastChar) {
-  int iPos = -1;
-  int len = eStr.size();
-  for (int i = 0; i < len; i++) {
-    int j = len - 1 - i;
-    if (iPos == -1) {
-      char eChar = eStr[j];
-      if (eChar == eLastChar)
-        iPos = j;
-    }
-  }
-  if (iPos == -1)
+  size_t pos = eStr.rfind(eLastChar);
+  if (pos == std::string::npos)
     return eStr;
-  return eStr.substr(0, iPos);
+  return eStr.substr(0, pos);
 }
 
 std::string NAMELIST_ClearEndOfLine(std::string const &eStr) {
