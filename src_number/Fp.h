@@ -96,7 +96,8 @@ public:
     Tint b0 = num;
     Tint b1 = 1;
     using Tfloat = long double;
-    Tfloat A = P * P;
+    Tfloat P_d = static_cast<Tfloat>(P);
+    Tfloat A = P_d * P_d;
     Tfloat B = num * num + 1;
     while (true) {
       Tfloat n = Tfloat(a0 * b0 + a1 * b1);
