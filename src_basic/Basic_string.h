@@ -137,6 +137,31 @@ int StringToInt(std::string const &str) {
   return std::stoi(str);
 }
 
+template<typename T>
+std::string StdVectorToString(std::vector<T> const& V) {
+  std::stringstream s;
+  for (auto & val: V) {
+    s << " " << val;
+  }
+  return s.str();
+}
+
+template<typename T>
+std::string StdVectorToStringGAP(std::vector<T> const& V) {
+  std::stringstream s;
+  s << "[ ";
+  bool is_first = true;
+  for (auto & val: V) {
+    if (!is_first) {
+      s << ", ";
+    }
+    is_first = false;
+    s << val;
+  }
+  s << " ]";
+  return s.str();
+}
+
 std::string StringVectorStringGAP(std::vector<std::string> const &LStr) {
   std::string ret = "[";
   size_t len = LStr.size();
