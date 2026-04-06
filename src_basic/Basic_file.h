@@ -251,12 +251,12 @@ void RemoveFileIfExist(std::string const &eFile) {
 
 bool IsProgramInPath(std::string const &ProgName) {
   std::string strRand = random_string(20);
-  std::string FileOut = "/tmp/out_" + strRand;
-  std::string FileErr = "/tmp/err_" + strRand;
+  std::string FileOut = "/tmp/is_program_" + strRand + ".out";
+  std::string FileErr = "/tmp/is_program_" + strRand + ".err";
   std::string eComm = "which " + ProgName + " > " + FileOut + " 2> " + FileErr;
   int iret = system(eComm.c_str());
-  RemoveFileIfExist(FileErr);
-  RemoveFileIfExist(FileOut);
+  RemoveFile(FileErr);
+  RemoveFile(FileOut);
   if (iret != 0) {
     return false;
   }

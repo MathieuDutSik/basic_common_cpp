@@ -17,7 +17,8 @@
 #PROGRAM		= TestQuadraticResidue
 #PROGRAM		= ReadValueString
 #PROGRAM		= ComputeQuadraticResidue
-PROGRAM		= Test_ComputePairGcdDot
+#PROGRAM		= Test_ComputePairGcdDot
+PROGRAM		= SequenceApproximant
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
