@@ -49,7 +49,7 @@ private:
       w(i) = num[i];
     std::optional<MyVector<T>> opt = SolutionMat(M, w);
     if (!opt) {
-      std::cerr << "Failed to solve the linear system\n";
+      std::cerr << "NTRF: Failed to solve the linear system\n";
       throw TerminalException{1};
     }
     MyVector<T> const &eSol = *opt;
@@ -62,9 +62,9 @@ private:
                   std::vector<std::pair<T, T>> const &l_approx) {
     val_double = _val_double;
     if (val_double < 0) {
-      std::cerr << "We require that the value val is positive. val_double="
+      std::cerr << "NTRF: We require that the value val is positive. val_double="
                 << val_double << "\n";
-      std::cerr << "This is arbitrary of us, but this is our choice and easy "
+      std::cerr << "NTRF: This is arbitrary of us, but this is our choice and easy "
                    "for you to correct\n";
       throw TerminalException{1};
     }
@@ -76,9 +76,9 @@ private:
       expo *= val_double;
     }
     if (T_abs(sum) > threshold_real_alg_check) {
-      std::cerr << "Error in Initialize\n";
-      std::cerr << "sum=" << sum << " val_double=" << val_double << "\n";
-      std::cerr << "Pminimal =";
+      std::cerr << "NTRF: Error in Initialize\n";
+      std::cerr << "NTRF: sum=" << sum << " val_double=" << val_double << "\n";
+      std::cerr << "NTRF: Pminimal =";
       for (auto &eVal : Pminimal)
         std::cerr << " " << eVal;
       std::cerr << "\n";
@@ -95,16 +95,15 @@ private:
       T val_low = e_approx.first;
       T val_upp = e_approx.second;
       if (val_low < 0) {
-        std::cerr << "We require that the value val_low is positive. val_low="
+        std::cerr << "NTRF: We require that the value val_low is positive. val_low="
                   << val_low << "\n";
-        std::cerr << "This is arbitrary of us, but this is our choice and easy "
+        std::cerr << "NTRF: This is arbitrary of us, but this is our choice and easy "
                      "for you to correct\n";
         throw TerminalException{1};
       }
       if (val_upp <= val_low) {
-        std::cerr
-            << "The upper bound should be higher than the lower bound. val_low="
-            << val_low << " val_upp=" << val_upp << "\n";
+        std::cerr << "NTRF: The upper bound should be higher than the lower bound.\n";
+        std::cerr << "NTRF: val_low=" << val_low << " val_upp=" << val_upp << "\n";
         throw TerminalException{1};
       }
       std::vector<T> l_pow_low;
@@ -128,6 +127,11 @@ public:
     Initialize(Pminimal, _val_double, l_approx);
   }
   HelperClassRealField(std::string const &eFile) {
+    if (!IsExistingFile(eFile)) {
+      std::cerr << "NTRF: HelperClassRealField constructor error. eFile=" << eFile << "\n";
+      std::cerr << "NTRF: does not exist\n";
+      throw TerminalException{1};
+    }
     std::ifstream is(eFile);
     is >> deg;
     std::vector<T> Pminimal;

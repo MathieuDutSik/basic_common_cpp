@@ -13,12 +13,13 @@
 #PROGRAM		= TestTypeBoostGmp
 #PROGRAM		= TestGetBit
 #PROGRAM		= TestPadic
+PROGRAM		= Test_RealCubicField
 #PROGRAM		= test_sequence_approximant
 #PROGRAM		= TestQuadraticResidue
 #PROGRAM		= ReadValueString
 #PROGRAM		= ComputeQuadraticResidue
 #PROGRAM		= Test_ComputePairGcdDot
-PROGRAM		= SequenceApproximant
+#PROGRAM		= SequenceApproximant
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

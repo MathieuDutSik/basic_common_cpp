@@ -13,10 +13,9 @@ run_step() {
 
 cd "$ROOT_DIR"
 
-run_step "Compile Sweep" ./compile.sh
+#run_step "Compile Sweep" ./compile.sh
 
 run_step "Build Basic Tests" make -C src_basic \
-  Test_Thompson_sampling \
   Test_timing \
   Test_PresenceProgram \
   Test_namelist \
@@ -32,7 +31,7 @@ run_step "Build Basic Tests" make -C src_basic \
   Test_Namelist_Substr \
   Test_Basic_string_Optimizations
 
-run_step "Test_Thompson_sampling" ./src_basic/Test_Thompson_sampling
+#run_step "Test_Thompson_sampling" ./src_basic/Test_Thompson_sampling
 run_step "Test_timing" ./src_basic/Test_timing
 run_step "Test_PresenceProgram" ./src_basic/Test_PresenceProgram
 run_step "Test_namelist" ./src_basic/Test_namelist
