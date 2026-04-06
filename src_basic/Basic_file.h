@@ -207,6 +207,11 @@ std::vector<std::string>
 FILE_DirectoryFilesSpecificExtension_Gen(std::string const &ePrefix,
                                          std::string const &eExtension) {
   size_t len = ePrefix.size();
+  if (len == 0) {
+    std::cerr << "FILE_DirectoryFilesSpecificExtension_Gen requires a non-empty "
+                 "prefix\n";
+    throw TerminalException{1};
+  }
   char LastChar = ePrefix[len - 1];
   if (LastChar == '/')
     return FILE_DirectoryFilesSpecificExtension(ePrefix, eExtension);

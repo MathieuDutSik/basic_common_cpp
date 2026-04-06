@@ -490,8 +490,11 @@ std::vector<std::string> STRING_SplitCharNb(std::string const &str) {
 }
 
 std::string FILE_GetExtension(std::string const &eFile) {
-  std::vector<std::string> LStr = STRING_Split(eFile, "/");
-  std::string eFinal = LStr[LStr.size() - 1];
+  if (eFile.find('/') != std::string::npos) {
+    std::cerr << "FILE_GetExtension expects a file name, not a path\n";
+    std::cerr << "eFile=" << eFile << "\n";
+    throw TerminalException{1};
+  }
   std::vector<std::string> LBlck = STRING_Split(eFile, ".");
   return LBlck[LBlck.size() - 1];
 }
