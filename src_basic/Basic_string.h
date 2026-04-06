@@ -313,6 +313,9 @@ STRING_ParseSingleLine(std::string const &strin,
   auto GetInit = [&](std::string const &strSearch,
                      size_t const &posStart) -> size_t {
     size_t lenSearch = strSearch.size();
+    if (lenSearch > lentot || posStart > lentot || posStart + lenSearch > lentot) {
+      return miss_val;
+    }
     for (size_t posi = posStart; posi <= lentot - lenSearch; posi++) {
       std::string strO = strin.substr(posi, lenSearch);
       if (strO == strSearch) {

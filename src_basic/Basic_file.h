@@ -6,6 +6,7 @@
 #include "Temp_common.h"
 #include <dirent.h>
 #include <errno.h>
+#include <filesystem>
 #include <string>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -22,12 +23,15 @@ void print_stderr_stdout_file(std::string const &FileOut, F f) {
 }
 
 void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
-  std::string eComm = "cp " + SrcFile + " " + DstFile;
-  int iret = system(eComm.c_str());
-  if (iret != 0) {
+  std::error_code ec;
+  std::filesystem::copy_file(SrcFile, DstFile,
+                             std::filesystem::copy_options::overwrite_existing,
+                             ec);
+  if (ec) {
     std::cerr << "Error in copy operation\n";
     std::cerr << "SrcFile=" << SrcFile << "\n";
     std::cerr << "DstFile=" << DstFile << "\n";
+    std::cerr << "ec.message()=" << ec.message() << "\n";
     throw TerminalException{1};
   }
 }
@@ -236,13 +240,16 @@ bool IsExistingDirectory(std::string const &ThePrefix) {
 }
 
 void RemoveEmptyDirectory(std::string const &eDir) {
-  std::string eOrder = "rm -d " + eDir;
-  int iret = system(eOrder.c_str());
-  if (iret == -1) {
+  std::error_code ec;
+  bool removed = std::filesystem::remove(eDir, ec);
+  if (ec || !removed) {
     std::cerr << "Error in RemoveEmptyDirectory\n";
     std::cerr << "eDir=" << eDir << "\n";
-    std::cerr << "eOrder=" << eOrder << "\n";
-    std::cerr << "unable to run the process\n";
+    if (ec) {
+      std::cerr << "ec.message()=" << ec.message() << "\n";
+    } else {
+      std::cerr << "Directory was not removed\n";
+    }
     throw TerminalException{1};
   }
 }
@@ -388,31 +395,17 @@ bool FILE_IsFileMakeable(std::string const &eFile) {
 }
 
 void CreateDirectory(std::string const &eDir) {
-  const char *dir = eDir.c_str();
-  char tmp[256];
-  char *p = nullptr;
-  size_t len;
-  snprintf(tmp, sizeof(tmp), "%s", dir);
-  len = strlen(tmp);
-  if (tmp[len - 1] == '/')
-    tmp[len - 1] = 0;
-  for (p = tmp + 1; *p; p++)
-    if (*p == '/') {
-      *p = 0;
-      mkdir(tmp, S_IRWXU);
-      *p = '/';
-    }
-  mkdir(tmp, S_IRWXU);
-}
-
-void CreateDirectory_V1(std::string const &eDir) {
-  std::string eOrder = "/bin/mkdir -p " + eDir;
-  int iret = system(eOrder.c_str());
-  if (iret == -1) {
+  if (eDir.empty()) {
     std::cerr << "Error in CreateDirectory\n";
     std::cerr << "eDir=" << eDir << "\n";
-    std::cerr << "eOrder=" << eOrder << "\n";
-    std::cerr << "unable to run the process\n";
+    throw TerminalException{1};
+  }
+  std::error_code ec;
+  std::filesystem::create_directories(eDir, ec);
+  if (ec && !std::filesystem::is_directory(eDir)) {
+    std::cerr << "Error in CreateDirectory\n";
+    std::cerr << "eDir=" << eDir << "\n";
+    std::cerr << "ec.message()=" << ec.message() << "\n";
     throw TerminalException{1};
   }
 }
