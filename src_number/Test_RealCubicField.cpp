@@ -11,7 +11,20 @@
 int main() {
   try {
     using T_rat = mpq_class;
-    std::string eFile = "../Examples/RealAlgebraicField/CubicFieldDisc_49";
+    std::string eFile = "Examples/RealAlgebraicField/CubicFieldDisc_49";
+    bool found = false;
+    for (int level = 0; level <= 10; level++) {
+      if (IsExistingFile(eFile)) {
+        found = true;
+        break;
+      }
+      eFile = "../" + eFile;
+    }
+    if (!found) {
+      std::cerr << "Failed to find RealAlgebraicField test data after checking "
+                   "paths from Examples/ up to 10 parent levels\n";
+      throw TerminalException{1};
+    }
     HelperClassRealField<T_rat> hcrf(eFile);
     int const idx_discriminant_49 = 1;
     insert_helper_real_algebraic_field(idx_discriminant_49, hcrf);
