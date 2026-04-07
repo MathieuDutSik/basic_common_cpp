@@ -411,7 +411,6 @@ void CreateDirectory(std::string const &eDir) {
 }
 
 std::vector<std::string> ls_operation(std::string const &ThePrefix) {
-  std::cerr << "Doing ls_operation\n";
   std::string strRand = random_string(20);
   std::string TmpFile = "/tmp/file" + strRand;
   std::string ErrFile = "/tmp/file" + strRand + ".err";

@@ -29,7 +29,8 @@ run_step "Build Basic Tests" make -C src_basic \
   Test_String_Trim \
   Test_String_Conversion \
   Test_Namelist_Substr \
-  Test_Basic_string_Optimizations
+  Test_Basic_string_Optimizations \
+  Test_filesystem
 
 #run_step "Test_Thompson_sampling" ./src_basic/Test_Thompson_sampling
 run_step "Test_timing" ./src_basic/Test_timing
@@ -46,6 +47,7 @@ run_step "Test_String_Trim" ./src_basic/Test_String_Trim
 run_step "Test_String_Conversion" ./src_basic/Test_String_Conversion
 run_step "Test_Namelist_Substr" ./src_basic/Test_Namelist_Substr
 run_step "Test_Basic_string_Optimizations" ./src_basic/Test_Basic_string_Optimizations
+run_step "Test_filesystem" ./src_basic/Test_filesystem
 
 run_step "Build Number Theory Tests" make -C src_number \
   Test_SquareRoot \

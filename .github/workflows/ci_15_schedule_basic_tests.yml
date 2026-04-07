@@ -29,7 +29,7 @@ jobs:
     - name: Build basic tests
       run: |
         cd src_basic
-        make Test_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Test_hash_table Test_bool Test_face Test_String_Optimization Test_String_Trim Test_String_Conversion Test_Namelist_Substr Test_Basic_string_Optimizations
+        make Test_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Test_hash_table Test_bool Test_face Test_String_Optimization Test_String_Trim Test_String_Conversion Test_Namelist_Substr Test_Basic_string_Optimizations Test_filesystem
 
     - name: Test_Thompson_sampling
       run: cd src_basic && ./Test_Thompson_sampling
@@ -75,3 +75,6 @@ jobs:
 
     - name: Test_Basic_string_Optimizations
       run: cd src_basic && ./Test_Basic_string_Optimizations
+
+    - name: Test_filesystem
+      run: cd src_basic && ./Test_filesystem
