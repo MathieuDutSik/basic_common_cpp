@@ -411,51 +411,24 @@ void CreateDirectory(std::string const &eDir) {
 }
 
 std::vector<std::string> ls_operation(std::string const &ThePrefix) {
-  std::string strRand = random_string(20);
-  std::string TmpFile = "/tmp/file" + strRand;
-  std::string ErrFile = "/tmp/file" + strRand + ".err";
-  std::string eOrder = "ls " + ThePrefix + " > " + TmpFile + " 2> " + ErrFile;
-  int iret = system(eOrder.c_str());
-  std::cerr << "iret=" << iret << "\n";
-  // The iret appears not to be a reliable way to determine the success of an
-  // operation
-  /*
-  if (iret != -1) {
-    std::cerr << "Error in ls_operation\n";
-    std::cerr << "unable to run the process\n";
-    throw TerminalException{1};
-  }
-  */
-  std::ifstream iserr(ErrFile);
-  size_t nbCharErr = 0;
-  while (!iserr.eof()) {
-    std::string PreStr;
-    std::getline(iserr, PreStr);
-    nbCharErr += PreStr.size();
-  }
-  if (nbCharErr > 0) {
-    std::cerr << "Error in ls_operation\n";
-    std::cerr << "We have nbCharErr = " << nbCharErr << "\n";
-    std::cerr << "TmpFile=" << TmpFile << "\n";
-    std::cerr << "ErrFile=" << ErrFile << "\n";
-    std::cerr << "ThePrefix=" << ThePrefix << "\n";
-    throw TerminalException{1};
-  }
-  //
-  std::ifstream is(TmpFile);
+  std::error_code ec;
   std::vector<std::string> ListFile;
-  while (true) {
-    if (is.eof()) {
-      is.close();
-      RemoveFile(TmpFile);
-      RemoveFile(ErrFile);
-      return ListFile;
+  for (auto const &entry : std::filesystem::directory_iterator(ThePrefix, ec)) {
+    if (ec) {
+      break;
     }
-    std::string eFile;
-    is >> eFile;
-    if (eFile.size() > 0)
+    std::string eFile = entry.path().filename().string();
+    if (!eFile.empty()) {
       ListFile.push_back(eFile);
+    }
   }
+  if (ec) {
+    std::cerr << "Error in ls_operation\n";
+    std::cerr << "ThePrefix=" << ThePrefix << "\n";
+    std::cerr << "ec.message()=" << ec.message() << "\n";
+    throw TerminalException{1};
+  }
+  return ListFile;
 }
 
 struct TempFile {
