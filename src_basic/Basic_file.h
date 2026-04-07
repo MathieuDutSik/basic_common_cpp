@@ -262,17 +262,39 @@ void RemoveFileIfExist(std::string const &eFile) {
 }
 
 bool IsProgramInPath(std::string const &ProgName) {
-  std::string strRand = random_string(20);
-  std::string FileOut = "/tmp/is_program_" + strRand + ".out";
-  std::string FileErr = "/tmp/is_program_" + strRand + ".err";
-  std::string eComm = "which " + ProgName + " > " + FileOut + " 2> " + FileErr;
-  int iret = system(eComm.c_str());
-  RemoveFile(FileErr);
-  RemoveFile(FileOut);
-  if (iret != 0) {
+  if (ProgName.empty()) {
     return false;
   }
-  return true;
+  if (ProgName.find('/') != std::string::npos) {
+    return access(ProgName.c_str(), X_OK) == 0;
+  }
+  char const *path_env = std::getenv("PATH");
+  if (path_env == nullptr) {
+    return false;
+  }
+  std::string path_str(path_env);
+  size_t pos = 0;
+  while (true) {
+    size_t next = path_str.find(':', pos);
+    std::string dir;
+    if (next == std::string::npos) {
+      dir = path_str.substr(pos);
+    } else {
+      dir = path_str.substr(pos, next - pos);
+    }
+    if (dir.empty()) {
+      dir = ".";
+    }
+    std::filesystem::path candidate = std::filesystem::path(dir) / ProgName;
+    if (access(candidate.c_str(), X_OK) == 0) {
+      return true;
+    }
+    if (next == std::string::npos) {
+      break;
+    }
+    pos = next + 1;
+  }
+  return false;
 }
 
 std::string FILE_RemoveEndingExtension(std::string const &FileName,
