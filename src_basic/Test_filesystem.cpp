@@ -15,6 +15,11 @@ int main() {
   try {
     namespace fs = std::filesystem;
 
+    std::string current_dir = GetCurrentDirectory();
+    std::string expected_current_dir = fs::current_path().string() + "/";
+    check(current_dir == expected_current_dir,
+          "GetCurrentDirectory should match std::filesystem::current_path");
+
     auto now = std::chrono::steady_clock::now().time_since_epoch().count();
     fs::path root =
         fs::temp_directory_path() / ("basic_common_cpp_fs_test_" + std::to_string(now));

@@ -362,29 +362,19 @@ int FILE_GetNumberLine(std::string const &eFile) {
   return number_of_lines;
 }
 
-#ifndef WINDOWS
 std::string GetCurrentDirectory() {
-  size_t size = pathconf(".", _PC_PATH_MAX);
-  std::vector<char> buf(size);
-  char *ptr = getcwd(buf.data(), size);
-  if (ptr == nullptr && errno != ERANGE) {
-    std::cerr << "Error while trying to use getcwd\n";
+  std::error_code ec;
+  std::filesystem::path ePath = std::filesystem::current_path(ec);
+  if (ec) {
+    std::cerr << "Error while trying to use current_path\n";
+    std::cerr << "ec.message()=" << ec.message() << "\n";
     throw TerminalException{1};
   }
-  std::string eRet = buf.data();
-  eRet = eRet + "/";
-  if (ptr != nullptr) {
-    if (ptr != buf.data()) {
-      std::cerr << "Before ptr freeing\n";
-      std::free(ptr);
-      std::cerr << "After ptr freeing\n";
-    }
-  }
+  std::string eRet = ePath.string();
+  eRet += "/";
   return eRet;
 }
-#endif
 
-#ifndef WINDOWS
 std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
   char FirstChar = ePrefix[0];
   if (FirstChar == '/') {
@@ -394,7 +384,6 @@ std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
     return ePWD + ePrefix;
   }
 }
-#endif
 
 bool FILE_CheckPrefix(std::string const &ePrefix) {
   return ePrefix.ends_with('/');
