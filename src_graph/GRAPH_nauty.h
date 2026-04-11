@@ -67,9 +67,8 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const &eGR) {
   os.close();
   //
   std::string FileDR2 = "dreadnaut";
-  int iret = RunExternalProgramWithInputFile(FileDR2, {}, eFileIn.string(),
-                                             eFileOut.string(),
-                                             eFileErr.string());
+  int iret = RunExternalProgram(FileDR2, {}, eFileIn.string(),
+                                eFileOut.string(), eFileErr.string());
   if (iret != 0) {
     std::cerr << "unable to run dreadnaut\n";
     std::cerr << "iret=" << iret << "\n";
@@ -82,7 +81,7 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const &eGR) {
   //
   std::string FileConvert = "NautyGroupToCPP";
   iret = RunExternalProgram(FileConvert,
-                            {eFileOut.string(), std::to_string(nbVert)},
+                            {eFileOut.string(), std::to_string(nbVert)}, {},
                             eFileGrp.string(), std::nullopt);
   if (iret != 0) {
     std::cerr << "unable to run NautyGroupToCPP\n";
@@ -120,9 +119,8 @@ std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const &eGR1, Tgr const &eGR2) {
   os.close();
   //
   std::string FileDR2 = "dreadnaut";
-  int iret = RunExternalProgramWithInputFile(FileDR2, {}, eFileIn.string(),
-                                             eFileOut.string(),
-                                             eFileErr.string());
+  int iret = RunExternalProgram(FileDR2, {}, eFileIn.string(),
+                                eFileOut.string(), eFileErr.string());
   if (iret != 0) {
     std::cerr << "unable to run dreadnaut\n";
     std::cerr << "iret=" << iret << "\n";
@@ -134,7 +132,7 @@ std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const &eGR1, Tgr const &eGR2) {
   }
   //
   std::string FileConvert = "NautyGroupToCPP";
-  iret = RunExternalProgram(FileConvert, {eFileOut.string()},
+  iret = RunExternalProgram(FileConvert, {eFileOut.string()}, {},
                             eFileIso.string(), std::nullopt);
   if (iret != 0) {
     std::cerr << "unable to run NautyGroupToCPP\n";
