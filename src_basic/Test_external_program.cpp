@@ -22,6 +22,14 @@ int main() {
 
     std::string out_file = (root / "stdout.txt").string();
     std::string err_file = (root / "stderr.txt").string();
+    std::string in_file = (root / "stdin.txt").string();
+    std::string cat_out_file = (root / "cat_stdout.txt").string();
+
+    {
+      std::ofstream os(in_file);
+      os << "first line\n";
+      os << "second line\n";
+    }
 
     int code = RunExternalProgram("/bin/echo", {"hello world"}, out_file, std::nullopt);
     check_external(code == 0, "echo should exit with code 0");
@@ -34,6 +42,12 @@ int main() {
     check_external(code != 0, "ls on a missing path should fail");
     check_external(IsExistingFile(err_file), "stderr redirection file should exist");
     check_external(FILE_GetNumberLine(err_file) > 0, "stderr redirection file should be non-empty");
+
+    code = RunExternalProgramWithInputFile("/bin/cat", {}, in_file, cat_out_file,
+                                           std::nullopt);
+    check_external(code == 0, "cat with redirected stdin should exit with code 0");
+    check_external(ReadFullFile(cat_out_file) == ReadFullFile(in_file),
+                   "cat output should match redirected stdin");
 
     fs::remove_all(root);
     std::cerr << "Normal termination of Test_external_program\n";

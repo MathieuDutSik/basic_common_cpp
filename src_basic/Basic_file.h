@@ -38,19 +38,33 @@ void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
   }
 }
 
-int RunExternalProgram(std::string const &program,
-                       std::vector<std::string> const &inputs,
-                       std::optional<std::string> const &output,
-                       std::optional<std::string> const &error) {
+int RunExternalProgramWithInputFile(
+    std::string const &program, std::vector<std::string> const &inputs,
+    std::optional<std::string> const &input,
+    std::optional<std::string> const &output,
+    std::optional<std::string> const &error) {
   if (program.empty()) {
     std::cerr << "RunExternalProgram requires a non-empty program name\n";
     throw TerminalException{1};
   }
+  int fd_in = -1;
   int fd_out = -1;
   int fd_err = -1;
+  if (input) {
+    fd_in = open(input->c_str(), O_RDONLY);
+    if (fd_in == -1) {
+      std::cerr << "RunExternalProgram failed to open input file\n";
+      std::cerr << "program=" << program << "\n";
+      std::cerr << "input=" << *input << "\n";
+      throw TerminalException{1};
+    }
+  }
   if (output) {
     fd_out = open(output->c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd_out == -1) {
+      if (fd_in != -1) {
+        close(fd_in);
+      }
       std::cerr << "RunExternalProgram failed to open output file\n";
       std::cerr << "program=" << program << "\n";
       std::cerr << "output=" << *output << "\n";
@@ -60,6 +74,9 @@ int RunExternalProgram(std::string const &program,
   if (error) {
     fd_err = open(error->c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (fd_err == -1) {
+      if (fd_in != -1) {
+        close(fd_in);
+      }
       if (fd_out != -1) {
         close(fd_out);
       }
@@ -71,6 +88,9 @@ int RunExternalProgram(std::string const &program,
   }
   pid_t pid = fork();
   if (pid == -1) {
+    if (fd_in != -1) {
+      close(fd_in);
+    }
     if (fd_out != -1) {
       close(fd_out);
     }
@@ -82,6 +102,11 @@ int RunExternalProgram(std::string const &program,
     throw TerminalException{1};
   }
   if (pid == 0) {
+    if (fd_in != -1) {
+      if (dup2(fd_in, STDIN_FILENO) == -1) {
+        _exit(127);
+      }
+    }
     if (fd_out != -1) {
       if (dup2(fd_out, STDOUT_FILENO) == -1) {
         _exit(127);
@@ -91,6 +116,9 @@ int RunExternalProgram(std::string const &program,
       if (dup2(fd_err, STDERR_FILENO) == -1) {
         _exit(127);
       }
+    }
+    if (fd_in != -1) {
+      close(fd_in);
     }
     if (fd_out != -1) {
       close(fd_out);
@@ -113,6 +141,9 @@ int RunExternalProgram(std::string const &program,
     execvp(program.c_str(), argv.data());
     _exit(127);
   }
+  if (fd_in != -1) {
+    close(fd_in);
+  }
   if (fd_out != -1) {
     close(fd_out);
   }
@@ -132,6 +163,14 @@ int RunExternalProgram(std::string const &program,
     return 128 + WTERMSIG(status);
   }
   return status;
+}
+
+int RunExternalProgram(std::string const &program,
+                       std::vector<std::string> const &inputs,
+                       std::optional<std::string> const &output,
+                       std::optional<std::string> const &error) {
+  return RunExternalProgramWithInputFile(program, inputs, std::nullopt, output,
+                                         error);
 }
 
 bool IsExistingFile(std::string const &eFile) {

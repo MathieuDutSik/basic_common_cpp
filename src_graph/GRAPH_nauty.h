@@ -67,11 +67,12 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const &eGR) {
   os.close();
   //
   std::string FileDR2 = "dreadnaut";
-  std::string TheCommand = FileDR2 + " < " + eFileIn.string() + " > " +
-                           eFileOut.string() + " 2> " + eFileErr.string();
-  int iret = system(TheCommand.c_str());
-  if (iret == -1) {
-    std::cerr << "unable to run the command\n";
+  int iret = RunExternalProgramWithInputFile(FileDR2, {}, eFileIn.string(),
+                                             eFileOut.string(),
+                                             eFileErr.string());
+  if (iret != 0) {
+    std::cerr << "unable to run dreadnaut\n";
+    std::cerr << "iret=" << iret << "\n";
     throw TerminalException{1};
   }
   if (!eFileOut.IsExisting()) {
@@ -80,9 +81,14 @@ TheGroupFormat GRAPH_Automorphism_Nauty(Tgr const &eGR) {
   }
   //
   std::string FileConvert = "NautyGroupToCPP";
-  TheCommand = FileConvert + " " + eFileOut.string() + " " +
-               std::to_string(nbVert) + " > " + eFileGrp.string();
-  //
+  iret = RunExternalProgram(FileConvert,
+                            {eFileOut.string(), std::to_string(nbVert)},
+                            eFileGrp.string(), std::nullopt);
+  if (iret != 0) {
+    std::cerr << "unable to run NautyGroupToCPP\n";
+    std::cerr << "iret=" << iret << "\n";
+    throw TerminalException{1};
+  }
   std::ifstream is(eFileGrp.string());
   TheGroupFormat GRP = ReadGroup(is);
   //
@@ -114,11 +120,12 @@ std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const &eGR1, Tgr const &eGR2) {
   os.close();
   //
   std::string FileDR2 = "dreadnaut";
-  std::string TheCommand = FileDR2 + " < " + eFileIn.string() + " > " +
-                           eFileOut.string() + " 2> " + eFileErr.string();
-  int iret = system(TheCommand.c_str());
-  if (iret == -1) {
-    std::cerr << "unable to run the command\n";
+  int iret = RunExternalProgramWithInputFile(FileDR2, {}, eFileIn.string(),
+                                             eFileOut.string(),
+                                             eFileErr.string());
+  if (iret != 0) {
+    std::cerr << "unable to run dreadnaut\n";
+    std::cerr << "iret=" << iret << "\n";
     throw TerminalException{1};
   }
   if (!eFileOut.IsExisting()) {
@@ -127,9 +134,13 @@ std::optional<Telt> GRAPH_Isomorphism_Nauty(Tgr const &eGR1, Tgr const &eGR2) {
   }
   //
   std::string FileConvert = "NautyGroupToCPP";
-  TheCommand =
-      FileConvert + " " + eFileOut.string() + " > " + eFileIso.string();
-  //
+  iret = RunExternalProgram(FileConvert, {eFileOut.string()},
+                            eFileIso.string(), std::nullopt);
+  if (iret != 0) {
+    std::cerr << "unable to run NautyGroupToCPP\n";
+    std::cerr << "iret=" << iret << "\n";
+    throw TerminalException{1};
+  }
   std::ifstream is(eFileIso.string());
   is >> test;
   if (test == 0) {
