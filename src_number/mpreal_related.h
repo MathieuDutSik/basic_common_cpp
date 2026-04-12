@@ -29,7 +29,7 @@ void NearestInteger(mpfr::mpreal const &x, mpz_class &xO) {
     for (int i = 0; i < 2; i++) {
       int shift = 2 * i - 1;
       mpz_class xTest = xRnd_z + shift;
-      mpfr::mpreal TheErr = GetErr(xRnd_z);
+      mpfr::mpreal TheErr = GetErr(xTest);
       if (TheErr < err) {
         IsOK = false;
         xRnd_z = xTest;
