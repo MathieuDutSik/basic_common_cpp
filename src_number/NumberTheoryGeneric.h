@@ -90,7 +90,7 @@ inline PairGCD_dot<T> ComputePairGcdDot(T const &m, T const &n) {
     eCoeff2 = (f - fm * m) / n;
   }
 #ifdef SANITY_CHECK_NB_THEORY_GENERIC
-  T diff1 = f - eCoeff1 * m - eCoeff1 * n;
+  T diff1 = f - eCoeff1 * m - eCoeff2 * n;
   if (diff1 != 0) {
     std::cerr << "A: diff1=" << diff1 << "\n";
     throw TerminalException{1};
