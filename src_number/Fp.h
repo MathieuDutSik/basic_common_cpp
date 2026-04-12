@@ -126,7 +126,7 @@ public:
   friend Fp<Tint, P> operator+(Fp<Tint, P> const &x, Fp<Tint, P> const &y) {
     Fp<Tint, P> z;
     Tint zz = x.num + y.num;
-    if (zz > P)
+    if (zz >= P)
       zz -= P;
     z.num = zz;
     return z;
