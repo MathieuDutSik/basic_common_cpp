@@ -391,11 +391,12 @@ public:
   //  QuadField<T,d>& operator=(T const&); // assignment operator from T
   //  QuadField<T,d>& operator=(int const&); // assignment operator from T
   // assignment operator from int
-  RealField<i_field> operator=(int const &u) {
+  RealField<i_field> operator=(int const &val) {
     size_t len = a.size();
-    for (size_t u = 1; u < len; u++)
+    a[0] = val;
+    for (size_t u = 1; u < len; u++) {
       a[u] = 0;
-    a[0] = u;
+    }
     return *this;
   }
   // assignment operator
@@ -407,13 +408,15 @@ public:
   // Arithmetic operators below:
   void operator+=(RealField<i_field> const &x) {
     size_t len = a.size();
-    for (size_t u = 0; u < len; u++)
+    for (size_t u = 0; u < len; u++) {
       a[u] += x.a[u];
+    }
   }
   void operator-=(RealField<i_field> const &x) {
     size_t len = a.size();
-    for (size_t u = 0; u < len; u++)
+    for (size_t u = 0; u < len; u++) {
       a[u] -= x.a[u];
+    }
   }
   void operator/=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
@@ -423,16 +426,18 @@ public:
                                       RealField<i_field> const &y) {
     size_t len = x.a.size();
     std::vector<T> V(len);
-    for (size_t u = 0; u < len; u++)
+    for (size_t u = 0; u < len; u++) {
       V[u] = x.a[u] + y.a[u];
+    }
     return RealField<i_field>(V);
   }
   friend RealField<i_field> operator-(RealField<i_field> const &x,
                                       RealField<i_field> const &y) {
     size_t len = x.a.size();
     std::vector<T> V(len);
-    for (size_t u = 0; u < len; u++)
+    for (size_t u = 0; u < len; u++) {
       V[u] = x.a[u] - y.a[u];
+    }
     return RealField<i_field>(V);
   }
   friend RealField<i_field> operator-(RealField<i_field> const &x,
@@ -444,8 +449,9 @@ public:
   friend RealField<i_field> operator-(RealField<i_field> const &x) {
     size_t len = x.a.size();
     std::vector<T> V(len);
-    for (size_t u = 0; u < len; u++)
+    for (size_t u = 0; u < len; u++) {
       V[u] = -x.a[u];
+    }
     return RealField<i_field>(V);
   }
   friend RealField<i_field> operator/(int const &x,
@@ -478,8 +484,9 @@ public:
                                       RealField<i_field> const &y) {
     size_t len = y.a.size();
     std::vector<T> V(len);
-    for (size_t u = 0; u < len; u++)
+    for (size_t u = 0; u < len; u++) {
       V[u] = x * y.a[u];
+    }
     return RealField<i_field>(V);
   }
   friend std::ostream &operator<<(std::ostream &os,
@@ -496,24 +503,30 @@ public:
   friend bool operator==(RealField<i_field> const &x,
                          RealField<i_field> const &y) {
     size_t deg = x.a.size();
-    for (size_t u = 0; u < deg; u++)
-      if (x.a[u] != y.a[u])
+    for (size_t u = 0; u < deg; u++) {
+      if (x.a[u] != y.a[u]) {
         return false;
+      }
+    }
     return true;
   }
   friend bool operator!=(RealField<i_field> const &x,
                          RealField<i_field> const &y) {
     size_t deg = x.a.size();
-    for (size_t u = 0; u < deg; u++)
-      if (x.a[u] != y.a[u])
+    for (size_t u = 0; u < deg; u++) {
+      if (x.a[u] != y.a[u]) {
         return true;
+      }
+    }
     return false;
   }
   friend bool operator!=(RealField<i_field> const &x, int const &y) {
     size_t deg = x.a.size();
-    for (size_t u = 1; u < deg; u++)
-      if (x.a[u] != 0)
+    for (size_t u = 1; u < deg; u++) {
+      if (x.a[u] != 0) {
         return true;
+      }
+    }
     return x.a[0] != y;
   }
   friend bool IsNonNegative(RealField<i_field> const &x) {
@@ -552,30 +565,34 @@ public:
   friend bool operator>(RealField<i_field> const &x,
                         RealField<i_field> const &y) {
     RealField<i_field> z = x - y;
-    if (IsZeroVector(z.a))
+    if (IsZeroVector(z.a)) {
       return false;
+    }
     HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
     return hcrf.IsStrictlyPositive(z.a);
   }
   friend bool operator>(RealField<i_field> const &x, int const &y) {
     RealField<i_field> z = x - y;
-    if (IsZeroVector(z.a))
+    if (IsZeroVector(z.a)) {
       return false;
+    }
     HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
     return hcrf.IsStrictlyPositive(z.a);
   }
   friend bool operator<(RealField<i_field> const &x,
                         RealField<i_field> const &y) {
     RealField<i_field> z = y - x;
-    if (IsZeroVector(z.a))
+    if (IsZeroVector(z.a)) {
       return false;
+    }
     HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
     return hcrf.IsStrictlyPositive(z.a);
   }
   friend bool operator<(RealField<i_field> const &x, int const &y) {
     RealField<i_field> z = y - x;
-    if (IsZeroVector(z.a))
+    if (IsZeroVector(z.a)) {
       return false;
+    }
     HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
     return hcrf.IsStrictlyPositive(z.a);
   }
