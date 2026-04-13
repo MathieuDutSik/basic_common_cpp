@@ -107,7 +107,7 @@ Face RandomKFace(int n, int k) {
     }
   } else {
     for (int i = 0; i < n; i++)
-      f[i] = 0;
+      f[i] = 1;
     int n_done = n;
     while (true) {
       int pos = random() % n;

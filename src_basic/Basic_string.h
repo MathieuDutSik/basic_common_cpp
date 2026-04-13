@@ -57,7 +57,7 @@ std::string StringSubstitution(
     for (size_t iPair = 0; iPair < ListSubst.size(); iPair++) {
       std::string eStr = ListSubst[iPair].first;
       size_t lenStr = eStr.size();
-      if (pos_inp + lenStr < len) {
+      if (pos_inp + lenStr <= len) {
         std::string eSubStr = FileIN.substr(pos_inp, lenStr);
         if (eSubStr == eStr)
           ListMatch.push_back(iPair);

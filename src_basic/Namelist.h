@@ -340,7 +340,7 @@ public:
   //
   // The existence functions
   //
-  bool get_int(std::string const& key) {
+  bool has_int(std::string const& key) {
     return has_key_value(ListIntValues, key);
   }
   bool has_bool(std::string const& key) {

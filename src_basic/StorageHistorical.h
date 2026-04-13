@@ -14,7 +14,7 @@ template <typename T> struct StorageHistorical {
 
 public:
   // no copy
-  StorageHistorical(const StorageSpaceLastN<T> &) = delete;
+  StorageHistorical(const StorageHistorical<T> &) = delete;
 
   // no assign
   StorageHistorical &operator=(const StorageHistorical<T> &) = delete;
@@ -27,7 +27,7 @@ public:
     siz = 0;
   }
 
-  StorageHistorical(int const &_ThePeriod) { ThePeriod = _ThePeriod; }
+  StorageHistorical(int const &_ThePeriod) { ThePeriod = _ThePeriod; siz = 0; }
 
   void SetPeriod(int const &_ThePeriod) { ThePeriod = _ThePeriod; }
 

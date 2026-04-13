@@ -127,7 +127,7 @@ MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const &M1, MyMatrix<T> const &M2,
       Equa(i1, j) = M1(i1, j);
   for (int i2 = 0; i2 < n_row2; i2++)
     for (int j = 0; j < n; j++)
-      Equa(n_row1 + i2, j) = M1(i2, j);
+      Equa(n_row1 + i2, j) = M2(i2, j);
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++) {
       if (i == j) {

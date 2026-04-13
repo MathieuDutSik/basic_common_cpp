@@ -351,7 +351,7 @@ ReadTimingComputationResult(std::string const &line, std::string const &name) {
   std::string str_keys = LStr[1];
   std::vector<std::string> LStrKey = STRING_Split(str_keys, ", ");
   std::map<std::string, T> keys;
-  for (auto &eStr : LStr) {
+  for (auto &eStr : LStrKey) {
     std::vector<std::string> LStrB = STRING_Split(eStr, ":");
     if (LStrB.size() != 2)
       return {};
