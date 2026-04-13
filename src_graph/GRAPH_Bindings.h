@@ -53,6 +53,7 @@ GetGraphListAdj_from_simplified(SimplifiedVertexColoredGraph const &s) {
     }
     i_color++;
   }
+  pos = 0;
   for (size_t iVert = 0; iVert < nbVert; iVert++) {
     int nbAdj = s.d[iVert];
     for (int u = 0; u < nbAdj; u++) {

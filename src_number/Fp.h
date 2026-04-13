@@ -98,9 +98,9 @@ public:
     using Tfloat = long double;
     Tfloat P_d = static_cast<Tfloat>(P);
     Tfloat A = P_d * P_d;
-    Tfloat B = num * num + 1;
+    Tfloat B = Tfloat(num) * Tfloat(num) + 1;
     while (true) {
-      Tfloat n = Tfloat(a0 * b0 + a1 * b1);
+      Tfloat n = Tfloat(a0) * Tfloat(b0) + Tfloat(a1) * Tfloat(b1);
       Tint r = Tint(boost::math::lround(n / B));
       Tfloat T = A - 2 * Tfloat(r) * n + Tfloat(r) * Tfloat(r) * B;
       if (T + 0.5 >= B) {
@@ -116,7 +116,7 @@ public:
       b0 = tmp0;
       b1 = tmp1;
       A = B;
-      B = tmp0 * tmp0 + tmp1 * tmp1;
+      B = Tfloat(tmp0) * Tfloat(tmp0) + Tfloat(tmp1) * Tfloat(tmp1);
     }
   }
 

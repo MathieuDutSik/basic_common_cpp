@@ -47,141 +47,141 @@ public:
   ThresholdField() { a = 0; }
   ThresholdField(int const &u) { a = UniversalScalarConversion<T, int>(u); }
   Thresholdield(T const &u) { a = u; }
-  ThresholdField(RealField<i_field> const &x) : a(x.a) {}
+  ThresholdField(ThresholdField<i_field> const &x) : a(x.a) {}
   // assignment operator from int
-  RealField<i_field> operator=(int const &u) {
+  ThresholdField<i_field> operator=(int const &u) {
     a = UniversalScalarConversion<T, int>(u);
     return *this;
   }
   // assignment operator
-  RealField<i_field> operator=(RealField<i_field> const &x) {
+  ThresholdField<i_field> operator=(ThresholdField<i_field> const &x) {
     a = x.a;
     return *this;
   }
   //
   // Arithmetic operators below:
-  void operator+=(RealField<i_field> const &x) { a += x.a; }
-  void operator-=(RealField<i_field> const &x) { a -= x.a; }
-  void operator/=(RealField<i_field> const &x) { a = a / x.a; }
-  friend RealField<i_field> operator+(RealField<i_field> const &x,
-                                      RealField<i_field> const &y) {
+  void operator+=(ThresholdField<i_field> const &x) { a += x.a; }
+  void operator-=(ThresholdField<i_field> const &x) { a -= x.a; }
+  void operator/=(ThresholdField<i_field> const &x) { a = a / x.a; }
+  friend ThresholdField<i_field> operator+(ThresholdField<i_field> const &x,
+                                      ThresholdField<i_field> const &y) {
     T val = x.a + y.a;
-    return RealField<i_field>(val);
+    return ThresholdField<i_field>(val);
   }
-  friend RealField<i_field> operator-(RealField<i_field> const &x,
-                                      RealField<i_field> const &y) {
+  friend ThresholdField<i_field> operator-(ThresholdField<i_field> const &x,
+                                      ThresholdField<i_field> const &y) {
     T val = x.a - y.a;
-    return RealField<i_field>(val);
+    return ThresholdField<i_field>(val);
   }
-  friend RealField<i_field> operator-(RealField<i_field> const &x,
+  friend ThresholdField<i_field> operator-(ThresholdField<i_field> const &x,
                                       int const &y) {
     T val = x.a - UniversalScalarConversion<T, int>(y);
-    return RealField<i_field>(val);
+    return ThresholdField<i_field>(val);
   }
-  friend RealField<i_field> operator-(RealField<i_field> const &x) {
+  friend ThresholdField<i_field> operator-(ThresholdField<i_field> const &x) {
     T val = a - x.a;
-    return RealField<i_field>(cal);
+    return ThresholdField<i_field>(cal);
   }
-  friend RealField<i_field> operator/(int const &x,
-                                      RealField<i_field> const &y) {
+  friend ThresholdField<i_field> operator/(int const &x,
+                                      ThresholdField<i_field> const &y) {
     T val = UniversalScalarConversion<T, int>(x) / y.a;
-    return RealField<i_field>(val);
+    return ThresholdField<i_field>(val);
   }
-  friend RealField<i_field> operator/(RealField<i_field> const &x,
-                                      RealField<i_field> const &y) {
+  friend ThresholdField<i_field> operator/(ThresholdField<i_field> const &x,
+                                      ThresholdField<i_field> const &y) {
     T val = x.a / y.a;
-    return RealField<i_field>(val);
+    return ThresholdField<i_field>(val);
   }
   double get_d() const { return UniversalScalarConversion<double, T>(a) }
-  void operator*=(RealField<i_field> const &x) { a += x.a; }
-  friend RealField<i_field> operator*(RealField<i_field> const &x,
-                                      RealField<i_field> const &y) {
-    T val = x.a / y.a;
-    return RealField<i_field>(val);
+  void operator*=(ThresholdField<i_field> const &x) { a *= x.a; }
+  friend ThresholdField<i_field> operator*(ThresholdField<i_field> const &x,
+                                      ThresholdField<i_field> const &y) {
+    T val = x.a * y.a;
+    return ThresholdField<i_field>(val);
   }
-  friend RealField<i_field> operator*(int const &x,
-                                      RealField<i_field> const &y) {
+  friend ThresholdField<i_field> operator*(int const &x,
+                                      ThresholdField<i_field> const &y) {
     T val = UniversalScalarConversion<T, int>(x) * y.a;
-    return RealField<i_field>(val);
+    return ThresholdField<i_field>(val);
   }
   friend std::ostream &operator<<(std::ostream &os,
-                                  RealField<i_field> const &v) {
+                                  ThresholdField<i_field> const &v) {
     os << v.a;
     return os;
   }
-  friend std::istream &operator>>(std::istream &is, RealField<i_field> &v) {
+  friend std::istream &operator>>(std::istream &is, ThresholdField<i_field> &v) {
     T val;
     is >> val;
-    v = RealField<i_field>(V);
+    v = ThresholdField<i_field>(V);
     return is;
   }
-  friend bool operator==(RealField<i_field> const &x,
-                         RealField<i_field> const &y) {
+  friend bool operator==(ThresholdField<i_field> const &x,
+                         ThresholdField<i_field> const &y) {
     double const &thr = list_threshold.at(i_field);
     if (T_abs(x.a - y.a) < thr)
       return true;
     return false;
   }
-  friend bool operator!=(RealField<i_field> const &x,
-                         RealField<i_field> const &y) {
+  friend bool operator!=(ThresholdField<i_field> const &x,
+                         ThresholdField<i_field> const &y) {
     double const &thr = list_threshold.at(i_field);
     if (T_abs(x.a - y.a) < thr)
       return false;
     return true;
   }
-  friend bool operator!=(RealField<i_field> const &x, int const &y) {
+  friend bool operator!=(ThresholdField<i_field> const &x, int const &y) {
     double const &thr = list_threshold.at(i_field);
     if (T_abs(x.a - UniversalScalarConversion<T, int>(y)) < thr)
       return false;
     return true;
   }
-  friend bool operator>=(RealField<i_field> const &x,
-                         RealField<i_field> const &y) {
+  friend bool operator>=(ThresholdField<i_field> const &x,
+                         ThresholdField<i_field> const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a >= y.a - thr)
       return true;
     return false;
   }
-  friend bool operator>=(RealField<i_field> const &x, int const &y) {
+  friend bool operator>=(ThresholdField<i_field> const &x, int const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a >= UniversalScalarConversion<T, int>(y) - thr)
       return true;
     return false;
   }
-  friend bool operator<=(RealField<i_field> const &x,
-                         RealField<i_field> const &y) {
+  friend bool operator<=(ThresholdField<i_field> const &x,
+                         ThresholdField<i_field> const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a <= y.a + thr)
       return true;
     return false;
   }
-  friend bool operator<=(RealField<i_field> const &x, int const &y) {
+  friend bool operator<=(ThresholdField<i_field> const &x, int const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a <= UniversalScalarConversion<T, int>(y) + thr)
       return true;
     return false;
   }
-  friend bool operator>(RealField<i_field> const &x,
-                        RealField<i_field> const &y) {
+  friend bool operator>(ThresholdField<i_field> const &x,
+                        ThresholdField<i_field> const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a > y.a + thr)
       return true;
     return false;
   }
-  friend bool operator>(RealField<i_field> const &x, int const &y) {
+  friend bool operator>(ThresholdField<i_field> const &x, int const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a > UniversalScalarConversion<T, int>(y) + thr)
       return true;
     return false;
   }
-  friend bool operator<(RealField<i_field> const &x,
-                        RealField<i_field> const &y) {
+  friend bool operator<(ThresholdField<i_field> const &x,
+                        ThresholdField<i_field> const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a < y.a - thr)
       return true;
     return false;
   }
-  friend bool operator<(RealField<i_field> const &x, int const &y) {
+  friend bool operator<(ThresholdField<i_field> const &x, int const &y) {
     double const &thr = list_threshold.at(i_field);
     if (x.a < UniversalScalarConversion<T, int>(y) - thr)
       return true;
@@ -191,54 +191,54 @@ public:
 
 // For this construction we cannot hope to handle rings and fields nicely
 
-template <int i_field> struct overlying_field<RealField<i_field>> {
-  typedef RealField<i_field> field_type;
+template <int i_field> struct overlying_field<ThresholdField<i_field>> {
+  typedef ThresholdField<i_field> field_type;
 };
 
 // Note that the underlying ring is not unique, there are many possibiliies
 // actually but we can represent only one in our scheme.
-template <int i_field> struct underlying_ring<RealField<i_field>> {
-  typedef RealField<i_field> ring_type;
+template <int i_field> struct underlying_ring<ThresholdField<i_field>> {
+  typedef ThresholdField<i_field> ring_type;
 };
 
 template <int i_field>
-inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ, double &eD) {
+inline void TYPE_CONVERSION(stc<ThresholdField<i_field>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
 }
 
 template <int i_field>
-inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ,
-                            RealField<i_field> &eD) {
+inline void TYPE_CONVERSION(stc<ThresholdField<i_field>> const &eQ,
+                            ThresholdField<i_field> &eD) {
   eD = eQ.val;
 }
 
-template <int i_field> struct is_totally_ordered<RealField<i_field>> {
+template <int i_field> struct is_totally_ordered<ThresholdField<i_field>> {
   static const bool value = true;
 };
 
-template <int i_field> struct is_ring_field<RealField<i_field>> {
+template <int i_field> struct is_ring_field<ThresholdField<i_field>> {
   static const bool value = true;
 };
 
-template <int i_field> struct is_exact_arithmetic<RealField<i_field>> {
+template <int i_field> struct is_exact_arithmetic<ThresholdField<i_field>> {
   static const bool value = true;
 };
 
 // Hashing function
 
-template <int i_field> struct is_implementation_of_Z<RealField<i_field>> {
+template <int i_field> struct is_implementation_of_Z<ThresholdField<i_field>> {
   static const bool value = false;
 };
 
-template <int i_field> struct is_implementation_of_Q<RealField<i_field>> {
+template <int i_field> struct is_implementation_of_Q<ThresholdField<i_field>> {
   static const bool value = false;
 };
 
 // Hashing function
 
 namespace std {
-template <int i_field> struct hash<RealField<i_field>> {
-  std::size_t operator()(const RealField<i_field> &x) const {
+template <int i_field> struct hash<ThresholdField<i_field>> {
+  std::size_t operator()(const ThresholdField<i_field> &x) const {
     auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
       seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
     };
@@ -259,13 +259,13 @@ template <int i_field> struct hash<RealField<i_field>> {
 
 template <typename T> struct is_real_algebraic_field {};
 
-template <int i_field> struct is_real_algebraic_field<RealField<i_field>> {
+template <int i_field> struct is_real_algebraic_field<ThresholdField<i_field>> {
   static const bool value = true;
 };
 
 // Some functionality
 
-template <int i_field> bool IsInteger(RealField<i_field> const &x) {
+template <int i_field> bool IsInteger(ThresholdField<i_field> const &x) {
   std::vector<mpq_class> V = x.get_const_seq();
   size_t len = V.size();
   for (size_t u = 1; u < len; u++)
@@ -278,7 +278,7 @@ template <int i_field> bool IsInteger(RealField<i_field> const &x) {
 
 template <typename T2, int i_field>
 requires (!is_real_algebraic_field<T2>::value)
-inline void TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
+inline void TYPE_CONVERSION(stc<ThresholdField<i_field>> const &x1, T2 &x2) {
   std::vector<mpq_class> const &V = x1.val.get_const_seq();
   size_t len = V.size();
   for (size_t u = 1; u < len; u++) {
@@ -296,7 +296,7 @@ inline void TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
 namespace boost::serialization {
 
 template <class Archive, int i_field>
-inline void serialize(Archive &ar, RealField<i_field> &val,
+inline void serialize(Archive &ar, ThresholdField<i_field> &val,
                       [[maybe_unused]] const unsigned int version) {
   std::vector<mpq_class> &V = val.get_seq();
   for (auto &val : V)
@@ -310,7 +310,7 @@ inline void serialize(Archive &ar, RealField<i_field> &val,
 // Turning into something rational
 
 template <typename Tring, int i_field>
-void ScalingInteger_Kernel(stc<RealField<i_field>> const &x, Tring &x_res) {
+void ScalingInteger_Kernel(stc<ThresholdField<i_field>> const &x, Tring &x_res) {
   std::vector<Tring> V;
   for (auto &val : x.val.get_const_seq())
     V.push_back(GetDenominator_z(val));

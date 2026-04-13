@@ -1504,7 +1504,7 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot(MyMatrix<T> const &Input,
   auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
     M.row(eRank) = Input.row(iRow);
   };
-  return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f, threshold);
+  return TMat_SelectRowColMaxPivot_Kernel<T>(nbRow, nbCol, f, threshold);
 }
 
 template <typename T>
@@ -1517,7 +1517,7 @@ TMat_SelectRowColMaxPivot_subset(MyMatrix<T> const &Input,
   auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
     M.row(eRank) = Input.row(Vsubset[iRow]);
   };
-  return TMat_SelectRowCol_Kernel<T>(nbRow, nbCol, f, threshold);
+  return TMat_SelectRowColMaxPivot_Kernel<T>(nbRow, nbCol, f, threshold);
 }
 
 template <typename T>
