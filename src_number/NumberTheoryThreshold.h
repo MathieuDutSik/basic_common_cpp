@@ -22,7 +22,7 @@ void insert_helper_real_algebraic_field(int i_field, double const &thr) {
   list_threshold.emplace(i_field, thr);
 }
 
-template <int i_field> class ThesholdField {
+template <int i_field> class ThresholdField {
 public:
   using T = double;
 
@@ -46,7 +46,7 @@ public:
   // Constructor
   ThresholdField() { a = 0; }
   ThresholdField(int const &u) { a = UniversalScalarConversion<T, int>(u); }
-  Thresholdield(T const &u) { a = u; }
+  ThresholdField(T const &u) { a = u; }
   ThresholdField(ThresholdField<i_field> const &x) : a(x.a) {}
   // assignment operator from int
   ThresholdField<i_field> operator=(int const &u) {
@@ -79,8 +79,8 @@ public:
     return ThresholdField<i_field>(val);
   }
   friend ThresholdField<i_field> operator-(ThresholdField<i_field> const &x) {
-    T val = a - x.a;
-    return ThresholdField<i_field>(cal);
+    T val = -x.a;
+    return ThresholdField<i_field>(val);
   }
   friend ThresholdField<i_field> operator/(int const &x,
                                       ThresholdField<i_field> const &y) {
@@ -92,7 +92,7 @@ public:
     T val = x.a / y.a;
     return ThresholdField<i_field>(val);
   }
-  double get_d() const { return UniversalScalarConversion<double, T>(a) }
+  double get_d() const { return UniversalScalarConversion<double, T>(a); }
   void operator*=(ThresholdField<i_field> const &x) { a *= x.a; }
   friend ThresholdField<i_field> operator*(ThresholdField<i_field> const &x,
                                       ThresholdField<i_field> const &y) {
@@ -112,7 +112,7 @@ public:
   friend std::istream &operator>>(std::istream &is, ThresholdField<i_field> &v) {
     T val;
     is >> val;
-    v = ThresholdField<i_field>(V);
+    v = ThresholdField<i_field>(val);
     return is;
   }
   friend bool operator==(ThresholdField<i_field> const &x,

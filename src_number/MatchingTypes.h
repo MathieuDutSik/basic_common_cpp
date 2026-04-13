@@ -26,8 +26,8 @@ template <typename Tinf> std::string get_matching_types(Tinf const &max_val) {
   int32_t val32 = get_signed_max_range<int32_t, Tinf>();
   int64_t val64 = get_signed_max_range<int64_t, Tinf>();
   Tinf val16_T = UniversalScalarConversion<Tinf, int16_t>(val16);
-  Tinf val32_T = UniversalScalarConversion<Tinf, int16_t>(val32);
-  Tinf val64_T = UniversalScalarConversion<Tinf, int16_t>(val64);
+  Tinf val32_T = UniversalScalarConversion<Tinf, int32_t>(val32);
+  Tinf val64_T = UniversalScalarConversion<Tinf, int64_t>(val64);
   if (max_val < val16_T)
     return "int16_t";
   if (max_val < val32_T)

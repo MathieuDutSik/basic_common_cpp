@@ -180,7 +180,8 @@ public:
     return tmp;
   }
   void operator*=(SafeInt64 const &x) {
-    check_sum_int64(x.val);
+    check_prod_int64(val);
+    check_prod_int64(x.val);
 #ifdef SANITY_CHECK_SAFETY_INTEGER
     std::cerr << "val=" << val << "\n";
 #endif
