@@ -121,7 +121,7 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
     }
     S.addClause(blocking_clause);
     iter++;
-    if (MAX_ITER == -1)
+    if (MAX_ITER != -1)
       if (iter > MAX_ITER)
         break;
   }

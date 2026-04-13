@@ -72,7 +72,7 @@ public:
   }
   void RemoveAdjacent(size_t const &iVert, size_t const &jVert) {
     size_t idxMat = iVert + nbVert * jVert;
-    LLAdj.set(idxMat, 1);
+    LLAdj.set(idxMat, 0);
   }
   bool IsAdjacent(size_t const &iVert, size_t const &jVert) const {
     size_t idxMat = iVert + nbVert * jVert;

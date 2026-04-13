@@ -42,12 +42,12 @@ InverseSquareMatrix(std::vector<std::vector<T>> TheMat) {
       for (k = 0; k < n; k++) {
         eVal1 = WorkMat[k][i];
         eVal2 = WorkMat[k][jSel];
-        WorkMat[k][i] = eVal1;
-        WorkMat[k][jSel] = eVal2;
+        WorkMat[k][i] = eVal2;
+        WorkMat[k][jSel] = eVal1;
         eVal1 = InvMat[k][i];
         eVal2 = InvMat[k][jSel];
-        InvMat[k][i] = eVal1;
-        InvMat[k][jSel] = eVal2;
+        InvMat[k][i] = eVal2;
+        InvMat[k][jSel] = eVal1;
       }
     }
     T alpha = 1 / WorkMat[i][i];

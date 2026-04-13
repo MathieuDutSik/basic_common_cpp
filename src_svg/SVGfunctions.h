@@ -272,8 +272,8 @@ void GeneralWriteSVGfile(std::string const &eFile,
     std::cerr << "height=" << height << " width=" << width << "\n";
     double FrameX = eSVGplot.width;
     double FrameY = eSVGplot.height;
-    double scale_factorX = FrameY / (MaxX - MinX);
-    double scale_factorY = FrameX / (MaxY - MinY);
+    double scale_factorX = FrameX / (MaxX - MinX);
+    double scale_factorY = FrameY / (MaxY - MinY);
     double MidX = (MaxX + MinX) / 2;
     double MidY = (MaxY + MinY) / 2;
     std::cerr << "MidX=" << MidX << " MidY=" << MidY << "\n";

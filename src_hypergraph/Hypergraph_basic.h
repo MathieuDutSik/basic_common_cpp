@@ -42,7 +42,7 @@ private:
   int nbVert;
   int nbHyperedge;
   Face ListEntry;
-}
+};
 
 template <typename T, typename Tgr>
 MyMatrix<T> GetLaplacianMatrix(std::vector<T> const &ListEdgeWeight,
@@ -53,7 +53,7 @@ MyMatrix<T> GetLaplacianMatrix(std::vector<T> const &ListEdgeWeight,
     std::vector<int> ListIEdge = GR.GetContainingHyperedge(iVert);
     T sum = 0;
     for (auto &iHyper : ListIEdge)
-      sum += ListEdge[iHyper];
+      sum += ListEdgeWeight[iHyper];
     ListVertexWeight[iVert] = sum;
   }
   //
