@@ -1961,7 +1961,7 @@ template <typename T>
 void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat,
                          MyVector<T> &eVectImg) {
   int iCol, nbCol, iRow, nbRow, n;
-  n = eVect->n;
+  n = eVect.size();
   nbRow = TheMat.rows();
   nbCol = TheMat.cols();
   if (n != nbRow) {

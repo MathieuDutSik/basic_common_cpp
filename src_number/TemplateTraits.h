@@ -131,19 +131,19 @@ template <> struct is_implementation_of_Q<float> {
 };
 
 template <> struct is_implementation_of_Q<int64_t> {
-  static const bool value = true;
+  static const bool value = false;
 };
 
 template <> struct is_implementation_of_Q<int32_t> {
-  static const bool value = true;
+  static const bool value = false;
 };
 
 template <> struct is_implementation_of_Q<int16_t> {
-  static const bool value = true;
+  static const bool value = false;
 };
 
 template <> struct is_implementation_of_Q<int8_t> {
-  static const bool value = true;
+  static const bool value = false;
 };
 
 // Trait definition for exactness

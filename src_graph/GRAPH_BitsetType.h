@@ -17,11 +17,7 @@ public:
     LLAdj = boost::dynamic_bitset<>(eProd);
     HasVertexColor = false;
   }
-  ~GraphBitset() {
-    ~LLAdj;
-    if (HasVertexColor)
-      ListVertexColor.clear();
-  }
+  ~GraphBitset() = default;
   GraphBitset(GraphBitset const &eG) {
     nbVert = eG.GetNbVert();
     LLAdj = eG.GetBitset();

@@ -41,7 +41,7 @@ int ComputeDiameterEquivariant(Tgr const &GR, TheGroupFormat const &TheGRP) {
   };
   int TheDiameter = 0;
   for (auto &eOrb : vvO) {
-    int ePt = eOrb[0];
+    int ePt = eOrb.find_first();
     int localDiameter = LocalDiameter(ePt);
     if (localDiameter == -1) {
       return -1;

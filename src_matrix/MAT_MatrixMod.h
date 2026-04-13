@@ -691,7 +691,7 @@ T HadamardUpperBoundRectangular(MyMatrix<T> const &TheMat) {
   int n_row = TheMat.rows();
   int n_col = TheMat.cols();
 
-  if (n_row <= n_col) {
+  if (n_row >= n_col) {
     return HadamardUpperBoundRectangularKernel(TheMat);
   } else {
     MyMatrix<T> TheMatTr = TransposedMat(TheMat);

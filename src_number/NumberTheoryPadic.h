@@ -225,7 +225,7 @@ Padic<T> Padic_reduce_precision(Padic<T> const &x,
 
 template <typename T> int Padic_valuation(Padic<T> const &x) {
   size_t infinite_precision = std::numeric_limits<size_t>::max();
-  if (x.precision == infinite_precision) {
+  if (x.precision == infinite_precision && x.coefficients.size() == 0) {
     int infinite_valuation = std::numeric_limits<int>::max();
     return infinite_valuation;
   }

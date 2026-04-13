@@ -239,16 +239,7 @@ template <int i_field> struct is_implementation_of_Q<ThresholdField<i_field>> {
 namespace std {
 template <int i_field> struct hash<ThresholdField<i_field>> {
   std::size_t operator()(const ThresholdField<i_field> &x) const {
-    auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
-      seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-    };
-    size_t seed = 0x9e2479b9;
-    std::vector<mpq_class> V = x.get_const_seq();
-    for (auto &val : V) {
-      size_t e_hash = std::hash<mpq_class>()(val);
-      combine_hash(seed, e_hash);
-    }
-    return seed;
+    return std::hash<double>()(x.get_const_val());
   }
 };
 // clang-format off
@@ -257,8 +248,6 @@ template <int i_field> struct hash<ThresholdField<i_field>> {
 
 // Local typing info
 
-template <typename T> struct is_real_algebraic_field {};
-
 template <int i_field> struct is_real_algebraic_field<ThresholdField<i_field>> {
   static const bool value = true;
 };
@@ -266,12 +255,10 @@ template <int i_field> struct is_real_algebraic_field<ThresholdField<i_field>> {
 // Some functionality
 
 template <int i_field> bool IsInteger(ThresholdField<i_field> const &x) {
-  std::vector<mpq_class> V = x.get_const_seq();
-  size_t len = V.size();
-  for (size_t u = 1; u < len; u++)
-    if (V[u] != 0)
-      return false;
-  return IsInteger(V[0]);
+  double const &val = x.get_const_val();
+  double const &thr = list_threshold.at(i_field);
+  double rounded = std::round(val);
+  return T_abs(val - rounded) < thr;
 }
 
 // The conversion tools (int)
@@ -279,15 +266,7 @@ template <int i_field> bool IsInteger(ThresholdField<i_field> const &x) {
 template <typename T2, int i_field>
 requires (!is_real_algebraic_field<T2>::value)
 inline void TYPE_CONVERSION(stc<ThresholdField<i_field>> const &x1, T2 &x2) {
-  std::vector<mpq_class> const &V = x1.val.get_const_seq();
-  size_t len = V.size();
-  for (size_t u = 1; u < len; u++) {
-    if (V[u] != 0) {
-      std::string str = "Conversion error for quadratic field";
-      throw ConversionException{str};
-    }
-  }
-  stc<mpq_class> a1{V[0]};
+  stc<double> a1{x1.val.get_const_val()};
   TYPE_CONVERSION(a1, x2);
 }
 
@@ -298,9 +277,7 @@ namespace boost::serialization {
 template <class Archive, int i_field>
 inline void serialize(Archive &ar, ThresholdField<i_field> &val,
                       [[maybe_unused]] const unsigned int version) {
-  std::vector<mpq_class> &V = val.get_seq();
-  for (auto &val : V)
-    ar &make_nvp("realfield_seq", val);
+  ar &make_nvp("threshold_val", val.get_val());
 }
 
 // clang-format off
@@ -311,10 +288,7 @@ inline void serialize(Archive &ar, ThresholdField<i_field> &val,
 
 template <typename Tring, int i_field>
 void ScalingInteger_Kernel(stc<ThresholdField<i_field>> const &x, Tring &x_res) {
-  std::vector<Tring> V;
-  for (auto &val : x.val.get_const_seq())
-    V.push_back(GetDenominator_z(val));
-  x_res = LCMlist(V);
+  x_res = 1;
 }
 
 // clang-format off
