@@ -141,8 +141,8 @@ MyMatrix<T> reorder_matrix(MyMatrix<T> const& M) {
     MyVector<T> V = GetMatrixRow(M, i_row);
     set.insert(V);
   }
-  int n_siz = set.size();
 #ifdef SANITY_CHECK_MAT_MATRIX
+  int n_siz = set.size();
   if (n_siz != n_row) {
     std::cerr << "MAT: We have duplication in the matrix. n_row=" << n_row << " n_siz=" << n_siz << "\n";
     throw TerminalException{1};
