@@ -1875,9 +1875,10 @@ requires (!is_ring_field<T>::value)
 inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   size_t nbRow = Input.rows();
-  size_t nbCol = Input.cols();
+  int nbCol_i = Input.cols();
+  size_t nbCol = nbCol_i;
   auto f = [&](MyMatrix<Tfield> &M, size_t eRank, size_t iRow) -> void {
-    for (int iCol=0; iCol<nbCol; iCol++) {
+    for (int iCol=0; iCol<nbCol_i; iCol++) {
       M(eRank, iCol) = UniversalScalarConversion<Tfield,T>(Input(iRow,iCol));
     }
   };
