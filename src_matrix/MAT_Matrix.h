@@ -1873,6 +1873,33 @@ inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
 template <typename T>
 requires (!is_ring_field<T>::value)
 inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
+  using Tfield = typename overlying_field<T>::field_type;
+  size_t nbRow = Input.rows();
+  size_t nbCol = Input.cols();
+  auto f = [&](MyMatrix<Tfield> &M, size_t eRank, size_t iRow) -> void {
+    for (int iCol=0; iCol<nbCol; iCol++) {
+      M(eRank, iCol) = UniversalScalarConversion<Tfield,T>(Input(iRow,iCol));
+    }
+  };
+  MyMatrix<Tfield> NSP_field = NullspaceTrMat_Kernel<Tfield, decltype(f)>(nbRow, nbCol, f);
+  int dim = NSP_field.rows();
+  MyMatrix<T> NSP(dim, NSP_field.cols());
+  for (int iNSP=0; iNSP<dim; iNSP++) {
+    MyVector<Tfield> V1 = GetMatrixRow(NSP_field, iNSP);
+    MyVector<Tfield> V2 = NonUniqueScaleToIntegerVector(V1);
+    MyVector<T> V3 = UniversalVectorConversion<T, Tfield>(V2);
+    AssignMatrixRow(NSP, iNSP, V3);
+  }
+  return NSP;
+}
+
+template <typename T> MyMatrix<T> NullspaceMat(MyMatrix<T> const &M) {
+  return NullspaceTrMat(TransposedMat(M));
+}
+
+
+template <typename T>
+MyMatrix<T> NullspaceTrMat_no_division(MyMatrix<T> const &Input) {
   // No division allowed. Maybe faster if we can allow for it using mpz_class.
   size_t nbRow = Input.rows();
   size_t nbCol = Input.cols();
@@ -1945,10 +1972,6 @@ inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
       nbVect++;
     }
   return NSP;
-}
-
-template <typename T> MyMatrix<T> NullspaceMat(MyMatrix<T> const &M) {
-  return TMat_SelectRowCol(TransposedMat(M)).NSP;
 }
 
 template <typename T> int RankMatKernel(MyMatrix<T> const &Input) {
