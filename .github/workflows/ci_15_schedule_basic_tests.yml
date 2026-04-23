@@ -32,7 +32,7 @@ jobs:
         make Test_Thompson_sampling Test_timing Test_PresenceProgram Test_namelist Test_String_Split Test_serialization Test_EmpiricalDistribution Test_hash_table Test_bool Test_face Test_String_Optimization Test_String_Trim Test_String_Conversion Test_Namelist_Substr Test_Basic_string_Optimizations Test_filesystem Test_program_in_path Test_external_program
 
     - name: Test_Thompson_sampling
-      run: cd src_basic && ./Test_Thompson_sampling
+      run: cd src_basic && ./Test_Thompson_sampling Input_Thompson_sampling.nml
 
     - name: Test_timing
       run: cd src_basic && ./Test_timing

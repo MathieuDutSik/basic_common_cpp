@@ -1,0 +1,31 @@
+&PROBABILITY_DISTRIBUTIONS
+  ListName = "distri1", "distri2"
+  ListNmax = 100, 100
+  ListNstart = 100, 100
+  ListNature = "dirac", "dirac"
+  ListDescription = "145.3", "150.7"
+/
+
+&THOMPSON_PRIOR
+  ListAnswer = "methodA", "methodB"
+  ListName = "state1", "state2"
+  ListDescription = "methodA:distri1 methodB:distri2", "methodA:distri1 methodB:distri2"
+/
+
+&KEY_COMPRESSION
+  ListKey = "incidence"
+  ListDescription = "superfine"
+/
+
+&HEURISTIC_PRIOR
+  DefaultPrior = "state1"
+  ListFullCond = "incidence > 10"
+  ListConclusion = "state1"
+/
+
+&IO
+  name = "test"
+  WriteLog = F
+  ProcessExistingDataIfExist = F
+  LogFileToProcess = "irrelevant"
+/
