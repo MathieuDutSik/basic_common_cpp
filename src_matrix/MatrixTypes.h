@@ -4,7 +4,6 @@
 
 // clang-format off
 #include <Eigen/Dense>
-#include <Eigen/Eigenvalues>
 #include <Eigen/LU>
 // clang-format on
 

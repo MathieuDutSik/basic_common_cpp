@@ -1,5 +1,11 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#include "MAT_Matrix.h"
+
+// clang-format off
+#include "Temp_common.h"
+#include "MAT_SparseMatrix.h"
+#include "MAT_MatrixEigen.h"
+// clang-format on
+
 int main(int argc, char *argv[]) {
   try {
     if (argc != 2) {
