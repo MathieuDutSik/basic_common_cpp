@@ -10,6 +10,7 @@
 #include "Basic_file.h"
 #include "Basic_string.h"
 #include "MatrixTypes.h"
+#include "MatrixTypesSparse.h"
 #include "Temp_common.h"
 #include "Timings.h"
 #include "hash_functions.h"
