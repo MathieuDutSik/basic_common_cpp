@@ -52,7 +52,7 @@ inline void save(Archive &ar, MySparseMatrix<T> const &val,
   ar &make_nvp("rows", nbRow);
   ar &make_nvp("cols", nbCol);
   ar &make_nvp("nnz", nnz);
-  for (int k = 0; k < val.outerSize(); ++k)
+  for (int k = 0; k < val.outerSize(); ++k) {
     for (typename MySparseMatrix<T>::InnerIterator it(val, k); it; ++it) {
       T eVal = it.value();
       // row index
@@ -63,6 +63,7 @@ inline void save(Archive &ar, MySparseMatrix<T> const &val,
       ar &make_nvp("iCol", iCol);
       ar &make_nvp("eVal", eVal);
     }
+  }
 }
 
 template <class Archive, typename T>
@@ -83,7 +84,7 @@ MySparseMatrix<T2> UniversalSparseMatrixConversion(MySparseMatrix<T1> const &M) 
   using Ttrip = Eigen::Triplet<T2>;
   std::vector<Ttrip> tripletList(nnz);
   int pos = 0;
-  for (int k = 0; k < M.outerSize(); ++k)
+  for (int k = 0; k < M.outerSize(); ++k) {
     for (typename MySparseMatrix<T1>::InnerIterator it(M, k); it; ++it) {
       T1 eVal1 = it.value();
       T2 eVal2 = UniversalScalarConversion<T2,T1>(eVal1);
@@ -94,6 +95,7 @@ MySparseMatrix<T2> UniversalSparseMatrixConversion(MySparseMatrix<T1> const &M) 
       tripletList[pos] = Ttrip(iRow, iCol, eVal2);
       pos++;
     }
+  }
   MySparseMatrix<T2> SpMat = MySparseMatrix<T2>(nbRow, nbCol);
   SpMat.setFromTriplets(tripletList.begin(), tripletList.end());
   return SpMat;
@@ -110,7 +112,7 @@ MySparseMatrix<T> SparseMatrixSelectRows(MySparseMatrix<T> const &M, std::vector
   int nbCol = M.cols();
   using Ttrip = Eigen::Triplet<T>;
   std::vector<Ttrip> tripletList;
-  for (int k = 0; k < M.outerSize(); ++k)
+  for (int k = 0; k < M.outerSize(); ++k) {
     for (typename MySparseMatrix<T>::InnerIterator it(M, k); it; ++it) {
       // row index
       int iRow_orig = it.row();
@@ -122,6 +124,7 @@ MySparseMatrix<T> SparseMatrixSelectRows(MySparseMatrix<T> const &M, std::vector
         tripletList.push_back(ent);
       }
     }
+  }
   MySparseMatrix<T> SpMat = MySparseMatrix<T>(nbRow, nbCol);
   SpMat.setFromTriplets(tripletList.begin(), tripletList.end());
   return SpMat;
@@ -136,7 +139,7 @@ void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const &TheMat) {
     T eVal;
   };
   std::vector<std::vector<PairCV>> LLPair(nbRow);
-  for (int k = 0; k < TheMat.outerSize(); ++k)
+  for (int k = 0; k < TheMat.outerSize(); ++k) {
     for (typename MySparseMatrix<T>::InnerIterator it(TheMat, k); it; ++it) {
       T eVal = it.value();
       int iRow = it.row();
@@ -144,6 +147,7 @@ void WriteSparseMatrixGAP(std::ostream &os, MySparseMatrix<T> const &TheMat) {
       PairCV ePair{iCol, eVal};
       LLPair[iRow].push_back(ePair);
     }
+  }
   os << "rec(nbRow:=" << nbRow << ", nbCol:=" << nbCol << ", ListEntries:=[";
   for (size_t iRow = 0; iRow < nbRow; iRow++) {
     if (iRow > 0)
@@ -207,7 +211,7 @@ void WriteSparseMatrix(std::ostream &os, MySparseMatrix<T> const &eMat) {
   int nnz = eMat.nonZeros();
   os << nbRow << " " << nbCol << " " << nnz;
   int nb = 0;
-  for (int k = 0; k < eMat.outerSize(); ++k)
+  for (int k = 0; k < eMat.outerSize(); ++k) {
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {
       T eVal = it.value();
       int iRow = it.row();
@@ -216,6 +220,7 @@ void WriteSparseMatrix(std::ostream &os, MySparseMatrix<T> const &eMat) {
       os << iRow << " " << iCol << " " << eVal << "\n";
       nb++;
     }
+  }
   if (nb != nnz) {
     std::cerr << "Logical error in our understanding of \n";
     throw TerminalException{1};
@@ -228,7 +233,7 @@ MyMatrix<T> MyMatrixFromSparseMatrix(MySparseMatrix<T> const &eMat) {
   int nbCol = eMat.cols();
   MyMatrix<T> M;
   M.setConstant(nbRow, nbCol, T(0));
-  for (int k = 0; k < eMat.outerSize(); ++k)
+  for (int k = 0; k < eMat.outerSize(); ++k) {
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {
       T eVal = it.value();
       int iRow = it.row();
@@ -236,6 +241,7 @@ MyMatrix<T> MyMatrixFromSparseMatrix(MySparseMatrix<T> const &eMat) {
       int iCol = it.col();
       M(iRow, iCol) = eVal;
     }
+  }
   return M;
 }
 
