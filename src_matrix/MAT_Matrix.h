@@ -78,33 +78,6 @@ MyVector<T> GetMatrixRow(MyMatrix<T> const &M, int const &iRow) {
   return V;
 }
 
-template <typename T>
-MyMatrix<T> reorder_matrix(MyMatrix<T> const& M) {
-  int n_row = M.rows();
-  int n_col = M.cols();
-  std::set<MyVector<T>> set;
-  for (int i_row=0; i_row<n_row; i_row++) {
-    MyVector<T> V = GetMatrixRow(M, i_row);
-    set.insert(V);
-  }
-#ifdef SANITY_CHECK_MAT_MATRIX
-  int n_siz = set.size();
-  if (n_siz != n_row) {
-    std::cerr << "MAT: We have duplication in the matrix. n_row=" << n_row << " n_siz=" << n_siz << "\n";
-    throw TerminalException{1};
-  }
-#endif
-  MyMatrix<T> Mret(n_row, n_col);
-  int pos = 0;
-  for (auto & v: set) {
-    AssignMatrixRow(Mret, pos, v);
-    pos += 1;
-  }
-  return Mret;
-}
-
-
-
 template <typename T> bool IsIdentity(MyMatrix<T> const &M) {
   int len = M.rows();
   for (int i = 0; i < len; i++) {
@@ -950,6 +923,31 @@ void AssignMatrixRow(MyMatrix<T> &eMat, int const &iRow,
 #endif
   for (int iCol = 0; iCol < nbCol; iCol++)
     eMat(iRow, iCol) = eVect(iCol);
+}
+
+template <typename T>
+MyMatrix<T> reorder_matrix(MyMatrix<T> const& M) {
+  int n_row = M.rows();
+  int n_col = M.cols();
+  std::set<MyVector<T>> set;
+  for (int i_row=0; i_row<n_row; i_row++) {
+    MyVector<T> V = GetMatrixRow(M, i_row);
+    set.insert(V);
+  }
+#ifdef SANITY_CHECK_MAT_MATRIX
+  int n_siz = set.size();
+  if (n_siz != n_row) {
+    std::cerr << "MAT: We have duplication in the matrix. n_row=" << n_row << " n_siz=" << n_siz << "\n";
+    throw TerminalException{1};
+  }
+#endif
+  MyMatrix<T> Mret(n_row, n_col);
+  int pos = 0;
+  for (auto & v: set) {
+    AssignMatrixRow(Mret, pos, v);
+    pos += 1;
+  }
+  return Mret;
 }
 
 template <typename T>
