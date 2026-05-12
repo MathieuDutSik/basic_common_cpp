@@ -483,6 +483,36 @@ inline void TYPE_CONVERSION(stc<long> const &a1,
   a2 = a1.val;
 }
 
+// int64_t as input.
+// On platforms where long is 64-bit and identical to int64_t (e.g. Linux
+// x86_64), the existing `long` overloads already cover this case, so adding
+// overloads here would cause redefinition errors. On Apple, long is 64-bit
+// but int64_t is `long long`, so they are distinct C++ types and we provide
+// separate overloads.
+#ifdef __APPLE__
+inline void TYPE_CONVERSION(stc<int64_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<int64_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+#endif
+
+// uint64_t as input.
+// No `unsigned long` overloads are defined elsewhere, so no platform guard
+// is needed: on Linux uint64_t == unsigned long, and on Apple they are
+// distinct types but unsigned long is not used as an overload elsewhere.
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+
 // mpz_int as output target for the small integer types.
 // The boost convert_to<>() does not check overflow, so we perform an
 // explicit range check against the destination type before converting
@@ -520,6 +550,16 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             uint32_t &a2) {
   mpz_int_to_small_integer(a1.val, a2);
 }
+#ifdef __APPLE__
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            int64_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+#endif
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            uint64_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
 
 // mpq_rational as output target for the small integer types
 
@@ -553,6 +593,22 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             uint32_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+#ifdef __APPLE__
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            int64_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+#endif
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            uint64_t &a2) {
   boost::multiprecision::mpz_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
   stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
