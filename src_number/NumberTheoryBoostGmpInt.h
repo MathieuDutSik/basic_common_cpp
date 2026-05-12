@@ -417,6 +417,148 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
   a2 = a1.val;
 }
 
+// int8_t as input
+
+inline void TYPE_CONVERSION(stc<int8_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<int8_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+
+// uint8_t as input
+
+inline void TYPE_CONVERSION(stc<uint8_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<uint8_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+
+// int16_t as input
+
+inline void TYPE_CONVERSION(stc<int16_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<int16_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+
+// uint16_t as input
+
+inline void TYPE_CONVERSION(stc<uint16_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<uint16_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+
+// uint32_t as input
+
+inline void TYPE_CONVERSION(stc<uint32_t> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<uint32_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
+  a2 = a1.val;
+}
+
+// long as input (the boost::multiprecision::mpq_rational and mpz_int
+// directly accept assignment from long).
+// Note: int32_t is intentionally omitted; on every platform we support
+// it is the same type as int, for which conversions are already defined
+// above. Adding stc<int32_t> overloads would produce redefinition errors.
+
+inline void TYPE_CONVERSION(stc<long> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+
+// mpz_int as output target for the small integer types.
+// The boost convert_to<>() does not check overflow, so we perform an
+// explicit range check against the destination type before converting
+// and throw ConversionException if the value does not fit.
+
+template <typename Tout>
+inline void mpz_int_to_small_integer(boost::multiprecision::mpz_int const &val,
+                                     Tout &out) {
+  if (val < std::numeric_limits<Tout>::min() ||
+      val > std::numeric_limits<Tout>::max()) {
+    std::string str = "value=" + val.str() +
+                      " does not fit in the destination integer type";
+    throw ConversionException{str};
+  }
+  out = val.template convert_to<Tout>();
+}
+
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            int8_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            uint8_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            int16_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            uint16_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            uint32_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+
+// mpq_rational as output target for the small integer types
+
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            int8_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            uint8_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            int16_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            uint16_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            uint32_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+
 inline void
 ScalingInteger_Kernel(stc<boost::multiprecision::mpq_rational> const &x,
                       boost::multiprecision::mpz_int &x_ret) {
