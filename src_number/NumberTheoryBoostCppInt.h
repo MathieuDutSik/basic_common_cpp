@@ -369,6 +369,16 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
 }
+// double as input.
+// This mirrors the conversion in NumberTheoryGmp.h: the double value is
+// truncated to int64_t before being assigned to the big integer. This
+// only handles doubles whose truncated value fits in int64_t; conversion
+// from doubles outside that range has inherent issues that must be
+// addressed by the caller.
+inline void TYPE_CONVERSION(stc<double> const &a1,
+                            boost::multiprecision::cpp_int &a2) {
+  a2 = static_cast<int64_t>(a1.val);
+}
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
                             int &a2) {
   a2 = a1.val.template convert_to<int>();
