@@ -43,6 +43,34 @@ set_target_properties(
 )
 add_dependencies(basic_common_nauty NautyDirectPackage)
 
+set(BLISS_PREFIX "${CMAKE_BINARY_DIR}/external/bliss")
+set(BLISS_INSTALL_DIR "${BLISS_PREFIX}/install")
+set(BLISS_INCLUDE_DIR "${BLISS_INSTALL_DIR}/include")
+set(BLISS_LIBRARY "${BLISS_INSTALL_DIR}/lib/libbliss.a")
+
+ExternalProject_Add(
+  BlissDirectPackage
+  PREFIX "${BLISS_PREFIX}"
+  URL "${CMAKE_SOURCE_DIR}/ExternalLib/bliss-0.77.zip"
+  CMAKE_ARGS
+    -DCMAKE_POSITION_INDEPENDENT_CODE=ON
+  INSTALL_COMMAND
+    ${CMAKE_COMMAND} -E make_directory ${BLISS_INCLUDE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory <SOURCE_DIR>/src ${BLISS_INCLUDE_DIR}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${BLISS_INSTALL_DIR}/lib
+    COMMAND ${CMAKE_COMMAND} -E copy <BINARY_DIR>/libbliss_static.a ${BLISS_LIBRARY}
+  BUILD_BYPRODUCTS "${BLISS_LIBRARY}"
+)
+
+add_library(basic_common_bliss STATIC IMPORTED GLOBAL)
+set_target_properties(
+  basic_common_bliss
+  PROPERTIES
+    IMPORTED_LOCATION "${BLISS_LIBRARY}"
+    INTERFACE_INCLUDE_DIRECTORIES "${BLISS_INCLUDE_DIR}"
+)
+add_dependencies(basic_common_bliss BlissDirectPackage)
+
 add_library(basic_common INTERFACE)
 target_include_directories(
   basic_common
@@ -72,6 +100,7 @@ target_link_libraries(
   INTERFACE
     basic_common
     basic_common_nauty
+    basic_common_bliss
 )
 
 function(add_basic_common_binary target source support_target)
