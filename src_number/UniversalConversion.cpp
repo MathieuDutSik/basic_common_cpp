@@ -17,5 +17,5 @@ int main() {
 
 
   size_t val = 3;
-  t3_int val_b = UniversalScalarConversion<T3_int,size_t>(val);
+  T3_int val_b = UniversalScalarConversion<T3_int,size_t>(val);
 }

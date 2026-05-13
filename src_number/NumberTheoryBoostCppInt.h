@@ -535,6 +535,34 @@ inline void TYPE_CONVERSION(stc<uint64_t> const &a1,
   a2 = a1.val;
 }
 
+// size_t as input.
+// On platforms where size_t coincides with uint64_t (e.g. Linux x86_64)
+// or with uint32_t (typical 32-bit platforms), the existing non-template
+// overloads above already cover the call and adding plain overloads here
+// would cause redefinition errors. We therefore guard these with a
+// `requires` clause that excludes the size_t == uint64_t and size_t ==
+// uint32_t cases; on those platforms the templates produce no candidates
+// and the non-template overloads win. On platforms where size_t is a
+// distinct type (e.g. Apple, where size_t is `unsigned long` while
+// uint64_t is `unsigned long long`), the templates supply the needed
+// overload.
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1,
+                            boost::multiprecision::cpp_int &a2) {
+  a2 = a1.val;
+}
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1,
+                            boost::multiprecision::cpp_rational &a2) {
+  a2 = a1.val;
+}
+
 // cpp_int as output target for the small integer types.
 // The boost convert_to<>() does not check overflow, so we perform an
 // explicit range check against the destination type before converting
@@ -580,6 +608,16 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
 #endif
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
                             uint64_t &a2) {
+  cpp_int_to_small_integer(a1.val, a2);
+}
+// size_t output: only enabled when size_t is a distinct type from
+// uint64_t and uint32_t (see the size_t input section for rationale).
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
+                            T &a2) {
   cpp_int_to_small_integer(a1.val, a2);
 }
 
@@ -631,6 +669,19 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
 #endif
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
                             uint64_t &a2) {
+  boost::multiprecision::cpp_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::cpp_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+// size_t output: only enabled when size_t is a distinct type from
+// uint64_t and uint32_t (see the size_t input section for rationale).
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
+                            T &a2) {
   boost::multiprecision::cpp_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
   stc<boost::multiprecision::cpp_int> stc_a1_z{a1_z};
