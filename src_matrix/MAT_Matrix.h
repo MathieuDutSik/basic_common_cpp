@@ -2782,6 +2782,26 @@ bool operator==(MyVector<T> const &V1, MyVector<T> const &V2) {
 }
 
 template <typename T>
+bool operator==(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
+  int nbRow = M1.rows();
+  int nbCol = M1.cols();
+  if (M2.rows() != nbRow || M2.cols() != nbCol) {
+    return false;
+  }
+  for (int iRow = 0; iRow < nbRow; iRow++)
+    for (int iCol = 0; iCol < nbCol; iCol++) {
+      if (M1(iRow, iCol) != M2(iRow, iCol))
+        return false;
+    }
+  return true;
+}
+
+template <typename T>
+bool operator!=(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
+  return !(M1 == M2);
+}
+
+template <typename T>
 bool operator<(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
   int nbRow = M1.rows();
   int nbCol = M1.cols();
