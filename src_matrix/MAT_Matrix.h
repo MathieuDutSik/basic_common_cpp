@@ -247,6 +247,19 @@ template <typename T> MyMatrix<T> ReadMatrixFile(std::string const &file_name) {
 }
 
 template <typename T>
+void WriteMatrix(std::ostream &os, MyMatrix<T> const &TheMat) {
+  size_t nbRow = TheMat.rows();
+  size_t nbCol = TheMat.cols();
+  //  TerminalEnding();
+  os << nbRow << " " << nbCol << "\n";
+  for (size_t iRow = 0; iRow < nbRow; iRow++) {
+    for (size_t iCol = 0; iCol < nbCol; iCol++)
+      os << " " << TheMat(iRow, iCol);
+    os << "\n";
+  }
+}
+
+template <typename T>
 std::vector<MyMatrix<T>> ReadListMatrix(std::istream &is) {
   int n_mat;
   is >> n_mat;
@@ -438,19 +451,6 @@ template <typename T> std::vector<T> ReadStdVector(std::istream &is) {
     eVect[iRow] = eVal;
   }
   return eVect;
-}
-
-template <typename T>
-void WriteMatrix(std::ostream &os, MyMatrix<T> const &TheMat) {
-  size_t nbRow = TheMat.rows();
-  size_t nbCol = TheMat.cols();
-  //  TerminalEnding();
-  os << nbRow << " " << nbCol << "\n";
-  for (size_t iRow = 0; iRow < nbRow; iRow++) {
-    for (size_t iCol = 0; iCol < nbCol; iCol++)
-      os << " " << TheMat(iRow, iCol);
-    os << "\n";
-  }
 }
 
 template <typename T>
