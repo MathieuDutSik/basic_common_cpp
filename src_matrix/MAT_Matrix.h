@@ -2834,6 +2834,17 @@ template <typename T> struct less<MyMatrix<T>> {
     return false;
   }
 };
+template <typename T, typename X> struct less<std::pair<MyMatrix<T>, X>> {
+  bool operator()(std::pair<MyMatrix<T>, X> const &a,
+                  std::pair<MyMatrix<T>, X> const &b) const {
+    std::less<MyMatrix<T>> lm;
+    if (lm(a.first, b.first))
+      return true;
+    if (lm(b.first, a.first))
+      return false;
+    return a.second < b.second;
+  }
+};
 // clang-format off
 }  // namespace std
 // clang-format on
