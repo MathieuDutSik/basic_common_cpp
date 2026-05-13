@@ -2820,6 +2820,20 @@ template <typename T> struct less<MyVector<T>> {
     return false;
   }
 };
+template <typename T> struct less<MyMatrix<T>> {
+  bool operator()(MyMatrix<T> const &M1, MyMatrix<T> const &M2) const {
+    int nbRow = M1.rows();
+    int nbCol = M1.cols();
+    for (int iRow = 0; iRow < nbRow; iRow++)
+      for (int iCol = 0; iCol < nbCol; iCol++) {
+        if (M1(iRow, iCol) < M2(iRow, iCol))
+          return true;
+        if (M2(iRow, iCol) < M1(iRow, iCol))
+          return false;
+      }
+    return false;
+  }
+};
 // clang-format off
 }  // namespace std
 // clang-format on
