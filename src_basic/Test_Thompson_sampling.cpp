@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
   try {
     //  using T = mpq_class;
     using T = mpz_class;
-    //    using T = T_uint64_t;
+    //    using T = size_t;
     // The chosenoptions
     FullNamelist eFull = NAMELIST_ThompsonSamplingRuntime();
     if (argc != 2) {

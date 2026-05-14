@@ -51,7 +51,7 @@ inline void TYPE_CONVERSION(stc<double> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<double> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<double> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -89,7 +89,7 @@ inline void TYPE_CONVERSION(stc<int8_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<int8_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -127,7 +127,7 @@ inline void TYPE_CONVERSION(stc<uint8_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<uint8_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<uint8_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -165,7 +165,7 @@ inline void TYPE_CONVERSION(stc<int16_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<int16_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -203,7 +203,7 @@ inline void TYPE_CONVERSION(stc<uint16_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<uint16_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<uint16_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -241,7 +241,7 @@ inline void TYPE_CONVERSION(stc<int32_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<int32_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -279,7 +279,7 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<uint32_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<uint32_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -317,7 +317,7 @@ inline void TYPE_CONVERSION(stc<int64_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<int64_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
@@ -327,39 +327,180 @@ inline void TYPE_CONVERSION(stc<int64_t> const &a1, int64_t &a2) {
 
 // Conversion from uint64_t
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, double &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, double &a2) {
   a2 = static_cast<double>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, uint8_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, uint8_t &a2) {
   a2 = static_cast<uint8_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, int8_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, int8_t &a2) {
   a2 = static_cast<int8_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, uint16_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, uint16_t &a2) {
   a2 = static_cast<uint16_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, int16_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, int16_t &a2) {
   a2 = static_cast<int16_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, uint32_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, uint32_t &a2) {
   a2 = static_cast<uint32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, int32_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, int32_t &a2) {
   a2 = static_cast<int32_t>(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, uint64_t &a2) {
   a2 = a1.val;
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, int64_t &a2) {
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, int64_t &a2) {
+  a2 = static_cast<int64_t>(a1.val);
+}
+
+// size_t conversions, only when size_t is distinct from both uint64_t and
+// uint32_t (e.g. Apple, where size_t is `unsigned long` while uint64_t is
+// `unsigned long long`). On Linux and 32-bit, the uint64_t / uint32_t
+// overloads above already cover size_t.
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<double> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<int8_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<uint8_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<int16_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<uint16_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<int32_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<uint32_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<int64_t> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, double &a2) {
+  a2 = static_cast<double>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, uint8_t &a2) {
+  a2 = static_cast<uint8_t>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, int8_t &a2) {
+  a2 = static_cast<int8_t>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, uint16_t &a2) {
+  a2 = static_cast<uint16_t>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, int16_t &a2) {
+  a2 = static_cast<int16_t>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, uint32_t &a2) {
+  a2 = static_cast<uint32_t>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, int32_t &a2) {
+  a2 = static_cast<int32_t>(a1.val);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, T &a2) {
+  a2 = a1.val;
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, int64_t &a2) {
   a2 = static_cast<int64_t>(a1.val);
 }
 

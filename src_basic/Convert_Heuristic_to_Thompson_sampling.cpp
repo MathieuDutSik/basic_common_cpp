@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "Convert_Heuristic_to_Thompson_sampling [fileI] [FileO]\n";
       throw TerminalException{1};
     }
-    using T = T_uint64_t;
+    using T = size_t;
     std::string FileI = argv[1];
     std::string FileO = argv[2];
     //

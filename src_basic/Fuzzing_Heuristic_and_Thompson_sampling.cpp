@@ -9,7 +9,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "Fuzzing_Heuristic_and_Thompson_sampling [fileI]\n";
       throw TerminalException{1};
     }
-    using T = T_uint64_t;
+    using T = size_t;
     std::string FileI = argv[1];
     //
     std::ifstream is(FileI);

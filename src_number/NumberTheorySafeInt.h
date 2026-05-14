@@ -751,27 +751,71 @@ inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, double &a2) {
   a2 = a1.val.get_d();
 }
 
-inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, uint64_t &a2) {
   int64_t const &eVal = a1.val.get_const_val();
-  a2 = static_cast<T_uint64_t>(eVal);
+  a2 = static_cast<uint64_t>(eVal);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, SafeInt64 &a2) {
-  T_uint64_t const &val1 = a1.val;
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, SafeInt64 &a2) {
+  uint64_t const &val1 = a1.val;
   int64_t val2 = static_cast<int64_t>(val1);
   a2 = SafeInt64(val2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1,
-                            T_uint64_t &a2) {
+                            uint64_t &a2) {
   Termination_rat_safeint_not_integer(a1);
   SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<T_uint64_t>(a1_z.get_const_val());
+  a2 = static_cast<uint64_t>(a1_z.get_const_val());
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1,
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1,
                             Rational<SafeInt64> &a2) {
-  T_uint64_t const &val1 = a1.val;
+  uint64_t const &val1 = a1.val;
+  int64_t val2 = static_cast<int64_t>(val1);
+  SafeInt64 val3(val2);
+  a2 = Rational(val3);
+}
+
+// size_t conversions, only when size_t is distinct from both uint64_t and
+// uint32_t (e.g. Apple, where size_t is `unsigned long` while uint64_t is
+// `unsigned long long`). On Linux and 32-bit, the uint64_t / uint32_t
+// overloads above already cover size_t.
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, T &a2) {
+  int64_t const &eVal = a1.val.get_const_val();
+  a2 = static_cast<T>(eVal);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, SafeInt64 &a2) {
+  T const &val1 = a1.val;
+  int64_t val2 = static_cast<int64_t>(val1);
+  a2 = SafeInt64(val2);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T &a2) {
+  Termination_rat_safeint_not_integer(a1);
+  SafeInt64 a1_z = a1.val.get_const_num();
+  a2 = static_cast<T>(a1_z.get_const_val());
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, Rational<SafeInt64> &a2) {
+  T const &val1 = a1.val;
   int64_t val2 = static_cast<int64_t>(val1);
   SafeInt64 val3(val2);
   a2 = Rational(val3);

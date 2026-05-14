@@ -31,17 +31,6 @@ template <typename T> struct PairGCD_dot {
   T gcd;
 };
 
-// The problem we face is that we have
-// --- std::is_same_v<size_t,uint64_t> = T on the Linux X86
-// --- std::is_same_v<size_t,uint64_t> = F on the Macintosh X86
-// By introducing that type we guarantee that we have always
-// std::is_same_v<size_t,T_uint64_t> = T on both platforms
-#ifdef __APPLE__
-using T_uint64_t = unsigned long;
-#else
-using T_uint64_t = uint64_t;
-#endif
-
 // clang-format off
 #endif  // SRC_NUMBER_BASICNUMBERTYPES_H_
 // clang-format on

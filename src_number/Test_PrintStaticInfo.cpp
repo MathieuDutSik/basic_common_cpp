@@ -32,12 +32,6 @@ int main() {
     std::cerr << "size_t and uint64_t DO NOT have the same type\n";
   }
   //
-  if (std::is_same_v<size_t, T_uint64_t>) {
-    std::cerr << "size_t and T_uint64_t have the same type\n";
-  } else {
-    std::cerr << "size_t and T_uint64_t DO NOT have the same type\n";
-  }
-  //
   if (std::is_same_v<size_t, unsigned long>) {
     std::cerr << "size_t and unsigned long have the same type\n";
   } else {

@@ -636,24 +636,65 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
   a2 = a1.val.get_d();
 }
 
-inline void TYPE_CONVERSION(stc<mpz_class> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint64_t &a2) {
   long eVal_long = a1.val.get_si();
-  a2 = static_cast<T_uint64_t>(eVal_long);
+  a2 = static_cast<uint64_t>(eVal_long);
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, mpz_class &a2) {
-  T_uint64_t const &eVal = a1.val;
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, mpz_class &a2) {
+  uint64_t const &eVal = a1.val;
   a2 = convert_mpz_class_uint64_t(eVal);
 }
 
-inline void TYPE_CONVERSION(stc<mpq_class> const &a1, T_uint64_t &a2) {
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint64_t &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   a2 = a1_z.get_si();
 }
 
-inline void TYPE_CONVERSION(stc<T_uint64_t> const &a1, mpq_class &a2) {
-  T_uint64_t const &eVal = a1.val;
+inline void TYPE_CONVERSION(stc<uint64_t> const &a1, mpq_class &a2) {
+  uint64_t const &eVal = a1.val;
+  a2 = convert_mpz_class_uint64_t(eVal);
+}
+
+// size_t conversions, only when size_t is distinct from both uint64_t and
+// uint32_t (e.g. Apple, where size_t is `unsigned long` while uint64_t is
+// `unsigned long long`). On Linux and 32-bit, the uint64_t / uint32_t
+// overloads above already cover size_t.
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<mpz_class> const &a1, T &a2) {
+  long eVal_long = a1.val.get_si();
+  a2 = static_cast<T>(eVal_long);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, mpz_class &a2) {
+  T const &eVal = a1.val;
+  a2 = convert_mpz_class_uint64_t(eVal);
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1, T &a2) {
+  Termination_mpq_not_integer(a1);
+  mpz_class a1_z = a1.val.get_num();
+  a2 = a1_z.get_si();
+}
+
+template <typename T>
+  requires (std::is_same_v<T, size_t>
+            && !std::is_same_v<size_t, uint64_t>
+            && !std::is_same_v<size_t, uint32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, mpq_class &a2) {
+  T const &eVal = a1.val;
   a2 = convert_mpz_class_uint64_t(eVal);
 }
 
