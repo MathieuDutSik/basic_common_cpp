@@ -448,18 +448,15 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint32_t &a2) {
   a2 = static_cast<uint32_t>(a1_long);
 }
 
-#ifdef __APPLE__
-// On APPLE platform, the long is not the same as the int64_t
-// And we cannot match that case with a
-// std::enable_if<!std::is_same_v<int64_t,long>,void>
-// statement because it is not a template function.
-inline void TYPE_CONVERSION(stc<mpq_class> const &a1, long &a2) {
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int64_t>
+            && !std::is_same_v<long, int32_t>)
+inline void TYPE_CONVERSION(stc<mpq_class> const &a1, T &a2) {
   Termination_mpq_not_integer(a1);
   mpz_class a1_z = a1.val.get_num();
   a2 = a1_z.get_si();
 }
-
-#endif
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int64_t &a2) {
   Termination_mpq_not_integer(a1);
@@ -524,18 +521,21 @@ mpz_class convert_mpz_class_int64_t(int64_t const &val) {
   return -convert_mpz_class_uint64_t(-val);
 }
 
-#ifdef __APPLE__
-// long as input (which is not the same as int64_t on APPLE platform)
-
-inline void TYPE_CONVERSION(stc<long> const &a1, mpq_class &a2) {
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int64_t>
+            && !std::is_same_v<long, int32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, mpq_class &a2) {
   a2 = convert_mpz_class_int64_t(a1.val);
 }
 
-inline void TYPE_CONVERSION(stc<long> const &a1, mpz_class &a2) {
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int64_t>
+            && !std::is_same_v<long, int32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, mpz_class &a2) {
   a2 = convert_mpz_class_int64_t(a1.val);
 }
-
-#endif
 
 // double as input
 

@@ -578,18 +578,15 @@ inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, uint32_t &a2) {
   a2 = static_cast<uint32_t>(a1_z.get_const_val());
 }
 
-#ifdef __APPLE__
-// On APPLE platform, the long is not the same as the int64_t
-// And we cannot match that case with a
-// std::enable_if<!std::is_same_v<int64_t,long>,void>
-// statement because it is not a template function.
-inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, long &a2) {
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int64_t>
+            && !std::is_same_v<long, int32_t>)
+inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T &a2) {
   Termination_rat_safeint_not_integer(a1);
   SafeInt64 a1_z = a1.val.get_const_num();
   a2 = static_cast<long>(a1_z.get_const_val());
 }
-
-#endif
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int64_t &a2) {
   Termination_rat_safeint_not_integer(a1);
@@ -644,23 +641,26 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1, SafeInt64 &a2) {
 
 // Conversion to SafeInt64
 
-#ifdef __APPLE__
-// long as input (which is not the same as int64_t on APPLE platform)
-
-inline void TYPE_CONVERSION(stc<long> const &a1, Rational<SafeInt64> &a2) {
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int64_t>
+            && !std::is_same_v<long, int32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, Rational<SafeInt64> &a2) {
   using Tint = typename SafeInt64::Tint;
   Tint val1 = static_cast<Tint>(a1.val);
   SafeInt64 val2(val1);
   a2 = Rational(val2);
 }
 
-inline void TYPE_CONVERSION(stc<long> const &a1, SafeInt64 &a2) {
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int64_t>
+            && !std::is_same_v<long, int32_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1, SafeInt64 &a2) {
   using Tint = typename SafeInt64::Tint;
   Tint val1 = static_cast<Tint>(a1.val);
   a2 = SafeInt64(val1);
 }
-
-#endif
 
 // int64_t as input
 

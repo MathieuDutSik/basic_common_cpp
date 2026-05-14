@@ -367,15 +367,33 @@ inline void TYPE_CONVERSION(stc<double> const &a1,
                             boost::multiprecision::mpz_int &a2) {
   a2 = static_cast<int64_t>(a1.val);
 }
+template <typename T>
+  requires (std::is_same_v<T, int>
+            && !std::is_same_v<int, int8_t>
+            && !std::is_same_v<int, int16_t>
+            && !std::is_same_v<int, int32_t>
+            && !std::is_same_v<int, int64_t>)
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
-                            int &a2) {
+                            T &a2) {
   a2 = a1.val.template convert_to<int>();
 }
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int8_t>
+            && !std::is_same_v<long, int16_t>
+            && !std::is_same_v<long, int32_t>
+            && !std::is_same_v<long, int64_t>)
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
-                            long &a2) {
+                            T &a2) {
   a2 = a1.val.template convert_to<long>();
 }
-inline void TYPE_CONVERSION(stc<int> const &a1,
+template <typename T>
+  requires (std::is_same_v<T, int>
+            && !std::is_same_v<int, int8_t>
+            && !std::is_same_v<int, int16_t>
+            && !std::is_same_v<int, int32_t>
+            && !std::is_same_v<int, int64_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1,
                             boost::multiprecision::mpz_int &a2) {
   a2 = a1.val;
 }
@@ -396,25 +414,49 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
   }
   a2 = numerator(a1.val);
 }
+template <typename T>
+  requires (std::is_same_v<T, int>
+            && !std::is_same_v<int, int8_t>
+            && !std::is_same_v<int, int16_t>
+            && !std::is_same_v<int, int32_t>
+            && !std::is_same_v<int, int64_t>)
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
-                            int &a2) {
+                            T &a2) {
   boost::multiprecision::mpz_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
   stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
   TYPE_CONVERSION(stc_a1_z, a2);
 }
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int8_t>
+            && !std::is_same_v<long, int16_t>
+            && !std::is_same_v<long, int32_t>
+            && !std::is_same_v<long, int64_t>)
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
-                            long &a2) {
+                            T &a2) {
   boost::multiprecision::mpz_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
   stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
   TYPE_CONVERSION(stc_a1_z, a2);
 }
-inline void TYPE_CONVERSION(stc<int> const &a1,
+template <typename T>
+  requires (std::is_same_v<T, int>
+            && !std::is_same_v<int, int8_t>
+            && !std::is_same_v<int, int16_t>
+            && !std::is_same_v<int, int32_t>
+            && !std::is_same_v<int, int64_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1,
                             boost::multiprecision::mpq_rational &a2) {
   a2 = a1.val;
 }
-inline void TYPE_CONVERSION(stc<long> const &a1,
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int8_t>
+            && !std::is_same_v<long, int16_t>
+            && !std::is_same_v<long, int32_t>
+            && !std::is_same_v<long, int64_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1,
                             boost::multiprecision::mpq_rational &a2) {
   a2 = a1.val;
 }
@@ -482,24 +524,17 @@ inline void TYPE_CONVERSION(stc<uint32_t> const &a1,
   a2 = a1.val;
 }
 
-// long as input (the boost::multiprecision::mpq_rational and mpz_int
-// directly accept assignment from long).
-// Note: int32_t is intentionally omitted; on every platform we support
-// it is the same type as int, for which conversions are already defined
-// above. Adding stc<int32_t> overloads would produce redefinition errors.
-
-inline void TYPE_CONVERSION(stc<long> const &a1,
+// int32_t as input.
+inline void TYPE_CONVERSION(stc<int32_t> const &a1,
                             boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
+inline void TYPE_CONVERSION(stc<int32_t> const &a1,
+                            boost::multiprecision::mpq_rational &a2) {
   a2 = a1.val;
 }
 
 // int64_t as input.
-// On platforms where long is 64-bit and identical to int64_t (e.g. Linux
-// x86_64), the existing `long` overloads already cover this case, so adding
-// overloads here would cause redefinition errors. On Apple, long is 64-bit
-// but int64_t is `long long`, so they are distinct C++ types and we provide
-// separate overloads.
-#ifdef __APPLE__
 inline void TYPE_CONVERSION(stc<int64_t> const &a1,
                             boost::multiprecision::mpz_int &a2) {
   a2 = a1.val;
@@ -508,7 +543,19 @@ inline void TYPE_CONVERSION(stc<int64_t> const &a1,
                             boost::multiprecision::mpq_rational &a2) {
   a2 = a1.val;
 }
-#endif
+
+// long as input: only enabled when long is distinct from every fixed-width
+// integer type for which an overload is already defined above.
+template <typename T>
+  requires (std::is_same_v<T, long>
+            && !std::is_same_v<long, int8_t>
+            && !std::is_same_v<long, int16_t>
+            && !std::is_same_v<long, int32_t>
+            && !std::is_same_v<long, int64_t>)
+inline void TYPE_CONVERSION(stc<T> const &a1,
+                            boost::multiprecision::mpz_int &a2) {
+  a2 = a1.val;
+}
 
 // uint64_t as input.
 // No `unsigned long` overloads are defined elsewhere, so no platform guard
@@ -585,15 +632,17 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
   mpz_int_to_small_integer(a1.val, a2);
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
+                            int32_t &a2) {
+  mpz_int_to_small_integer(a1.val, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             uint32_t &a2) {
   mpz_int_to_small_integer(a1.val, a2);
 }
-#ifdef __APPLE__
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             int64_t &a2) {
   mpz_int_to_small_integer(a1.val, a2);
 }
-#endif
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             uint64_t &a2) {
   mpz_int_to_small_integer(a1.val, a2);
@@ -640,13 +689,19 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
   TYPE_CONVERSION(stc_a1_z, a2);
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
+                            int32_t &a2) {
+  boost::multiprecision::mpz_int a1_z;
+  TYPE_CONVERSION(a1, a1_z);
+  stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
+  TYPE_CONVERSION(stc_a1_z, a2);
+}
+inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             uint32_t &a2) {
   boost::multiprecision::mpz_int a1_z;
   TYPE_CONVERSION(a1, a1_z);
   stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
   TYPE_CONVERSION(stc_a1_z, a2);
 }
-#ifdef __APPLE__
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             int64_t &a2) {
   boost::multiprecision::mpz_int a1_z;
@@ -654,7 +709,6 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
   stc<boost::multiprecision::mpz_int> stc_a1_z{a1_z};
   TYPE_CONVERSION(stc_a1_z, a2);
 }
-#endif
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             uint64_t &a2) {
   boost::multiprecision::mpz_int a1_z;
