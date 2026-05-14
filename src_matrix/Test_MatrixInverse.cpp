@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
@@ -47,6 +49,14 @@ int main(int argc, char *argv[]) {
         return process<SafeInt64>(n);
       if (arith == "safe_rational")
         return process<Rational<SafeInt64>>(n);
+      if (arith == "boost_cpp_int")
+        return process<boost::multiprecision::cpp_int>(n);
+      if (arith == "boost_cpp_rational")
+        return process<boost::multiprecision::cpp_rational>(n);
+      if (arith == "boost_mpz_int")
+        return process<boost::multiprecision::mpz_int>(n);
+      if (arith == "boost_mpq_rational")
+        return process<boost::multiprecision::mpq_rational>(n);
       std::cerr << "Failed to find a matching entry\n";
       throw TerminalException{1};
     };

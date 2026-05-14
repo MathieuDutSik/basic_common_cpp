@@ -1,7 +1,8 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
-#include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryBoostGmpInt.h"
+#include "NumberTheory.h"
 #include "NumberTheorySafeInt.h"
 #include "TypeConversion.h"
 #include <random>
@@ -132,6 +133,7 @@ int main(int argc, char *argv[]) {
       std::cerr << "  mpz_class\n";
       std::cerr << "  SafeInt64\n";
       std::cerr << "  boost_cpp_int\n";
+      std::cerr << "  boost_mpz_int\n";
       throw TerminalException{1};
     }
 
@@ -148,6 +150,8 @@ int main(int argc, char *argv[]) {
       Test_ComputePairGcdDot<SafeInt64>();
     } else if (numeric_type == "boost_cpp_int") {
       Test_ComputePairGcdDot<boost::multiprecision::cpp_int>();
+    } else if (numeric_type == "boost_mpz_int") {
+      Test_ComputePairGcdDot<boost::multiprecision::mpz_int>();
     } else {
       std::cerr << "Unknown numeric type: " << numeric_type << "\n";
       throw TerminalException{1};

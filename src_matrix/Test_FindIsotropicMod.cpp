@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
@@ -33,6 +35,22 @@ void find_isotropic(std::string const &arithmetic, std::string const &FileI) {
   }
   if (arithmetic == "rational") {
     using T = mpq_class;
+    return find_isotropic_kernel<T>(FileI);
+  }
+  if (arithmetic == "boost_cpp_int") {
+    using T = boost::multiprecision::cpp_int;
+    return find_isotropic_kernel<T>(FileI);
+  }
+  if (arithmetic == "boost_cpp_rational") {
+    using T = boost::multiprecision::cpp_rational;
+    return find_isotropic_kernel<T>(FileI);
+  }
+  if (arithmetic == "boost_mpz_int") {
+    using T = boost::multiprecision::mpz_int;
+    return find_isotropic_kernel<T>(FileI);
+  }
+  if (arithmetic == "boost_mpq_rational") {
+    using T = boost::multiprecision::mpq_rational;
     return find_isotropic_kernel<T>(FileI);
   }
   std::cerr << "Failed to find a matching arithmetic\n";

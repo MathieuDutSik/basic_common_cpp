@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
@@ -43,6 +45,14 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
   }
   if (arith == "rational") {
     using T = mpq_class;
+    return full_process_type<T>(M);
+  }
+  if (arith == "boost_cpp_rational") {
+    using T = boost::multiprecision::cpp_rational;
+    return full_process_type<T>(M);
+  }
+  if (arith == "boost_mpq_rational") {
+    using T = boost::multiprecision::mpq_rational;
     return full_process_type<T>(M);
   }
   if (arith == "Qsqrt5") {
@@ -120,9 +130,10 @@ int main() {
   try {
     //    std::vector<std::string> ListArith = {"Fp", "rational<SafeInt64>",
     //    "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
-    std::vector<std::string> ListArith = {"rational<SafeInt64>",
-                                          "rational<int64_t>", "rational",
-                                          "Qsqrt5", "Qsqrt2"};
+    std::vector<std::string> ListArith = {
+        "rational<SafeInt64>", "rational<int64_t>", "rational",
+        "boost_cpp_rational",  "boost_mpq_rational", "Qsqrt5",
+        "Qsqrt2"};
 
     std::vector<MyMatrix<int>> ListM;
     auto insert = [&](int m, int n) -> void {

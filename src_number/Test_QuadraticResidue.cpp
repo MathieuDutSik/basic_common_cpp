@@ -1,10 +1,11 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
-#include "NumberTheory.h"
+#include "NumberTheoryCommon.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheorySafeInt.h"
 #include "TypeConversion.h"
+#include "NumberTheory.h"
 #include "quadratic_residue.h"
 // clang-format on
 
@@ -41,8 +42,8 @@ int main() {
     std::cerr << "TheMod=" << TheMod << "\n";
     process<mpz_class>(TheMod);
     process<SafeInt64>(TheMod);
-    //    process<boost::multiprecision::cpp_int>(TheMod);
-    //    process<boost::multiprecision::mpz_int>(TheMod);
+    process<boost::multiprecision::cpp_int>(TheMod);
+    process<boost::multiprecision::mpz_int>(TheMod);
     std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
     std::cerr << "There is a bug to be resolved in the code\n";

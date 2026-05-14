@@ -1,6 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
 #include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheoryCommon.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheory.h"
@@ -49,6 +50,12 @@ int main() {
         l_result.push_back({get_pair<mpq_class>(a, b), "mpq_class"});
         l_result.push_back({get_pair<boost::multiprecision::cpp_int>(a, b),
                             "boost::multiprecision::cpp_int"});
+        l_result.push_back({get_pair<boost::multiprecision::cpp_rational>(a, b),
+                            "boost::multiprecision::cpp_rational"});
+        l_result.push_back({get_pair<boost::multiprecision::mpz_int>(a, b),
+                            "boost::multiprecision::mpz_int"});
+        l_result.push_back({get_pair<boost::multiprecision::mpq_rational>(a, b),
+                            "boost::multiprecision::mpq_rational"});
         check_consistency(a, b, l_result, n_error);
       }
     };

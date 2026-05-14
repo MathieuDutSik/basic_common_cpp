@@ -203,10 +203,11 @@ CanonicalizationUnit(boost::multiprecision::mpq_rational const &eVal) {
   return 1;
 }
 
-inline void ResInt_Kernel(boost::multiprecision::mpz_int const &a,
-                          boost::multiprecision::mpz_int const &b,
-                          boost::multiprecision::mpz_int &res) {
-  using T = boost::multiprecision::mpz_int;
+namespace boost::multiprecision {
+inline void ResInt_Kernel(mpz_int const &a,
+                          mpz_int const &b,
+                          mpz_int &res) {
+  using T = mpz_int;
   T q = a / b;
   if (a < 0 && b * q != a) {
     if (b > 0)
@@ -216,6 +217,7 @@ inline void ResInt_Kernel(boost::multiprecision::mpz_int const &a,
   }
   res = a - q * b;
 }
+}  // namespace boost::multiprecision
 
 void QUO_INT(stc<boost::multiprecision::mpz_int> const &a,
              stc<boost::multiprecision::mpz_int> const &b,
@@ -279,11 +281,13 @@ ResQuoInt_kernel(boost::multiprecision::mpq_rational const &a,
     }
   }
 }
-inline void ResInt_Kernel(boost::multiprecision::mpq_rational const &a,
-                          boost::multiprecision::mpq_rational const &b,
-                          boost::multiprecision::mpq_rational &res) {
+namespace boost::multiprecision {
+inline void ResInt_Kernel(mpq_rational const &a,
+                          mpq_rational const &b,
+                          mpq_rational &res) {
   res = ResQuoInt_kernel(a, b).first;
 }
+}  // namespace boost::multiprecision
 
 void QUO_INT(stc<boost::multiprecision::mpq_rational> const &a,
              stc<boost::multiprecision::mpq_rational> const &b,

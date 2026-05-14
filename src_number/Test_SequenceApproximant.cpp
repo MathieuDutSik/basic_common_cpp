@@ -14,6 +14,8 @@ template <typename T> std::string test(std::string name_numeric) {
   for (int n = 1; n < 100; n++) {
     int num = rand() % 10000;
     int den = rand() % 10000;
+    if (den == 0)
+      continue;
     int choice = rand() % 2;
     int sign = 2 * choice - 1;
     T num_T(num);
@@ -52,11 +54,16 @@ int main(int argc, char *argv[]) {
     auto eval = [&]() -> void {
       if (oper == "check") {
         std::unordered_map<std::string, std::string> map;
+        unsigned int seed = 1;
+        srand(seed);
         map[test<mpq_class>("mpz_class")] = "mpq_class";
-        //        map[test<boost::multiprecision::mpq_rational>("mpq_rationql")]
-        //        = "boost::mpq_rational";
-        //        map[test<boost::multiprecision::cpp_rational>("cpp_rational")]
-        //        = "boost::cpp_rational";
+        srand(seed);
+        map[test<boost::multiprecision::mpq_rational>("mpq_rational")] =
+            "boost::mpq_rational";
+        srand(seed);
+        map[test<boost::multiprecision::cpp_rational>("cpp_rational")] =
+            "boost::cpp_rational";
+        srand(seed);
         map[test<Rational<SafeInt64>>("Rational<SafeInt64>")] =
             "Rational<SafeInt64>";
         if (map.size() != 1) {

@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryBoostCppInt.h"
+#include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheory.h"
 #include "rational.h"
 #include "NumberTheoryRealField.h"
@@ -41,6 +43,10 @@ int main(int argc, char *argv[]) {
         return process<mpq_class>(n);
       if (arith == "safe_rational")
         return process<Rational<SafeInt64>>(n);
+      if (arith == "boost_cpp_rational")
+        return process<boost::multiprecision::cpp_rational>(n);
+      if (arith == "boost_mpq_rational")
+        return process<boost::multiprecision::mpq_rational>(n);
       std::cerr << "Failed to find a matching type\n";
       throw TerminalException{1};
     };
