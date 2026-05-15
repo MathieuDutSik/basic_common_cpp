@@ -14,6 +14,7 @@
 #include <boost/safe_numerics/checked_result.hpp>
 #include <limits>
 #include <string>
+#include <type_traits>
 #include <utility>
 // clang-format on
 
@@ -70,14 +71,16 @@ public:
     std::cerr << "Default constructor for SafeInt64 val=" << val << "\n";
 #endif
   }
-  SafeInt64(int const &x) : val(x) {
+  // Single constructor accepting any built-in integral type (int, long,
+  // long long, unsigned, uint32_t, size_t, etc.).  This avoids the
+  // ambiguity that arose when separate overloads for int and int64_t
+  // coexisted: a uint32_t argument would have two equally-ranked
+  // integral conversions.
+  template <class U,
+            std::enable_if_t<std::is_integral_v<U>, int> = 0>
+  SafeInt64(U const &x) : val(static_cast<Tint>(x)) {
 #ifdef SANITY_CHECK_SAFETY_INTEGER
-    std::cerr << "Int64_t constructor for SafeInt64 val=" << x << "\n";
-#endif
-  }
-  explicit SafeInt64(Tint const &x) : val(x) {
-#ifdef SANITY_CHECK_SAFETY_INTEGER
-    std::cerr << "Int64_t constructor for SafeInt64 val=" << x << "\n";
+    std::cerr << "Integral constructor for SafeInt64 val=" << val << "\n";
 #endif
   }
   SafeInt64(SafeInt64 const &x) : val(x.val) {
