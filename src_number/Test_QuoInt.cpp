@@ -46,8 +46,11 @@ int main() {
         std::vector<std::pair<std::pair<int, int>, std::string>> l_result;
         l_result.push_back({get_pair<int64_t>(a, b), "int64_t"});
         l_result.push_back({get_pair<int32_t>(a, b), "int32_t"});
+        l_result.push_back({get_pair<SafeInt64>(a, b), "SafeInt64"});
         l_result.push_back({get_pair<mpz_class>(a, b), "mpz_class"});
         l_result.push_back({get_pair<mpq_class>(a, b), "mpq_class"});
+        l_result.push_back({get_pair<Rational<SafeInt64>>(a, b),
+                            "Rational<SafeInt64>"});
         l_result.push_back({get_pair<boost::multiprecision::cpp_int>(a, b),
                             "boost::multiprecision::cpp_int"});
         l_result.push_back({get_pair<boost::multiprecision::cpp_rational>(a, b),

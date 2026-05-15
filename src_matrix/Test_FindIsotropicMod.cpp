@@ -37,6 +37,10 @@ void find_isotropic(std::string const &arithmetic, std::string const &FileI) {
     using T = mpq_class;
     return find_isotropic_kernel<T>(FileI);
   }
+  if (arithmetic == "safe_rational") {
+    using T = Rational<SafeInt64>;
+    return find_isotropic_kernel<T>(FileI);
+  }
   if (arithmetic == "boost_cpp_int") {
     using T = boost::multiprecision::cpp_int;
     return find_isotropic_kernel<T>(FileI);

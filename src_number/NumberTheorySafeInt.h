@@ -328,6 +328,18 @@ struct underlying_totally_ordered_ring<int64_t> {
 };
 */
 
+// Range-checked conversion from int64_t (the underlying type of SafeInt64) to
+// any narrower integer type. Throws ConversionException if the value does not
+// fit. Not meant for uint64_t targets (where max() does not fit in int64_t).
+template <typename Tout>
+inline void int64_to_small_integer(int64_t val, Tout &out) {
+  if (val < static_cast<int64_t>(std::numeric_limits<Tout>::min()) ||
+      val > static_cast<int64_t>(std::numeric_limits<Tout>::max())) {
+    throw ConversionException{"out of range: val=" + std::to_string(val)};
+  }
+  out = static_cast<Tout>(val);
+}
+
 // hash functionality
 
 namespace std {
@@ -476,40 +488,45 @@ inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, SafeInt64 &a2) {
   a2 = a1.val.get_const_num();
 }
 
-inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int &a2) {
+template <typename T>
+  requires (std::is_same_v<T, int>
+            && !std::is_same_v<int, int8_t>
+            && !std::is_same_v<int, int16_t>
+            && !std::is_same_v<int, int32_t>
+            && !std::is_same_v<int, int64_t>)
+inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<int>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, uint8_t &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<uint8_t>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int8_t &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<int8_t>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, uint16_t &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<uint16_t>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int16_t &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<int16_t>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
+}
+
+inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int32_t &a2) {
+  Termination_rat_safeint_not_integer(a1);
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, uint32_t &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<uint32_t>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 template <typename T>
@@ -524,8 +541,7 @@ inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T &a2) {
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int64_t &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<int64_t>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 // uint8_t as input
@@ -666,23 +682,41 @@ inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, Rational<SafeInt64> &a2) {
   a2 = Rational(a1.val);
 }
 
+inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int8_t &a2) {
+  int64_to_small_integer(a1.val.get_const_val(), a2);
+}
+
+inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, uint8_t &a2) {
+  int64_to_small_integer(a1.val.get_const_val(), a2);
+}
+
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int16_t &a2) {
-  int64_t const &eVal = a1.val.get_const_val();
-  a2 = static_cast<int16_t>(eVal);
+  int64_to_small_integer(a1.val.get_const_val(), a2);
+}
+
+inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, uint16_t &a2) {
+  int64_to_small_integer(a1.val.get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int32_t &a2) {
-  int64_t const &eVal = a1.val.get_const_val();
-  a2 = static_cast<int32_t>(eVal);
+  int64_to_small_integer(a1.val.get_const_val(), a2);
+}
+
+inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, uint32_t &a2) {
+  int64_to_small_integer(a1.val.get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, int64_t &a2) {
-  int64_t const &eVal = a1.val.get_const_val();
-  a2 = static_cast<int64_t>(eVal);
+  int64_to_small_integer(a1.val.get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, double &a2) {
   a2 = a1.val.get_d();
+}
+
+inline void TYPE_CONVERSION(stc<double> const &a1, SafeInt64 &a2) {
+  int64_t val = static_cast<int64_t>(a1.val);
+  a2 = SafeInt64(val);
 }
 
 inline void TYPE_CONVERSION(stc<SafeInt64> const &a1, uint64_t &a2) {
@@ -779,6 +813,11 @@ bool universal_square_root(Rational<SafeInt64> &ret,
     return false;
   ret = Rational(ret_num, ret_den);
   return true;
+}
+
+inline void set_to_infinity(SafeInt64 &x) {
+  int64_t val = std::numeric_limits<int64_t>::max();
+  x = SafeInt64(val);
 }
 
 inline void set_to_infinity(Rational<SafeInt64> &x) {

@@ -1,14 +1,14 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryCommon.h"
+#include "NumberTheorySafeInt.h"
 #include "NumberTheory.h"
 #include "NumberTheoryPadic.h"
 #include "TypeConversion.h"
 // clang-format on
 
-int main() {
-  using T = mpz_class;
-  try {
-    for (int p_i = 2; p_i < 30; p_i++) {
+template <typename T> void process() {
+  for (int p_i = 2; p_i < 30; p_i++) {
       T p(p_i);
       std::vector<T> classes = Padic_get_residue_classes(p);
       auto get_class = [&](Padic<T> const &u) -> size_t {
@@ -34,6 +34,12 @@ int main() {
         std::cerr << "pos=" << pos << "\n";
       }
     }
+}
+
+int main() {
+  try {
+    process<mpz_class>();
+    process<SafeInt64>();
     std::cerr << "Normal termination of the program\n";
   } catch (TerminalException const &e) {
     std::cerr << "Something went wrong in the computation\n";

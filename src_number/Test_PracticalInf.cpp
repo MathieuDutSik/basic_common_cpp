@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryCommon.h"
+#include "NumberTheorySafeInt.h"
 #include "NumberTheory.h"
 #include "factorizations.h"
 // clang-format on
@@ -8,6 +10,9 @@ int main() {
   try {
     std::cerr << "Inf(mpz_class)=" << practical_infinity<mpz_class>() << "\n";
     std::cerr << "Inf(mpq_class)=" << practical_infinity<mpq_class>() << "\n";
+    std::cerr << "Inf(SafeInt64)=" << practical_infinity<SafeInt64>() << "\n";
+    std::cerr << "Inf(Rational<SafeInt64>)="
+              << practical_infinity<Rational<SafeInt64>>() << "\n";
     std::cerr << "Inf(size_t)=" << practical_infinity<size_t>() << "\n";
     std::cerr << "Inf(int)=" << practical_infinity<int>() << "\n";
     std::cerr << "Inf(uint8_t)=" << size_t(practical_infinity<uint8_t>())

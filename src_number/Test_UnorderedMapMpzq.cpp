@@ -1,5 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryCommon.h"
+#include "NumberTheorySafeInt.h"
 #include "NumberTheory.h"
 #include "Temp_common.h"
 // clang-format on
@@ -9,6 +11,8 @@ int main() {
   int expo = 10;
   std::unordered_map<mpz_class, int> M1;
   std::unordered_map<mpq_class, int> M2;
+  std::unordered_map<SafeInt64, int> M3;
+  std::unordered_map<Rational<SafeInt64>, int> M4;
   auto get_mpz = [&]() -> mpz_class {
     int eval_i = random() % 3 - 1;
     mpz_class eval = eval_i;

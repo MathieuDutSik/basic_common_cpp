@@ -1,9 +1,11 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 
 // clang-format off
-#include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryBoostGmpInt.h"
+#include "NumberTheoryCommon.h"
+#include "NumberTheorySafeInt.h"
+#include "NumberTheory.h"
 #include "TypeConversion.h"
 #include "TypeConversionFinal.h"
 // clang-format on
@@ -31,6 +33,8 @@ int main(int argc, char *argv[]) {
   try {
     process_B<mpq_class>();
     process_B<mpz_class>();
+    process_B<SafeInt64>();
+    process_B<Rational<SafeInt64>>();
     process_B<boost::multiprecision::cpp_int>();
     process_B<boost::multiprecision::cpp_rational>();
     process_B<boost::multiprecision::mpz_int>();

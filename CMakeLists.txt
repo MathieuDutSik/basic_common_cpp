@@ -162,6 +162,8 @@ set(
   ComputeQuadraticResidue
   Test_ComputePairGcdDot
   Test_Conversion
+  Test_Conversion8_16_32_64
+  Test_Padic
   SequenceApproximant
 )
 foreach(target IN LISTS NUMBER_PROGRAMS)
