@@ -164,6 +164,8 @@ set(
   Test_Conversion
   Test_Conversion8_16_32_64
   Test_Padic
+  Test_FactorizeHelp
+  Test_FloorCeilScalarInteger
   SequenceApproximant
 )
 foreach(target IN LISTS NUMBER_PROGRAMS)

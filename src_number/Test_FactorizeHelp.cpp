@@ -9,51 +9,53 @@
 #include "Timings.h"
 // clang-format on
 
-template <typename T> std::string test(std::string name_numeric) {
+template <typename T> std::string test(std::string const &name_numeric) {
   HumanTime time;
   std::stringstream os;
-  for (int n = 1; n < 500; n++) {
-    T n_T = n;
-    std::vector<T> V = FactorsInt(n_T);
-    os << "n=" << n_T << " Fact=";
-    for (auto &val : V)
-      os << " " << val;
-    os << "\n";
-    std::vector<T> Ldiv = GetAllFactors(n_T);
-    os << "  divisors =";
-    for (auto &val : Ldiv)
-      os << " " << val;
-    os << "\n";
-    // Also exercise FactorsIntMap (the function used by Factorize.cpp) and
-    // verify it matches the multiset implied by FactorsInt.
-    std::map<T, size_t> M = FactorsIntMap(n_T);
-    std::map<T, size_t> M_from_V;
-    for (auto &val : V)
-      M_from_V[val]++;
-    if (M != M_from_V) {
-      std::cerr << "FactorsIntMap does not agree with FactorsInt for n="
-                << n_T << "\n";
-      throw TerminalException{1};
+  // For each composite N, supply a partial list of helper factors and
+  // verify that FactorsIntMap_help returns the same map as FactorsIntMap.
+  for (int n = 2; n < 200; n++) {
+    T n_T(n);
+    std::map<T, size_t> ref = FactorsIntMap(n_T);
+
+    // Three variants of the help list:
+    //  - empty (should still produce the correct factorization)
+    //  - the smallest prime factor of n
+    //  - the smallest prime factor squared (a guaranteed divisor when the
+    //    multiplicity is at least 2; otherwise harmless)
+    std::vector<std::vector<T>> help_variants;
+    help_variants.push_back({});
+    if (!ref.empty()) {
+      T smallest = ref.begin()->first;
+      help_variants.push_back({smallest});
+      help_variants.push_back({smallest, smallest * smallest});
     }
-    os << "  factor_map =";
-    for (auto &kv : M)
-      os << " " << kv.first << "^" << kv.second;
-    os << "\n";
+    for (size_t v = 0; v < help_variants.size(); v++) {
+      std::map<T, size_t> got = FactorsIntMap_help(n_T, help_variants[v]);
+      if (got != ref) {
+        std::cerr << "FactorsIntMap_help disagrees with FactorsIntMap for n="
+                  << n_T << " variant=" << v << "\n";
+        throw TerminalException{1};
+      }
+      os << "n=" << n_T << " help_variant=" << v << " factors=";
+      for (auto &kv : got) {
+        os << " " << kv.first << "^" << kv.second;
+      }
+      os << "\n";
+    }
   }
   std::cerr << "Result for numeric=" << name_numeric << " time=" << time
             << "\n";
-  std::string converted(os.str());
-  return converted;
+  return os.str();
 }
 
 int main(int argc, char *argv[]) {
   HumanTime time;
   try {
     if (argc != 2) {
-      std::cerr << "Factorize [oper]\n";
+      std::cerr << "Test_FactorizeHelp [oper]\n";
       std::cerr << "\n";
-      std::cerr << "oper: check the \n";
-      std::cerr << "print: output the data to the file\n";
+      std::cerr << "oper: check / print\n";
       throw TerminalException{1};
     }
     std::string oper = argv[1];
@@ -73,11 +75,6 @@ int main(int argc, char *argv[]) {
       }
       if (oper == "print") {
         std::cerr << "mpz_class : " << test<mpz_class>("mpz_class") << "\n";
-        std::cerr << "SafeInt64 : " << test<SafeInt64>("SafeInt64") << "\n";
-        std::cerr << "cpp_int : "
-                  << test<boost::multiprecision::cpp_int>("cpp_int") << "\n";
-        std::cerr << "mpz_int : "
-                  << test<boost::multiprecision::mpz_int>("mpz_int") << "\n";
         return;
       }
       std::cerr << "Failed to find matching oper\n";

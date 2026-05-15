@@ -31,3 +31,9 @@
 *.out
 *.app
 .aider*
+
+# Editor backup files
+*~
+
+# CMake build directory
+build/
