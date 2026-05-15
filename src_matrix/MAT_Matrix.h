@@ -2530,7 +2530,7 @@ T MatrixScalarProduct(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
     std::cerr << "p1=" << p1 << " p1=" << p2 << "\n";
     throw TerminalException{1};
   }
-  T eSum = 0;
+  T eSum(0);
   for (int i = 0; i < n1; i++)
     for (int j = 0; j < p1; j++)
       eSum += M1(i, j) * M2(i, j);
