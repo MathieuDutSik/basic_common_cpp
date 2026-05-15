@@ -92,7 +92,7 @@ template <typename T> constexpr T PrevIdx(T const &len, T const &i) {
 }
 
 template <typename T> constexpr T MyPow(T const &eVal, int const &n) {
-  T eRet = 1;
+  T eRet(1);
   for (int i = 0; i < n; i++)
     eRet *= eVal;
   return eRet;
