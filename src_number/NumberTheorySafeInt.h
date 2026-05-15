@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "BasicNumberTypes.h"
+#include "NumberTheoryGeneric.h"
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
 #include "TypeConversion.h"
