@@ -269,10 +269,10 @@ std::map<T, size_t> FactorsIntMap_help(T const &N,
 
 template <typename T>
 std::vector<T> GetAllFactors(std::map<T, int> const &eMap) {
-  std::vector<T> LVal = {1};
+  std::vector<T> LVal = {T(1)};
   for (auto &kv : eMap) {
     std::vector<T> NewVal;
-    T ePow = 1;
+    T ePow(1);
     T mult = kv.first;
     for (int i = 0; i <= kv.second; i++) {
       for (auto &eVal : LVal)

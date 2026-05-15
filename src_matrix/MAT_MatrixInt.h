@@ -48,7 +48,7 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
   std::vector<int> colStat(nbCol, 1);
   std::vector<int> rowStat(nbRow, 1);
   size_t nbDone = 0;
-  T TheIndex = 1;
+  T TheIndex(1);
   while (true) {
     bool IsFirst = true;
     Treal MinPivot(0);
@@ -57,7 +57,7 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
         for (size_t iRow = 0; iRow < nbRow; iRow++) {
           if (rowStat[iRow] == 1) {
             T eVal = eMatW(iRow, iCol);
-            if (eVal != 0) {
+            if (eVal != T(0)) {
               Treal eValA = T_NormGen(eVal);
               if (IsFirst) {
                 iRowF = iRow;
@@ -77,7 +77,7 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
       }
     }
     if (IsFirst)
-      return 0;
+      return T(0);
 #ifdef SANITY_CHECK_MATRIX_INT
     if (MinPivot == 0) {
       std::cerr << "Clear error in the code of IndexLattice\n";
@@ -2119,7 +2119,7 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
         MyVector<Tout> eClass = ListClasses[iClass];
         for (int i = 0; i < n; i++) {
           MyVector<Tout> fClass = eClass;
-          fClass[i]++;
+          fClass[i] += Tout(1);
           FuncInsert(fClass);
         }
       }
@@ -2167,7 +2167,7 @@ std::vector<size_t> GetActionOnClasses(std::vector<MyVector<T>> const &l_v,
                           MyVector<T> const &fV) -> bool {
     MyVector<T> diff = eV - fV;
     for (int i = 0; i < n; i++) {
-      T eVal = 0;
+      T eVal(0);
       for (int j = 0; j < n; j++)
         eVal += diff(j) * eInv(j, i);
       if (!IsInteger(eVal))
