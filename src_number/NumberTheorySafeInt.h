@@ -303,6 +303,10 @@ template <> struct underlying_ring<Rational<SafeInt64>> {
   typedef SafeInt64 ring_type;
 };
 
+template <> struct underlying_ring<SafeInt64> {
+  typedef SafeInt64 ring_type;
+};
+
 //
 //
 

@@ -319,7 +319,7 @@ template <typename T> std::pair<bool, T> ReadMatrixInfo(std::istream &is) {
     throw TerminalException{1};
   }
   bool is_integral = true;
-  T TheMax = 0;
+  T TheMax(0);
   for (int iRow = 0; iRow < nbRow; iRow++)
     for (int iCol = 0; iCol < nbCol; iCol++) {
       is >> eVal;
@@ -895,7 +895,7 @@ MyVector<T> VectorMatrix(MyVector<T> const &eVect, MyMatrix<T> const &eMat) {
 #endif
   MyVector<T> rVect(nbCol);
   for (int iCol = 0; iCol < nbCol; iCol++) {
-    T eSum = 0;
+    T eSum(0);
     for (int iRow = 0; iRow < nbRow; iRow++)
       eSum += eMat(iRow, iCol) * eVect(iRow);
     rVect(iCol) = eSum;
@@ -1306,7 +1306,7 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol,
       }
     }
     auto get_firstnonzerocol_iife = [&]() -> size_t {
-      T MaxPivot = 0;
+      T MaxPivot(0);
       size_t selected_pivot = miss_val;
       for (size_t iCol = 0; iCol < nbCol; iCol++) {
         T abs_pivot = T_abs(provMat(eRank, iCol));
@@ -1804,7 +1804,7 @@ MyMatrix<T> NullspaceTrMat_no_division(MyMatrix<T> const &Input) {
   for (size_t iCol = 0; iCol < nbCol; iCol++)
     if (ListColSelect01[iCol] == 0) {
       NSP(nbVect, iCol) = 1;
-      T prodVal = 1;
+      T prodVal(1);
       for (size_t iRank = 0; iRank < eRank; iRank++) {
         size_t eCol = ListColSelect[iRank];
         T pivotVal = provMat(iRank, iCol);
@@ -1870,7 +1870,7 @@ void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat,
     throw TerminalException{1};
   }
   for (iCol = 0; iCol < nbCol; iCol++) {
-    T t = 0;
+    T t(0);
     for (iRow = 0; iRow < n; iRow++)
       t += TheMat(iRow, iCol) * eVect(iRow);
     eVectImg(iCol) = t;
@@ -2648,7 +2648,7 @@ void PrintEigenvalueDefect(MyMatrix<T> const &Sinp,
                            MyMatrix<T> const &ListEigVect, std::ostream &os) {
   int n = Sinp.rows();
   for (int i = 0; i < n; i++) {
-    T eDelta = 0;
+    T eDelta(0);
     for (int j = 0; j < n; j++) {
       T eSum = ListEigVal(i) * ListEigVect(i, j);
       for (int k = 0; k < n; k++)
@@ -2672,7 +2672,7 @@ MyVector<T> SolveConjGrad(MyMatrix<T> const &A, MyVector<T> const &b) {
   r = b;
   p = r;
   rsold = r.dot(r);
-  T eZer = 0;
+  T eZer(0);
   for (int i = 0; i < n; i++)
     x(i) = eZer;
   int nbOper = 4 * n;
@@ -2706,7 +2706,7 @@ template <typename T> MyVector<T> Isobarycenter(MyMatrix<T> const &eMat) {
   MyVector<T> eVect(nbCol);
   T nbRow_T = nbRow;
   for (int iCol = 0; iCol < nbCol; iCol++) {
-    T eSum = 0;
+    T eSum(0);
     for (int iRow = 0; iRow < nbRow; iRow++)
       eSum += eMat(iRow, iCol);
     eVect(iCol) = eSum / nbRow_T;
@@ -2871,7 +2871,7 @@ template <typename T, typename X> struct less<std::pair<MyMatrix<T>, X>> {
 
 template <typename T> T L1_norm_vect(MyVector<T> const &V) {
   int siz = V.size();
-  T norm = 0;
+  T norm(0);
   for (int i = 0; i < siz; i++)
     norm += T_abs(V(i));
   return norm;
@@ -2879,7 +2879,7 @@ template <typename T> T L1_norm_vect(MyVector<T> const &V) {
 
 template <typename T> T Linfinity_norm_vect(MyVector<T> const &V) {
   int siz = V.size();
-  T norm = 0;
+  T norm(0);
   for (int i = 0; i < siz; i++)
     norm = T_max(norm, T_abs(V(i)));
   return norm;
@@ -2887,7 +2887,7 @@ template <typename T> T Linfinity_norm_vect(MyVector<T> const &V) {
 
 template <typename T> T L1_norm_mat(MyMatrix<T> const &M) {
   int siz = M.size();
-  T norm = 0;
+  T norm(0);
   for (int i = 0; i < siz; i++)
     norm += T_abs(M(i));
   return norm;
@@ -2895,7 +2895,7 @@ template <typename T> T L1_norm_mat(MyMatrix<T> const &M) {
 
 template <typename T> T Linfinity_norm_mat(MyMatrix<T> const &M) {
   int siz = M.size();
-  T norm = 0;
+  T norm(0);
   for (int i = 0; i < siz; i++)
     norm = T_max(norm, T_abs(M(i)));
   return norm;
@@ -3048,7 +3048,7 @@ template <typename T> MyVector<T> SumMatrix(MyMatrix<T> const &M) {
   int nbCol = M.cols();
   MyVector<T> V(nbCol);
   for (int iCol = 0; iCol < nbCol; iCol++) {
-    T eSum = 0;
+    T eSum(0);
     for (int iRow = 0; iRow < nbRow; iRow++)
       eSum += M(iRow, iCol);
     V(iCol) = eSum;
@@ -3112,7 +3112,7 @@ MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const &inputMat) {
   for (size_t iRow = 0; iRow < nbRow; iRow++) {
     size_t FoundRow = std::numeric_limits<size_t>::max();
     size_t FoundCol = 0;
-    T MaxValue = 0;
+    T MaxValue(0);
     for (size_t eRow = 0; eRow < nbRow; eRow++) {
       for (size_t eCol = 0; eCol < nbCol; eCol++) {
         if (ColStatus[eCol] == 1 && RowStatus[eRow] == 1) {
@@ -3149,7 +3149,7 @@ template <typename T, typename Tint>
 T ScalarProductQuadForm(MyMatrix<T> const &eMat, MyVector<Tint> const &V1,
                         MyVector<Tint> const &V2) {
   int n = V1.size();
-  T eSum = 0;
+  T eSum(0);
   for (int i = 0; i < n; i++)
     for (int j = 0; j < n; j++)
       eSum += V1(i) * V2(j) * eMat(i, j);
