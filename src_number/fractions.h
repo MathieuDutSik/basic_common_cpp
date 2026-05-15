@@ -42,9 +42,9 @@ std::vector<T> get_sequence_continuous_fraction_approximant(T const &x) {
 }
 
 template <typename T> T get_mid_val(T const &TheLow, T const &TheUpp) {
-  T eFrac = (TheLow + TheUpp) / 2;
-  T TargetLow = (2 * TheLow + TheUpp) / 3;
-  T TargetUpp = (TheLow + 2 * TheUpp) / 3;
+  T eFrac = (TheLow + TheUpp) / T(2);
+  T TargetLow = (T(2) * TheLow + TheUpp) / T(3);
+  T TargetUpp = (TheLow + T(2) * TheUpp) / T(3);
   std::vector<T> list_approx =
       get_sequence_continuous_fraction_approximant(eFrac);
   for (auto &approx : list_approx) {
