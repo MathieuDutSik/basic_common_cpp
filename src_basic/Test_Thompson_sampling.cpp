@@ -1,5 +1,6 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 
+#include "Basic_threading.h"
 #include "Heuristic_ThompsonSampling.h"
 #include "NumberTheoryGmp.h"
 

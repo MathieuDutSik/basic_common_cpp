@@ -1,4 +1,5 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
+#include "Basic_external_program.h"
 #include "Basic_file.h"
 #include <chrono>
 #include <filesystem>

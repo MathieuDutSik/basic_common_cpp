@@ -5,7 +5,6 @@
 #include <chrono>
 #include <iostream>
 #include <string>
-#include <thread>
 
 std::chrono::time_point<std::chrono::system_clock>
 get_cpp_time(int day, int month, int year) {
@@ -45,13 +44,6 @@ int64_t seconds_till_end_of_time() {
 
 bool pass_end_of_time() {
   return std::chrono::system_clock::now() > end_of_time;
-}
-
-// The sleep function
-
-void my_sleep(size_t n_millisecond) {
-  std::chrono::milliseconds timespan(n_millisecond);
-  std::this_thread::sleep_for(timespan);
 }
 
 // The nice time printout

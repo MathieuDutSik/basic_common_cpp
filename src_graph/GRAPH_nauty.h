@@ -2,6 +2,7 @@
 #ifndef SRC_GRAPH_GRAPH_NAUTY_H_
 #define SRC_GRAPH_GRAPH_NAUTY_H_
 
+#include "Basic_external_program.h"
 #include <string>
 #include <vector>
 
