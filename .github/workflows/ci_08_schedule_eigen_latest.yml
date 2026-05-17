@@ -1,0 +1,57 @@
+name: Latest Eigen compatibility
+
+on:
+  # Every 8th of the month at midnight
+  schedule:
+    - cron: "0 0 8 * *"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  eigen-latest:
+    runs-on: ubuntu-latest
+
+    # Pinned to a known recent Eigen release. Bump as new ones come out.
+    # Internal version reported by Eigen at this tag:
+    #   EIGEN_WORLD_VERSION 3, EIGEN_MAJOR_VERSION 5, EIGEN_MINOR_VERSION 0
+    env:
+      EIGEN_TAG: "5.0.1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential g++ libgmp-dev libgmpxx4ldbl libboost-all-dev
+
+      - name: Fetch latest pinned Eigen
+        run: |
+          mkdir -p $HOME/opt
+          wget -q https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_TAG}/eigen-${EIGEN_TAG}.tar.gz
+          tar -xzf eigen-${EIGEN_TAG}.tar.gz -C $HOME/opt
+          mv $HOME/opt/eigen-${EIGEN_TAG} $HOME/opt/eigen
+          echo "EIGEN_INC=$HOME/opt/eigen" >> $GITHUB_ENV
+          grep -E "EIGEN_(WORLD|MAJOR|MINOR)_VERSION" $HOME/opt/eigen/Eigen/src/Core/util/Macros.h | head -3 || true
+
+      - name: Compile Test_eigen_all_types
+        # Compile + run a tiny smoke test that exercises matrix multiplication
+        # for every scalar type the project supports. The
+        # INCLUDE_NUMBER_THEORY_BOOST_* macros come from the source file
+        # itself, so the boost <-> Eigen adapter (and our Literal=int override
+        # in EigenBoostNumTraits.h) is in scope.
+        run: |
+          g++ -std=c++20 -O2 -Wall -Wextra \
+            -I src_basic -I src_number -I src_matrix \
+            -I sparse-map/include/tsl -I robin-map/include/tsl \
+            -I hopscotch-map/include/tsl \
+            -I "$EIGEN_INC" \
+            src_matrix/Test_eigen_all_types.cpp \
+            -lgmp -lgmpxx \
+            -o Test_eigen_all_types
+
+      - name: Run Test_eigen_all_types
+        run: ./Test_eigen_all_types

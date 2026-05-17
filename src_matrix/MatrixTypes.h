@@ -12,10 +12,12 @@
 #include <boost/multiprecision/eigen.hpp>
 #endif
 
-#if defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
+#if defined INCLUDE_NUMBER_THEORY_BOOST_GMP_INT ||                             \
+    defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
 // Must come after boost/multiprecision/eigen.hpp: overrides Literal=double
-// for cpp_int / cpp_rational so Eigen >= 3.5 does not emit
-// (cpp_int == double) inside is_exactly_zero / equal_strict.
+// for cpp_int / cpp_rational / mpz_int / mpq_rational so Eigen >= 3.5 does
+// not emit (boost::multiprecision::number == double) inside
+// is_exactly_zero / equal_strict.
 #include "EigenBoostNumTraits.h"
 #endif
 

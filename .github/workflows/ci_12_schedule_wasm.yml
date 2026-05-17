@@ -1,0 +1,50 @@
+name: Wasm compatibility
+
+on:
+  # Every 12th of the month at midnight
+  schedule:
+    - cron: "0 0 12 * *"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  wasm-tests:
+    runs-on: ubuntu-latest
+
+    # Pinned to a known recent Eigen release; bump as new ones come out.
+    # The in-tree EigenBoostNumTraits.h override makes any version usable.
+    env:
+      EIGEN_TAG: "5.0.1"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Boost (header-only is enough for cpp_int / cpp_rational)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libboost-all-dev
+
+      - name: Set up Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+
+      - name: Fetch Eigen
+        run: |
+          mkdir -p $HOME/opt
+          wget -q https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_TAG}/eigen-${EIGEN_TAG}.tar.gz
+          tar -xzf eigen-${EIGEN_TAG}.tar.gz -C $HOME/opt
+          mv $HOME/opt/eigen-${EIGEN_TAG} $HOME/opt/eigen
+          echo "EIGEN_INC=$HOME/opt/eigen" >> $GITHUB_ENV
+
+      - name: Verify toolchain
+        run: |
+          emcc --version | head -1
+          node --version
+
+      - name: Build and run src_wasm tests
+        env:
+          # On the GitHub Ubuntu image, libboost-all-dev installs headers
+          # under /usr/include (i.e. /usr/include/boost/...).
+          BOOST_INC: /usr/include
+        run: bash src_wasm/build.sh
