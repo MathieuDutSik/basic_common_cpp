@@ -4,12 +4,8 @@
 
 #include "Basic_string.h"
 #include "Temp_common.h"
-#include <dirent.h>
-#include <errno.h>
 #include <filesystem>
 #include <string>
-#include <sys/stat.h>
-#include <sys/types.h>
 #include <vector>
 
 template <typename F>
@@ -100,26 +96,14 @@ std::string FILE_GetDirectoryOfFileName(std::string const &eFileFull) {
 }
 
 std::vector<std::string> FILE_GetDirectoryListFile(std::string const &eDir) {
-  std::string ePath = eDir + ".";
-  DIR *dirp = opendir(ePath.c_str());
-  if (dirp == nullptr) {
-    std::cerr << "Error in routine FILE_GetDirectoryListFile\n";
-    std::cerr << "Error in call to opendir\n";
-    std::cerr << "eDir = " << eDir << "\n";
-    throw TerminalException{1};
-  }
-  struct dirent *dp;
+  std::error_code ec;
   std::vector<std::string> ListFile;
-  while ((dp = readdir(dirp)) != nullptr) {
-    std::string eName = dp->d_name;
-    //    free(dp); // not sure this is portable
-    if (eName != ".." && eName != ".")
-      ListFile.push_back(eName);
+  for (auto const &entry : std::filesystem::directory_iterator(eDir, ec)) {
+    ListFile.push_back(entry.path().filename().string());
   }
-  int err = closedir(dirp);
-  if (err != 0) {
-    std::cerr << "err=" << err << "\n";
-    printf("Oh dear, something went wrong with ls! %s\n", strerror(errno));
+  if (ec) {
+    std::cerr << "Error in FILE_GetDirectoryListFile: " << ec.message() << "\n";
+    std::cerr << "eDir = " << eDir << "\n";
     throw TerminalException{1};
   }
   return ListFile;
@@ -134,19 +118,14 @@ bool FILE_CheckFinalShashDirectory(std::string const &eDir) {
 }
 
 bool FILE_IsRegularFile(std::string const &eFile) {
-  int status;
-  struct stat st_buf;
-  status = stat(eFile.c_str(), &st_buf);
-  if (status != 0) {
-    std::cerr << "Problem in FILE_IsRegularFile\n";
-    std::cerr << "Error, errno = " << errno << "\n";
+  std::error_code ec;
+  bool reg = std::filesystem::is_regular_file(eFile, ec);
+  if (ec) {
+    std::cerr << "Problem in FILE_IsRegularFile: " << ec.message() << "\n";
     std::cerr << "eFile=" << eFile << "\n";
     throw TerminalException{1};
   }
-  if (S_ISREG(st_buf.st_mode)) {
-    return true;
-  }
-  return false;
+  return reg;
 }
 
 std::vector<std::string>

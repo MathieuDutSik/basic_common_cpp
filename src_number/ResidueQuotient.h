@@ -169,6 +169,12 @@ template <typename T> T ResInt(T const &a, T const &b) {
   return res;
 }
 
+template <typename T> std::pair<T, T> ResQuoInt(T const &a, T const &b) {
+  T res = ResInt(a, b);
+  T TheQ = (a - res) / b;
+  return {res, TheQ};
+}
+
 // clang-format off
 #endif  // SRC_NUMBER_RESIDUEQUOTIENT_H_
 // clang-format on

@@ -250,12 +250,6 @@ inline void QUO_INT(stc<mpq_class> const &a, stc<mpq_class> const &b,
 
 #include "QuoIntFcts.h"
 
-template <typename T> std::pair<T, T> ResQuoInt(T const &a, T const &b) {
-  T res = ResInt(a, b);
-  T TheQ = (a - res) / b;
-  return {res, TheQ};
-}
-
 inline mpz_class CanonicalizationUnit(mpz_class const &eVal) {
   if (eVal < 0)
     return -1;
