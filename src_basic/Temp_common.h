@@ -75,17 +75,6 @@ template <typename T> struct is_mymatrix {
   static const bool value = false;
 };
 
-unsigned get_random_time_seed() {
-#ifdef USE_NANOSECOND_RAND
-  std::timespec ts;
-  std::timespec_get(&ts, TIME_UTC);
-  unsigned val = ts.tv_nsec;
-#else
-  unsigned val = time(nullptr);
-#endif
-  return val;
-}
-
 std::string random_string_kernel(std::string const &strChoice, size_t length) {
   const size_t n_index = strChoice.size();
   auto randchar = [&]() -> char {
