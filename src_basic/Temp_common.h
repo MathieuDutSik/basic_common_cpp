@@ -54,6 +54,7 @@
 
 // Type conversion
 #include "Basic_functions.h"
+#include "Basic_random.h"
 #include "ExceptionsFunc.h"
 #include "TypeConversion.h"
 
