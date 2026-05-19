@@ -194,6 +194,7 @@ set(
   Test_ProdMat
   Matrix_As_Set
   Test_NullspaceComputation
+  Test_NullspaceTrMat
   ScalarCanonicalization
   MatrixSubsetSolver
   DeterminantMat

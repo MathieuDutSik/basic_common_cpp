@@ -381,11 +381,6 @@ CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
   return {TheMult, std::move(M2)};
 }
 
-template <typename T> struct FractionVector {
-  T TheMult;
-  MyVector<T> TheVect;
-};
-
 template <typename T>
 FractionVector<T>
 CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
@@ -409,26 +404,6 @@ FractionMatrix<T> ScalarCanonicalizationMatrixPlusCoeff(MyMatrix<T> const &M) {
 template <typename T>
 MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
   return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
-}
-
-template <typename T>
-FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
-  if (IsZeroVector(V)) {
-    T TheMult(1);
-    return {TheMult, V};
-  }
-  int n = V.size();
-  std::vector<T> eVect(n);
-  T eLCM = GetDenominator(V(0));
-  for (int i = 1; i < n; i++)
-    eLCM = LCMpair(eLCM, GetDenominator(V(i)));
-  MyVector<T> V1 = eLCM * V;
-  T eGCD = V1(0);
-  for (int i = 1; i < n; i++)
-    eGCD = GcdPair(eGCD, V1(i));
-  MyVector<T> Vret = V1 / eGCD;
-  T TheMult = eLCM / eGCD;
-  return {TheMult, std::move(Vret)};
 }
 
 template <typename T>
