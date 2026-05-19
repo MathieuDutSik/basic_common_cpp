@@ -10,6 +10,7 @@
 #include "Basic_file.h"
 #include "Basic_string.h"
 #include "MatrixTypes.h"
+#include "MAT_NonUniqueRescale.h"
 #include "Temp_common.h"
 #include "Timings.h"
 #include "hash_functions.h"
@@ -23,6 +24,7 @@
 #include <utility>
 #include <vector>
 // clang-format on
+
 
 template <typename T> struct is_mymatrix<MyMatrix<T>> {
   static const bool value = true;
