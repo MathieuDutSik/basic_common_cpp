@@ -1,6 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #ifndef SRC_NUMBER_NUMBERTHEORYBOOSTCPPINT_H_
 #define SRC_NUMBER_NUMBERTHEORYBOOSTCPPINT_H_
+#define INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
 // clang-format off
 #include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
