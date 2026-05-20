@@ -3,7 +3,7 @@
 #define SRC_MATRIX_MAT_TENSOR_H_
 
 // clang-format off
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include <unsupported/Eigen/CXX11/Tensor>
 // clang-format on
 

@@ -3,7 +3,7 @@
 #define SRC_NUMBER_NUMBERTHEORYREALFIELD_H_
 
 // clang-format off
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #ifdef OSCAR_USE_BOOST_GMP_BINDINGS
 # include "NumberTheoryBoostGmpInt.h"
 #else

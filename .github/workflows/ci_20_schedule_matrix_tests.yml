@@ -44,7 +44,7 @@ jobs:
       run: cd src_matrix && ./Test_MatrixInverse mpz_class 10
 
     - name: Test_PerformanceHNF
-      run: cd src_matrix && ./Test_PerformanceHNF 10 10
+      run: cd src_matrix && ./Test_PerformanceHNF mpq_class 10 10
 
     - name: Test_HilbertMatrix
       run: cd src_matrix && ./Test_HilbertMatrix mpq_class 10
@@ -53,4 +53,4 @@ jobs:
       run: cd src_matrix && ./Test_NullspaceComputation
 
     - name: Test_SubspaceCompletion
-      run: cd src_matrix && ./Test_SubspaceCompletion 15 10
+      run: cd src_matrix && ./Test_SubspaceCompletion mpq_class 15 10

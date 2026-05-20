@@ -3,7 +3,7 @@
 #define SRC_MATRIX_MATRIXLINBOX_H_
 
 // clang-format off
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include "NumberGivaro.h"
 #include "linbox/algorithms/gauss.h"
 #include "linbox/matrix/dense-matrix.h"

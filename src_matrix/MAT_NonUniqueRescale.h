@@ -3,7 +3,7 @@
 #define SRC_MATRIX_MAT_NONUNIQUERESCALE_H_
 
 // clang-format off
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include <utility>
 // clang-format on
 
