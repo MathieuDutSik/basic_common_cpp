@@ -1384,7 +1384,7 @@ bool TestEqualitySpaces(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
     while (true) {
       int nbDiff = 0;
       bool IsFirst = true;
-      Treal AbsVal = 0;
+      Treal AbsVal(0);
       for (size_t j = 0; j < k; j++) {
         T eVal = M1copy(j, idxSearch);
         if (eVal != 0 && StatusRow[j] == 0) {
