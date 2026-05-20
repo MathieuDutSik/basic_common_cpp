@@ -6,7 +6,7 @@
 #include "COMB_Combinatorics_elem.h"
 #include "COMB_Stor.h"
 #include "COMB_Vectors.h"
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include <algorithm>
 #include <limits>
 #include <vector>

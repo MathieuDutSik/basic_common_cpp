@@ -3,7 +3,7 @@
 #define SRC_GRAPH_GRAPH_GRAPHICALBASIC_H_
 
 // clang-format off
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include "Temp_common.h"
 #include "Boost_bitset.h"
 #include "COMB_Combinatorics_elem.h"

@@ -2,7 +2,7 @@
 #ifndef SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
 #define SRC_COMB_COMB_COMBINATORICS_BUILDSET_H_
 
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include <vector>
 
 MyMatrix<int> BuildSet(int const &n, int const &Nval) {

@@ -6,7 +6,7 @@
 #include "COMB_Vectors.h"
 #include "GRAPH_BitsetType.h"
 #include "GRAPH_GraphicalBasic.h"
-#include "MAT_Matrix.h"
+#include "MAT_MatrixFund.h"
 #include <limits>
 #include <string>
 #include <unordered_set>
