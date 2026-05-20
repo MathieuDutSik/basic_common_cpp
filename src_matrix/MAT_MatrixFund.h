@@ -6,6 +6,13 @@
 // http://eigen.tuxfamily.org/dox/AsciiQuickReference.txt
 //
 
+/*
+  The functions of this file should not use the number
+  theoretic functions of denominator, numerator and
+  other GCD. Therefore, they should be safe to be
+  included at any stage of the code.
+ */
+
 // clang-format off
 #include "Basic_file.h"
 #include "Basic_string.h"
