@@ -22,11 +22,9 @@
 #include <unistd.h>
 
 // Basic C++
-
 #include <exception>
 
 // STL containers
-
 #include <list>
 #include <map>
 #include <optional>
@@ -36,13 +34,11 @@
 #include <vector>
 
 // Functional code
-
 #include <algorithm>
 #include <functional>
 #include <utility>
 
 // IO streams
-
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -57,6 +53,11 @@
 #include "Basic_random.h"
 #include "ExceptionsFunc.h"
 #include "TypeConversion.h"
+
+// signal for early termination
+#ifndef WASM_PLATFORM
+#include <signal.h>
+#endif
 
 // synonyms
 
