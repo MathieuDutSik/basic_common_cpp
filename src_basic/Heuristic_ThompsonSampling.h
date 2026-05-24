@@ -13,28 +13,49 @@
 #include <utility>
 #include <vector>
 
-template <typename T> struct SingleCondition {
-  std::string eCond;
-  std::string eType;
-  T NumValue;
-};
+enum class HeuristicOp { Gt, Ge, Eq, Lt, Le };
+
+std::string HeuristicOpToString(HeuristicOp op) {
+  switch (op) {
+  case HeuristicOp::Gt: return ">";
+  case HeuristicOp::Ge: return ">=";
+  case HeuristicOp::Eq: return "=";
+  case HeuristicOp::Lt: return "<";
+  case HeuristicOp::Le: return "<=";
+  }
+  std::cerr << "HTS: Unreachable HeuristicOp value\n";
+  throw TerminalException{1};
+}
+
+HeuristicOp ParseHeuristicOp(std::string const &eType) {
+  if (eType == ">") return HeuristicOp::Gt;
+  if (eType == ">=") return HeuristicOp::Ge;
+  if (eType == "=") return HeuristicOp::Eq;
+  if (eType == "<") return HeuristicOp::Lt;
+  if (eType == "<=") return HeuristicOp::Le;
+  std::cerr << "HTS: We found eType=" << eType << "\n";
+  std::cerr << "HTS: But the allowed types are";
+  for (auto const &eStr : {">", ">=", "=", "<", "<="})
+    std::cerr << " " << eStr;
+  std::cerr << "\n";
+  throw TerminalException{1};
+}
 
 void CheckEType(std::string const &eType) {
-  std::vector<std::string> LTypes{">", ">=", "=", "<", "<="};
-  if (PositionVect(LTypes, eType) == -1) {
-    std::cerr << "HTS: We found eType=" << eType << "\n";
-    std::cerr << "HTS: But the allowed types are";
-    for (auto &eStr : LTypes)
-      std::cerr << " " << eStr;
-    std::cerr << "\n";
-    throw TerminalException{1};
-  }
+  (void)ParseHeuristicOp(eType);
 }
+
+template <typename T> struct SingleCondition {
+  std::string eCond;
+  HeuristicOp eType;
+  T NumValue;
+};
 
 template <typename T>
 std::ostream &operator<<(std::ostream &os,
                          SingleCondition<T> const &eSingCond) {
-  os << eSingCond.eCond << " " << eSingCond.eType << " " << eSingCond.NumValue;
+  os << eSingCond.eCond << " " << HeuristicOpToString(eSingCond.eType) << " "
+     << eSingCond.NumValue;
   return os;
 }
 
@@ -97,12 +118,12 @@ template <typename T> TheHeuristic<T> ReadHeuristic(std::istream &is) {
       throw TerminalException{1};
     }
     for (int iCond = 0; iCond < nbCond; iCond++) {
-      std::string eType, eCond;
+      std::string eType_str, eCond;
       T eNum;
       is >> eCond;
-      is >> eType;
+      is >> eType_str;
       is >> eNum;
-      CheckEType(eType);
+      HeuristicOp eType = ParseHeuristicOp(eType_str);
       if (eCond.size() == 0) {
         std::cerr << "HTS: eCond must be nontrivial\n";
         throw TerminalException{1};
@@ -152,8 +173,8 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
   for (auto const &eFullCond : TheHeu.AllTests) {
     bool IsOK = true;
     for (auto const &eSingCond : eFullCond.TheConditions) {
-      std::string eCond = eSingCond.eCond;
-      std::string eType = eSingCond.eType;
+      std::string const &eCond = eSingCond.eCond;
+      HeuristicOp eType = eSingCond.eType;
       T eNum = eSingCond.NumValue;
       auto get_value = [&]() -> T {
         auto search = TheCand.find(eCond);
@@ -171,20 +192,12 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
       };
       T eValue = get_value();
       bool WeMatch = false;
-      if (eValue > eNum && eType == ">") {
-        WeMatch = true;
-      }
-      if (eValue >= eNum && eType == ">=") {
-        WeMatch = true;
-      }
-      if (eValue == eNum && eType == "=") {
-        WeMatch = true;
-      }
-      if (eValue < eNum && eType == "<") {
-        WeMatch = true;
-      }
-      if (eValue <= eNum && eType == "<=") {
-        WeMatch = true;
+      switch (eType) {
+      case HeuristicOp::Gt: WeMatch = (eValue > eNum); break;
+      case HeuristicOp::Ge: WeMatch = (eValue >= eNum); break;
+      case HeuristicOp::Eq: WeMatch = (eValue == eNum); break;
+      case HeuristicOp::Lt: WeMatch = (eValue < eNum); break;
+      case HeuristicOp::Le: WeMatch = (eValue <= eNum); break;
       }
       if (!WeMatch) {
         IsOK = false;
@@ -248,8 +261,7 @@ HeuristicFrom_LS_LS_S(std::string const &Default,
         throw TerminalException{1};
       }
       std::string eCond = LStrB[0];
-      std::string eType = LStrB[1];
-      CheckEType(eType);
+      HeuristicOp eType = ParseHeuristicOp(LStrB[1]);
       T eNum = ParseScalar<T>(LStrB[2]);
       SingleCondition<T> eSingCond{eCond, eType, eNum};
       TheConditions.push_back(eSingCond);
@@ -1080,7 +1092,8 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const &heu) {
           fullcond += " && ";
         }
         IsFirst = false;
-        fullcond += eSingCond.eCond + " " + eSingCond.eType + " " +
+        fullcond += eSingCond.eCond + " " +
+                    HeuristicOpToString(eSingCond.eType) + " " +
                     std::to_string(eSingCond.NumValue);
       }
       l_fullcond.push_back(fullcond);
