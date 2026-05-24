@@ -171,21 +171,28 @@ std::string HeuristicEvaluation(std::map<std::string, T> const &TheCand,
       };
       T eValue = get_value();
       bool WeMatch = false;
-      if (eValue > eNum && eType == ">")
+      if (eValue > eNum && eType == ">") {
         WeMatch = true;
-      if (eValue >= eNum && eType == ">=")
+      }
+      if (eValue >= eNum && eType == ">=") {
         WeMatch = true;
-      if (eValue == eNum && eType == "=")
+      }
+      if (eValue == eNum && eType == "=") {
         WeMatch = true;
-      if (eValue < eNum && eType == "<")
+      }
+      if (eValue < eNum && eType == "<") {
         WeMatch = true;
-      if (eValue <= eNum && eType == "<=")
+      }
+      if (eValue <= eNum && eType == "<=") {
         WeMatch = true;
-      if (!WeMatch)
+      }
+      if (!WeMatch) {
         IsOK = false;
+      }
     }
-    if (IsOK)
+    if (IsOK) {
       return eFullCond.TheResult;
+    }
   }
   return TheHeu.DefaultResult;
 }
@@ -262,8 +269,9 @@ void CheckHeuristicInput(TheHeuristic<T> const &heu,
         std::cerr << "HTS: The variable eCond=" << eSingCond.eCond
                   << " is not allowed on input\n";
         std::cerr << "HTS: ListAlowedInput =";
-        for (auto &eStr : ListAllowedInput)
+        for (auto &eStr : ListAllowedInput) {
           std::cerr << " " << eStr;
+        }
         std::cerr << "\n";
         throw TerminalException{1};
       }
@@ -303,9 +311,11 @@ std::vector<std::string> GetHeuristicOutput(TheHeuristic<T> const &heu) {
 template <typename T>
 std::vector<std::string> GetHeuristicInput(TheHeuristic<T> const &heu) {
   std::set<std::string> s_in;
-  for (auto &eFullCond : heu.AllTests)
-    for (auto &eSingCond : eFullCond.TheConditions)
+  for (auto &eFullCond : heu.AllTests) {
+    for (auto &eSingCond : eFullCond.TheConditions) {
       s_in.insert(eSingCond.eCond);
+    }
+  }
   return std::vector<std::string>(s_in.begin(), s_in.end());
 }
 
@@ -1066,8 +1076,9 @@ FullNamelist ConvertHeuristicToFullNamelist(TheHeuristic<T> const &heu) {
       std::string fullcond;
       bool IsFirst = true;
       for (auto &eSingCond : eFullCond.TheConditions) {
-        if (!IsFirst)
+        if (!IsFirst) {
           fullcond += " && ";
+        }
         IsFirst = false;
         fullcond += eSingCond.eCond + " " + eSingCond.eType + " " +
                     std::to_string(eSingCond.NumValue);
