@@ -306,16 +306,6 @@ T unfold_opt(std::optional<T> const &opt, std::string const &str) {
   return *opt;
 }
 
-#ifndef WASM_PLATFORM
-std::atomic<bool> ExitEvent;
-
-void signal_callback_handler(int signum) {
-  std::cout << "Caught signal " << signum << "\n";
-  std::cout << "We are going to exit hopefully\n";
-  ExitEvent = true;
-}
-#endif
-
 // clang-format off
 #endif  // SRC_BASIC_TEMP_COMMON_H_
 // clang-format on
