@@ -10,7 +10,8 @@
 #PROGRAM		= Test_timing
 #PROGRAM		= Test_namelist
 #PROGRAM		= Test_PresenceProgram
-PROGRAM		= Test_Basic_string_Optimizations
+#PROGRAM		= Test_Basic_string_Optimizations
+PROGRAM		= Test_Heuristic
 
 OBJECTS		= $(PROGRAM:%=%.o)
 

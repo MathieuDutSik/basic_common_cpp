@@ -2,7 +2,6 @@
 #ifndef SRC_BASIC_HEURISTIC_THOMPSONSAMPLING_H_
 #define SRC_BASIC_HEURISTIC_THOMPSONSAMPLING_H_
 
-#include "Basic_file.h"
 #include "Namelist.h"
 #include "Temp_common.h"
 #include "Timings.h"
@@ -49,8 +48,9 @@ std::ostream &operator<<(std::ostream &os,
                          OneFullCondition<T> const &eFullCond) {
   size_t len = eFullCond.TheConditions.size();
   for (size_t i = 0; i < len; i++) {
-    if (i > 0)
+    if (i > 0) {
       os << " && ";
+    }
     os << "(" << eFullCond.TheConditions[i] << ")";
   }
   os << " => " << eFullCond.TheResult;
