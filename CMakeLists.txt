@@ -149,6 +149,7 @@ set(
   Test_Factorize
   Test_PracticalInf
   Test_QuoInt
+  Test_Operations
   Test_PrintStaticInfo
   Test_RealCubicField
   Test_QuadField

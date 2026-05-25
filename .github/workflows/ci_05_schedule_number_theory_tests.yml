@@ -39,7 +39,7 @@ jobs:
     - name: Build number theory tests
       run: |
         cd src_number
-        make Test_SquareRoot Test_Factorize Test_QuoInt Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo
+        make Test_SquareRoot Test_Factorize Test_QuoInt Test_Operations Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo
 
     - name: Test_SquareRoot
       run: cd src_number && ./Test_SquareRoot
@@ -49,6 +49,9 @@ jobs:
 
     - name: Test_QuoInt
       run: cd src_number && ./Test_QuoInt
+
+    - name: Test_Operations
+      run: cd src_number && ./Test_Operations
 
     - name: Test_TypeBoostGmp
       run: cd src_number && ./Test_TypeBoostGmp
