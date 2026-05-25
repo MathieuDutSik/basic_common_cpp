@@ -2,6 +2,9 @@
 #ifndef SRC_BASIC_BASIC_INTERRUPT_H_
 #define SRC_BASIC_BASIC_INTERRUPT_H_
 
+// signal for early termination
+#include <signal.h>
+
 std::atomic<bool> ExitEvent;
 
 void signal_callback_handler(int signum) {

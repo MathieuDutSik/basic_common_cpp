@@ -17,9 +17,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
-#include <getopt.h>
 #include <string>
-#include <unistd.h>
 
 // Basic C++
 #include <exception>
@@ -53,11 +51,6 @@
 #include "Basic_random.h"
 #include "ExceptionsFunc.h"
 #include "TypeConversion.h"
-
-// signal for early termination
-#ifndef WASM_PLATFORM
-#include <signal.h>
-#endif
 
 // synonyms
 
