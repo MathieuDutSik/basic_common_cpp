@@ -1,0 +1,48 @@
+name: Compile the code as test (Windows / CMake)
+
+# Mirrors ci_02_schedule_compile_test.yml but on windows-latest using
+# MSYS2 / MinGW. Only the CMake configure + build is exercised; the
+# resulting binaries are not run here.
+
+on:
+  # At midnight on every Tuesday, same cadence as the Linux compile test.
+  schedule:
+    - cron: "0 0 * * 2"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up MSYS2 (MINGW64)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            base-devel
+            git
+            unzip
+            wget
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-pkg-config
+            mingw-w64-x86_64-gmp
+            mingw-w64-x86_64-boost
+            mingw-w64-x86_64-eigen3
+
+      - name: Configure with CMake
+        run: |
+          cmake -S . -B build -G "MinGW Makefiles"
+
+      - name: Build
+        run: |
+          cmake --build build
