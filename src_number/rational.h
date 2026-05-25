@@ -214,6 +214,10 @@ public:
     //    check("*");
     gcd_reduction();
   }
+  void operator*=(Tint const &x) {
+    num *= x;
+    gcd_reduction();
+  }
   //
   friend Rational<Tint> operator*(Rational<Tint> const &x,
                                   Rational<Tint> const &y) {
