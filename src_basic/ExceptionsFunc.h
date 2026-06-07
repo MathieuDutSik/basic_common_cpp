@@ -20,7 +20,7 @@ struct SafeIntException {
 
 // This is guaranteed to trigger an end.
 // Also it gives something that can be used for having the stacktrace via gdb.
-void TerminalEnding() {
+inline void TerminalEnding() {
   assert(false);
   exit(1);
 }
