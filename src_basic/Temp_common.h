@@ -69,7 +69,7 @@ template <typename T> struct is_mymatrix {
   static const bool value = false;
 };
 
-std::string random_string_kernel(std::string const &strChoice, size_t length) {
+inline std::string random_string_kernel(std::string const &strChoice, size_t length) {
   const size_t n_index = strChoice.size();
   auto randchar = [&]() -> char {
     size_t pos = size_t(random()) % n_index;
@@ -80,24 +80,24 @@ std::string random_string_kernel(std::string const &strChoice, size_t length) {
   return str;
 }
 
-std::string random_string(size_t length) {
+inline std::string random_string(size_t length) {
   std::string strChoice =
       "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   return random_string_kernel(strChoice, length);
 }
 
-std::string random_string_restricted(size_t length) {
+inline std::string random_string_restricted(size_t length) {
   std::string strChoice = "abcdefghijklmnopqrstuvwxyz";
   return random_string_kernel(strChoice, length);
 }
 
-std::string GAP_logical(bool const &x) {
+inline std::string GAP_logical(bool const &x) {
   if (x)
     return "true";
   return "false";
 }
 
-std::string PYTHON_logical(bool const &x) {
+inline std::string PYTHON_logical(bool const &x) {
   if (x)
     return "True";
   return "False";
@@ -214,7 +214,7 @@ CollectedResult<T> Collected(std::vector<T> const &eVect) {
   return {std::move(LVal), std::move(LMult)};
 }
 
-std::vector<int> StdVectorFirstNentries(size_t const &N) {
+inline std::vector<int> StdVectorFirstNentries(size_t const &N) {
   std::vector<int> eList(N);
   for (size_t i = 0; i < N; i++)
     eList[i] = static_cast<int>(i);
@@ -234,7 +234,7 @@ void WriteVectorInt_GAP(std::ostream &os, std::vector<T> const &OneInc) {
   os << "]";
 }
 
-std::vector<int> DivideListPosition(int const &len, int const &nbBlock) {
+inline std::vector<int> DivideListPosition(int const &len, int const &nbBlock) {
   std::vector<int> ListVal;
   double fact = static_cast<double>(len) / static_cast<double>(nbBlock);
   for (int i = 0; i <= nbBlock; i++) {

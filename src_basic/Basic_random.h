@@ -6,7 +6,7 @@
 #include <thread>
 #endif
 
-unsigned get_random_time_seed() {
+inline unsigned get_random_time_seed() {
 #ifdef USE_NANOSECOND_RAND
   std::timespec ts;
   std::timespec_get(&ts, TIME_UTC);
@@ -19,7 +19,7 @@ unsigned get_random_time_seed() {
 
 #ifndef WASM_PLATFORM
 
-unsigned get_random_pid_seed() {
+inline unsigned get_random_pid_seed() {
   // There seems to be no way of converting std::thread::id to size_t
   // even though the pid is going to be a normal integer. So, instead
   // we use the hash.
@@ -30,7 +30,7 @@ unsigned get_random_pid_seed() {
 
 #endif
 
-unsigned get_random_seed() {
+inline unsigned get_random_seed() {
   unsigned seed = get_random_time_seed();
 #ifndef WASM_PLATFORM
   seed += get_random_pid_seed();
@@ -38,7 +38,7 @@ unsigned get_random_seed() {
   return seed;
 }
 
-void srand_random_set() {
+inline void srand_random_set() {
   unsigned val = get_random_seed();
   srand(val);
 }

@@ -355,7 +355,7 @@ template <> struct std::iterator_traits<typename vectface::iterator> {
   using difference_type = std::ptrdiff_t;
 };
 
-vectface select_minimum_count(vectface const &vf) {
+inline vectface select_minimum_count(vectface const &vf) {
   size_t n = vf.n;
   size_t min_incd = std::numeric_limits<size_t>::max();
   for (auto &eFace : vf) {
@@ -372,7 +372,7 @@ vectface select_minimum_count(vectface const &vf) {
   return vf_ret;
 }
 
-vectface sort_vectface(vectface const &vf) {
+inline vectface sort_vectface(vectface const &vf) {
   size_t n = vf.get_n();
   std::set<Face> set;
   for (auto &f : vf) {
@@ -385,7 +385,7 @@ vectface sort_vectface(vectface const &vf) {
   return vf_ret;
 }
 
-vectface unicize_vectface(vectface const &vf) { return sort_vectface(vf); }
+inline vectface unicize_vectface(vectface const &vf) { return sort_vectface(vf); }
 
 template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   size_t nbVert = eSet.count();
@@ -398,7 +398,7 @@ template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   return eList;
 }
 
-void WriteVectfaceGAP(std::ostream &os, vectface const &vf) {
+inline void WriteVectfaceGAP(std::ostream &os, vectface const &vf) {
   bool IsFirst = true;
   os << "[";
   for (auto &trig : vf) {
@@ -412,7 +412,7 @@ void WriteVectfaceGAP(std::ostream &os, vectface const &vf) {
   os << "]";
 }
 
-std::string StringVectfaceGAP(vectface const &vf) {
+inline std::string StringVectfaceGAP(vectface const &vf) {
   std::ostringstream os;
   WriteVectfaceGAP(os, vf);
   return os.str();

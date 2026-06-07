@@ -567,7 +567,7 @@ template <typename T1, typename T2> T1 ScalingInteger(T2 const &a) {
 // Nearest / Floor / Ceil operations
 //
 
-void NearestInteger_double_int(double const &xI, int &xO) {
+inline void NearestInteger_double_int(double const &xI, int &xO) {
   double xRnd_d = round(xI);
   int xRnd_z = static_cast<int>(xRnd_d);
   auto GetErr = [&](int const &u) -> double {
