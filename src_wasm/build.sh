@@ -29,8 +29,14 @@ INCLUDES=(
   -I"$ROOT/sparse-map/include/tsl"
   -I"$ROOT/robin-map/include/tsl"
   -I"$ROOT/hopscotch-map/include/tsl"
-  -I"$BOOST_INC"
-  -I"$EIGEN_INC"
+  # External: -idirafter (not -I) so the host include tree never shadows the
+  # wasm sysroot. With BOOST_INC=/usr/include (Linux CI), plain -I would
+  # inject the host glibc tree ahead of wasi-libc and libc++'s
+  # `#include_next <stdlib.h>` would land on /usr/include/stdlib.h and fail
+  # on glibc-only bits/libc-header-start.h. -idirafter appends these strictly
+  # after the sysroot search path.
+  -idirafter "$BOOST_INC"
+  -idirafter "$EIGEN_INC"
 )
 
 CXXFLAGS=(
