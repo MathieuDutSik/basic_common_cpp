@@ -41,7 +41,7 @@ jobs:
 
       - name: Configure with CMake
         run: |
-          cmake -S . -B build -G "MinGW Makefiles"
+          cmake -S . -B build -G "MSYS Makefiles"
 
       - name: Build
         run: |
