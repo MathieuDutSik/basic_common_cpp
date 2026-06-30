@@ -7,7 +7,7 @@ name: Compile the code as test (Windows / CMake)
 on:
   # At midnight on every Tuesday, same cadence as the Linux compile test.
   schedule:
-    - cron: "0 0 * * 2"
+    - cron: "0 0 22 * *"
   # Manually triggered
   workflow_dispatch:
 

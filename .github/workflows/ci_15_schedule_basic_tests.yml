@@ -3,7 +3,7 @@ name: Basic Tests
 on:
   # Every 15th of the month at midnight
   schedule:
-    - cron: "0 0 23 * *"
+    - cron: "0 0 15 * *"
   # Manually triggered
   workflow_dispatch:
 

@@ -245,8 +245,35 @@ bool IsProgramInPath(std::string const &ProgName) {
   if (ProgName.empty()) {
     return false;
   }
-  if (ProgName.find('/') != std::string::npos) {
-    return access(ProgName.c_str(), X_OK) == 0;
+  namespace fs = std::filesystem;
+  // Platform facts derived from std::filesystem rather than preprocessor:
+  // path::preferred_separator is '/' on POSIX-style systems and L'\\' on
+  // Windows-style ones. From that we pick the PATH list separator and the
+  // set of executable extensions to probe.
+  constexpr bool windows_style = fs::path::preferred_separator != '/';
+  constexpr char path_list_separator = windows_style ? ';' : ':';
+  static const std::vector<std::string> exec_exts =
+      windows_style
+          ? std::vector<std::string>{"", ".exe", ".com", ".bat", ".cmd"}
+          : std::vector<std::string>{""};
+  auto is_runnable = [](fs::path const &p) -> bool {
+    std::error_code ec;
+    fs::file_status st = fs::status(p, ec);
+    if (ec || !fs::is_regular_file(st)) {
+      return false;
+    }
+    // On POSIX this checks the executable bit; on Windows libstdc++ reports
+    // owner_exec for every regular file, which collapses to an existence
+    // check (executability is implied by the extension list above).
+    return (st.permissions() & fs::perms::owner_exec) != fs::perms::none;
+  };
+  if (fs::path(ProgName).has_parent_path()) {
+    for (auto const &ext : exec_exts) {
+      if (is_runnable(fs::path(ProgName + ext))) {
+        return true;
+      }
+    }
+    return false;
   }
   char const *path_env = std::getenv("PATH");
   if (path_env == nullptr) {
@@ -255,7 +282,7 @@ bool IsProgramInPath(std::string const &ProgName) {
   std::string path_str(path_env);
   size_t pos = 0;
   while (true) {
-    size_t next = path_str.find(':', pos);
+    size_t next = path_str.find(path_list_separator, pos);
     std::string dir;
     if (next == std::string::npos) {
       dir = path_str.substr(pos);
@@ -265,9 +292,11 @@ bool IsProgramInPath(std::string const &ProgName) {
     if (dir.empty()) {
       dir = ".";
     }
-    std::filesystem::path candidate = std::filesystem::path(dir) / ProgName;
-    if (access(candidate.c_str(), X_OK) == 0) {
-      return true;
+    for (auto const &ext : exec_exts) {
+      fs::path candidate = fs::path(dir) / (ProgName + ext);
+      if (is_runnable(candidate)) {
+        return true;
+      }
     }
     if (next == std::string::npos) {
       break;

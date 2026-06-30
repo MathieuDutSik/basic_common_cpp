@@ -7,7 +7,7 @@ name: Compile the code as test
 on:
   # At midnight on every Tuesday
   schedule:
-    - cron: "0 0 * * 2"
+    - cron: "0 0 2 * *"
   # Manually triggered
   workflow_dispatch:
 jobs:

@@ -2,6 +2,10 @@
 #ifndef SRC_BASIC_BASIC_RANDOM_H_
 #define SRC_BASIC_BASIC_RANDOM_H_
 
+#include <cstdlib>
+#ifdef _WIN32
+#include <random>
+#endif
 #ifndef WASM_PLATFORM
 #include <thread>
 #endif
@@ -42,6 +46,16 @@ inline void srand_random_set() {
   unsigned val = get_random_seed();
   srand(val);
 }
+
+#ifdef _WIN32
+// POSIX random() is not provided by the MinGW / MSVC C runtimes. Supply a
+// portable shim with the same signature (long in [0, 2^31 - 1]) so call sites
+// can use random() uniformly across platforms.
+inline long random() {
+  thread_local std::mt19937 gen{get_random_seed()};
+  return static_cast<long>(gen() & 0x7FFFFFFFL);
+}
+#endif
 
 // clang-format off
 #endif  // SRC_BASIC_BASIC_RANDOM_H_
