@@ -287,6 +287,25 @@ std::ostream &operator<<(std::ostream &os, jet<T, N> const &j) {
   return os;
 }
 
+// Hash over all coefficients (so distinct jets -- including two that share a
+// constant term but differ at higher order -- hash apart, as needed by the
+// weight-matrix / canonical-form coloring that resolves the t -> 0^+ structure).
+namespace std {
+template <typename T, int N> struct hash<jet<T, N>> {
+  std::size_t operator()(const jet<T, N> &x) const {
+    auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+      seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+    size_t seed = std::hash<int>()(N);
+    for (int k = 0; k <= N; k++)
+      combine_hash(seed, std::hash<T>()(x.c[k]));
+    return seed;
+  }
+};
+// clang-format off
+}  // namespace std
+// clang-format on
+
 // clang-format off
 #endif  // SRC_NUMBER_JET_NUMBER_H_
 // clang-format on
