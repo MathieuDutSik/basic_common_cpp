@@ -1047,6 +1047,32 @@ T DivideVector(MyVector<T> const &V1, MyVector<T> const &V2) {
   throw TerminalException{1};
 }
 
+// Among the candidates get(0..n-1) that pass valid(k), return the index of the
+// non-zero one with the most preferable pivot cost (see PivotCost.h), or -1 if
+// every candidate is zero. With the default (trivial) cost no candidate is ever
+// preferred, so this returns the FIRST non-zero candidate -- reproducing the
+// historical "first non-zero pivot" behaviour exactly. Numeric types that
+// specialize f_cost_pivot / is_preferable_pivot (floating point, exact
+// rationals, jet<T, N>) get their own pivot rule.
+template <typename T, typename Fget, typename Fvalid>
+int SelectBestPivot(int n, Fget const &get, Fvalid const &valid) {
+  int best = -1;
+  decltype(f_cost_pivot(std::declval<T>())) best_cost{};
+  for (int k = 0; k < n; k++) {
+    if (!valid(k))
+      continue;
+    T const &x = get(k);
+    if (x == 0)
+      continue;
+    auto cost = f_cost_pivot(x);
+    if (best == -1 || is_preferable_pivot(cost, best_cost)) {
+      best = k;
+      best_cost = cost;
+    }
+  }
+  return best;
+}
+
 template <typename T>
 void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
   static_assert(is_ring_field<T>::value,
@@ -1083,22 +1109,16 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
     std::cerr << "Input=\n";
     WriteMatrix(std::cerr, Input);
 #endif
-    iColFound = -1;
-    prov1 = 0;
-    for (iCol = iRow; iCol < nbCol; iCol++)
-      if (iColFound == -1) {
-        prov1 = Input(iRow, iCol);
-        if (prov1 != 0) {
-          iColFound = iCol;
-          prov1 = 1 / prov1;
-        }
-      }
+    iColFound = SelectBestPivot<T>(
+        nbCol, [&](int iCol) -> T const & { return Input(iRow, iCol); },
+        [&](int iCol) -> bool { return iCol >= iRow; });
 #ifdef SANITY_CHECK_MAT_MATRIX
-    if (prov1 == 0) {
+    if (iColFound == -1) {
       std::cerr << "Error during the computation of the matrix inverse\n";
       throw TerminalException{1};
     }
 #endif
+    prov1 = 1 / Input(iRow, iColFound);
     for (iRowB = 0; iRowB < nbRow; iRowB++)
       Output(iRowB, iColFound) *= prov1;
     for (iRowB = iRow; iRowB < nbRow; iRowB++)
@@ -1242,13 +1262,16 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
           provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
       }
     }
-    auto get_firstnonzerocol_iife = [&]() -> size_t {
-      for (size_t iCol = 0; iCol < nbCol; iCol++)
-        if (provMat(eRank, iCol) != 0)
-          return iCol;
-      return miss_val;
+    auto get_pivotcol_iife = [&]() -> size_t {
+      int piv = SelectBestPivot<T>(
+          static_cast<int>(nbCol),
+          [&](int iCol) -> T const & { return provMat(eRank, iCol); },
+          [&](int) -> bool { return true; });
+      if (piv == -1)
+        return miss_val;
+      return static_cast<size_t>(piv);
     };
-    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
+    size_t FirstNonZeroCol = get_pivotcol_iife();
     if (FirstNonZeroCol != miss_val) {
       ListColSelect.push_back(FirstNonZeroCol);
       ListRowSelect.push_back(iRow);
@@ -1494,19 +1517,15 @@ template <typename T> MyMatrix<T> CongrMap(MyMatrix<T> const &eMat) {
 template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to be a field in DeterminantMatKernel");
-  T hVal, alpha;
+  T alpha;
   int n = TheMat.rows();
   MyMatrix<T> WorkMat = TheMat;
   std::vector<int> eVectPos(n, -1);
   T TheDet(1);
   for (int i = 0; i < n; i++) {
-    int jSel = -1;
-    for (int j = 0; j < n; j++)
-      if (eVectPos[j] == -1) {
-        hVal = WorkMat(i, j);
-        if (hVal != 0)
-          jSel = j;
-      }
+    int jSel = SelectBestPivot<T>(
+        n, [&](int j) -> T const & { return WorkMat(i, j); },
+        [&](int j) -> bool { return eVectPos[j] == -1; });
     if (jSel == -1) {
       return T(0);
     }

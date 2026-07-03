@@ -266,6 +266,16 @@ inline mpq_class T_NormGen(mpq_class const &x) { return T_abs(x); }
 
 inline mpz_class T_NormGen(mpz_class const &x) { return T_abs(x); }
 
+// Pivot cost: the number of machine words. Smaller pivots keep the intermediate
+// fractions small during exact Gaussian elimination (see PivotCost.h). For a
+// rational, num and den contribute jointly.
+inline size_t f_cost_pivot(mpz_class const &x) {
+  return mpz_size(x.get_mpz_t());
+}
+inline size_t f_cost_pivot(mpq_class const &x) {
+  return mpz_size(x.get_num_mpz_t()) + mpz_size(x.get_den_mpz_t());
+}
+
 inline bool IsInteger(mpq_class const &x) {
   mpz_class eDen = x.get_den();
   return eDen == 1;

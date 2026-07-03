@@ -6,6 +6,7 @@
 // the std::is_same<T,mpz_class> is not adequate because it requires the type
 // mpz_class to be known in the scope.
 
+#include "PivotCost.h"
 #include <cstdint>
 
 template <typename T> struct has_reduction_subset_solver {
