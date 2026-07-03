@@ -281,6 +281,12 @@ inline void TYPE_CONVERSION(stc<Tin> const &x1, jet<T, N> &x2) {
   TYPE_CONVERSION(x1, val);
   x2 = jet<T, N>(val);
 }
+// Jet -> jet of the same type is the identity (more specialized than the scalar
+// lift above, so it wins for UniversalScalarConversion<jet, jet>).
+template <typename T, int N>
+inline void TYPE_CONVERSION(stc<jet<T, N>> const &x1, jet<T, N> &x2) {
+  x2 = x1.val;
+}
 
 // Reading a jet from a stream (used by ParseScalar) fills the constant term.
 template <typename T, int N>
