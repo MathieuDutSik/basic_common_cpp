@@ -5,7 +5,9 @@
 // clang-format off
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
+#include "BasicNumberTypes.h"
 #include <array>
+#include <istream>
 #include <ostream>
 #include <utility>
 // clang-format on
@@ -243,6 +245,40 @@ template <typename T, int N> struct overlying_field<jet<T, N>> {
 template <typename T, int N> struct underlying_ring<jet<T, N>> {
   typedef jet<typename underlying_ring<T>::ring_type, N> ring_type;
 };
+template <typename T, int N> struct is_implementation_of_Q<jet<T, N>> {
+  static const bool value = false;
+};
+template <typename T, int N> struct is_implementation_of_Z<jet<T, N>> {
+  static const bool value = false;
+};
+template <typename T, int N> struct underlying_totally_ordered_ring<jet<T, N>> {
+  typedef jet<typename underlying_totally_ordered_ring<T>::real_type, N>
+      real_type;
+};
+
+// A jet represents an integer iff it is a constant with integer constant term.
+template <typename T, int N> bool IsInteger(jet<T, N> const &x) {
+  for (int k = 1; k <= N; k++)
+    if (x.c[k] != T(0))
+      return false;
+  return IsInteger(x.c[0]);
+}
+
+// Conversion to double goes through the constant term (the value at t = 0); it
+// is only used for the floating-point diagnostics.
+template <typename T, int N>
+inline void TYPE_CONVERSION(stc<jet<T, N>> const &x1, double &x2) {
+  stc<T> a1{x1.val.c[0]};
+  TYPE_CONVERSION(a1, x2);
+}
+
+// Reading a jet from a stream (used by ParseScalar) fills the constant term.
+template <typename T, int N>
+std::istream &operator>>(std::istream &is, jet<T, N> &j) {
+  j = jet<T, N>();
+  is >> j.c[0];
+  return is;
+}
 
 // Pivot cost of a jet (see PivotCost.h): the order (index of the first non-zero
 // coefficient) together with the base-field cost of that leading coefficient.
