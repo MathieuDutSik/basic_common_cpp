@@ -66,7 +66,7 @@ private:
   Tint val;
 
 public:
-  explicit SafeInt64() : val(0) {
+  SafeInt64() : val(0) {
 #ifdef SANITY_CHECK_SAFETY_INTEGER
     std::cerr << "Default constructor for SafeInt64 val=" << val << "\n";
 #endif
