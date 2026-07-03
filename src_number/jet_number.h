@@ -272,6 +272,16 @@ inline void TYPE_CONVERSION(stc<jet<T, N>> const &x1, double &x2) {
   TYPE_CONVERSION(a1, x2);
 }
 
+// Conversion of a scalar (a rational / integer at t = 0) into a jet: the value
+// becomes the constant term, all higher coefficients zero. This is how the
+// t = 0 data (SHV, EXT, the Gram matrix Q) is lifted into the jet computation.
+template <typename Tin, typename T, int N>
+inline void TYPE_CONVERSION(stc<Tin> const &x1, jet<T, N> &x2) {
+  T val;
+  TYPE_CONVERSION(x1, val);
+  x2 = jet<T, N>(val);
+}
+
 // Reading a jet from a stream (used by ParseScalar) fills the constant term.
 template <typename T, int N>
 std::istream &operator>>(std::istream &is, jet<T, N> &j) {
