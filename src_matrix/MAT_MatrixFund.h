@@ -26,6 +26,7 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <type_traits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -1550,9 +1551,34 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
 }
 
 template <typename T>
-requires is_ring_field<T>::value
+requires (is_ring_field<T>::value && !determinant_division_free<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
   return DeterminantMatKernel(Input);
+}
+
+// Determinant over a field that carries zero divisors and opts into a
+// division-free algorithm (jets). The elimination kernel is safe as long as a
+// unit pivot is available at every step, which holds precisely when the matrix
+// is non-singular at the degeneracy point (its constant term): there the
+// constant-term arithmetic is an ordinary non-singular elimination, so
+// SelectBestPivot always finds a valuation-0 (invertible) pivot. When the
+// constant-term matrix is singular the true determinant has positive valuation
+// (e.g. a simplex volume alpha*t^d), and elimination would be forced onto a
+// zero-divisor pivot; we then fall back to the division-free permutation
+// expansion. The expensive fallback therefore runs only for the (rare)
+// rationally-degenerate matrices.
+template <typename T>
+requires (is_ring_field<T>::value && determinant_division_free<T>::value)
+inline T DeterminantMat(MyMatrix<T> const &Input) {
+  using Tct = std::decay_t<decltype(constant_term(std::declval<T const &>()))>;
+  int n = Input.rows();
+  MyMatrix<Tct> M0(n, n);
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < n; j++)
+      M0(i, j) = constant_term(Input(i, j));
+  if (DeterminantMat(M0) != Tct(0))
+    return DeterminantMatKernel(Input);
+  return DeterminantMatPermutation(Input);
 }
 
 template <typename T>

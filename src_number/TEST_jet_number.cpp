@@ -132,6 +132,35 @@ int main() {
     check(sol_ok, "pivot fix: SolutionMat over jets on [[t,1],[1,t]]");
   }
 
+  // Division-free fallback: a jet matrix whose DETERMINANT itself has c0 == 0
+  // (its constant-term matrix is singular). Elimination would be forced onto a
+  // zero-divisor pivot, so DeterminantMat must detect this and switch to the
+  // division-free permutation expansion. This is the "split simplex" case
+  // det = alpha t^d + ... that vanishes at t = 0 but not for t > 0.
+  {
+    constexpr int Nd = 2;
+    using JT = jet<T, Nd>;
+    JT t = JT::var();
+    // [[t, 0], [0, t]] -> det = t^2 (valuation 2; constant-term matrix all zero).
+    MyMatrix<JT> M(2, 2);
+    M(0, 0) = t;
+    M(0, 1) = JT(0);
+    M(1, 0) = JT(0);
+    M(1, 1) = t;
+    JT det = DeterminantMat(M);
+    check(det[0] == T(0) && det[1] == T(0) && det[2] == T(1),
+          "division-free det [[t,0],[0,t]] = t^2");
+    // [[t, 1], [t, t]] -> det = t^2 - t (valuation 1).
+    MyMatrix<JT> M2(2, 2);
+    M2(0, 0) = t;
+    M2(0, 1) = JT(1);
+    M2(1, 0) = t;
+    M2(1, 1) = t;
+    JT det2 = DeterminantMat(M2);
+    check(det2[0] == T(0) && det2[1] == T(-1) && det2[2] == T(1),
+          "division-free det [[t,1],[t,t]] = -t + t^2");
+  }
+
   if (n_error == 0)
     std::cerr << "All jet_number tests passed.\n";
   else

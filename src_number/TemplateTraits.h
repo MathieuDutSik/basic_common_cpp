@@ -187,6 +187,23 @@ template <> struct is_ring_field<float> {
   static const bool value = true;
 };
 
+// Trait selecting a division-free determinant algorithm. For fields and integral
+// domains the elimination-based determinant (DeterminantMatKernel) is exact and
+// fast. For rings with zero divisors -- in particular the truncated jet ring
+// T[t]/(t^{N+1}), where a rationally degenerate quantity has a zero constant
+// term and is therefore not invertible -- elimination can be forced to divide by
+// a zero divisor. Types that set this to true are routed through a division-free
+// determinant instead. Default: false.
+template <typename T> struct determinant_division_free {
+  static const bool value = false;
+};
+
+// The value of a scalar at its degeneracy / base point. A generic scalar is its
+// own constant term (identity); the jet specialization (in jet_number.h) returns
+// the t = 0 coefficient. This is the bridge that lets generic code (e.g. the
+// division-free determinant dispatch) build the constant-term matrix.
+template <typename T> T const &constant_term(T const &x) { return x; }
+
 // Trait of totally ordered set
 
 template <typename T> struct is_totally_ordered {

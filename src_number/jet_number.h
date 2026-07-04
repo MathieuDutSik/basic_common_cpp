@@ -171,18 +171,24 @@ public:
     return r;
   }
 
+  // Division a / b, defined only when b is a unit (non-zero constant term), in
+  // which case it is a * inverse(b). Division by a jet with c0 == 0 (a
+  // zero-divisor of T[t]/(t^{N+1})) has no representable quotient in general
+  // (the true result is a Laurent series). Such a division must never occur: the
+  // computations that would otherwise divide by a rationally-degenerate quantity
+  // (e.g. a simplex volume alpha*t^d that vanishes at t = 0) are routed through
+  // the division-free determinant (see determinant_division_free below) instead.
+  // Hitting this with a non-unit b is therefore a programming error, flagged
+  // under SANITY_CHECK rather than papered over.
   friend jet operator/(jet const &a, jet const &b) {
-    jet q = a * inverse(b);
 #ifdef SANITY_CHECK_JET_NUMBER
-    // Cheap invariant: (a / b) * b == a.
-    jet chk = q * b;
-    for (int k = 0; k <= N; k++)
-      if (chk.c[k] != a.c[k]) {
-        std::cerr << "jet_number: division check failed at c" << k << "\n";
-        throw TerminalException{1};
-      }
+    if (b.c[0] == T(0)) {
+      std::cerr << "jet_number: division by a jet with zero constant term "
+                   "(zero-divisor); the caller should use a division-free path\n";
+      throw TerminalException{1};
+    }
 #endif
-    return q;
+    return a * inverse(b);
   }
 
   // Total order by the leading coefficient of the difference.
@@ -207,12 +213,11 @@ public:
   }
 };
 
-// The constant term (value at t = 0) of a scalar. Generic scalars are their own
-// constant term; a jet returns c0. This is the bridge that lets the
-// combinatorial / canonical-form subroutines of a scalar-templated computation
-// (which need a concrete field element) recover the t = 0 data from a jet
-// Gram matrix, while the numeric parts keep the full expansion.
-template <typename T> T const &constant_term(T const &x) { return x; }
+// The constant term (value at t = 0) of a jet is c0. This overloads the generic
+// constant_term (the identity, in TemplateTraits.h) so that the combinatorial /
+// canonical-form subroutines of a scalar-templated computation (which need a
+// concrete field element) recover the t = 0 data from a jet Gram matrix, while
+// the numeric parts keep the full expansion.
 template <typename T, int N> T const &constant_term(jet<T, N> const &j) {
   return j.c[0];
 }
@@ -254,6 +259,12 @@ template <typename T, int N> struct is_implementation_of_Z<jet<T, N>> {
 template <typename T, int N> struct underlying_totally_ordered_ring<jet<T, N>> {
   typedef jet<typename underlying_totally_ordered_ring<T>::real_type, N>
       real_type;
+};
+// The truncated jet ring has zero divisors (any jet with c0 == 0), so an
+// elimination-based determinant can be forced to divide by one. Route jet
+// determinants through the division-free dispatch (see DeterminantMat).
+template <typename T, int N> struct determinant_division_free<jet<T, N>> {
+  static const bool value = true;
 };
 
 // A jet represents an integer iff it is a constant with integer constant term.
