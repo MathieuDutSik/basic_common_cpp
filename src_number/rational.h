@@ -31,13 +31,13 @@ public:
   Rational(Tint const &num, Tint const &den) : num(num), den(den) {}
   Rational(Rational<Tint> const &x) : num(x.num), den(x.den) {}
   // Assignment operators
-  Rational<Tint> operator=(Tint const &u) {
+  Rational<Tint> &operator=(Tint const &u) {
     // assignment operator from int
     num = u;
     den = 1;
     return *this;
   }
-  Rational<Tint> operator=(Rational<Tint> const &x) {
+  Rational<Tint> &operator=(Rational<Tint> const &x) {
     // assignment operator
     num = x.num;
     den = x.den;
