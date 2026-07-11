@@ -90,18 +90,22 @@ public:
   }
   double get_d() const { return static_cast<double>(val); }
   // Assignment operators
-  SafeInt64 operator=(SafeInt64 const &u) {
-    // assignment operator from int
+  SafeInt64 &operator=(SafeInt64 const &u) {
+    // assignment operator. Must return `SafeInt64&` (not by value) so that
+    // Eigen expressions of the form `return (x = y);` bind to a real lvalue
+    // reference. Returning a fresh temporary broke SparseMatrix::insertBack*.
     val = u.val;
-    return SafeInt64(val);
+    return *this;
   }
   Tint &get_val() { return val; }
   const Tint &get_const_val() const { return val; }
-  void operator+=(SafeInt64 const &x) {
+  SafeInt64 &operator+=(SafeInt64 const &x) {
     val = safe_add_int64(val, x.val);
+    return *this;
   }
-  void operator-=(SafeInt64 const &x) {
+  SafeInt64 &operator-=(SafeInt64 const &x) {
     val = safe_subtract_int64(val, x.val);
+    return *this;
   }
   friend SafeInt64 operator+(SafeInt64 const &x, SafeInt64 const &y) {
     SafeInt64 z;
@@ -128,7 +132,7 @@ public:
     z.val = safe_negate_int64(x.val);
     return z;
   }
-  SafeInt64 operator++() {
+  SafeInt64 &operator++() {
     val = safe_add_int64(val, 1);
     return *this;
   }
@@ -137,7 +141,7 @@ public:
     val = safe_add_int64(val, 1);
     return tmp;
   }
-  SafeInt64 operator--() {
+  SafeInt64 &operator--() {
     val = safe_subtract_int64(val, 1);
     return *this;
   }
@@ -146,8 +150,9 @@ public:
     val = safe_subtract_int64(val, 1);
     return tmp;
   }
-  void operator*=(SafeInt64 const &x) {
+  SafeInt64 &operator*=(SafeInt64 const &x) {
     val = safe_multiply_int64(val, x.val);
+    return *this;
   }
   friend SafeInt64 operator*(SafeInt64 const &x, SafeInt64 const &y) {
     SafeInt64 z;
