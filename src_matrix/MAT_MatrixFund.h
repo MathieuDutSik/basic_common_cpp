@@ -1550,6 +1550,115 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   return -TheDet;
 }
 
+// Samuelson-Berkowitz characteristic-polynomial determinant. It uses only +, -,
+// * (no division), so it is valid over any commutative ring, including one with
+// zero divisors such as the truncated jet ring. O(n^4). The characteristic
+// polynomial coefficients p (p[0] = 1) are built as a product of lower-triangular
+// Toeplitz matrices; det(A) = (-1)^n p[n].
+template <typename T> T DeterminantMatBerkowitz(MyMatrix<T> const &A) {
+  int n = A.rows();
+  if (n == 0)
+    return T(1);
+  std::vector<T> p(1, T(1));
+  for (int i = 1; i <= n; i++) {
+    // Leading i x i submatrix partitioned as [[M, S], [R, a]] with
+    // M = A[0..i-2][0..i-2], R = A(i-1, 0..i-2), S = A(0..i-2, i-1), a = A(i-1,i-1).
+    // Toeplitz first column: c[0]=1, c[1]=-a, c[k+2] = -(R M^k S) for k=0..i-2.
+    std::vector<T> c(i + 1);
+    c[0] = T(1);
+    c[1] = -A(i - 1, i - 1);
+    if (i >= 2) {
+      MyVector<T> y(i - 1); // y = M^k S, initialised to S
+      for (int r = 0; r < i - 1; r++)
+        y(r) = A(r, i - 1);
+      for (int k = 0; k <= i - 2; k++) {
+        T w(0); // w = R . y
+        for (int r = 0; r < i - 1; r++)
+          w += A(i - 1, r) * y(r);
+        c[k + 2] = -w;
+        if (k < i - 2) { // y <- M y
+          MyVector<T> yn(i - 1);
+          for (int r = 0; r < i - 1; r++) {
+            T s(0);
+            for (int col = 0; col < i - 1; col++)
+              s += A(r, col) * y(col);
+            yn(r) = s;
+          }
+          y = yn;
+        }
+      }
+    }
+    // new_p = (lower-triangular Toeplitz of c, (i+1) x i) * p
+    std::vector<T> np(i + 1, T(0));
+    for (int r = 0; r <= i; r++) {
+      T s(0);
+      for (int col = 0; col <= r && col < i; col++)
+        s += c[r - col] * p[col];
+      np[r] = s;
+    }
+    p = std::move(np);
+  }
+  T det = p[n];
+  if (n % 2 == 1)
+    det = -det;
+  return det;
+}
+
+// Determinant over a ring with zero divisors (opting into
+// determinant_division_free, e.g. jets). Eliminate with UNIT pivots -- entries
+// whose constant term is non-zero, so the division is exact -- as far as
+// possible, an ordinary O(n^3) Gaussian elimination. When the active block has no
+// unit pivot left it is the corank-d residual (the matrix is singular at the
+// degeneracy point), all of whose entries are zero divisors; its determinant is
+// computed division-free by Berkowitz. Total O(n^3 + d^4): a non-singular matrix
+// has no residual and this is a plain elimination; only the small corank-d block
+// pays the division-free price.
+template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
+  using Tct = std::decay_t<decltype(constant_term(std::declval<T const &>()))>;
+  int n = Input.rows();
+  MyMatrix<T> M = Input;
+  T det(1);
+  bool neg = false;
+  for (int step = 0; step < n; step++) {
+    int pr = -1, pc = -1;
+    decltype(f_cost_pivot(std::declval<T>())) best_cost{};
+    for (int i = step; i < n; i++)
+      for (int j = step; j < n; j++)
+        if (constant_term(M(i, j)) != Tct(0)) { // unit (invertible) pivot
+          auto cost = f_cost_pivot(M(i, j));
+          if (pr == -1 || is_preferable_pivot(cost, best_cost)) {
+            pr = i;
+            pc = j;
+            best_cost = cost;
+          }
+        }
+    if (pr == -1) {
+      int d = n - step;
+      MyMatrix<T> R(d, d);
+      for (int i = 0; i < d; i++)
+        for (int j = 0; j < d; j++)
+          R(i, j) = M(step + i, step + j);
+      det = det * DeterminantMatBerkowitz(R);
+      return neg ? -det : det;
+    }
+    if (pr != step) {
+      M.row(step).swap(M.row(pr));
+      neg = !neg;
+    }
+    if (pc != step) {
+      M.col(step).swap(M.col(pc));
+      neg = !neg;
+    }
+    det = det * M(step, step);
+    for (int i = step + 1; i < n; i++) {
+      T factor = M(i, step) / M(step, step); // unit pivot -> exact division
+      for (int j = step + 1; j < n; j++)
+        M(i, j) -= factor * M(step, j);
+    }
+  }
+  return neg ? -det : det;
+}
+
 template <typename T>
 requires (is_ring_field<T>::value && !determinant_division_free<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
@@ -1557,28 +1666,12 @@ inline T DeterminantMat(MyMatrix<T> const &Input) {
 }
 
 // Determinant over a field that carries zero divisors and opts into a
-// division-free algorithm (jets). The elimination kernel is safe as long as a
-// unit pivot is available at every step, which holds precisely when the matrix
-// is non-singular at the degeneracy point (its constant term): there the
-// constant-term arithmetic is an ordinary non-singular elimination, so
-// SelectBestPivot always finds a valuation-0 (invertible) pivot. When the
-// constant-term matrix is singular the true determinant has positive valuation
-// (e.g. a simplex volume alpha*t^d), and elimination would be forced onto a
-// zero-divisor pivot; we then fall back to the division-free permutation
-// expansion. The expensive fallback therefore runs only for the (rare)
-// rationally-degenerate matrices.
+// division-free algorithm (jets): elimination with unit pivots plus a Berkowitz
+// determinant on the corank-d residual (see DeterminantMatUnitReduce).
 template <typename T>
 requires (is_ring_field<T>::value && determinant_division_free<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
-  using Tct = std::decay_t<decltype(constant_term(std::declval<T const &>()))>;
-  int n = Input.rows();
-  MyMatrix<Tct> M0(n, n);
-  for (int i = 0; i < n; i++)
-    for (int j = 0; j < n; j++)
-      M0(i, j) = constant_term(Input(i, j));
-  if (DeterminantMat(M0) != Tct(0))
-    return DeterminantMatKernel(Input);
-  return DeterminantMatPermutation(Input);
+  return DeterminantMatUnitReduce(Input);
 }
 
 template <typename T>

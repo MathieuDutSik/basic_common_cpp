@@ -161,6 +161,41 @@ int main() {
           "division-free det [[t,1],[t,t]] = -t + t^2");
   }
 
+  // Berkowitz cross-check: on ordinary rationals it must equal the elimination
+  // determinant, for several sizes.
+  {
+    bool ok = true;
+    auto fill = [](int nn, int seed) {
+      MyMatrix<T> A(nn, nn);
+      for (int i = 0; i < nn; i++)
+        for (int j = 0; j < nn; j++)
+          A(i, j) = T(((i * 7 + j * 3 + seed * 5) % 11) - 5);
+      return A;
+    };
+    for (int nn = 1; nn <= 6 && ok; nn++)
+      for (int seed = 0; seed < 4 && ok; seed++) {
+        MyMatrix<T> A = fill(nn, seed);
+        if (DeterminantMatBerkowitz(A) != DeterminantMatKernel(A))
+          ok = false;
+      }
+    check(ok, "Berkowitz == elimination determinant (n=1..6)");
+  }
+
+  // Higher-corank jet case: a 3x3 that is corank 3 at t = 0 (whole matrix is
+  // O(t)), exercising the full Berkowitz residual. M = t*I3 -> det = t^3.
+  {
+    constexpr int Nd = 4;
+    using JT = jet<T, Nd>;
+    JT t = JT::var();
+    MyMatrix<JT> M(3, 3);
+    for (int i = 0; i < 3; i++)
+      for (int j = 0; j < 3; j++)
+        M(i, j) = (i == j) ? t : JT(0);
+    JT det = DeterminantMat(M);
+    check(det[0] == T(0) && det[1] == T(0) && det[2] == T(0) && det[3] == T(1),
+          "division-free det t*I3 = t^3 (corank-3 Berkowitz residual)");
+  }
+
   if (n_error == 0)
     std::cerr << "All jet_number tests passed.\n";
   else
