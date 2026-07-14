@@ -8,6 +8,24 @@
 #include <string>
 // clang-format on
 
+template <typename Tinp, int d> class QuadField;
+
+// Lazy product of two QuadField elements -- a minimal expression template (see
+// the analogous RatProd in rational.h). `a * b` returns this proxy; the fast
+// sinks evaluate it directly into their own buffers,
+//   prod  = a * b;   -> QuadField::operator=(QuadProd)    (in place)
+//   acc  += a * b;   -> QuadField::operator+=(QuadProd)   (fused, no wrapper)
+//   acc  -= a * b;   -> QuadField::operator-=(QuadProd)   (fused, no wrapper)
+//   QuadField r=a*b; -> QuadField(QuadProd)               (fresh, as before)
+// and every other use materializes it into a QuadField through the operators
+// defined after the class, so results are identical to the eager version. Like
+// gmpxx expression templates it holds references: consume within the same
+// full-expression, do not bind with `auto` and reuse later.
+template <typename Tinp, int d> struct QuadProd {
+  QuadField<Tinp, d> const &x;
+  QuadField<Tinp, d> const &y;
+};
+
 template <typename Tinp, int d> class QuadField {
 public:
   using Tresidual = Tinp;
@@ -39,6 +57,12 @@ public:
   QuadField(T const &u) : a(u), b(0) {}
   QuadField(T const &_a, T const &_b) : a(_a), b(_b) {}
   QuadField(QuadField<T, d> const &x) : a(x.a), b(x.b) {}
+  // Construct from a lazy product a*b: a fresh object, as the eager operator*
+  // did. Also the implicit QuadProd -> QuadField conversion for every non-sink
+  // use.
+  QuadField(QuadProd<Tinp, d> const &e)
+      : a(e.x.a * e.y.a + d * e.x.b * e.y.b),
+        b(e.x.a * e.y.b + e.x.b * e.y.a) {}
   //  QuadField<T,d>& operator=(QuadField<T,d> const&); // assignment operator
   //  QuadField<T,d>& operator=(T const&); // assignment operator from T
   //  QuadField<T,d>& operator=(int const&); // assignment operator from T
@@ -54,15 +78,41 @@ public:
     b = x.b;
     return *this;
   }
+  // Assign from a lazy product a*b: multiply in place, reusing this->a / this->b
+  // (only one temporary, as in operator*=). Aliasing-safe when this == x or y:
+  // the new a is computed into a temporary and stored last, and the new b reads
+  // this->a before it is overwritten.
+  QuadField<T, d> &operator=(QuadProd<Tinp, d> const &e) {
+    T na = e.x.a * e.y.a + d * e.x.b * e.y.b;
+    b = e.x.a * e.y.b + e.x.b * e.y.a;
+    a = na;
+    return *this;
+  }
   //
   // Arithmetic operators below:
   void operator+=(QuadField<T, d> const &x) {
     a += x.a;
     b += x.b;
   }
+  // Fused accumulate of a lazy product: this += a*b, without the wrapper
+  // QuadField the eager operator* would build. Product components are formed
+  // first (aliasing-safe).
+  void operator+=(QuadProd<Tinp, d> const &e) {
+    T pa = e.x.a * e.y.a + d * e.x.b * e.y.b;
+    T pb = e.x.a * e.y.b + e.x.b * e.y.a;
+    a += pa;
+    b += pb;
+  }
   void operator-=(QuadField<T, d> const &x) {
     a -= x.a;
     b -= x.b;
+  }
+  // Fused subtract of a lazy product: this -= a*b.
+  void operator-=(QuadProd<Tinp, d> const &e) {
+    T pa = e.x.a * e.y.a + d * e.x.b * e.y.b;
+    T pb = e.x.a * e.y.b + e.x.b * e.y.a;
+    a -= pa;
+    b -= pb;
   }
   void operator/=(QuadField<T, d> const &x) {
     T disc = x.a * x.a - d * x.b * x.b;
@@ -104,9 +154,11 @@ public:
     b = a * x.b + b * x.a;
     a = hA;
   }
-  friend QuadField<T, d> operator*(QuadField<T, d> const &x,
-                                   QuadField<T, d> const &y) {
-    return QuadField<T, d>(x.a * y.a + d * x.b * y.b, x.a * y.b + x.b * y.a);
+  // Lazy: returns a QuadProd proxy (see above), evaluated in place by the
+  // consumer. Mixed int*QuadField stays eager below.
+  friend QuadProd<Tinp, d> operator*(QuadField<T, d> const &x,
+                                     QuadField<T, d> const &y) {
+    return QuadProd<Tinp, d>{x, y};
   }
   friend QuadField<T, d> operator*(int const &x, QuadField<T, d> const &y) {
     return QuadField<T, d>(x * y.a, x * y.b);
@@ -214,6 +266,86 @@ public:
     return IsNonNegative(z);
   }
 };
+
+// ---------------------------------------------------------------------------
+// QuadProd (the lazy a*b proxy) as a first-class value. Every use other than the
+// in-place sinks above materializes the proxy into a QuadField and delegates to
+// the ordinary QuadField operators, so results are identical to the eager
+// implementation. Arithmetic operators return QuadField explicitly so that a
+// QuadProd produced on the right-hand side is materialized before the operand
+// temporaries die.
+// ---------------------------------------------------------------------------
+template <typename Tinp, int d>
+inline QuadField<Tinp, d> const &quad_eval(QuadField<Tinp, d> const &x) {
+  return x;
+}
+template <typename Tinp, int d>
+inline QuadField<Tinp, d> quad_eval(QuadProd<Tinp, d> const &e) {
+  return QuadField<Tinp, d>(e);
+}
+
+#define QUADFIELD_QUADPROD_ARITH(OP)                                           \
+  template <typename Tinp, int d>                                              \
+  inline QuadField<Tinp, d> operator OP(QuadProd<Tinp, d> const &a,            \
+                                        QuadProd<Tinp, d> const &b) {          \
+    return quad_eval(a) OP quad_eval(b);                                       \
+  }                                                                            \
+  template <typename Tinp, int d>                                              \
+  inline QuadField<Tinp, d> operator OP(QuadProd<Tinp, d> const &a,            \
+                                        QuadField<Tinp, d> const &b) {         \
+    return quad_eval(a) OP b;                                                  \
+  }                                                                            \
+  template <typename Tinp, int d>                                              \
+  inline QuadField<Tinp, d> operator OP(QuadField<Tinp, d> const &a,           \
+                                        QuadProd<Tinp, d> const &b) {          \
+    return a OP quad_eval(b);                                                  \
+  }
+QUADFIELD_QUADPROD_ARITH(+)
+QUADFIELD_QUADPROD_ARITH(-)
+QUADFIELD_QUADPROD_ARITH(*)
+QUADFIELD_QUADPROD_ARITH(/)
+#undef QUADFIELD_QUADPROD_ARITH
+
+#define QUADFIELD_QUADPROD_CMP(OP)                                             \
+  template <typename Tinp, int d>                                              \
+  inline bool operator OP(QuadProd<Tinp, d> const &a,                          \
+                          QuadProd<Tinp, d> const &b) {                        \
+    return quad_eval(a) OP quad_eval(b);                                       \
+  }                                                                            \
+  template <typename Tinp, int d>                                              \
+  inline bool operator OP(QuadProd<Tinp, d> const &a,                          \
+                          QuadField<Tinp, d> const &b) {                       \
+    return quad_eval(a) OP b;                                                  \
+  }                                                                            \
+  template <typename Tinp, int d>                                              \
+  inline bool operator OP(QuadField<Tinp, d> const &a,                         \
+                          QuadProd<Tinp, d> const &b) {                        \
+    return a OP quad_eval(b);                                                  \
+  }                                                                            \
+  template <typename Tinp, int d>                                              \
+  inline bool operator OP(QuadProd<Tinp, d> const &a, int const &b) {          \
+    return quad_eval(a) OP b;                                                  \
+  }
+QUADFIELD_QUADPROD_CMP(==)
+QUADFIELD_QUADPROD_CMP(!=)
+QUADFIELD_QUADPROD_CMP(<)
+QUADFIELD_QUADPROD_CMP(>)
+QUADFIELD_QUADPROD_CMP(<=)
+QUADFIELD_QUADPROD_CMP(>=)
+#undef QUADFIELD_QUADPROD_CMP
+
+template <typename Tinp, int d>
+inline QuadField<Tinp, d> operator-(QuadProd<Tinp, d> const &e) {
+  return -quad_eval(e);
+}
+template <typename Tinp, int d>
+inline bool IsNonNegative(QuadProd<Tinp, d> const &e) {
+  return IsNonNegative(QuadField<Tinp, d>(e));
+}
+template <typename Tinp, int d>
+inline std::ostream &operator<<(std::ostream &os, QuadProd<Tinp, d> const &e) {
+  return os << QuadField<Tinp, d>(e);
+}
 
 template <typename T, int d> struct overlying_field<QuadField<T, d>> {
   typedef QuadField<typename QuadField<T, d>::Tresidual, d> field_type;

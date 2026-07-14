@@ -348,6 +348,24 @@ template <typename T> bool IsZeroVector(std::vector<T> const &V) {
   return true;
 }
 
+template <int i_field> class RealField;
+
+// Lazy product of two RealField elements -- a minimal expression template (see
+// the analogous RatProd / QuadProd). `a * b` returns this proxy; the fast sinks
+// evaluate it directly into their own storage (moving the product vector rather
+// than copying it into a fresh RealField, as the eager operator* did):
+//   prod  = a * b;   -> RealField::operator=(RealProd)   (move, reuse storage)
+//   acc  += a * b;   -> RealField::operator+=(RealProd)  (no wrapper copy)
+//   acc  -= a * b;   -> RealField::operator-=(RealProd)
+//   RealField r=a*b; -> RealField(RealProd)              (fresh, moved)
+// Every other use materializes it into a RealField through the operators after
+// the class, so results are identical to the eager version. Holds references:
+// consume within the same full-expression, do not bind with `auto`.
+template <int i_field> struct RealProd {
+  RealField<i_field> const &x;
+  RealField<i_field> const &y;
+};
+
 template <int i_field> class RealField {
 public:
   using T = Trat_real_field;
@@ -387,6 +405,12 @@ public:
   }
   RealField(std::vector<T> const &_a) : a(_a) {}
   RealField(RealField<i_field> const &x) : a(x.a) {}
+  // Construct from a lazy product a*b: the product vector is moved in (the eager
+  // operator* copied it). Also the implicit RealProd -> RealField conversion.
+  RealField(RealProd<i_field> const &e) {
+    HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
+    a = hcrf.ComputeProduct(e.x.a, e.y.a);
+  }
   //  QuadField<T,d>& operator=(QuadField<T,d> const&); // assignment operator
   //  QuadField<T,d>& operator=(T const&); // assignment operator from T
   //  QuadField<T,d>& operator=(int const&); // assignment operator from T
@@ -404,6 +428,14 @@ public:
     a = x.a;
     return *this;
   }
+  // Assign from a lazy product a*b: move the product vector into this->a (the
+  // eager path built a temporary RealField and copied). Aliasing-safe: the
+  // product is fully computed from the operands before this->a is replaced.
+  RealField<i_field> &operator=(RealProd<i_field> const &e) {
+    HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
+    a = hcrf.ComputeProduct(e.x.a, e.y.a);
+    return *this;
+  }
   //
   // Arithmetic operators below:
   void operator+=(RealField<i_field> const &x) {
@@ -412,10 +444,29 @@ public:
       a[u] += x.a[u];
     }
   }
+  // Fused accumulate of a lazy product: this += a*b, without building and
+  // copying a wrapper RealField for the product.
+  void operator+=(RealProd<i_field> const &e) {
+    HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
+    std::vector<T> V = hcrf.ComputeProduct(e.x.a, e.y.a);
+    size_t len = a.size();
+    for (size_t u = 0; u < len; u++) {
+      a[u] += V[u];
+    }
+  }
   void operator-=(RealField<i_field> const &x) {
     size_t len = a.size();
     for (size_t u = 0; u < len; u++) {
       a[u] -= x.a[u];
+    }
+  }
+  // Fused subtract of a lazy product: this -= a*b.
+  void operator-=(RealProd<i_field> const &e) {
+    HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
+    std::vector<T> V = hcrf.ComputeProduct(e.x.a, e.y.a);
+    size_t len = a.size();
+    for (size_t u = 0; u < len; u++) {
+      a[u] -= V[u];
     }
   }
   void operator/=(RealField<i_field> const &x) {
@@ -474,11 +525,11 @@ public:
     HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
     a = hcrf.ComputeProduct(a, x.a);
   }
-  friend RealField<i_field> operator*(RealField<i_field> const &x,
-                                      RealField<i_field> const &y) {
-    HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
-    std::vector<T> V = hcrf.ComputeProduct(x.a, y.a);
-    return RealField<i_field>(V);
+  // Lazy: returns a RealProd proxy (see above), evaluated in place by the
+  // consumer. Mixed int*RealField stays eager below.
+  friend RealProd<i_field> operator*(RealField<i_field> const &x,
+                                     RealField<i_field> const &y) {
+    return RealProd<i_field>{x, y};
   }
   friend RealField<i_field> operator*(int const &x,
                                       RealField<i_field> const &y) {
@@ -597,6 +648,86 @@ public:
     return hcrf.IsStrictlyPositive(z.a);
   }
 };
+
+// ---------------------------------------------------------------------------
+// RealProd (the lazy a*b proxy) as a first-class value. Every use other than the
+// in-place sinks above materializes the proxy into a RealField and delegates to
+// the ordinary RealField operators, so results are identical to the eager
+// implementation. Arithmetic operators return RealField explicitly so that a
+// RealProd produced on the right-hand side is materialized before the operand
+// temporaries die.
+// ---------------------------------------------------------------------------
+template <int i_field>
+inline RealField<i_field> const &real_eval(RealField<i_field> const &x) {
+  return x;
+}
+template <int i_field>
+inline RealField<i_field> real_eval(RealProd<i_field> const &e) {
+  return RealField<i_field>(e);
+}
+
+#define REALFIELD_REALPROD_ARITH(OP)                                           \
+  template <int i_field>                                                       \
+  inline RealField<i_field> operator OP(RealProd<i_field> const &a,            \
+                                        RealProd<i_field> const &b) {          \
+    return real_eval(a) OP real_eval(b);                                       \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline RealField<i_field> operator OP(RealProd<i_field> const &a,            \
+                                        RealField<i_field> const &b) {         \
+    return real_eval(a) OP b;                                                  \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline RealField<i_field> operator OP(RealField<i_field> const &a,           \
+                                        RealProd<i_field> const &b) {          \
+    return a OP real_eval(b);                                                  \
+  }
+REALFIELD_REALPROD_ARITH(+)
+REALFIELD_REALPROD_ARITH(-)
+REALFIELD_REALPROD_ARITH(*)
+REALFIELD_REALPROD_ARITH(/)
+#undef REALFIELD_REALPROD_ARITH
+
+#define REALFIELD_REALPROD_CMP(OP)                                             \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealProd<i_field> const &a,                          \
+                          RealProd<i_field> const &b) {                        \
+    return real_eval(a) OP real_eval(b);                                       \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealProd<i_field> const &a,                          \
+                          RealField<i_field> const &b) {                       \
+    return real_eval(a) OP b;                                                  \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealField<i_field> const &a,                         \
+                          RealProd<i_field> const &b) {                        \
+    return a OP real_eval(b);                                                  \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealProd<i_field> const &a, int const &b) {          \
+    return real_eval(a) OP b;                                                  \
+  }
+REALFIELD_REALPROD_CMP(==)
+REALFIELD_REALPROD_CMP(!=)
+REALFIELD_REALPROD_CMP(<)
+REALFIELD_REALPROD_CMP(>)
+REALFIELD_REALPROD_CMP(<=)
+REALFIELD_REALPROD_CMP(>=)
+#undef REALFIELD_REALPROD_CMP
+
+template <int i_field>
+inline RealField<i_field> operator-(RealProd<i_field> const &e) {
+  return -real_eval(e);
+}
+template <int i_field>
+inline bool IsNonNegative(RealProd<i_field> const &e) {
+  return IsNonNegative(RealField<i_field>(e));
+}
+template <int i_field>
+inline std::ostream &operator<<(std::ostream &os, RealProd<i_field> const &e) {
+  return os << RealField<i_field>(e);
+}
 
 // For this construction we cannot hope to handle rings and fields nicely
 
