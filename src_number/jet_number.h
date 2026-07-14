@@ -34,6 +34,25 @@
 #define SANITY_CHECK_JET_NUMBER
 #endif
 
+template <typename T, int N> class jet;
+
+// Lazy product of two jets -- a minimal expression template (see the analogous
+// RatProd / QuadProd). `a * b` returns this proxy (no computation, no
+// allocation) instead of a fresh jet. The fast sinks evaluate the convolution
+// directly into their own coefficient buffers, so no temporary jet (N+1 fresh T
+// coefficients) is allocated per product:
+//   prod  = a * b;   -> jet::operator=(jetProd)    (convolve into prod.c[])
+//   acc  += a * b;   -> jet::operator+=(jetProd)   (fused into acc.c[])
+//   acc  -= a * b;   -> jet::operator-=(jetProd)
+//   jet r = a * b;   -> jet(jetProd)               (fresh, as before)
+// Every other use materializes it into a jet through the operators after the
+// class, so results are identical to the eager version. Holds references:
+// consume within the same full-expression, do not bind with `auto`.
+template <typename T, int N> struct jetProd {
+  jet<T, N> const &x;
+  jet<T, N> const &y;
+};
+
 template <typename T, int N> class jet {
 public:
   std::array<T, N + 1> c; // c[k] = coefficient of t^k, 0 <= k <= N
@@ -48,6 +67,17 @@ public:
   jet(T const &v) {
     c.fill(T(0));
     c[0] = v;
+  }
+  // Construct from a lazy product a*b: materialize the convolution into this
+  // fresh jet. Also the implicit jetProd -> jet conversion for non-sink uses.
+  jet(jetProd<T, N> const &e) {
+    c.fill(T(0));
+    T prod;
+    for (int i = 0; i <= N; i++)
+      for (int j = 0; i + j <= N; j++) {
+        prod = e.x.c[i] * e.y.c[j];
+        c[i + j] += prod;
+      }
   }
   // The infinitesimal t itself (c1 = 1, all others 0).
   static jet var() {
@@ -80,6 +110,59 @@ public:
   jet &operator-=(jet const &o) {
     for (int k = 0; k <= N; k++)
       c[k] -= o.c[k];
+    return *this;
+  }
+  // Assign from a lazy product a*b: convolve directly into this->c[], reusing
+  // its buffers (no fresh jet is allocated). If this aliases an operand, fall
+  // back to a materialized temporary, since the convolution reads the operands'
+  // coefficients while it would be overwriting this->c[].
+  jet &operator=(jetProd<T, N> const &e) {
+    if (this == &e.x || this == &e.y) {
+      jet tmp(e);
+      c = std::move(tmp.c);
+      return *this;
+    }
+    for (int k = 0; k <= N; k++)
+      c[k] = T(0);
+    T prod;
+    for (int i = 0; i <= N; i++)
+      for (int j = 0; i + j <= N; j++) {
+        prod = e.x.c[i] * e.y.c[j];
+        c[i + j] += prod;
+      }
+    return *this;
+  }
+  // Fused accumulate of a lazy product: this += a*b, convolved directly into
+  // this->c[] with no temporary jet (aliasing handled as in operator=).
+  jet &operator+=(jetProd<T, N> const &e) {
+    if (this == &e.x || this == &e.y) {
+      jet tmp(e);
+      for (int k = 0; k <= N; k++)
+        c[k] += tmp.c[k];
+      return *this;
+    }
+    T prod;
+    for (int i = 0; i <= N; i++)
+      for (int j = 0; i + j <= N; j++) {
+        prod = e.x.c[i] * e.y.c[j];
+        c[i + j] += prod;
+      }
+    return *this;
+  }
+  // Fused subtract of a lazy product: this -= a*b.
+  jet &operator-=(jetProd<T, N> const &e) {
+    if (this == &e.x || this == &e.y) {
+      jet tmp(e);
+      for (int k = 0; k <= N; k++)
+        c[k] -= tmp.c[k];
+      return *this;
+    }
+    T prod;
+    for (int i = 0; i <= N; i++)
+      for (int j = 0; i + j <= N; j++) {
+        prod = e.x.c[i] * e.y.c[j];
+        c[i + j] -= prod;
+      }
     return *this;
   }
   jet &operator*=(jet const &o) {
@@ -129,19 +212,10 @@ public:
     a -= b;
     return a;
   }
-  friend jet operator*(jet const &a, jet const &b) {
-    jet r; // zero
-    // Hoisted scratch for the partial product: a GMP-backed T reuses its limb
-    // buffer across reassignments, so one scratch reassigned per term allocates
-    // once instead of once per (i, j). Generic: for any T this is just a moved
-    // declaration.
-    T prod;
-    for (int i = 0; i <= N; i++)
-      for (int j = 0; i + j <= N; j++) {
-        prod = a.c[i] * b.c[j];
-        r.c[i + j] += prod;
-      }
-    return r;
+  // Lazy: returns a jetProd proxy (see above), evaluated in place by the
+  // consumer (operator= / operator+= / operator-= / the constructor).
+  friend jetProd<T, N> operator*(jet const &a, jet const &b) {
+    return jetProd<T, N>{a, b};
   }
 
   // Inverse 1/f of a jet with non-zero constant term, from f * f^{-1} = 1:
@@ -224,6 +298,68 @@ public:
     return (a - b).sign() >= 0;
   }
 };
+
+// ---------------------------------------------------------------------------
+// jetProd (the lazy a*b proxy) as a first-class value. Every use other than the
+// in-place sinks above materializes the proxy into a jet and delegates to the
+// ordinary jet operators, so results are identical to the eager version. The
+// arithmetic operators return jet explicitly so that a jetProd produced on the
+// right-hand side is materialized before its operand temporaries die.
+// ---------------------------------------------------------------------------
+template <typename T, int N>
+inline jet<T, N> const &jet_eval(jet<T, N> const &x) {
+  return x;
+}
+template <typename T, int N>
+inline jet<T, N> jet_eval(jetProd<T, N> const &e) {
+  return jet<T, N>(e);
+}
+
+#define JET_JETPROD_ARITH(OP)                                                  \
+  template <typename T, int N>                                                 \
+  inline jet<T, N> operator OP(jetProd<T, N> const &a,                         \
+                               jetProd<T, N> const &b) {                       \
+    return jet_eval(a) OP jet_eval(b);                                         \
+  }                                                                            \
+  template <typename T, int N>                                                 \
+  inline jet<T, N> operator OP(jetProd<T, N> const &a, jet<T, N> const &b) {   \
+    return jet_eval(a) OP b;                                                   \
+  }                                                                            \
+  template <typename T, int N>                                                 \
+  inline jet<T, N> operator OP(jet<T, N> const &a, jetProd<T, N> const &b) {   \
+    return a OP jet_eval(b);                                                   \
+  }
+JET_JETPROD_ARITH(+)
+JET_JETPROD_ARITH(-)
+JET_JETPROD_ARITH(*)
+JET_JETPROD_ARITH(/)
+#undef JET_JETPROD_ARITH
+
+#define JET_JETPROD_CMP(OP)                                                    \
+  template <typename T, int N>                                                 \
+  inline bool operator OP(jetProd<T, N> const &a, jetProd<T, N> const &b) {    \
+    return jet_eval(a) OP jet_eval(b);                                         \
+  }                                                                            \
+  template <typename T, int N>                                                 \
+  inline bool operator OP(jetProd<T, N> const &a, jet<T, N> const &b) {        \
+    return jet_eval(a) OP b;                                                   \
+  }                                                                            \
+  template <typename T, int N>                                                 \
+  inline bool operator OP(jet<T, N> const &a, jetProd<T, N> const &b) {        \
+    return a OP jet_eval(b);                                                   \
+  }
+JET_JETPROD_CMP(==)
+JET_JETPROD_CMP(!=)
+JET_JETPROD_CMP(<)
+JET_JETPROD_CMP(>)
+JET_JETPROD_CMP(<=)
+JET_JETPROD_CMP(>=)
+#undef JET_JETPROD_CMP
+
+template <typename T, int N>
+inline jet<T, N> operator-(jetProd<T, N> const &e) {
+  return -jet_eval(e);
+}
 
 // The constant term (value at t = 0) of a jet is c0. This overloads the generic
 // constant_term (the identity, in TemplateTraits.h) so that the combinatorial /
