@@ -159,6 +159,57 @@ template <> struct is_exact_arithmetic<float> {
   static const bool value = false;
 };
 
+// Trait for the preferred multiply-accumulate ("acc += a * b") form.
+//
+// value == true  (the default): the direct fused form  acc += a * b  is at
+//   least as fast as materializing the product into a temporary first. True for
+//   native types, for boost::multiprecision::mpz_int (whose expression
+//   templates fuse += product), and for the number types whose
+//   operator+=(product-proxy) accumulates in place (the jet / RealField
+//   expression templates). The generic matrix kernels then keep writing
+//   acc += a * b.
+//
+// value == false: a reused scratch is measurably faster,
+//   prod = a * b; acc += prod;
+//   because acc += a * b would allocate and free a fresh temporary on every
+//   evaluation (gmpxx / boost.cpp: mpz_class, mpq_class, cpp_int, cpp_rational,
+//   mpq_rational), or because operator=(product) is cheaper than
+//   operator+=(product) for the type (QuadField). Both branches compute the
+//   same value; the trait only selects the faster implementation.
+template <typename T> struct is_fma_prefered {
+  static const bool value = true;
+};
+
+// Empty placeholder for a reuse-scratch that a code path does not need. When
+// is_fma_prefered<T> is true a kernel declares its scratch as
+//   std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> scratch;
+// so that for the fused-preferring types NO unused T (e.g. an mpq_class or a
+// jet) is constructed at all -- the scratch collapses to this empty object,
+// which the compiler need not even lay out.
+struct empty_scratch {};
+
+// Native types: the product stays in a register, so the direct/fused form is
+// best (a scratch has nothing to save). These match the default but are stated
+// explicitly so every numerical type carries a deliberate choice.
+template <> struct is_fma_prefered<int8_t> {
+  static const bool value = true;
+};
+template <> struct is_fma_prefered<int16_t> {
+  static const bool value = true;
+};
+template <> struct is_fma_prefered<int32_t> {
+  static const bool value = true;
+};
+template <> struct is_fma_prefered<int64_t> {
+  static const bool value = true;
+};
+template <> struct is_fma_prefered<double> {
+  static const bool value = true;
+};
+template <> struct is_fma_prefered<float> {
+  static const bool value = true;
+};
+
 // Trait definition for fields
 
 template <typename T> struct is_ring_field {};

@@ -146,6 +146,16 @@ template <> struct is_implementation_of_Z<boost::multiprecision::mpq_rational> {
   static const bool value = false;
 };
 
+// FMA form (see is_fma_prefered). boost mpz_int fuses `acc += a*b` via its
+// expression templates, so the direct form is best (measured). mpq_rational
+// does not, so the reused-scratch form wins.
+template <> struct is_fma_prefered<boost::multiprecision::mpz_int> {
+  static const bool value = true;
+};
+template <> struct is_fma_prefered<boost::multiprecision::mpq_rational> {
+  static const bool value = false;
+};
+
 template <> struct is_implementation_of_Q<boost::multiprecision::mpz_int> {
   static const bool value = false;
 };

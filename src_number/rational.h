@@ -515,6 +515,14 @@ template <typename Tint> struct is_implementation_of_Q<Rational<Tint>> {
   static const bool value = true;
 };
 
+// FMA form (see is_fma_prefered). The reused-scratch form is (marginally) best
+// for Rational: with the expression template, operator=(RatProd) is as cheap as
+// operator+=(RatProd), and for a heap-backed Tint the scratch avoids a fresh
+// numerator/denominator allocation.
+template <typename Tint> struct is_fma_prefered<Rational<Tint>> {
+  static const bool value = false;
+};
+
 template <typename Tint> struct is_ring_field<Rational<Tint>> {
   static const bool value = true;
 };

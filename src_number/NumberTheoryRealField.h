@@ -760,6 +760,13 @@ template <int i_field> struct is_ring_field<RealField<i_field>> {
   static const bool value = true;
 };
 
+// FMA form (see is_fma_prefered). The direct/fused form is fastest for RealField
+// (measured): operator+=(RealProd) accumulates the product in place, while the
+// scratch form move-assigns the product vector into a temporary first.
+template <int i_field> struct is_fma_prefered<RealField<i_field>> {
+  static const bool value = true;
+};
+
 template <int i_field> struct is_exact_arithmetic<RealField<i_field>> {
   static const bool value = true;
 };

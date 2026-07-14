@@ -398,6 +398,13 @@ template <typename T, int d> struct is_ring_field<QuadField<T, d>> {
   static const bool value = is_ring_field<T>::value;
 };
 
+// FMA form (see is_fma_prefered). The reused-scratch form is fastest for
+// QuadField (measured): operator=(QuadProd) uses one temporary vs
+// operator+=(QuadProd)'s two.
+template <typename T, int d> struct is_fma_prefered<QuadField<T, d>> {
+  static const bool value = false;
+};
+
 template <typename T, int d> struct is_exact_arithmetic<QuadField<T, d>> {
   static const bool value = true;
 };

@@ -1083,6 +1083,12 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
   int nbRow = Input.rows();
   int nbCol = Input.cols();
   T prov1;
+  // Reuse-scratch for the row-combination product, hoisted so its buffer is
+  // reused across the whole elimination. For fused-preferring types it collapses
+  // to an empty object (no unused T is constructed); see is_fma_prefered.
+  [[maybe_unused]] std::conditional_t<is_fma_prefered<T>::value, empty_scratch,
+                                      T>
+      prov2;
 #ifdef DEBUG_MAT_MATRIX_DISABLE
   std::cerr << "TMat_Inverse_destroy, step 1\n";
 #endif
@@ -1128,10 +1134,24 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
       if (iCol != iColFound) {
         prov1 = Input(iRow, iCol);
         if (prov1 != 0) {
-          for (iRowB = 0; iRowB < nbRow; iRowB++)
-            Output(iRowB, iCol) -= prov1 * Output(iRowB, iColFound);
-          for (iRowB = iRow; iRowB < nbRow; iRowB++)
-            Input(iRowB, iCol) -= prov1 * Input(iRowB, iColFound);
+          // Y -= prov1 * pivot_col. For types where the product allocates a
+          // temporary each evaluation (mpz_class, mpq_class, ...) reuse prov2;
+          // otherwise the fused form is at least as good (see is_fma_prefered).
+          if constexpr (is_fma_prefered<T>::value) {
+            for (iRowB = 0; iRowB < nbRow; iRowB++)
+              Output(iRowB, iCol) -= prov1 * Output(iRowB, iColFound);
+            for (iRowB = iRow; iRowB < nbRow; iRowB++)
+              Input(iRowB, iCol) -= prov1 * Input(iRowB, iColFound);
+          } else {
+            for (iRowB = 0; iRowB < nbRow; iRowB++) {
+              prov2 = prov1 * Output(iRowB, iColFound);
+              Output(iRowB, iCol) -= prov2;
+            }
+            for (iRowB = iRow; iRowB < nbRow; iRowB++) {
+              prov2 = prov1 * Input(iRowB, iColFound);
+              Input(iRowB, iCol) -= prov2;
+            }
+          }
         }
       }
     if (iColFound != iRow) {

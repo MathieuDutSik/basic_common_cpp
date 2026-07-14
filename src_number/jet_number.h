@@ -386,6 +386,12 @@ template <typename T, int N> T jet_deriv(jet<T, N> const &j, int k) {
 template <typename T, int N> struct is_ring_field<jet<T, N>> {
   static const bool value = is_ring_field<T>::value;
 };
+// FMA form (see is_fma_prefered). The direct/fused form is fastest for jet
+// (measured): operator+=(jetProd) / operator-=(jetProd) convolve the product
+// directly into the accumulator in a single pass, with no temporary jet.
+template <typename T, int N> struct is_fma_prefered<jet<T, N>> {
+  static const bool value = true;
+};
 template <typename T, int N> struct is_totally_ordered<jet<T, N>> {
   static const bool value = true;
 };

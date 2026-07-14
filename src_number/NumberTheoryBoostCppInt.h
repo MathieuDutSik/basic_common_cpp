@@ -157,6 +157,15 @@ template <> struct is_implementation_of_Z<boost::multiprecision::cpp_rational> {
   static const bool value = false;
 };
 
+// FMA form (see is_fma_prefered). Both cpp_int and cpp_rational materialize a
+// temporary for `a*b`, so the reused-scratch form is faster (measured).
+template <> struct is_fma_prefered<boost::multiprecision::cpp_int> {
+  static const bool value = false;
+};
+template <> struct is_fma_prefered<boost::multiprecision::cpp_rational> {
+  static const bool value = false;
+};
+
 template <> struct is_implementation_of_Q<boost::multiprecision::cpp_int> {
   static const bool value = false;
 };

@@ -179,6 +179,12 @@ template <typename Tint, Tint P> struct is_implementation_of_Q<Fp<Tint, P>> {
   static const bool value = false;
 };
 
+// FMA form (see is_fma_prefered). Fp holds a single native-width residue (< P),
+// so the direct/fused form is best (no heap allocation for a scratch to save).
+template <typename Tint, Tint P> struct is_fma_prefered<Fp<Tint, P>> {
+  static const bool value = true;
+};
+
 template <typename Tint, Tint P> struct is_ring_field<Fp<Tint, P>> {
   static const bool value = true;
 };

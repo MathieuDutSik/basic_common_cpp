@@ -75,6 +75,17 @@ template <> struct is_ring_field<mpq_class> {
   static const bool value = true;
 };
 
+// gmpxx does not fuse `acc += a*b`; it allocates a temporary for the product on
+// every evaluation. A reused scratch (prod = a*b; acc += prod) avoids that, so
+// the scratch form is preferred for both mpz_class and mpq_class.
+template <> struct is_fma_prefered<mpz_class> {
+  static const bool value = false;
+};
+
+template <> struct is_fma_prefered<mpq_class> {
+  static const bool value = false;
+};
+
 // is_totally_ordered (i.e. not a complex field or ring)
 
 template <> struct is_totally_ordered<mpz_class> {

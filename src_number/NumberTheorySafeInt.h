@@ -269,6 +269,13 @@ template <> struct is_implementation_of_Z<SafeInt64> {
   static const bool value = true;
 };
 
+// FMA form (see is_fma_prefered). SafeInt64 is a native-width integer with no
+// heap allocation, so the direct/fused form is best (nothing for a scratch to
+// save).
+template <> struct is_fma_prefered<SafeInt64> {
+  static const bool value = true;
+};
+
 // is an implementation of Q
 
 template <> struct is_implementation_of_Q<SafeInt64> {
