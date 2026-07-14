@@ -356,10 +356,6 @@ MyMatrix<T> NullspaceTrMat_no_division(MyMatrix<T> const &Input) {
     maxRank = nbCol;
   size_t sizMat = maxRank + 1;
   MyMatrix<T> provMat(sizMat, nbCol);
-  // Reuse-scratch for the row-elimination products (see is_fma_prefered);
-  // collapses to an empty object for fused-preferring types.
-  [[maybe_unused]]
-  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
   size_t eRank = 0;
