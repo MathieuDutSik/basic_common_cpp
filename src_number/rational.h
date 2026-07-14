@@ -19,6 +19,29 @@
   A rational class supposed to build integers.
   Typical use would be for example Rational<long> which should be pretty fast.
  */
+template <typename Tint> struct Rational;
+
+// Lazy product of two Rationals -- a minimal expression template. `a * b`
+// returns this proxy (no computation, no allocation) instead of a fresh
+// Rational. The proxy is a first-class citizen: the fast sinks evaluate it
+// directly into their own already-allocated buffers,
+//   prod  = a * b;     -> Rational::operator=(RatProd)   (in place)
+//   acc  += a * b;     -> Rational::operator+=(RatProd)  (fused, no temp)
+//   acc  -= a * b;     -> Rational::operator-=(RatProd)  (fused, no temp)
+//   Rational r = a*b;  -> Rational(RatProd)              (fresh, as before)
+// and every other use (arithmetic combinations like s*a + t*b, comparisons,
+// printing, function arguments, ...) materializes it into a Rational through
+// the operators defined after the class, exactly as before -- so introducing
+// the proxy changes no results.
+//
+// Like the gmpxx / boost expression templates it holds references, so it must
+// be consumed within the same full-expression: do NOT bind it with `auto` and
+// use it after the operands may have changed or gone out of scope.
+template <typename Tint> struct RatProd {
+  Rational<Tint> const &x;
+  Rational<Tint> const &y;
+};
+
 template <typename Tint> struct Rational {
 private:
   Tint num;
@@ -30,6 +53,12 @@ public:
   Rational(Tint const &x) : num(x), den(1) {}
   Rational(Tint const &num, Tint const &den) : num(num), den(den) {}
   Rational(Rational<Tint> const &x) : num(x.num), den(x.den) {}
+  // Construct from a lazy product a*b: a fresh object (allocates), as before.
+  // Also the implicit RatProd -> Rational conversion used by every non-sink use.
+  Rational(RatProd<Tint> const &e)
+      : num(e.x.num * e.y.num), den(e.x.den * e.y.den) {
+    gcd_reduction();
+  }
   // Assignment operators
   Rational<Tint> &operator=(Tint const &u) {
     // assignment operator from int
@@ -41,6 +70,16 @@ public:
     // assignment operator
     num = x.num;
     den = x.den;
+    return *this;
+  }
+  // Assign from a lazy product a*b: the multiplication is done in place, reusing
+  // this->num / this->den (a GMP-backed Tint reuses its buffer on assignment),
+  // so `prod = a * b;` allocates nothing per call. Aliasing-safe (num is
+  // computed from the operands before den is touched, and vice versa).
+  Rational<Tint> &operator=(RatProd<Tint> const &e) {
+    num = e.x.num * e.y.num;
+    den = e.x.den * e.y.den;
+    gcd_reduction();
     return *this;
   }
   Tint &get_num() { return num; }
@@ -126,6 +165,21 @@ public:
     gcd_reduction();
     return *this;
   }
+  // Fused accumulate of a lazy product: this += a*b, without materializing a
+  // temporary Rational for the product.
+  Rational<Tint> &operator+=(RatProd<Tint> const &e) {
+    Tint pn = e.x.num * e.y.num;
+    Tint pd = e.x.den * e.y.den;
+    Tint gp = comp_gcd(pn, pd);
+    pn = pn / gp;
+    pd = pd / gp;
+    Tint gcd = comp_gcd(den, pd);
+    Tint part_prod = pd / gcd;
+    num = num * part_prod + pn * (den / gcd);
+    den = den * part_prod;
+    gcd_reduction();
+    return *this;
+  }
   Rational<Tint> &operator-=(Rational<Tint> const &x) {
     Tint gcd = comp_gcd(den, x.den);
     Tint part_prod = x.den / gcd;
@@ -134,6 +188,20 @@ public:
     den = new_den;
     // Yes, it is needed: example 1/2 - 1/2
     //    check("-=");
+    gcd_reduction();
+    return *this;
+  }
+  // Fused subtract of a lazy product: this -= a*b, without a temporary product.
+  Rational<Tint> &operator-=(RatProd<Tint> const &e) {
+    Tint pn = e.x.num * e.y.num;
+    Tint pd = e.x.den * e.y.den;
+    Tint gp = comp_gcd(pn, pd);
+    pn = pn / gp;
+    pd = pd / gp;
+    Tint gcd = comp_gcd(den, pd);
+    Tint part_prod = pd / gcd;
+    num = num * part_prod - pn * (den / gcd);
+    den = den * part_prod;
     gcd_reduction();
     return *this;
   }
@@ -226,13 +294,11 @@ public:
     return *this;
   }
   //
-  friend Rational<Tint> operator*(Rational<Tint> const &x,
-                                  Rational<Tint> const &y) {
-    Rational<Tint> z;
-    z.num = x.num * y.num;
-    z.den = x.den * y.den;
-    z.gcd_reduction();
-    return z;
+  // Lazy: returns a RatProd proxy (see above), evaluated in place by the
+  // consumer. Mixed Rational*int / int*Rational stay eager below.
+  friend RatProd<Tint> operator*(Rational<Tint> const &x,
+                                 Rational<Tint> const &y) {
+    return RatProd<Tint>{x, y};
   }
   friend Rational<Tint> operator*(int const &x, Rational<Tint> const &y) {
     Rational<Tint> z;
@@ -351,6 +417,76 @@ public:
     return x.num < y * x.den;
   }
 };
+
+// ---------------------------------------------------------------------------
+// RatProd (the lazy a*b proxy) as a first-class value. Every use other than the
+// in-place sinks above (operator= / operator+= / operator-= / the constructor)
+// materializes the proxy into a Rational and delegates to the ordinary Rational
+// operators, so all results are identical to the eager implementation. The
+// arithmetic operators return Rational<Tint> explicitly, which forces any
+// RatProd produced on the right-hand side (e.g. by Rational*Rational) to be
+// materialized before the operand temporaries die.
+// ---------------------------------------------------------------------------
+template <typename Tint>
+inline Rational<Tint> const &rat_eval(Rational<Tint> const &x) {
+  return x;
+}
+template <typename Tint>
+inline Rational<Tint> rat_eval(RatProd<Tint> const &e) {
+  return Rational<Tint>(e);
+}
+
+#define RATIONAL_RATPROD_ARITH(OP)                                             \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(RatProd<Tint> const &a,                    \
+                                    RatProd<Tint> const &b) {                  \
+    return rat_eval(a) OP rat_eval(b);                                         \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(RatProd<Tint> const &a,                    \
+                                    Rational<Tint> const &b) {                 \
+    return rat_eval(a) OP b;                                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(Rational<Tint> const &a,                   \
+                                    RatProd<Tint> const &b) {                  \
+    return a OP rat_eval(b);                                                   \
+  }
+RATIONAL_RATPROD_ARITH(+)
+RATIONAL_RATPROD_ARITH(-)
+RATIONAL_RATPROD_ARITH(*)
+RATIONAL_RATPROD_ARITH(/)
+#undef RATIONAL_RATPROD_ARITH
+
+#define RATIONAL_RATPROD_CMP(OP)                                               \
+  template <typename Tint>                                                     \
+  inline bool operator OP(RatProd<Tint> const &a, RatProd<Tint> const &b) {    \
+    return rat_eval(a) OP rat_eval(b);                                         \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline bool operator OP(RatProd<Tint> const &a, Rational<Tint> const &b) {   \
+    return rat_eval(a) OP b;                                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline bool operator OP(Rational<Tint> const &a, RatProd<Tint> const &b) {   \
+    return a OP rat_eval(b);                                                   \
+  }
+RATIONAL_RATPROD_CMP(==)
+RATIONAL_RATPROD_CMP(!=)
+RATIONAL_RATPROD_CMP(<)
+RATIONAL_RATPROD_CMP(>)
+RATIONAL_RATPROD_CMP(<=)
+RATIONAL_RATPROD_CMP(>=)
+#undef RATIONAL_RATPROD_CMP
+
+template <typename Tint>
+inline Rational<Tint> operator-(RatProd<Tint> const &e) {
+  return -rat_eval(e);
+}
+template <typename Tint>
+inline std::ostream &operator<<(std::ostream &os, RatProd<Tint> const &e) {
+  return os << Rational<Tint>(e);
+}
 
 namespace std {
 template <typename Tint> std::string to_string(const Rational<Tint> &e_val) {
