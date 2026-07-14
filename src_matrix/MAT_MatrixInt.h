@@ -1759,8 +1759,15 @@ public:
               TheVectWork(j) -= eProd;
             }
           }
-          for (int iVect = 0; iVect < nbVect; iVect++) {
-            eSol(iVect) += TheQ * eEquivMat(iRow, iVect);
+          if constexpr (is_fma_prefered<T>::value) {
+            for (int iVect = 0; iVect < nbVect; iVect++) {
+              eSol(iVect) += TheQ * eEquivMat(iRow, iVect);
+            }
+          } else {
+            for (int iVect = 0; iVect < nbVect; iVect++) {
+              eProd = TheQ * eEquivMat(iRow, iVect);
+              eSol(iVect) += eProd;
+            }
           }
         }
       }
