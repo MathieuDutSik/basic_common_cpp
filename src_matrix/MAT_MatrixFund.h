@@ -1504,10 +1504,19 @@ template <typename T>
 bool IsVectorInSpace(const SelectionRowCol<T> &eSelect, const MyVector<T> &V) {
   size_t dim_nsp = eSelect.NSP.rows();
   size_t n_cols = eSelect.NSP.cols();
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> prod;
   for (size_t i_nsp = 0; i_nsp < dim_nsp; i_nsp++) {
     T scal(0);
-    for (size_t i_col = 0; i_col < n_cols; i_col++)
-      scal += eSelect.NSP(i_nsp, i_col) * V(i_col);
+    if constexpr (is_fma_prefered<T>::value) {
+      for (size_t i_col = 0; i_col < n_cols; i_col++)
+        scal += eSelect.NSP(i_nsp, i_col) * V(i_col);
+    } else {
+      for (size_t i_col = 0; i_col < n_cols; i_col++) {
+        prod = eSelect.NSP(i_nsp, i_col) * V(i_col);
+        scal += prod;
+      }
+    }
     if (scal != 0)
       return false;
   }
@@ -1595,10 +1604,19 @@ void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat,
     std::cerr << "n=" << n << " nbRow=" << nbRow << "\n";
     throw TerminalException{1};
   }
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> prod;
   for (iCol = 0; iCol < nbCol; iCol++) {
     T t(0);
-    for (iRow = 0; iRow < n; iRow++)
-      t += TheMat(iRow, iCol) * eVect(iRow);
+    if constexpr (is_fma_prefered<T>::value) {
+      for (iRow = 0; iRow < n; iRow++)
+        t += TheMat(iRow, iCol) * eVect(iRow);
+    } else {
+      for (iRow = 0; iRow < n; iRow++) {
+        prod = TheMat(iRow, iCol) * eVect(iRow);
+        t += prod;
+      }
+    }
     eVectImg(iCol) = t;
   }
 }

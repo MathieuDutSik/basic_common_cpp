@@ -40,6 +40,10 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
     maxRank = nbCol;
   size_t sizMat = maxRank + 1;
   MyMatrix<T> provMat(sizMat, nbCol);
+  // Reuse-scratch for the row-elimination products (see is_fma_prefered);
+  // collapses to an empty object for fused-preferring types.
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
   size_t eRank = 0;
@@ -49,8 +53,15 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
       size_t eCol = ListColSelect[iRank];
       T eVal1 = provMat(eRank, eCol);
       if (eVal1 != 0) {
-        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
-          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        if constexpr (is_fma_prefered<T>::value) {
+          for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+            provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+          }
+        } else {
+          for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+            eProd = eVal1 * provMat(iRank, iCol);
+            provMat(eRank, iCol) -= eProd;
+          }
         }
       }
     }
@@ -72,8 +83,15 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
         T eVal1 = provMat(iRank, FirstNonZeroCol);
         if (eVal1 != 0) {
           size_t StartCol = ListColSelect[iRank];
-          for (size_t iCol = StartCol; iCol < nbCol; iCol++)
-            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          if constexpr (is_fma_prefered<T>::value) {
+            for (size_t iCol = StartCol; iCol < nbCol; iCol++)
+              provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          } else {
+            for (size_t iCol = StartCol; iCol < nbCol; iCol++) {
+              eProd = eVal1 * provMat(eRank, iCol);
+              provMat(iRank, iCol) -= eProd;
+            }
+          }
         }
       }
       eRank++;
@@ -102,6 +120,10 @@ MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol,
                 "Requires T to be a field in NullspaceTrMat_Kernel");
   size_t target_rank = nbCol - target_zero;
   MyMatrix<T> provMat(target_rank, nbCol);
+  // Reuse-scratch for the row-elimination products (see is_fma_prefered);
+  // collapses to an empty object for fused-preferring types.
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
   size_t eRank = 0;
@@ -111,8 +133,15 @@ MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol,
       size_t eCol = ListColSelect[iRank];
       T eVal1 = provMat(eRank, eCol);
       if (eVal1 != 0) {
-        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
-          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        if constexpr (is_fma_prefered<T>::value) {
+          for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+            provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+          }
+        } else {
+          for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+            eProd = eVal1 * provMat(iRank, iCol);
+            provMat(eRank, iCol) -= eProd;
+          }
         }
       }
     }
@@ -134,8 +163,15 @@ MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol,
         T eVal1 = provMat(iRank, FirstNonZeroCol);
         if (eVal1 != 0) {
           size_t StartCol = ListColSelect[iRank];
-          for (size_t iCol = StartCol; iCol < nbCol; iCol++)
-            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          if constexpr (is_fma_prefered<T>::value) {
+            for (size_t iCol = StartCol; iCol < nbCol; iCol++)
+              provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          } else {
+            for (size_t iCol = StartCol; iCol < nbCol; iCol++) {
+              eProd = eVal1 * provMat(eRank, iCol);
+              provMat(iRank, iCol) -= eProd;
+            }
+          }
         }
       }
       eRank++;
@@ -180,6 +216,10 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
                 "Requires T to be a field in NullspaceTrMat_Kernel");
   size_t target_rank = nbCol - 1;
   MyMatrix<T> provMat(target_rank, nbCol);
+  // Reuse-scratch for the row-elimination products (see is_fma_prefered);
+  // collapses to an empty object for fused-preferring types.
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
   size_t eRank = 0;
@@ -189,8 +229,15 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
       size_t eCol = ListColSelect[iRank];
       T eVal1 = provMat(eRank, eCol);
       if (eVal1 != 0) {
-        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
-          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        if constexpr (is_fma_prefered<T>::value) {
+          for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+            provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+          }
+        } else {
+          for (size_t iCol = eCol; iCol < nbCol; iCol++) {
+            eProd = eVal1 * provMat(iRank, iCol);
+            provMat(eRank, iCol) -= eProd;
+          }
         }
       }
     }
@@ -212,8 +259,15 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
         T eVal1 = provMat(iRank, FirstNonZeroCol);
         if (eVal1 != 0) {
           size_t StartCol = ListColSelect[iRank];
-          for (size_t iCol = StartCol; iCol < nbCol; iCol++)
-            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          if constexpr (is_fma_prefered<T>::value) {
+            for (size_t iCol = StartCol; iCol < nbCol; iCol++)
+              provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          } else {
+            for (size_t iCol = StartCol; iCol < nbCol; iCol++) {
+              eProd = eVal1 * provMat(eRank, iCol);
+              provMat(iRank, iCol) -= eProd;
+            }
+          }
         }
       }
       eRank++;
@@ -302,6 +356,10 @@ MyMatrix<T> NullspaceTrMat_no_division(MyMatrix<T> const &Input) {
     maxRank = nbCol;
   size_t sizMat = maxRank + 1;
   MyMatrix<T> provMat(sizMat, nbCol);
+  // Reuse-scratch for the row-elimination products (see is_fma_prefered);
+  // collapses to an empty object for fused-preferring types.
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
   size_t eRank = 0;
