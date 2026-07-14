@@ -131,9 +131,16 @@ public:
   }
   friend jet operator*(jet const &a, jet const &b) {
     jet r; // zero
+    // Hoisted scratch for the partial product: a GMP-backed T reuses its limb
+    // buffer across reassignments, so one scratch reassigned per term allocates
+    // once instead of once per (i, j). Generic: for any T this is just a moved
+    // declaration.
+    T prod;
     for (int i = 0; i <= N; i++)
-      for (int j = 0; i + j <= N; j++)
-        r.c[i + j] += a.c[i] * b.c[j];
+      for (int j = 0; i + j <= N; j++) {
+        prod = a.c[i] * b.c[j];
+        r.c[i + j] += prod;
+      }
     return r;
   }
 
@@ -149,11 +156,16 @@ public:
 #endif
     jet r;
     r.c[0] = T(1) / f.c[0];
+    // Hoisted scratch (buffer reuse across iterations, as in operator*).
+    T s, prod;
     for (int k = 1; k <= N; k++) {
-      T s(0);
-      for (int j = 1; j <= k; j++)
-        s += f.c[j] * r.c[k - j];
-      r.c[k] = -r.c[0] * s;
+      s = T(0);
+      for (int j = 1; j <= k; j++) {
+        prod = f.c[j] * r.c[k - j];
+        s += prod;
+      }
+      prod = r.c[0] * s;
+      r.c[k] = -prod;
     }
 #ifdef SANITY_CHECK_JET_NUMBER
     // Cheap invariant: f * f^{-1} == 1 (one order-N convolution).
