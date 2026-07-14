@@ -756,8 +756,16 @@ T ScalarProduct(MyVector<T> const &V1, MyVector<T> const &V2) {
   }
   size_t siz = V1.size();
   T eSum(0);
-  for (size_t i = 0; i < siz; i++)
-    eSum += V1(i) * V2(i);
+  if constexpr (is_fma_prefered<T>::value) {
+    for (size_t i = 0; i < siz; i++)
+      eSum += V1(i) * V2(i);
+  } else {
+    T prod;
+    for (size_t i = 0; i < siz; i++) {
+      prod = V1(i) * V2(i);
+      eSum += prod;
+    }
+  }
   return eSum;
 }
 
@@ -772,10 +780,19 @@ MyVector<T> ListScalarProduct(MyVector<T> const &V, MyMatrix<T> const &eMat) {
     throw TerminalException{1};
   }
   MyVector<T> retVect(nbRow);
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> prod;
   for (int iRow = 0; iRow < nbRow; iRow++) {
     T eSum(0);
-    for (int iCol = 0; iCol < dim; iCol++)
-      eSum += eMat(iRow, iCol) * V(iCol);
+    if constexpr (is_fma_prefered<T>::value) {
+      for (int iCol = 0; iCol < dim; iCol++)
+        eSum += eMat(iRow, iCol) * V(iCol);
+    } else {
+      for (int iCol = 0; iCol < dim; iCol++) {
+        prod = eMat(iRow, iCol) * V(iCol);
+        eSum += prod;
+      }
+    }
     retVect(iRow) = eSum;
   }
   return retVect;
@@ -854,10 +871,19 @@ MyVector<T> ProductVectorMatrix(MyVector<T> const &X, MyMatrix<T> const &M) {
     throw TerminalException{1};
   }
   MyVector<T> Vret(nbCol);
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> prod;
   for (int iCol = 0; iCol < nbCol; iCol++) {
     T sum(0);
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      sum += M(iRow, iCol) * X(iRow);
+    if constexpr (is_fma_prefered<T>::value) {
+      for (int iRow = 0; iRow < nbRow; iRow++)
+        sum += M(iRow, iCol) * X(iRow);
+    } else {
+      for (int iRow = 0; iRow < nbRow; iRow++) {
+        prod = M(iRow, iCol) * X(iRow);
+        sum += prod;
+      }
+    }
     Vret(iCol) = sum;
   }
   return Vret;
@@ -903,10 +929,19 @@ MyVector<T> VectorMatrix(MyVector<T> const &eVect, MyMatrix<T> const &eMat) {
   }
 #endif
   MyVector<T> rVect(nbCol);
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> prod;
   for (int iCol = 0; iCol < nbCol; iCol++) {
     T eSum(0);
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      eSum += eMat(iRow, iCol) * eVect(iRow);
+    if constexpr (is_fma_prefered<T>::value) {
+      for (int iRow = 0; iRow < nbRow; iRow++)
+        eSum += eMat(iRow, iCol) * eVect(iRow);
+    } else {
+      for (int iRow = 0; iRow < nbRow; iRow++) {
+        prod = eMat(iRow, iCol) * eVect(iRow);
+        eSum += prod;
+      }
+    }
     rVect(iCol) = eSum;
   }
   return rVect;
@@ -1268,6 +1303,11 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
     maxRank = nbCol;
   size_t sizMat = maxRank + 1;
   MyMatrix<T> provMat(sizMat, nbCol);
+  // Reuse-scratch for the row-elimination products, hoisted so its buffer is
+  // reused across the whole reduction; collapses to an empty object for
+  // fused-preferring types (see is_fma_prefered), so no unused T is built.
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<int> ListColSelect;
   std::vector<int> ListRowSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
@@ -1279,8 +1319,15 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
       int eCol = ListColSelect[iRank];
       T eVal1 = provMat(eRank, eCol);
       if (eVal1 != 0) {
-        for (size_t iCol = 0; iCol < nbCol; iCol++)
-          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        if constexpr (is_fma_prefered<T>::value) {
+          for (size_t iCol = 0; iCol < nbCol; iCol++)
+            provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        } else {
+          for (size_t iCol = 0; iCol < nbCol; iCol++) {
+            eProd = eVal1 * provMat(iRank, iCol);
+            provMat(eRank, iCol) -= eProd;
+          }
+        }
       }
     }
     auto get_pivotcol_iife = [&]() -> size_t {
@@ -1303,8 +1350,15 @@ SelectionRowCol<T> TMat_SelectRowCol_Kernel(size_t nbRow, size_t nbCol, F f) {
       for (size_t iRank = 0; iRank < eRank; iRank++) {
         T eVal1 = provMat(iRank, FirstNonZeroCol);
         if (eVal1 != 0) {
-          for (size_t iCol = 0; iCol < nbCol; iCol++)
-            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          if constexpr (is_fma_prefered<T>::value) {
+            for (size_t iCol = 0; iCol < nbCol; iCol++)
+              provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          } else {
+            for (size_t iCol = 0; iCol < nbCol; iCol++) {
+              eProd = eVal1 * provMat(eRank, iCol);
+              provMat(iRank, iCol) -= eProd;
+            }
+          }
         }
       }
       eRank++;
@@ -1342,6 +1396,11 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol,
     maxRank = nbCol;
   size_t sizMat = maxRank + 1;
   MyMatrix<T> provMat(sizMat, nbCol);
+  // Reuse-scratch for the row-elimination products, hoisted so its buffer is
+  // reused across the whole reduction; collapses to an empty object for
+  // fused-preferring types (see is_fma_prefered), so no unused T is built.
+  [[maybe_unused]]
+  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
   std::vector<int> ListColSelect;
   std::vector<int> ListRowSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
@@ -1353,8 +1412,15 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol,
       int eCol = ListColSelect[iRank];
       T eVal1 = provMat(eRank, eCol);
       if (eVal1 != 0) {
-        for (size_t iCol = 0; iCol < nbCol; iCol++)
-          provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        if constexpr (is_fma_prefered<T>::value) {
+          for (size_t iCol = 0; iCol < nbCol; iCol++)
+            provMat(eRank, iCol) -= eVal1 * provMat(iRank, iCol);
+        } else {
+          for (size_t iCol = 0; iCol < nbCol; iCol++) {
+            eProd = eVal1 * provMat(iRank, iCol);
+            provMat(eRank, iCol) -= eProd;
+          }
+        }
       }
     }
     auto get_firstnonzerocol_iife = [&]() -> size_t {
@@ -1380,8 +1446,15 @@ SelectionRowCol<T> TMat_SelectRowColMaxPivot_Kernel(size_t nbRow, size_t nbCol,
       for (size_t iRank = 0; iRank < eRank; iRank++) {
         T eVal1 = provMat(iRank, FirstNonZeroCol);
         if (eVal1 != 0) {
-          for (size_t iCol = 0; iCol < nbCol; iCol++)
-            provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          if constexpr (is_fma_prefered<T>::value) {
+            for (size_t iCol = 0; iCol < nbCol; iCol++)
+              provMat(iRank, iCol) -= eVal1 * provMat(eRank, iCol);
+          } else {
+            for (size_t iCol = 0; iCol < nbCol; iCol++) {
+              eProd = eVal1 * provMat(eRank, iCol);
+              provMat(iRank, iCol) -= eProd;
+            }
+          }
         }
       }
       eRank++;
