@@ -14,42 +14,45 @@
 // ENABLING IT
 //   Two things, both keyed off the single -DGMP_POOL build flag:
 //     1. Build with -DGMP_POOL (the Makefiles / CMake set it by default).
-//     2. Call maybe_install_gmp_pool() as the first line of main(). It expands to
-//        install_gmp_pool() under -DGMP_POOL and to nothing otherwise, so the call
-//        site stays a single unconditional line and the flag alone turns the pool
-//        on/off. Without the call, or without -DGMP_POOL, this header is inert.
+//     2. Call one of the installers as the first line of main() (see below). Each
+//        expands to a real install under -DGMP_POOL and to nothing otherwise, so
+//        the call site stays a single unconditional line and the flag alone turns
+//        the pool on/off. Without the call, or without -DGMP_POOL, this is inert.
 //
-// SERIAL vs MULTI-THREADED
-//   Default: a single process-global pool. Correct for single-threaded programs
-//   AND for MPI (each rank is a separate process with its own pool -- MPI is
-//   multi-process, not multi-threaded).
-//   -DGMP_POOL_THREAD_SAFE: the pool state becomes thread_local -- one free-list
-//   set per thread -- so it is safe when several threads of one process use GMP
-//   concurrently. The only such spot is the MPI dual description, whose optional
-//   background communication thread inserts orbits (mpz) while the main thread
-//   computes. That thread is OFF by default (the CommThread heuristic defaults to
-//   "no"), so a normal MPI run is single-threaded per rank and the global pool is
-//   fine; define this only if you enable the comm thread. Cross-thread frees are
-//   safe: a block freed on another thread simply joins that thread's free-list
-//   and is reused there; the memory stays valid, nothing is corrupted.
+// SERIAL vs THREADED -- CHOOSE THE INSTALLER, NOT A BUILD FLAG
+//   The pool exists in two flavours, both always compiled in; which one is active
+//   is decided at runtime by which installer main() calls. There is no
+//   thread-safety build flag.
+//
+//   maybe_install_gmp_pool()      -- process-GLOBAL pool state. Fastest (no
+//       thread-local indirection, no locks). Use it in single-threaded programs.
+//
+//   maybe_install_tls_gmp_pool()  -- THREAD-LOCAL pool state: each thread gets its
+//       own free-lists and arena. Use it whenever more than one thread of the
+//       process may touch GMP concurrently. The global pool is lock-free, so it
+//       would corrupt its free-lists under concurrent use; the thread-local pool
+//       cannot. Cross-thread frees are safe: a block freed on another thread joins
+//       that thread's free-list and is reused there; the memory stays valid.
+//
+//   Rule of thumb: MPI programs call maybe_install_tls_gmp_pool(). Even though MPI
+//   is multi-process (each rank could in principle use the global pool), MPI code
+//   -- ours (the dual-description background communication thread) and the MPI
+//   runtime itself -- may spawn helper threads that allocate GMP, so the
+//   thread-local pool is the safe, take-no-risk default there. Everything else
+//   uses maybe_install_gmp_pool().
 //
 // MEMORY
 //   The pool never hands chunks back to the OS during the run -- it grows to the
-//   peak working set. At process exit the OS reclaims everything, so there is no
-//   persistent leak (a leak checker may report the pooled chunks as still
-//   reachable at exit; that is expected and harmless).
+//   peak working set (the thread-local flavour, to the peak of each live thread).
+//   At process exit the OS reclaims everything, so there is no persistent leak (a
+//   leak checker may report the pooled chunks as still reachable at exit; that is
+//   expected and harmless).
 #ifndef SRC_NUMBER_GMP_POOL_ALLOCATOR_H_
 #define SRC_NUMBER_GMP_POOL_ALLOCATOR_H_
 
 #include <cstdlib>
 #include <cstring>
 #include <gmp.h>
-
-#ifdef GMP_POOL_THREAD_SAFE
-#define GMP_POOL_STORAGE thread_local
-#else
-#define GMP_POOL_STORAGE
-#endif
 
 namespace gmp_pool {
 
@@ -62,36 +65,44 @@ struct FreeNode {
   FreeNode *next;
 };
 
-inline GMP_POOL_STORAGE FreeNode *g_freelist[NCLASS] = {};
-inline GMP_POOL_STORAGE char *g_arena = nullptr;
-inline GMP_POOL_STORAGE size_t g_arena_left = 0;
+// All the pool's mutable state. Constant-initialized (every member has a constant
+// default initializer), so a namespace-scope instance -- global or thread_local --
+// needs no dynamic-init guard: the global path stays guard-free and the
+// thread_local path pays only the unavoidable TLS access.
+struct PoolState {
+  FreeNode *freelist[NCLASS] = {};
+  char *arena = nullptr;
+  size_t arena_left = 0;
+};
 
 // 0-based size class for a non-zero size in (0, MAX_POOLED].
 inline size_t class_index(size_t size) { return (size + ALIGN - 1) / ALIGN - 1; }
 
-inline void *pool_alloc(size_t size) {
+// Core alloc/free/realloc, written once against an explicit state reference; the
+// global and thread-local flavours below are thin trampolines over these.
+inline void *pool_alloc(PoolState &st, size_t size) {
   if (size == 0)
     size = 1;
   if (size > MAX_POOLED)
     return std::malloc(size);
   size_t ci = class_index(size);
-  if (g_freelist[ci] != nullptr) {
-    FreeNode *n = g_freelist[ci];
-    g_freelist[ci] = n->next;
+  if (st.freelist[ci] != nullptr) {
+    FreeNode *n = st.freelist[ci];
+    st.freelist[ci] = n->next;
     return n;
   }
   size_t bytes = (ci + 1) * ALIGN;
-  if (g_arena_left < bytes) {
-    g_arena = static_cast<char *>(std::malloc(CHUNK));
-    g_arena_left = CHUNK;
+  if (st.arena_left < bytes) {
+    st.arena = static_cast<char *>(std::malloc(CHUNK));
+    st.arena_left = CHUNK;
   }
-  void *p = g_arena;
-  g_arena += bytes;
-  g_arena_left -= bytes;
+  void *p = st.arena;
+  st.arena += bytes;
+  st.arena_left -= bytes;
   return p;
 }
 
-inline void pool_free(void *ptr, size_t size) {
+inline void pool_free(PoolState &st, void *ptr, size_t size) {
   if (size == 0)
     size = 1;
   if (size > MAX_POOLED) {
@@ -100,11 +111,12 @@ inline void pool_free(void *ptr, size_t size) {
   }
   size_t ci = class_index(size);
   FreeNode *n = static_cast<FreeNode *>(ptr);
-  n->next = g_freelist[ci];
-  g_freelist[ci] = n;
+  n->next = st.freelist[ci];
+  st.freelist[ci] = n;
 }
 
-inline void *pool_realloc(void *ptr, size_t old_size, size_t new_size) {
+inline void *pool_realloc(PoolState &st, void *ptr, size_t old_size,
+                          size_t new_size) {
   if (old_size == 0)
     old_size = 1;
   if (new_size == 0)
@@ -113,28 +125,61 @@ inline void *pool_realloc(void *ptr, size_t old_size, size_t new_size) {
   if (old_size <= MAX_POOLED && new_size <= MAX_POOLED &&
       class_index(old_size) == class_index(new_size))
     return ptr;
-  void *np = pool_alloc(new_size);
+  void *np = pool_alloc(st, new_size);
   std::memcpy(np, ptr, old_size < new_size ? old_size : new_size);
-  pool_free(ptr, old_size);
+  pool_free(st, ptr, old_size);
   return np;
 }
 
-} // namespace gmp_pool
-
-// Install the pool as GMP's allocator (idempotent). Call it once, at the top of
-// main(), before any GMP object is created.
-inline void install_gmp_pool() {
-  mp_set_memory_functions(gmp_pool::pool_alloc, gmp_pool::pool_realloc,
-                          gmp_pool::pool_free);
+// --- process-global flavour (no locks, no TLS: fastest, single-threaded only) ---
+inline PoolState g_global_state;
+inline void *global_alloc(size_t size) { return pool_alloc(g_global_state, size); }
+inline void *global_realloc(void *ptr, size_t os, size_t ns) {
+  return pool_realloc(g_global_state, ptr, os, ns);
+}
+inline void global_free(void *ptr, size_t size) {
+  pool_free(g_global_state, ptr, size);
 }
 
-// The intended entry point: put `maybe_install_gmp_pool();` as the first line of
-// main(). It installs the pool when the program is built with -DGMP_POOL and is a
-// no-op otherwise, so the single GMP_POOL build flag turns the pool on/off with
-// no #ifdef at the call site.
+// --- thread-local flavour (one state per thread: safe under concurrent GMP use) --
+inline thread_local PoolState g_tls_state;
+inline void *tls_alloc(size_t size) { return pool_alloc(g_tls_state, size); }
+inline void *tls_realloc(void *ptr, size_t os, size_t ns) {
+  return pool_realloc(g_tls_state, ptr, os, ns);
+}
+inline void tls_free(void *ptr, size_t size) { pool_free(g_tls_state, ptr, size); }
+
+} // namespace gmp_pool
+
+// Install the process-global pool as GMP's allocator (idempotent). Call once, at
+// the top of main(), before any GMP object is created. Single-threaded programs.
+inline void install_gmp_pool() {
+  mp_set_memory_functions(gmp_pool::global_alloc, gmp_pool::global_realloc,
+                          gmp_pool::global_free);
+}
+
+// Install the thread-local pool as GMP's allocator (idempotent). Call once, at the
+// top of main(). Use in any program where several threads may use GMP at once
+// (MPI programs -- take-no-risk default).
+inline void install_tls_gmp_pool() {
+  mp_set_memory_functions(gmp_pool::tls_alloc, gmp_pool::tls_realloc,
+                          gmp_pool::tls_free);
+}
+
+// The intended entry points: put one of these as the first line of main(). Each
+// installs the corresponding pool when built with -DGMP_POOL and is a no-op
+// otherwise, so the single GMP_POOL build flag turns the pool on/off with no
+// #ifdef at the call site. Use the plain one for serial programs and the _tls_ one
+// for MPI / multi-threaded programs.
 inline void maybe_install_gmp_pool() {
 #ifdef GMP_POOL
   install_gmp_pool();
+#endif
+}
+
+inline void maybe_install_tls_gmp_pool() {
+#ifdef GMP_POOL
+  install_tls_gmp_pool();
 #endif
 }
 
