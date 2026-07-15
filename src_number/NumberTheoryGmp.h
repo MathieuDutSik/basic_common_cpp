@@ -7,6 +7,7 @@
 #include "Temp_common.h"
 #include "TypeConversion.h"
 #include "gmpxx.h"
+#include "gmp_pool_allocator.h"
 #include "hash_functions.h"
 #include <limits>
 #include <string>

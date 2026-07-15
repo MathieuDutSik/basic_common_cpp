@@ -12,9 +12,12 @@
 // end-to-end speedup on the dim-6 quantization cases.
 //
 // ENABLING IT
-//   Build with -DGMP_POOL. The pool then installs itself automatically (a static
-//   constructor calls mp_set_memory_functions), so no per-program main() change
-//   is needed. Without -DGMP_POOL this header is inert.
+//   Two things, both keyed off the single -DGMP_POOL build flag:
+//     1. Build with -DGMP_POOL (the Makefiles / CMake set it by default).
+//     2. Call maybe_install_gmp_pool() as the first line of main(). It expands to
+//        install_gmp_pool() under -DGMP_POOL and to nothing otherwise, so the call
+//        site stays a single unconditional line and the flag alone turns the pool
+//        on/off. Without the call, or without -DGMP_POOL, this header is inert.
 //
 // SERIAL vs MULTI-THREADED
 //   Default: a single process-global pool. Correct for single-threaded programs
@@ -22,10 +25,13 @@
 //   multi-process, not multi-threaded).
 //   -DGMP_POOL_THREAD_SAFE: the pool state becomes thread_local -- one free-list
 //   set per thread -- so it is safe when several threads of one process use GMP
-//   concurrently. Use this for the genuinely multi-threaded code (the MPI
-//   dual-description runs a background communication thread). Cross-thread frees
-//   are safe: a block freed on another thread simply joins that thread's
-//   free-list and is reused there; the memory stays valid, nothing is corrupted.
+//   concurrently. The only such spot is the MPI dual description, whose optional
+//   background communication thread inserts orbits (mpz) while the main thread
+//   computes. That thread is OFF by default (the CommThread heuristic defaults to
+//   "no"), so a normal MPI run is single-threaded per rank and the global pool is
+//   fine; define this only if you enable the comm thread. Cross-thread frees are
+//   safe: a block freed on another thread simply joins that thread's free-list
+//   and is reused there; the memory stays valid, nothing is corrupted.
 //
 // MEMORY
 //   The pool never hands chunks back to the OS during the run -- it grows to the
@@ -115,25 +121,21 @@ inline void *pool_realloc(void *ptr, size_t old_size, size_t new_size) {
 
 } // namespace gmp_pool
 
-// Install the pool as GMP's allocator (idempotent). Normally called
-// automatically via the GMP_POOL auto-installer below; exposed for programs that
-// prefer an explicit call at the top of main().
+// Install the pool as GMP's allocator (idempotent). Call it once, at the top of
+// main(), before any GMP object is created.
 inline void install_gmp_pool() {
   mp_set_memory_functions(gmp_pool::pool_alloc, gmp_pool::pool_realloc,
                           gmp_pool::pool_free);
 }
 
+// The intended entry point: put `maybe_install_gmp_pool();` as the first line of
+// main(). It installs the pool when the program is built with -DGMP_POOL and is a
+// no-op otherwise, so the single GMP_POOL build flag turns the pool on/off with
+// no #ifdef at the call site.
+inline void maybe_install_gmp_pool() {
 #ifdef GMP_POOL
-namespace gmp_pool {
-// Auto-install at static-initialization time. mp_set_memory_functions only sets
-// three pointers (no allocation), and any GMP object allocated before this runs
-// is merely reabsorbed into the pool when freed -- never corrupted -- so the
-// initialization order is not a hazard.
-struct Installer {
-  Installer() { install_gmp_pool(); }
-};
-inline Installer g_installer;
-} // namespace gmp_pool
+  install_gmp_pool();
 #endif
+}
 
 #endif // SRC_NUMBER_GMP_POOL_ALLOCATOR_H_

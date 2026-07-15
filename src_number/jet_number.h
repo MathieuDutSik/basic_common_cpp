@@ -243,13 +243,13 @@ public:
     }
 #ifdef SANITY_CHECK_JET_NUMBER
     // Cheap invariant: f * f^{-1} == 1 (one order-N convolution).
-    jet prod = f * r;
-    if (prod.c[0] != T(1)) {
+    jet chk = f * r;
+    if (chk.c[0] != T(1)) {
       std::cerr << "jet_number: inverse check failed (c0 != 1)\n";
       throw TerminalException{1};
     }
     for (int k = 1; k <= N; k++)
-      if (prod.c[k] != T(0)) {
+      if (chk.c[k] != T(0)) {
         std::cerr << "jet_number: inverse check failed (c" << k << " != 0)\n";
         throw TerminalException{1};
       }
