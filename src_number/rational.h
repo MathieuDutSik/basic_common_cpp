@@ -451,6 +451,24 @@ inline Rational<Tint> rat_eval(RatProd<Tint> const &e) {
   inline Rational<Tint> operator OP(Rational<Tint> const &a,                   \
                                     RatProd<Tint> const &b) {                  \
     return a OP rat_eval(b);                                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(RatProd<Tint> const &a,                    \
+                                    Tint const &b) {                           \
+    return rat_eval(a) OP Rational<Tint>(b);                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(Tint const &a,                             \
+                                    RatProd<Tint> const &b) {                  \
+    return Rational<Tint>(a) OP rat_eval(b);                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(RatProd<Tint> const &a, int const &b) {    \
+    return rat_eval(a) OP b;                                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline Rational<Tint> operator OP(int const &a, RatProd<Tint> const &b) {    \
+    return a OP rat_eval(b);                                                   \
   }
 RATIONAL_RATPROD_ARITH(+)
 RATIONAL_RATPROD_ARITH(-)
@@ -469,6 +487,22 @@ RATIONAL_RATPROD_ARITH(/)
   }                                                                            \
   template <typename Tint>                                                     \
   inline bool operator OP(Rational<Tint> const &a, RatProd<Tint> const &b) {   \
+    return a OP rat_eval(b);                                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline bool operator OP(RatProd<Tint> const &a, Tint const &b) {             \
+    return rat_eval(a) OP Rational<Tint>(b);                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline bool operator OP(Tint const &a, RatProd<Tint> const &b) {             \
+    return Rational<Tint>(a) OP rat_eval(b);                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline bool operator OP(RatProd<Tint> const &a, int const &b) {              \
+    return rat_eval(a) OP b;                                                   \
+  }                                                                            \
+  template <typename Tint>                                                     \
+  inline bool operator OP(int const &a, RatProd<Tint> const &b) {              \
     return a OP rat_eval(b);                                                   \
   }
 RATIONAL_RATPROD_CMP(==)
