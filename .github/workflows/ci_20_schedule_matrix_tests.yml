@@ -43,8 +43,11 @@ jobs:
     - name: Test_MatrixInverse
       run: cd src_matrix && ./Test_MatrixInverse mpz_class 10
 
-    - name: Test_PerformanceHNF
-      run: cd src_matrix && ./Test_PerformanceHNF mpq_class 10 10
+    - name: Test_PerformanceHNF(mpz_class)
+      run: cd src_matrix && ./Test_PerformanceHNF mpz_class 10 10
+
+    - name: Test_PerformanceHNF(safe)
+      run: cd src_matrix && ./Test_PerformanceHNF SafeInt64 8 8
 
     - name: Test_HilbertMatrix
       run: cd src_matrix && ./Test_HilbertMatrix mpq_class 10
