@@ -846,11 +846,11 @@ inline void NearestInteger(boost::multiprecision::mpq_rational const &xI,
 }
 
 inline void set_to_infinity(boost::multiprecision::mpq_rational &x) {
-  x = std::numeric_limits<size_t>::max();
+  x = std::numeric_limits<uint64_t>::max();
 }
 
 inline void set_to_infinity(boost::multiprecision::mpz_int &x) {
-  x = std::numeric_limits<size_t>::max();
+  x = std::numeric_limits<uint64_t>::max();
 }
 
 inline boost::multiprecision::mpq_rational

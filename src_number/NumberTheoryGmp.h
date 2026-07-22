@@ -733,11 +733,11 @@ bool universal_square_root(mpq_class &ret, mpq_class const &val) {
 }
 
 inline void set_to_infinity(mpz_class &x) {
-  x = std::numeric_limits<size_t>::max();
+  x = convert_mpz_class_uint64_t(std::numeric_limits<uint64_t>::max());
 }
 
 inline void set_to_infinity(mpq_class &x) {
-  x = std::numeric_limits<size_t>::max();
+  x = convert_mpz_class_uint64_t(std::numeric_limits<uint64_t>::max());
 }
 
 //
