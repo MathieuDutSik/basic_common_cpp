@@ -3,6 +3,7 @@
 #define SRC_BASIC_EXCEPTIONSFUNC_H_
 
 #include <cassert>
+#include <cstdint>
 #include <string>
 
 // types for exception
