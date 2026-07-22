@@ -10,6 +10,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+# On Windows (LLP64), Eigen::Index defaults to std::ptrdiff_t == `long long`,
+# for which gmpxx provides no constructor, so Eigen-internal conversions such as
+# RealScalar(Index) are ambiguous for mpz_class / mpq_class. Force Eigen::Index
+# to `long`, which gmpxx accepts. On LP64 (Linux/macOS) std::ptrdiff_t already
+# is `long`, so this is a no-op there.
+if(WIN32)
+  add_compile_definitions(EIGEN_DEFAULT_DENSE_INDEX_TYPE=long)
+endif()
+
 find_package(PkgConfig REQUIRED)
 find_package(Threads REQUIRED)
 find_package(Eigen3 REQUIRED NO_MODULE)
