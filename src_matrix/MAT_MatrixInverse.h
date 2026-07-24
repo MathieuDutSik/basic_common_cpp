@@ -136,6 +136,86 @@ inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
   return UniversalMatrixConversion<T, Tfield>(OutputF);
 }
 
+// Fraction-free Gauss-Jordan elimination, also known as fraction-free
+// Gauss-Jordan or the Bareiss-Montante algorithm. Gauss-Jordan is run on the
+// augmented matrix [A | I] using only ring operations and EXACT divisions: at
+// step k every entry (pivot * M(i,j) - M(i,k) * M(k,j)) is divisible by the
+// previous pivot, because Bareiss's theorem makes each intermediate entry a
+// minor determinant of the input. This drives [A | I] to [det(A) * I | adj(A)],
+// where adj(A) is the adjugate, so A^{-1} = adj(A) / det(A). Keeping the
+// elimination fraction-free bounds intermediate operand growth (Hadamard), so
+// for exact heavy arithmetic (rationals, number fields) it is faster than the
+// classical Gauss-Jordan of InverseKernel, in the same way that
+// DeterminantMatBareiss beats plain Gaussian elimination.
+//
+// Valid over any integral domain. The final division adj(A) / det(A) is exact
+// over a field; over a ring of integers it is exact only when A is unimodular,
+// and a non-exact division is reported rather than silently truncated.
+template <typename T> MyMatrix<T> InverseBareiss(MyMatrix<T> const &Input) {
+  int n = Input.rows();
+  // Augmented matrix M = [A | I], of size n x 2n.
+  MyMatrix<T> M(n, 2 * n);
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < n; j++) {
+      M(i, j) = Input(i, j);
+      M(i, n + j) = (i == j) ? T(1) : T(0);
+    }
+  T prev(1);
+  for (int k = 0; k < n; k++) {
+    if (M(k, k) == 0) {
+      int r = -1;
+      for (int i = k + 1; i < n; i++)
+        if (M(i, k) != 0) {
+          r = i;
+          break;
+        }
+      if (r == -1) {
+        std::cerr << "InverseBareiss: the matrix is singular\n";
+        throw TerminalException{1};
+      }
+      M.row(k).swap(M.row(r));
+    }
+    T pivot = M(k, k);
+    for (int i = 0; i < n; i++) {
+      if (i == k)
+        continue;
+      for (int j = 0; j < 2 * n; j++) {
+        if (j == k)
+          continue;
+        T val = pivot * M(i, j) - M(i, k) * M(k, j);
+        T quot = val / prev; // exact division guaranteed by Bareiss's theorem
+#ifdef DEBUG_MAT_MATRIX
+        if (quot * prev != val) {
+          std::cerr << "InverseBareiss: non-exact division, T is not an "
+                       "integral domain\n";
+          throw TerminalException{1};
+        }
+#endif
+        M(i, j) = quot;
+      }
+      M(i, k) = T(0);
+    }
+    prev = pivot;
+  }
+  // Left block is now det(A) * I (the shared diagonal value) and the right
+  // block is the adjugate adj(A) = det(A) * A^{-1}; the swap sign cancels in the
+  // ratio, so no sign bookkeeping is needed.
+  T det = prev;
+  MyMatrix<T> Output(n, n);
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < n; j++) {
+      T num = M(i, n + j);
+      T quot = num / det;
+      if (quot * det != num) {
+        std::cerr << "InverseBareiss: A^{-1} is not representable over T "
+                     "(the determinant does not divide the adjugate)\n";
+        throw TerminalException{1};
+      }
+      Output(i, j) = quot;
+    }
+  return Output;
+}
+
 template <typename T> MyMatrix<T> CongrMap(MyMatrix<T> const &eMat) {
   MyMatrix<T> TheInv = Inverse(eMat);
   return TransposedMat(TheInv);
