@@ -76,6 +76,12 @@ template <> struct is_ring_field<mpq_class> {
   static const bool value = true;
 };
 
+// Exact fraction field: Bareiss beats classical Gaussian elimination on ratio-
+// nal matrices for n above ~25 (see use_bareiss_for_determinants).
+template <> struct use_bareiss_for_determinants<mpq_class> {
+  static const bool value = true;
+};
+
 // gmpxx does not fuse `acc += a*b`; it allocates a temporary for the product on
 // every evaluation. A reused scratch (prod = a*b; acc += prod) avoids that, so
 // the scratch form is preferred for both mpz_class and mpq_class.

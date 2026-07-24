@@ -561,6 +561,12 @@ template <typename Tint> struct is_ring_field<Rational<Tint>> {
   static const bool value = true;
 };
 
+// Exact fraction field: same as mpq_class, Bareiss controls operand growth
+// better than classical Gaussian elimination (see use_bareiss_for_determinants).
+template <typename Tint> struct use_bareiss_for_determinants<Rational<Tint>> {
+  static const bool value = true;
+};
+
 template <typename Tint> struct is_totally_ordered<Rational<Tint>> {
   static const bool value = true;
 };

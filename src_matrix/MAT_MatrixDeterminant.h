@@ -227,37 +227,41 @@ template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
   return neg ? -det : det;
 }
 
+// Types opting into Bareiss (see use_bareiss_for_determinants): the integer
+// rings and the exact fields. Bareiss fraction-free elimination controls
+// intermediate operand growth, so it beats classical Gaussian elimination for
+// exact heavy arithmetic (>20x for integers, where it also avoids rational
+// arithmetic entirely; ~2x for mpq_class; up to ~4x for QuadField).
 template <typename T>
-requires (is_ring_field<T>::value && !determinant_division_free<T>::value)
-inline T DeterminantMat(MyMatrix<T> const &Input) {
-  return DeterminantMatKernel(Input);
-}
-
-// Determinant over a field that carries zero divisors and opts into a
-// division-free algorithm (jets): elimination with unit pivots plus a Berkowitz
-// determinant on the corank-d residual (see DeterminantMatUnitReduce).
-template <typename T>
-requires (is_ring_field<T>::value && determinant_division_free<T>::value)
-inline T DeterminantMat(MyMatrix<T> const &Input) {
-  return DeterminantMatUnitReduce(Input);
-}
-
-// Rings of integers (integral domains with exact division): compute the
-// determinant with Bareiss fraction-free elimination, which stays inside the
-// ring. This is dramatically faster than mapping to the fraction field and
-// running rational Gaussian elimination -- benchmarks show more than 20x at
-// n=200 -- because the rational path pays a GCD reduction at every elimination
-// step whereas Bareiss keeps every entry integral and bounded by the minor
-// (Hadamard) size.
-template <typename T>
-requires (!is_ring_field<T>::value && is_implementation_of_Z<T>::value)
+requires (use_bareiss_for_determinants<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
   return DeterminantMatBareiss(Input);
 }
 
-// Any other non-field ring: map to the overlying field and eliminate there.
+// Field that carries zero divisors and opts into a division-free algorithm
+// (jets): elimination with unit pivots plus a Berkowitz determinant on the
+// corank-d residual (see DeterminantMatUnitReduce).
 template <typename T>
-requires (!is_ring_field<T>::value && !is_implementation_of_Z<T>::value)
+requires (!use_bareiss_for_determinants<T>::value &&
+          is_ring_field<T>::value && determinant_division_free<T>::value)
+inline T DeterminantMat(MyMatrix<T> const &Input) {
+  return DeterminantMatUnitReduce(Input);
+}
+
+// Ordinary field not opting into Bareiss (e.g. floating point): classical
+// Gaussian elimination, whose SelectBestPivot pivoting preserves numerical
+// stability.
+template <typename T>
+requires (!use_bareiss_for_determinants<T>::value &&
+          is_ring_field<T>::value && !determinant_division_free<T>::value)
+inline T DeterminantMat(MyMatrix<T> const &Input) {
+  return DeterminantMatKernel(Input);
+}
+
+// Any other non-field ring not opting into Bareiss: map to the overlying field
+// and eliminate there.
+template <typename T>
+requires (!use_bareiss_for_determinants<T>::value && !is_ring_field<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);

@@ -169,6 +169,11 @@ template <> struct is_ring_field<boost::multiprecision::mpz_int> {
 template <> struct is_ring_field<boost::multiprecision::mpq_rational> {
   static const bool value = true;
 };
+// Exact fraction field: opt into Bareiss (see use_bareiss_for_determinants).
+template <>
+struct use_bareiss_for_determinants<boost::multiprecision::mpq_rational> {
+  static const bool value = true;
+};
 
 template <> struct is_totally_ordered<boost::multiprecision::mpz_int> {
   static const bool value = true;

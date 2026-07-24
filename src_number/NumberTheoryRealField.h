@@ -760,6 +760,14 @@ template <int i_field> struct is_ring_field<RealField<i_field>> {
   static const bool value = true;
 };
 
+// Exact real-algebraic field with heavy arithmetic (polynomial reduction per
+// operation): the same reasoning as QuadField makes Bareiss preferable to
+// classical Gaussian elimination (see use_bareiss_for_determinants).
+template <int i_field>
+struct use_bareiss_for_determinants<RealField<i_field>> {
+  static const bool value = true;
+};
+
 // FMA form (see is_fma_prefered). The direct/fused form is fastest for RealField
 // (measured): operator+=(RealProd) accumulates the product in place, while the
 // scratch form move-assigns the product vector into a temporary first.

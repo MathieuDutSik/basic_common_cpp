@@ -119,6 +119,21 @@ template <> struct is_implementation_of_Z<int8_t> {
   static const bool value = true;
 };
 
+// Whether DeterminantMat should compute the determinant with the Bareiss
+// fraction-free algorithm instead of classical Gaussian elimination. Bareiss
+// requires an integral domain with EXACT division and controls intermediate
+// operand growth, which makes it faster than Gaussian elimination for exact,
+// non-trivial arithmetic (integers, rationals, number fields -- benchmarked at
+// ~2x for mpq_class and up to ~4x for QuadField). It must be left OFF for:
+//   --- floating point, where pivoting for numerical stability matters;
+//   --- division-free rings such as jets, which carry zero divisors, so the
+//       previous pivot may be non-invertible and the Bareiss division invalid.
+// The default follows is_implementation_of_Z (the integer rings); exact fields
+// opt in explicitly in their own headers.
+template <typename T> struct use_bareiss_for_determinants {
+  static const bool value = is_implementation_of_Z<T>::value;
+};
+
 // Trait definition for subset of rationals
 
 template <typename T> struct is_implementation_of_Q {};

@@ -415,6 +415,14 @@ template <typename T, int d> struct is_implementation_of_Z<QuadField<T, d>> {
   static const bool value = false;
 };
 
+// A quadratic field inherits Bareiss-eligibility from its base: exact over an
+// exact base (e.g. QuadField<mpq_class,d>, where Bareiss wins ~2-4x), and off
+// over a floating-point base where numerical pivoting must be preserved.
+template <typename T, int d>
+struct use_bareiss_for_determinants<QuadField<T, d>> {
+  static const bool value = use_bareiss_for_determinants<T>::value;
+};
+
 template <typename T, int d> struct is_implementation_of_Q<QuadField<T, d>> {
   static const bool value = false;
 };

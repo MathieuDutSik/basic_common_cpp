@@ -410,6 +410,12 @@ template <typename T, int N> struct is_implementation_of_Q<jet<T, N>> {
 template <typename T, int N> struct is_implementation_of_Z<jet<T, N>> {
   static const bool value = false;
 };
+// Explicitly OFF: jets carry zero divisors, so a Bareiss pivot may be non-
+// invertible and its exact division invalid. DeterminantMat routes jets to the
+// division-free DeterminantMatUnitReduce instead (see determinant_division_free).
+template <typename T, int N> struct use_bareiss_for_determinants<jet<T, N>> {
+  static const bool value = false;
+};
 template <typename T, int N> struct underlying_totally_ordered_ring<jet<T, N>> {
   typedef jet<typename underlying_totally_ordered_ring<T>::real_type, N>
       real_type;
