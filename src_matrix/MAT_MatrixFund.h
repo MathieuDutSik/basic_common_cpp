@@ -1109,128 +1109,6 @@ int SelectBestPivot(int n, Fget const &get, Fvalid const &valid) {
   return best;
 }
 
-template <typename T>
-void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
-  static_assert(is_ring_field<T>::value,
-                "Requires T to be a field in TMat_Inverse_destroy");
-  int iCol, iRow;
-  int iRowB;
-  int nbRow = Input.rows();
-  int nbCol = Input.cols();
-  T prov1;
-  // Reuse-scratch for the row-combination product, hoisted so its buffer is
-  // reused across the whole elimination. For fused-preferring types it collapses
-  // to an empty object (no unused T is constructed); see is_fma_prefered.
-  [[maybe_unused]] std::conditional_t<is_fma_prefered<T>::value, empty_scratch,
-                                      T>
-      prov2;
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-  std::cerr << "TMat_Inverse_destroy, step 1\n";
-#endif
-#ifdef SANITY_CHECK_MAT_MATRIX
-  if (nbRow != nbCol) {
-    std::cerr << "Error on nbRow, nbCol in TMat_Inverse_destroy";
-    throw TerminalException{1};
-  }
-#endif
-  for (iCol = 0; iCol < nbRow; iCol++)
-    for (iRow = 0; iRow < nbRow; iRow++) {
-      if (iRow == iCol)
-        prov1 = 1;
-      else
-        prov1 = 0;
-      Output(iRow, iCol) = prov1;
-    }
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-  std::cerr << "TMat_Inverse_destroy, step 2\n";
-#endif
-  int iColFound;
-  for (iRow = 0; iRow < nbRow; iRow++) {
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-    std::cerr << "iRow=" << iRow << "\n";
-    std::cerr << "Input=\n";
-    WriteMatrix(std::cerr, Input);
-#endif
-    iColFound = SelectBestPivot<T>(
-        nbCol, [&](int iCol) -> T const & { return Input(iRow, iCol); },
-        [&](int iCol) -> bool { return iCol >= iRow; });
-#ifdef SANITY_CHECK_MAT_MATRIX
-    if (iColFound == -1) {
-      std::cerr << "Error during the computation of the matrix inverse\n";
-      throw TerminalException{1};
-    }
-#endif
-    prov1 = 1 / Input(iRow, iColFound);
-    for (iRowB = 0; iRowB < nbRow; iRowB++)
-      Output(iRowB, iColFound) *= prov1;
-    for (iRowB = iRow; iRowB < nbRow; iRowB++)
-      Input(iRowB, iColFound) *= prov1;
-    for (iCol = 0; iCol < nbCol; iCol++)
-      if (iCol != iColFound) {
-        prov1 = Input(iRow, iCol);
-        if (prov1 != 0) {
-          // Y -= prov1 * pivot_col. For types where the product allocates a
-          // temporary each evaluation (mpz_class, mpq_class, ...) reuse prov2;
-          // otherwise the fused form is at least as good (see is_fma_prefered).
-          if constexpr (is_fma_prefered<T>::value) {
-            for (iRowB = 0; iRowB < nbRow; iRowB++)
-              Output(iRowB, iCol) -= prov1 * Output(iRowB, iColFound);
-            for (iRowB = iRow; iRowB < nbRow; iRowB++)
-              Input(iRowB, iCol) -= prov1 * Input(iRowB, iColFound);
-          } else {
-            for (iRowB = 0; iRowB < nbRow; iRowB++) {
-              prov2 = prov1 * Output(iRowB, iColFound);
-              Output(iRowB, iCol) -= prov2;
-            }
-            for (iRowB = iRow; iRowB < nbRow; iRowB++) {
-              prov2 = prov1 * Input(iRowB, iColFound);
-              Input(iRowB, iCol) -= prov2;
-            }
-          }
-        }
-      }
-    if (iColFound != iRow) {
-      for (iRowB = 0; iRowB < nbRow; iRowB++)
-        std::swap(Output(iRowB, iColFound), Output(iRowB, iRow));
-      for (iRowB = iRow; iRowB < nbRow; iRowB++)
-        std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
-    }
-  }
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-  std::cerr << "TMat_Inverse_destroy, step 3\n";
-#endif
-}
-
-template <typename T> MyMatrix<T> InverseKernel(MyMatrix<T> const &Input) {
-  int nbRow = Input.rows();
-  MyMatrix<T> provMat = Input;
-  MyMatrix<T> Output(nbRow, nbRow);
-  TMat_Inverse_destroy(provMat, Output);
-  return Output;
-}
-
-template <typename T> MyMatrix<T> Inverse_destroy(MyMatrix<T> &Input) {
-  int nbRow = Input.rows();
-  MyMatrix<T> Output(nbRow, nbRow);
-  TMat_Inverse_destroy(Input, Output);
-  return Output;
-}
-
-template <typename T>
-requires is_ring_field<T>::value
-inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
-  return InverseKernel(Input);
-}
-
-template <typename T>
-requires (!is_ring_field<T>::value)
-inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
-  using Tfield = typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
-  MyMatrix<Tfield> OutputF = InverseKernel(InputF);
-  return UniversalMatrixConversion<T, Tfield>(OutputF);
-}
-
 /* This function is for rank calculation.
    Of course, it can be used for many other purpose:
    1> Selecting specific sets of rows and columns for reduction
@@ -1621,11 +1499,6 @@ void TMat_ImageIntVector(MyVector<T> &eVect, MyMatrix<T> &TheMat,
   }
 }
 
-template <typename T> MyMatrix<T> CongrMap(MyMatrix<T> const &eMat) {
-  MyMatrix<T> TheInv = Inverse(eMat);
-  return TransposedMat(TheInv);
-}
-
 template <typename T>
 MyMatrix<T> SelectRow(MyMatrix<T> const &TheMat,
                       std::vector<int> const &eList) {
@@ -1704,42 +1577,6 @@ template <typename T> bool IsZeroVector(MyVector<T> const &V) {
   return true;
 }
 
-// Given the equation Y = XA, we find one solution X if it exists.
-//
-template <typename T>
-std::optional<MyVector<T>> SolutionMatKernel(MyMatrix<T> const &eMat,
-                                             MyVector<T> const &eVect) {
-  static_assert(is_ring_field<T>::value,
-                "Requires T to be a field in SolutionMat");
-  if (eMat.rows() == 0) {
-    if (!IsZeroVector(eVect))
-      return {};
-    MyVector<T> eSol(0);
-    return eSol;
-  }
-  int nbRow = eMat.rows();
-  int nbCol = eMat.cols();
-  SelectionRowCol<T> eSelect = TMat_SelectRowCol(eMat);
-  int eRank = eSelect.TheRank;
-  std::vector<int> ListRowSelect = eSelect.ListRowSelect;
-  std::vector<int> ListColSelect = eSelect.ListColSelect;
-  MyMatrix<T> eMat2 = SelectRow(eMat, ListRowSelect);
-  MyMatrix<T> eMat3 = SelectColumn(eMat2, ListColSelect);
-  MyVector<T> eVectB = SelectColumnVector(eVect, ListColSelect);
-  MyMatrix<T> eMatInv = Inverse(eMat3);
-  MyVector<T> eSol = ProductVectorMatrix(eVectB, eMatInv);
-  MyVector<T> eProd = ProductVectorMatrix(eSol, eMat2);
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    if (eProd(iCol) != eVect(iCol))
-      return {};
-  MyVector<T> eRetSol = ZeroVector<T>(nbRow);
-  for (int iRank = 0; iRank < eRank; iRank++) {
-    int iRow = ListRowSelect[iRank];
-    eRetSol(iRow) = eSol(iRank);
-  }
-  return eRetSol;
-}
-
 template <typename T> bool IsIntegerVector(MyVector<T> const &V) {
   int n = V.size();
   for (int i = 0; i < n; i++)
@@ -1747,65 +1584,6 @@ template <typename T> bool IsIntegerVector(MyVector<T> const &V) {
       return false;
   return true;
 }
-
-template <typename T>
-requires is_ring_field<T>::value
-inline std::optional<MyVector<T>> SolutionMat(MyMatrix<T> const &eMat,
-                                              MyVector<T> const &eVect) {
-  return SolutionMatKernel(eMat, eVect);
-}
-
-template <typename T>
-requires (!is_ring_field<T>::value)
-inline std::optional<MyVector<T>> SolutionMat(MyMatrix<T> const &eMat,
-                                              MyVector<T> const &eVect) {
-  using Tfield = typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> eMatF = UniversalMatrixConversion<Tfield, T>(eMat);
-  MyVector<Tfield> eVectF = UniversalVectorConversion<Tfield, T>(eVect);
-  std::optional<MyVector<Tfield>> opt = SolutionMatKernel(eMatF, eVectF);
-  if (opt) {
-    const MyVector<Tfield> &V = *opt;
-    if (!IsIntegerVector(V))
-      return {};
-    return UniversalVectorConversion<T, Tfield>(V);
-  }
-  return {};
-}
-
-template <typename T> struct SolutionMatRepetitive {
-private:
-  MyMatrix<T> TheBasis;
-  std::vector<int> ListColSelect;
-  MyMatrix<T> InvMat;
-
-public:
-  SolutionMatRepetitive(MyMatrix<T> const &_TheBasis) : TheBasis(_TheBasis) {
-#ifdef SANITY_CHECK_MAT_MATRIX
-    if (RankMat(TheBasis) != TheBasis.rows()) {
-      std::cerr << "RankMat(TheBasis)=" << RankMat(TheBasis) << "\n";
-      std::cerr << "  TheBasis.rows()=" << TheBasis.rows() << "\n";
-      std::cerr << "Error in SolutionMatRepetitive\n";
-      throw TerminalException{1};
-    }
-#endif
-    SelectionRowCol<T> src = TMat_SelectRowCol(TheBasis);
-    ListColSelect = src.ListColSelect;
-    MyMatrix<T> SelMat = SelectColumn(TheBasis, ListColSelect);
-    InvMat = Inverse(SelMat);
-  }
-  std::optional<MyVector<T>> GetSolution(MyVector<T> const &eVect) {
-    int siz = ListColSelect.size();
-    MyVector<T> V(siz);
-    for (int u = 0; u < siz; u++) {
-      V(u) = eVect(ListColSelect[u]);
-    }
-    MyVector<T> MySol = InvMat.transpose() * V;
-    if (TheBasis.transpose() * MySol != eVect) {
-      return {};
-    }
-    return MySol;
-  }
-};
 
 template <typename T> struct MutableSubspaceBelongingRepetitive {
 private:
@@ -1928,59 +1706,6 @@ bool IsSubspaceContained(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
   return true;
 }
 
-template <typename T>
-bool TestEqualitySpannedSpaces(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
-#ifdef SANITY_CHECK_MAT_MATRIX
-  if (M1.cols() != M2.cols()) {
-    std::cerr << "That case is actually not allowed\n";
-    throw TerminalException{1};
-  }
-  if (RankMat(M1) != M1.rows()) {
-    std::cerr << "M1 number of rows should match its rank\n";
-    throw TerminalException{1};
-  }
-  if (RankMat(M2) != M2.rows()) {
-    std::cerr << "M2 number of rows should match its rank\n";
-    throw TerminalException{1};
-  }
-#endif
-  // We make the assumption that the input is valid, that is
-  // that the number of rows is equal to the rank.
-  if (M1.rows() != M2.rows()) {
-    return false;
-  }
-  SolutionMatRepetitive<T> smr(M1);
-  for (int irow = 0; irow < M2.rows(); irow++) {
-    MyVector<T> V2 = GetMatrixRow(M2, irow);
-    std::optional<MyVector<T>> opt = smr.GetSolution(V2);
-    if (!opt) {
-      return false;
-    }
-  }
-  return true;
-}
-
-/*
-  We can actually do a little bit better for the solution to avoid repeating
-  the preprocessing.
- */
-template <typename T>
-std::optional<MyMatrix<T>> ListSolutionMat(MyMatrix<T> const &eMat,
-                                           MyMatrix<T> const &LVect) {
-  int n_vect = LVect.rows();
-  int dim = eMat.rows();
-  MyMatrix<T> TheSol(n_vect, dim);
-  for (int i_vect = 0; i_vect < n_vect; i_vect++) {
-    MyVector<T> V = GetMatrixRow(LVect, i_vect);
-    std::optional<MyVector<T>> opt = SolutionMat(eMat, V);
-    if (!opt)
-      return {};
-    MyVector<T> const &V2 = *opt;
-    AssignMatrixRow(TheSol, i_vect, V2);
-  }
-  return TheSol;
-}
-
 template <typename T> MyMatrix<T> MatrixFromVector(MyVector<T> const &V) {
   int n = V.size();
   MyMatrix<T> M(1, n);
@@ -1988,24 +1713,6 @@ template <typename T> MyMatrix<T> MatrixFromVector(MyVector<T> const &V) {
     M(0, i) = V(i);
   }
   return M;
-}
-
-template <typename T>
-MyMatrix<T> ExpressVectorsInIndependentFamilt(MyMatrix<T> const &VF,
-                                              MyMatrix<T> const &IVF) {
-  int n_vect = VF.rows();
-  int dim = IVF.rows();
-  MyMatrix<T> P(n_vect, dim);
-  for (int i = 0; i < n_vect; i++) {
-    MyVector<T> eV = GetMatrixRow(VF, i);
-    std::optional<MyVector<T>> opt = SolutionMat(IVF, eV);
-    if (!opt) {
-      std::cerr << "VF : i=" << i << " not expressed in term of IVF\n";
-      throw TerminalException{1};
-    }
-    AssignMatrixRow(P, i, *opt);
-  }
-  return P;
 }
 
 template <typename T> MyMatrix<T> SelectNonZeroRows(MyMatrix<T> const &EXT) {
@@ -2800,27 +2507,6 @@ T ScalarProductQuadForm(MyMatrix<T> const &eMat, MyVector<Tint> const &V1,
     for (int j = 0; j < n; j++)
       eSum += V1(i) * V2(j) * eMat(i, j);
   return eSum;
-}
-
-template <typename T>
-MyVector<T> SolutionMat_LeastSquare(MyMatrix<T> const &M,
-                                    MyVector<double> const &V) {
-  int nbRow = M.rows();
-  int nbCol = M.cols();
-  // Msqr should have size (nbCol, nbCol)
-  MyMatrix<double> Msqr = M.transpose() * M;
-  MyVector<double> B = ZeroVector<double>(nbCol);
-  for (int j = 0; j < nbCol; j++)
-    for (int i = 0; i < nbRow; i++)
-      B(i, j) += V(i) * M(i, j);
-  //
-  // We have now a linear system to solve
-  //
-  Eigen::FullPivLU<MyMatrix<double>> solver;
-  solver.compute(Msqr);
-  MyVector<double> eSol = solver.solve(B);
-  //
-  return eSol;
 }
 
 template <typename T> bool IsSymmetricMatrix(MyMatrix<T> const &M) {

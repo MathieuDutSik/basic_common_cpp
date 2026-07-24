@@ -7,6 +7,7 @@
 
 // clang-format off
 #include "MAT_MatrixDeterminant.h"
+#include "MAT_MatrixInverse.h"
 // clang-format on
 
 template <typename T> MyVector<T> OrthogonalHyperplane(MyMatrix<T> const &M) {
