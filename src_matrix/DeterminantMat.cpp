@@ -11,12 +11,26 @@
 template <typename T>
 void compute_determinant_kernel(std::string const &eFile) {
   MyMatrix<T> A = ReadMatrixFile<T>(eFile);
-  std::cerr << "Computing determinant of matrix A=\n";
-  WriteMatrix(std::cerr, A);
-  T TheDet_gauss = DeterminantMat(A);
-  T TheDet_symm = DeterminantMatPermutation(A);
-  std::cerr << "TheDet_gauss=" << TheDet_gauss << "\n";
-  std::cerr << "TheDet_symm =" << TheDet_symm << "\n";
+  std::cerr << "Benchmarking determinant of a " << A.rows() << " x " << A.cols()
+            << " matrix\n";
+
+  MicrosecondTime time;
+  T det_dispatch = DeterminantMat(A);
+  std::cerr << "|DeterminantMat|=" << time << "\n";
+
+  T det_bareiss = DeterminantMatBareiss(A);
+  std::cerr << "|DeterminantMatBareiss|=" << time << "\n";
+
+  T det_berkowitz = DeterminantMatBerkowitz(A);
+  std::cerr << "|DeterminantMatBerkowitz|=" << time << "\n";
+
+  T det_perm = DeterminantMatPermutation(A);
+  std::cerr << "|DeterminantMatPermutation|=" << time << "\n";
+
+  std::cerr << "det_dispatch  =" << det_dispatch << "\n";
+  std::cerr << "det_bareiss   =" << det_bareiss << "\n";
+  std::cerr << "det_berkowitz =" << det_berkowitz << "\n";
+  std::cerr << "det_perm      =" << det_perm << "\n";
 }
 
 void compute_determinant(std::string const &arithmetic,
@@ -34,6 +48,10 @@ void compute_determinant(std::string const &arithmetic,
     return compute_determinant_kernel<T>(eFile);
   }
 #ifndef DISABLE_GMP_ARITHMETIC
+  if (arithmetic == "integer") {
+    using T = mpz_class;
+    return compute_determinant_kernel<T>(eFile);
+  }
   if (arithmetic == "rational") {
     using T = mpq_class;
     return compute_determinant_kernel<T>(eFile);

@@ -68,6 +68,56 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   return -TheDet;
 }
 
+// Bareiss fraction-free Gaussian elimination. Over an integral domain (e.g. the
+// integers) it computes the determinant using only ring operations and EXACT
+// divisions: at step k every entry M(i,j)*M(k,k) - M(i,k)*M(k,j) is divisible by
+// the previous pivot, because Bareiss's theorem makes each intermediate entry a
+// minor determinant of the input. So all quantities stay in the ring -- no
+// fractions, and coefficient growth is bounded by the Hadamard bound rather than
+// exploding -- while the cost stays O(n^3). This is the method of choice for
+// exact integer matrices, where the field-based DeterminantMatKernel would drag
+// in rational arithmetic. A zero pivot is handled by swapping in a non-zero entry
+// from the same column below (flipping the sign); if none exists the matrix is
+// singular and the determinant is zero.
+template <typename T> T DeterminantMatBareiss(MyMatrix<T> const &Input) {
+  int n = Input.rows();
+  if (n == 0)
+    return T(1);
+  MyMatrix<T> M = Input;
+  T prev(1);
+  bool neg = false;
+  for (int k = 0; k < n - 1; k++) {
+    if (M(k, k) == 0) {
+      int r = -1;
+      for (int i = k + 1; i < n; i++)
+        if (M(i, k) != 0) {
+          r = i;
+          break;
+        }
+      if (r == -1)
+        return T(0);
+      M.row(k).swap(M.row(r));
+      neg = !neg;
+    }
+    for (int i = k + 1; i < n; i++)
+      for (int j = k + 1; j < n; j++) {
+        T val = M(i, j) * M(k, k) - M(i, k) * M(k, j);
+        T quot = val / prev; // exact division guaranteed by Bareiss's theorem
+#ifdef DEBUG_MAT_MATRIX
+        if (quot * prev != val) {
+          std::cerr << "DeterminantMatBareiss: non-exact division, T is not an "
+                       "integral domain\n";
+          throw TerminalException{1};
+        }
+#endif
+        M(i, j) = quot;
+      }
+    prev = M(k, k);
+  }
+  T det = M(n - 1, n - 1);
+  return neg ? -det : det;
+}
+
 // Samuelson-Berkowitz characteristic-polynomial determinant. It uses only +, -,
 // * (no division), so it is valid over any commutative ring, including one with
 // zero divisors such as the truncated jet ring. O(n^4). The characteristic
