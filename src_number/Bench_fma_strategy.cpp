@@ -139,7 +139,7 @@ int main() {
     bench<QuadField<mpq_class, 3>>("QuadField<mpq,3>", qfa, qfb, outer);
 
     // RealField needs a registered field (2cos(2pi/7), X^3 + X^2 - 2X - 1).
-    std::string eFile = "Examples/RealAlgebraicField/CubicFieldDisc_49";
+    std::string eFile = "CI_tests/RealAlgebraicField/CubicFieldDisc_49";
     for (int lev = 0; lev <= 10 && !IsExistingFile(eFile); lev++)
       eFile = "../" + eFile;
     if (IsExistingFile(eFile)) {

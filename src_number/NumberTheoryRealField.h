@@ -11,6 +11,7 @@
 #endif
 #include "Temp_common.h"
 #include "InputOutput.h"
+#include <boost/container/small_vector.hpp>
 #include <map>
 #include <string>
 #include <utility>
@@ -47,10 +48,27 @@ using Trat_real_field = mpq_class;
 using Tint_real_field = mpz_class;
 #endif
 
+// Inline storage capacity of the numerator coefficients: elements of fields
+// of degree up to REALFIELD_INLINE_DEG are stored without heap allocation
+// while larger degrees transparently fall back to heap storage, exactly as
+// with std::vector. This is a performance knob, not a limit on the degree;
+// computations on fields of low degree can tighten it, for example with
+// -DREALFIELD_INLINE_DEG=4.
+#ifndef REALFIELD_INLINE_DEG
+#define REALFIELD_INLINE_DEG 8
+#endif
+using Tvec_real_field =
+    boost::container::small_vector<Tint_real_field, REALFIELD_INLINE_DEG>;
+using Tconv_real_field =
+    boost::container::small_vector<Tint_real_field,
+                                   2 * REALFIELD_INLINE_DEG - 1>;
+
 template <typename Tfield> struct HelperClassRealField {
 private:
   using T = Tfield;
   using Tz = Tint_real_field;
+  using Tvec = Tvec_real_field;
+  using Tconv = Tconv_real_field;
   // One level of the approximant ladder: the powers of the lower / upper
   // bound of y as integers over the single denominator den shared by both
   // lists. A shared denominator is required because a bound evaluation mixes
@@ -219,7 +237,7 @@ public:
     }
     Initialize(Pminimal, _val_double, l_approx);
   }
-  void normalize(std::vector<Tz> &num, Tz &den) const {
+  void normalize(Tvec &num, Tz &den) const {
     Tz g = den;
     for (int u = 0; u < deg; u++) {
       if (g == 1)
@@ -236,8 +254,7 @@ public:
   // 2 deg - 1 size across calls so that the limb storage of its entries is
   // reused (no allocation in steady state); only the first deg entries are
   // meaningful on return.
-  void ComputeProductInto(std::vector<Tz> &conv, std::vector<Tz> const &a,
-                          std::vector<Tz> const &b) const {
+  void ComputeProductInto(Tconv &conv, Tvec const &a, Tvec const &b) const {
     // Schoolbook convolution into degrees 0..2 deg - 2 followed by the
     // reduction of the upper part with the precomputed integer rows.
     size_t conv_len = 2 * deg - 1;
@@ -267,20 +284,20 @@ public:
     }
 #endif
   }
-  std::vector<Tz> ComputeProduct(std::vector<Tz> const &a,
-                                 std::vector<Tz> const &b) const {
-    std::vector<Tz> conv;
+  Tvec ComputeProduct(Tvec const &a, Tvec const &b) const {
+    Tconv conv;
     ComputeProductInto(conv, a, b);
-    conv.resize(deg);
-    return conv;
+    Tvec res(deg);
+    for (int u = 0; u < deg; u++)
+      res[u] = std::move(conv[u]);
+    return res;
   }
   // The quotient of the two numerator polynomials: a / b = qnum / qden with
   // qnum integral and qden > 0. Solved via the linear system M(b) sol = a
   // where M(b) is the matrix of the multiplication by b.
-  std::pair<std::vector<Tz>, Tz> FindQuotient(std::vector<Tz> const &a,
-                                              std::vector<Tz> const &b) const {
+  std::pair<Tvec, Tz> FindQuotient(Tvec const &a, Tvec const &b) const {
     MyMatrix<T> M(deg, deg);
-    std::vector<Tz> row = b;
+    Tvec row = b;
     for (int i_row = 0; i_row < deg; i_row++) {
       for (int i_col = 0; i_col < deg; i_col++)
         M(i_row, i_col) = T(row[i_col]);
@@ -309,7 +326,7 @@ public:
     Tz qden(1);
     for (int u = 0; u < deg; u++)
       qden = KernelLCMpair(qden, GetDenominator_z(eSol(u)));
-    std::vector<Tz> qnum(deg);
+    Tvec qnum(deg);
     for (int u = 0; u < deg; u++)
       qnum[u] = GetNumerator_z(eSol(u)) * (qden / GetDenominator_z(eSol(u)));
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
@@ -326,7 +343,7 @@ public:
 #endif
     return {std::move(qnum), std::move(qden)};
   }
-  bool IsStrictlyPositive(std::vector<Tz> const &x) const {
+  bool IsStrictlyPositive(Tvec const &x) const {
     // x is the numerator polynomial, assumed to be non-zero; the denominator
     // is positive and does not affect the sign. The bound evaluations are
     // integers over the positive common denominators of the level, so the
@@ -381,7 +398,8 @@ public:
                  "please produce better approximants\n";
     throw TerminalException{1};
   }
-  double evaluate_as_double(std::vector<Tz> const &num, Tz const &den) const {
+  template <typename Tvect>
+  double evaluate_as_double(Tvect const &num, Tz const &den) const {
     double ret_val = 0;
     double pow_double = 1.0;
     for (int i = 0; i < deg; i++) {
@@ -393,14 +411,13 @@ public:
   }
   // Conversion to the coefficients over the powers of x: the change of basis
   // is diagonal since y^i = scal^i x^i.
-  std::vector<T> get_x_basis(std::vector<Tz> const &num, Tz const &den) const {
+  std::vector<T> get_x_basis(Tvec const &num, Tz const &den) const {
     std::vector<T> V(deg);
     for (int u = 0; u < deg; u++)
       V[u] = T(num[u] * pow_scal[u]) / T(den);
     return V;
   }
-  void set_from_x_basis(std::vector<T> const &V, std::vector<Tz> &num,
-                        Tz &den) const {
+  void set_from_x_basis(std::vector<T> const &V, Tvec &num, Tz &den) const {
     std::vector<T> b(deg);
     for (int u = 0; u < deg; u++)
       b[u] = V[u] / T(pow_scal[u]);
@@ -438,7 +455,9 @@ void print_all_helpers(int val) {
   }
 }
 
-template <typename T> bool IsZeroVector(std::vector<T> const &V) {
+// Zero test for std::vector like containers (std::vector, small_vector); the
+// MyVector case is handled by IsZeroVector in MAT_MatrixFund.h.
+template <typename Tvect> bool IsZeroStdVector(Tvect const &V) {
   for (auto &val : V)
     if (val != 0)
       return false;
@@ -466,12 +485,13 @@ template <int i_field> class RealField {
 public:
   using T = Trat_real_field;
   using Tz = Tint_real_field;
+  using Tvec = Tvec_real_field;
   using Tresidual = T;
 
 private:
   // The element is (num[0] + num[1] y + ... + num[deg-1] y^{deg-1}) / den
   // with den > 0 and gcd(den, num[0], ..., num[deg-1]) = 1.
-  std::vector<Tz> num;
+  Tvec num;
   Tz den;
 
   static HelperClassRealField<T> const &get_hcrf() {
@@ -479,8 +499,12 @@ private:
     return hcrf;
   }
   void normalize() { get_hcrf().normalize(num, den); }
-  // this += (or -=) onum / oden, followed by the normalization.
-  void axpy_merge(std::vector<Tz> const &onum, Tz const &oden, bool negate) {
+  // this += (or -=) onum / oden, followed by the normalization. Templated on
+  // the container so that both elements (Tvec) and the convolution scratch
+  // buffer (Tconv_real_field, of which only the first deg entries are read)
+  // can be merged in.
+  template <typename Tvect>
+  void axpy_merge(Tvect const &onum, Tz const &oden, bool negate) {
     size_t len = num.size();
     if (den == oden) {
       if (negate) {
@@ -514,10 +538,10 @@ private:
   // The numerator polynomial of x - y, whose sign is the sign of x - y since
   // the denominators are positive. No normalization is needed for sign or
   // zero tests.
-  static std::vector<Tz> diff_numerator(RealField<i_field> const &x,
-                                        RealField<i_field> const &y) {
+  static Tvec diff_numerator(RealField<i_field> const &x,
+                             RealField<i_field> const &y) {
     size_t len = x.num.size();
-    std::vector<Tz> V(len);
+    Tvec V(len);
     if (x.den == y.den) {
       for (size_t u = 0; u < len; u++)
         V[u] = x.num[u] - y.num[u];
@@ -528,17 +552,16 @@ private:
     return V;
   }
   // The numerator polynomial of x - y for y integer.
-  static std::vector<Tz> diff_numerator_int(RealField<i_field> const &x,
-                                            int const &y) {
-    std::vector<Tz> V = x.num;
+  static Tvec diff_numerator_int(RealField<i_field> const &x, int const &y) {
+    Tvec V = x.num;
     V[0] -= y * x.den;
     return V;
   }
-  RealField(std::vector<Tz> &&_num, Tz &&_den)
+  RealField(Tvec &&_num, Tz &&_den)
       : num(std::move(_num)), den(std::move(_den)) {}
 
 public:
-  std::vector<Tz> const &get_num() const { return num; }
+  Tvec const &get_num() const { return num; }
   Tz const &get_den() const { return den; }
   std::vector<T> get_x_basis() const {
     return get_hcrf().get_x_basis(num, den);
@@ -586,7 +609,7 @@ public:
   // overwritten, and the existing limb storage of this->num is reused.
   RealField<i_field> &operator=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local std::vector<Tz> conv;
+    static thread_local Tconv_real_field conv;
     hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     Tz pd = e.x.den * e.y.den;
     size_t len = num.size();
@@ -607,7 +630,7 @@ public:
   // survives across the accumulations of a dot product.
   void operator+=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local std::vector<Tz> conv;
+    static thread_local Tconv_real_field conv;
     hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     axpy_merge(conv, e.x.den * e.y.den, false);
   }
@@ -617,13 +640,13 @@ public:
   // Fused subtract of a lazy product: this -= a*b.
   void operator-=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local std::vector<Tz> conv;
+    static thread_local Tconv_real_field conv;
     hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     axpy_merge(conv, e.x.den * e.y.den, true);
   }
   void operator/=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    std::pair<std::vector<Tz>, Tz> quot = hcrf.FindQuotient(num, x.num);
+    std::pair<Tvec, Tz> quot = hcrf.FindQuotient(num, x.num);
     Tz db = x.den;
     size_t len = num.size();
     for (size_t u = 0; u < len; u++)
@@ -661,9 +684,9 @@ public:
   friend RealField<i_field> operator/(int const &x,
                                       RealField<i_field> const &y) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    std::vector<Tz> xnum(y.num.size(), Tz(0));
+    Tvec xnum(y.num.size(), Tz(0));
     xnum[0] = x;
-    std::pair<std::vector<Tz>, Tz> quot = hcrf.FindQuotient(xnum, y.num);
+    std::pair<Tvec, Tz> quot = hcrf.FindQuotient(xnum, y.num);
     size_t len = y.num.size();
     for (size_t u = 0; u < len; u++)
       quot.first[u] *= y.den;
@@ -674,7 +697,7 @@ public:
   friend RealField<i_field> operator/(RealField<i_field> const &x,
                                       RealField<i_field> const &y) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    std::pair<std::vector<Tz>, Tz> quot = hcrf.FindQuotient(x.num, y.num);
+    std::pair<Tvec, Tz> quot = hcrf.FindQuotient(x.num, y.num);
     size_t len = x.num.size();
     for (size_t u = 0; u < len; u++)
       quot.first[u] *= y.den;
@@ -685,7 +708,7 @@ public:
   double get_d() const { return get_hcrf().evaluate_as_double(num, den); }
   void operator*=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local std::vector<Tz> conv;
+    static thread_local Tconv_real_field conv;
     hcrf.ComputeProductInto(conv, num, x.num);
     size_t len = num.size();
     for (size_t u = 0; u < len; u++)
@@ -747,20 +770,20 @@ public:
     return x.num[0] != y * x.den;
   }
   friend bool IsNonNegative(RealField<i_field> const &x) {
-    if (IsZeroVector(x.num))
+    if (IsZeroStdVector(x.num))
       return true;
     return get_hcrf().IsStrictlyPositive(x.num);
   }
   friend bool operator>=(RealField<i_field> const &x,
                          RealField<i_field> const &y) {
-    std::vector<Tz> V = diff_numerator(x, y);
-    if (IsZeroVector(V))
+    Tvec V = diff_numerator(x, y);
+    if (IsZeroStdVector(V))
       return true;
     return get_hcrf().IsStrictlyPositive(V);
   }
   friend bool operator>=(RealField<i_field> const &x, int const &y) {
-    std::vector<Tz> V = diff_numerator_int(x, y);
-    if (IsZeroVector(V))
+    Tvec V = diff_numerator_int(x, y);
+    if (IsZeroStdVector(V))
       return true;
     return get_hcrf().IsStrictlyPositive(V);
   }
@@ -769,8 +792,8 @@ public:
     return y >= x;
   }
   friend bool operator<=(RealField<i_field> const &x, int const &y) {
-    std::vector<Tz> V = diff_numerator_int(x, y);
-    if (IsZeroVector(V))
+    Tvec V = diff_numerator_int(x, y);
+    if (IsZeroStdVector(V))
       return true;
     for (auto &val : V)
       val = -val;
@@ -778,30 +801,30 @@ public:
   }
   friend bool operator>(RealField<i_field> const &x,
                         RealField<i_field> const &y) {
-    std::vector<Tz> V = diff_numerator(x, y);
-    if (IsZeroVector(V)) {
+    Tvec V = diff_numerator(x, y);
+    if (IsZeroStdVector(V)) {
       return false;
     }
     return get_hcrf().IsStrictlyPositive(V);
   }
   friend bool operator>(RealField<i_field> const &x, int const &y) {
-    std::vector<Tz> V = diff_numerator_int(x, y);
-    if (IsZeroVector(V)) {
+    Tvec V = diff_numerator_int(x, y);
+    if (IsZeroStdVector(V)) {
       return false;
     }
     return get_hcrf().IsStrictlyPositive(V);
   }
   friend bool operator<(RealField<i_field> const &x,
                         RealField<i_field> const &y) {
-    std::vector<Tz> V = diff_numerator(y, x);
-    if (IsZeroVector(V)) {
+    Tvec V = diff_numerator(y, x);
+    if (IsZeroStdVector(V)) {
       return false;
     }
     return get_hcrf().IsStrictlyPositive(V);
   }
   friend bool operator<(RealField<i_field> const &x, int const &y) {
-    std::vector<Tz> V = diff_numerator_int(x, y);
-    if (IsZeroVector(V)) {
+    Tvec V = diff_numerator_int(x, y);
+    if (IsZeroStdVector(V)) {
       return false;
     }
     for (auto &val : V)
@@ -929,10 +952,12 @@ struct use_bareiss_for_determinants<RealField<i_field>> {
   static const bool value = true;
 };
 
-// Fraction-free LU inverse is likewise a win for this exact, heavy-arithmetic
-// field (see use_fraction_free_lu).
+// Fraction-free LU inverse measured 23% slower on the G553 dual description
+// benchmark (dimension 7 systems over a degree 4 field): with the integer
+// polynomial representation the classical elimination normalizes cheaply and
+// fraction-free growth does not pay off at these sizes.
 template <int i_field> struct use_fraction_free_lu<RealField<i_field>> {
-  static const bool value = true;
+  static const bool value = false;
 };
 
 // FMA form (see is_fma_prefered). The direct/fused form is fastest for RealField
@@ -988,7 +1013,7 @@ template <int i_field> struct is_real_algebraic_field<RealField<i_field>> {
 // Some functionality
 
 template <int i_field> bool IsInteger(RealField<i_field> const &x) {
-  std::vector<Tint_real_field> const &num = x.get_num();
+  Tvec_real_field const &num = x.get_num();
   size_t len = num.size();
   for (size_t u = 1; u < len; u++)
     if (num[u] != 0)
@@ -1002,7 +1027,7 @@ template <int i_field> bool IsInteger(RealField<i_field> const &x) {
 template <typename T2, int i_field>
 requires (!is_real_algebraic_field<T2>::value)
 inline void TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
-  std::vector<Tint_real_field> const &num = x1.val.get_num();
+  Tvec_real_field const &num = x1.val.get_num();
   size_t len = num.size();
   for (size_t u = 1; u < len; u++) {
     if (num[u] != 0) {
