@@ -26,11 +26,17 @@ void compute_inverse_kernel(std::string const &eFile) {
   MyMatrix<T> inv_bareiss = InverseBareiss(A);
   std::cerr << "|InverseBareiss|=" << time << "\n";
 
+  MyMatrix<T> inv_fflu = InverseFractionFreeLU(A);
+  std::cerr << "|InverseFractionFreeLU|=" << time << "\n";
+
   MyMatrix<T> Id = IdentityMat<T>(n);
-  std::cerr << "Inverse        * A == I  : " << (A * inv_dispatch == Id) << "\n";
-  std::cerr << "InverseBareiss * A == I  : " << (A * inv_bareiss == Id) << "\n";
-  std::cerr << "Inverse == InverseBareiss : " << (inv_dispatch == inv_bareiss)
+  std::cerr << "Inverse             * A == I : " << (A * inv_dispatch == Id)
             << "\n";
+  std::cerr << "InverseBareiss      * A == I : " << (A * inv_bareiss == Id)
+            << "\n";
+  std::cerr << "InverseFractionFreeLU * A==I : " << (A * inv_fflu == Id) << "\n";
+  std::cerr << "all three agree              : "
+            << (inv_dispatch == inv_bareiss && inv_bareiss == inv_fflu) << "\n";
 }
 
 void compute_inverse(std::string const &arithmetic, std::string const &eFile) {

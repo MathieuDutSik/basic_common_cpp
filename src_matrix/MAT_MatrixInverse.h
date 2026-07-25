@@ -216,6 +216,138 @@ template <typename T> MyMatrix<T> InverseBareiss(MyMatrix<T> const &Input) {
   return Output;
 }
 
+// Fraction-free LU factorization (Zhou & Jeffrey, "Fraction-free matrix factors:
+// new forms for LU and QR factors", 2008). It writes
+//     A = L * D^{-1} * U
+// with integer lower-triangular L, integer upper-triangular U, and diagonal
+//     D = diag(d_{-1} d_0, d_0 d_1, ..., d_{n-2} d_{n-1}),  d_{-1} = 1,
+// where d_k is the pivot at step k, i.e. the leading (k+1) x (k+1) minor of A;
+// det(A) = d_{n-1}. L and U carry the pivots d_k on their diagonals, every entry
+// is a subdeterminant of A, and all divisions are exact (Bareiss's theorem). No
+// pivoting is done, so this form requires the leading principal minors to be
+// non-zero (a generic dense matrix qualifies).
+template <typename T> struct FractionFreeLU_result {
+  MyMatrix<T> L;
+  MyMatrix<T> U;
+  std::vector<T> d; // pivots d_0 .. d_{n-1}; det(A) = d_{n-1}
+};
+
+template <typename T>
+FractionFreeLU_result<T> FractionFreeLU(MyMatrix<T> const &A) {
+  int n = A.rows();
+  MyMatrix<T> M = A;
+  MyMatrix<T> L = ZeroMatrix<T>(n, n);
+  std::vector<T> d(n);
+  T prev(1);
+  for (int k = 0; k < n; k++) {
+    // Column k of L is the current column-k below (and on) the diagonal.
+    for (int i = k; i < n; i++)
+      L(i, k) = M(i, k);
+    T pivot = M(k, k);
+    d[k] = pivot;
+    for (int i = k + 1; i < n; i++) {
+      for (int j = k + 1; j < n; j++) {
+        T val = pivot * M(i, j) - M(i, k) * M(k, j);
+        M(i, j) = val / prev; // exact division (Bareiss)
+      }
+      M(i, k) = T(0);
+    }
+    prev = pivot;
+  }
+  MyMatrix<T> U = ZeroMatrix<T>(n, n);
+  for (int i = 0; i < n; i++)
+    for (int j = i; j < n; j++)
+      U(i, j) = M(i, j);
+  return {std::move(L), std::move(U), std::move(d)};
+}
+
+// Matrix inverse through the fraction-free LU factorization. Rather than
+// reducing all the way to a diagonal like the Bareiss-Montante Gauss-Jordan
+// (InverseBareiss), it performs fraction-free forward elimination on [A | I]
+// only below the diagonal -- yielding the upper-triangular U on the left and the
+// forward-transformed identity C on the right -- and then a fraction-free back
+// substitution, one column at a time. For column c the scaled solution
+//     xhat_i = (det * C(i,c) - sum_{k>i} U(i,k) xhat_k) / d_i
+// stays integral (Bareiss), and xhat is the corresponding column of the adjugate
+// adj(A); A^{-1} = adj(A) / det. Forward-then-back does fewer ring operations
+// than the full Gauss-Jordan, so it is the cheaper fraction-free inverse.
+template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input) {
+  int n = Input.rows();
+  // Augmented matrix M = [A | I], of size n x 2n.
+  MyMatrix<T> M(n, 2 * n);
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < n; j++) {
+      M(i, j) = Input(i, j);
+      M(i, n + j) = (i == j) ? T(1) : T(0);
+    }
+  T prev(1);
+  bool neg = false;
+  // Fraction-free forward elimination (only the rows below the pivot).
+  for (int k = 0; k < n; k++) {
+    if (M(k, k) == 0) {
+      int r = -1;
+      for (int i = k + 1; i < n; i++)
+        if (M(i, k) != 0) {
+          r = i;
+          break;
+        }
+      if (r == -1) {
+        std::cerr << "InverseFractionFreeLU: the matrix is singular\n";
+        throw TerminalException{1};
+      }
+      M.row(k).swap(M.row(r));
+      neg = !neg;
+    }
+    T pivot = M(k, k);
+    for (int i = k + 1; i < n; i++) {
+      for (int j = k + 1; j < 2 * n; j++) {
+        T val = pivot * M(i, j) - M(i, k) * M(k, j);
+        T quot = val / prev; // exact division (Bareiss)
+#ifdef DEBUG_MAT_MATRIX
+        if (quot * prev != val) {
+          std::cerr << "InverseFractionFreeLU: non-exact elimination division\n";
+          throw TerminalException{1};
+        }
+#endif
+        M(i, j) = quot;
+      }
+      M(i, k) = T(0);
+    }
+    prev = pivot;
+  }
+  T det = neg ? -prev : prev;
+  // Fraction-free back substitution, one column of the adjugate at a time.
+  MyMatrix<T> Output(n, n);
+  std::vector<T> xhat(n);
+  for (int c = 0; c < n; c++) {
+    for (int i = n - 1; i >= 0; i--) {
+      T s = det * M(i, n + c);
+      for (int k = i + 1; k < n; k++)
+        s -= M(i, k) * xhat[k];
+      T quot = s / M(i, i); // exact division (Bareiss)
+#ifdef DEBUG_MAT_MATRIX
+      if (quot * M(i, i) != s) {
+        std::cerr << "InverseFractionFreeLU: non-exact back-substitution\n";
+        throw TerminalException{1};
+      }
+#endif
+      xhat[i] = quot;
+    }
+    // xhat is column c of adj(A); A^{-1} = adj(A) / det.
+    for (int i = 0; i < n; i++) {
+      T num = xhat[i];
+      T quot = num / det;
+      if (quot * det != num) {
+        std::cerr << "InverseFractionFreeLU: A^{-1} is not representable over T "
+                     "(the determinant does not divide the adjugate)\n";
+        throw TerminalException{1};
+      }
+      Output(i, c) = quot;
+    }
+  }
+  return Output;
+}
+
 template <typename T> MyMatrix<T> CongrMap(MyMatrix<T> const &eMat) {
   MyMatrix<T> TheInv = Inverse(eMat);
   return TransposedMat(TheInv);
