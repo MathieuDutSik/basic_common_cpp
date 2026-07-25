@@ -134,6 +134,22 @@ template <typename T> struct use_bareiss_for_determinants {
   static const bool value = is_implementation_of_Z<T>::value;
 };
 
+// Whether Inverse should be computed with the fraction-free LU factorization
+// (Zhou & Jeffrey, InverseFractionFreeLU) instead of classical Gauss-Jordan.
+// The forward-elimination-then-back-substitution structure does fewer ring
+// operations than the Bareiss-Montante Gauss-Jordan and, benchmarked, beats
+// classical elimination for the integer rings and for the exact number fields
+// (QuadField, RealField), where it wins by ~1.3x (integers) to several times
+// (number fields). It is left OFF for:
+//   --- mpq_class and the rational fields, where classical is competitive and
+//       the fraction-free gain only appears in dimensions we rarely reach;
+//   --- floating point, where pivoting for numerical stability matters.
+// The default follows is_implementation_of_Z (the integer rings); the exact
+// number fields opt in explicitly in their own headers.
+template <typename T> struct use_fraction_free_lu {
+  static const bool value = is_implementation_of_Z<T>::value;
+};
+
 // Trait definition for subset of rationals
 
 template <typename T> struct is_implementation_of_Q {};

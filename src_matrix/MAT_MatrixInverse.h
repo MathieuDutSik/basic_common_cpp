@@ -121,21 +121,6 @@ template <typename T> MyMatrix<T> Inverse_destroy(MyMatrix<T> &Input) {
   return Output;
 }
 
-template <typename T>
-requires is_ring_field<T>::value
-inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
-  return InverseKernel(Input);
-}
-
-template <typename T>
-requires (!is_ring_field<T>::value)
-inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
-  using Tfield = typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
-  MyMatrix<Tfield> OutputF = InverseKernel(InputF);
-  return UniversalMatrixConversion<T, Tfield>(OutputF);
-}
-
 // Fraction-free Gauss-Jordan elimination, also known as fraction-free
 // Gauss-Jordan or the Bareiss-Montante algorithm. Gauss-Jordan is run on the
 // augmented matrix [A | I] using only ring operations and EXACT divisions: at
@@ -346,6 +331,35 @@ template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input
     }
   }
   return Output;
+}
+
+// Types opting into the fraction-free LU inverse (see use_fraction_free_lu): the
+// integer rings and the exact number fields. Forward-elimination-then-back-
+// substitution does fewer ring operations than the classical Gauss-Jordan.
+template <typename T>
+requires (use_fraction_free_lu<T>::value)
+inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
+  return InverseFractionFreeLU(Input);
+}
+
+// Ordinary field not opting into fraction-free LU (mpq_class and the rational
+// fields, floating point, Fp, ...): classical Gauss-Jordan, whose
+// SelectBestPivot pivoting also preserves numerical stability for floats.
+template <typename T>
+requires (!use_fraction_free_lu<T>::value && is_ring_field<T>::value)
+inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
+  return InverseKernel(Input);
+}
+
+// Any other non-field ring not opting into fraction-free LU: map to the
+// overlying field and invert there.
+template <typename T>
+requires (!use_fraction_free_lu<T>::value && !is_ring_field<T>::value)
+inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
+  MyMatrix<Tfield> OutputF = InverseKernel(InputF);
+  return UniversalMatrixConversion<T, Tfield>(OutputF);
 }
 
 template <typename T> MyMatrix<T> CongrMap(MyMatrix<T> const &eMat) {

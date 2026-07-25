@@ -51,6 +51,15 @@ template <typename Tfield> struct HelperClassRealField {
 private:
   using T = Tfield;
   using Tz = Tint_real_field;
+  // One level of the approximant ladder: the powers of the lower / upper
+  // bound of y as integers over the single denominator den shared by both
+  // lists. A shared denominator is required because a bound evaluation mixes
+  // lower and upper powers depending on the coefficient signs.
+  struct ApproximantLevel {
+    std::vector<Tz> pow_low;
+    std::vector<Tz> pow_upp;
+    Tz den;
+  };
   void Initialize(std::vector<T> const &Pminimal, double const &_val_double,
                   std::vector<std::pair<T, T>> const &l_approx) {
     val_double = _val_double;
@@ -140,19 +149,38 @@ private:
       }
       // The bounds are on x but the sign determination works on the numerator
       // polynomial in y, so the stored powers are those of y = scal * x.
+      // For the bounds pl/ql and pu/qu the powers (pl/ql)^i and (pu/qu)^i
+      // are stored as integers over the shared denominator
+      // den = ql^{deg-1} qu^{deg-1}, so that the bound evaluations and their
+      // sign tests stay in integer arithmetic.
       T y_low = val_low * scal_T;
       T y_upp = val_upp * scal_T;
-      std::vector<T> l_pow_low;
-      std::vector<T> l_pow_upp;
-      T pow_low = y_low;
-      T pow_upp = y_upp;
+      ApproximantLevel level;
+      Tz pl = GetNumerator_z(y_low);
+      Tz ql = GetDenominator_z(y_low);
+      Tz pu = GetNumerator_z(y_upp);
+      Tz qu = GetDenominator_z(y_upp);
+      std::vector<Tz> pow_pl(deg), pow_ql(deg), pow_pu(deg), pow_qu(deg);
+      pow_pl[0] = 1;
+      pow_ql[0] = 1;
+      pow_pu[0] = 1;
+      pow_qu[0] = 1;
       for (int i = 1; i < deg; i++) {
-        l_pow_low.push_back(pow_low);
-        l_pow_upp.push_back(pow_upp);
-        pow_low *= y_low;
-        pow_upp *= y_upp;
+        pow_pl[i] = pow_pl[i - 1] * pl;
+        pow_ql[i] = pow_ql[i - 1] * ql;
+        pow_pu[i] = pow_pu[i - 1] * pu;
+        pow_qu[i] = pow_qu[i - 1] * qu;
       }
-      SequenceApproximant.push_back({l_pow_low, l_pow_upp});
+      level.den = pow_ql[deg - 1] * pow_qu[deg - 1];
+      level.pow_low.resize(deg - 1);
+      level.pow_upp.resize(deg - 1);
+      for (int i = 1; i < deg; i++) {
+        level.pow_low[i - 1] =
+            pow_pl[i] * pow_ql[deg - 1 - i] * pow_qu[deg - 1];
+        level.pow_upp[i - 1] =
+            pow_pu[i] * pow_qu[deg - 1 - i] * pow_ql[deg - 1];
+      }
+      SequenceApproximant.push_back(level);
     }
   }
 
@@ -204,11 +232,19 @@ public:
       num[u] /= g;
     den /= g;
   }
-  std::vector<Tz> ComputeProduct(std::vector<Tz> const &a,
-                                 std::vector<Tz> const &b) const {
+  // Product computed into a caller provided buffer. The buffer keeps its
+  // 2 deg - 1 size across calls so that the limb storage of its entries is
+  // reused (no allocation in steady state); only the first deg entries are
+  // meaningful on return.
+  void ComputeProductInto(std::vector<Tz> &conv, std::vector<Tz> const &a,
+                          std::vector<Tz> const &b) const {
     // Schoolbook convolution into degrees 0..2 deg - 2 followed by the
     // reduction of the upper part with the precomputed integer rows.
-    std::vector<Tz> conv(2 * deg - 1);
+    size_t conv_len = 2 * deg - 1;
+    if (conv.size() != conv_len)
+      conv.resize(conv_len);
+    for (size_t k = 0; k < conv_len; k++)
+      conv[k] = 0;
     for (int i = 0; i < deg; i++)
       for (int j = 0; j < deg; j++)
         conv[i + j] += a[i] * b[j];
@@ -220,7 +256,6 @@ public:
           conv[j] += val * row[j];
       }
     }
-    conv.resize(deg);
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
     double result_d = evaluate_as_double(conv, Tz(1));
     double a_d = evaluate_as_double(a, Tz(1));
@@ -231,6 +266,12 @@ public:
       throw TerminalException{1};
     }
 #endif
+  }
+  std::vector<Tz> ComputeProduct(std::vector<Tz> const &a,
+                                 std::vector<Tz> const &b) const {
+    std::vector<Tz> conv;
+    ComputeProductInto(conv, a, b);
+    conv.resize(deg);
     return conv;
   }
   // The quotient of the two numerator polynomials: a / b = qnum / qden with
@@ -287,30 +328,22 @@ public:
   }
   bool IsStrictlyPositive(std::vector<Tz> const &x) const {
     // x is the numerator polynomial, assumed to be non-zero; the denominator
-    // is positive and does not affect the sign.
-    auto get_bounds =
-        [&](std::pair<std::vector<T>, std::vector<T>> const &epair)
-        -> std::pair<T, T> {
-      T val_low(x[0]);
-      T val_upp(x[0]);
+    // is positive and does not affect the sign. The bound evaluations are
+    // integers over the positive common denominators of the level, so the
+    // sign tests stay in integer arithmetic.
+    for (auto &level : SequenceApproximant) {
+      Tz val_low = x[0] * level.den;
+      Tz val_upp = val_low;
       for (int i = 1; i < deg; i++) {
         if (x[i] > 0) {
-          T val(x[i]);
-          val_low += val * epair.first[i - 1];
-          val_upp += val * epair.second[i - 1];
+          val_low += x[i] * level.pow_low[i - 1];
+          val_upp += x[i] * level.pow_upp[i - 1];
         }
         if (x[i] < 0) {
-          T val(x[i]);
-          val_low += val * epair.second[i - 1];
-          val_upp += val * epair.first[i - 1];
+          val_low += x[i] * level.pow_upp[i - 1];
+          val_upp += x[i] * level.pow_low[i - 1];
         }
       }
-      return {val_low, val_upp};
-    };
-    for (auto &epair : SequenceApproximant) {
-      auto pair_bound = get_bounds(epair);
-      T const &val_low = pair_bound.first;
-      T const &val_upp = pair_bound.second;
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
       if (val_low > val_upp) {
         std::cerr << "The ordering of values is not respected\n";
@@ -319,7 +352,8 @@ public:
 #endif
       if (val_upp <= 0) {
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
-        double val_upp_d = UniversalScalarConversion<double, T>(val_upp);
+        double val_upp_d =
+            UniversalScalarConversion<double, T>(T(val_upp) / T(level.den));
         if (val_upp_d > threshold_real_alg_check) {
           std::cerr << "Error in IsStrictlyPositive (it is negative)\n";
           throw TerminalException{1};
@@ -329,7 +363,8 @@ public:
       }
       if (val_low >= 0) {
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
-        double val_low_d = UniversalScalarConversion<double, T>(val_low);
+        double val_low_d =
+            UniversalScalarConversion<double, T>(T(val_low) / T(level.den));
         if (val_low_d < -threshold_real_alg_check) {
           std::cerr << "Error in IsStrictlyPositive (it is positive)\n";
           throw TerminalException{1};
@@ -385,7 +420,7 @@ private:
   std::vector<std::vector<Tz>> ExprYpow;
   double val_double;
   double val_double_y;
-  std::vector<std::pair<std::vector<T>, std::vector<T>>> SequenceApproximant;
+  std::vector<ApproximantLevel> SequenceApproximant;
 };
 
 std::map<int, HelperClassRealField<Trat_real_field>> list_helper;
@@ -459,12 +494,18 @@ private:
       Tz g = KernelGcdPair(den, oden);
       Tz m_this = oden / g;
       Tz m_o = den / g;
+      // Split as in-place multiply then addmul/submul so that no temporary
+      // integer is created per coefficient.
       if (negate) {
-        for (size_t u = 0; u < len; u++)
-          num[u] = num[u] * m_this - onum[u] * m_o;
+        for (size_t u = 0; u < len; u++) {
+          num[u] *= m_this;
+          num[u] -= onum[u] * m_o;
+        }
       } else {
-        for (size_t u = 0; u < len; u++)
-          num[u] = num[u] * m_this + onum[u] * m_o;
+        for (size_t u = 0; u < len; u++) {
+          num[u] *= m_this;
+          num[u] += onum[u] * m_o;
+        }
       }
       den *= m_this;
     }
@@ -541,12 +582,16 @@ public:
     return *this;
   }
   // Assign from a lazy product a*b. Aliasing-safe: the product is fully
-  // computed from the operands before this->num is replaced.
+  // computed into the scratch buffer from the operands before this->num is
+  // overwritten, and the existing limb storage of this->num is reused.
   RealField<i_field> &operator=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    std::vector<Tz> V = hcrf.ComputeProduct(e.x.num, e.y.num);
+    static thread_local std::vector<Tz> conv;
+    hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     Tz pd = e.x.den * e.y.den;
-    num = std::move(V);
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] = conv[u];
     den = std::move(pd);
     normalize();
     return *this;
@@ -557,11 +602,14 @@ public:
     axpy_merge(x.num, x.den, false);
   }
   // Fused accumulate of a lazy product: this += a*b. The product is left
-  // unnormalized and a single normalization runs after the merge.
+  // unnormalized and a single normalization runs after the merge. The
+  // convolution goes into a thread-local scratch buffer whose limb storage
+  // survives across the accumulations of a dot product.
   void operator+=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    std::vector<Tz> V = hcrf.ComputeProduct(e.x.num, e.y.num);
-    axpy_merge(V, e.x.den * e.y.den, false);
+    static thread_local std::vector<Tz> conv;
+    hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
+    axpy_merge(conv, e.x.den * e.y.den, false);
   }
   void operator-=(RealField<i_field> const &x) {
     axpy_merge(x.num, x.den, true);
@@ -569,8 +617,9 @@ public:
   // Fused subtract of a lazy product: this -= a*b.
   void operator-=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    std::vector<Tz> V = hcrf.ComputeProduct(e.x.num, e.y.num);
-    axpy_merge(V, e.x.den * e.y.den, true);
+    static thread_local std::vector<Tz> conv;
+    hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
+    axpy_merge(conv, e.x.den * e.y.den, true);
   }
   void operator/=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
@@ -636,7 +685,11 @@ public:
   double get_d() const { return get_hcrf().evaluate_as_double(num, den); }
   void operator*=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    num = hcrf.ComputeProduct(num, x.num);
+    static thread_local std::vector<Tz> conv;
+    hcrf.ComputeProductInto(conv, num, x.num);
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] = conv[u];
     den *= x.den;
     normalize();
   }
@@ -873,6 +926,12 @@ template <int i_field> struct is_ring_field<RealField<i_field>> {
 // classical Gaussian elimination (see use_bareiss_for_determinants).
 template <int i_field>
 struct use_bareiss_for_determinants<RealField<i_field>> {
+  static const bool value = true;
+};
+
+// Fraction-free LU inverse is likewise a win for this exact, heavy-arithmetic
+// field (see use_fraction_free_lu).
+template <int i_field> struct use_fraction_free_lu<RealField<i_field>> {
   static const bool value = true;
 };
 
