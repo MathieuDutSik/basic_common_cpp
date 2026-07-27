@@ -78,6 +78,28 @@ MyVector<T> NonUniqueScaleToIntegerVector(MyVector<T> const &V) {
   return NonUniqueScaleToIntegerVectorPlusCoeff(V).TheVect;
 }
 
+// Scale the vector to integer entries by clearing the denominators only,
+// without the content (gcd) reduction of RemoveFractionVectorPlusCoeff.
+// This is much cheaper: no gcd of the entries is computed and already
+// integral vectors are returned unchanged with multiplier one. The
+// multiplier is always positive.
+template <typename T>
+FractionVector<T> ClearDenominatorVectorPlusCoeff(MyVector<T> const &V) {
+  if constexpr (is_implementation_of_Q<T>::value) {
+    int n = V.size();
+    T eLCM(GetDenominator(V(0)));
+    for (int i = 1; i < n; i++)
+      eLCM = LCMpair(eLCM, GetDenominator(V(i)));
+    if (eLCM == 1) {
+      return {eLCM, V};
+    }
+    MyVector<T> Vret = eLCM * V;
+    return {eLCM, std::move(Vret)};
+  } else {
+    return NonUniqueScaleToIntegerVectorPlusCoeff_Kernel(V);
+  }
+}
+
 // clang-format off
 #endif  // SRC_MATRIX_MAT_NONUNIQUERESCALE_H_
 // clang-format on
