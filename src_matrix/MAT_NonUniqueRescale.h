@@ -35,6 +35,15 @@ FractionVector<T> RemoveFractionVectorPlusCoeff(MyVector<T> const &V) {
   T eGCD = V1(0);
   for (int i = 1; i < n; i++)
     eGCD = GcdPair(eGCD, V1(i));
+  // The gcd must be positive: a negative multiplier would flip the signs
+  // of the vector, which changes the meaning for the callers (e.g. an
+  // inequality would be reversed). GcdPair returns nonnegative values but
+  // the seeding entry V1(0) survives untouched for vectors of size one.
+  if constexpr (is_totally_ordered<T>::value) {
+    if (eGCD < 0) {
+      eGCD = -eGCD;
+    }
+  }
   MyVector<T> Vret = V1 / eGCD;
   T TheMult = eLCM / eGCD;
   return {TheMult, std::move(Vret)};
