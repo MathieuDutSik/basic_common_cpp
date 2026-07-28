@@ -320,29 +320,76 @@ template <typename T> struct FractionMatrix {
   MyMatrix<T> TheMat;
 };
 
+// The scaled matrix expressed over the underlying ring: TheMat is over the
+// ring and TheMat = TheMult * M, following the design of FractionVectorRing
+// in MAT_NonUniqueRescale.h.
+template <typename T> struct FractionMatrixRing {
+  using Tring = typename underlying_ring<T>::ring_type;
+  T TheMult;
+  MyMatrix<Tring> TheMat;
+};
+
+// Scale the matrix M to TheMat = TheMult * M with TheMat over the
+// underlying ring, TheMult > 0 and the entries of TheMat coprime. All the
+// arithmetic is done in the ring: no canonicalizing field operation occurs
+// and the gcd of the entries is computed with an early exit since it
+// usually collapses to 1 after a few entries.
 template <typename T>
-FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
-  if (IsZeroMatrix(M)) {
-    T TheMult(1);
-    return {TheMult, M};
-  }
+FractionMatrixRing<T> RemoveFractionMatrixPlusCoeffRing(MyMatrix<T> const &M) {
+  using Tring = typename underlying_ring<T>::ring_type;
   int nbRow = M.rows();
   int nbCol = M.cols();
+  MyMatrix<Tring> W(nbRow, nbCol);
+  Tring eLCM(1);
+  if constexpr (is_implementation_of_Z<T>::value) {
+    // No denominator to clear for a ring type: only the content reduction
+    // remains.
+    W = UniversalMatrixConversion<Tring, T>(M);
+  } else {
+    // iRow is the inner loop because of cache locality.
+    std::vector<Tring> dens(nbRow * nbCol);
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      for (int iRow = 0; iRow < nbRow; iRow++) {
+        Tring den = GetDenominator_z(M(iRow, iCol));
+        eLCM = LCMpair(eLCM, den);
+        dens[iRow + nbRow * iCol] = std::move(den);
+      }
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      for (int iRow = 0; iRow < nbRow; iRow++)
+        W(iRow, iCol) = GetNumerator_z(M(iRow, iCol)) *
+                        (eLCM / dens[iRow + nbRow * iCol]);
+  }
+  Tring eGCD(0);
+  for (int iCol = 0; iCol < nbCol && eGCD != 1; iCol++) {
+    for (int iRow = 0; iRow < nbRow; iRow++) {
+      eGCD = GcdPair(eGCD, W(iRow, iCol));
+      if (eGCD == 1)
+        break;
+    }
+  }
+  if constexpr (is_totally_ordered<Tring>::value) {
+    if (eGCD < 0)
+      eGCD = -eGCD;
+  }
+  if (eGCD == 0) {
+    // The zero matrix, for which any multiplier works.
+    eGCD = 1;
+  }
+  if (eGCD != 1)
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      for (int iRow = 0; iRow < nbRow; iRow++)
+        W(iRow, iCol) = W(iRow, iCol) / eGCD;
+  T TheMult = UniversalScalarConversion<T, Tring>(eLCM) /
+              UniversalScalarConversion<T, Tring>(eGCD);
+  return {std::move(TheMult), std::move(W)};
+}
+
+template <typename T>
+FractionMatrix<T> RemoveFractionMatrixPlusCoeff(MyMatrix<T> const &M) {
   using Tring = typename underlying_ring<T>::ring_type;
-  Tring eLCM_ring(1);
-  // iRow is inner loop because of cache locality
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      eLCM_ring = LCMpair(eLCM_ring, GetDenominator_z(M(iRow, iCol)));
-  T eLCM = eLCM_ring;
-  MyMatrix<T> M1 = eLCM * M;
-  T eGCD = M1(0, 0);
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      eGCD = GcdPair(eGCD, M1(iRow, iCol));
-  MyMatrix<T> M2 = M1 / eGCD;
-  T TheMult = eLCM / eGCD;
-  return {TheMult, std::move(M2)};
+  FractionMatrixRing<T> frr = RemoveFractionMatrixPlusCoeffRing(M);
+  return {std::move(frr.TheMult),
+          UniversalMatrixConversion<T, Tring>(frr.TheMat)};
 }
 
 template <typename T> T GetDenominatorMatrix(MyMatrix<T> const &M) {
@@ -461,9 +508,24 @@ UniqueRescaleRowsRing(MyMatrix<T> const &M) {
     for (int iCol = 0; iCol < nbCol; iCol++) {
       Vret[iCol] = (scale / dens[iCol]) * GetNumerator_z(M(iRow, iCol));
     }
-    Tring eGCD = Vret[0];
-    for (int iCol = 1; iCol < nbCol; iCol++)
+    // The gcd must be positive so that the signs of the row are kept:
+    // seeding at zero and going through GcdPair guarantees it, with the
+    // guard for the generality. The early exit applies since the gcd
+    // usually collapses to 1 after a few entries.
+    Tring eGCD(0);
+    for (int iCol = 0; iCol < nbCol; iCol++) {
       eGCD = GcdPair(eGCD, Vret[iCol]);
+      if (eGCD == 1)
+        break;
+    }
+    if constexpr (is_totally_ordered<Tring>::value) {
+      if (eGCD < 0)
+        eGCD = -eGCD;
+    }
+    if (eGCD == 0) {
+      // The zero row, for which no reduction applies.
+      eGCD = 1;
+    }
     for (int iCol = 0; iCol < nbCol; iCol++) {
       Mret(iRow, iCol) = Vret[iCol] / eGCD;
     }
