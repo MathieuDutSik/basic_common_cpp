@@ -60,21 +60,18 @@ inline std::optional<MyVector<T>> SolutionMat(MyMatrix<T> const &eMat,
   return SolutionMatKernel(eMat, eVect);
 }
 
+// Over a ring the solution is fractional in general, so it is returned
+// over the overlying field; the return is empty exactly when the system
+// has no solution at all. For a solution over the ring itself, use
+// SolutionIntMat.
 template <typename T>
 requires (!is_ring_field<T>::value)
-inline std::optional<MyVector<T>> SolutionMat(MyMatrix<T> const &eMat,
-                                              MyVector<T> const &eVect) {
+inline std::optional<MyVector<typename overlying_field<T>::field_type>>
+SolutionMat(MyMatrix<T> const &eMat, MyVector<T> const &eVect) {
   using Tfield = typename overlying_field<T>::field_type;
   MyMatrix<Tfield> eMatF = UniversalMatrixConversion<Tfield, T>(eMat);
   MyVector<Tfield> eVectF = UniversalVectorConversion<Tfield, T>(eVect);
-  std::optional<MyVector<Tfield>> opt = SolutionMatKernel(eMatF, eVectF);
-  if (opt) {
-    const MyVector<Tfield> &V = *opt;
-    if (!IsIntegerVector(V))
-      return {};
-    return UniversalVectorConversion<T, Tfield>(V);
-  }
-  return {};
+  return SolutionMatKernel(eMatF, eVectF);
 }
 
 template <typename T> struct SolutionMatRepetitive {

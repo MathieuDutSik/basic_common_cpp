@@ -2501,10 +2501,11 @@ MyMatrix<T> IntersectionLattice_VectorSpace(MyMatrix<T> const &Latt,
                    "lattice\n";
       throw TerminalException{1};
     }
-    std::optional<MyVector<T>> opt2 = SolutionMat(Space, v);
+    using Tfield = typename overlying_field<T>::field_type;
+    std::optional<MyVector<Tfield>> opt2 = SolutionMat(Space, v);
     if (!opt2) {
       std::cerr
-          << "The vector should be expressed integrally in terms of the spacen";
+          << "The vector should be expressible in terms of the space\n";
       throw TerminalException{1};
     }
   }

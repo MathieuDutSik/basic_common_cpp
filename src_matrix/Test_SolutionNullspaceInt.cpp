@@ -8,7 +8,9 @@
 
 // Tests of the linear system solving and the integral kernels:
 // --- SolutionMat / SolutionIntMat: a planted solution is recovered
-//     (verified by substitution) and an unsolvable system is rejected.
+//     (verified by substitution), an unsolvable system is rejected, and
+//     over a ring SolutionMat returns the fractional solution over the
+//     overlying field whenever one exists.
 // --- NullspaceIntTrMat / NullspaceIntMat: the kernel vectors annihilate
 //     the matrix, the rank is the nullity, and the returned basis is
 //     saturated (every integral kernel vector is an integral combination
@@ -53,29 +55,20 @@ template <typename T> void process_solution(int n, int nb) {
       WriteMatrix(std::cerr, A);
       throw TerminalException{1};
     }
-    // Over the ring, SolutionMat returns the particular solution of the
-    // kernel only when it is integral, so the completeness statement is
-    // over the overlying field; the ring answer is checked for soundness.
+    // Over the ring, SolutionMat returns the (fractional in general)
+    // solution over the overlying field, and misses nothing solvable.
     using Tfield = typename overlying_field<T>::field_type;
     MyMatrix<Tfield> Af = UniversalMatrixConversion<Tfield, T>(A);
     MyVector<Tfield> bf = UniversalVectorConversion<Tfield, T>(b);
-    std::optional<MyVector<Tfield>> opt_fld = SolutionMat(Af, bf);
-    if (!opt_fld) {
+    std::optional<MyVector<Tfield>> opt_ring = SolutionMat(A, b);
+    if (!opt_ring) {
       std::cerr << "SolutionMat missed a solvable system\n";
       throw TerminalException{1};
     }
-    MyVector<Tfield> b_check_fld = Af.transpose() * (*opt_fld);
+    MyVector<Tfield> b_check_fld = Af.transpose() * (*opt_ring);
     if (b_check_fld != bf) {
       std::cerr << "The solution of SolutionMat is incorrect\n";
       throw TerminalException{1};
-    }
-    std::optional<MyVector<T>> opt_ring = SolutionMat(A, b);
-    if (opt_ring) {
-      MyVector<T> b_check_ring = A.transpose() * (*opt_ring);
-      if (b_check_ring != b) {
-        std::cerr << "The ring solution of SolutionMat is incorrect\n";
-        throw TerminalException{1};
-      }
     }
     // A right hand side outside of the row space has to be rejected.
     if (RankMat(A) < n) {
@@ -87,8 +80,7 @@ template <typename T> void process_solution(int n, int nb) {
         Aext(n_row, j) = b_bad(j);
       }
       if (RankMat(Aext) > RankMat(A)) {
-        MyVector<Tfield> b_bad_f = UniversalVectorConversion<Tfield, T>(b_bad);
-        if (SolutionMat(Af, b_bad_f)) {
+        if (SolutionMat(A, b_bad)) {
           std::cerr << "SolutionMat accepted an unsolvable system\n";
           throw TerminalException{1};
         }
@@ -107,10 +99,10 @@ template <typename T> void process_solution(int n, int nb) {
     std::cerr << "SolutionIntMat accepted a non-integral system\n";
     throw TerminalException{1};
   }
+  // The ring SolutionMat has to return the fractional solution.
   using Tfield = typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> Adouble_f = UniversalMatrixConversion<Tfield, T>(Adouble);
-  MyVector<Tfield> e1_f = UniversalVectorConversion<Tfield, T>(e1);
-  if (!SolutionMat(Adouble_f, e1_f)) {
+  std::optional<MyVector<Tfield>> opt_half = SolutionMat(Adouble, e1);
+  if (!opt_half) {
     std::cerr << "SolutionMat rejected a rationally solvable system\n";
     throw TerminalException{1};
   }
