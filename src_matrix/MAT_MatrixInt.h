@@ -2541,13 +2541,93 @@ inline MyMatrix<T> CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
   return CanonicalizeOrderedMatrix_Kernel(Input);
 }
 
+/*
+  The first maximal set of linearly independent rows of M, by greedy
+  division-free elimination: each candidate row is reduced against the
+  echelon rows accumulated so far using cross multiplication only, so the
+  selection works over a ring and matches the greedy selection of
+  TMat_SelectRowCol over the overlying field. For a euclidean ring the
+  reduced rows are divided by their content to keep the entries small.
+*/
+template <typename T>
+std::vector<int> SelectIndependentRowsRing(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  std::vector<MyVector<T>> echelon;
+  std::vector<int> pivcol;
+  std::vector<int> selected;
+  for (int iRow = 0; iRow < nbRow; iRow++) {
+    MyVector<T> V = GetMatrixRow(M, iRow);
+    for (size_t k = 0; k < echelon.size(); k++) {
+      int c = pivcol[k];
+      if (V(c) != 0) {
+        T coef1 = echelon[k](c);
+        T coef2 = V(c);
+        for (int j = 0; j < nbCol; j++) {
+          V(j) = V(j) * coef1 - coef2 * echelon[k](j);
+        }
+        if constexpr (is_euclidean_domain<T>::value) {
+          T eGCD(0);
+          for (int j = 0; j < nbCol; j++) {
+            eGCD = GcdPair(eGCD, V(j));
+            if (eGCD == 1) {
+              break;
+            }
+          }
+          if constexpr (is_totally_ordered<T>::value) {
+            if (eGCD < 0) {
+              eGCD = -eGCD;
+            }
+          }
+          if (eGCD != 0 && eGCD != 1) {
+            for (int j = 0; j < nbCol; j++) {
+              V(j) = V(j) / eGCD;
+            }
+          }
+        }
+      }
+    }
+    int c_piv = -1;
+    for (int j = 0; j < nbCol; j++) {
+      if (V(j) != 0) {
+        c_piv = j;
+        break;
+      }
+    }
+    if (c_piv >= 0) {
+      echelon.push_back(V);
+      pivcol.push_back(c_piv);
+      selected.push_back(iRow);
+      if (selected.size() == static_cast<size_t>(nbCol)) {
+        return selected;
+      }
+    }
+  }
+  return selected;
+}
+
+/*
+  Any other ring: the canonicalization is done natively over the ring.
+  The independent rows are selected division-free, the inverse of the
+  basis is replaced by its adjugate -- which differs from it by the
+  determinant, a single scalar for the whole matrix -- with the sign of
+  the determinant compensated, and the scalar canonicalization absorbs
+  the remaining positive factor. The output is the same matrix as the
+  computation over the overlying field.
+*/
 template <typename T>
 requires (!is_ring_field<T>::value)
 inline MyMatrix<T> CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
-  using Tfield = typename overlying_field<T>::field_type;
-  MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
-  MyMatrix<Tfield> OutputF = CanonicalizeOrderedMatrix_Kernel(InputF);
-  return UniversalMatrixConversion<T, Tfield>(OutputF);
+  std::vector<int> ListRowSelect = SelectIndependentRowsRing(Input);
+  MyMatrix<T> Basis = SelectRow(Input, ListRowSelect);
+  std::pair<MyMatrix<T>, T> pair = AdjugateDeterminant(Basis);
+  MyMatrix<T> M1 = Input * pair.first;
+  if constexpr (is_totally_ordered<T>::value) {
+    if (pair.second < 0) {
+      M1 = -M1;
+    }
+  }
+  return ScalarCanonicalizationMatrix(M1);
 }
 
 template <typename Tint, typename Tfloat>
