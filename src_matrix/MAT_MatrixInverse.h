@@ -14,6 +14,10 @@
 #include "MAT_MatrixFund.h"
 // clang-format on
 
+#ifdef SANITY_CHECK
+#define SANITY_CHECK_MATRIX_INVERSE
+#endif
+
 template <typename T>
 void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
   static_assert(is_ring_field<T>::value,
@@ -246,17 +250,23 @@ FractionFreeLU_result<T> FractionFreeLU(MyMatrix<T> const &A) {
   return {std::move(L), std::move(U), std::move(d)};
 }
 
-// Matrix inverse through the fraction-free LU factorization. Rather than
-// reducing all the way to a diagonal like the Bareiss-Montante Gauss-Jordan
-// (InverseBareiss), it performs fraction-free forward elimination on [A | I]
-// only below the diagonal -- yielding the upper-triangular U on the left and the
-// forward-transformed identity C on the right -- and then a fraction-free back
-// substitution, one column at a time. For column c the scaled solution
+// The adjugate matrix and the determinant, computed fraction-free through
+// the LU approach. Rather than reducing all the way to a diagonal like the
+// Bareiss-Montante Gauss-Jordan (InverseBareiss), it performs fraction-free
+// forward elimination on [A | I] only below the diagonal -- yielding the
+// upper-triangular U on the left and the forward-transformed identity C on
+// the right -- and then a fraction-free back substitution, one column at a
+// time. For column c the scaled solution
 //     xhat_i = (det * C(i,c) - sum_{k>i} U(i,k) xhat_k) / d_i
-// stays integral (Bareiss), and xhat is the corresponding column of the adjugate
-// adj(A); A^{-1} = adj(A) / det. Forward-then-back does fewer ring operations
-// than the full Gauss-Jordan, so it is the cheaper fraction-free inverse.
-template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input) {
+// stays integral (Bareiss), and xhat is the corresponding column of the
+// adjugate adj(A). The returned pair (adj(A), det(A)) satisfies
+//     A * adj(A) = adj(A) * A = det(A) * I_n
+// with every entry of adj(A) in the ring (a signed cofactor of A), so the
+// whole computation runs over a ring (only exact divisions occur).
+// Precondition: A is non-singular (the elimination needs a non-zero pivot
+// in every column; singular input throws).
+template <typename T>
+std::pair<MyMatrix<T>, T> AdjugateDeterminant(MyMatrix<T> const &Input) {
   int n = Input.rows();
   // Augmented matrix M = [A | I], of size n x 2n.
   MyMatrix<T> M(n, 2 * n);
@@ -277,7 +287,7 @@ template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input
           break;
         }
       if (r == -1) {
-        std::cerr << "InverseFractionFreeLU: the matrix is singular\n";
+        std::cerr << "AdjugateDeterminant: the matrix is singular\n";
         throw TerminalException{1};
       }
       M.row(k).swap(M.row(r));
@@ -288,9 +298,9 @@ template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input
       for (int j = k + 1; j < 2 * n; j++) {
         T val = pivot * M(i, j) - M(i, k) * M(k, j);
         T quot = val / prev; // exact division (Bareiss)
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MATRIX_INVERSE
         if (quot * prev != val) {
-          std::cerr << "InverseFractionFreeLU: non-exact elimination division\n";
+          std::cerr << "AdjugateDeterminant: non-exact elimination division\n";
           throw TerminalException{1};
         }
 #endif
@@ -310,26 +320,41 @@ template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input
       for (int k = i + 1; k < n; k++)
         s -= M(i, k) * xhat[k];
       T quot = s / M(i, i); // exact division (Bareiss)
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MATRIX_INVERSE
       if (quot * M(i, i) != s) {
-        std::cerr << "InverseFractionFreeLU: non-exact back-substitution\n";
+        std::cerr << "AdjugateDeterminant: non-exact back-substitution\n";
         throw TerminalException{1};
       }
 #endif
       xhat[i] = quot;
     }
-    // xhat is column c of adj(A); A^{-1} = adj(A) / det.
-    for (int i = 0; i < n; i++) {
-      T num = xhat[i];
-      T quot = num / det;
-      if (quot * det != num) {
+    for (int i = 0; i < n; i++)
+      Output(i, c) = xhat[i];
+  }
+  return {std::move(Output), std::move(det)};
+}
+
+// Matrix inverse through the fraction-free LU factorization:
+// A^{-1} = adj(A) / det(A). Forward-then-back does fewer ring operations
+// than the full Gauss-Jordan, so it is the cheaper fraction-free inverse.
+template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input) {
+  std::pair<MyMatrix<T>, T> pair = AdjugateDeterminant(Input);
+  MyMatrix<T> const &adj = pair.first;
+  T const &det = pair.second;
+  int n = Input.rows();
+  MyMatrix<T> Output(n, n);
+  for (int i = 0; i < n; i++)
+    for (int j = 0; j < n; j++) {
+      T quot = adj(i, j) / det;
+#ifdef SANITY_CHECK_MATRIX_INVERSE
+      if (quot * det != adj(i, j)) {
         std::cerr << "InverseFractionFreeLU: A^{-1} is not representable over T "
                      "(the determinant does not divide the adjugate)\n";
         throw TerminalException{1};
       }
-      Output(i, c) = quot;
+#endif
+      Output(i, j) = quot;
     }
-  }
   return Output;
 }
 
