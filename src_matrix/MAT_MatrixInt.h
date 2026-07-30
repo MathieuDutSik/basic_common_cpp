@@ -932,75 +932,101 @@ MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper,
   int nbCol = M.cols();
   MyMatrix<T> H = M;
   int posDone = 0;
-  while (true) {
-    struct choice {
-      int iRow;
-      int iCol;
-      T norm;
-    };
-    std::optional<choice> opt;
-    for (int iRow = posDone; iRow < nbRow; iRow++) {
-      for (int iCol = posDone; iCol < nbCol; iCol++) {
-        T eVal = T_abs(H(iRow, iCol));
-        if (eVal != 0) {
-          if (!opt) {
-            opt = {iRow, iCol, eVal};
-          } else {
-            if (eVal < opt->norm) {
+  auto run_elimination = [&]() -> void {
+    while (true) {
+      struct choice {
+        int iRow;
+        int iCol;
+        T norm;
+      };
+      std::optional<choice> opt;
+      for (int iRow = posDone; iRow < nbRow; iRow++) {
+        for (int iCol = posDone; iCol < nbCol; iCol++) {
+          T eVal = T_abs(H(iRow, iCol));
+          if (eVal != 0) {
+            if (!opt) {
               opt = {iRow, iCol, eVal};
+            } else {
+              if (eVal < opt->norm) {
+                opt = {iRow, iCol, eVal};
+              }
             }
           }
         }
       }
-    }
-    if (!opt) {
-      break;
-    }
-    int iRowF = opt->iRow;
-    int iColF = opt->iCol;
-    T ThePivot = H(iRowF, iColF);
-    bool NonZeroResidue = false;
-    for (int iRow = posDone; iRow < nbRow; iRow++) {
-      if (iRow != iRowF) {
-        T eVal = H(iRow, iColF);
-        if (eVal != 0) {
-          T TheQ = QuoInt(eVal, ThePivot);
-          H.row(iRow) -= TheQ * H.row(iRowF);
-          f_row_oper(iRow, iRowF, TheQ);
-          if (H(iRow, iColF) != 0)
-            NonZeroResidue = true;
-        }
+      if (!opt) {
+        break;
       }
-    }
-    for (int iCol = posDone; iCol < nbCol; iCol++) {
-      if (iCol != iColF) {
-        T eVal = H(iRowF, iCol);
-        if (eVal != 0) {
-          T TheQ = QuoInt(eVal, ThePivot);
-          H.col(iCol) -= TheQ * H.col(iColF);
-          f_col_oper(iCol, iColF, TheQ);
-          if (H(iRowF, iCol) != 0) {
-            NonZeroResidue = true;
+      int iRowF = opt->iRow;
+      int iColF = opt->iCol;
+      T ThePivot = H(iRowF, iColF);
+      bool NonZeroResidue = false;
+      for (int iRow = posDone; iRow < nbRow; iRow++) {
+        if (iRow != iRowF) {
+          T eVal = H(iRow, iColF);
+          if (eVal != 0) {
+            T TheQ = QuoInt(eVal, ThePivot);
+            H.row(iRow) -= TheQ * H.row(iRowF);
+            f_row_oper(iRow, iRowF, TheQ);
+            if (H(iRow, iColF) != 0)
+              NonZeroResidue = true;
           }
         }
       }
+      for (int iCol = posDone; iCol < nbCol; iCol++) {
+        if (iCol != iColF) {
+          T eVal = H(iRowF, iCol);
+          if (eVal != 0) {
+            T TheQ = QuoInt(eVal, ThePivot);
+            H.col(iCol) -= TheQ * H.col(iColF);
+            f_col_oper(iCol, iColF, TheQ);
+            if (H(iRowF, iCol) != 0) {
+              NonZeroResidue = true;
+            }
+          }
+        }
+      }
+      if (!NonZeroResidue) {
+        if (iRowF != posDone) {
+          f_row_flip(posDone, iRowF);
+          flip_rows(H, posDone, iRowF);
+        }
+        if (iColF != posDone) {
+          f_col_flip(posDone, iColF);
+          flip_cols(H, posDone, iColF);
+        }
+        T CanUnit = CanonicalizationUnit(H(posDone, posDone));
+        if (CanUnit != 1) {
+          f_row_oper(posDone, posDone, 1 - CanUnit);
+          H.row(posDone) = CanUnit * H.row(posDone);
+        }
+        posDone++;
+      }
     }
-    if (!NonZeroResidue) {
-      if (iRowF != posDone) {
-        f_row_flip(posDone, iRowF);
-        flip_rows(H, posDone, iRowF);
+  };
+  run_elimination();
+  // The elimination diagonalizes but the diagonal entries frozen early
+  // can fail to divide the later ones. Whenever a pair violates the
+  // divisibility chain, the later row is added to the earlier one and
+  // the elimination is rerun from there: the smallest pivot strategy
+  // then puts the gcd of the pair in the earlier position. The rank
+  // does not change, so the process ends with the divisibility chain
+  // holding on the whole diagonal.
+  int rank = posDone;
+  while (true) {
+    int i_fix = -1;
+    for (int i = 0; i + 1 < rank && i_fix < 0; i++) {
+      if (ResInt(H(i + 1, i + 1), H(i, i)) != 0) {
+        i_fix = i;
       }
-      if (iColF != posDone) {
-        f_col_flip(posDone, iColF);
-        flip_cols(H, posDone, iColF);
-      }
-      T CanUnit = CanonicalizationUnit(H(posDone, posDone));
-      if (CanUnit != 1) {
-        f_row_oper(posDone, posDone, 1 - CanUnit);
-        H.row(posDone) = CanUnit * H.row(posDone);
-      }
-      posDone++;
     }
+    if (i_fix < 0) {
+      break;
+    }
+    H.row(i_fix) += H.row(i_fix + 1);
+    f_row_oper(i_fix, i_fix + 1, T(-1));
+    posDone = i_fix;
+    run_elimination();
   }
   return H;
 }
@@ -2240,7 +2266,8 @@ std::vector<size_t> GetActionOnClasses(std::vector<MyVector<T>> const &l_v,
 // Zbasis(VP) = Zbasis(V) P
 // But of course this depends on the ordering of the operations.
 //
-template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
+template <typename T>
+MyMatrix<T> GetZbasis_Kernel(MyMatrix<T> const &ListElement) {
   static_assert(is_euclidean_domain<T>::value,
                 "Requires T to be an Euclidean domain in GetZbasis");
   using Treal = typename underlying_totally_ordered_ring<T>::real_type;
@@ -2382,6 +2409,26 @@ template <typename T> MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
   std::cerr << "After SANITY_CHECK_EXTENSIVE_MATRIX_INT of GetZbasis\n";
 #endif
   return TheBasis;
+}
+// The kernel works with fractional coordinates (the inverse of the
+// selected basis columns and the integrality test on the solutions), so
+// a field is required. A euclidean ring goes through the overlying
+// field: the resulting basis of the lattice is integral, so the
+// conversion back is exact.
+template <typename T>
+requires is_ring_field<T>::value
+inline MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
+  return GetZbasis_Kernel(ListElement);
+}
+
+template <typename T>
+requires (!is_ring_field<T>::value)
+inline MyMatrix<T> GetZbasis(MyMatrix<T> const &ListElement) {
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> ListElementF =
+      UniversalMatrixConversion<Tfield, T>(ListElement);
+  MyMatrix<Tfield> TheBasisF = GetZbasis_Kernel(ListElementF);
+  return UniversalMatrixConversion<T, Tfield>(TheBasisF);
 }
 
 /*

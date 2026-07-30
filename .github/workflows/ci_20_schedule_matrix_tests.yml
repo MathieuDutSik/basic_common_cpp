@@ -46,6 +46,9 @@ jobs:
     - name: Test_AdjugateDeterminant
       run: ./CI_tests/AdjugateDeterminant/run_test.sh
 
+    - name: Test_MatrixFunctionality
+      run: ./CI_tests/MatrixFunctionality/run_test.sh
+
     - name: Test_PerformanceHNF(mpz_class)
       run: cd src_matrix && ./Test_PerformanceHNF mpz_class 10 10
 
