@@ -65,7 +65,6 @@ template <typename T> Face RandomCoRankOneFace(MyMatrix<T> const &EXT) {
 }
 
 template <typename T> void process(int n) {
-  using Tint = typename SubsetRankOneSolver<T>::Tint;
   using Tfield = typename overlying_field<T>::field_type;
   int nb = 50;
   for (int i = 0; i < nb; i++) {
@@ -76,9 +75,8 @@ template <typename T> void process(int n) {
     MyMatrix<Tfield> EXTf = UniversalMatrixConversion<Tfield, T>(EXT);
     Face f = RandomCoRankOneFace(EXT);
     SubsetRankOneSolver<T> solver(EXT);
-    MyMatrix<Tint> const &EXT_int = solver.GetEXT_int();
     SubsetRankOneSolver_Field<Tfield> solver_field(EXTf);
-    MyVector<Tint> V1 = solver.GetPositiveKernelVector(f);
+    MyVector<T> V1 = solver.GetPositiveKernelVector(f);
     MyVector<Tfield> V2 = solver_field.GetPositiveKernelVector(f);
     if (IsZeroVector(V1) || IsZeroVector(V2)) {
       std::cerr << "The kernel vector is zero\n";
@@ -87,9 +85,9 @@ template <typename T> void process(int n) {
     // Orthogonality to the selected rows.
     for (int iRow = 0; iRow < n_row; iRow++) {
       if (f[iRow] == 1) {
-        Tint scal(0);
+        T scal(0);
         for (int iCol = 0; iCol < n; iCol++)
-          scal += EXT_int(iRow, iCol) * V1(iCol);
+          scal += EXT(iRow, iCol) * V1(iCol);
         if (scal != 0) {
           std::cerr << "The kernel vector is not orthogonal to the subset\n";
           WriteMatrix(std::cerr, EXT);
@@ -98,7 +96,7 @@ template <typename T> void process(int n) {
       }
     }
     // The two implementations agree up to a positive scalar.
-    MyVector<Tfield> V1_T = UniversalVectorConversion<Tfield, Tint>(V1);
+    MyVector<Tfield> V1_T = UniversalVectorConversion<Tfield, T>(V1);
     for (int iCol = 0; iCol < n; iCol++) {
       for (int jCol = iCol + 1; jCol < n; jCol++) {
         if (V1_T(iCol) * V2(jCol) != V1_T(jCol) * V2(iCol)) {
@@ -118,16 +116,16 @@ template <typename T> void process(int n) {
     }
     // The kernel vector together with its incidence: the same vector and
     // the exact set of rows with a zero scalar product.
-    std::pair<MyVector<Tint>, Face> pairVF =
+    std::pair<MyVector<T>, Face> pairVF =
         solver.GetPositiveKernelVectorAndFace(f);
     if (pairVF.first != V1) {
       std::cerr << "GetPositiveKernelVectorAndFace returns another vector\n";
       throw TerminalException{1};
     }
     for (int iRow = 0; iRow < n_row; iRow++) {
-      Tint scal(0);
+      T scal(0);
       for (int iCol = 0; iCol < n; iCol++)
-        scal += EXT_int(iRow, iCol) * V1(iCol);
+        scal += EXT(iRow, iCol) * V1(iCol);
       bool is_zero = (scal == 0);
       if (is_zero != (pairVF.second[iRow] == 1)) {
         std::cerr << "The incidence of GetPositiveKernelVectorAndFace is "
@@ -152,7 +150,7 @@ template <typename T> void process(int n) {
     for (int k = 1; k < n; k++)
       f[k] = 1;
     SubsetRankOneSolver<T> solver(EXT);
-    MyVector<Tint> V = solver.GetPositiveKernelVector(f);
+    MyVector<T> V = solver.GetPositiveKernelVector(f);
     // The kernel is spanned by e_0 and the orientation is positive.
     if (V(0) <= 0) {
       std::cerr << "The zero scalar product row decided the sign\n";

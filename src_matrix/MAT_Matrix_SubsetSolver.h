@@ -352,18 +352,30 @@ private:
     }
   }
 
+  static MyVector<T> to_T(MyVector<Tint> const &V) {
+    if constexpr (std::is_same_v<T, Tint>) {
+      return V;
+    } else {
+      return UniversalVectorConversion<T, Tint>(V);
+    }
+  }
+
 public:
   SubsetRankOneSolver(MyMatrix<T> const &EXT)
       : EXT_int(get_ext_int(EXT)), subsetsolver(EXT_int) {}
   MyMatrix<Tint> const &GetEXT_int() const { return EXT_int; }
-  MyVector<Tint> GetKernelVector(Face const &sInc) {
-    return subsetsolver.GetKernelVector(sInc);
+  // The results are expressed over T, the internal Tint arithmetic being
+  // an implementation matter of the variants.
+  MyVector<T> GetKernelVector(Face const &sInc) {
+    return to_T(subsetsolver.GetKernelVector(sInc));
   }
-  MyVector<Tint> GetPositiveKernelVector(Face const &sInc) {
-    return subsetsolver.GetPositiveKernelVector(sInc);
+  MyVector<T> GetPositiveKernelVector(Face const &sInc) {
+    return to_T(subsetsolver.GetPositiveKernelVector(sInc));
   }
-  std::pair<MyVector<Tint>, Face> GetPositiveKernelVectorAndFace(Face const &sInc) {
-    return subsetsolver.GetPositiveKernelVectorAndFace(sInc);
+  std::pair<MyVector<T>, Face> GetPositiveKernelVectorAndFace(Face const &sInc) {
+    std::pair<MyVector<Tint>, Face> pair =
+        subsetsolver.GetPositiveKernelVectorAndFace(sInc);
+    return {to_T(pair.first), std::move(pair.second)};
   }
 };
 
