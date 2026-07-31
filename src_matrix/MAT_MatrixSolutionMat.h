@@ -13,6 +13,7 @@
 
 // clang-format off
 #include "MAT_MatrixInverse.h"
+#include "MAT_MatrixRankmat.h"
 #include <optional>
 #include <vector>
 // clang-format on

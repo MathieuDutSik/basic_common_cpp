@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "MAT_MatrixFund.h"
+#include "MAT_MatrixRankmat.h"
 #include "MAT_MatrixInverse.h"
 #include "MAT_MatrixDeterminant.h"
 #include "MAT_MatrixSolutionMat.h"

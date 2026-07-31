@@ -5,6 +5,7 @@
 // clang-format off
 #include "Boost_bitset.h"
 #include "MAT_Matrix.h"
+#include "MAT_MatrixRankmat.h"
 #include <algorithm>
 #include <limits>
 #include <string>
