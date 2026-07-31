@@ -73,10 +73,10 @@ template <typename T> void process(int n) {
     MyMatrix<T> EXT = RandomIntegralMatrix<T>(n_row, n);
     if (RankMat(EXT) != n)
       continue;
-    MyMatrix<Tint> EXT_int = UniversalMatrixConversion<Tint, T>(EXT);
     MyMatrix<Tfield> EXTf = UniversalMatrixConversion<Tfield, T>(EXT);
     Face f = RandomCoRankOneFace(EXT);
-    SubsetRankOneSolver<T> solver(EXT_int);
+    SubsetRankOneSolver<T> solver(EXT);
+    MyMatrix<Tint> const &EXT_int = solver.GetEXT_int();
     SubsetRankOneSolver_Field<Tfield> solver_field(EXTf);
     MyVector<Tint> V1 = solver.GetPositiveKernelVector(f);
     MyVector<Tfield> V2 = solver_field.GetPositiveKernelVector(f);
@@ -113,6 +113,54 @@ template <typename T> void process(int n) {
           (V1_T(iCol) < 0 && V2(iCol) > 0)) {
         std::cerr << "The signs of the two kernel vectors differ\n";
         WriteMatrix(std::cerr, EXT);
+        throw TerminalException{1};
+      }
+    }
+    // The kernel vector together with its incidence: the same vector and
+    // the exact set of rows with a zero scalar product.
+    std::pair<MyVector<Tint>, Face> pairVF =
+        solver.GetPositiveKernelVectorAndFace(f);
+    if (pairVF.first != V1) {
+      std::cerr << "GetPositiveKernelVectorAndFace returns another vector\n";
+      throw TerminalException{1};
+    }
+    for (int iRow = 0; iRow < n_row; iRow++) {
+      Tint scal(0);
+      for (int iCol = 0; iCol < n; iCol++)
+        scal += EXT_int(iRow, iCol) * V1(iCol);
+      bool is_zero = (scal == 0);
+      if (is_zero != (pairVF.second[iRow] == 1)) {
+        std::cerr << "The incidence of GetPositiveKernelVectorAndFace is "
+                     "incorrect\n";
+        WriteMatrix(std::cerr, EXT);
+        throw TerminalException{1};
+      }
+    }
+  }
+  // The sign skips the rows lying on the hyperplane: the first row
+  // outside the subset is a duplicate of a subset row, so the
+  // orientation has to come from the last row.
+  {
+    int n_row = n + 1;
+    MyMatrix<T> EXT = ZeroMatrix<T>(n_row, n);
+    EXT(0, 1) = T(1);
+    for (int k = 1; k < n; k++)
+      EXT(k, k) = T(1);
+    EXT(n, 0) = T(1);
+    EXT(n, 1) = T(1);
+    Face f(n_row);
+    for (int k = 1; k < n; k++)
+      f[k] = 1;
+    SubsetRankOneSolver<T> solver(EXT);
+    MyVector<Tint> V = solver.GetPositiveKernelVector(f);
+    // The kernel is spanned by e_0 and the orientation is positive.
+    if (V(0) <= 0) {
+      std::cerr << "The zero scalar product row decided the sign\n";
+      throw TerminalException{1};
+    }
+    for (int iCol = 1; iCol < n; iCol++) {
+      if (V(iCol) != 0) {
+        std::cerr << "The kernel vector is not proportional to e_0\n";
         throw TerminalException{1};
       }
     }
