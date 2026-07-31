@@ -8,6 +8,9 @@
 #     of planted solutions, rejection of unsolvable systems),
 #     NullspaceIntMat / NullspaceIntTrMat (kernel, nullity, saturation),
 #     GetZbasis (double inclusion) and IntersectionLattice;
+#   * Test_RankMat: the fraction-free Bareiss rank over the rings
+#     against the Gaussian elimination over the overlying field, with
+#     planted low rank factorizations and rank invariances;
 #   * Test_ScalingCanonic: RemoveFractionVector / RemoveFractionMatrix
 #     (integrality, content one, positive multiplier),
 #     NonUniqueScaleToIntegerVector, CanonicalizeVector and
@@ -39,7 +42,7 @@ trap 'rm -rf "$WORK"' EXIT
 CXXFLAGS="-std=c++20 -Wall -Wextra -O3 -DSANITY_CHECK -I${SRC} -I${ROOT}/src_basic -I${ROOT}/src_number -I${ROOT}/src_comb -I${GMP_INCDIR} -I${BOOST_INCDIR} -I${EIGEN_PATH}"
 LDFLAGS="-lm ${GMP_CXX_LINK} -pthread"
 
-for prog in Test_HermiteSmith Test_SolutionNullspaceInt Test_ScalingCanonic; do
+for prog in Test_HermiteSmith Test_SolutionNullspaceInt Test_ScalingCanonic Test_RankMat; do
   echo "Building $prog ..."
   "$CXX" $CXXFLAGS "$SRC/$prog.cpp" -o "$WORK/$prog" $LDFLAGS
 done
@@ -53,6 +56,17 @@ for prog in Test_HermiteSmith Test_SolutionNullspaceInt; do
   done
   echo "----- $prog n = 3 arith = safe_integer -----"
   "$WORK/$prog" safe_integer 3
+done
+
+for n in 5 8; do
+  for arith in mpz_class boost_cpp_int mpq_class; do
+    echo "----- Test_RankMat n = $n arith = $arith -----"
+    "$WORK/Test_RankMat" "$arith" "$n"
+  done
+done
+for arith in safe_integer safe_rational; do
+  echo "----- Test_RankMat n = 5 arith = $arith -----"
+  "$WORK/Test_RankMat" "$arith" 5
 done
 
 for n in 6 10; do
