@@ -11,6 +11,13 @@
 #   * Test_RankMat: the fraction-free Bareiss rank over the rings
 #     against the Gaussian elimination over the overlying field, with
 #     planted low rank factorizations and rank invariances;
+#   * Test_SubsetSolver: the SubsetRankOneSolver kernel vectors
+#     (orthogonality, agreement of the accelerated and the field
+#     implementations up to a positive scalar);
+#   * Test_SaturationCompletion: SolutionMatRepetitive against
+#     SolutionMat, RecSolutionIntMat against SolutionIntMat,
+#     IntegralSpaceSaturation (same span, saturation) and
+#     SubspaceCompletionInt (completion to a unimodular basis);
 #   * Test_ScalingCanonic: RemoveFractionVector / RemoveFractionMatrix
 #     (integrality, content one, positive multiplier),
 #     NonUniqueScaleToIntegerVector, CanonicalizeVector and
@@ -42,7 +49,7 @@ trap 'rm -rf "$WORK"' EXIT
 CXXFLAGS="-std=c++20 -Wall -Wextra -O3 -DSANITY_CHECK -I${SRC} -I${ROOT}/src_basic -I${ROOT}/src_number -I${ROOT}/src_comb -I${GMP_INCDIR} -I${BOOST_INCDIR} -I${EIGEN_PATH}"
 LDFLAGS="-lm ${GMP_CXX_LINK} -pthread"
 
-for prog in Test_HermiteSmith Test_SolutionNullspaceInt Test_ScalingCanonic Test_RankMat; do
+for prog in Test_HermiteSmith Test_SolutionNullspaceInt Test_ScalingCanonic Test_RankMat Test_SubsetSolver Test_SaturationCompletion; do
   echo "Building $prog ..."
   "$CXX" $CXXFLAGS "$SRC/$prog.cpp" -o "$WORK/$prog" $LDFLAGS
 done
@@ -75,4 +82,18 @@ for n in 6 10; do
     "$WORK/Test_ScalingCanonic" "$arith" "$n"
   done
 done
+
+for n in 4 6; do
+  for arith in mpq_class safe_rational; do
+    echo "----- Test_SubsetSolver n = $n arith = $arith -----"
+    "$WORK/Test_SubsetSolver" "$arith" "$n"
+  done
+done
+
+for arith in mpz_class boost_cpp_int mpq_class safe_rational; do
+  echo "----- Test_SaturationCompletion n = 6 arith = $arith -----"
+  "$WORK/Test_SaturationCompletion" "$arith" 6
+done
+echo "----- Test_SaturationCompletion n = 4 arith = safe_integer -----"
+"$WORK/Test_SaturationCompletion" safe_integer 4
 echo "All the matrix functionality tests passed"
