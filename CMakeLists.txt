@@ -140,6 +140,8 @@ set(
   Test_filesystem
   Test_program_in_path
   Test_external_program
+  Test_Heuristic
+  Test_parse_split
 )
 foreach(target IN LISTS BASIC_PROGRAMS)
   add_basic_common_binary(
@@ -177,6 +179,8 @@ set(
   Test_FactorizeHelp
   Test_FloorCeilScalarInteger
   SequenceApproximant
+  TEST_jet_number
+  Test_Fp
 )
 foreach(target IN LISTS NUMBER_PROGRAMS)
   add_basic_common_binary(
@@ -230,6 +234,14 @@ set(
   ComputeChromaticLowerBounds
   Test_ReadListMat
   ComputeTranslationClasses
+  Test_eigen_all_types
+  Test_AdjugateDeterminant
+  Test_HermiteSmith
+  Test_SolutionNullspaceInt
+  Test_ScalingCanonic
+  Test_RankMat
+  Test_SubsetSolver
+  Test_SaturationCompletion
 )
 foreach(target IN LISTS MATRIX_PROGRAMS)
   add_basic_common_binary(
@@ -256,6 +268,19 @@ foreach(target IN LISTS COMB_PROGRAMS)
   add_basic_common_binary(
     ${target}
     "${CMAKE_SOURCE_DIR}/src_comb/${target}.cpp"
+    basic_common
+  )
+endforeach()
+
+set(
+  WASM_PROGRAMS
+  Test_wasm_cpp_int
+  Test_wasm_matrix
+)
+foreach(target IN LISTS WASM_PROGRAMS)
+  add_basic_common_binary(
+    ${target}
+    "${CMAKE_SOURCE_DIR}/src_wasm/${target}.cpp"
     basic_common
   )
 endforeach()

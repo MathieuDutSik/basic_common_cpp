@@ -17,10 +17,11 @@ int main(int argc, char *argv[]) {
 
   std::cerr << (Tint(7) * xinv == Tint(7) / x) << std::endl;
 
-  auto r = (Tint(7) / Tint(5)).rational_lift();
-  std::cout << (r == Rational<long>(7, 5)) << std::endl;
+  std::pair<long, long> r = (Tint(7) / Tint(5)).rational_lift();
+  std::cout << (r.first * 5 == r.second * 7) << std::endl;
 
-  std::cerr << Tint(2131).rational_lift() << std::endl;
+  std::pair<long, long> r2 = Tint(2131).rational_lift();
+  std::cerr << r2.first << " / " << r2.second << std::endl;
 
   return 0;
 }
