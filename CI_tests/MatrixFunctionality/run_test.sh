@@ -12,8 +12,9 @@
 #     against the Gaussian elimination over the overlying field, with
 #     planted low rank factorizations and rank invariances;
 #   * Test_SubsetSolver: the SubsetRankOneSolver kernel vectors
-#     (orthogonality, agreement of the accelerated and the field
-#     implementations up to a positive scalar);
+#     (orthogonality, agreement of the dispatched implementation --
+#     accelerated for the rational types, exact ring for the euclidean
+#     rings -- with the field one up to a positive scalar);
 #   * Test_SaturationCompletion: SolutionMatRepetitive against
 #     SolutionMat, RecSolutionIntMat against SolutionIntMat,
 #     IntegralSpaceSaturation (same span, saturation) and
@@ -84,11 +85,13 @@ for n in 6 10; do
 done
 
 for n in 4 6; do
-  for arith in mpq_class safe_rational; do
+  for arith in mpq_class safe_rational mpz_class boost_cpp_int; do
     echo "----- Test_SubsetSolver n = $n arith = $arith -----"
     "$WORK/Test_SubsetSolver" "$arith" "$n"
   done
 done
+echo "----- Test_SubsetSolver n = 4 arith = safe_integer -----"
+"$WORK/Test_SubsetSolver" safe_integer 4
 
 for arith in mpz_class boost_cpp_int mpq_class safe_rational; do
   echo "----- Test_SaturationCompletion n = 6 arith = $arith -----"

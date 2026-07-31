@@ -1,5 +1,6 @@
 // Copyright (C) 2026 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 // clang-format off
+#include "NumberTheoryBoostCppInt.h"
 #include "NumberTheory.h"
 #include "NumberTheorySafeInt.h"
 #include "Boost_bitset.h"
@@ -9,9 +10,11 @@
 
 // Tests of SubsetRankOneSolver: for a subset of d-1 independent rows of
 // a m x d matrix, the kernel vector is non-zero and orthogonal to the
-// selected rows, and the accelerated implementation agrees with the
-// field one up to a positive scalar (GetPositiveKernelVector fixes the
-// sign against the first row outside the subset).
+// selected rows, and the dispatched implementation (accelerated for the
+// rational types, exact ring for the euclidean rings) agrees with the
+// field one over the overlying field up to a positive scalar
+// (GetPositiveKernelVector fixes the sign against the first row outside
+// the subset).
 
 template <typename T> MyMatrix<T> RandomIntegralMatrix(int n_row, int n_col) {
   MyMatrix<T> A(n_row, n_col);
@@ -63,6 +66,7 @@ template <typename T> Face RandomCoRankOneFace(MyMatrix<T> const &EXT) {
 
 template <typename T> void process(int n) {
   using Tint = typename SubsetRankOneSolver<T>::Tint;
+  using Tfield = typename overlying_field<T>::field_type;
   int nb = 50;
   for (int i = 0; i < nb; i++) {
     int n_row = n + 3 + (i % 3);
@@ -70,11 +74,12 @@ template <typename T> void process(int n) {
     if (RankMat(EXT) != n)
       continue;
     MyMatrix<Tint> EXT_int = UniversalMatrixConversion<Tint, T>(EXT);
+    MyMatrix<Tfield> EXTf = UniversalMatrixConversion<Tfield, T>(EXT);
     Face f = RandomCoRankOneFace(EXT);
     SubsetRankOneSolver<T> solver(EXT_int);
-    SubsetRankOneSolver_Field<T> solver_field(EXT);
+    SubsetRankOneSolver_Field<Tfield> solver_field(EXTf);
     MyVector<Tint> V1 = solver.GetPositiveKernelVector(f);
-    MyVector<T> V2 = solver_field.GetPositiveKernelVector(f);
+    MyVector<Tfield> V2 = solver_field.GetPositiveKernelVector(f);
     if (IsZeroVector(V1) || IsZeroVector(V2)) {
       std::cerr << "The kernel vector is zero\n";
       throw TerminalException{1};
@@ -93,7 +98,7 @@ template <typename T> void process(int n) {
       }
     }
     // The two implementations agree up to a positive scalar.
-    MyVector<T> V1_T = UniversalVectorConversion<T, Tint>(V1);
+    MyVector<Tfield> V1_T = UniversalVectorConversion<Tfield, Tint>(V1);
     for (int iCol = 0; iCol < n; iCol++) {
       for (int jCol = iCol + 1; jCol < n; jCol++) {
         if (V1_T(iCol) * V2(jCol) != V1_T(jCol) * V2(iCol)) {
@@ -129,6 +134,12 @@ int main(int argc, char *argv[]) {
         return process<mpq_class>(n);
       if (arith == "safe_rational")
         return process<Rational<SafeInt64>>(n);
+      if (arith == "mpz_class")
+        return process<mpz_class>(n);
+      if (arith == "boost_cpp_int")
+        return process<boost::multiprecision::cpp_int>(n);
+      if (arith == "safe_integer")
+        return process<SafeInt64>(n);
       std::cerr << "Failed to find a matching entry\n";
       throw TerminalException{1};
     };

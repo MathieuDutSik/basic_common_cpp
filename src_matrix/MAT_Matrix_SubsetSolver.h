@@ -11,6 +11,10 @@
 #include <vector>
 // clang-format on
 
+#ifdef SANITY_CHECK
+#define SANITY_CHECK_MATRIX_SUBSET_SOLVER
+#endif
+
 template <typename T> struct SubsetRankOneSolver_Field {
 public:
   using Tint = T;
@@ -258,11 +262,61 @@ public:
   }
 };
 
+// The ring variant: the kernel vector of the corank one subset is
+// computed over the ring itself, as the saturated integral kernel of
+// the selected rows (NullspaceIntTrMat), so no conversion to the
+// overlying field occurs and the output has content one. It serves the
+// euclidean rings that do not have the Fp acceleration.
+template <typename T> struct SubsetRankOneSolver_Ring {
+public:
+  using Tint = T;
+  MyMatrix<T> const &EXT;
+  int nbRow;
+  int nbCol;
+
+  SubsetRankOneSolver_Ring(MyMatrix<Tint> const &_EXT)
+      : EXT(_EXT), nbRow(EXT.rows()), nbCol(EXT.cols()) {}
+  MyVector<Tint> GetKernelVector(Face const &sInc) {
+    int nb = sInc.count();
+    MyMatrix<T> Msel(nb, nbCol);
+    boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
+    for (int i = 0; i < nb; i++) {
+      Msel.row(i) = EXT.row(jRow);
+      jRow = sInc.find_next(jRow);
+    }
+    MyMatrix<T> NSP = NullspaceIntTrMat(Msel);
+#ifdef SANITY_CHECK_MATRIX_SUBSET_SOLVER
+    if (NSP.rows() != 1) {
+      std::cerr << "The subset does not have corank one: |NSP|="
+                << NSP.rows() << "\n";
+      throw TerminalException{1};
+    }
+#endif
+    return GetMatrixRow(NSP, 0);
+  }
+  MyVector<Tint> GetPositiveKernelVector(Face const &sInc) {
+    MyVector<Tint> V = GetKernelVector(sInc);
+    for (int iRow = 0; iRow < nbRow; iRow++) {
+      if (sInc[iRow] == 0) {
+        T scal(0);
+        for (int iCol = 0; iCol < nbCol; iCol++)
+          scal += EXT(iRow, iCol) * V(iCol);
+        if (scal > 0)
+          return V;
+        return -V;
+      }
+    }
+    std::cerr << "We should never reach that stage\n";
+    throw TerminalException{1};
+  }
+};
+
 template <typename T>
-using subsetsolver_type =
-    std::conditional_t<has_reduction_subset_solver<T>::value,
-                       SubsetRankOneSolver_Acceleration<T>,
-                       SubsetRankOneSolver_Field<T>>;
+using subsetsolver_type = std::conditional_t<
+    has_reduction_subset_solver<T>::value,
+    SubsetRankOneSolver_Acceleration<T>,
+    std::conditional_t<is_ring_field<T>::value, SubsetRankOneSolver_Field<T>,
+                       SubsetRankOneSolver_Ring<T>>>;
 
 template <typename T> class SubsetRankOneSolver {
   using T_solver = subsetsolver_type<T>;
