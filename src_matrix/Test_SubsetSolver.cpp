@@ -16,11 +16,15 @@
 // (GetPositiveKernelVector fixes the sign against the first row outside
 // the subset).
 
-template <typename T> MyMatrix<T> RandomIntegralMatrix(int n_row, int n_col) {
+// Entries uniform in [-amp, amp]; amp=1 models the 0/1 and small
+// coefficient polytopes of the applications, larger amplitudes stress
+// the rational lift of the accelerated solver.
+template <typename T>
+MyMatrix<T> RandomIntegralMatrix(int n_row, int n_col, int amp) {
   MyMatrix<T> A(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++)
-      A(i, j) = T((random() % 13) - 6);
+      A(i, j) = T((random() % (2 * amp + 1)) - amp);
   return A;
 }
 
@@ -69,7 +73,7 @@ template <typename T> void process(int n) {
   int nb = 50;
   for (int i = 0; i < nb; i++) {
     int n_row = n + 3 + (i % 3);
-    MyMatrix<T> EXT = RandomIntegralMatrix<T>(n_row, n);
+    MyMatrix<T> EXT = RandomIntegralMatrix<T>(n_row, n, 6);
     if (RankMat(EXT) != n)
       continue;
     MyMatrix<Tfield> EXTf = UniversalMatrixConversion<Tfield, T>(EXT);
@@ -143,7 +147,7 @@ template <typename T> void process(int n) {
                 !std::is_same_v<T, Rational<SafeInt64>>) {
     for (int i = 0; i < 10; i++) {
       int n_row = n + 3;
-      MyMatrix<T> EXT = RandomIntegralMatrix<T>(n_row, n);
+      MyMatrix<T> EXT = RandomIntegralMatrix<T>(n_row, n, 6);
       if (RankMat(EXT) != n)
         continue;
       T scale(1);
@@ -203,17 +207,96 @@ template <typename T> void process(int n) {
   }
 }
 
+// The benchmark: on one fixed full rank matrix and a fixed list of
+// corank one subsets, the dispatched solver is timed against the
+// explicit variants (field over the overlying field, exact ring over
+// the integer matrix), together with the construction cost and the
+// incidence computing call. Timings in microseconds for the whole face
+// list.
+template <typename T>
+void benchmark(std::string const &name, int n, int amp) {
+  using Tint = typename SubsetRankOneSolver<T>::Tint;
+  using Tfield = typename overlying_field<T>::field_type;
+  int n_row = 2 * n + 4;
+  int n_face = 100;
+  MyMatrix<T> EXT(n_row, n);
+  while (true) {
+    EXT = RandomIntegralMatrix<T>(n_row, n, amp);
+    if (RankMat(EXT) == n)
+      break;
+  }
+  std::vector<Face> faces;
+  for (int i = 0; i < n_face; i++)
+    faces.push_back(RandomCoRankOneFace(EXT));
+  MicrosecondTime time;
+  SubsetRankOneSolver<T> solver(EXT);
+  int64_t t_build = time.eval_int64();
+  MyMatrix<Tfield> EXTf = UniversalMatrixConversion<Tfield, T>(EXT);
+  SubsetRankOneSolver_Field<Tfield> solver_field(EXTf);
+  SubsetRankOneSolver_Ring<Tint> solver_ring(solver.GetEXT_int());
+  int n_zero = 0;
+  time.eval_int64();
+  for (auto &f : faces) {
+    MyVector<T> V = solver.GetPositiveKernelVector(f);
+    if (IsZeroVector(V))
+      n_zero++;
+  }
+  int64_t t_disp = time.eval_int64();
+  for (auto &f : faces) {
+    std::pair<MyVector<T>, Face> pair = solver.GetPositiveKernelVectorAndFace(f);
+    if (IsZeroVector(pair.first))
+      n_zero++;
+  }
+  int64_t t_disp_face = time.eval_int64();
+  for (auto &f : faces) {
+    MyVector<Tfield> V = solver_field.GetPositiveKernelVector(f);
+    if (IsZeroVector(V))
+      n_zero++;
+  }
+  int64_t t_field = time.eval_int64();
+  for (auto &f : faces) {
+    MyVector<Tint> V = solver_ring.GetPositiveKernelVector(f);
+    if (IsZeroVector(V))
+      n_zero++;
+  }
+  int64_t t_ring = time.eval_int64();
+  if (n_zero > 0) {
+    std::cerr << "A kernel vector is zero\n";
+    throw TerminalException{1};
+  }
+  std::cerr << name << " n=" << n << " n_row=" << n_row
+            << " amp=" << amp
+            << " (microseconds for " << n_face << " faces):"
+            << " build=" << t_build << " dispatched=" << t_disp
+            << " with_face=" << t_disp_face << " field=" << t_field
+            << " ring=" << t_ring << "\n";
+}
+
+void benchmark_all(int n, int amp) {
+  benchmark<mpq_class>("mpq_class", n, amp);
+  benchmark<Rational<SafeInt64>>("safe_rational", std::min(n, 6), amp);
+  benchmark<mpz_class>("mpz_class", n, amp);
+  benchmark<boost::multiprecision::cpp_int>("boost_cpp_int", n, amp);
+  benchmark<SafeInt64>("safe_integer", std::min(n, 6), amp);
+}
+
 int main(int argc, char *argv[]) {
   HumanTime time;
   try {
-    if (argc != 3) {
-      std::cerr << "Test_SubsetSolver [arith] [n]\n";
+    if (argc != 3 && argc != 4) {
+      std::cerr << "Test_SubsetSolver [arith] [n] [amp]\n";
+      std::cerr << "with amp used by the benchmark only (default 6)\n";
       return -1;
     }
     std::string arith = argv[1];
     int n;
     sscanf(argv[2], "%d", &n);
+    int amp = 6;
+    if (argc == 4)
+      sscanf(argv[3], "%d", &amp);
     auto f = [&]() -> void {
+      if (arith == "benchmark")
+        return benchmark_all(n, amp);
       if (arith == "mpq_class")
         return process<mpq_class>(n);
       if (arith == "safe_rational")

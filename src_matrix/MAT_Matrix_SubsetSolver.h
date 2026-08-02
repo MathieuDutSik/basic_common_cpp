@@ -15,6 +15,10 @@
 #define SANITY_CHECK_MATRIX_SUBSET_SOLVER
 #endif
 
+#ifdef DEBUG
+#define DEBUG_MATRIX_SUBSET_SOLVER
+#endif
+
 // The sign fix of a kernel vector: the first row outside the subset
 // with a non-zero scalar product decides the orientation, the rows
 // lying on the hyperplane being skipped.
@@ -120,6 +124,12 @@ public:
   MyMatrix<Tlift> EXT_lift;
   bool try_int;
   size_t max_bits;
+  // The matrix determines the lifting regime: when the kernel entries
+  // exceed the reconstruction range of the prime, every attempt fails.
+  // After several consecutive failures the attempts stop, so only the
+  // exact computation is paid.
+  static const size_t max_consecutive_fails = 5;
+  size_t n_consecutive_fail = 0;
   SubsetRankOneSolver_Acceleration(MyMatrix<Tint> const &_EXT)
       : EXT(_EXT), nbRow(EXT.rows()), nbCol(EXT.cols()), lifts(nbCol) {
     //
@@ -160,8 +170,9 @@ private:
     size_t nb = sInc.count();
     MyVector<Tint> Vkernel(nbCol);
     MyVector<Tlift> VZ_lift(nbCol);
+    bool attempt_lift = try_int && n_consecutive_fail < max_consecutive_fails;
     bool failed_int = false;
-    if (try_int) {
+    if (attempt_lift) {
       boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
       auto f = [&](MyMatrix<Tfast> &M, size_t eRank,
                    [[maybe_unused]] size_t iRow) -> void {
@@ -215,26 +226,27 @@ private:
       }
     }
 
-    if (failed_int || !try_int) {
-      if constexpr (is_ring_field<T>::value) {
-        std::cerr << "Lifting strategy failed, retrying with the field\n";
-        boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
-        auto f = [&](MyMatrix<T> &M, size_t eRank,
-                     [[maybe_unused]] size_t iRow) -> void {
-          for (int iCol = 0; iCol < nbCol; iCol++)
-            M(eRank, iCol) =
-                UniversalScalarConversion<T, Tint>(EXT(jRow, iCol));
-          jRow = sInc.find_next(jRow);
-        };
-        Vkernel = NonUniqueRescaleVecRing(
-            NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f));
-      } else {
-        std::cerr << "Lifting strategy failed, retrying with the exact ring "
-                     "computation\n";
-        Vkernel = SubsetRankOneSolver_KernelRing(EXT, sInc);
-      }
+    if (failed_int || !attempt_lift) {
+      if (failed_int)
+        n_consecutive_fail++;
+#ifdef DEBUG_MATRIX_SUBSET_SOLVER
+      std::cerr << "Lifting strategy failed, retrying with the exact "
+                   "computation\n";
+#endif
+      using Tfield = typename overlying_field<Tint>::field_type;
+      boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
+      auto f = [&](MyMatrix<Tfield> &M, size_t eRank,
+                   [[maybe_unused]] size_t iRow) -> void {
+        for (int iCol = 0; iCol < nbCol; iCol++)
+          M(eRank, iCol) =
+              UniversalScalarConversion<Tfield, Tint>(EXT(jRow, iCol));
+        jRow = sInc.find_next(jRow);
+      };
+      Vkernel = NonUniqueRescaleVecRing(
+          NullspaceTrMatTargetOne_Kernel<Tfield, decltype(f)>(nb, nbCol, f));
       return {std::move(Vkernel), false, std::move(VZ_lift)};
     }
+    n_consecutive_fail = 0;
     return {std::move(Vkernel), true, std::move(VZ_lift)};
   }
 
@@ -288,10 +300,10 @@ public:
   }
 };
 
-// The ring variant:// The exact kernel vector of the corank one subset over a euclidean
+// The exact kernel vector of the corank one subset over a euclidean
 // ring: the saturated integral kernel of the selected rows
 // (NullspaceIntTrMat), with a content one output. Used by the ring
-// variant and as the exact fallback of the accelerated one.
+// variant.
 template <typename Tint>
 MyVector<Tint> SubsetRankOneSolver_KernelRing(MyMatrix<Tint> const &EXT,
                                               Face const &sInc) {
