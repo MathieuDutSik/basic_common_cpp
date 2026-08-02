@@ -20,6 +20,10 @@ size_t get_bit(mpz_class const &v) { return mpz_sizeinbase(v.get_mpz_t(), 2); }
 
 // The scheme for rank one reduction is some advanced scheme
 
+template <> struct has_reduction_subset_solver<mpz_class> {
+  static const bool value = true;
+};
+
 template <> struct has_reduction_subset_solver<mpq_class> {
   static const bool value = true;
 };

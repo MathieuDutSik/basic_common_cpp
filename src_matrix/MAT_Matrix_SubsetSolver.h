@@ -98,15 +98,15 @@ public:
   }
 };
 
-// The acceleration scheme is using reduction to Fp.
+// The acceleration scheme is using reduction to Fp
 // techniques for the computation of the Kernel.
 //
-// The type T should be an implementation of Q.
-// Then Tint is some implementation of Z.
-// We then do computation over a fast modulo ring Tfast.
-//
-// The scheme should be failsafe, that is not throw any
-// more error than the type T.
+// The type T is an implementation of Q or of Z; Tint is the
+// corresponding implementation of Z. The computation runs over a fast
+// modulo ring Tfast and is verified by lifting; on failure the exact
+// computation is used (over the field for a Q type, over the ring for
+// a Z type), so the scheme does not throw any more errors than the
+// exact types themselves.
 template <typename T> struct SubsetRankOneSolver_Acceleration {
 public:
   using Tint = typename underlying_ring<T>::ring_type;
@@ -126,17 +126,21 @@ public:
     // Faster modular version of EXT_red
     //
     max_bits = 0;
-    EXT_fast = MyMatrix<Tfast>(nbRow, nbCol);
-    EXT_lift = MyMatrix<Tlift>(nbRow, nbCol);
-    for (int iRow = 0; iRow < nbRow; iRow++) {
-      for (int iCol = 0; iCol < nbCol; iCol++) {
-        Tint const &val = EXT(iRow, iCol);
-        max_bits = std::max(get_bit(val), max_bits);
-        EXT_lift(iRow, iCol) = UniversalScalarConversion<Tlift, Tint>(val);
-        EXT_fast(iRow, iCol) = Tfast(EXT_lift(iRow, iCol));
+    for (int iRow = 0; iRow < nbRow; iRow++)
+      for (int iCol = 0; iCol < nbCol; iCol++)
+        max_bits = std::max(get_bit(EXT(iRow, iCol)), max_bits);
+    try_int = (max_bits <= 30);
+    if (try_int) {
+      EXT_fast = MyMatrix<Tfast>(nbRow, nbCol);
+      EXT_lift = MyMatrix<Tlift>(nbRow, nbCol);
+      for (int iRow = 0; iRow < nbRow; iRow++) {
+        for (int iCol = 0; iCol < nbCol; iCol++) {
+          EXT_lift(iRow, iCol) =
+              UniversalScalarConversion<Tlift, Tint>(EXT(iRow, iCol));
+          EXT_fast(iRow, iCol) = Tfast(EXT_lift(iRow, iCol));
+        }
       }
     }
-    try_int = (max_bits <= 30);
     max_bits += get_bit(static_cast<int64_t>(nbCol));
   }
 
@@ -212,16 +216,23 @@ private:
     }
 
     if (failed_int || !try_int) {
-      std::cerr << "Lifting strategy failed, retrying with mpq_class\n";
-      boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
-      auto f = [&](MyMatrix<T> &M, size_t eRank,
-                   [[maybe_unused]] size_t iRow) -> void {
-        for (int iCol = 0; iCol < nbCol; iCol++)
-          M(eRank, iCol) = UniversalScalarConversion<T, Tint>(EXT(jRow, iCol));
-        jRow = sInc.find_next(jRow);
-      };
-      Vkernel = NonUniqueRescaleVecRing(
-          NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f));
+      if constexpr (is_ring_field<T>::value) {
+        std::cerr << "Lifting strategy failed, retrying with the field\n";
+        boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
+        auto f = [&](MyMatrix<T> &M, size_t eRank,
+                     [[maybe_unused]] size_t iRow) -> void {
+          for (int iCol = 0; iCol < nbCol; iCol++)
+            M(eRank, iCol) =
+                UniversalScalarConversion<T, Tint>(EXT(jRow, iCol));
+          jRow = sInc.find_next(jRow);
+        };
+        Vkernel = NonUniqueRescaleVecRing(
+            NullspaceTrMatTargetOne_Kernel<T, decltype(f)>(nb, nbCol, f));
+      } else {
+        std::cerr << "Lifting strategy failed, retrying with the exact ring "
+                     "computation\n";
+        Vkernel = SubsetRankOneSolver_KernelRing(EXT, sInc);
+      }
       return {std::move(Vkernel), false, std::move(VZ_lift)};
     }
     return {std::move(Vkernel), true, std::move(VZ_lift)};
@@ -277,11 +288,35 @@ public:
   }
 };
 
-// The ring variant:// The ring variant: the kernel vector of the corank one subset is
-// computed over the ring itself, as the saturated integral kernel of
-// the selected rows (NullspaceIntTrMat), so no conversion to the
-// overlying field occurs and the output has content one. It serves the
-// euclidean rings that do not have the Fp acceleration.
+// The ring variant:// The exact kernel vector of the corank one subset over a euclidean
+// ring: the saturated integral kernel of the selected rows
+// (NullspaceIntTrMat), with a content one output. Used by the ring
+// variant and as the exact fallback of the accelerated one.
+template <typename Tint>
+MyVector<Tint> SubsetRankOneSolver_KernelRing(MyMatrix<Tint> const &EXT,
+                                              Face const &sInc) {
+  int nb = sInc.count();
+  int nbCol = EXT.cols();
+  MyMatrix<Tint> Msel(nb, nbCol);
+  boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
+  for (int i = 0; i < nb; i++) {
+    Msel.row(i) = EXT.row(jRow);
+    jRow = sInc.find_next(jRow);
+  }
+  MyMatrix<Tint> NSP = NullspaceIntTrMat(Msel);
+#ifdef SANITY_CHECK_MATRIX_SUBSET_SOLVER
+  if (NSP.rows() != 1) {
+    std::cerr << "The subset does not have corank one: |NSP|=" << NSP.rows()
+              << "\n";
+    throw TerminalException{1};
+  }
+#endif
+  return GetMatrixRow(NSP, 0);
+}
+
+// The ring variant: everything over the ring itself, no conversion to
+// the overlying field. It serves the euclidean rings that do not have
+// the Fp acceleration.
 template <typename T> struct SubsetRankOneSolver_Ring {
 public:
   using Tint = T;
@@ -292,22 +327,7 @@ public:
   SubsetRankOneSolver_Ring(MyMatrix<Tint> const &_EXT)
       : EXT(_EXT), nbRow(EXT.rows()), nbCol(EXT.cols()) {}
   MyVector<Tint> GetKernelVector(Face const &sInc) {
-    int nb = sInc.count();
-    MyMatrix<T> Msel(nb, nbCol);
-    boost::dynamic_bitset<>::size_type jRow = sInc.find_first();
-    for (int i = 0; i < nb; i++) {
-      Msel.row(i) = EXT.row(jRow);
-      jRow = sInc.find_next(jRow);
-    }
-    MyMatrix<T> NSP = NullspaceIntTrMat(Msel);
-#ifdef SANITY_CHECK_MATRIX_SUBSET_SOLVER
-    if (NSP.rows() != 1) {
-      std::cerr << "The subset does not have corank one: |NSP|="
-                << NSP.rows() << "\n";
-      throw TerminalException{1};
-    }
-#endif
-    return GetMatrixRow(NSP, 0);
+    return SubsetRankOneSolver_KernelRing(EXT, sInc);
   }
   MyVector<Tint> GetPositiveKernelVector(Face const &sInc) {
     MyVector<Tint> V = GetKernelVector(sInc);

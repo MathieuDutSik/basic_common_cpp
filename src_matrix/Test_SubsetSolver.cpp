@@ -135,6 +135,44 @@ template <typename T> void process(int n) {
       }
     }
   }
+  // Large entries: the lifting is impossible, so the exact fallback of
+  // the accelerated variant has to deliver the same result as the field
+  // computation. The checked 64 bit types are excluded: the exact
+  // computation overflows them legitimately.
+  if constexpr (!std::is_same_v<T, SafeInt64> &&
+                !std::is_same_v<T, Rational<SafeInt64>>) {
+    for (int i = 0; i < 10; i++) {
+      int n_row = n + 3;
+      MyMatrix<T> EXT = RandomIntegralMatrix<T>(n_row, n);
+      if (RankMat(EXT) != n)
+        continue;
+      T scale(1);
+      for (int k = 0; k < 40; k++)
+        scale *= T(2);
+      for (int iCol = 0; iCol < n; iCol++)
+        EXT(0, iCol) = scale * EXT(0, iCol) + T(1);
+      MyMatrix<Tfield> EXTf = UniversalMatrixConversion<Tfield, T>(EXT);
+      Face f = RandomCoRankOneFace(EXT);
+      SubsetRankOneSolver<T> solver(EXT);
+      SubsetRankOneSolver_Field<Tfield> solver_field(EXTf);
+      MyVector<T> V1 = solver.GetPositiveKernelVector(f);
+      MyVector<Tfield> V2 = solver_field.GetPositiveKernelVector(f);
+      MyVector<Tfield> V1_F = UniversalVectorConversion<Tfield, T>(V1);
+      for (int iCol = 0; iCol < n; iCol++) {
+        for (int jCol = iCol + 1; jCol < n; jCol++) {
+          if (V1_F(iCol) * V2(jCol) != V1_F(jCol) * V2(iCol)) {
+            std::cerr << "Large entries: kernel vectors not proportional\n";
+            throw TerminalException{1};
+          }
+        }
+        if ((V1_F(iCol) > 0 && V2(iCol) < 0) ||
+            (V1_F(iCol) < 0 && V2(iCol) > 0)) {
+          std::cerr << "Large entries: the signs differ\n";
+          throw TerminalException{1};
+        }
+      }
+    }
+  }
   // The sign skips the rows lying on the hyperplane: the first row
   // outside the subset is a duplicate of a subset row, so the
   // orientation has to come from the last row.
