@@ -191,7 +191,7 @@ MyVector<T> SolutionMat_LeastSquare(MyMatrix<T> const &M,
   MyVector<double> B = ZeroVector<double>(nbCol);
   for (int j = 0; j < nbCol; j++)
     for (int i = 0; i < nbRow; i++)
-      B(i, j) += V(i) * M(i, j);
+      AddMul(B(i, j), V(i), M(i, j));
   //
   // We have now a linear system to solve
   //

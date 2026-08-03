@@ -264,13 +264,13 @@ public:
       conv[k] = 0;
     for (int i = 0; i < deg; i++)
       for (int j = 0; j < deg; j++)
-        conv[i + j] += a[i] * b[j];
+        AddMul(conv[i + j], a[i], b[j]);
     for (int k = deg - 2; k >= 0; k--) {
       Tz const &val = conv[deg + k];
       if (val != 0) {
         std::vector<Tz> const &row = ExprYpow[k];
         for (int j = 0; j < deg; j++)
-          conv[j] += val * row[j];
+          AddMul(conv[j], val, row[j]);
       }
     }
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
@@ -310,7 +310,7 @@ public:
         if (carry != 0) {
           std::vector<Tz> const &red = ExprYpow[0];
           for (int j = 0; j < deg; j++)
-            row[j] += carry * red[j];
+            AddMul(row[j], carry, red[j]);
         }
       }
     }
@@ -353,12 +353,12 @@ public:
       Tz val_upp = val_low;
       for (int i = 1; i < deg; i++) {
         if (x[i] > 0) {
-          val_low += x[i] * level.pow_low[i - 1];
-          val_upp += x[i] * level.pow_upp[i - 1];
+          AddMul(val_low, x[i], level.pow_low[i - 1]);
+          AddMul(val_upp, x[i], level.pow_upp[i - 1]);
         }
         if (x[i] < 0) {
-          val_low += x[i] * level.pow_upp[i - 1];
-          val_upp += x[i] * level.pow_low[i - 1];
+          AddMul(val_low, x[i], level.pow_upp[i - 1]);
+          AddMul(val_upp, x[i], level.pow_low[i - 1]);
         }
       }
 #ifdef SANITY_CHECK_REAL_ALG_NUMERIC
@@ -523,7 +523,7 @@ private:
       if (negate) {
         for (size_t u = 0; u < len; u++) {
           num[u] *= m_this;
-          num[u] -= onum[u] * m_o;
+          SubMul(num[u], onum[u], m_o);
         }
       } else {
         for (size_t u = 0; u < len; u++) {
