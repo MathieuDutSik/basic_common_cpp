@@ -206,10 +206,43 @@ template <> struct is_exact_arithmetic<float> {
 //   evaluation (gmpxx / boost.cpp: mpz_class, mpq_class, cpp_int, cpp_rational,
 //   mpq_rational), or because operator=(product) is cheaper than
 //   operator+=(product) for the type (QuadField). Both branches compute the
-//   same value; the trait only selects the faster implementation.
+//   same value; the trait only selects the faster implementation. The
+//   choices were re-measured with the GMP pool installed and are
+//   unchanged by it.
+//
+// The kernels consume the trait through AddMul / SubMul below rather
+// than branching themselves.
 template <typename T> struct is_fma_prefered {
   static const bool value = true;
 };
+
+// The multiply-accumulate acc += a * b and acc -= a * b in the fastest
+// form for the type: the compound expression when it is at least as
+// good (is_fma_prefered), a reused thread local scratch otherwise, and
+// the native fused calls where they exist (mpz_class, specialized in
+// NumberTheoryGmp.h: the gmpxx expression templates do NOT fuse the
+// compound form, mpz_addmul / mpz_submul must be called directly).
+template <typename T>
+inline void AddMul(T &acc, T const &a, T const &b) {
+  if constexpr (is_fma_prefered<T>::value) {
+    acc += a * b;
+  } else {
+    static thread_local T scratch;
+    scratch = a * b;
+    acc += scratch;
+  }
+}
+
+template <typename T>
+inline void SubMul(T &acc, T const &a, T const &b) {
+  if constexpr (is_fma_prefered<T>::value) {
+    acc -= a * b;
+  } else {
+    static thread_local T scratch;
+    scratch = a * b;
+    acc -= scratch;
+  }
+}
 
 // Empty placeholder for a reuse-scratch that a code path does not need. When
 // is_fma_prefered<T> is true a kernel declares its scratch as

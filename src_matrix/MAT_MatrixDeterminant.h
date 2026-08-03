@@ -26,10 +26,6 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
   static_assert(is_ring_field<T>::value,
                 "Requires T to be a field in DeterminantMatKernel");
   T alpha;
-  // Reuse-scratch for the elimination product (see is_fma_prefered); collapses
-  // to an empty object for fused-preferring types.
-  [[maybe_unused]]
-  std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> prod;
   int n = TheMat.rows();
   MyMatrix<T> WorkMat = TheMat;
   std::vector<int> eVectPos(n, -1);
@@ -45,15 +41,8 @@ template <typename T> T DeterminantMatKernel(MyMatrix<T> const &TheMat) {
     for (int j = 0; j < n; j++)
       if (j != jSel) {
         alpha = WorkMat(i, j) / WorkMat(i, jSel);
-        if constexpr (is_fma_prefered<T>::value) {
-          for (int k = 0; k < n; k++)
-            WorkMat(k, j) -= alpha * WorkMat(k, jSel);
-        } else {
-          for (int k = 0; k < n; k++) {
-            prod = alpha * WorkMat(k, jSel);
-            WorkMat(k, j) -= prod;
-          }
-        }
+        for (int k = 0; k < n; k++)
+          SubMul(WorkMat(k, j), alpha, WorkMat(k, jSel));
       }
     TheDet = TheDet * WorkMat(i, jSel);
   }

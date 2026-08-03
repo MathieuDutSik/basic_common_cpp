@@ -1795,25 +1795,14 @@ public:
   }
   bool has_solution_v(MyVector<T> const &TheVect) const {
     MyVector<T> TheVectWork = TheVect;
-    // Reuse-scratch for the back-substitution product (see is_fma_prefered);
-    // collapses to an empty object for fused-preferring types.
-    [[maybe_unused]]
-    std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
     for (int i = 0; i < nbCol; i++) {
       int iRow = ListRow[i];
       if (iRow >= 0) {
         T const &prov2 = TheMatWork(iRow, i);
         T TheQ = QuoInt(TheVectWork(i), prov2);
         if (TheQ != 0) {
-          if constexpr (is_fma_prefered<T>::value) {
-            for (int j = 0; j < nbCol; j++) {
-              TheVectWork(j) -= TheQ * TheMatWork(iRow, j);
-            }
-          } else {
-            for (int j = 0; j < nbCol; j++) {
-              eProd = TheQ * TheMatWork(iRow, j);
-              TheVectWork(j) -= eProd;
-            }
+          for (int j = 0; j < nbCol; j++) {
+            SubMul(TheVectWork(j), TheQ, TheMatWork(iRow, j));
           }
         }
       }
@@ -1828,35 +1817,17 @@ public:
     int nbCol = TheMatWork.cols();
     MyVector<T> TheVectWork = TheVect;
     MyVector<T> eSol = ZeroVector<T>(nbVect);
-    // Reuse-scratch for the back-substitution product (see is_fma_prefered);
-    // collapses to an empty object for fused-preferring types.
-    [[maybe_unused]]
-    std::conditional_t<is_fma_prefered<T>::value, empty_scratch, T> eProd;
     for (int i = 0; i < nbCol; i++) {
       int iRow = ListRow[i];
       if (iRow >= 0) {
         T const &prov2 = TheMatWork(iRow, i);
         T TheQ = QuoInt(TheVectWork(i), prov2);
         if (TheQ != 0) {
-          if constexpr (is_fma_prefered<T>::value) {
-            for (int j = 0; j < nbCol; j++) {
-              TheVectWork(j) -= TheQ * TheMatWork(iRow, j);
-            }
-          } else {
-            for (int j = 0; j < nbCol; j++) {
-              eProd = TheQ * TheMatWork(iRow, j);
-              TheVectWork(j) -= eProd;
-            }
+          for (int j = 0; j < nbCol; j++) {
+            SubMul(TheVectWork(j), TheQ, TheMatWork(iRow, j));
           }
-          if constexpr (is_fma_prefered<T>::value) {
-            for (int iVect = 0; iVect < nbVect; iVect++) {
-              eSol(iVect) += TheQ * eEquivMat(iRow, iVect);
-            }
-          } else {
-            for (int iVect = 0; iVect < nbVect; iVect++) {
-              eProd = TheQ * eEquivMat(iRow, iVect);
-              eSol(iVect) += eProd;
-            }
+          for (int iVect = 0; iVect < nbVect; iVect++) {
+            AddMul(eSol(iVect), TheQ, eEquivMat(iRow, iVect));
           }
         }
       }
