@@ -2128,7 +2128,7 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
     for (int i = 0; i < n; i++) {
       T eVal(0);
       for (int j = 0; j < n; j++)
-        AddMul(eVal, diff(j), eInv(j, i));
+        eVal += diff(j) * eInv(j, i);
       if (!IsInteger(eVal))
         return false;
     }
@@ -2204,7 +2204,7 @@ std::vector<size_t> GetActionOnClasses(std::vector<MyVector<T>> const &l_v,
     for (int i = 0; i < n; i++) {
       T eVal(0);
       for (int j = 0; j < n; j++)
-        AddMul(eVal, diff(j), eInv(j, i));
+        eVal += diff(j) * eInv(j, i);
       if (!IsInteger(eVal))
         return false;
     }
