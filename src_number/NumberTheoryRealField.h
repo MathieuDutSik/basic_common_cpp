@@ -59,16 +59,12 @@ using Tint_real_field = mpz_class;
 #endif
 using Tvec_real_field =
     boost::container::small_vector<Tint_real_field, REALFIELD_INLINE_DEG>;
-using Tconv_real_field =
-    boost::container::small_vector<Tint_real_field,
-                                   2 * REALFIELD_INLINE_DEG - 1>;
 
 template <typename Tfield> struct HelperClassRealField {
 private:
   using T = Tfield;
   using Tz = Tint_real_field;
   using Tvec = Tvec_real_field;
-  using Tconv = Tconv_real_field;
   // One level of the approximant ladder: the powers of the lower / upper
   // bound of y as integers over the single denominator den shared by both
   // lists. A shared denominator is required because a bound evaluation mixes
@@ -254,19 +250,26 @@ public:
   // 2 deg - 1 size across calls so that the limb storage of its entries is
   // reused (no allocation in steady state); only the first deg entries are
   // meaningful on return.
-  void ComputeProductInto(Tconv &conv, Tvec const &a, Tvec const &b) const {
-    // Schoolbook convolution into degrees 0..2 deg - 2 followed by the
-    // reduction of the upper part with the precomputed integer rows.
-    size_t conv_len = 2 * deg - 1;
-    if (conv.size() != conv_len)
-      conv.resize(conv_len);
-    for (size_t k = 0; k < conv_len; k++)
-      conv[k] = 0;
-    for (int i = 0; i < deg; i++)
-      for (int j = 0; j < deg; j++)
-        AddMul(conv[i + j], a[i], b[j]);
-    for (int k = deg - 2; k >= 0; k--) {
-      Tz const &val = conv[deg + k];
+  void ComputeProductInto(Tvec &conv, Tvec const &a, Tvec const &b) const {
+    // Schoolbook convolution reduced on the fly: the upper degrees are
+    // never stored, each coefficient of degree deg + k is accumulated
+    // into a scalar and expanded through its precomputed row
+    // ExprYpow[k] right away (the rows expand fully into the degrees
+    // below deg, so the upper entries are independent of each other).
+    // The buffer therefore has length deg and must not alias a or b.
+    if (conv.size() != static_cast<size_t>(deg))
+      conv.resize(deg);
+    for (int X = 0; X < deg; X++) {
+      conv[X] = 0;
+      for (int i = 0; i <= X; i++)
+        AddMul(conv[X], a[i], b[X - i]);
+    }
+    static thread_local Tz val;
+    for (int k = 0; k <= deg - 2; k++) {
+      int X = deg + k;
+      val = 0;
+      for (int i = X - deg + 1; i < deg; i++)
+        AddMul(val, a[i], b[X - i]);
       if (val != 0) {
         std::vector<Tz> const &row = ExprYpow[k];
         for (int j = 0; j < deg; j++)
@@ -283,14 +286,6 @@ public:
       throw TerminalException{1};
     }
 #endif
-  }
-  Tvec ComputeProduct(Tvec const &a, Tvec const &b) const {
-    Tconv conv;
-    ComputeProductInto(conv, a, b);
-    Tvec res(deg);
-    for (int u = 0; u < deg; u++)
-      res[u] = std::move(conv[u]);
-    return res;
   }
   // The quotient of the two numerator polynomials: a / b = qnum / qden with
   // qnum integral and qden > 0. Solved via the linear system M(b) sol = a
@@ -501,7 +496,7 @@ private:
   void normalize() { get_hcrf().normalize(num, den); }
   // this += (or -=) onum / oden, followed by the normalization. Templated on
   // the container so that both elements (Tvec) and the convolution scratch
-  // buffer (Tconv_real_field, of which only the first deg entries are read)
+  // buffer (Tvec_real_field, of length deg)
   // can be merged in.
   template <typename Tvect>
   void axpy_merge(Tvect const &onum, Tz const &oden, bool negate) {
@@ -592,7 +587,7 @@ public:
   // Construct from a lazy product a*b.
   RealField(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    num = hcrf.ComputeProduct(e.x.num, e.y.num);
+    hcrf.ComputeProductInto(num, e.x.num, e.y.num);
     den = e.x.den * e.y.den;
     normalize();
   }
@@ -610,7 +605,7 @@ public:
   // overwritten, and the existing limb storage of this->num is reused.
   RealField<i_field> &operator=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local Tconv_real_field conv;
+    static thread_local Tvec_real_field conv;
     hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     Tz pd = e.x.den * e.y.den;
     size_t len = num.size();
@@ -631,7 +626,7 @@ public:
   // survives across the accumulations of a dot product.
   void operator+=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local Tconv_real_field conv;
+    static thread_local Tvec_real_field conv;
     hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     axpy_merge(conv, e.x.den * e.y.den, false);
   }
@@ -641,7 +636,7 @@ public:
   // Fused subtract of a lazy product: this -= a*b.
   void operator-=(RealProd<i_field> const &e) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local Tconv_real_field conv;
+    static thread_local Tvec_real_field conv;
     hcrf.ComputeProductInto(conv, e.x.num, e.y.num);
     axpy_merge(conv, e.x.den * e.y.den, true);
   }
@@ -710,7 +705,7 @@ public:
   double get_d() const { return get_hcrf().evaluate_as_double(num, den); }
   void operator*=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
-    static thread_local Tconv_real_field conv;
+    static thread_local Tvec_real_field conv;
     hcrf.ComputeProductInto(conv, num, x.num);
     size_t len = num.size();
     for (size_t u = 0; u < len; u++)
