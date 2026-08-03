@@ -104,6 +104,13 @@ inline void ColSubMul(MyMatrix<T> &M, int i, T const &q, int j) {
 }
 
 template <typename T>
+inline void ColAddMul(MyMatrix<T> &M, int i, T const &q, int j) {
+  int nbRow = M.rows();
+  for (int u = 0; u < nbRow; u++)
+    AddMul(M(u, i), q, M(u, j));
+}
+
+template <typename T>
 inline void VecSubMul(MyVector<T> &V, T const &q, MyVector<T> const &W) {
   int siz = V.size();
   for (int u = 0; u < siz; u++)
