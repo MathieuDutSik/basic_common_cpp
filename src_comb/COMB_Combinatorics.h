@@ -251,7 +251,7 @@ Tint ConvertVectorToNumber(std::vector<int> const &V, int const &N) {
   Tint expo = 1;
   int len = V.size();
   for (int i = 0; i < len; i++) {
-    val += expo * V[i];
+    AddMul(val, expo, V[i]);
     expo *= N;
   }
   return val;

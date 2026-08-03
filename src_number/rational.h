@@ -161,7 +161,7 @@ public:
     return *this;
   }
   Rational<Tint> &operator+=(Tint const &x) {
-    num += x * den;
+    AddMul(num, x, den);
     gcd_reduction();
     return *this;
   }

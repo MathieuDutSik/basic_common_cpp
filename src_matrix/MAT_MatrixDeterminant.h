@@ -131,14 +131,14 @@ template <typename T> T DeterminantMatBerkowitz(MyMatrix<T> const &A) {
       for (int k = 0; k <= i - 2; k++) {
         T w(0); // w = R . y
         for (int r = 0; r < i - 1; r++)
-          w += A(i - 1, r) * y(r);
+          AddMul(w, A(i - 1, r), y(r));
         c[k + 2] = -w;
         if (k < i - 2) { // y <- M y
           MyVector<T> yn(i - 1);
           for (int r = 0; r < i - 1; r++) {
             T s(0);
             for (int col = 0; col < i - 1; col++)
-              s += A(r, col) * y(col);
+              AddMul(s, A(r, col), y(col));
             yn(r) = s;
           }
           y = yn;
@@ -150,7 +150,7 @@ template <typename T> T DeterminantMatBerkowitz(MyMatrix<T> const &A) {
     for (int r = 0; r <= i; r++) {
       T s(0);
       for (int col = 0; col <= r && col < i; col++)
-        s += c[r - col] * p[col];
+        AddMul(s, c[r - col], p[col]);
       np[r] = s;
     }
     p = std::move(np);
@@ -210,7 +210,7 @@ template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
     for (int i = step + 1; i < n; i++) {
       T factor = M(i, step) / M(step, step); // unit pivot -> exact division
       for (int j = step + 1; j < n; j++)
-        M(i, j) -= factor * M(step, j);
+        SubMul(M(i, j), factor, M(step, j));
     }
   }
   return neg ? -det : det;
@@ -278,7 +278,7 @@ template <typename T> T DeterminantMatPermutation(MyMatrix<T> const &A) {
       for (int j = i + 1; j < n; j++)
         if (s[j] < s[i])
           eSign = -eSign;
-    TheDet += eSign * eProd;
+    AddMul(TheDet, eSign, eProd);
   } while (std::next_permutation(s.begin(), s.end()));
   return TheDet;
 }

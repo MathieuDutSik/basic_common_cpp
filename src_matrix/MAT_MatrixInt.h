@@ -94,7 +94,7 @@ template <typename T> T Int_IndexLattice(MyMatrix<T> const &eMat) {
           IsFinished = false;
           T TheQ = QuoInt(eVal, ThePivot);
           if (TheQ != 0)
-            eMatW.row(iRow) -= TheQ * eMatW.row(iRowF);
+            RowSubMul(eMatW, iRow, TheQ, iRowF);
         }
       }
     }
@@ -136,7 +136,7 @@ template <typename T> GCD_dot<T> ComputeGcdDot(MyVector<T> const &x) {
 #ifdef SANITY_CHECK_MATRIX_INT
   T sum(0);
   for (int u = 0; u < siz; u++) {
-    sum += V(u) * x(u);
+    AddMul(sum, V(u), x(u));
   }
   if (sum != gcd) {
     std::cerr << "A: sum=" << sum << " gcd=" << gcd << "\n";
@@ -739,7 +739,7 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
           auto fct3 = [&](MyMatrix<T> &m) -> void {
-            m.row(iRow) -= TheQ * m.row(TopPosition);
+            RowSubMul(m, iRow, TheQ, TopPosition);
           };
           f(fct3);
         }
@@ -859,7 +859,7 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
         T TheQ = QuoInt(eVal, ThePivot);
         if (TheQ != 0) {
           auto fct3 = [&](MyMatrix<T> &m) -> void {
-            m.col(iCol) -= TheQ * m.col(TopPosition);
+            ColSubMul(m, iCol, TheQ, TopPosition);
           };
           f(fct3);
         }
@@ -967,7 +967,7 @@ MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper,
           T eVal = H(iRow, iColF);
           if (eVal != 0) {
             T TheQ = QuoInt(eVal, ThePivot);
-            H.row(iRow) -= TheQ * H.row(iRowF);
+            RowSubMul(H, iRow, TheQ, iRowF);
             f_row_oper(iRow, iRowF, TheQ);
             if (H(iRow, iColF) != 0)
               NonZeroResidue = true;
@@ -979,7 +979,7 @@ MyMatrix<T> SmithNormalFormKernel(MyMatrix<T> const &M, Frow_oper f_row_oper,
           T eVal = H(iRowF, iCol);
           if (eVal != 0) {
             T TheQ = QuoInt(eVal, ThePivot);
-            H.col(iCol) -= TheQ * H.col(iColF);
+            ColSubMul(H, iCol, TheQ, iColF);
             f_col_oper(iCol, iColF, TheQ);
             if (H(iRowF, iCol) != 0) {
               NonZeroResidue = true;
@@ -1059,13 +1059,13 @@ ResultSmithNormalForm<T> SmithNormalForm(MyMatrix<T> const &M) {
   MyMatrix<T> ROW = IdentityMat<T>(nbRow);
   MyMatrix<T> COL = IdentityMat<T>(nbCol);
   auto f_row_oper = [&](int row1, int row2, T val) -> void {
-    ROW.row(row1) -= val * ROW.row(row2);
+    RowSubMul(ROW, row1, val, row2);
   };
   auto f_row_flip = [&](int row1, int row2) -> void {
     flip_rows(ROW, row1, row2);
   };
   auto f_col_oper = [&](int col1, int col2, T val) -> void {
-    COL.col(col1) -= val * COL.col(col2);
+    ColSubMul(COL, col1, val, col2);
   };
   auto f_col_flip = [&](int col1, int col2) -> void {
     flip_cols(COL, col1, col2);
@@ -1219,7 +1219,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
           T eVal = eMat(iRow, iCol);
           T TheQ = QuoInt(eVal, ThePivot);
           if (TheQ != 0)
-            eMat.row(iRow) -= TheQ * eMat.row(iRowFound);
+            RowSubMul(eMat, iRow, TheQ, iRowFound);
         }
       if (nbFound == 1)
         return;
@@ -1286,7 +1286,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
       for (size_t iRel = 0; iRel < sizRelIndex; iRel++) {
         size_t jCol = ListRelIndex[iRel];
         T fVal = eMatW(iRow, jCol);
-        eSum += eVect[iRel] * fVal;
+        AddMul(eSum, eVect[iRel], fVal);
       }
       ListX.push_back(eSum);
     }
@@ -1327,7 +1327,7 @@ template <typename T> MyMatrix<T> NullspaceIntTrMat(MyMatrix<T> const &eMat) {
     for (size_t iRow = 0; iRow < nbRow; iRow++) {
       T eSum(0);
       for (size_t iCol = 0; iCol < nbCol; iCol++)
-        eSum += eMat(iRow, iCol) * retNSP(iVect, iCol);
+        AddMul(eSum, eMat(iRow, iCol), retNSP(iVect, iCol));
       if (eSum != 0) {
         std::cerr << "There are remaining errors in NullspaceIntTrMat\n";
         throw TerminalException{1};
@@ -1499,7 +1499,7 @@ bool TestEqualitySpaces(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
           T eVal2 = M1copy(j, idxSearch);
           T TheQ = QuoInt(eVal2, eVal1);
           if (TheQ != 0)
-            M1copy.row(j) -= TheQ * M1copy.row(idxSelect);
+            RowSubMul(M1copy, j, TheQ, idxSelect);
         }
     }
     StatusRow[idxSelect] = 1;
@@ -1676,8 +1676,8 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
           T prov2 = TheMatWork(iVect, i);
           T TheQ = QuoInt(prov2, prov1b);
           if (TheQ != 0) {
-            TheMatWork.row(iVect) -= TheQ * TheMatWork.row(iVectFound);
-            eEquivMat.row(iVect) -= TheQ * eEquivMat.row(iVectFound);
+            RowSubMul(TheMatWork, iVect, TheQ, iVectFound);
+            RowSubMul(eEquivMat, iVect, TheQ, iVectFound);
           }
         }
     }
@@ -1694,9 +1694,9 @@ std::optional<MyVector<T>> SolutionIntMat(MyMatrix<T> const &TheMat,
       T TheQ = QuoInt(prov1, prov2);
       if (TheQ != 0) {
         for (int j = 0; j < nbCol; j++)
-          TheVectWork(j) -= TheQ * TheMatWork(iVectFound, j);
+          SubMul(TheVectWork(j), TheQ, TheMatWork(iVectFound, j));
         for (int iVect = 0; iVect < nbVect; iVect++)
-          eSol(iVect) += TheQ * eEquivMat(iVectFound, iVect);
+          AddMul(eSol(iVect), TheQ, eEquivMat(iVectFound, iVect));
       }
     }
     if (TheVectWork(i) != 0)
@@ -1772,8 +1772,8 @@ public:
             T prov2 = TheMatWork(iVect, i);
             T TheQ = QuoInt(prov2, prov1b);
             if (TheQ != 0) {
-              TheMatWork.row(iVect) -= TheQ * TheMatWork.row(iVectFound);
-              eEquivMat.row(iVect) -= TheQ * eEquivMat.row(iVectFound);
+              RowSubMul(TheMatWork, iVect, TheQ, iVectFound);
+              RowSubMul(eEquivMat, iVect, TheQ, iVectFound);
             }
           }
       }
@@ -2128,7 +2128,7 @@ Kernel_ComputeTranslationClasses(MyMatrix<T> const &M) {
     for (int i = 0; i < n; i++) {
       T eVal(0);
       for (int j = 0; j < n; j++)
-        eVal += diff(j) * eInv(j, i);
+        AddMul(eVal, diff(j), eInv(j, i));
       if (!IsInteger(eVal))
         return false;
     }
@@ -2204,7 +2204,7 @@ std::vector<size_t> GetActionOnClasses(std::vector<MyVector<T>> const &l_v,
     for (int i = 0; i < n; i++) {
       T eVal(0);
       for (int j = 0; j < n; j++)
-        eVal += diff(j) * eInv(j, i);
+        AddMul(eVal, diff(j), eInv(j, i));
       if (!IsInteger(eVal))
         return false;
     }
@@ -2305,8 +2305,8 @@ MyMatrix<T> GetZbasis_Kernel(MyMatrix<T> const &ListElement) {
         if (iCol != ThePivot) {
           T TheQ = QuoInt(eVect(iCol), eVect(ThePivot));
           if (TheQ != 0) {
-            TheRedMat.row(ThePivot) += TheQ * TheRedMat.row(iCol);
-            eVect(iCol) -= TheQ * eVect(ThePivot);
+            RowAddMul(TheRedMat, ThePivot, TheQ, iCol);
+            SubMul(eVect(iCol), TheQ, eVect(ThePivot));
           }
         }
     }
@@ -2328,7 +2328,7 @@ MyMatrix<T> GetZbasis_Kernel(MyMatrix<T> const &ListElement) {
     for (int iEqua = 0; iEqua < nbEqua; iEqua++) {
       T eSum(0);
       for (int i = 0; i < TheDim; i++)
-        eSum += ListEqua(iEqua, i) * eElt(i);
+        AddMul(eSum, ListEqua(iEqua, i), eElt(i));
       if (eSum != 0)
         return false;
     }
@@ -2514,7 +2514,7 @@ MyMatrix<Tint> SYMPL_ComputeSymplecticBasis(MyMatrix<Tint> const &M) {
     for (int i_row = 0; i_row < nb_row; i_row++) {
       Tint eScal = 0;
       for (int i = 0; i < 2 * n; i++)
-        eScal += w1(i) * Mwork(i_row, i);
+        AddMul(eScal, w1(i), Mwork(i_row, i));
       ListScal[i_row] = eScal;
     }
     GCD_int<Tint> eGCD = ComputeGCD_information(ListScal);

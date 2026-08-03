@@ -76,6 +76,47 @@ inline void serialize(Archive &ar, MyMatrix<T> &matrix,
 
 // clang-format off
 }  // namespace boost::serialization
+
+// The row / column / vector elimination operations through SubMul /
+// AddMul: the Eigen expression M.row(i) -= q * M.row(j) evaluates with
+// a temporary per coefficient for the GMP types, the explicit loop
+// reaches the fused forms. The scalar q must not be a reference into
+// the modified row (copy it first).
+template <typename T>
+inline void RowSubMul(MyMatrix<T> &M, int i, T const &q, int j) {
+  int nbCol = M.cols();
+  for (int u = 0; u < nbCol; u++)
+    SubMul(M(i, u), q, M(j, u));
+}
+
+template <typename T>
+inline void RowAddMul(MyMatrix<T> &M, int i, T const &q, int j) {
+  int nbCol = M.cols();
+  for (int u = 0; u < nbCol; u++)
+    AddMul(M(i, u), q, M(j, u));
+}
+
+template <typename T>
+inline void ColSubMul(MyMatrix<T> &M, int i, T const &q, int j) {
+  int nbRow = M.rows();
+  for (int u = 0; u < nbRow; u++)
+    SubMul(M(u, i), q, M(u, j));
+}
+
+template <typename T>
+inline void VecSubMul(MyVector<T> &V, T const &q, MyVector<T> const &W) {
+  int siz = V.size();
+  for (int u = 0; u < siz; u++)
+    SubMul(V(u), q, W(u));
+}
+
+template <typename T>
+inline void VecAddMul(MyVector<T> &V, T const &q, MyVector<T> const &W) {
+  int siz = V.size();
+  for (int u = 0; u < siz; u++)
+    AddMul(V(u), q, W(u));
+}
+
 // clang-format on
 
 template <typename T>
@@ -1099,7 +1140,8 @@ template <typename T> struct RankTool {
   int insertion_operation(MyVector<T> &V) {
     for (int i_line = 0; i_line < rank; i_line++) {
       int eCol = ListICol[i_line];
-      V -= V[eCol] * ListVect[i_line];
+      T coeff = V[eCol];
+      VecSubMul(V, coeff, ListVect[i_line]);
     }
     for (int i_dim = 0; i_dim < dim; i_dim++)
       if (V[i_dim] != 0) {
@@ -1514,7 +1556,7 @@ private:
       T coeff = Vins[eCol];
       if (coeff != 0) {
         for (size_t i = 0; i < dim; i++) {
-          Vins[i] -= coeff * TheBasis[pos];
+          SubMul(Vins[i], coeff, TheBasis[pos]);
           pos++;
         }
       } else {
@@ -1776,7 +1818,7 @@ T MatrixScalarProduct(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
   T eSum(0);
   for (int i = 0; i < n1; i++)
     for (int j = 0; j < p1; j++)
-      eSum += M1(i, j) * M2(i, j);
+      AddMul(eSum, M1(i, j), M2(i, j));
   return eSum;
 }
 
@@ -1895,7 +1937,7 @@ void PrintEigenvalueDefect(MyMatrix<T> const &Sinp,
     for (int j = 0; j < n; j++) {
       T eSum = ListEigVal(i) * ListEigVect(i, j);
       for (int k = 0; k < n; k++)
-        eSum -= ListEigVect(i, k) * Sinp(j, k);
+        SubMul(eSum, ListEigVect(i, k), Sinp(j, k));
       eDelta += T_abs(eSum);
     }
     os << "i=" << i << " err=" << eDelta << "\n";
@@ -1922,8 +1964,8 @@ MyVector<T> SolveConjGrad(MyMatrix<T> const &A, MyVector<T> const &b) {
   for (int i = 0; i < nbOper; i++) {
     Ap = A * p;
     alpha = rsold / EvaluationQuadForm(A, p);
-    x += alpha * p;
-    r -= alpha * Ap;
+    VecAddMul(x, alpha, p);
+    VecSubMul(r, alpha, Ap);
     rsnew = r.dot(r);
     p = r + (rsnew / rsold) * p;
     rsold = rsnew;
@@ -2334,9 +2376,12 @@ T EvaluationQuadForm(MyMatrix<T> const &eMat, MyVector<Tint> const &eVect) {
   }
 #endif
   T eSum(0);
+  T prod;
   for (size_t i = 0; i < n; i++)
-    for (size_t j = 0; j < n; j++)
-      eSum += eVect(i) * eVect(j) * eMat(i, j);
+    for (size_t j = 0; j < n; j++) {
+      prod = eVect(i) * eVect(j);
+      AddMul(eSum, prod, eMat(i, j));
+    }
   return eSum;
 }
 
@@ -2381,7 +2426,7 @@ MyMatrix<T> CanonicalizeBasisVectorSpace(MyMatrix<T> const &inputMat) {
       if (eRow != FoundRow) {
         T alpha = WorkMat(eRow, FoundCol) / WorkMat(FoundRow, FoundCol);
         for (size_t iCol = 0; iCol < nbCol; iCol++)
-          WorkMat(eRow, iCol) -= alpha * WorkMat(FoundRow, iCol);
+          SubMul(WorkMat(eRow, iCol), alpha, WorkMat(FoundRow, iCol));
       }
     }
   }
@@ -2393,9 +2438,12 @@ T ScalarProductQuadForm(MyMatrix<T> const &eMat, MyVector<Tint> const &V1,
                         MyVector<Tint> const &V2) {
   int n = V1.size();
   T eSum(0);
+  T prod;
   for (int i = 0; i < n; i++)
-    for (int j = 0; j < n; j++)
-      eSum += V1(i) * V2(j) * eMat(i, j);
+    for (int j = 0; j < n; j++) {
+      prod = V1(i) * V2(j);
+      AddMul(eSum, prod, eMat(i, j));
+    }
   return eSum;
 }
 

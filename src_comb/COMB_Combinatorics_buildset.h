@@ -35,7 +35,7 @@ int PositionBuildSet(int const &n, int const &Nval, MyVector<int> const &V) {
   int pos = 0;
   int eProd = 1;
   for (int i = 0; i < n; i++) {
-    pos += eProd * V(i);
+    AddMul(pos, eProd, V(i));
     eProd *= Nval;
   }
   return pos;

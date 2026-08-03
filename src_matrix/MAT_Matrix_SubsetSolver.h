@@ -31,7 +31,7 @@ void SubsetRankOneSolver_SignFix(MyMatrix<Tint> const &EXT, Face const &sInc,
     if (sInc[iRow] == 0) {
       Tint scal(0);
       for (int iCol = 0; iCol < nbCol; iCol++)
-        scal += EXT(iRow, iCol) * V(iCol);
+        AddMul(scal, EXT(iRow, iCol), V(iCol));
       if (scal > 0)
         return;
       if (scal < 0) {
@@ -57,7 +57,7 @@ Face SubsetRankOneSolver_SignFixAndFace(MyMatrix<Tint> const &EXT,
   for (int iRow = 0; iRow < nbRow; iRow++) {
     Tint scal(0);
     for (int iCol = 0; iCol < nbCol; iCol++)
-      scal += EXT(iRow, iCol) * V(iCol);
+      AddMul(scal, EXT(iRow, iCol), V(iCol));
     if (scal == 0) {
       f[iRow] = 1;
     } else {
@@ -212,7 +212,7 @@ private:
           for (size_t iRow = 0; iRow < nb; iRow++) {
             Tlift sm = 0;
             for (int iCol = 0; iCol < nbCol; iCol++) {
-              sm += VZ_lift(iCol) * EXT_lift(jRow, iCol);
+              AddMul(sm, VZ_lift(iCol), EXT_lift(jRow, iCol));
             }
             if (sm != 0) {
               failed_int = true;
@@ -261,7 +261,7 @@ public:
         if (sInc[iRow] == 0) {
           Tlift sm = 0;
           for (int iCol = 0; iCol < nbCol; iCol++)
-            sm += res.VZ_lift(iCol) * EXT_lift(iRow, iCol);
+            AddMul(sm, res.VZ_lift(iCol), EXT_lift(iRow, iCol));
           if (sm > 0)
             return res.V;
           if (sm < 0)
@@ -283,7 +283,7 @@ public:
       for (int iRow = 0; iRow < nbRow; iRow++) {
         Tlift sm = 0;
         for (int iCol = 0; iCol < nbCol; iCol++)
-          sm += res.VZ_lift(iCol) * EXT_lift(iRow, iCol);
+          AddMul(sm, res.VZ_lift(iCol), EXT_lift(iRow, iCol));
         if (sm == 0) {
           f[iRow] = 1;
         } else {

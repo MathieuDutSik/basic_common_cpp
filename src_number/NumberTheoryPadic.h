@@ -289,7 +289,7 @@ T Padic_T_sum(Padic<T> const &x, T const &p, size_t const &precision) {
   T sum(0);
   T pow = 1;
   for (size_t u = 0; u < len; u++) {
-    sum += x.coefficients[u] * pow;
+    AddMul(sum, x.coefficients[u], pow);
     pow *= p;
   }
   return sum;

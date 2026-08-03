@@ -301,7 +301,7 @@ std::pair<MyMatrix<T>, T> AdjugateDeterminant(MyMatrix<T> const &Input) {
     for (int i = n - 1; i >= 0; i--) {
       T s = det * M(i, n + c);
       for (int k = i + 1; k < n; k++)
-        s -= M(i, k) * xhat[k];
+        SubMul(s, M(i, k), xhat[k]);
       T quot = s / M(i, i); // exact division (Bareiss)
 #ifdef SANITY_CHECK_MATRIX_INVERSE
       if (quot * M(i, i) != s) {
