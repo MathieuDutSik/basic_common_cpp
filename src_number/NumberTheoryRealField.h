@@ -554,7 +554,8 @@ private:
   // The numerator polynomial of x - y for y integer.
   static Tvec diff_numerator_int(RealField<i_field> const &x, int const &y) {
     Tvec V = x.num;
-    SubMul(V[0], y, x.den);
+    Tz y_z(y);
+    SubMul(V[0], y_z, x.den);
     return V;
   }
   RealField(Tvec &&_num, Tz &&_den)
@@ -671,7 +672,8 @@ public:
     // gcd(num[0] - y den, den) = gcd(num[0], den) so the canonical form is
     // preserved without normalization.
     RealField<i_field> res = x;
-    SubMul(res.num[0], y, res.den);
+    Tz y_z(y);
+    SubMul(res.num[0], y_z, res.den);
     return res;
   }
   friend RealField<i_field> operator-(RealField<i_field> const &x) {
