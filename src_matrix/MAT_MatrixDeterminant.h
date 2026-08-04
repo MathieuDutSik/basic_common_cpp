@@ -278,7 +278,7 @@ template <typename T> T DeterminantMatPermutation(MyMatrix<T> const &A) {
       for (int j = i + 1; j < n; j++)
         if (s[j] < s[i])
           eSign = -eSign;
-    AddMul(TheDet, eSign, eProd);
+    TheDet += eSign * eProd;
   } while (std::next_permutation(s.begin(), s.end()));
   return TheDet;
 }
