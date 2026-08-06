@@ -19,6 +19,14 @@ struct SafeIntException {
   int64_t eVal;
 };
 
+// Thrown by terminate_in_arithmetic_error<TryInt64>() when an overflow was
+// recorded by the deferred-checking TryInt64 arithmetic (see
+// NumberTheorySafeInt.h), and by the conversions into TryInt64 when a value
+// does not fit into int64_t.
+struct TryIntException {
+  int64_t eVal;
+};
+
 // This is guaranteed to trigger an end.
 // Also it gives something that can be used for having the stacktrace via gdb.
 inline void TerminalEnding() {

@@ -17,6 +17,7 @@
 
 // clang-format off
 #include "MAT_MatrixFund.h"
+#include "NumberTheoryTryInt.h"
 #include <algorithm>
 #include <utility>
 #include <vector>
@@ -93,6 +94,10 @@ template <typename T> T DeterminantMatBareiss(MyMatrix<T> const &Input) {
         T val = M(i, j) * M(k, k) - M(i, k) * M(k, j);
         T quot = val / prev; // exact division guaranteed by Bareiss's theorem
 #ifdef DEBUG_MAT_MATRIX
+        // For a deferred-checking type, report a pending overflow before the
+        // exactness check: on wrapped values the division is legitimately
+        // non-exact and must surface as TryIntException, not as a bug.
+        terminate_in_arithmetic_error<T>();
         if (quot * prev != val) {
           std::cerr << "DeterminantMatBareiss: non-exact division, T is not an "
                        "integral domain\n";
@@ -102,6 +107,9 @@ template <typename T> T DeterminantMatBareiss(MyMatrix<T> const &Input) {
         M(i, j) = quot;
       }
     prev = M(k, k);
+    // Deferred overflow check (no-op except for TryInt64-like types): a
+    // wrapped value never survives past the outer iteration that produced it.
+    terminate_in_arithmetic_error<T>();
   }
   T det = M(n - 1, n - 1);
   return neg ? -det : det;
@@ -221,10 +229,39 @@ template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
 // intermediate operand growth, so it beats classical Gaussian elimination for
 // exact heavy arithmetic (>20x for integers, where it also avoids rational
 // arithmetic entirely; ~2x for mpq_class; up to ~4x for QuadField).
+//
+// For the big-integer implementations of Z (e.g. mpz_class) the computation
+// is first attempted over TryInt64, the int64_t with deferred overflow
+// detection: the entries are converted (throwing TryIntException when one
+// does not fit), the Bareiss elimination runs at machine-integer speed with
+// its per-iteration terminate_in_arithmetic_error checks, and any overflow
+// falls back to the exact computation over T. The native integer types are
+// excluded (plain int64_t is already at machine speed and its callers expect
+// the wrapping behavior), and so is TryInt64 itself.
 template <typename T>
 requires (use_bareiss_for_determinants<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
-  return DeterminantMatBareiss(Input);
+  constexpr bool try_int64_first = is_implementation_of_Z<T>::value &&
+                                   !std::is_integral_v<T> &&
+                                   !std::is_same_v<T, TryInt64>;
+  if constexpr (try_int64_first) {
+    try {
+      int n = Input.rows();
+      MyMatrix<TryInt64> M(n, n);
+      T scratch;
+      for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+          M(i, j) = ConvertToTryInt64(Input(i, j), scratch);
+      TryInt64 det = DeterminantMatBareiss(M);
+      // Reports an overflow from the last iteration or the final negation.
+      terminate_in_arithmetic_error<TryInt64>();
+      return ConvertFromTryInt64<T>(det);
+    } catch (TryIntException const &) {
+      return DeterminantMatBareiss(Input);
+    }
+  } else {
+    return DeterminantMatBareiss(Input);
+  }
 }
 
 // Field that carries zero divisors and opts into a division-free algorithm

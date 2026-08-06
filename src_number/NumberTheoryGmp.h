@@ -3,6 +3,7 @@
 #define SRC_NUMBER_NUMBERTHEORYGMP_H_
 // clang-format off
 #include "BasicNumberTypes.h"
+#include "NumberTheoryTryInt.h"
 #include "ResidueQuotient.h"
 #include "Temp_common.h"
 #include "TypeConversion.h"
@@ -13,6 +14,17 @@
 #include <string>
 #include <utility>
 // clang-format on
+
+// The fast conversion into TryInt64: an exact fit test with no allocation,
+// preferred by overload resolution to the generic round-trip template of
+// NumberTheoryTryInt.h. On the 64-bit platforms long is int64_t, so
+// fits_slong_p is exactly the int64_t fit test.
+inline TryInt64 ConvertToTryInt64(mpz_class const &val,
+                                  [[maybe_unused]] mpz_class &scratch) {
+  if (!val.fits_slong_p())
+    throw TryIntException{1};
+  return TryInt64(static_cast<int64_t>(val.get_si()));
+}
 
 // get_bit
 
