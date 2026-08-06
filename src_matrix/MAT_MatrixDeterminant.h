@@ -241,10 +241,7 @@ template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
 template <typename T>
 requires (use_bareiss_for_determinants<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
-  constexpr bool try_int64_first = is_implementation_of_Z<T>::value &&
-                                   !std::is_integral_v<T> &&
-                                   !std::is_same_v<T, TryInt64>;
-  if constexpr (try_int64_first) {
+  if constexpr (use_try_int64<T>::value) {
     try {
       int n = Input.rows();
       MyMatrix<TryInt64> M(n, n);

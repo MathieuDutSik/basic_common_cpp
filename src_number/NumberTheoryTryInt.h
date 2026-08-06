@@ -3,6 +3,8 @@
 #define SRC_NUMBER_NUMBERTHEORYTRYINT_H_
 
 // clang-format off
+#include "QuoIntFcts.h"
+#include "ResidueQuotient.h"
 #include "TypeConversion.h"
 #include "rational.h"
 #include <cstdint>
@@ -327,6 +329,61 @@ template <> struct is_fma_prefered<TryInt64> {
 template <> struct underlying_ring<TryInt64> {
   typedef TryInt64 ring_type;
 };
+
+// Whether an algorithm should attempt its computation over TryInt64 first:
+// convert the input (throwing TryIntException when an entry does not fit),
+// run with the terminate_in_arithmetic_error discipline, and fall back to T
+// on TryIntException. The big-integer implementations of Z qualify. The
+// native integer types are excluded (already at machine speed, and their
+// callers expect the wrapping behavior), and so is TryInt64 itself. Types
+// whose is_implementation_of_Z is not specialized resolve to false through
+// the SFINAE default.
+template <typename T, typename = void> struct use_try_int64 {
+  static const bool value = false;
+};
+
+template <typename T>
+struct use_try_int64<T, std::enable_if_t<is_implementation_of_Z<T>::value>> {
+  static const bool value =
+      !std::is_integral_v<T> && !std::is_same_v<T, TryInt64>;
+};
+
+// The Euclidean domain operations, with the same deferred guards as the
+// divisions: after an overflow the operands can be wrapped garbage, so a zero
+// or overflowing divisor flags is_correct instead of trapping. This is what
+// GcdPair / GenericGcd route through, making the gcd-based content reduction
+// of the polyhedral kernels available over TryInt64.
+inline void QUO_INT(stc<TryInt64> const &a, stc<TryInt64> const &b,
+                    TryInt64 &q) {
+  using Tint = typename TryInt64::Tint;
+  const Tint &a_int = a.val.get_const_val();
+  const Tint &b_int = b.val.get_const_val();
+  if (b_int == 0 ||
+      (b_int == -1 && a_int == std::numeric_limits<int64_t>::min())) {
+    is_correct = false;
+    q = TryInt64(0);
+    return;
+  }
+  q = TryInt64(QuoInt_C_integer<Tint>(a_int, b_int));
+}
+
+inline void ResInt_Kernel(TryInt64 const &a, TryInt64 const &b, TryInt64 &res) {
+  using Tint = typename TryInt64::Tint;
+  const Tint &a_int = a.get_const_val();
+  const Tint &b_int = b.get_const_val();
+  if (b_int == 0 ||
+      (b_int == -1 && a_int == std::numeric_limits<int64_t>::min())) {
+    is_correct = false;
+    res = TryInt64(0);
+    return;
+  }
+  res.get_val() = ResInt_C_integer<Tint>(a_int, b_int);
+}
+
+inline size_t get_bit(TryInt64 const &x) {
+  int64_t const &val = x.get_const_val();
+  return get_bit(val);
+}
 
 // clang-format off
 #endif  // SRC_NUMBER_NUMBERTHEORYTRYINT_H_
