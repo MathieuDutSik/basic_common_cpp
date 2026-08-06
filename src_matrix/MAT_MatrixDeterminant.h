@@ -224,6 +224,21 @@ template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
   return neg ? -det : det;
 }
 
+// The entrywise conversion of a matrix into TryInt64, throwing
+// TryIntException when an entry does not fit into int64_t. The scratch keeps
+// the round-trip allocation of the generic conversion out of the loop.
+template <typename T>
+MyMatrix<TryInt64> ConvertMatrixToTryInt64(MyMatrix<T> const &Input) {
+  int n_rows = Input.rows();
+  int n_cols = Input.cols();
+  MyMatrix<TryInt64> M(n_rows, n_cols);
+  T scratch;
+  for (int i = 0; i < n_rows; i++)
+    for (int j = 0; j < n_cols; j++)
+      M(i, j) = ConvertToTryInt64(Input(i, j), scratch);
+  return M;
+}
+
 // Types opting into Bareiss (see use_bareiss_for_determinants): the integer
 // rings and the exact fields. Bareiss fraction-free elimination controls
 // intermediate operand growth, so it beats classical Gaussian elimination for
@@ -243,12 +258,7 @@ requires (use_bareiss_for_determinants<T>::value)
 inline T DeterminantMat(MyMatrix<T> const &Input) {
   if constexpr (use_try_int64<T>::value) {
     try {
-      int n = Input.rows();
-      MyMatrix<TryInt64> M(n, n);
-      T scratch;
-      for (int i = 0; i < n; i++)
-        for (int j = 0; j < n; j++)
-          M(i, j) = ConvertToTryInt64(Input(i, j), scratch);
+      MyMatrix<TryInt64> M = ConvertMatrixToTryInt64(Input);
       TryInt64 det = DeterminantMatBareiss(M);
       // Reports an overflow from the last iteration or the final negation.
       terminate_in_arithmetic_error<TryInt64>();
