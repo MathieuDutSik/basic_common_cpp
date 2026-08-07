@@ -224,18 +224,20 @@ template <typename T> T DeterminantMatUnitReduce(MyMatrix<T> const &Input) {
   return neg ? -det : det;
 }
 
-// The entrywise conversion of a matrix into TryInt64, throwing
+// The entrywise conversion of a matrix into the try-type Ttry, throwing
 // TryIntException when an entry does not fit into int64_t. The scratch keeps
-// the round-trip allocation of the generic conversion out of the loop.
-template <typename T>
-MyMatrix<TryInt64> ConvertMatrixToTryInt64(MyMatrix<T> const &Input) {
+// the round-trip allocation of the generic conversion out of the loop. Ttry
+// defaults to TryInt64 (the exact-detection flavour) so existing call sites
+// are unchanged; pass TrySimdInt64 to use the conservative SIMD flavour.
+template <typename Ttry = TryInt64, typename T>
+MyMatrix<Ttry> ConvertMatrixToTryInt64(MyMatrix<T> const &Input) {
   int n_rows = Input.rows();
   int n_cols = Input.cols();
-  MyMatrix<TryInt64> M(n_rows, n_cols);
+  MyMatrix<Ttry> M(n_rows, n_cols);
   T scratch;
   for (int i = 0; i < n_rows; i++)
     for (int j = 0; j < n_cols; j++)
-      M(i, j) = ConvertToTryInt64(Input(i, j), scratch);
+      M(i, j) = ConvertToTryInt64<Ttry>(Input(i, j), scratch);
   return M;
 }
 
