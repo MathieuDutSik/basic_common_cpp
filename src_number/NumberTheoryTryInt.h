@@ -397,6 +397,20 @@ template <class Pol> struct underlying_ring<TryIntGen<Pol>> {
   typedef TryIntGen<Pol> ring_type;
 };
 
+// The totally-ordered-ring self map and the generalized norm (absolute value),
+// needed by the ring-arithmetic linear algebra that runs over the try-types
+// (e.g. NullspaceIntTrMat's magnitude-based pivot selection). These do NOT
+// pull in an overlying field: TryInt64 deliberately has no Rational<TryInt64>
+// (the ring-only paths -- SelectIndependentRows, the ring subset solver, the
+// gcd content reduction -- are used instead of the field ones).
+template <class Pol> struct underlying_totally_ordered_ring<TryIntGen<Pol>> {
+  typedef TryIntGen<Pol> real_type;
+};
+
+template <class Pol> inline TryIntGen<Pol> T_NormGen(TryIntGen<Pol> const &x) {
+  return T_abs(x);
+}
+
 // Whether an algorithm should attempt its computation over a try-type first:
 // convert the input (throwing TryIntException when an entry does not fit), run
 // with the terminate_in_arithmetic_error discipline, and fall back to T on

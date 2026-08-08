@@ -1410,6 +1410,104 @@ inline std::vector<int> TMat_ListRowSelect(MyMatrix<T> const &Input) {
   return TMat_SelectRowCol(InputF).ListRowSelect;
 }
 
+// Reduce a vector by the gcd of its content: an exact division that keeps the
+// entries small along a fraction-free computation. The gcd is seeded at zero,
+// computed with an early exit, and made positive so no sign flip occurs. Types
+// without a euclidean gcd (e.g. the quadratic / real field extensions, which
+// act as their own ring) are left untouched; their arithmetic already reduces.
+template <typename T> void NormalizeVectorContent(MyVector<T> &V) {
+  if constexpr (is_euclidean_domain<T>::value) {
+    int n = V.size();
+    T eGCD(0);
+    for (int i = 0; i < n; i++) {
+      eGCD = GcdPair(eGCD, V(i));
+      if (eGCD == 1)
+        return;
+    }
+    if constexpr (is_totally_ordered<T>::value) {
+      if (eGCD < 0)
+        eGCD = -eGCD;
+    }
+    if (eGCD == 0 || eGCD == 1)
+      return;
+    for (int i = 0; i < n; i++)
+      V(i) = V(i) / eGCD;
+  }
+}
+
+// Greedy selection of a maximal set of linearly independent rows among the
+// listed candidates, in the given order, by DIVISION-FREE elimination: each
+// candidate row is reduced against the echelon rows accumulated so far using
+// cross-multiplication only, and content-normalized to keep entries small.
+// Usable over a ring (no overlying field needed), which is the point: it is
+// the ring-arithmetic counterpart of TMat_ListRowSelect for the fraction-free
+// / machine-integer settings where the overlying field is unavailable or
+// undesirable (e.g. TryInt64). Stops early once max_rank rows are found.
+template <typename T>
+std::vector<int> SelectIndependentRows(MyMatrix<T> const &M,
+                                       std::vector<int> const &candidates,
+                                       size_t const &max_rank) {
+  int nbCol = M.cols();
+  std::vector<MyVector<T>> echelon;
+  std::vector<int> pivcol;
+  std::vector<int> selected;
+  for (auto &iRow : candidates) {
+    MyVector<T> V = GetMatrixRow(M, iRow);
+    for (size_t k = 0; k < echelon.size(); k++) {
+      int c = pivcol[k];
+      if (V(c) != 0) {
+        T coef1 = echelon[k](c);
+        T coef2 = V(c);
+        for (int j = 0; j < nbCol; j++) {
+          V(j) *= coef1;
+          SubMul(V(j), coef2, echelon[k](j));
+        }
+        NormalizeVectorContent(V);
+      }
+    }
+    int c_piv = -1;
+    for (int j = 0; j < nbCol; j++) {
+      if (V(j) != 0) {
+        c_piv = j;
+        break;
+      }
+    }
+    if (c_piv >= 0) {
+      echelon.push_back(V);
+      pivcol.push_back(c_piv);
+      selected.push_back(iRow);
+      if (selected.size() == max_rank)
+        return selected;
+    }
+  }
+  return selected;
+}
+
+// Convenience: a maximal independent row set of the whole matrix (a row
+// basis), the ring-arithmetic counterpart of TMat_ListRowSelect(M).
+template <typename T>
+std::vector<int> SelectIndependentRows(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  std::vector<int> candidates(nbRow);
+  for (int i = 0; i < nbRow; i++)
+    candidates[i] = i;
+  return SelectIndependentRows(M, candidates,
+                               static_cast<size_t>(std::min(nbRow, nbCol)));
+}
+
+// Greedy maximal independent set of columns, via the row selection on the
+// transpose.
+template <typename T>
+std::vector<int> SelectIndependentColumns(MyMatrix<T> const &M) {
+  MyMatrix<T> Mtr = TransposedMat(M);
+  int nbRow = Mtr.rows();
+  std::vector<int> candidates(nbRow);
+  for (int i = 0; i < nbRow; i++)
+    candidates[i] = i;
+  return SelectIndependentRows(Mtr, candidates, static_cast<size_t>(nbRow));
+}
+
 template <typename T>
 SelectionRowCol<T>
 TMat_SelectRowCol_subset(MyMatrix<T> const &Input,
