@@ -142,6 +142,9 @@ set(
   Test_external_program
   Test_Heuristic
   Test_parse_split
+  Read_FileNumber
+  Read_FileBool
+  Read_FileFace
 )
 foreach(target IN LISTS BASIC_PROGRAMS)
   add_basic_common_binary(

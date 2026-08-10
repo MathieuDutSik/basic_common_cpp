@@ -560,8 +560,7 @@ template <typename T>
             && !std::is_same_v<long, int32_t>)
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, T &a2) {
   Termination_rat_safeint_not_integer(a1);
-  SafeInt64 a1_z = a1.val.get_const_num();
-  a2 = static_cast<long>(a1_z.get_const_val());
+  int64_to_small_integer(a1.val.get_const_num().get_const_val(), a2);
 }
 
 inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, int64_t &a2) {

@@ -406,7 +406,7 @@ template <typename T>
             && !std::is_same_v<int, int64_t>)
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
                             T &a2) {
-  a2 = a1.val.template convert_to<int>();
+  cpp_int_to_small_integer(a1.val, a2);
 }
 template <typename T>
   requires (std::is_same_v<T, long>
@@ -416,7 +416,7 @@ template <typename T>
             && !std::is_same_v<long, int64_t>)
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
                             T &a2) {
-  a2 = a1.val.template convert_to<long>();
+  cpp_int_to_small_integer(a1.val, a2);
 }
 template <typename T>
   requires (std::is_same_v<T, int>

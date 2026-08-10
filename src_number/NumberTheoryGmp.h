@@ -453,51 +453,93 @@ void Termination_mpq_not_integer(stc<mpq_class> const &a1) {
   }
 }
 
+/*
+  mpz_class as source for the bounded integer types.
+
+  mpz_get_si returns a truncated value when the integer does not fit in a long
+  and a further static_cast to a narrower type truncates again, so the range is
+  checked before converting and a ConversionException reports the overflow.
+  That exception is what UniversalScalarConversionCheck turns into an empty
+  optional, so without it an out of range value is silently replaced by a wrong
+  one. Same contract as mpz_int_to_small_integer for the boost types.
+ */
+template <typename Tout>
+inline void mpz_class_to_small_integer(mpz_class const &val, Tout &out) {
+  static_assert(std::is_integral_v<Tout>,
+                "mpz_class_to_small_integer is for the integral types");
+  if constexpr (std::is_signed_v<Tout>) {
+    static_assert(sizeof(Tout) <= sizeof(long),
+                  "the signed target is expected to be at most as wide as "
+                  "long, which holds on the LP64 platforms this is built on");
+    if (!mpz_fits_slong_p(val.get_mpz_t())) {
+      std::string str = "value=" + val.get_str() +
+                        " does not fit in the destination integer type";
+      throw ConversionException{str};
+    }
+    long e_val = val.get_si();
+    if (e_val < static_cast<long>(std::numeric_limits<Tout>::min()) ||
+        e_val > static_cast<long>(std::numeric_limits<Tout>::max())) {
+      std::string str = "value=" + val.get_str() +
+                        " does not fit in the destination integer type";
+      throw ConversionException{str};
+    }
+    out = static_cast<Tout>(e_val);
+  } else {
+    static_assert(sizeof(Tout) <= sizeof(unsigned long),
+                  "the unsigned target is expected to be at most as wide as "
+                  "unsigned long, which holds on the LP64 platforms this is "
+                  "built on");
+    if (sgn(val) < 0 || !mpz_fits_ulong_p(val.get_mpz_t())) {
+      std::string str = "value=" + val.get_str() +
+                        " does not fit in the destination integer type";
+      throw ConversionException{str};
+    }
+    unsigned long e_val = val.get_ui();
+    if (e_val >
+        static_cast<unsigned long>(std::numeric_limits<Tout>::max())) {
+      std::string str = "value=" + val.get_str() +
+                        " does not fit in the destination integer type";
+      throw ConversionException{str};
+    }
+    out = static_cast<Tout>(e_val);
+  }
+}
+
+// Same for the mpq_class source: the value has to be an integer first.
+template <typename Tout>
+inline void mpq_class_to_small_integer(stc<mpq_class> const &a1, Tout &out) {
+  Termination_mpq_not_integer(a1);
+  mpz_class a1_z = a1.val.get_num();
+  mpz_class_to_small_integer(a1_z, out);
+}
+
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, mpz_class &a2) {
   Termination_mpq_not_integer(a1);
   a2 = a1.val.get_num();
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  long a1_long = a1_z.get_si();
-  a2 = static_cast<int>(a1_long);
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint8_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  long a1_long = a1_z.get_si();
-  a2 = static_cast<uint8_t>(a1_long);
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int8_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  long a1_long = a1_z.get_si();
-  a2 = static_cast<int8_t>(a1_long);
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint16_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  long a1_long = a1_z.get_si();
-  a2 = static_cast<uint16_t>(a1_long);
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int16_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  long a1_long = a1_z.get_si();
-  a2 = static_cast<int16_t>(a1_long);
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint32_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  long a1_long = a1_z.get_si();
-  a2 = static_cast<uint32_t>(a1_long);
+  mpq_class_to_small_integer(a1, a2);
 }
 
 template <typename T>
@@ -505,15 +547,11 @@ template <typename T>
             && !std::is_same_v<long, int64_t>
             && !std::is_same_v<long, int32_t>)
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, T &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  a2 = a1_z.get_si();
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, int64_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  a2 = a1_z.get_si();
+  mpq_class_to_small_integer(a1, a2);
 }
 
 // uint8_t as input
@@ -650,38 +688,31 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, mpq_class &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int8_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<int8_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint8_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<uint8_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int16_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<int16_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint16_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<uint16_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int32_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<int32_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint32_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<uint32_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, int64_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<int64_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
@@ -689,8 +720,7 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint64_t &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<uint64_t>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 inline void TYPE_CONVERSION(stc<uint64_t> const &a1, mpz_class &a2) {
@@ -699,9 +729,7 @@ inline void TYPE_CONVERSION(stc<uint64_t> const &a1, mpz_class &a2) {
 }
 
 inline void TYPE_CONVERSION(stc<mpq_class> const &a1, uint64_t &a2) {
-  Termination_mpq_not_integer(a1);
-  mpz_class a1_z = a1.val.get_num();
-  a2 = a1_z.get_si();
+  mpq_class_to_small_integer(a1, a2);
 }
 
 inline void TYPE_CONVERSION(stc<uint64_t> const &a1, mpq_class &a2) {
@@ -718,8 +746,7 @@ template <typename T>
             && !std::is_same_v<size_t, uint64_t>
             && !std::is_same_v<size_t, uint32_t>)
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, T &a2) {
-  long eVal_long = a1.val.get_si();
-  a2 = static_cast<T>(eVal_long);
+  mpz_class_to_small_integer(a1.val, a2);
 }
 
 template <typename T>
