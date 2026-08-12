@@ -279,6 +279,7 @@ set(
   WASM_PROGRAMS
   Test_wasm_cpp_int
   Test_wasm_matrix
+  Test_wasm_ordered_containers
 )
 foreach(target IN LISTS WASM_PROGRAMS)
   add_basic_common_binary(

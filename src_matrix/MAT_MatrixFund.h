@@ -2209,6 +2209,29 @@ bool operator!=(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
   return !(M1 == M2);
 }
 
+
+
+/*
+  The lexicographic order of the matrices and of the vectors.
+
+  These live in namespace Eigen on purpose. MyMatrix and MyVector are aliases
+  of Eigen::Matrix, a type this project does not own, so the only lookup that
+  reaches an operator of it from inside another namespace is the argument
+  dependent one, and that searches Eigen. Defining them at global scope
+  instead makes them invisible to the standard library: the containers of
+  <set> and <map> compare their keys from inside namespace std.
+
+  The std::less specializations below are kept because they are named
+  explicitly in places, but they cannot be relied on by themselves. A
+  specialization of a standard template for a type the program does not
+  define is not allowed, and an implementation is free to bypass it: the
+  libc++ of emscripten 6 recognizes std::less<Key> as the comparator of a
+  std::set and substitutes its transparent form, which compares with
+  operator< and never instantiates the specialization at all. That is what
+  broke the wasm build of the Delaunay code.
+ */
+namespace Eigen {
+
 template <typename T>
 bool operator<(MyMatrix<T> const &M1, MyMatrix<T> const &M2) {
   int nbRow = M1.rows();
@@ -2234,6 +2257,10 @@ bool operator<(MyVector<T> const &V1, MyVector<T> const &V2) {
   }
   return false;
 }
+
+// clang-format off
+}  // namespace Eigen
+// clang-format on
 
 namespace std {
 template <typename T> struct less<MyVector<T>> {

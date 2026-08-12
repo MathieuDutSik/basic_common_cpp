@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Build the Wasm smoke test(s) in this directory and run them under node.
-# Requires emscripten (emcc) on PATH. On macOS:  brew install emscripten
+# Requires emscripten (em++) on PATH. On macOS:  brew install emscripten
 
 cd "$(dirname "$0")"
 
@@ -69,7 +69,10 @@ for src in "${sources[@]}"; do
   name="${src%.cpp}"
   out="build/${name}.js"
   echo "==> Building $src -> $out"
-  emcc "${CXXFLAGS[@]}" "${INCLUDES[@]}" "$src" -o "$out"
+  # em++ and not emcc: from emscripten 6 on, the C driver no longer links
+  # the C++ runtime just because the inputs are C++, and the standard
+  # library symbols are left undefined at link time.
+  em++ "${CXXFLAGS[@]}" "${INCLUDES[@]}" "$src" -o "$out"
   echo "==> Running $out under node"
   node "$out"
 done
