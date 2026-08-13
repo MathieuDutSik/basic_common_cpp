@@ -168,6 +168,7 @@ set(
   Test_RealCubicField
   Test_QuadField
   Test_Rational
+  Test_Format
   Test_TypeBoostGmp
   Test_GetBit
   Test_QuadraticResidue

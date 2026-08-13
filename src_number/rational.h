@@ -522,16 +522,8 @@ inline std::ostream &operator<<(std::ostream &os, RatProd<Tint> const &e) {
   return os << Rational<Tint>(e);
 }
 
-namespace std {
-template <typename Tint> std::string to_string(const Rational<Tint> &e_val) {
-  std::stringstream s;
-  s << e_val;
-  std::string converted(s.str());
-  return converted;
-}
-// clang-format off
-}  // namespace std
-// clang-format on
+template <typename Tint>
+struct std::formatter<Rational<Tint>> : ostream_formatter<Rational<Tint>> {};
 
 template <typename Tint> struct is_euclidean_domain<Rational<Tint>> {
   static const bool value = true;

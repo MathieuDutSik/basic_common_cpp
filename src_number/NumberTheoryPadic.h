@@ -132,20 +132,8 @@ template <typename T> struct Padic {
   std::vector<T> coefficients;
 };
 
-namespace std {
-template <typename T> std::string to_string(Padic<T> const &x) {
-  std::stringstream s;
-  s << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision
-    << " coefficients=";
-  for (auto &val : x.coefficients) {
-    s << " " << val;
-  }
-  std::string converted(s.str());
-  return converted;
-}
-// clang-format off
-}  // namespace std
-// clang-format on
+template <typename T>
+struct std::formatter<Padic<T>> : ostream_formatter<Padic<T>> {};
 
 template <typename T>
 void Padic_debug_print(Padic<T> const &x, std::ostream &os) {

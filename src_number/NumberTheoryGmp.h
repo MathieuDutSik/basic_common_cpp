@@ -221,22 +221,19 @@ template <> struct hash<mpq_class> {
 
 // to_string functionality
 
-namespace std {
-std::string to_string(const mpz_class &e_val) {
-  std::stringstream s;
-  s << e_val;
-  std::string converted(s.str());
-  return converted;
-}
-std::string to_string(const mpq_class &e_val) {
-  std::stringstream s;
-  s << e_val;
-  std::string converted(s.str());
-  return converted;
-}
-// clang-format off
-}  // namespace std
-// clang-format on
+/*
+  One partial specialization covers the whole of gmpxx. mpz_class and mpq_class
+  are themselves __gmp_expr<mpz_t, mpz_t> and __gmp_expr<mpq_t, mpq_t>, and the
+  arithmetic of gmpxx returns expression templates of the same family rather
+  than the concrete types. This matters here in a way it did not for the
+  std::to_string overloads that this replaces: an overload accepted an
+  expression through the implicit conversion to mpz_class, whereas the
+  formatter of std::format is selected on the exact type and no conversion
+  takes place. Without this, std::format("{}", a + b) would not compile.
+ */
+template <typename T, typename U>
+struct std::formatter<__gmp_expr<T, U>> : ostream_formatter<__gmp_expr<T, U>> {
+};
 
 // As documented in section 5.6 this is done exactly as in C int
 inline void ResInt_Kernel(mpz_class const &a, mpz_class const &b,
@@ -448,7 +445,7 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1, double &a2) {
 
 void Termination_mpq_not_integer(stc<mpq_class> const &a1) {
   if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
+    std::string str = std::format("a1={} is not an integer", a1.val);
     throw ConversionException{str};
   }
 }

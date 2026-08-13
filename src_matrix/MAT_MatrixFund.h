@@ -2262,47 +2262,22 @@ bool operator<(MyVector<T> const &V1, MyVector<T> const &V2) {
 }  // namespace Eigen
 // clang-format on
 
-namespace std {
-template <typename T> struct less<MyVector<T>> {
-  bool operator()(MyVector<T> const &V1, MyVector<T> const &V2) const {
-    int siz = V1.size();
-    for (int i = 0; i < siz; i++) {
-      if (V1(i) < V2(i))
-        return true;
-      if (V2(i) < V1(i))
-        return false;
-    }
-    return false;
-  }
-};
-template <typename T> struct less<MyMatrix<T>> {
-  bool operator()(MyMatrix<T> const &M1, MyMatrix<T> const &M2) const {
-    int nbRow = M1.rows();
-    int nbCol = M1.cols();
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      for (int iCol = 0; iCol < nbCol; iCol++) {
-        if (M1(iRow, iCol) < M2(iRow, iCol))
-          return true;
-        if (M2(iRow, iCol) < M1(iRow, iCol))
-          return false;
-      }
-    return false;
-  }
-};
-template <typename T, typename X> struct less<std::pair<MyMatrix<T>, X>> {
-  bool operator()(std::pair<MyMatrix<T>, X> const &a,
-                  std::pair<MyMatrix<T>, X> const &b) const {
-    std::less<MyMatrix<T>> lm;
-    if (lm(a.first, b.first))
-      return true;
-    if (lm(b.first, a.first))
-      return false;
-    return a.second < b.second;
-  }
-};
-// clang-format off
-}  // namespace std
-// clang-format on
+/*
+  There is deliberately no specialization of std::less here.
+
+  [comparisons.less] requires std::less<T> to return x < y, so a specialization
+  can never mean anything other than the operator above, which makes it
+  redundant. Worse, it is actively harmful: libc++ 220108 rewrites the
+  comparator std::less<Key> of an ordered container into its transparent form
+  and compares with a < b, so the specialization is not instantiated at all and
+  the only thing that counts is whether operator< is reachable. The primary
+  template does the right thing on its own.
+
+  An order different from operator< must not be spelled as a specialization of
+  std::less either. Give it a named function object and pass it to the
+  container explicitly.
+ */
+
 
 template <typename T> T L1_norm_vect(MyVector<T> const &V) {
   int siz = V.size();

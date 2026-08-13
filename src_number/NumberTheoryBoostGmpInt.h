@@ -4,6 +4,7 @@
 #define INCLUDE_NUMBER_THEORY_BOOST_GMP_INT
 // clang-format off
 #include "BasicNumberTypes.h"
+#include "NumberTheoryBoostFormat.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
@@ -48,22 +49,6 @@ template <> struct hash<boost::multiprecision::mpq_rational> {
 
 // to_string
 
-namespace std {
-std::string to_string(const boost::multiprecision::mpz_int &e_val) {
-  std::stringstream s;
-  s << e_val;
-  std::string converted(s.str());
-  return converted;
-}
-std::string to_string(const boost::multiprecision::mpq_rational &e_val) {
-  std::stringstream s;
-  s << e_val;
-  std::string converted(s.str());
-  return converted;
-}
-// clang-format off
-}  // namespace std
-// clang-format on
 
 // boost serialization
 
@@ -429,7 +414,7 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             boost::multiprecision::mpz_int &a2) {
   if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
+    std::string str = std::format("a1={} is not an integer", a1.val);
     throw ConversionException{str};
   }
   a2 = numerator(a1.val);
