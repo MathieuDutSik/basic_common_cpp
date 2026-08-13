@@ -274,6 +274,15 @@ template <> struct is_fma_prefered<float> {
   static const bool value = true;
 };
 
+// Trait definition for real algebraic fields.
+//
+// The primary template lives here, with the other traits, rather than next to
+// RealField: NumberTheoryThreshold.h specializes it without depending on
+// NumberTheoryRealField.h, and a specialization of an undeclared template is
+// an error.
+
+template <typename T> struct is_real_algebraic_field {};
+
 // Trait definition for fields
 
 template <typename T> struct is_ring_field {};

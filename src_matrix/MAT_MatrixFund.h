@@ -21,6 +21,8 @@
 #include "Timings.h"
 #include "hash_functions.h"
 #include <algorithm>
+#include <boost/serialization/nvp.hpp>
+#include <format>
 #include <functional>
 #include <limits>
 #include <memory>
@@ -482,8 +484,8 @@ template <typename T> std::string StringSizeMatrix(MyMatrix<T> const &X) {
 template <typename T> std::string MinMaxMatrix(MyMatrix<T> const &X) {
   T minV = X.minCoeff();
   T maxV = X.maxCoeff();
-  return std::string("min/max=") + std::to_string(minV) + " / " +
-         std::to_string(maxV);
+  return std::string("min/max=") + std::format("{}", minV) + " / " +
+         std::format("{}", maxV);
 }
 
 template <typename T> MyVector<T> ReadVector(std::istream &is) {

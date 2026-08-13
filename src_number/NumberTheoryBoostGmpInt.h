@@ -10,6 +10,8 @@
 #include "TypeConversion.h"
 #include "boost_serialization.h"
 #include <boost/multiprecision/gmp.hpp>
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/split_free.hpp>
 #include <iostream>
 #include <limits>
 #include <string>

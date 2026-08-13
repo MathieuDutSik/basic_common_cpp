@@ -2,6 +2,7 @@
 #ifndef SRC_NUMBER_TYPECONVERSIONFINAL_H_
 #define SRC_NUMBER_TYPECONVERSIONFINAL_H_
 
+#include <format>
 #include <string>
 
 // This is a block of type conversion after the types have been defined
@@ -18,7 +19,9 @@ inline void TYPE_CONVERSION_STRING(Ti const &a1, To &a2) {
   is >> a2;
 }
 
-#if defined INCLUDE_NUMBER_THEORY_GMP &&                                       \
+// The gmp side is detected through the include guard of NumberTheoryGmp.h:
+// that header defines no INCLUDE_NUMBER_THEORY_ macro of its own.
+#if defined SRC_NUMBER_NUMBERTHEORYGMP_H_ &&                                   \
     defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
 
 // Nothing clever for this combination
@@ -30,7 +33,8 @@ inline void TYPE_CONVERSION(stc<mpq_class> const &a1,
 template <typename T1, typename T2>
 void TYPE_CONVERSION_IsInteger(stc<T1> const &a1, T2 &a2) {
   if (!IsInteger(a1.val)) {
-    std::string str_ret = "a1=" + std::to_string(a1.val) + " is not an integer";
+    std::string str_ret =
+        "a1=" + std::format("{}", a1.val) + " is not an integer";
     throw ConversionException{str_ret};
   }
   TYPE_CONVERSION_STRING(a1.val, a2);

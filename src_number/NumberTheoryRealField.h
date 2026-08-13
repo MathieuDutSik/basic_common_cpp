@@ -12,6 +12,7 @@
 #include "Temp_common.h"
 #include "InputOutput.h"
 #include <boost/container/small_vector.hpp>
+#include <boost/serialization/nvp.hpp>
 #include <map>
 #include <string>
 #include <utility>
@@ -1000,8 +1001,8 @@ template <int i_field> struct hash<RealField<i_field>> {
 // clang-format on
 
 // Local typing info
-
-template <typename T> struct is_real_algebraic_field {};
+//
+// The primary template of is_real_algebraic_field is in TemplateTraits.h.
 
 template <int i_field> struct is_real_algebraic_field<RealField<i_field>> {
   static const bool value = true;

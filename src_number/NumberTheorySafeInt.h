@@ -13,6 +13,7 @@
 #include "rational.h"
 #include <boost/safe_numerics/checked_integer.hpp>
 #include <boost/safe_numerics/checked_result.hpp>
+#include <boost/serialization/nvp.hpp>
 #include <limits>
 #include <string>
 #include <type_traits>
@@ -364,6 +365,11 @@ inline void int64_to_small_integer(int64_t val, Tout &out) {
   }
   out = static_cast<Tout>(val);
 }
+
+// std::format support, delegating to the operator<< above. See
+// BasicNumberTypes.h for why this and not an overload of std::to_string.
+
+template <> struct std::formatter<SafeInt64> : ostream_formatter<SafeInt64> {};
 
 // hash functionality
 

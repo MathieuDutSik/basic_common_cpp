@@ -4,6 +4,7 @@
 // clang-format off
 #include "Temp_common.h"
 #include "InputOutput.h"
+#include <boost/serialization/nvp.hpp>
 #include <limits>
 #include <string>
 // clang-format on

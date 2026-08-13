@@ -3,6 +3,7 @@
 #define SRC_NUMBER_NUMBERTHEORYGENERIC_H_
 // clang-format off
 #include "Basic_functions.h"
+#include "TemplateTraits.h"
 #include <vector>
 #include <optional>
 #include <limits>

@@ -6,6 +6,7 @@
 #include "MAT_Matrix.h"
 #include "NumberTheory.h"
 #include "Temp_common.h"
+#include <boost/serialization/nvp.hpp>
 #include <map>
 #include <string>
 #include <vector>

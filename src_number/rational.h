@@ -8,6 +8,7 @@
 #include "ResidueQuotient.h"
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
+#include <boost/serialization/nvp.hpp>
 #include <iostream>
 #include <limits>
 #include <sstream>
@@ -703,7 +704,7 @@ void TYPE_CONVERSION_Rational_T(stc<Rational<T>> const &a1, T &a2) {
   const T &den = a1.val.get_const_den();
   if (den != 1) {
     std::string str_err =
-        "The denominator should be 1. It is den = " + std::to_string(den);
+        "The denominator should be 1. It is den = " + std::format("{}", den);
     throw ConversionException{str_err};
   }
   a2 = a1.val.get_const_num();

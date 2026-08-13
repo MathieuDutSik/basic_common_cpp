@@ -133,11 +133,21 @@ template <typename T> struct Padic {
 };
 
 template <typename T>
+std::ostream &operator<<(std::ostream &os, Padic<T> const &x) {
+  os << "eff_valuation=" << x.eff_valuation << " precision=" << x.precision
+     << " coefficients=";
+  for (auto &val : x.coefficients) {
+    os << " " << val;
+  }
+  return os;
+}
+
+template <typename T>
 struct std::formatter<Padic<T>> : ostream_formatter<Padic<T>> {};
 
 template <typename T>
 void Padic_debug_print(Padic<T> const &x, std::ostream &os) {
-  os << std::to_string(x) << "\n";
+  os << std::format("{}", x) << "\n";
 }
 
 template <typename T>

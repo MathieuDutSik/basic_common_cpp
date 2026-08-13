@@ -2,14 +2,18 @@
 #ifndef SRC_MATRIX_MATRIXTYPESSPARSE_H_
 #define SRC_MATRIX_MATRIXTYPESSPARSE_H_
 
+#include "ExceptionsFunc.h"
 #include "MatrixTypes.h"
 #include <Eigen/Sparse>
+#include <iostream>
 
 #if defined INCLUDE_NUMBER_THEORY_BOOST_GMP_INT ||                             \
     defined INCLUDE_NUMBER_THEORY_BOOST_CPP_INT
 #include <boost/multiprecision/eigen.hpp>
 #endif
 
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/split_free.hpp>
 #include <vector>
 
 template <typename T>

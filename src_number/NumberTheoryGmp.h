@@ -10,6 +10,8 @@
 #include "gmpxx.h"
 #include "gmp_pool_allocator.h"
 #include "hash_functions.h"
+#include <boost/serialization/nvp.hpp>
+#include <boost/serialization/split_free.hpp>
 #include <limits>
 #include <string>
 #include <utility>
