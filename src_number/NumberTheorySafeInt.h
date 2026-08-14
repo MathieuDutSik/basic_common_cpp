@@ -14,6 +14,7 @@
 #include <boost/safe_numerics/checked_integer.hpp>
 #include <boost/safe_numerics/checked_result.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <format>
 #include <limits>
 #include <string>
 #include <type_traits>
@@ -390,25 +391,11 @@ template <> struct hash<Rational<SafeInt64>> {
     return hash1 + (hash2 << 6) + (hash2 >> 2);
   }
 };
-// to_string functionality
-std::string to_string(const SafeInt64 &val) {
-  std::stringstream s;
-  s << val;
-  std::string converted(s.str());
-  return converted;
-}
-std::string to_string(const Rational<SafeInt64> &val) {
-  int64_t const &val_den = val.get_const_den().get_const_val();
-  int64_t const &val_num = val.get_const_num().get_const_val();
-  std::stringstream s;
-  if (val_den != 1) {
-    s << val_num << "/" << val_den;
-  } else {
-    s << val_num;
-  }
-  std::string converted(s.str());
-  return converted;
-}
+// No to_string here. Adding a function to namespace std is never permitted
+// ([namespace.std]/1), and these two were non-inline definitions in a header
+// besides. Both types are printed through std::format: the std::formatter for
+// SafeInt64 is above, the one for Rational<Tint> is in rational.h, and both
+// delegate to the operator<< that produced exactly these strings.
 // clang-format off
 }  // namespace std
 // clang-format on
@@ -509,7 +496,7 @@ inline void TYPE_CONVERSION(stc<Rational<SafeInt64>> const &a1, double &a2) {
 
 void Termination_rat_safeint_not_integer(stc<Rational<SafeInt64>> const &a1) {
   if (!IsInteger(a1.val)) {
-    std::string str = "a1=" + std::to_string(a1.val) + " is not an integer";
+    std::string str = "a1=" + std::format("{}", a1.val) + " is not an integer";
     throw ConversionException{str};
   }
 }
