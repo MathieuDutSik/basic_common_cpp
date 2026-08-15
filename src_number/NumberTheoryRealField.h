@@ -206,7 +206,7 @@ public:
     Initialize(Pminimal, _val_double, l_approx);
   }
   HelperClassRealField(std::string const &eFile) {
-    if (!IsExistingFile(eFile)) {
+    if (!FILE_IsExistingFile(eFile)) {
       std::cerr << "NTRF: HelperClassRealField constructor error. eFile=" << eFile << "\n";
       std::cerr << "NTRF: does not exist\n";
       throw TerminalException{1};

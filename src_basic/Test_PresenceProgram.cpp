@@ -4,7 +4,7 @@
 int main() {
   std::vector<std::string> l_prog = {"ppl_lcdd", "cat", "normaliz"};
   for (auto &e_prog : l_prog) {
-    bool test = IsProgramInPath(e_prog);
+    bool test = FILE_IsProgramInPath(e_prog);
     std::cerr << "e_prog=" << e_prog << " test=" << test << "\n";
   }
 }

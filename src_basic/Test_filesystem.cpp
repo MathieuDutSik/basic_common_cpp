@@ -15,10 +15,10 @@ int main() {
   try {
     namespace fs = std::filesystem;
 
-    std::string current_dir = GetCurrentDirectory();
+    std::string current_dir = FILE_GetCurrentDirectory();
     std::string expected_current_dir = fs::current_path().string() + "/";
     check(current_dir == expected_current_dir,
-          "GetCurrentDirectory should match std::filesystem::current_path");
+          "FILE_GetCurrentDirectory should match std::filesystem::current_path");
 
     auto now = std::chrono::steady_clock::now().time_since_epoch().count();
     fs::path root =
@@ -29,11 +29,11 @@ int main() {
     std::string nested_dir = root_dir + "nested/inner/";
     std::string flat_dir = root_dir + "flat/";
 
-    CreateDirectory(nested_dir);
-    CreateDirectory(flat_dir);
+    FILE_CreateDirectory(nested_dir);
+    FILE_CreateDirectory(flat_dir);
 
-    check(IsExistingDirectory(root_dir), "root directory should exist");
-    check(IsExistingDirectory(nested_dir), "nested directory should exist");
+    check(FILE_IsExistingDirectory(root_dir), "root directory should exist");
+    check(FILE_IsExistingDirectory(nested_dir), "nested directory should exist");
     check(FILE_IsDirectoryEmpty(nested_dir), "nested directory should start empty");
 
     std::string source_file = nested_dir + "source.txt";
@@ -43,19 +43,19 @@ int main() {
       os << "beta\n";
     }
 
-    check(IsExistingFile(source_file), "source file should exist");
+    check(FILE_IsExistingFile(source_file), "source file should exist");
     check(FILE_IsRegularFile(source_file), "source should be a regular file");
     check(!FILE_IsDirectoryEmpty(nested_dir), "nested directory should no longer be empty");
 
-    std::vector<std::string> lines = ReadFullFile(source_file);
+    std::vector<std::string> lines = FILE_ReadFullFile(source_file);
     check(lines.size() == 2, "source file should have two lines");
     check(lines[0] == "alpha" && lines[1] == "beta",
           "source file contents should match");
 
     std::string copied_file = flat_dir + "copied.txt";
-    CopyOperation(source_file, copied_file);
-    check(IsExistingFile(copied_file), "copied file should exist");
-    check(ReadFullFile(copied_file) == lines, "copied file contents should match");
+    FILE_CopyOperation(source_file, copied_file);
+    check(FILE_IsExistingFile(copied_file), "copied file should exist");
+    check(FILE_ReadFullFile(copied_file) == lines, "copied file contents should match");
 
     std::string matching_file = flat_dir + "sample.log";
     {
@@ -69,11 +69,11 @@ int main() {
     check(top_entries[0] == "flat" && top_entries[1] == "nested",
           "root directory entries should match");
 
-    std::vector<std::string> ls_entries = ls_operation(root_dir);
+    std::vector<std::string> ls_entries = FILE_LsOperation(root_dir);
     std::sort(ls_entries.begin(), ls_entries.end());
-    check(ls_entries.size() == 2, "ls_operation should find two root entries");
+    check(ls_entries.size() == 2, "FILE_LsOperation should find two root entries");
     check(ls_entries[0] == "flat" && ls_entries[1] == "nested",
-          "ls_operation entries should match");
+          "FILE_LsOperation entries should match");
 
     std::vector<std::string> recursive_files =
         FILE_GetDirectoryFilesRecursively(root_dir);
@@ -98,24 +98,24 @@ int main() {
     check(prefix_files.size() == 1 && prefix_files[0] == copied_file,
           "prefix listing should find copied.txt");
 
-    RemoveFileSpecificExtension(flat_dir, "log");
-    check(!IsExistingFile(matching_file), "log file should be removed");
-    check(IsExistingFile(copied_file), "txt file should remain after log removal");
+    FILE_RemoveFileSpecificExtension(flat_dir, "log");
+    check(!FILE_IsExistingFile(matching_file), "log file should be removed");
+    check(FILE_IsExistingFile(copied_file), "txt file should remain after log removal");
 
-    RemoveFileInDirectory(flat_dir);
+    FILE_RemoveFileInDirectory(flat_dir);
     check(FILE_IsDirectoryEmpty(flat_dir), "flat directory should be empty after removal");
 
-    RemoveFile(source_file);
+    FILE_RemoveFile(source_file);
     check(FILE_IsDirectoryEmpty(nested_dir), "nested directory should be empty after file removal");
 
-    RemoveEmptyDirectory(nested_dir);
-    check(!IsExistingDirectory(nested_dir), "nested directory should be removed");
+    FILE_RemoveEmptyDirectory(nested_dir);
+    check(!FILE_IsExistingDirectory(nested_dir), "nested directory should be removed");
 
-    RemoveEmptyDirectory(root_dir + "nested/");
-    RemoveEmptyDirectory(flat_dir);
-    RemoveEmptyDirectory(root_dir);
+    FILE_RemoveEmptyDirectory(root_dir + "nested/");
+    FILE_RemoveEmptyDirectory(flat_dir);
+    FILE_RemoveEmptyDirectory(root_dir);
 
-    check(!IsExistingDirectory(root_dir), "root directory should be removed");
+    check(!FILE_IsExistingDirectory(root_dir), "root directory should be removed");
     std::cerr << "Normal termination of Test_filesystem\n";
   } catch (TerminalException const &e) {
     std::cerr << "Error in Test_filesystem\n";

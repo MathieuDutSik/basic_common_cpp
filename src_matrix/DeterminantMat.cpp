@@ -70,7 +70,7 @@ void compute_determinant(std::string const &arithmetic,
       get_postfix(arithmetic, "RealAlgebraic=");
   if (opt_realalgebraic) {
     std::string const &FileAlgebraicField = *opt_realalgebraic;
-    if (!IsExistingFile(FileAlgebraicField)) {
+    if (!FILE_IsExistingFile(FileAlgebraicField)) {
       std::cerr << "FileAlgebraicField=" << FileAlgebraicField
                 << " is missing\n";
       throw TerminalException{1};

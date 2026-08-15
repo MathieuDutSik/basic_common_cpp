@@ -879,7 +879,7 @@ std::string GetNamelistStringEntry(FullNamelist const &eFull,
 
 void NAMELIST_ReadNamelistFile(std::string const &eFileName,
                                FullNamelist &eFull) {
-  if (!IsExistingFile(eFileName)) {
+  if (!FILE_IsExistingFile(eFileName)) {
     std::cerr << "The following namelist file is missing\n";
     std::cerr << "eFileName = " << eFileName << "\n";
     throw TerminalException{1};

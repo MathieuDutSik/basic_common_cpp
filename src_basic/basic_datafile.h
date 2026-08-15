@@ -30,7 +30,7 @@ public:
     if (overwrite) {
       fp = std::fopen(file.data(), "w+");
     } else {
-      if (!IsExistingFile(file)) {
+      if (!FILE_IsExistingFile(file)) {
         std::cerr << "FileNumber: The file " << file
                   << " should not be missing\n";
         throw TerminalException{1};
@@ -101,7 +101,7 @@ public:
   }
 
   FileBool(std::string const &file, size_t const &_n_ent) : file(file) {
-    if (!IsExistingFile(file)) {
+    if (!FILE_IsExistingFile(file)) {
       std::cerr << "FileBool: The file " << file << " should not be missing\n";
       throw TerminalException{1};
     }
@@ -282,7 +282,7 @@ public:
 
   FileFace(std::string const &file, size_t const &_siz, size_t const &_n_face)
       : file(file) {
-    if (!IsExistingFile(file)) {
+    if (!FILE_IsExistingFile(file)) {
       std::cerr << "FileFace: The file " << file << " should not be missing\n";
       throw TerminalException{1};
     }
@@ -539,7 +539,7 @@ public:
 #ifdef DEBUG_BASIC_DATAFILE
       std::cerr << "BASIC_DATAFILE: FileData constructor ow=F step 1\n";
 #endif
-      if (!IsExistingFile(file_number) || !IsExistingFile(file_data)) {
+      if (!FILE_IsExistingFile(file_number) || !FILE_IsExistingFile(file_data)) {
         std::cerr << "FileData: The file " << file
                   << " should not be missing\n";
         throw TerminalException{1};
@@ -658,21 +658,21 @@ template <typename T> T SingleData_Read(std::string const &FileData) {
 
 template <typename T>
 void SingleData_IncrementalWrite(std::string const &prefix, T const &obj) {
-  std::string FileData = FindAvailableFileFromPrefix(prefix);
+  std::string FileData = FILE_FindAvailableFileFromPrefix(prefix);
   SingleData_Write(FileData, obj);
 }
 
 template <typename T>
 std::optional<T> SingleData_LoadLast(std::string const &prefix) {
   std::string FullFile = prefix + "0";
-  if (!IsExistingFile(FullFile)) {
+  if (!FILE_IsExistingFile(FullFile)) {
     return {};
   }
   size_t iFile = 0;
   while (true) {
     std::string FullFile1 = prefix + std::to_string(iFile);
     std::string FullFile2 = prefix + std::to_string(iFile + 1);
-    if (IsExistingFile(FullFile1) && !IsExistingFile(FullFile2)) {
+    if (FILE_IsExistingFile(FullFile1) && !FILE_IsExistingFile(FullFile2)) {
       return SingleData_Read<T>(FullFile1);
     }
     iFile += 1;

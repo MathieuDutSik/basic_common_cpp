@@ -14,7 +14,7 @@ int main() {
     std::string eFile = "CI_tests/RealAlgebraicField/CubicFieldDisc_49";
     bool found = false;
     for (int level = 0; level <= 10; level++) {
-      if (IsExistingFile(eFile)) {
+      if (FILE_IsExistingFile(eFile)) {
         found = true;
         break;
       }

@@ -314,7 +314,7 @@ template <typename T> MyMatrix<T> ReadMatrix(std::istream &is) {
 }
 
 template <typename T> MyMatrix<T> ReadMatrixFile(std::string const &file_name) {
-  if (!IsExistingFile(file_name)) {
+  if (!FILE_IsExistingFile(file_name)) {
     std::cerr << "Error in ReadMatrixFile\n";
     std::cerr << "file_name=" << file_name << " does not appear to exist\n";
     throw TerminalException{1};
@@ -360,7 +360,7 @@ std::vector<MyMatrix<T>> ReadListMatrix(std::istream &is) {
 
 template <typename T>
 std::vector<MyMatrix<T>> ReadListMatrixFile(std::string const &eFile) {
-  if (!IsExistingFile(eFile)) {
+  if (!FILE_IsExistingFile(eFile)) {
     std::cerr << "Error in ReadListMatrixFile\n";
     std::cerr << "eFile=" << eFile << " does not appear to exist\n";
     throw TerminalException{1};
@@ -505,7 +505,7 @@ template <typename T> MyVector<T> ReadVector(std::istream &is) {
 }
 
 template <typename T> MyVector<T> ReadVectorFile(std::string const &file_name) {
-  if (!IsExistingFile(file_name)) {
+  if (!FILE_IsExistingFile(file_name)) {
     std::cerr << "Error in ReadVectorFile\n";
     std::cerr << "file_name=" << file_name << " does not appear to exist\n";
     throw TerminalException{1};

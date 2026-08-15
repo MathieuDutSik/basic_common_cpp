@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
       throw TerminalException{1};
     }
     std::string FileI = argv[1];
-    std::vector<std::string> ListLines = ReadFullFile(FileI);
+    std::vector<std::string> ListLines = FILE_ReadFullFile(FileI);
     for (auto &eLine : ListLines) {
       std::vector<std::string> LStr = STRING_Split(eLine, "ListValWei = ");
       if (LStr.size() == 2) {

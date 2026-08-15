@@ -156,7 +156,7 @@ void ReadHeuristicFileCond(std::string const &eFile, TheHeuristic<T> &eHeu) {
 #ifdef DEBUG_THOMPSON_SAMPLING
     std::cerr << "HTS: eFile=" << eFile << "\n";
 #endif
-    IsExistingFileDie(eFile);
+    FILE_IsExistingFileDie(eFile);
     std::ifstream is(eFile);
     try {
       eHeu = ReadHeuristic<T>(is);
@@ -1347,7 +1347,7 @@ private:
     }
   }
   void InsertCompletedInfo(std::string const &file) {
-    if (!IsExistingFile(file)) {
+    if (!FILE_IsExistingFile(file)) {
       std::cerr << "HTS: The file=" << file << " is missing.\n";
       std::cerr << "HTS: Cannot parse it in SelfCorrectingHeuristic with name="
                 << name << "\n";

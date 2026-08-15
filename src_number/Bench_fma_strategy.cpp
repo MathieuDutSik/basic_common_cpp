@@ -140,9 +140,9 @@ int main() {
 
     // RealField needs a registered field (2cos(2pi/7), X^3 + X^2 - 2X - 1).
     std::string eFile = "CI_tests/RealAlgebraicField/CubicFieldDisc_49";
-    for (int lev = 0; lev <= 10 && !IsExistingFile(eFile); lev++)
+    for (int lev = 0; lev <= 10 && !FILE_IsExistingFile(eFile); lev++)
       eFile = "../" + eFile;
-    if (IsExistingFile(eFile)) {
+    if (FILE_IsExistingFile(eFile)) {
       HelperClassRealField<Tq> hcrf(eFile);
       int const idx = 1;
       insert_helper_real_algebraic_field(idx, hcrf);

@@ -35,7 +35,7 @@ int main() {
     int code = RunExternalProgram("/bin/echo", {"hello world"}, {}, out_file,
                                   std::nullopt);
     check_external(code == 0, "echo should exit with code 0");
-    std::vector<std::string> out_lines = ReadFullFile(out_file);
+    std::vector<std::string> out_lines = FILE_ReadFullFile(out_file);
     check_external(out_lines.size() == 1, "echo output should have one line");
     check_external(out_lines[0] == "hello world", "echo output should match argument");
 
@@ -43,13 +43,13 @@ int main() {
     code = RunExternalProgram("/bin/ls", {missing_path}, {}, std::nullopt,
                               err_file);
     check_external(code != 0, "ls on a missing path should fail");
-    check_external(IsExistingFile(err_file), "stderr redirection file should exist");
+    check_external(FILE_IsExistingFile(err_file), "stderr redirection file should exist");
     check_external(FILE_GetNumberLine(err_file) > 0, "stderr redirection file should be non-empty");
 
     code = RunExternalProgram("/bin/cat", {}, in_file, cat_out_file,
                               std::nullopt);
     check_external(code == 0, "cat with redirected stdin should exit with code 0");
-    check_external(ReadFullFile(cat_out_file) == ReadFullFile(in_file),
+    check_external(FILE_ReadFullFile(cat_out_file) == FILE_ReadFullFile(in_file),
                    "cat output should match redirected stdin");
 
     fs::remove_all(root);

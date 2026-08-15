@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
       throw TerminalException{1};
     }
     std::string FileBl = argv[1];
-    if (!IsExistingFile(FileBl)) {
+    if (!FILE_IsExistingFile(FileBl)) {
       std::cerr << "The file FileBl=" << FileBl << " is missing\n";
       throw TerminalException{1};
     }

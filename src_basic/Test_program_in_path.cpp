@@ -3,11 +3,11 @@
 
 int main() {
   try {
-    if (!IsProgramInPath("ls")) {
+    if (!FILE_IsProgramInPath("ls")) {
       std::cerr << "Expected ls to be available in PATH\n";
       throw TerminalException{1};
     }
-    if (IsProgramInPath("lsx")) {
+    if (FILE_IsProgramInPath("lsx")) {
       std::cerr << "Expected lsx to be unavailable in PATH\n";
       throw TerminalException{1};
     }

@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         BlPROC.get_bool("CheckPrimalDualCancellation");
     std::string PrimalDualPairFile = BlPROC.get_string("PrimalDualPairFile");
     // reading the matrix
-    if (!IsExistingFile(InputFile)) {
+    if (!FILE_IsExistingFile(InputFile)) {
       std::cerr << "The InputFile=" << InputFile << " is missing\n";
       throw TerminalException{1};
     }
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     int nbRow = eMat.rows();
     if (CheckPrimalDualCancellation) {
       /*
-      if (!IsExistingFile(PrimalDualPairFile)) {
+      if (!FILE_IsExistingFile(PrimalDualPairFile)) {
         std::cerr << "The PrimalDualPairFile=" << PrimalDualPairFile << " is
       missing\n"; throw TerminalException{1};
         }*/

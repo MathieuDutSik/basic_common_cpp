@@ -39,7 +39,7 @@ void test_specific_size(int const &m, int const &n) {
   //
   std::string TestFile = "/tmp/testbool_n" + std::to_string(n) + "_m" +
                          std::to_string(m) + "_" + random_string(20);
-  RemoveFileIfExist(TestFile);
+  FILE_RemoveFileIfExist(TestFile);
   //  std::cerr << "TestFile=" << TestFile << "\n";
   {
     FileFace ff(TestFile, m);
@@ -70,7 +70,7 @@ void test_specific_size_randaccess(int const &m, int const &n) {
   //
   std::string TestFile = "/tmp/testbool_n" + std::to_string(n) + "_m" +
                          std::to_string(m) + "_" + random_string(20);
-  RemoveFileIfExist(TestFile);
+  FILE_RemoveFileIfExist(TestFile);
   FileFace ff(TestFile, m);
   for (size_t iter = 0; iter < 1000; iter++) {
     size_t pos = random() % n;

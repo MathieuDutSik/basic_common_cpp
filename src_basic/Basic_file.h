@@ -10,7 +10,7 @@
 #include <vector>
 
 template <typename F>
-void print_stderr_stdout_file(std::string const &FileOut, F f) {
+void FILE_PrintStderrStdoutFile(std::string const &FileOut, F f) {
   if (FileOut == "stderr")
     return f(std::cerr);
   if (FileOut == "stdout")
@@ -19,7 +19,7 @@ void print_stderr_stdout_file(std::string const &FileOut, F f) {
   return f(os);
 }
 
-void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
+void FILE_CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
   std::error_code ec;
   std::filesystem::copy_file(SrcFile, DstFile,
                              std::filesystem::copy_options::overwrite_existing,
@@ -33,32 +33,32 @@ void CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
   }
 }
 
-bool IsExistingFile(std::string const &eFile) {
+bool FILE_IsExistingFile(std::string const &eFile) {
   return std::ifstream(eFile).good();
 }
 
-std::string FindAvailableFileFromPrefix(std::string const &prefix) {
+std::string FILE_FindAvailableFileFromPrefix(std::string const &prefix) {
   size_t iFile = 0;
   while (true) {
     std::string FullFile = prefix + std::to_string(iFile);
-    if (!IsExistingFile(FullFile)) {
+    if (!FILE_IsExistingFile(FullFile)) {
       return FullFile;
     }
     iFile++;
   }
 }
 
-void IsExistingFileDie(std::string const &eFile) {
-  if (!IsExistingFile(eFile)) {
+void FILE_IsExistingFileDie(std::string const &eFile) {
+  if (!FILE_IsExistingFile(eFile)) {
     std::cerr << "The file eFile = " << eFile << "\n";
     std::cerr << "Is missing. DIE\n";
     throw TerminalException{1};
   }
 }
 
-std::vector<std::string> ReadFullFile(std::string const &eFile) {
-  if (!IsExistingFile(eFile)) {
-    std::cerr << "ReadFullFile eFile=" << eFile << "\n";
+std::vector<std::string> FILE_ReadFullFile(std::string const &eFile) {
+  if (!FILE_IsExistingFile(eFile)) {
+    std::cerr << "FILE_ReadFullFile eFile=" << eFile << "\n";
     std::cerr << "Missing file\n";
     throw TerminalException{1};
   }
@@ -203,7 +203,7 @@ FILE_DirectoryFilesSpecificExtension_Gen(std::string const &ePrefix,
   return FILE_DirectoryMatchingPrefixExtension(ePrefix, eExtension);
 }
 
-bool IsExistingDirectory(std::string const &ThePrefix) {
+bool FILE_IsExistingDirectory(std::string const &ThePrefix) {
   if (0 != access(ThePrefix.c_str(), F_OK)) {
     if (ENOENT == errno) {
       // does not exist
@@ -219,11 +219,11 @@ bool IsExistingDirectory(std::string const &ThePrefix) {
   return true;
 }
 
-void RemoveEmptyDirectory(std::string const &eDir) {
+void FILE_RemoveEmptyDirectory(std::string const &eDir) {
   std::error_code ec;
   bool removed = std::filesystem::remove(eDir, ec);
   if (ec || !removed) {
-    std::cerr << "Error in RemoveEmptyDirectory\n";
+    std::cerr << "Error in FILE_RemoveEmptyDirectory\n";
     std::cerr << "eDir=" << eDir << "\n";
     if (ec) {
       std::cerr << "ec.message()=" << ec.message() << "\n";
@@ -234,14 +234,14 @@ void RemoveEmptyDirectory(std::string const &eDir) {
   }
 }
 
-void RemoveFile(std::string const &eFile) { std::remove(eFile.c_str()); }
+void FILE_RemoveFile(std::string const &eFile) { std::remove(eFile.c_str()); }
 
-void RemoveFileIfExist(std::string const &eFile) {
-  if (IsExistingFile(eFile))
-    RemoveFile(eFile);
+void FILE_RemoveFileIfExist(std::string const &eFile) {
+  if (FILE_IsExistingFile(eFile))
+    FILE_RemoveFile(eFile);
 }
 
-bool IsProgramInPath(std::string const &ProgName) {
+bool FILE_IsProgramInPath(std::string const &ProgName) {
   if (ProgName.empty()) {
     return false;
   }
@@ -325,22 +325,22 @@ std::string FILE_RemoveEndingExtension(std::string const &FileName,
   return FileName;
 }
 
-void RemoveFileSpecificExtension(std::string const &ThePrefix,
+void FILE_RemoveFileSpecificExtension(std::string const &ThePrefix,
                                  std::string const &TheExtension) {
-  bool test = IsExistingDirectory(ThePrefix);
+  bool test = FILE_IsExistingDirectory(ThePrefix);
   if (!test)
     return;
   std::vector<std::string> ListFile = FILE_GetDirectoryListFile(ThePrefix);
   for (auto &eFile : ListFile) {
     if (eFile.ends_with(TheExtension)) {
       std::string eFileTot = ThePrefix + eFile;
-      RemoveFile(eFileTot);
+      FILE_RemoveFile(eFileTot);
     }
   }
 }
 
-void RemoveFileInDirectory(std::string const &ThePrefix) {
-  bool test = IsExistingDirectory(ThePrefix);
+void FILE_RemoveFileInDirectory(std::string const &ThePrefix) {
+  bool test = FILE_IsExistingDirectory(ThePrefix);
   if (!test)
     return;
   std::vector<std::string> ListFile = FILE_GetDirectoryListFile(ThePrefix);
@@ -358,7 +358,7 @@ void RemoveFileInDirectory(std::string const &ThePrefix) {
   }
   for (auto &eFile : ListFile) {
     std::string eFileTot = ThePrefix + eFile;
-    RemoveFile(eFileTot);
+    FILE_RemoveFile(eFileTot);
   }
 }
 
@@ -371,7 +371,7 @@ int FILE_GetNumberLine(std::string const &eFile) {
   return number_of_lines;
 }
 
-std::string GetCurrentDirectory() {
+std::string FILE_GetCurrentDirectory() {
   std::error_code ec;
   std::filesystem::path ePath = std::filesystem::current_path(ec);
   if (ec) {
@@ -389,7 +389,7 @@ std::string FILE_GetAbsoluteDirectory(std::string const &ePrefix) {
   if (FirstChar == '/') {
     return ePrefix;
   } else {
-    std::string ePWD = GetCurrentDirectory();
+    std::string ePWD = FILE_GetCurrentDirectory();
     return ePWD + ePrefix;
   }
 }
@@ -398,39 +398,39 @@ bool FILE_CheckPrefix(std::string const &ePrefix) {
   return ePrefix.ends_with('/');
 }
 
-std::string ExtractDirectoryFromFileString(std::string const &eFile) {
+std::string FILE_ExtractDirectoryFromFileString(std::string const &eFile) {
   size_t pos = eFile.rfind('/');
   if (pos == std::string::npos) {
-    std::cerr << "Error in ExtractDirectoryFromFileString\n";
+    std::cerr << "Error in FILE_ExtractDirectoryFromFileString\n";
     throw TerminalException{1};
   }
   return eFile.substr(0, pos + 1);
 }
 
 bool FILE_IsFileMakeable(std::string const &eFile) {
-  std::string eDir = ExtractDirectoryFromFileString(eFile);
-  if (!IsExistingFile(eDir))
+  std::string eDir = FILE_ExtractDirectoryFromFileString(eFile);
+  if (!FILE_IsExistingFile(eDir))
     return false;
   return true;
 }
 
-void CreateDirectory(std::string const &eDir) {
+void FILE_CreateDirectory(std::string const &eDir) {
   if (eDir.empty()) {
-    std::cerr << "Error in CreateDirectory\n";
+    std::cerr << "Error in FILE_CreateDirectory\n";
     std::cerr << "eDir=" << eDir << "\n";
     throw TerminalException{1};
   }
   std::error_code ec;
   std::filesystem::create_directories(eDir, ec);
   if (ec && !std::filesystem::is_directory(eDir)) {
-    std::cerr << "Error in CreateDirectory\n";
+    std::cerr << "Error in FILE_CreateDirectory\n";
     std::cerr << "eDir=" << eDir << "\n";
     std::cerr << "ec.message()=" << ec.message() << "\n";
     throw TerminalException{1};
   }
 }
 
-std::vector<std::string> ls_operation(std::string const &ThePrefix) {
+std::vector<std::string> FILE_LsOperation(std::string const &ThePrefix) {
   std::error_code ec;
   std::vector<std::string> ListFile;
   for (auto const &entry : std::filesystem::directory_iterator(ThePrefix, ec)) {
@@ -443,7 +443,7 @@ std::vector<std::string> ls_operation(std::string const &ThePrefix) {
     }
   }
   if (ec) {
-    std::cerr << "Error in ls_operation\n";
+    std::cerr << "Error in FILE_LsOperation\n";
     std::cerr << "ThePrefix=" << ThePrefix << "\n";
     std::cerr << "ec.message()=" << ec.message() << "\n";
     throw TerminalException{1};
@@ -460,12 +460,12 @@ public:
   TempFile(std::string const &eFile) { FileName = eFile; }
   TempFile(char *eFile) { FileName = eFile; }
   ~TempFile() {
-    if (IsExistingFile(FileName)) {
-      RemoveFile(FileName);
+    if (FILE_IsExistingFile(FileName)) {
+      FILE_RemoveFile(FileName);
     }
   }
   //
-  bool IsExisting() const { return IsExistingFile(FileName); }
+  bool IsExisting() const { return FILE_IsExistingFile(FileName); }
   std::string string() const { return FileName; }
 };
 
@@ -491,7 +491,7 @@ public:
     used = eUsed;
     if (used) {
       DirName = eDir;
-      CreateDirectory(DirName);
+      FILE_CreateDirectory(DirName);
     } else {
       DirName = "unset_and_irrelevant";
     }
@@ -506,17 +506,17 @@ public:
       : used(eTemp.usedness()), DirName(eTemp.str()) {}
   ~CondTempDirectory() {
     if (used && DirName != "unset_and_irrelevant") {
-      if (IsExistingDirectory(DirName)) {
+      if (FILE_IsExistingDirectory(DirName)) {
         if (!FILE_IsDirectoryEmpty(DirName)) {
           std::cerr << "Keeping " << DirName << " since it is not empty\n";
         } else {
-          RemoveFile(DirName);
+          FILE_RemoveFile(DirName);
         }
       }
     }
   }
   //
-  bool IsExisting() const { return IsExistingDirectory(DirName); }
+  bool IsExisting() const { return FILE_IsExistingDirectory(DirName); }
   bool usedness() const { return used; }
   std::string str() const { return DirName; }
 };
