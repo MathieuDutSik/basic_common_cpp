@@ -461,46 +461,78 @@ void Termination_mpq_not_integer(stc<mpq_class> const &a1) {
   That exception is what UniversalScalarConversionCheck turns into an empty
   optional, so without it an out of range value is silently replaced by a wrong
   one. Same contract as mpz_int_to_small_integer for the boost types.
+
+  On LLP64 platforms (Windows) long is 32-bit while int64_t is long long, so
+  targets wider than long cannot go through mpz_get_si / mpz_get_ui. Those take
+  a separate path: the range is checked against the exact bounds of Tout as
+  mpz_class values and the magnitude is then extracted with mpz_export, which
+  is not limited to the width of long.
  */
 template <typename Tout>
 inline void mpz_class_to_small_integer(mpz_class const &val, Tout &out) {
   static_assert(std::is_integral_v<Tout>,
                 "mpz_class_to_small_integer is for the integral types");
   if constexpr (std::is_signed_v<Tout>) {
-    static_assert(sizeof(Tout) <= sizeof(long),
-                  "the signed target is expected to be at most as wide as "
-                  "long, which holds on the LP64 platforms this is built on");
-    if (!mpz_fits_slong_p(val.get_mpz_t())) {
-      std::string str = "value=" + val.get_str() +
-                        " does not fit in the destination integer type";
-      throw ConversionException{str};
+    if constexpr (sizeof(Tout) <= sizeof(long)) {
+      if (!mpz_fits_slong_p(val.get_mpz_t())) {
+        std::string str = "value=" + val.get_str() +
+                          " does not fit in the destination integer type";
+        throw ConversionException{str};
+      }
+      long e_val = val.get_si();
+      if (e_val < static_cast<long>(std::numeric_limits<Tout>::min()) ||
+          e_val > static_cast<long>(std::numeric_limits<Tout>::max())) {
+        std::string str = "value=" + val.get_str() +
+                          " does not fit in the destination integer type";
+        throw ConversionException{str};
+      }
+      out = static_cast<Tout>(e_val);
+    } else {
+      constexpr int nbits = std::numeric_limits<Tout>::digits;
+      mpz_class const upper = mpz_class(1) << nbits;
+      if (val >= upper || val < -upper) {
+        std::string str = "value=" + val.get_str() +
+                          " does not fit in the destination integer type";
+        throw ConversionException{str};
+      }
+      using Tu = std::make_unsigned_t<Tout>;
+      mpz_class a_abs = abs(val);
+      Tu mag = 0;
+      mpz_export(&mag, nullptr, -1, sizeof(Tu), 0, 0, a_abs.get_mpz_t());
+      // Unsigned to signed conversion is modular (two's complement), so the
+      // negation below is exact, including for the minimum value.
+      if (sgn(val) < 0)
+        out = static_cast<Tout>(static_cast<Tu>(0) - mag);
+      else
+        out = static_cast<Tout>(mag);
     }
-    long e_val = val.get_si();
-    if (e_val < static_cast<long>(std::numeric_limits<Tout>::min()) ||
-        e_val > static_cast<long>(std::numeric_limits<Tout>::max())) {
-      std::string str = "value=" + val.get_str() +
-                        " does not fit in the destination integer type";
-      throw ConversionException{str};
-    }
-    out = static_cast<Tout>(e_val);
   } else {
-    static_assert(sizeof(Tout) <= sizeof(unsigned long),
-                  "the unsigned target is expected to be at most as wide as "
-                  "unsigned long, which holds on the LP64 platforms this is "
-                  "built on");
-    if (sgn(val) < 0 || !mpz_fits_ulong_p(val.get_mpz_t())) {
-      std::string str = "value=" + val.get_str() +
-                        " does not fit in the destination integer type";
-      throw ConversionException{str};
+    if constexpr (sizeof(Tout) <= sizeof(unsigned long)) {
+      if (sgn(val) < 0 || !mpz_fits_ulong_p(val.get_mpz_t())) {
+        std::string str = "value=" + val.get_str() +
+                          " does not fit in the destination integer type";
+        throw ConversionException{str};
+      }
+      unsigned long e_val = val.get_ui();
+      if (e_val >
+          static_cast<unsigned long>(std::numeric_limits<Tout>::max())) {
+        std::string str = "value=" + val.get_str() +
+                          " does not fit in the destination integer type";
+        throw ConversionException{str};
+      }
+      out = static_cast<Tout>(e_val);
+    } else {
+      constexpr int nbits = std::numeric_limits<Tout>::digits;
+      mpz_class const upper = mpz_class(1) << nbits;
+      if (sgn(val) < 0 || val >= upper) {
+        std::string str = "value=" + val.get_str() +
+                          " does not fit in the destination integer type";
+        throw ConversionException{str};
+      }
+      Tout mag = 0;
+      mpz_export(&mag, nullptr, -1, sizeof(Tout), 0, 0, val.get_mpz_t());
+      out = mag;
     }
-    unsigned long e_val = val.get_ui();
-    if (e_val >
-        static_cast<unsigned long>(std::numeric_limits<Tout>::max())) {
-      std::string str = "value=" + val.get_str() +
-                        " does not fit in the destination integer type";
-      throw ConversionException{str};
-    }
-    out = static_cast<Tout>(e_val);
   }
 }
 
