@@ -248,6 +248,29 @@ std::ostream &operator<<(std::ostream &os, HumanTime &x) {
   return os;
 }
 
+/*
+  Accumulates the lifetime of a scope into a counter, whatever the exit path.
+  This is what a function with several return statements needs in order to be
+  timed as a whole: declare the timer, then the accumulator right after it, so
+  that the accumulator is destroyed first and the timer is still alive.
+
+    int64_t total = 0;
+    ...
+    MicrosecondTime time;
+    AccumOnExit<MicrosecondTime> accum(time, total);
+
+  The timer type is a template parameter so that any of the TimeEval
+  instantiations can be used.
+ */
+template <typename Ttime> struct AccumOnExit {
+  Ttime &time;
+  int64_t &accum;
+  AccumOnExit(Ttime &_time, int64_t &_accum) : time(_time), accum(_accum) {}
+  AccumOnExit(const AccumOnExit &) = delete;
+  AccumOnExit &operator=(const AccumOnExit &) = delete;
+  ~AccumOnExit() { accum += time.eval_int64(); }
+};
+
 void runtime(HumanTime &time) { std::cerr << "runtime = " << time << " timeanddate=" << timeanddate() << "\n"; }
 
 // clang-format off
