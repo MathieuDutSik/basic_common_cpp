@@ -504,16 +504,31 @@ inline void TYPE_CONVERSION(stc<T> const &a1, int64_t &a2) {
   a2 = static_cast<int64_t>(a1.val);
 }
 
+/*
+  Three tiers: the identity conversion is free, an arithmetic pair without a
+  dedicated TYPE_CONVERSION overload is a plain cast, and everything else
+  goes through TYPE_CONVERSION as before. A dedicated overload always wins
+  over the cast, so any pair with checking semantics keeps them.
+ */
 template <typename T1, typename T2> T1 UniversalScalarConversion(T2 const &a) {
-  T1 ret;
-  try {
-    stc<T2> stc_a{a};
-    TYPE_CONVERSION(stc_a, ret);
-  } catch (ConversionException &e) {
-    std::cerr << "ConversionError e=" << e.val << "\n";
-    throw TerminalException{1};
+  if constexpr (std::is_same_v<T1, T2>) {
+    return a;
+  } else if constexpr (!requires(stc<T2> const &x, T1 &y) {
+                         TYPE_CONVERSION(x, y);
+                       } && std::is_arithmetic_v<T1> &&
+                       std::is_arithmetic_v<T2>) {
+    return static_cast<T1>(a);
+  } else {
+    T1 ret;
+    try {
+      stc<T2> stc_a{a};
+      TYPE_CONVERSION(stc_a, ret);
+    } catch (ConversionException &e) {
+      std::cerr << "ConversionError e=" << e.val << "\n";
+      throw TerminalException{1};
+    }
+    return ret;
   }
-  return ret;
 }
 
 template <typename T1, typename T2>
