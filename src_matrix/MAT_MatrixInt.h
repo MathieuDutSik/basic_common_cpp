@@ -584,7 +584,7 @@ template <typename T> bool IsVectorPrimitive(MyVector<T> const &TheV) {
   T TheGCD = TheV(0);
   for (size_t i = 1; i < n; i++) {
     T val = TheV(i);
-    TheGCD = PairGcd(TheGCD, val);
+    TheGCD = GcdPair(TheGCD, val);
   }
   return T_abs(TheGCD) == 1;
 }
