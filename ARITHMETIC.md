@@ -15,7 +15,10 @@ to classify types at compile time. The key traits are:
   * `is_implementation_of_Z<T>` -- whether the type represents the integers Z.
   * `is_implementation_of_Q<T>` -- whether the type represents the rationals Q.
   * `overlying_field<T>` -- the field of fractions of an integer type.
-  * `underlying_ring<T>` -- the ring of integers inside a field type.
+  * `underlying_ring<T>` -- a ring inside a field type over which the
+    computation can be run without denominators. It is not canonical and it
+    need not be the ring of integers: for a real algebraic field it is the
+    order spanned by the powers of the generator (see `RealRing` below).
 
 These traits drive `static_assert` checks and `if constexpr` / SFINAE dispatch
 throughout the library.
@@ -72,6 +75,54 @@ A `HelperClassRealField<T>` object is constructed from the file and stored in
 a global registry (`list_helper`), keyed by a compile-time integer index
 `i_field`. The `RealField<i_field>` class then looks up its helper at
 construction time.
+
+### The underlying ring -- `RealRing<i_field>`
+
+`underlying_ring<RealField<i_field>>::ring_type` is `RealRing<i_field>`, the
+order `Z[x] = sum_{0 <= i < d} Z x^i` spanned by the powers of the generator.
+It is not the ring of integers of the field: no integral closure is computed,
+and another generator gives another ring.
+
+`Z[x]` is a ring exactly when the minimal polynomial of `x` is monic, that is
+when the coefficient of `x^d` is 1 and `x` is an algebraic integer. **Using
+`RealRing` over a descriptor file whose minimal polynomial is not monic emits
+an error and throws `TerminalException{1}`.** A non-monic description is easy
+to repair: replacing the generator `x` by `c*x` for a suitable integer `c`
+makes the minimal polynomial monic without changing the field. For instance
+`sin(2*pi/7)`, of minimal polynomial `64 X^6 - 112 X^4 + 56 X^2 - 7`, becomes
+`2*sin(2*pi/7)` of minimal polynomial `X^6 - 7 X^4 + 14 X^2 - 7`.
+
+A `RealRing` element is a `d`-tuple of integers with no denominator, so the
+gcd normalization that every `RealField` operation performs disappears:
+addition and multiplication are plain integer polynomial operations followed
+by the reduction rows. Measured on the cubic field of discriminant 49
+(`CI_tests/RealAlgebraicField/CubicFieldDisc_49`) with
+`src_number/Bench_real_ring`, the ring is about 4x faster on determinants and
+1.3x to 2x faster on matrix products. The sign determination is unchanged,
+since it uses the same approximant ladder.
+
+Division is where the ring differs in kind from the field. `a / b` is the
+solution of `M(b) v = a` with `M(b)` the integer matrix of the multiplication
+by `b`, solved fraction-free by `SolveIntegralFractionFree` (Zhou & Jeffrey,
+"Fraction-free matrix factors: new forms for LU and QR factors", 2008), so the
+computation stays over `Z`. When the solution is not integral the quotient is
+not an element of `Z[x]`, there is nothing to fall back on, and the division
+emits an error and throws `TerminalException{1}`.
+
+The generic code that runs a computation over `underlying_ring<T>` therefore
+sees, for a real algebraic field, a ring that is neither a field nor a
+Euclidean domain. Three dispatches in `src_matrix` account for it:
+`ScalarCanonicalizationVector` / `ScalarCanonicalizationMatrix` normalize
+through the overlying field and scale back into the ring,
+`RemoveFractionMatrixPlusCoeffRing` gains the same second regime its vector
+counterpart already had, and `SubsetRankOneSolver` uses the
+`SubsetRankOneSolver_RingOverField` variant.
+
+`CI_tests/RealAlgebraicField/run_test.sh` covers all of it: the field, the
+ring, the field/ring consistency of every one of those paths
+(`src_matrix/Test_RealRingConsistency`) and the timing comparison of the two
+(`src_number/Bench_real_ring`). It is run by the number theory and the matrix
+CI workflows.
 
 ## Speed types (rational and integer implementations)
 

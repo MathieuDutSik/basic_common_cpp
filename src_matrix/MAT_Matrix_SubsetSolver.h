@@ -353,12 +353,49 @@ public:
   }
 };
 
+// The variant for a ring that is neither euclidean nor a field: the integral
+// nullspace of NullspaceIntTrMat needs a gcd the ring does not have, and the
+// field elimination needs a division it does not have either. The kernel
+// vector is therefore computed over the overlying field and scaled back into
+// the ring, which is exactly what the field variant used to do when such a
+// ring was still described by its own field. The order Z[x] underlying a real
+// algebraic field is the case in point.
+template <typename T> struct SubsetRankOneSolver_RingOverField {
+public:
+  using Tint = T;
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<T> const &EXT;
+  MyMatrix<Tfield> EXT_field;
+  SubsetRankOneSolver_Field<Tfield> solver;
+
+  SubsetRankOneSolver_RingOverField(MyMatrix<Tint> const &_EXT)
+      : EXT(_EXT), EXT_field(UniversalMatrixConversion<Tfield, T>(_EXT)),
+        solver(EXT_field) {}
+  MyVector<Tint> GetKernelVector(Face const &sInc) {
+    MyVector<Tfield> V_field = solver.GetKernelVector(sInc);
+    return RemoveFractionVectorPlusCoeffRing(V_field).TheVect;
+  }
+  MyVector<Tint> GetPositiveKernelVector(Face const &sInc) {
+    MyVector<Tint> V = GetKernelVector(sInc);
+    SubsetRankOneSolver_SignFix(EXT, sInc, V);
+    return V;
+  }
+  std::pair<MyVector<Tint>, Face> GetPositiveKernelVectorAndFace(Face const &sInc) {
+    MyVector<Tint> V = GetKernelVector(sInc);
+    Face f = SubsetRankOneSolver_SignFixAndFace(EXT, V);
+    return {std::move(V), std::move(f)};
+  }
+};
+
 template <typename T>
 using subsetsolver_type = std::conditional_t<
     has_reduction_subset_solver<T>::value,
     SubsetRankOneSolver_Acceleration<T>,
-    std::conditional_t<is_ring_field<T>::value, SubsetRankOneSolver_Field<T>,
-                       SubsetRankOneSolver_Ring<T>>>;
+    std::conditional_t<
+        is_ring_field<T>::value, SubsetRankOneSolver_Field<T>,
+        std::conditional_t<is_euclidean_domain<T>::value,
+                           SubsetRankOneSolver_Ring<T>,
+                           SubsetRankOneSolver_RingOverField<T>>>>;
 
 // The public solver, for the repeated computation of corank one kernel
 // vectors on a fixed matrix: the one-shot use case is FindFacetInequality.

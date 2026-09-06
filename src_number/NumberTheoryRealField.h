@@ -14,6 +14,7 @@
 #include <boost/container/small_vector.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <map>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -104,6 +105,11 @@ private:
 #endif
     // Finding the expression of X^deg
     deg = Pminimal.size() - 1;
+    // Whether the minimal polynomial is monic. When it is, the generator x is
+    // an algebraic integer, the rescaling below collapses to scal = 1 and
+    // Z[x] = sum_{0 <= i < deg} Z x^i is a ring: this is the condition for
+    // RealRing to be usable (RealField works either way).
+    monic = (Pminimal[deg] == 1);
     for (int u = 0; u < deg; u++) {
       T val = -Pminimal[u] / Pminimal[deg];
       ExprXdeg.push_back(val);
@@ -339,6 +345,46 @@ public:
 #endif
     return {std::move(qnum), std::move(qden)};
   }
+  // The quotient a / b inside the ring Z[x] = sum_{0 <= i < deg} Z x^i, or
+  // nothing when a / b lies outside that ring. The system is M(b) v = a with
+  // M(b) the matrix of the multiplication by b, whose column i holds the
+  // coefficients of b x^i; it is an integer matrix, so the solve is done
+  // fraction-free (Zhou & Jeffrey) and the whole computation stays over Z
+  // instead of going through the rationals as FindQuotient does.
+  // Only meaningful when the minimal polynomial is monic, in which case the
+  // internal y = scal * x rescaling is trivial and num is already expressed
+  // over the powers of x.
+  std::optional<Tvec> FindQuotientRing(Tvec const &a, Tvec const &b) const {
+    MyMatrix<Tz> M(deg, deg);
+    Tvec col = b;
+    for (int i_col = 0; i_col < deg; i_col++) {
+      for (int i_row = 0; i_row < deg; i_row++)
+        M(i_row, i_col) = col[i_row];
+      if (i_col < deg - 1) {
+        // Multiplication of the column by x.
+        Tz carry = col[deg - 1];
+        for (int j = deg - 1; j > 0; j--)
+          col[j] = col[j - 1];
+        col[0] = 0;
+        if (carry != 0) {
+          std::vector<Tz> const &red = ExprYpow[0];
+          for (int j = 0; j < deg; j++)
+            AddMul(col[j], carry, red[j]);
+        }
+      }
+    }
+    MyVector<Tz> w(deg);
+    for (int i = 0; i < deg; i++)
+      w(i) = a[i];
+    std::optional<MyVector<Tz>> opt = SolveIntegralFractionFree(M, w);
+    if (!opt)
+      return {};
+    MyVector<Tz> const &eSol = *opt;
+    Tvec qnum(deg);
+    for (int u = 0; u < deg; u++)
+      qnum[u] = eSol(u);
+    return qnum;
+  }
   bool IsStrictlyPositive(Tvec const &x) const {
     // x is the numerator polynomial, assumed to be non-zero; the denominator
     // is positive and does not affect the sign. The bound evaluations are
@@ -424,10 +470,12 @@ public:
     for (int u = 0; u < deg; u++)
       num[u] = GetNumerator_z(b[u]) * (den / GetDenominator_z(b[u]));
   }
+  bool is_monic() const { return monic; }
   int deg;
   std::vector<T> ExprXdeg;
 
 private:
+  bool monic;
   Tz scal;
   std::vector<Tz> pow_scal;
   std::vector<std::vector<Tz>> ExprYpow;
@@ -461,6 +509,7 @@ template <typename Tvect> bool IsZeroStdVector(Tvect const &V) {
 }
 
 template <int i_field> class RealField;
+template <int i_field> class RealRing;
 
 // Lazy product of two RealField elements -- a minimal expression template (see
 // the analogous RatProd / QuadProd). `a * b` returns this proxy; the fast sinks
@@ -917,10 +966,13 @@ template <int i_field> struct overlying_field<RealField<i_field>> {
   typedef RealField<i_field> field_type;
 };
 
-// Note that the underlying ring is not unique, there are many possibiliies
-// actually but we can represent only one in our scheme.
+// The underlying ring is Z[x], the free Z-module on the powers of the
+// generator. It is not the ring of integers of the field (no integral closure
+// is computed) and it is not canonical -- another generator gives another ring
+// -- but it is a ring as soon as the minimal polynomial is monic, and running
+// over it avoids the denominators of the field.
 template <int i_field> struct underlying_ring<RealField<i_field>> {
-  typedef RealField<i_field> ring_type;
+  typedef RealRing<i_field> ring_type;
 };
 
 template <int i_field>
@@ -998,6 +1050,569 @@ template <int i_field> struct hash<RealField<i_field>> {
 };
 // clang-format off
 }  // namespace std
+// clang-format on
+
+// ---------------------------------------------------------------------------
+// RealRing: the order Z[x] = sum_{0 <= i < deg} Z x^i inside the real
+// algebraic field, where x is the field generator. It is NOT the ring of
+// integers of the field (no integral closure is computed), just the free
+// Z-module on the powers of the generator, which is a ring exactly when the
+// minimal polynomial of x is monic. Using RealRing over a field whose minimal
+// polynomial is not monic is an error and throws.
+//
+// Compared with RealField this is deliberately barebones: there is no
+// denominator, hence no gcd normalization after every operation -- the gcd
+// work is what dominates the field arithmetic. Addition and multiplication are
+// plain integer polynomial operations followed by the reduction rows, and the
+// only expensive operation left is the division, which has to solve a linear
+// system and must land back in the ring.
+// ---------------------------------------------------------------------------
+
+// Lazy product of two RealRing elements, the analogue of RealProd. Holds
+// references: consume within the same full-expression, do not bind with `auto`.
+template <int i_field> struct RealRingProd {
+  RealRing<i_field> const &x;
+  RealRing<i_field> const &y;
+};
+
+template <int i_field> class RealRing {
+public:
+  using T = Trat_real_field;
+  using Tz = Tint_real_field;
+  using Tvec = Tvec_real_field;
+  // The residual type is the plain integers: a RealRing element carries no
+  // fraction, so nothing has to be scaled away.
+  using Tresidual = Tz;
+
+private:
+  // The element is num[0] + num[1] x + ... + num[deg-1] x^{deg-1}.
+  Tvec num;
+
+  // The registered field description, with the monic requirement checked once
+  // on the first use of RealRing<i_field>.
+  static HelperClassRealField<T> const &get_checked_hcrf() {
+    HelperClassRealField<T> const &hcrf = list_helper.at(i_field);
+    if (!hcrf.is_monic()) {
+      std::cerr << "NTRR: RealRing<" << i_field << "> requires the minimal "
+                   "polynomial of the generator x to be monic,\n";
+      std::cerr << "NTRR: that is the coefficient of x^" << hcrf.deg
+                << " must be 1, so that the powers of x span a ring.\n";
+      std::cerr << "NTRR: The registered field does not satisfy this.\n";
+      std::cerr << "NTRR: Rescale the generator, replacing x by c*x for a "
+                   "suitable integer c, so that\n";
+      std::cerr << "NTRR: its minimal polynomial becomes monic, or stay with "
+                   "RealField<" << i_field << ">.\n";
+      throw TerminalException{1};
+    }
+    return hcrf;
+  }
+  static HelperClassRealField<T> const &get_hcrf() {
+    static HelperClassRealField<T> const &hcrf = get_checked_hcrf();
+    return hcrf;
+  }
+  // The numerator polynomial of x - y. Used for the sign and equality tests.
+  static Tvec diff_vector(RealRing<i_field> const &x,
+                          RealRing<i_field> const &y) {
+    size_t len = x.num.size();
+    Tvec V(len);
+    for (size_t u = 0; u < len; u++)
+      V[u] = x.num[u] - y.num[u];
+    return V;
+  }
+  static Tvec diff_vector_int(RealRing<i_field> const &x, int const &y) {
+    Tvec V = x.num;
+    V[0] -= y;
+    return V;
+  }
+  explicit RealRing(Tvec &&_num) : num(std::move(_num)) {}
+
+public:
+  Tvec const &get_num() const { return num; }
+  static size_t get_deg() { return get_hcrf().deg; }
+
+  // Constructor
+  RealRing() : num(get_deg(), Tz(0)) {}
+  RealRing(int const &u) : num(get_deg(), Tz(0)) { num[0] = u; }
+  RealRing(Tz const &u) : num(get_deg(), Tz(0)) { num[0] = u; }
+  // Constructor from the coefficients over the powers of x.
+  RealRing(std::vector<Tz> const &V) : num(get_deg(), Tz(0)) {
+    size_t deg = get_deg();
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
+    if (V.size() != deg) {
+      std::cerr << "NTRR: The coefficient list has size " << V.size()
+                << " while the degree is " << deg << "\n";
+      throw TerminalException{1};
+    }
+#endif
+    for (size_t u = 0; u < deg && u < V.size(); u++)
+      num[u] = V[u];
+  }
+  // Construct from a lazy product a*b.
+  RealRing(RealRingProd<i_field> const &e) {
+    get_hcrf().ComputeProductInto(num, e.x.num, e.y.num);
+  }
+  // assignment operator from int
+  RealRing<i_field> &operator=(int const &val) {
+    size_t len = num.size();
+    num[0] = val;
+    for (size_t u = 1; u < len; u++)
+      num[u] = 0;
+    return *this;
+  }
+  // Assign from a lazy product a*b. Aliasing-safe: ComputeProductInto writes
+  // into a scratch buffer built from the operands before num is overwritten.
+  RealRing<i_field> &operator=(RealRingProd<i_field> const &e) {
+    static thread_local Tvec_real_field conv;
+    get_hcrf().ComputeProductInto(conv, e.x.num, e.y.num);
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] = conv[u];
+    return *this;
+  }
+  //
+  // Arithmetic operators below. No normalization step exists: the
+  // representation over the powers of x is already canonical.
+  void operator+=(RealRing<i_field> const &x) {
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] += x.num[u];
+  }
+  // Fused accumulate of a lazy product: this += a*b, through a thread-local
+  // scratch whose limb storage survives across the terms of a dot product.
+  void operator+=(RealRingProd<i_field> const &e) {
+    static thread_local Tvec_real_field conv;
+    get_hcrf().ComputeProductInto(conv, e.x.num, e.y.num);
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] += conv[u];
+  }
+  void operator-=(RealRing<i_field> const &x) {
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] -= x.num[u];
+  }
+  void operator-=(RealRingProd<i_field> const &e) {
+    static thread_local Tvec_real_field conv;
+    get_hcrf().ComputeProductInto(conv, e.x.num, e.y.num);
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] -= conv[u];
+  }
+  void operator*=(RealRing<i_field> const &x) {
+    static thread_local Tvec_real_field conv;
+    get_hcrf().ComputeProductInto(conv, num, x.num);
+    size_t len = num.size();
+    for (size_t u = 0; u < len; u++)
+      num[u] = conv[u];
+  }
+  void operator/=(RealRing<i_field> const &x) { *this = *this / x; }
+  friend RealRing<i_field> operator+(RealRing<i_field> const &x,
+                                     RealRing<i_field> const &y) {
+    RealRing<i_field> res = x;
+    res += y;
+    return res;
+  }
+  friend RealRing<i_field> operator-(RealRing<i_field> const &x,
+                                     RealRing<i_field> const &y) {
+    RealRing<i_field> res = x;
+    res -= y;
+    return res;
+  }
+  friend RealRing<i_field> operator-(RealRing<i_field> const &x,
+                                     int const &y) {
+    RealRing<i_field> res = x;
+    res.num[0] -= y;
+    return res;
+  }
+  friend RealRing<i_field> operator-(RealRing<i_field> const &x) {
+    RealRing<i_field> res = x;
+    size_t len = res.num.size();
+    for (size_t u = 0; u < len; u++)
+      res.num[u] = -res.num[u];
+    return res;
+  }
+  // The division, which is where the ring differs in kind from the field: the
+  // quotient has to be an element of Z[x] and there is nothing to fall back on
+  // when it is not.
+  friend RealRing<i_field> operator/(RealRing<i_field> const &x,
+                                     RealRing<i_field> const &y) {
+    std::optional<Tvec> opt = get_hcrf().FindQuotientRing(x.num, y.num);
+    if (!opt) {
+      std::cerr << "NTRR: The quotient " << x << " / " << y
+                << " is not an element of the ring Z[x].\n";
+      std::cerr << "NTRR: The linear system has no solution over Z, so the "
+                   "division cannot be performed\n";
+      std::cerr << "NTRR: in RealRing<" << i_field
+                << ">. Use RealField<" << i_field << "> for this quotient.\n";
+      throw TerminalException{1};
+    }
+    return RealRing<i_field>(std::move(*opt));
+  }
+  friend RealRing<i_field> operator/(int const &x,
+                                     RealRing<i_field> const &y) {
+    return RealRing<i_field>(x) / y;
+  }
+  friend RealRing<i_field> operator*(int const &x,
+                                     RealRing<i_field> const &y) {
+    RealRing<i_field> res = y;
+    size_t len = res.num.size();
+    for (size_t u = 0; u < len; u++)
+      res.num[u] *= x;
+    return res;
+  }
+  // Lazy: returns a RealRingProd proxy, evaluated in place by the consumer.
+  friend RealRingProd<i_field> operator*(RealRing<i_field> const &x,
+                                         RealRing<i_field> const &y) {
+    return RealRingProd<i_field>{x, y};
+  }
+  double get_d() const { return get_hcrf().evaluate_as_double(num, Tz(1)); }
+  friend std::ostream &operator<<(std::ostream &os,
+                                  RealRing<i_field> const &v) {
+    std::vector<Tz> V(v.num.begin(), v.num.end());
+    WriteVectorFromRealAlgebraicString(os, V);
+    return os;
+  }
+  friend std::istream &operator>>(std::istream &is, RealRing<i_field> &v) {
+    size_t deg = get_deg();
+    std::vector<Tz> V = ReadVectorFromRealAlgebraicString<Tz>(is, deg);
+    v = RealRing<i_field>(V);
+    return is;
+  }
+  friend bool operator==(RealRing<i_field> const &x,
+                         RealRing<i_field> const &y) {
+    size_t len = x.num.size();
+    for (size_t u = 0; u < len; u++)
+      if (x.num[u] != y.num[u])
+        return false;
+    return true;
+  }
+  friend bool operator!=(RealRing<i_field> const &x,
+                         RealRing<i_field> const &y) {
+    return !(x == y);
+  }
+  friend bool operator!=(RealRing<i_field> const &x, int const &y) {
+    size_t len = x.num.size();
+    for (size_t u = 1; u < len; u++)
+      if (x.num[u] != 0)
+        return true;
+    return x.num[0] != y;
+  }
+  friend bool IsNonNegative(RealRing<i_field> const &x) {
+    if (IsZeroStdVector(x.num))
+      return true;
+    return get_hcrf().IsStrictlyPositive(x.num);
+  }
+  friend bool operator>=(RealRing<i_field> const &x,
+                         RealRing<i_field> const &y) {
+    Tvec V = diff_vector(x, y);
+    if (IsZeroStdVector(V))
+      return true;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+  friend bool operator>=(RealRing<i_field> const &x, int const &y) {
+    Tvec V = diff_vector_int(x, y);
+    if (IsZeroStdVector(V))
+      return true;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+  friend bool operator<=(RealRing<i_field> const &x,
+                         RealRing<i_field> const &y) {
+    return y >= x;
+  }
+  friend bool operator<=(RealRing<i_field> const &x, int const &y) {
+    Tvec V = diff_vector_int(x, y);
+    if (IsZeroStdVector(V))
+      return true;
+    for (auto &val : V)
+      val = -val;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+  friend bool operator>(RealRing<i_field> const &x,
+                        RealRing<i_field> const &y) {
+    Tvec V = diff_vector(x, y);
+    if (IsZeroStdVector(V))
+      return false;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+  friend bool operator>(RealRing<i_field> const &x, int const &y) {
+    Tvec V = diff_vector_int(x, y);
+    if (IsZeroStdVector(V))
+      return false;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+  friend bool operator<(RealRing<i_field> const &x,
+                        RealRing<i_field> const &y) {
+    Tvec V = diff_vector(y, x);
+    if (IsZeroStdVector(V))
+      return false;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+  friend bool operator<(RealRing<i_field> const &x, int const &y) {
+    Tvec V = diff_vector_int(x, y);
+    if (IsZeroStdVector(V))
+      return false;
+    for (auto &val : V)
+      val = -val;
+    return get_hcrf().IsStrictlyPositive(V);
+  }
+};
+
+// ---------------------------------------------------------------------------
+// RealRingProd (the lazy a*b proxy) as a first-class value, exactly as for
+// RealProd: every use other than the in-place sinks materializes into a
+// RealRing and delegates to the ordinary operators.
+// ---------------------------------------------------------------------------
+template <int i_field>
+inline RealRing<i_field> const &real_ring_eval(RealRing<i_field> const &x) {
+  return x;
+}
+template <int i_field>
+inline RealRing<i_field> real_ring_eval(RealRingProd<i_field> const &e) {
+  return RealRing<i_field>(e);
+}
+
+#define REALRING_REALRINGPROD_ARITH(OP)                                        \
+  template <int i_field>                                                       \
+  inline RealRing<i_field> operator OP(RealRingProd<i_field> const &a,         \
+                                       RealRingProd<i_field> const &b) {       \
+    return real_ring_eval(a) OP real_ring_eval(b);                             \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline RealRing<i_field> operator OP(RealRingProd<i_field> const &a,         \
+                                       RealRing<i_field> const &b) {           \
+    return real_ring_eval(a) OP b;                                             \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline RealRing<i_field> operator OP(RealRing<i_field> const &a,             \
+                                       RealRingProd<i_field> const &b) {       \
+    return a OP real_ring_eval(b);                                             \
+  }
+REALRING_REALRINGPROD_ARITH(+)
+REALRING_REALRINGPROD_ARITH(-)
+REALRING_REALRINGPROD_ARITH(*)
+REALRING_REALRINGPROD_ARITH(/)
+#undef REALRING_REALRINGPROD_ARITH
+
+#define REALRING_REALRINGPROD_CMP(OP)                                          \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealRingProd<i_field> const &a,                      \
+                          RealRingProd<i_field> const &b) {                    \
+    return real_ring_eval(a) OP real_ring_eval(b);                             \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealRingProd<i_field> const &a,                      \
+                          RealRing<i_field> const &b) {                        \
+    return real_ring_eval(a) OP b;                                             \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealRing<i_field> const &a,                          \
+                          RealRingProd<i_field> const &b) {                    \
+    return a OP real_ring_eval(b);                                             \
+  }                                                                            \
+  template <int i_field>                                                       \
+  inline bool operator OP(RealRingProd<i_field> const &a, int const &b) {      \
+    return real_ring_eval(a) OP b;                                             \
+  }
+REALRING_REALRINGPROD_CMP(==)
+REALRING_REALRINGPROD_CMP(!=)
+REALRING_REALRINGPROD_CMP(<)
+REALRING_REALRINGPROD_CMP(>)
+REALRING_REALRINGPROD_CMP(<=)
+REALRING_REALRINGPROD_CMP(>=)
+#undef REALRING_REALRINGPROD_CMP
+
+template <int i_field>
+inline RealRing<i_field> operator-(RealRingProd<i_field> const &e) {
+  return -real_ring_eval(e);
+}
+template <int i_field>
+inline bool IsNonNegative(RealRingProd<i_field> const &e) {
+  return IsNonNegative(RealRing<i_field>(e));
+}
+template <int i_field>
+inline std::ostream &operator<<(std::ostream &os,
+                                RealRingProd<i_field> const &e) {
+  return os << RealRing<i_field>(e);
+}
+
+// The field of fractions of Z[x] is the whole real algebraic field.
+template <int i_field> struct overlying_field<RealRing<i_field>> {
+  typedef RealField<i_field> field_type;
+};
+
+// Z[x] is its own underlying ring.
+template <int i_field> struct underlying_ring<RealRing<i_field>> {
+  typedef RealRing<i_field> ring_type;
+};
+
+template <int i_field>
+inline void TYPE_CONVERSION(stc<RealRing<i_field>> const &eQ, double &eD) {
+  eD = eQ.val.get_d();
+}
+
+template <int i_field>
+inline void TYPE_CONVERSION(stc<RealRing<i_field>> const &eQ,
+                            RealRing<i_field> &eD) {
+  eD = eQ.val;
+}
+
+// The ring embeds in the field.
+template <int i_field>
+inline void TYPE_CONVERSION(stc<RealRing<i_field>> const &eQ,
+                            RealField<i_field> &eD) {
+  Tvec_real_field const &num = eQ.val.get_num();
+  size_t deg = num.size();
+  std::vector<Trat_real_field> V(deg);
+  for (size_t u = 0; u < deg; u++)
+    V[u] = Trat_real_field(num[u]);
+  eD = RealField<i_field>(V);
+}
+
+// The reverse embedding, defined only on the elements of the field that lie
+// in Z[x]. The internal representation of RealField is num / den over the
+// powers of y = scal * x with scal = 1 here (the minimal polynomial is monic,
+// as RealRing requires), and it is kept in canonical form, so membership in
+// the ring is exactly den == 1.
+template <int i_field>
+inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ,
+                            RealRing<i_field> &eD) {
+  if (eQ.val.get_den() != 1) {
+    std::string str = "Conversion error: the real algebraic number is not in "
+                      "the ring Z[x]";
+    throw ConversionException{str};
+  }
+  Tvec_real_field const &num = eQ.val.get_num();
+  size_t deg = num.size();
+  std::vector<Tint_real_field> V(deg);
+  for (size_t u = 0; u < deg; u++)
+    V[u] = num[u];
+  eD = RealRing<i_field>(V);
+}
+
+template <int i_field> struct is_totally_ordered<RealRing<i_field>> {
+  static const bool value = true;
+};
+
+template <int i_field> struct is_ring_field<RealRing<i_field>> {
+  static const bool value = false;
+};
+
+// Bareiss stays valid over any integral domain with exact division, and Z[x]
+// is one: every intermediate entry is a minor of the input, so all the
+// divisions are exact. It is the reason the ring is interesting here, since
+// the determinant then never leaves Z[x].
+template <int i_field>
+struct use_bareiss_for_determinants<RealRing<i_field>> {
+  static const bool value = true;
+};
+
+// The fraction-free LU inverse is left off: A^{-1} lies in Z[x] only when
+// det(A) is a unit, so the generic non-field dispatch of Inverse -- go to the
+// overlying field and come back -- is the correct behaviour.
+template <int i_field> struct use_fraction_free_lu<RealRing<i_field>> {
+  static const bool value = false;
+};
+
+// FMA form (see is_fma_prefered): operator+=(RealRingProd) accumulates the
+// product in place, as for RealField.
+template <int i_field> struct is_fma_prefered<RealRing<i_field>> {
+  static const bool value = true;
+};
+
+template <int i_field> struct is_exact_arithmetic<RealRing<i_field>> {
+  static const bool value = true;
+};
+
+// Z[x] is not the integers: it is an extension of them of rank deg.
+template <int i_field> struct is_implementation_of_Z<RealRing<i_field>> {
+  static const bool value = false;
+};
+
+template <int i_field> struct is_implementation_of_Q<RealRing<i_field>> {
+  static const bool value = false;
+};
+
+// The trait guards the generic TYPE_CONVERSION of the real algebraic types
+// against each other, so the ring has to be flagged as well.
+template <int i_field> struct is_real_algebraic_field<RealRing<i_field>> {
+  static const bool value = true;
+};
+
+template <int i_field> bool IsInteger(RealRing<i_field> const &x) {
+  Tvec_real_field const &num = x.get_num();
+  size_t len = num.size();
+  for (size_t u = 1; u < len; u++)
+    if (num[u] != 0)
+      return false;
+  return true;
+}
+
+// Conversion to the types that are not real algebraic: only the rational
+// integers of the ring can be converted.
+template <typename T2, int i_field>
+requires (!is_real_algebraic_field<T2>::value)
+inline void TYPE_CONVERSION(stc<RealRing<i_field>> const &x1, T2 &x2) {
+  Tvec_real_field const &num = x1.val.get_num();
+  size_t len = num.size();
+  for (size_t u = 1; u < len; u++) {
+    if (num[u] != 0) {
+      std::string str = "Conversion error for the real algebraic ring";
+      throw ConversionException{str};
+    }
+  }
+  stc<Tint_real_field> a1{num[0]};
+  TYPE_CONVERSION(a1, x2);
+}
+
+// A ring element carries no fraction, so no scaling is ever needed.
+template <typename Tring, int i_field>
+void ScalingInteger_Kernel([[maybe_unused]] stc<RealRing<i_field>> const &x,
+                           Tring &x_res) {
+  x_res = 1;
+}
+
+// Hashing function
+
+namespace std {
+template <int i_field> struct hash<RealRing<i_field>> {
+  std::size_t operator()(const RealRing<i_field> &x) const {
+    auto combine_hash = [](size_t &seed, size_t new_hash) -> void {
+      seed ^= new_hash + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+    };
+    size_t seed = 0x3c5a71d3;
+    for (auto &val : x.get_num()) {
+      size_t e_hash = std::hash<Tint_real_field>()(val);
+      combine_hash(seed, e_hash);
+    }
+    return seed;
+  }
+};
+// clang-format off
+}  // namespace std
+// clang-format on
+
+namespace boost::serialization {
+
+template <class Archive, int i_field>
+inline void serialize(Archive &ar, RealRing<i_field> &val,
+                      [[maybe_unused]] const unsigned int version) {
+  size_t deg = RealRing<i_field>::get_deg();
+  if constexpr (Archive::is_saving::value) {
+    Tvec_real_field const &num = val.get_num();
+    for (size_t u = 0; u < deg; u++) {
+      Tint_real_field e_val = num[u];
+      ar &make_nvp("realring_seq", e_val);
+    }
+  } else {
+    std::vector<Tint_real_field> V(deg);
+    for (auto &e_val : V)
+      ar &make_nvp("realring_seq", e_val);
+    val = RealRing<i_field>(V);
+  }
+}
+
+// clang-format off
+}  // namespace boost::serialization
 // clang-format on
 
 // Local typing info

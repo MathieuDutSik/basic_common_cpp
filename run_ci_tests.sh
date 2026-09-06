@@ -65,6 +65,7 @@ run_step "Build Number Theory Tests" make -C src_number \
   Test_UnorderedMapMpzq \
   Test_ComputePairGcdDot \
   Test_RealCubicField \
+  Test_RealRing \
   Test_QuadField \
   Test_Rational \
   Test_PracticalInf \
@@ -84,6 +85,7 @@ run_step "Test_ComputePairGcdDot mpz_class" ./src_number/Test_ComputePairGcdDot 
 run_step "Test_ComputePairGcdDot SafeInt64" ./src_number/Test_ComputePairGcdDot SafeInt64
 run_step "Test_ComputePairGcdDot boost_cpp_int" ./src_number/Test_ComputePairGcdDot boost_cpp_int
 run_step "Test_RealCubicField" ./src_number/Test_RealCubicField
+run_step "Test_RealAlgebraicField" ./CI_tests/RealAlgebraicField/run_test.sh
 run_step "Test_QuadField" ./src_number/Test_QuadField
 run_step "Test_Rational" ./src_number/Test_Rational
 run_step "Test_PracticalInf" ./src_number/Test_PracticalInf

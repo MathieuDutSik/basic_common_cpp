@@ -12,6 +12,9 @@
 
 // clang-format off
 #include "MAT_MatrixFund.h"
+#include <optional>
+#include <utility>
+#include <vector>
 // clang-format on
 
 #ifdef SANITY_CHECK
@@ -315,6 +318,110 @@ std::pair<MyMatrix<T>, T> AdjugateDeterminant(MyMatrix<T> const &Input) {
       Output(i, c) = xhat[i];
   }
   return {std::move(Output), std::move(det)};
+}
+
+// Fraction-free solution of the single right-hand side system A x = b
+// (Zhou & Jeffrey, "Fraction-free matrix factors: new forms for LU and QR
+// factors", 2008). It runs the same forward elimination as
+// AdjugateDeterminant, but on the augmented [A | b] of width n + 1 instead of
+// [A | I] of width 2n, and then a single fraction-free back substitution
+// instead of n of them. The returned pair is (xhat, det) with
+//     A * xhat = det * b,   xhat = adj(A) * b,
+// every entry staying in the ring: xhat_i is obtained by exact (Bareiss)
+// divisions only, so no field operation ever occurs. The genuine solution is
+// x = xhat / det, which lies in the ring exactly when det divides every entry
+// of xhat -- the caller decides what to do when it does not.
+// Precondition: A is square and non-singular (a singular A throws).
+template <typename T>
+std::pair<MyVector<T>, T> SolveScaledFractionFree(MyMatrix<T> const &A,
+                                                  MyVector<T> const &b) {
+  int n = A.rows();
+#ifdef SANITY_CHECK_MATRIX_INVERSE
+  if (A.cols() != n || b.size() != n) {
+    std::cerr << "SolveScaledFractionFree: dimension mismatch\n";
+    throw TerminalException{1};
+  }
+#endif
+  // Augmented matrix M = [A | b], of size n x (n + 1).
+  MyMatrix<T> M(n, n + 1);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++)
+      M(i, j) = A(i, j);
+    M(i, n) = b(i);
+  }
+  T prev(1);
+  bool neg = false;
+  // Fraction-free forward elimination (only the rows below the pivot).
+  for (int k = 0; k < n; k++) {
+    if (M(k, k) == 0) {
+      int r = -1;
+      for (int i = k + 1; i < n; i++)
+        if (M(i, k) != 0) {
+          r = i;
+          break;
+        }
+      if (r == -1) {
+        std::cerr << "SolveScaledFractionFree: the matrix is singular\n";
+        throw TerminalException{1};
+      }
+      M.row(k).swap(M.row(r));
+      neg = !neg;
+    }
+    T pivot = M(k, k);
+    for (int i = k + 1; i < n; i++) {
+      for (int j = k + 1; j <= n; j++) {
+        T val = pivot * M(i, j) - M(i, k) * M(k, j);
+        T quot = val / prev; // exact division (Bareiss)
+#ifdef SANITY_CHECK_MATRIX_INVERSE
+        if (quot * prev != val) {
+          std::cerr << "SolveScaledFractionFree: non-exact elimination "
+                       "division\n";
+          throw TerminalException{1};
+        }
+#endif
+        M(i, j) = quot;
+      }
+      M(i, k) = T(0);
+    }
+    prev = pivot;
+  }
+  T det = neg ? -prev : prev;
+  // Fraction-free back substitution of the single column.
+  MyVector<T> xhat(n);
+  for (int i = n - 1; i >= 0; i--) {
+    T s = det * M(i, n);
+    for (int k = i + 1; k < n; k++)
+      SubMul(s, M(i, k), xhat(k));
+    T quot = s / M(i, i); // exact division (Bareiss)
+#ifdef SANITY_CHECK_MATRIX_INVERSE
+    if (quot * M(i, i) != s) {
+      std::cerr << "SolveScaledFractionFree: non-exact back-substitution\n";
+      throw TerminalException{1};
+    }
+#endif
+    xhat(i) = quot;
+  }
+  return {std::move(xhat), std::move(det)};
+}
+
+// The solution of A x = b over the ring T, or nothing when the system has no
+// solution over T (it always has one over the fraction field, since A is
+// required to be non-singular, but that solution need not be integral).
+template <typename T>
+std::optional<MyVector<T>> SolveIntegralFractionFree(MyMatrix<T> const &A,
+                                                     MyVector<T> const &b) {
+  std::pair<MyVector<T>, T> pair = SolveScaledFractionFree(A, b);
+  MyVector<T> const &xhat = pair.first;
+  T const &det = pair.second;
+  int n = xhat.size();
+  MyVector<T> x(n);
+  for (int i = 0; i < n; i++) {
+    T quot = xhat(i) / det;
+    if (quot * det != xhat(i))
+      return {};
+    x(i) = quot;
+  }
+  return x;
 }
 
 // Matrix inverse through the fraction-free LU factorization:

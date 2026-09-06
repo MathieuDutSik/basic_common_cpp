@@ -11,6 +11,8 @@
 // --- AdjugateDeterminant: A adj(A) = adj(A) A = det(A) I and the
 //     determinant matching DeterminantMat, including the row-swap path
 //     and the rejection of singular input.
+// --- SolveScaledFractionFree / SolveIntegralFractionFree: the fraction-free
+//     single right-hand side solve.
 // --- InverseFractionFreeLU on unimodular matrices.
 // --- SelectIndependentRowsRing matching the greedy selection of
 //     TMat_SelectRowCol over the overlying field.
@@ -89,6 +91,62 @@ template <typename T> void process_inverse_unimodular(int n, int nb) {
   }
 }
 
+// SolveScaledFractionFree returns (xhat, det) with A xhat = det b, and
+// SolveIntegralFractionFree returns the solution when it lies in the ring.
+// Both are checked against a right-hand side built as A x for a known
+// integral x, so the solution is known to exist over the ring.
+template <typename T> void process_fraction_free_solve(int n, int nb) {
+  for (int i = 0; i < nb; i++) {
+    MyMatrix<T> A = RandomSquareMatrix<T>(n, 5);
+    MyVector<T> x(n);
+    for (int u = 0; u < n; u++)
+      x(u) = T((random() % 11) - 5);
+    MyVector<T> b = A * x;
+    // The scaled solution.
+    std::pair<MyVector<T>, T> pair = SolveScaledFractionFree(A, b);
+    MyVector<T> prod = A * pair.first;
+    for (int u = 0; u < n; u++) {
+      if (prod(u) != pair.second * b(u)) {
+        std::cerr << "Error in SolveScaledFractionFree: A xhat != det b\n";
+        throw TerminalException{1};
+      }
+    }
+    if (pair.second != DeterminantMat(A)) {
+      std::cerr << "Error in SolveScaledFractionFree: wrong determinant\n";
+      throw TerminalException{1};
+    }
+    // The integral solution, which exists here by construction.
+    std::optional<MyVector<T>> opt = SolveIntegralFractionFree(A, b);
+    if (!opt) {
+      std::cerr << "Error in SolveIntegralFractionFree: no solution found "
+                   "while one exists\n";
+      throw TerminalException{1};
+    }
+    if (*opt != x) {
+      std::cerr << "Error in SolveIntegralFractionFree: wrong solution\n";
+      throw TerminalException{1};
+    }
+    // A right-hand side whose solution is not integral is rejected: scaling
+    // b by det(A) + 1 makes the solution (det + 1) x / 1 integral again, so
+    // instead the last entry is bumped by one, which moves the solution off
+    // the lattice unless the matrix is unimodular.
+    if (T_abs(DeterminantMat(A)) != 1) {
+      MyVector<T> b2 = b;
+      b2(n - 1) += 1;
+      std::optional<MyVector<T>> opt2 = SolveIntegralFractionFree(A, b2);
+      if (opt2) {
+        // It can legitimately be integral; when it is, it must be a solution.
+        MyVector<T> prod2 = A * (*opt2);
+        if (prod2 != b2) {
+          std::cerr << "Error in SolveIntegralFractionFree: the returned "
+                       "solution does not solve the system\n";
+          throw TerminalException{1};
+        }
+      }
+    }
+  }
+}
+
 template <typename T> MyMatrix<T> RandomRectangularMatrix(int n_row, int n_col) {
   while (true) {
     MyMatrix<T> M(n_row, n_col);
@@ -150,6 +208,8 @@ template <typename T> void process(int n) {
   std::cerr << "process_adjugate done\n";
   process_inverse_unimodular<T>(n, nb);
   std::cerr << "process_inverse_unimodular done\n";
+  process_fraction_free_solve<T>(n, nb);
+  std::cerr << "process_fraction_free_solve done\n";
   if constexpr (!is_ring_field<T>::value) {
     process_selection<T>(2 * n, n, nb);
     std::cerr << "process_selection done\n";

@@ -330,59 +330,89 @@ template <typename T> struct FractionMatrixRing {
   MyMatrix<Tring> TheMat;
 };
 
+// The matrix counterpart of NonUniqueScaleToIntegerVectorPlusCoeff_Kernel: a
+// single multiplier for the whole matrix, so the scaling is by one scalar and
+// the direction of the matrix is preserved.
+template <typename T>
+FractionMatrix<T>
+NonUniqueScaleToIntegerMatrixPlusCoeff_Kernel(MyMatrix<T> const &M) {
+  using Tresidual = typename T::Tresidual;
+  using Tring = typename underlying_ring<Tresidual>::ring_type;
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  Tring eLCM_ring(1);
+  for (int iRow = 0; iRow < nbRow; iRow++)
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      eLCM_ring = LCMpair(eLCM_ring, ScalingInteger<Tring, T>(M(iRow, iCol)));
+  Tresidual eLCM_res = UniversalScalarConversion<Tresidual, Tring>(eLCM_ring);
+  T eLCM(eLCM_res);
+  MyMatrix<T> Mret = M * eLCM;
+  return {eLCM, std::move(Mret)};
+}
+
 // Scale the matrix M to TheMat = TheMult * M with TheMat over the
-// underlying ring, TheMult > 0 and the entries of TheMat coprime. All the
-// arithmetic is done in the ring: no canonicalizing field operation occurs
-// and the gcd of the entries is computed with an early exit since it
-// usually collapses to 1 after a few entries.
+// underlying ring, TheMult > 0 and, in the rational case, the entries of
+// TheMat coprime. All the arithmetic is done in the ring: no canonicalizing
+// field operation occurs and the gcd of the entries is computed with an early
+// exit since it usually collapses to 1 after a few entries. Follows the same
+// two regimes as RemoveFractionVectorPlusCoeffRing in MAT_NonUniqueRescale.h,
+// the second one serving the number fields, whose underlying ring has no gcd
+// to reduce a content with.
 template <typename T>
 FractionMatrixRing<T> RemoveFractionMatrixPlusCoeffRing(MyMatrix<T> const &M) {
   using Tring = typename underlying_ring<T>::ring_type;
-  int nbRow = M.rows();
-  int nbCol = M.cols();
-  MyMatrix<Tring> W(nbRow, nbCol);
-  Tring eLCM(1);
-  if constexpr (is_implementation_of_Z<T>::value) {
-    // No denominator to clear for a ring type: only the content reduction
-    // remains.
-    W = UniversalMatrixConversion<Tring, T>(M);
-  } else {
-    // iRow is the inner loop because of cache locality.
-    std::vector<Tring> dens(nbRow * nbCol);
-    for (int iCol = 0; iCol < nbCol; iCol++)
-      for (int iRow = 0; iRow < nbRow; iRow++) {
-        Tring den = GetDenominator_z(M(iRow, iCol));
-        eLCM = LCMpair(eLCM, den);
-        dens[iRow + nbRow * iCol] = std::move(den);
-      }
-    for (int iCol = 0; iCol < nbCol; iCol++)
-      for (int iRow = 0; iRow < nbRow; iRow++)
-        W(iRow, iCol) = GetNumerator_z(M(iRow, iCol)) *
-                        (eLCM / dens[iRow + nbRow * iCol]);
-  }
-  Tring eGCD(0);
-  for (int iCol = 0; iCol < nbCol && eGCD != 1; iCol++) {
-    for (int iRow = 0; iRow < nbRow; iRow++) {
-      eGCD = GcdPair(eGCD, W(iRow, iCol));
-      if (eGCD == 1)
-        break;
+  if constexpr (is_implementation_of_Q<T>::value ||
+                is_implementation_of_Z<T>::value) {
+    int nbRow = M.rows();
+    int nbCol = M.cols();
+    MyMatrix<Tring> W(nbRow, nbCol);
+    Tring eLCM(1);
+    if constexpr (is_implementation_of_Z<T>::value) {
+      // No denominator to clear for a ring type: only the content reduction
+      // remains.
+      W = UniversalMatrixConversion<Tring, T>(M);
+    } else {
+      // iRow is the inner loop because of cache locality.
+      std::vector<Tring> dens(nbRow * nbCol);
+      for (int iCol = 0; iCol < nbCol; iCol++)
+        for (int iRow = 0; iRow < nbRow; iRow++) {
+          Tring den = GetDenominator_z(M(iRow, iCol));
+          eLCM = LCMpair(eLCM, den);
+          dens[iRow + nbRow * iCol] = std::move(den);
+        }
+      for (int iCol = 0; iCol < nbCol; iCol++)
+        for (int iRow = 0; iRow < nbRow; iRow++)
+          W(iRow, iCol) = GetNumerator_z(M(iRow, iCol)) *
+                          (eLCM / dens[iRow + nbRow * iCol]);
     }
+    Tring eGCD(0);
+    for (int iCol = 0; iCol < nbCol && eGCD != 1; iCol++) {
+      for (int iRow = 0; iRow < nbRow; iRow++) {
+        eGCD = GcdPair(eGCD, W(iRow, iCol));
+        if (eGCD == 1)
+          break;
+      }
+    }
+    if constexpr (is_totally_ordered<Tring>::value) {
+      if (eGCD < 0)
+        eGCD = -eGCD;
+    }
+    if (eGCD == 0) {
+      // The zero matrix, for which any multiplier works.
+      eGCD = 1;
+    }
+    if (eGCD != 1)
+      for (int iCol = 0; iCol < nbCol; iCol++)
+        for (int iRow = 0; iRow < nbRow; iRow++)
+          W(iRow, iCol) = W(iRow, iCol) / eGCD;
+    T TheMult = UniversalScalarConversion<T, Tring>(eLCM) /
+                UniversalScalarConversion<T, Tring>(eGCD);
+    return {std::move(TheMult), std::move(W)};
+  } else {
+    FractionMatrix<T> fr = NonUniqueScaleToIntegerMatrixPlusCoeff_Kernel(M);
+    return {std::move(fr.TheMult),
+            UniversalMatrixConversion<Tring, T>(fr.TheMat)};
   }
-  if constexpr (is_totally_ordered<Tring>::value) {
-    if (eGCD < 0)
-      eGCD = -eGCD;
-  }
-  if (eGCD == 0) {
-    // The zero matrix, for which any multiplier works.
-    eGCD = 1;
-  }
-  if (eGCD != 1)
-    for (int iCol = 0; iCol < nbCol; iCol++)
-      for (int iRow = 0; iRow < nbRow; iRow++)
-        W(iRow, iCol) = W(iRow, iCol) / eGCD;
-  T TheMult = UniversalScalarConversion<T, Tring>(eLCM) /
-              UniversalScalarConversion<T, Tring>(eGCD);
-  return {std::move(TheMult), std::move(W)};
 }
 
 template <typename T>
@@ -439,6 +469,11 @@ CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
   return {TheMult, std::move(V2)};
 }
 
+// The canonical representative of M up to a positive scalar, together with the
+// multiplier that produced it: the rational types clear the denominators and
+// reduce the content, the fields with no gcd divide by the smallest
+// coefficient. Requires the multiplier to exist in T, so a ring that is
+// neither has to go through ScalarCanonicalizationMatrix instead.
 template <typename T>
 FractionMatrix<T> ScalarCanonicalizationMatrixPlusCoeff(MyMatrix<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
@@ -449,9 +484,26 @@ FractionMatrix<T> ScalarCanonicalizationMatrixPlusCoeff(MyMatrix<T> const &M) {
   }
 }
 
+// The canonical representative alone, which is all the callers need. It also
+// covers the rings that are neither Z-like (no gcd to reduce a content with)
+// nor fields (no division to normalize with), such as the order Z[x]
+// underlying a real algebraic field: the normalization is then done in the
+// overlying field, where the division exists, and the result is scaled back
+// into the ring. Leaving such a matrix untouched is not an option -- the
+// coefficients grow without bound over the repeated combinations the callers
+// perform, and the growth eventually defeats the sign determination.
 template <typename T>
 MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
-  return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
+  using Tfield = typename overlying_field<T>::field_type;
+  if constexpr (is_implementation_of_Q<Tfield>::value ||
+                is_ring_field<T>::value) {
+    return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
+  } else {
+    MyMatrix<Tfield> M_field = UniversalMatrixConversion<Tfield, T>(M);
+    MyMatrix<Tfield> M_can =
+        CanonicalizationSmallestCoefficientMatrixPlusCoeff(M_field).TheMat;
+    return RemoveFractionMatrixPlusCoeffRing(M_can).TheMat;
+  }
 }
 
 template <typename T>
@@ -534,6 +586,7 @@ UniqueRescaleRowsRing(MyMatrix<T> const &M) {
   return Mret;
 }
 
+// The vector counterpart of ScalarCanonicalizationMatrixPlusCoeff.
 template <typename T>
 FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
   using Tfield = typename overlying_field<T>::field_type;
@@ -544,9 +597,20 @@ FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
   }
 }
 
+// The vector counterpart of ScalarCanonicalizationMatrix, covering the rings
+// that are neither Z-like nor fields in the same way.
 template <typename T>
 MyVector<T> ScalarCanonicalizationVector(MyVector<T> const &M) {
-  return ScalarCanonicalizationVectorPlusCoeff(M).TheVect;
+  using Tfield = typename overlying_field<T>::field_type;
+  if constexpr (is_implementation_of_Q<Tfield>::value ||
+                is_ring_field<T>::value) {
+    return ScalarCanonicalizationVectorPlusCoeff(M).TheVect;
+  } else {
+    MyVector<Tfield> V_field = UniversalVectorConversion<Tfield, T>(M);
+    MyVector<Tfield> V_can =
+        CanonicalizationSmallestCoefficientVectorPlusCoeff(V_field).TheVect;
+    return RemoveFractionVectorPlusCoeffRing(V_can).TheVect;
+  }
 }
 
 template <typename T>

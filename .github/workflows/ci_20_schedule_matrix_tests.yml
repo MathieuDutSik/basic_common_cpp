@@ -49,6 +49,12 @@ jobs:
     - name: Test_MatrixFunctionality
       run: ./CI_tests/MatrixFunctionality/run_test.sh
 
+    # ScalarCanonicalization* and SubsetRankOneSolver dispatch on a ring that
+    # is neither a field nor a euclidean domain when the type is a real
+    # algebraic field; this checks those paths against the field ones.
+    - name: Test_RealAlgebraicField
+      run: ./CI_tests/RealAlgebraicField/run_test.sh
+
     - name: Test_PerformanceHNF(mpz_class)
       run: cd src_matrix && ./Test_PerformanceHNF mpz_class 10 10
 
