@@ -605,6 +605,8 @@ MyVector<T> ScalarCanonicalizationVector(MyVector<T> const &M) {
   if constexpr (is_implementation_of_Q<Tfield>::value ||
                 is_ring_field<T>::value) {
     return ScalarCanonicalizationVectorPlusCoeff(M).TheVect;
+  } else if constexpr (has_ring_canonicalization<T>::value) {
+    return ScalarCanonicalizationVectorRing(M);
   } else {
     MyVector<Tfield> V_field = UniversalVectorConversion<Tfield, T>(M);
     MyVector<Tfield> V_can =

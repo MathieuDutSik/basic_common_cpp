@@ -1414,9 +1414,16 @@ inline std::vector<int> TMat_ListRowSelect(MyMatrix<T> const &Input) {
 
 // Reduce a vector by the gcd of its content: an exact division that keeps the
 // entries small along a fraction-free computation. The gcd is seeded at zero,
-// computed with an early exit, and made positive so no sign flip occurs. Types
-// without a euclidean gcd (e.g. the quadratic / real field extensions, which
-// act as their own ring) are left untouched; their arithmetic already reduces.
+// computed with an early exit, and made positive so no sign flip occurs.
+//
+// A ring with no euclidean gcd but with a canonicalization of its own (see
+// has_ring_canonicalization, the case of the order Z[x] underlying a real
+// algebraic field) uses that instead: it divides by one entry rather than by
+// a content, which is also a positive scalar and so equally leaves the
+// direction of V alone. The reduction matters just as much there, the ring
+// arithmetic having nothing that shrinks its operands by itself.
+//
+// A field is left untouched: its own arithmetic already reduces.
 template <typename T> void NormalizeVectorContent(MyVector<T> &V) {
   if constexpr (is_euclidean_domain<T>::value) {
     int n = V.size();
@@ -1434,6 +1441,8 @@ template <typename T> void NormalizeVectorContent(MyVector<T> &V) {
       return;
     for (int i = 0; i < n; i++)
       V(i) = V(i) / eGCD;
+  } else if constexpr (has_ring_canonicalization<T>::value) {
+    V = ScalarCanonicalizationVectorRing(V);
   }
 }
 

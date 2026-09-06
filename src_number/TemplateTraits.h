@@ -274,6 +274,15 @@ template <> struct is_fma_prefered<float> {
   static const bool value = true;
 };
 
+// Whether the ring canonicalizes a vector up to a positive scalar on its own,
+// through ScalarCanonicalizationVectorRing. A ring that is neither Z-like nor
+// a field has no gcd to reduce a content with and no division to normalize
+// with, so it otherwise has to go through its overlying field, which costs a
+// conversion and a field division per vector.
+template <typename T> struct has_ring_canonicalization {
+  static const bool value = false;
+};
+
 // Trait definition for real algebraic fields.
 //
 // The primary template lives here, with the other traits, rather than next to

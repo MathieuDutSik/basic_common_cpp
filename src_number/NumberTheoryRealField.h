@@ -354,7 +354,10 @@ public:
   // Only meaningful when the minimal polynomial is monic, in which case the
   // internal y = scal * x rescaling is trivial and num is already expressed
   // over the powers of x.
-  std::optional<Tvec> FindQuotientRing(Tvec const &a, Tvec const &b) const {
+  // The matrix of the multiplication by b in the basis of the powers of x:
+  // its column i holds the coefficients of b x^i. Integral, since the
+  // minimal polynomial is monic.
+  MyMatrix<Tz> MultiplicationMatrix(Tvec const &b) const {
     MyMatrix<Tz> M(deg, deg);
     Tvec col = b;
     for (int i_col = 0; i_col < deg; i_col++) {
@@ -373,6 +376,25 @@ public:
         }
       }
     }
+    return M;
+  }
+  // The pair (adj, norm) with b * adj = norm, adj in the ring and norm the
+  // rational integer det(M(b)), the norm of b. It is the inverse of b without
+  // leaving Z, since 1/b = adj / norm: adj is the first column of the
+  // adjugate of the multiplication matrix, that matrix sending the
+  // coefficients of 1 to those of 1/b once divided by the determinant.
+  // Dividing a vector by b is therefore a multiplication by adj followed by a
+  // content reduction, with no rational arithmetic anywhere.
+  std::pair<Tvec, Tz> GetAdjugateNorm(Tvec const &b) const {
+    MyMatrix<Tz> M = MultiplicationMatrix(b);
+    std::pair<MyMatrix<Tz>, Tz> pair = AdjugateDeterminant(M);
+    Tvec adj(deg);
+    for (int u = 0; u < deg; u++)
+      adj[u] = pair.first(u, 0);
+    return {std::move(adj), std::move(pair.second)};
+  }
+  std::optional<Tvec> FindQuotientRing(Tvec const &a, Tvec const &b) const {
+    MyMatrix<Tz> M = MultiplicationMatrix(b);
     MyVector<Tz> w(deg);
     for (int i = 0; i < deg; i++)
       w(i) = a[i];
@@ -1129,6 +1151,28 @@ private:
 public:
   Tvec const &get_num() const { return num; }
   static size_t get_deg() { return get_hcrf().deg; }
+  static HelperClassRealField<T> const &get_helper() { return get_hcrf(); }
+  // Build an element from its coefficients over the powers of x, moving them
+  // in. Used by the ring canonicalization.
+  static RealRing<i_field> from_coefficients(Tvec num_in) {
+    return RealRing<i_field>(std::move(num_in));
+  }
+  // x / g for g a rational integer dividing every coefficient of x, done
+  // coefficient by coefficient so that no linear system is solved.
+  static RealRing<i_field> divide_by_integer(RealRing<i_field> const &x,
+                                             Tz const &g) {
+    Tvec V(x.num.size());
+    for (size_t u = 0; u < x.num.size(); u++) {
+      V[u] = x.num[u] / g;
+#ifdef SANITY_CHECK_REAL_ALG_NUMERIC
+      if (V[u] * g != x.num[u]) {
+        std::cerr << "NTRR: divide_by_integer on a non-dividing integer\n";
+        throw TerminalException{1};
+      }
+#endif
+    }
+    return RealRing<i_field>(std::move(V));
+  }
 
   // Constructor
   RealRing() : num(get_deg(), Tz(0)) {}
@@ -1487,6 +1531,69 @@ inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ,
   for (size_t u = 0; u < deg; u++)
     V[u] = num[u];
   eD = RealRing<i_field>(V);
+}
+
+// The canonical representative of V up to a positive scalar, computed inside
+// the ring. Z[x] has no gcd, so the content of V cannot be reduced away;
+// what bounds the coefficients is the division by one entry, which the field
+// does with an actual division. Here the same division is done through
+// 1/s = adj(s) / norm(s): V is multiplied by adj(s), which stays in the ring,
+// and the content over Z of the result is divided out. The outcome is the
+// primitive integral vector on the ray of V / s, which is what the field
+// normalization produces too, but reached without a single rational
+// operation. The entry s is the one of smallest absolute value, as in
+// CanonicalizationSmallestCoefficientVectorPlusCoeff.
+template <int i_field> struct has_ring_canonicalization<RealRing<i_field>> {
+  static const bool value = true;
+};
+
+template <int i_field>
+MyVector<RealRing<i_field>>
+ScalarCanonicalizationVectorRing(MyVector<RealRing<i_field>> const &V) {
+  using Tz = Tint_real_field;
+  using Tvec = Tvec_real_field;
+  int n = V.size();
+  int i_sma = -1;
+  for (int i = 0; i < n; i++) {
+    if (V(i) != 0) {
+      if (i_sma == -1 || T_abs(V(i)) < T_abs(V(i_sma)))
+        i_sma = i;
+    }
+  }
+  if (i_sma == -1) {
+    // The zero vector, already canonical.
+    return V;
+  }
+  HelperClassRealField<Trat_real_field> const &hcrf =
+      RealRing<i_field>::get_helper();
+  // The divisor is the absolute value of the smallest entry, as
+  // GetSmallestVectorCoefficient returns it, so that the direction of the
+  // result is the one the field normalization gives.
+  RealRing<i_field> s = T_abs(V(i_sma));
+  std::pair<Tvec, Tz> pair = hcrf.GetAdjugateNorm(s.get_num());
+  RealRing<i_field> adj = RealRing<i_field>::from_coefficients(pair.first);
+  // The norm carries the sign of the division by s, and the direction of the
+  // result must be that of V / s.
+  bool negate = (pair.second < 0);
+  MyVector<RealRing<i_field>> W(n);
+  Tz g(0);
+  for (int i = 0; i < n; i++) {
+    RealRing<i_field> val = V(i) * adj;
+    if (negate)
+      val = -val;
+    for (auto &coeff : val.get_num()) {
+      g = KernelGcdPair(g, coeff);
+    }
+    W(i) = std::move(val);
+  }
+  if (g < 0)
+    g = -g;
+  if (g == 0 || g == 1)
+    return W;
+  MyVector<RealRing<i_field>> Wred(n);
+  for (int i = 0; i < n; i++)
+    Wred(i) = RealRing<i_field>::divide_by_integer(W(i), g);
+  return Wred;
 }
 
 template <int i_field> struct is_totally_ordered<RealRing<i_field>> {
