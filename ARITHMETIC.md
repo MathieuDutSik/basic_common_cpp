@@ -50,6 +50,39 @@ To add a new quadratic field such as **Q(sqrt(6))**, add a new branch in
 Elements are written in the input format `a+b*x`, for instance `1`, `1+x`,
 `x/4`, `-3-3x/4`, `3+(3*4)*x^3`. No spaces are allowed inside an entry.
 
+#### The underlying ring
+
+`underlying_ring<QuadField<T, d>>::ring_type` is `QuadField<Tring, d>` with
+`Tring` the underlying ring of the base, so `QuadField<mpq_class, d>` has
+`QuadField<mpz_class, d>` -- that is `Z[sqrt(d)]` -- as its ring. No separate
+class is needed: the arithmetic, the ordering, the input/output, the hashing
+and the serialization are the same over either base, and the traits already
+follow the base type, `is_ring_field<QuadField<T, d>>` being
+`is_ring_field<T>`.
+
+`Z[sqrt(d)]` is not the ring of integers of the field: for `d = 1 mod 4` that
+is the strictly larger `Z[(1+sqrt(d))/2]`, which the `(a, b)` layout over
+`(1, sqrt(d))` cannot represent. It is a ring for every `d` since `sqrt(d)` is
+a root of the monic `X^2 - d`, so no monicity check arises here, unlike
+`RealRing`.
+
+What changes with the base is the division. Over either base it is
+`x / y = x * conj(y) / N(y)` with the norm `N(y) = c^2 - d e^2` a scalar of the
+base, and the two coordinates of `x * conj(y)` are divided by it. Over a field
+those divisions are exact by construction. Over a ring the quotient lies in
+the ring exactly when the norm divides both coordinates, and **when it does
+not the division emits an error and throws `TerminalException{1}`** rather
+than truncate. It used to truncate silently: `(1+sqrt(5))/2` came back as `0`.
+
+The same `conj(s)/N(s)` gives the canonicalization of a vector inside the ring
+(`ScalarCanonicalizationVectorRing`), which is what keeps the coefficients
+from growing where the ring has no gcd to reduce a content with.
+
+Measured on cyclic polytopes over `Q(sqrt(5))`, running the dual description
+over the ring instead of the field: about 2.3x for beneath-and-beyond, 2.5x
+for lrs, and 806x for cdd on the larger case, the double description being the
+place where unbounded ray growth was the whole cost.
+
 ### General real algebraic fields -- `RealField<i_field>`
 
 Defined in `src_number/NumberTheoryRealField.h`.
@@ -120,7 +153,7 @@ counterpart already had, and `SubsetRankOneSolver` uses the
 
 `CI_tests/RealAlgebraicField/run_test.sh` covers all of it: the field, the
 ring, the field/ring consistency of every one of those paths
-(`src_matrix/Test_RealRingConsistency`) and the timing comparison of the two
+(`src_matrix/Test_RingConsistency`) and the timing comparison of the two
 (`src_number/Bench_real_ring`). It is run by the number theory and the matrix
 CI workflows.
 

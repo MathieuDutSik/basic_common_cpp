@@ -8,13 +8,15 @@
 #                                 exact division and its failure mode, the
 #                                 rejection of a non-monic minimal polynomial,
 #                                 the conversions and the string round trip.
-#   * Test_RealRingConsistency:   the field and the ring code paths return the
+#   * Test_RingConsistency:       the field and the ring code paths return the
 #                                 same answers -- determinant, product, rank,
 #                                 adjugate, the canonicalizations, the subset
 #                                 solver, the scaling into the ring, the
 #                                 ordering and the division. These are the
 #                                 dispatches that see, in the ring, a type that
 #                                 is neither a field nor a euclidean domain.
+#                                 Run for the cubic field against Z[x] and for
+#                                 Q(sqrt(d)) against Z[sqrt(d)], d = 2, 3, 5.
 #   * Bench_real_ring:            the field against the ring on the same
 #                                 matrices, printing the timing comparison and
 #                                 checking that both compute the same
@@ -58,7 +60,7 @@ BENCH_SIZE="${2:-8}"
 cd "$ROOT"
 
 for prog in src_number/Test_RealCubicField src_number/Test_RealRing \
-            src_matrix/Test_RealRingConsistency src_number/Bench_real_ring; do
+            src_matrix/Test_RingConsistency src_number/Bench_real_ring; do
   name="$(basename "$prog")"
   echo "Building $name ..."
   "$CXX" $CXXFLAGS "$ROOT/$prog.cpp" -o "$WORK/$name" $LDFLAGS
@@ -73,8 +75,8 @@ echo "===== Test_RealRing ====="
 "$WORK/Test_RealRing"
 
 echo
-echo "===== Test_RealRingConsistency ($N_TRIALS trials per section) ====="
-"$WORK/Test_RealRingConsistency" "$N_TRIALS"
+echo "===== Test_RingConsistency ($N_TRIALS trials per section) ====="
+"$WORK/Test_RingConsistency" "$N_TRIALS"
 
 echo
 echo "===== Bench_real_ring (RealField against RealRing) ====="

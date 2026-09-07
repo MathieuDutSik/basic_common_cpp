@@ -4,6 +4,7 @@
 // clang-format off
 #include "Temp_common.h"
 #include "InputOutput.h"
+#include "MatrixTypes.h"
 #include <boost/serialization/nvp.hpp>
 #include <limits>
 #include <string>
@@ -134,10 +135,38 @@ public:
     a -= pa;
     b -= pb;
   }
+  // Every division here is x / y = x * conj(y) / N(y), with the norm
+  // N(y) = c^2 - d e^2 a scalar of the base type: the coordinates of
+  // x * conj(y) are divided by it. Over a field that is exact by
+  // construction. Over a ring -- the case of Z[sqrt(d)], which is what
+  // underlying_ring returns for a quadratic field -- it need not be: the
+  // quotient lies in the ring exactly when the norm divides both
+  // coordinates, and there is nothing to fall back on when it does not, so
+  // the division reports and throws rather than truncate silently.
+  static T DivideByNorm(T const &num, T const &norm) {
+    if constexpr (is_ring_field<T>::value) {
+      return num / norm;
+    } else {
+      if (norm == 0) {
+        std::cerr << "QUADFIELD: division by zero in Z[sqrt(" << d << ")]\n";
+        throw TerminalException{1};
+      }
+      T quot = num / norm;
+      if (quot * norm != num) {
+        std::cerr << "QUADFIELD: the quotient is not an element of the ring "
+                     "Z[sqrt(" << d << ")]\n";
+        std::cerr << "QUADFIELD: the norm " << norm
+                  << " does not divide the coordinate " << num << "\n";
+        std::cerr << "QUADFIELD: use the overlying field for this quotient\n";
+        throw TerminalException{1};
+      }
+      return quot;
+    }
+  }
   void operator/=(QuadField<T, d> const &x) {
     T disc = x.a * x.a - d * x.b * x.b;
-    T a_new = (a * x.a - d * b * x.b) / disc;
-    b = (b * x.a - a * x.b) / disc;
+    T a_new = DivideByNorm(a * x.a - d * b * x.b, disc);
+    b = DivideByNorm(b * x.a - a * x.b, disc);
     a = a_new;
   }
   friend QuadField<T, d> operator+(QuadField<T, d> const &x,
@@ -157,16 +186,16 @@ public:
   friend QuadField<T, d> operator/(int const &x, QuadField<T, d> const &y) {
     QuadField<T, d> z;
     T disc = y.a * y.a - d * y.b * y.b;
-    z.a = x * y.a / disc;
-    z.b = -x * y.b / disc;
+    z.a = DivideByNorm(x * y.a, disc);
+    z.b = DivideByNorm(-x * y.b, disc);
     return z;
   }
   friend QuadField<T, d> operator/(QuadField<T, d> const &x,
                                    QuadField<T, d> const &y) {
     QuadField<T, d> z;
     T disc = y.a * y.a - d * y.b * y.b;
-    z.a = (x.a * y.a - d * x.b * y.b) / disc;
-    z.b = (x.b * y.a - x.a * y.b) / disc;
+    z.a = DivideByNorm(x.a * y.a - d * x.b * y.b, disc);
+    z.b = DivideByNorm(x.b * y.a - x.a * y.b, disc);
     return z;
   }
   void operator*=(QuadField<T, d> const &x) {
@@ -367,14 +396,23 @@ inline std::ostream &operator<<(std::ostream &os, QuadProd<Tinp, d> const &e) {
   return os << QuadField<Tinp, d>(e);
 }
 
+// The field of fractions and the underlying ring follow the base type: over
+// mpz_class the quadratic field is the order Z[sqrt(d)] and its field of
+// fractions is the quadratic field over mpq_class. Both are fixpoints on the
+// side they already are, so overlying_field of a field and underlying_ring of
+// a ring return the type itself.
 template <typename T, int d> struct overlying_field<QuadField<T, d>> {
-  typedef QuadField<typename QuadField<T, d>::Tresidual, d> field_type;
+  typedef QuadField<typename overlying_field<T>::field_type, d> field_type;
 };
 
-// Note that the underlying ring is not unique, there are many possibiliies
-// actually but we can represent only one in our scheme.
+// The underlying ring is Z[sqrt(d)] = { a + b sqrt(d) : a, b in Z }, the free
+// Z-module on 1 and sqrt(d). It is not the ring of integers of the field: for
+// d = 1 mod 4 that is the strictly larger Z[(1+sqrt(d))/2], which the (a, b)
+// layout over (1, sqrt(d)) cannot even represent. It is not canonical either,
+// but it is a ring, sqrt(d) being a root of the monic X^2 - d, and running
+// over it avoids the denominators of the field.
 template <typename T, int d> struct underlying_ring<QuadField<T, d>> {
-  typedef QuadField<typename QuadField<T, d>::Tresidual, d> ring_type;
+  typedef QuadField<typename underlying_ring<T>::ring_type, d> ring_type;
 };
 
 template <typename T, int d>
@@ -446,10 +484,23 @@ struct use_bareiss_for_determinants<QuadField<T, d>> {
 };
 
 // Fraction-free LU inverse is a clear win for quadratic fields over an exact
-// base (benchmarked 2.5-6x vs classical); off over a floating-point base.
+// base (benchmarked 2.5-6x vs classical); off over a floating-point base, and
+// off over a ring base, where the inverse lies in the ring only when the
+// determinant is a unit, so the generic non-field dispatch of Inverse -- go to
+// the overlying field and come back -- is the correct behaviour.
 template <typename T, int d>
 struct use_fraction_free_lu<QuadField<T, d>> {
-  static const bool value = is_exact_arithmetic<T>::value;
+  static const bool value = is_exact_arithmetic<T>::value &&
+                            is_ring_field<T>::value;
+};
+
+// Over a ring base there is no gcd of two ring elements to reduce a content
+// with and no division to normalize with, so the vector canonicalization is
+// done by ScalarCanonicalizationVectorRing below rather than through the
+// overlying field.
+template <typename T, int d>
+struct has_ring_canonicalization<QuadField<T, d>> {
+  static const bool value = !is_ring_field<T>::value;
 };
 
 template <typename T, int d> struct is_implementation_of_Q<QuadField<T, d>> {
@@ -537,6 +588,61 @@ void ScalingInteger_Kernel(stc<QuadField<T, d>> const &x, Tring &x_res) {
   Tfield const &a = x.val.get_const_a();
   Tfield const &b = x.val.get_const_b();
   x_res = LCMpair(GetDenominator_z(a), GetDenominator_z(b));
+}
+
+// The canonical representative of V on its ray, computed inside the ring.
+// Z[sqrt(d)] has no gcd of two ring elements, so the content of V cannot be
+// reduced away; what bounds the coefficients is the division by one entry,
+// which the field does with an actual division. Here the same division is done
+// through 1/s = conj(s) / N(s): V is multiplied by conj(s), which stays in the
+// ring, and the content over the base ring of the result is divided out. The
+// outcome is the primitive vector on the ray of V / s, which is what the field
+// normalization produces too, but reached without a single fraction. The entry
+// s is the one of smallest absolute value, as
+// CanonicalizationSmallestCoefficientVectorPlusCoeff picks it.
+template <typename T, int d>
+MyVector<QuadField<T, d>>
+ScalarCanonicalizationVectorRing(MyVector<QuadField<T, d>> const &V) {
+  using Tquad = QuadField<T, d>;
+  int n = V.size();
+  int i_sma = -1;
+  for (int i = 0; i < n; i++) {
+    if (V(i) != 0) {
+      if (i_sma == -1 || T_abs(V(i)) < T_abs(V(i_sma)))
+        i_sma = i;
+    }
+  }
+  if (i_sma == -1) {
+    // The zero vector, already canonical.
+    return V;
+  }
+  // The divisor is the absolute value of the smallest entry, so that the
+  // direction of the result is the one the field normalization gives.
+  Tquad s = T_abs(V(i_sma));
+  Tquad conj_s(s.get_const_a(), -s.get_const_b());
+  T norm = s.get_const_a() * s.get_const_a() -
+           d * s.get_const_b() * s.get_const_b();
+  // The norm carries the sign of the division by s, and the direction of the
+  // result must be that of V / s.
+  bool negate = (norm < 0);
+  MyVector<Tquad> W(n);
+  T g(0);
+  for (int i = 0; i < n; i++) {
+    Tquad val = V(i) * conj_s;
+    if (negate)
+      val = -val;
+    g = GcdPair(g, val.get_const_a());
+    g = GcdPair(g, val.get_const_b());
+    W(i) = val;
+  }
+  if (g < 0)
+    g = -g;
+  if (g == 0 || g == 1)
+    return W;
+  MyVector<Tquad> Wred(n);
+  for (int i = 0; i < n; i++)
+    Wred(i) = Tquad(W(i).get_const_a() / g, W(i).get_const_b() / g);
+  return Wred;
 }
 
 // clang-format off
