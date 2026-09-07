@@ -2608,8 +2608,16 @@ inline MyMatrix<T> CanonicalizeOrderedMatrix(MyMatrix<T> const &Input) {
   division-free elimination: each candidate row is reduced against the
   echelon rows accumulated so far using cross multiplication only, so the
   selection works over a ring and matches the greedy selection of
-  TMat_SelectRowCol over the overlying field. For a euclidean ring the
-  reduced rows are divided by their content to keep the entries small.
+  TMat_SelectRowCol over the overlying field.
+
+  The reduced rows go through NormalizeVectorContent, which is what keeps the
+  entries small: the cross multiplication doubles their size at every echelon
+  level, so without it they grow through the whole elimination. That matters
+  for every ring that does not reduce on its own, not only the euclidean ones
+  -- the reduction used to be open coded here behind is_euclidean_domain,
+  which silently did nothing for a ring such as the order Z[x] underlying a
+  real algebraic field. Scaling a row by a non-zero scalar changes neither the
+  independence nor the pivot column, so the selection is unaffected.
 */
 template <typename T>
 std::vector<int> SelectIndependentRowsRing(MyMatrix<T> const &M) {
@@ -2628,25 +2636,7 @@ std::vector<int> SelectIndependentRowsRing(MyMatrix<T> const &M) {
         for (int j = 0; j < nbCol; j++) {
           V(j) = V(j) * coef1 - coef2 * echelon[k](j);
         }
-        if constexpr (is_euclidean_domain<T>::value) {
-          T eGCD(0);
-          for (int j = 0; j < nbCol; j++) {
-            eGCD = GcdPair(eGCD, V(j));
-            if (eGCD == 1) {
-              break;
-            }
-          }
-          if constexpr (is_totally_ordered<T>::value) {
-            if (eGCD < 0) {
-              eGCD = -eGCD;
-            }
-          }
-          if (eGCD != 0 && eGCD != 1) {
-            for (int j = 0; j < nbCol; j++) {
-              V(j) = V(j) / eGCD;
-            }
-          }
-        }
+        NormalizeVectorContent(V);
       }
     }
     int c_piv = -1;
@@ -2674,8 +2664,13 @@ std::vector<int> SelectIndependentRowsRing(MyMatrix<T> const &M) {
   basis is replaced by its adjugate -- which differs from it by the
   determinant, a single scalar for the whole matrix -- with the sign of
   the determinant compensated, and the scalar canonicalization absorbs
-  the remaining positive factor. The output is the same matrix as the
-  computation over the overlying field.
+  the remaining positive factor.
+
+  The output is on the same ray as the computation over the overlying field,
+  not equal to it: the field representative carries a rational denominator
+  that the ring cannot divide by, so the ring returns the integral multiple of
+  it. Being canonical on the ray is the contract, and it holds within either
+  type; only a comparison across the two sees the positive scalar.
 */
 template <typename T>
 requires (!is_ring_field<T>::value)

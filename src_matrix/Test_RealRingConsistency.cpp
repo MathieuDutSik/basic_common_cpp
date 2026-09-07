@@ -232,6 +232,55 @@ static void process_canonicalization(int n, int deg, int nb) {
         "representative");
 }
 
+// CanonicalizeOrderedMatrix and, through it, SelectIndependentRowsRing. That
+// selection reduces by cross multiplication, which doubles the size of the
+// entries at every echelon level, and relies on NormalizeVectorContent to pull
+// them back; the reduction used to be gated on is_euclidean_domain and so did
+// nothing here. The canonical form must be the one the overlying field gives.
+static void process_canonicalize_ordered(int n_row, int n_col, int deg,
+                                         int nb) {
+  SmallRandom rnd(5150);
+  bool ok = true, sel_ok = true;
+  int n_done = 0;
+  for (int i_test = 0; i_test < nb; i_test++) {
+    MyMatrix<Tring> Mr = RandomRingMatrix(rnd, n_row, n_col, deg, 3);
+    MyMatrix<Tfield> Mf = to_field(Mr);
+    if (RankMat(Mf) < n_col)
+      continue;
+    // The independent rows selected over the ring are those selected over the
+    // field: the selection is by rank, which no scaling changes.
+    std::vector<int> sel_r = SelectIndependentRowsRing(Mr);
+    std::vector<int> sel_f = SelectIndependentRowsRing(Mf);
+    if (sel_r != sel_f)
+      sel_ok = false;
+    // And the canonical form is the one computed over the field, up to the
+    // positive scalar the ring cannot divide by: the field representative
+    // carries a rational denominator, the ring one is the integral multiple
+    // of it. Being canonical on the ray is the whole contract, so this is the
+    // comparison that applies; requiring equality would be requiring the ring
+    // to leave itself.
+    MyMatrix<Tring> Cr = CanonicalizeOrderedMatrix(Mr);
+    MyMatrix<Tfield> Cf = CanonicalizeOrderedMatrix(Mf);
+    if (Cr.rows() != Cf.rows() || Cr.cols() != Cf.cols()) {
+      ok = false;
+      continue;
+    }
+    MyVector<Tfield> flat_r(Cr.rows() * Cr.cols());
+    MyVector<Tfield> flat_f(Cr.rows() * Cr.cols());
+    for (int i = 0; i < Cr.rows(); i++)
+      for (int j = 0; j < Cr.cols(); j++) {
+        flat_r(i * Cr.cols() + j) = to_field(Cr(i, j));
+        flat_f(i * Cr.cols() + j) = Cf(i, j);
+      }
+    if (!PositivelyProportional(flat_r, flat_f))
+      ok = false;
+    n_done++;
+  }
+  check(n_done > 0, "the ordered canonicalization test found usable matrices");
+  check(sel_ok, "SelectIndependentRowsRing agrees between the ring and the field");
+  check(ok, "CanonicalizeOrderedMatrix agrees with the field up to a positive scalar");
+}
+
 // SubsetRankOneSolver: the ring uses the SubsetRankOneSolver_RingOverField
 // variant since the euclidean one needs a gcd. The kernel vector it returns
 // must be the same ray as the one the field variant returns.
@@ -373,12 +422,14 @@ int main(int argc, char *argv[]) {
     std::cerr << "STEP 1: the square matrix operations\n";
     process_canonicalization(4, deg, nb);
     std::cerr << "STEP 2: the canonicalizations\n";
+    process_canonicalize_ordered(7, 4, deg, nb);
+    std::cerr << "STEP 3: the ordered canonicalization and the row selection\n";
     process_subset_solver(6, 4, deg, nb);
-    std::cerr << "STEP 3: the subset solver\n";
+    std::cerr << "STEP 4: the subset solver\n";
     process_scaling(5, deg, nb);
-    std::cerr << "STEP 4: the scaling into the ring\n";
+    std::cerr << "STEP 5: the scaling into the ring\n";
     process_ordering(deg, 10 * nb);
-    std::cerr << "STEP 5: the ordering, the sign and the division\n";
+    std::cerr << "STEP 6: the ordering, the sign and the division\n";
     //
     std::cerr << "n_error=" << n_error << "\n";
     if (n_error > 0) {
