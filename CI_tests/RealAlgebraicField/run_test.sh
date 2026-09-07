@@ -41,12 +41,14 @@ ROOT="$HERE/../.."
 : "${EIGEN_PATH:=/opt/homebrew/include/eigen3}"
 : "${GMP_LIBDIR:=/opt/homebrew/lib}"
 : "${GMP_CXX_LINK:=-L${GMP_LIBDIR} -lgmp -lgmpxx}"
+# Test_RealRing serializes, so the boost serialization library is needed.
+: "${BOOST_LINK:=-L${GMP_LIBDIR} -lboost_serialization}"
 
 WORK="$(mktemp -d)"
 trap 'rm -rf "$WORK"' EXIT
 
 CXXFLAGS="-std=c++20 -Wall -Wextra -O3 -I${ROOT}/src_basic -I${ROOT}/src_number -I${ROOT}/src_matrix -I${ROOT}/src_comb -I${GMP_INCDIR} -I${BOOST_INCDIR} -I${EIGEN_PATH}"
-LDFLAGS="-lm ${GMP_CXX_LINK} -pthread"
+LDFLAGS="-lm ${GMP_CXX_LINK} ${BOOST_LINK} -pthread"
 
 N_TRIALS="${1:-50}"
 BENCH_SIZE="${2:-8}"

@@ -10,13 +10,17 @@
 //   --- the exact division succeeds when the quotient is in the ring,
 //   --- it throws when the quotient is not in the ring,
 //   --- a non-monic description of the same field is rejected,
-//   --- the conversions ring <-> field and the string round trip.
+//   --- the conversions ring <-> field and the string round trip,
+//   --- the boost serialization, on which the MPI dual description relies.
 
 // clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
 #include "MAT_Matrix.h"
 // clang-format on
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -155,6 +159,49 @@ int main() {
     std::cerr << "INFO: a=" << str << "\n";
     std::cerr << "STEP 6: conversions and string round trip checked\n";
     //
+    // The boost serialization. POLY_MPI_DualDesc moves matrices between ranks,
+    // so both the scalar and the matrix round trip are exercised.
+    {
+      std::ostringstream oss;
+      {
+        boost::archive::text_oarchive oa(oss);
+        oa << a;
+      }
+      Tring a_ser;
+      {
+        std::istringstream iss(oss.str());
+        boost::archive::text_iarchive ia(iss);
+        ia >> a_ser;
+      }
+      check(a_ser == a, "the round trip ring -> archive -> ring");
+      //
+      MyMatrix<Tring> Mser(2, 2);
+      Mser(0, 0) = a;
+      Mser(0, 1) = MakeRing(5, 0, 0);
+      Mser(1, 0) = -a;
+      Mser(1, 1) = a * b;
+      std::ostringstream oss2;
+      {
+        boost::archive::text_oarchive oa(oss2);
+        oa << Mser;
+      }
+      MyMatrix<Tring> Nser;
+      {
+        std::istringstream iss(oss2.str());
+        boost::archive::text_iarchive ia(iss);
+        ia >> Nser;
+      }
+      bool mat_ok = (Nser.rows() == 2 && Nser.cols() == 2);
+      if (mat_ok) {
+        for (int i = 0; i < 2; i++)
+          for (int j = 0; j < 2; j++)
+            if (Mser(i, j) != Nser(i, j))
+              mat_ok = false;
+      }
+      check(mat_ok, "the round trip MyMatrix<ring> -> archive -> MyMatrix<ring>");
+    }
+    std::cerr << "STEP 7: serialization checked\n";
+    //
     // The matrix operations run over the ring, with the determinant matching
     // the one computed over the field.
     int n = 4;
@@ -180,7 +227,7 @@ int main() {
         if (!same(Pr(i, j), Pf(i, j)))
           prod_ok = false;
     check(prod_ok, "the matrix product over the ring matches the field");
-    std::cerr << "STEP 7: matrix operations checked\n";
+    std::cerr << "STEP 8: matrix operations checked\n";
     //
     // A non-monic description of the very same field must be rejected. The
     // polynomial 2X^3 + 2X^2 - 4X - 2 has the same root as X^3 + X^2 - 2X - 1.
@@ -225,7 +272,7 @@ int main() {
       monic_thrown = true;
     }
     check(monic_thrown, "RealRing over a non-monic description throws");
-    std::cerr << "STEP 8: the monic requirement is enforced\n";
+    std::cerr << "STEP 9: the monic requirement is enforced\n";
     //
     std::cerr << "n_error=" << n_error << "\n";
     if (n_error > 0) {
