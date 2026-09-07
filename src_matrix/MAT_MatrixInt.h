@@ -450,16 +450,6 @@ inline MyMatrix<T> ScaledInverse(MyMatrix<T> const &M) {
 }
 
 template <typename T>
-FractionMatrix<T>
-CanonicalizationSmallestCoefficientMatrixPlusCoeff(MyMatrix<T> const &M) {
-  static_assert(is_ring_field<T>::value, "Requires T to be a field");
-  T the_sma = GetSmallestMatrixCoefficient(M);
-  MyMatrix<T> M2 = M / the_sma;
-  T TheMult = 1 / the_sma;
-  return {TheMult, std::move(M2)};
-}
-
-template <typename T>
 FractionVector<T>
 CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
   static_assert(is_ring_field<T>::value, "Requires T to be a field");
@@ -469,41 +459,56 @@ CanonicalizationSmallestCoefficientVectorPlusCoeff(MyVector<T> const &V) {
   return {TheMult, std::move(V2)};
 }
 
-// The canonical representative of M up to a positive scalar, together with the
-// multiplier that produced it: the rational types clear the denominators and
-// reduce the content, the fields with no gcd divide by the smallest
-// coefficient. Requires the multiplier to exist in T, so a ring that is
-// neither has to go through ScalarCanonicalizationMatrix instead.
+// The canonical representative of V on its ray: two vectors differing by a
+// positive scalar give the same output. Four regimes, by what the type has to
+// normalize with:
+//   --- the rational types clear the denominators and reduce the content;
+//   --- a field with no gcd divides by its smallest coefficient;
+//   --- a ring with a canonicalization of its own uses it (see
+//       has_ring_canonicalization, the order Z[x] underlying a real algebraic
+//       field), which stays in the ring;
+//   --- any other ring normalizes in its overlying field and is scaled back.
+// Leaving a vector untouched is not an option for the ring regimes: the
+// coefficients then grow without bound over the repeated combinations the
+// callers perform, and the growth eventually defeats the sign determination.
+//
+// The multiplier that produced the representative is deliberately not
+// returned: it does not exist in T for a ring, and no caller has needed it.
 template <typename T>
-FractionMatrix<T> ScalarCanonicalizationMatrixPlusCoeff(MyMatrix<T> const &M) {
+MyVector<T> ScalarCanonicalizationVector(MyVector<T> const &V) {
   using Tfield = typename overlying_field<T>::field_type;
   if constexpr (is_implementation_of_Q<Tfield>::value) {
-    return RemoveFractionMatrixPlusCoeff(M);
+    return RemoveFractionVectorPlusCoeff(V).TheVect;
+  } else if constexpr (is_ring_field<T>::value) {
+    return CanonicalizationSmallestCoefficientVectorPlusCoeff(V).TheVect;
+  } else if constexpr (has_ring_canonicalization<T>::value) {
+    return ScalarCanonicalizationVectorRing(V);
   } else {
-    return CanonicalizationSmallestCoefficientMatrixPlusCoeff(M);
+    MyVector<Tfield> V_field = UniversalVectorConversion<Tfield, T>(V);
+    MyVector<Tfield> V_can =
+        CanonicalizationSmallestCoefficientVectorPlusCoeff(V_field).TheVect;
+    return RemoveFractionVectorPlusCoeffRing(V_can).TheVect;
   }
 }
 
-// The canonical representative alone, which is all the callers need. It also
-// covers the rings that are neither Z-like (no gcd to reduce a content with)
-// nor fields (no division to normalize with), such as the order Z[x]
-// underlying a real algebraic field: the normalization is then done in the
-// overlying field, where the division exists, and the result is scaled back
-// into the ring. Leaving such a matrix untouched is not an option -- the
-// coefficients grow without bound over the repeated combinations the callers
-// perform, and the growth eventually defeats the sign determination.
+// The same rule for a matrix. Being canonical on the ray does not depend on
+// the shape, so this is the vector rule on the entries rather than a second
+// implementation of it; the two used to be written out in parallel and the
+// ring regime was added to one of them only.
 template <typename T>
 MyMatrix<T> ScalarCanonicalizationMatrix(MyMatrix<T> const &M) {
-  using Tfield = typename overlying_field<T>::field_type;
-  if constexpr (is_implementation_of_Q<Tfield>::value ||
-                is_ring_field<T>::value) {
-    return ScalarCanonicalizationMatrixPlusCoeff(M).TheMat;
-  } else {
-    MyMatrix<Tfield> M_field = UniversalMatrixConversion<Tfield, T>(M);
-    MyMatrix<Tfield> M_can =
-        CanonicalizationSmallestCoefficientMatrixPlusCoeff(M_field).TheMat;
-    return RemoveFractionMatrixPlusCoeffRing(M_can).TheMat;
-  }
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  MyVector<T> V(nbRow * nbCol);
+  for (int iRow = 0; iRow < nbRow; iRow++)
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      V(iRow * nbCol + iCol) = M(iRow, iCol);
+  MyVector<T> Vcan = ScalarCanonicalizationVector(V);
+  MyMatrix<T> Mret(nbRow, nbCol);
+  for (int iRow = 0; iRow < nbRow; iRow++)
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      Mret(iRow, iCol) = Vcan(iRow * nbCol + iCol);
+  return Mret;
 }
 
 template <typename T>
@@ -584,35 +589,6 @@ UniqueRescaleRowsRing(MyMatrix<T> const &M) {
     }
   }
   return Mret;
-}
-
-// The vector counterpart of ScalarCanonicalizationMatrixPlusCoeff.
-template <typename T>
-FractionVector<T> ScalarCanonicalizationVectorPlusCoeff(MyVector<T> const &M) {
-  using Tfield = typename overlying_field<T>::field_type;
-  if constexpr (is_implementation_of_Q<Tfield>::value) {
-    return RemoveFractionVectorPlusCoeff(M);
-  } else {
-    return CanonicalizationSmallestCoefficientVectorPlusCoeff(M);
-  }
-}
-
-// The vector counterpart of ScalarCanonicalizationMatrix, covering the rings
-// that are neither Z-like nor fields in the same way.
-template <typename T>
-MyVector<T> ScalarCanonicalizationVector(MyVector<T> const &M) {
-  using Tfield = typename overlying_field<T>::field_type;
-  if constexpr (is_implementation_of_Q<Tfield>::value ||
-                is_ring_field<T>::value) {
-    return ScalarCanonicalizationVectorPlusCoeff(M).TheVect;
-  } else if constexpr (has_ring_canonicalization<T>::value) {
-    return ScalarCanonicalizationVectorRing(M);
-  } else {
-    MyVector<Tfield> V_field = UniversalVectorConversion<Tfield, T>(M);
-    MyVector<Tfield> V_can =
-        CanonicalizationSmallestCoefficientVectorPlusCoeff(V_field).TheVect;
-    return RemoveFractionVectorPlusCoeffRing(V_can).TheVect;
-  }
 }
 
 template <typename T>

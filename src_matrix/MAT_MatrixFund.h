@@ -2802,38 +2802,6 @@ int get_position_vec_in_mat(MyMatrix<T> const& M, MyVector<T> const& V) {
 
 
 
-template <typename T> T GetSmallestMatrixCoefficient(MyMatrix<T> const &M) {
-  int nbRow = M.rows();
-  int nbCol = M.cols();
-  auto get_abs = [](T const &val) -> T {
-    if (val < 0)
-      return -val;
-    return val;
-  };
-  T the_sma = 1; // Just to shut up warnings. Will not be used
-  bool IsAssigned = false;
-  auto f_insert = [&](T const &input) -> void {
-    T val = get_abs(input);
-    if (val > 0) {
-      if (!IsAssigned) {
-        the_sma = val;
-        IsAssigned = true;
-      } else {
-        if (val < the_sma)
-          the_sma = val;
-      }
-    }
-  };
-  for (int iCol = 0; iCol < nbCol; iCol++)
-    for (int iRow = 0; iRow < nbRow; iRow++)
-      f_insert(M(iRow, iCol));
-  if (!IsAssigned) {
-    std::cerr << "Failed to find a non-zero value for M, so impossible to "
-                 "canonicalize\n";
-    throw TerminalException{1};
-  }
-  return the_sma;
-}
 
 template <typename T> T GetSmallestVectorCoefficient(MyVector<T> const &V) {
   int n = V.size();
