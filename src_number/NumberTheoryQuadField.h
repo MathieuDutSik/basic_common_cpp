@@ -6,6 +6,8 @@
 #include "InputOutput.h"
 #include "MatrixTypes.h"
 #include <boost/serialization/nvp.hpp>
+#include <cmath>
+#include <cstdint>
 #include <limits>
 #include <string>
 // clang-format on
@@ -446,6 +448,41 @@ inline void NearestInteger(QuadField<T, d> const &xI, QuadField<T, d> &xO) {
     }
     xO = xB;
   }
+}
+
+// The nearest integer of the underlying ring to an element of the field.
+// Since underlying_ring made Z[sqrt(d)] the ring of QuadField, the LLL size
+// reduction now asks for the rounding of a Q(sqrt(d)) element into a
+// Z[sqrt(d)] one, which the same-type overload above cannot express.
+//
+// The value returned is the nearest rational integer, exactly as the
+// same-type overload: it belongs to Z[sqrt(d)], and being the nearest
+// element of Z to a real number it is within 1/2, which is the property
+// the size reduction relies on. Starting from the floating point
+// evaluation keeps the exact adjustment below to a couple of steps
+// instead of walking from zero one unit at a time; the adjustment is
+// exact, so an unusable estimate costs time and never correctness.
+template <typename T, typename Tring, int d>
+inline void NearestInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
+  using Tfield = QuadField<T, d>;
+  Tfield cur(0);
+  double x_d;
+  TYPE_CONVERSION(stc<Tfield>{xI}, x_d);
+  if (std::isfinite(x_d) && std::abs(x_d) < 9e15) {
+    int64_t start = static_cast<int64_t>(std::llround(x_d));
+    cur = Tfield(UniversalScalarConversion<T, int64_t>(start));
+  }
+  while (true) {
+    Tfield err = T_abs(xI - cur);
+    Tfield delta = (xI > cur) ? Tfield(1) : Tfield(-1);
+    Tfield cand = cur + delta;
+    if (T_abs(cand - xI) >= err) {
+      break;
+    }
+    cur = cand;
+  }
+  // cur is a rational integer, so the component wise conversion is exact.
+  TYPE_CONVERSION(stc<Tfield>{cur}, xO);
 }
 
 template <typename T, int d> struct is_totally_ordered<QuadField<T, d>> {
