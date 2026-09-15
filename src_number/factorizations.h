@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "TemplateTraits.h"
+#include <algorithm>
 #include <map>
 #include <utility>
 #include <vector>
@@ -105,10 +106,16 @@ template <typename T> std::vector<T> Kernel_FactorsInt(T const &N) {
   }
 }
 
+// The prime factors of N with multiplicity, in non-decreasing order. The
+// kernel returns them unsorted (rho-Pollard splits N into arbitrary factors,
+// and successive_division_factorize recurses before appending), so the sort
+// is what makes the order a guarantee callers can rely on.
 template <typename T>
 requires is_implementation_of_Z<T>::value
 inline std::vector<T> FactorsInt(T const &N) {
-  return Kernel_FactorsInt(N);
+  std::vector<T> LFact = Kernel_FactorsInt(N);
+  std::sort(LFact.begin(), LFact.end());
+  return LFact;
 }
 
 template <typename T>
@@ -117,6 +124,7 @@ inline std::vector<T> FactorsInt(T const &N) {
   using Tint = typename underlying_ring<T>::ring_type;
   Tint N_int = UniversalScalarConversion<Tint, T>(N);
   std::vector<Tint> LFact_int = Kernel_FactorsInt(N_int);
+  std::sort(LFact_int.begin(), LFact_int.end());
   std::vector<T> LFact;
   for (auto &val_i : LFact_int) {
     T val = UniversalScalarConversion<T, Tint>(val_i);

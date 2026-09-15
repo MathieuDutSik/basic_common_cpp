@@ -15,6 +15,13 @@ template <typename T> std::string test(std::string name_numeric) {
   for (int n = 1; n < 500; n++) {
     T n_T = n;
     std::vector<T> V = FactorsInt(n_T);
+    // FactorsInt must return the prime factors in non-decreasing order.
+    for (size_t i = 1; i < V.size(); i++) {
+      if (V[i] < V[i - 1]) {
+        std::cerr << "FactorsInt is not sorted for n=" << n_T << "\n";
+        throw TerminalException{1};
+      }
+    }
     os << "n=" << n_T << " Fact=";
     for (auto &val : V)
       os << " " << val;
