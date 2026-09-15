@@ -73,6 +73,42 @@ int main() {
     for (int a = -10; a < 10; a++)
       for (int b = -10; b < 10; b++)
         TestCons(a, b);
+    // Unsigned ResInt. QUO_INT is not defined for unsigned types, so only
+    // ResInt is exercised, over non-negative arguments, across the unsigned
+    // widths and against the reference a % b. This covers in particular the
+    // uint64_t kernel, including arguments beyond 2^32 where the uint32_t
+    // path cannot reach.
+    auto TestUnsignedResInt = [&](uint64_t a, uint64_t b) -> void {
+      if (b == 0)
+        return;
+      uint64_t ref = a % b;
+      uint64_t r64 = ResInt<uint64_t>(a, b);
+      if (r64 != ref) {
+        std::cerr << "uint64_t ResInt error a=" << a << " b=" << b
+                  << " got=" << r64 << " ref=" << ref << "\n";
+        n_error++;
+      }
+      if (a <= std::numeric_limits<uint32_t>::max() &&
+          b <= std::numeric_limits<uint32_t>::max()) {
+        uint32_t r32 = ResInt<uint32_t>(static_cast<uint32_t>(a),
+                                        static_cast<uint32_t>(b));
+        if (static_cast<uint64_t>(r32) != ref) {
+          std::cerr << "uint32_t ResInt error a=" << a << " b=" << b << "\n";
+          n_error++;
+        }
+      }
+    };
+    for (uint64_t a = 0; a < 50; a++)
+      for (uint64_t b = 1; b < 50; b++)
+        TestUnsignedResInt(a, b);
+    std::vector<uint64_t> big_vals = {45580ULL,
+                                      91160ULL,
+                                      4294967311ULL,
+                                      1000000000000ULL,
+                                      18446744073709551557ULL};
+    for (uint64_t a : big_vals)
+      for (uint64_t b : big_vals)
+        TestUnsignedResInt(a, b);
     std::cerr << "n_error=" << n_error << "\n";
   } catch (TerminalException const &e) {
     exit(e.eVal);

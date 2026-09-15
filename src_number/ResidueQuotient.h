@@ -103,6 +103,10 @@ inline void ResInt_Kernel(uint32_t const &a, uint32_t const &b, uint32_t &res) {
   res = ResInt_C_unsigned_integer<uint32_t>(a, b);
 }
 
+inline void ResInt_Kernel(uint64_t const &a, uint64_t const &b, uint64_t &res) {
+  res = ResInt_C_unsigned_integer<uint64_t>(a, b);
+}
+
 template <typename T> T QuoInt_C_integer(T const &a, T const &b) {
   T quo2 = a / b;
   if (a < 0 && b * quo2 != a) {
