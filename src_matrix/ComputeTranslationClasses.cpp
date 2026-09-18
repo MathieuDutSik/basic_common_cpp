@@ -3,6 +3,9 @@
 #include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheorySafeInt.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -49,6 +52,16 @@ void process(std::string const &arith, std::string const &matrix_file,
     using T = boost::multiprecision::cpp_rational;
     return compute_translation_classes<T>(matrix_file, OutFormat, os_out);
   }
+#ifdef ENABLE_FLINT_SUPPORT
+  if (arith == "flint_rational") {
+    using T = fmpq_class;
+    return compute_translation_classes<T>(matrix_file, OutFormat, os_out);
+  }
+  if (arith == "flint_integer") {
+    using T = fmpz_class;
+    return compute_translation_classes<T>(matrix_file, OutFormat, os_out);
+  }
+#endif
 #ifndef DISABLE_GMP_ARITHMETIC
   if (arith == "rational") {
     using T = mpq_class;

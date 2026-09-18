@@ -4,6 +4,9 @@
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheoryQuadField.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixMod.h"
 #include "MAT_MatrixInt.h"
 // clang-format on
@@ -57,6 +60,12 @@ void process(std::string const &arith, std::string const &matrix_file,
     using T = mpz_class;
     return full_process_type<T>(matrix_file, OutFormat, os_out);
   }
+#ifdef ENABLE_FLINT_SUPPORT
+  if (arith == "flint_integer") {
+    using T = fmpz_class;
+    return full_process_type<T>(matrix_file, OutFormat, os_out);
+  }
+#endif
   std::cerr << "Failed to find a matching entry for arith\n";
   throw TerminalException{1};
 }

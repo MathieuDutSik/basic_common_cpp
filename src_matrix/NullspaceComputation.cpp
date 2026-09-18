@@ -4,6 +4,9 @@
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheoryQuadField.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_Matrix.h"
 // clang-format on
 
@@ -35,6 +38,12 @@ void process(std::string const &arith, std::string const &input,
     using T = mpq_class;
     return full_process_type<T>(input, output);
   }
+#ifdef ENABLE_FLINT_SUPPORT
+  if (arith == "flint_rational") {
+    using T = fmpq_class;
+    return full_process_type<T>(input, output);
+  }
+#endif
   if (arith == "Qsqrt5") {
     using Trat = mpq_class;
     using T = QuadField<Trat, 5>;

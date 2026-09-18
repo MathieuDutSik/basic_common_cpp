@@ -1,4 +1,4 @@
-PROGRAM		= AnalysisSingMat Test_AdjugateDeterminant Test_RingConsistency Test_HermiteSmith Test_SolutionNullspaceInt Test_ScalingCanonic Test_RankMat Test_SubsetSolver Test_SaturationCompletion NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix Test_MatrixInverse Test_PerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice Test_HilbertMatrix Test_ProdMat Matrix_As_Set Test_NullspaceComputation Test_NullspaceTrMat ScalarCanonicalization MatrixSubsetSolver DeterminantMat DeterminantMatMod DeterminantMatHadamard Inverse ComputePointer NonUniqueScaleToInteger NullspaceComputationExperiment SelectRowColMatModHadamard SmithNormalForm SmithNormalFormIntegerMat Test_SubspaceCompletion RemoveFractionMatrix SolutionMatRepetitive Test_FindIsotropicMod Test_EquaSpace RankMat Matrix_As_SetPosScal NullspaceMatMod IsotropicMatMod RescaleInverse SmithNormalFormInvariant ComputeChromaticLowerBounds Test_ReadListMat ComputeTranslationClasses Test_eigen_all_types
+PROGRAM		= AnalysisSingMat Test_AdjugateDeterminant Test_RingConsistency Test_HermiteSmith Test_SolutionNullspaceInt Test_ScalingCanonic Test_RankMat Test_SubsetSolver Test_SaturationCompletion NullspaceComputation ZbasisComputation RowHermiteNormalForm SerializeMatrix Test_MatrixInverse Test_PerformanceHNF ColHermiteNormalForm NullspaceIntTrMat NullspaceIntMat SolutionIntMat IntersectionLattice Test_HilbertMatrix Test_ProdMat Matrix_As_Set Test_NullspaceComputation Test_NullspaceTrMat ScalarCanonicalization MatrixSubsetSolver DeterminantMat DeterminantMatMod DeterminantMatHadamard Inverse ComputePointer NonUniqueScaleToInteger NullspaceComputationExperiment SelectRowColMatModHadamard SmithNormalForm SmithNormalFormIntegerMat Test_SubspaceCompletion RemoveFractionMatrix SolutionMatRepetitive Test_FindIsotropicMod Test_EquaSpace RankMat Matrix_As_SetPosScal NullspaceMatMod IsotropicMatMod RescaleInverse SmithNormalFormInvariant ComputeChromaticLowerBounds Test_ReadListMat ComputeTranslationClasses Test_eigen_all_types Bench_matrix_arithmetic
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -21,6 +21,16 @@ CLOCAL          = -I../src_basic -I../src_number -I../src_comb
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) -I.
 
 LIBS		= -lm $(GMP_CXX_LINK) $(BOOST_LINK) -pthread
+
+# Optional flint arithmetic: build with `make ENABLE_FLINT_SUPPORT=1`.
+# FLINT_INCDIR / FLINT_LINK can be set in the environment; the defaults
+# assume flint is installed next to gmp.
+ifeq ($(ENABLE_FLINT_SUPPORT),1)
+FLINT_INCDIR	?= $(GMP_INCDIR)
+FLINT_LINK	?= -lflint
+CFLAGS		+= -DENABLE_FLINT_SUPPORT -I$(FLINT_INCDIR)
+LIBS		+= $(FLINT_LINK)
+endif
 
 %.o: %.cpp
 	@echo

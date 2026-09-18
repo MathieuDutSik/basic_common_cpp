@@ -166,6 +166,37 @@ CI workflows.
     `src_number/NumberTheoryGmp.h`.
   * **mpz_class** -- GMP arbitrary-precision integer type. Same header.
 
+### FLINT types (optional, `ENABLE_FLINT_SUPPORT`)
+
+  * **fmpz_class** -- wrapper around the `fmpz_t` integer of the
+    [flint](https://flintlib.org) library. Header:
+    `src_number/NumberTheoryFlint.h`.
+  * **fmpq_class** -- wrapper around `fmpq_t`, the flint rational. Same
+    header.
+
+The wrappers expose the interface surface of `mpz_class` / `mpq_class`
+(operators, `get_num` / `get_den`, iostream, the trait specializations,
+`TYPE_CONVERSION` overloads including conversions to and from the gmp
+types), so the generic matrix code accepts them unchanged. The point of
+flint over gmp is the small-integer optimization: an `fmpz` is a single
+word holding either the value itself (below 62 bits) or a pointer to an
+mpz, so matrices of typical small entries never touch the allocator. The
+multiply-accumulate goes through the native fused `fmpz_addmul` /
+`fmpq_addmul` calls (see `is_fma_prefered`).
+
+The support is compiled only when `ENABLE_FLINT_SUPPORT` is defined; in
+`src_matrix` this is done with `make ENABLE_FLINT_SUPPORT=1` (the
+`FLINT_INCDIR` / `FLINT_LINK` variables override the include directory and
+the link flags, the defaults assume flint installed next to gmp). The
+programs then accept the arithmetic names `flint_integer` and
+`flint_rational` next to `integer` / `rational`, and
+`src_matrix/Bench_matrix_arithmetic` benchmarks the two families on
+identical inputs. Measured on random matrices (Apple M-series, flint 3.6):
+the small-entry matrix product is ~6x (integer) to ~14x (rational) faster
+than gmp, determinants ~2x, ~90-bit-entry products ~1.4-3x, while
+Hermite normal form and the rational inverse/nullspace, dominated by very
+large coefficients, are within ~10% of gmp either way.
+
 ### Boost.Multiprecision types
 
   * **boost::multiprecision::cpp_rational** -- Pure C++ rational type from

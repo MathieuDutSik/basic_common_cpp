@@ -7,6 +7,9 @@
 #include "NumberTheoryQuadField.h"
 #include "NumberTheorySafeInt.h"
 #include "Fp.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_Matrix.h"
 // clang-format on
 
@@ -47,6 +50,12 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
     using T = mpq_class;
     return full_process_type<T>(M);
   }
+#ifdef ENABLE_FLINT_SUPPORT
+  if (arith == "flint_rational") {
+    using T = fmpq_class;
+    return full_process_type<T>(M);
+  }
+#endif
   if (arith == "boost_cpp_rational") {
     using T = boost::multiprecision::cpp_rational;
     return full_process_type<T>(M);
@@ -134,6 +143,9 @@ int main() {
         "rational<SafeInt64>", "rational<int64_t>", "rational",
         "boost_cpp_rational",  "boost_mpq_rational", "Qsqrt5",
         "Qsqrt2"};
+#ifdef ENABLE_FLINT_SUPPORT
+    ListArith.push_back("flint_rational");
+#endif
 
     std::vector<MyMatrix<int>> ListM;
     auto insert = [&](int m, int n) -> void {

@@ -5,6 +5,9 @@
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
 #include "NumberTheorySafeInt.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -47,6 +50,16 @@ void compute_determinant(std::string const &arithmetic,
     using T = boost::multiprecision::cpp_rational;
     return compute_determinant_kernel<T>(eFile);
   }
+#ifdef ENABLE_FLINT_SUPPORT
+  if (arithmetic == "flint_integer") {
+    using T = fmpz_class;
+    return compute_determinant_kernel<T>(eFile);
+  }
+  if (arithmetic == "flint_rational") {
+    using T = fmpq_class;
+    return compute_determinant_kernel<T>(eFile);
+  }
+#endif
 #ifndef DISABLE_GMP_ARITHMETIC
   if (arithmetic == "integer") {
     using T = mpz_class;

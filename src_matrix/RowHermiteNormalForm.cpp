@@ -5,6 +5,9 @@
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheoryQuadField.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -37,6 +40,12 @@ int main(int argc, char *argv[]) {
         return process<mpq_class>(FileI, FileO);
       if (arith == "mpz_class")
         return process<mpz_class>(FileI, FileO);
+#ifdef ENABLE_FLINT_SUPPORT
+      if (arith == "flint_integer")
+        return process<fmpz_class>(FileI, FileO);
+      if (arith == "flint_rational")
+        return process<fmpq_class>(FileI, FileO);
+#endif
       if (arith == "cpp_int")
         return process<boost::multiprecision::cpp_int>(FileI, FileO);
       if (arith == "safe_integer")

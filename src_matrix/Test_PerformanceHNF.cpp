@@ -3,6 +3,9 @@
 #include "NumberTheoryCommon.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheory.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -34,6 +37,10 @@ int main(int argc, char *argv[]) {
     sscanf(argv[3], "%d", &m);
     if (arith == "mpz_class") {
       process<mpz_class>(n, m);
+#ifdef ENABLE_FLINT_SUPPORT
+    } else if (arith == "flint_integer") {
+      process<fmpz_class>(n, m);
+#endif
     } else if (arith == "SafeInt64") {
       process<SafeInt64>(n, m);
     } else {

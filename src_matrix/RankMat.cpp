@@ -4,6 +4,9 @@
 #include "NumberTheoryRealField.h"
 #include "NumberTheoryQuadField.h"
 #include "NumberTheorySafeInt.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -26,6 +29,12 @@ void compute_rankmat(std::string const &arithmetic, std::string const &eFile) {
     using T = mpq_class;
     return compute_rankmat_kernel<T>(eFile);
   }
+#ifdef ENABLE_FLINT_SUPPORT
+  if (arithmetic == "flint_rational") {
+    using T = fmpq_class;
+    return compute_rankmat_kernel<T>(eFile);
+  }
+#endif
   if (arithmetic == "Qsqrt5") {
     using Trat = mpq_class;
     using T = QuadField<Trat, 5>;
