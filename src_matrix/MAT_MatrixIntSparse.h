@@ -39,7 +39,7 @@ SmithSparseWork<T> SmithSparseWorkFromSparse(MySparseMatrix<T> const &M) {
 
 template <typename T>
 MySparseMatrix<T> SmithCoreSparse(SmithSparseWork<T> const &W,
-                                  SmithUnitPivotLayout const &layout) {
+                                  SmithUnitPivotLayout<T> const &layout) {
   std::vector<int> col_pos(W.nbCol, -1);
   for (size_t idx = 0; idx < layout.keep_cols.size(); idx++)
     col_pos[layout.keep_cols[idx]] = idx;
@@ -57,21 +57,21 @@ MySparseMatrix<T> SmithCoreSparse(SmithSparseWork<T> const &W,
 }
 
 template <typename T> struct SmithUnitPivotReductionSparse {
-  int nb_unit;
+  std::vector<T> pivots;
   MySparseMatrix<T> core;
   size_t core_nnz;
 };
 
 template <typename T>
 SmithUnitPivotReductionSparse<T>
-SmithUnitPivotEliminate_sparse(MySparseMatrix<T> const &M,
-                               size_t markowitz_bound, int nb_candidates,
+SmithUnitPivotEliminate_sparse(MySparseMatrix<T> const &M, int nb_candidates,
                                double switch_density) {
   SmithSparseWork<T> W = SmithSparseWorkFromSparse(M);
-  SmithUnitPivotLayout layout = SmithUnitPivotEliminate_Work(
-      W, markowitz_bound, nb_candidates, switch_density);
+  SmithUnitPivotLayout<T> layout =
+      SmithUnitPivotEliminate_Work(W, nb_candidates, switch_density);
   size_t core_nnz = W.nnz;
-  return {layout.nb_unit, SmithCoreSparse(W, layout), core_nnz};
+  MySparseMatrix<T> core = SmithCoreSparse(W, layout);
+  return {std::move(layout.pivots), std::move(core), core_nnz};
 }
 
 // The invariant factors of a sparse matrix.
@@ -90,17 +90,16 @@ MyVector<T> SmithNormalFormInvariant_sparse(MySparseMatrix<T> const &M) {
     return MyVector<T>(0);
   if constexpr (use_unit_pivot_preelimination<T>::value) {
     SmithUnitPivotReductionSparse<T> red = SmithUnitPivotEliminate_sparse(
-        M, smith_unit_pivot_markowitz_bound, smith_unit_pivot_nb_candidates,
-        smith_unit_pivot_switch_density);
-    if (red.nb_unit > 0) {
+        M, smith_unit_pivot_nb_candidates, smith_unit_pivot_switch_density);
+    if (!red.pivots.empty()) {
       // Only a core with something left in it reaches the backend, and
       // only then is it made dense.
       if (red.core_nnz == 0) {
         MyMatrix<T> empty(0, 0);
-        return SmithInvariantFromCore(min_dim, red.nb_unit, empty, 0);
+        return SmithInvariantFromCore(min_dim, red.pivots, empty, 0);
       }
       MyMatrix<T> core_dense = MyMatrixFromSparseMatrix(red.core);
-      return SmithInvariantFromCore(min_dim, red.nb_unit, core_dense,
+      return SmithInvariantFromCore(min_dim, red.pivots, core_dense,
                                     red.core_nnz);
     }
   }

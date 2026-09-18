@@ -235,28 +235,48 @@ Three mechanisms stack on top of the plain wrappers:
     overlying field. For mpz_class this took the 32x32 HNF from ~1.1s to
     ~4ms and makes 100x100 (formerly out of reach) run in ~0.3s.
 
-  * **Sparse unit-pivot pre-elimination for the Smith form** (generic, in
-    `MAT_MatrixInt.h`). A unit entry u = M(p, q) splits off an invariant
-    factor 1 by a pair of unimodular operations and leaves M without its
-    row p and column q, so `SmithUnitPivotEliminate` peels those off before
-    the backend sees anything. It works on a sparse image of the matrix and
-    chooses its pivot by the Markowitz criterion, minimizing
-    (|row p| - 1) * (|col q| - 1); the search is symmetric in rows and
-    columns, which matters because a boundary matrix of a graph has a dozen
-    entries per row and exactly two per column, so its cheap pivots are
-    only visible from the column side. A density guard and a fill bound
-    make the pass fall through after a single search on a dense matrix.
-    `use_unit_pivot_preelimination<T>` gates it, on by default for every
-    implementation of Z, and `IsUnitForPivot` is the customization point
-    for a ring with more units than +-1 (Z[i]).
+  * **Sparse splitting-pivot pre-elimination for the Smith form**
+    (generic, in `MAT_MatrixInt.h`). An entry u = M(p, q) that divides
+    every entry of its own row and of its own column is a *splitting
+    pivot*: both eliminations are exact, M becomes diag(u) + core, and the
+    cokernel is a direct sum. `SmithUnitPivotEliminate` peels those off
+    before the backend sees anything. A unit is the special case u = +-1,
+    which needs no verification and covers a torsion-free matrix; a
+    general splitting pivot is what carries the torsion, and it is
+    recognized by a divisibility test with nothing to choose or tune.
+    Because the cokernel splits, the elementary divisors of the whole are
+    the union of those of the parts, and the divisibility chain is
+    restored at the end by the gcd / lcm cascade -- the Smith form of the
+    diagonal matrix carrying all the factors. With only unit pivots that
+    cascade is a no-op and the assembly is a concatenation.
 
-    The pass stops on two conditions: no unit pivot is left, or the fill
-    has made what remains dense (`smith_unit_pivot_switch_density`), which
-    is the point where handing over to a dense backend is the better
-    move. The per-pivot fill bound only rules out a single catastrophic
-    step -- setting it tightly was measured to be actively harmful, since
-    it strands the elimination with a core that costs the backend far more
-    than finishing would have cost.
+    The pass works on a sparse image of the matrix and chooses its pivot
+    by the Markowitz criterion, minimizing (|row p| - 1) * (|col q| - 1);
+    the search is symmetric in rows and columns, which matters because a
+    boundary matrix of a graph has a dozen entries per row and exactly two
+    per column, so its cheap pivots are only visible from the column side.
+    It runs the search for units first and falls back to the general test
+    only when that finds nothing -- an ordering by cost, not a preference
+    between pivots. `use_unit_pivot_preelimination<T>` gates the whole
+    thing, on by default for every implementation of Z, and
+    `IsUnitForPivot` is the customization point for a ring with more units
+    than +-1 (Z[i]).
+
+    The pass stops on two conditions: no splitting pivot is left, or the
+    fill has made what remains dense, which is the point where handing
+    over to a dense backend is the better move. That density is derived
+    rather than tuned: a sparse entry costs a row index, a column index
+    and a value against the single value of the dense form, so the sparse
+    representation stops paying for itself around one third. A bound on
+    the fill of a single pivot used to sit alongside it and was removed
+    after being measured to be inert -- 2^20 and 2^40 gave bit-identical
+    results, the elimination being stopped by the exhaustion of its
+    pivots, never by the fill of one of them. The one quantity left is
+    how many rows and columns the Markowitz search looks at, and it is a
+    search effort where more is not better: an unbounded window is an
+    exact Markowitz minimum, which on a 11568 x 12119 matrix costs 121
+    seconds against 2.3 and leaves a worse core, the exact minimum of a
+    greedy criterion not being a global optimum.
 
     A sparse input path avoids the dense form altogether:
     `SmithNormalFormInvariant_sparse` in `MAT_MatrixIntSparse.h` takes a
