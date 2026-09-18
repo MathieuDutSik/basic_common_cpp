@@ -2919,6 +2919,24 @@ template <typename T> MyVector<T> GetDiagonal(MyMatrix<T> const &M) {
   return V;
 }
 
+#ifdef ENABLE_FLINT_SUPPORT
+#include "MAT_MatrixFlint.h"
+#endif
+
+// The matrix product as a named operation. Semantically the same as A * B,
+// but the types with a native matrix backend route to it (flint: the
+// machine-word and multimodular kernels of fmpz_mat_mul / fmpq_mat_mul,
+// measured ~20x over the generic scalar-by-scalar product).
+template <typename T>
+MyMatrix<T> MatrixProduct(MyMatrix<T> const &A, MyMatrix<T> const &B) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value || is_fmpq_class<T>::value) {
+    return FlintProductMatrix(A, B);
+  }
+#endif
+  return A * B;
+}
+
 // clang-format off
 #endif  // SRC_MATRIX_MAT_MATRIXFUND_H_
 // clang-format on

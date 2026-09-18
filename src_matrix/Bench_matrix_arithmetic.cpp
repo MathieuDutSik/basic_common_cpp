@@ -94,7 +94,9 @@ template <typename T> void bench_arith(std::string const &name) {
     MyMatrix<T> B = build_matrix<T>(n, n, random_entries(n * n, 100, 72));
     MyMatrix<T> C;
     announce("product");
-    report("product", time_best(5, [&]() { C = A * B; }));
+    report("product", time_best(5, [&]() { C = MatrixProduct(A, B); }));
+    announce("product_eigen");
+    report("product_eigen", time_best(5, [&]() { C = A * B; }));
   }
   // product, ~90 bit entries
   {
@@ -117,7 +119,7 @@ template <typename T> void bench_arith(std::string const &name) {
     MyMatrix<T> B = build_big(e2, e3, e1);
     MyMatrix<T> C;
     announce("product_big");
-    report("product_big", time_best(5, [&]() { C = A * B; }));
+    report("product_big", time_best(5, [&]() { C = MatrixProduct(A, B); }));
   }
   // determinant
   {
@@ -153,6 +155,14 @@ template <typename T> void bench_arith(std::string const &name) {
       report("hnf", time_best(3, [&]() {
                std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
                    ComputeRowHermiteNormalForm(A);
+             }));
+      announce("hnf_h");
+      report("hnf_h", time_best(3, [&]() {
+               MyMatrix<T> H = ComputeRowHermiteNormalForm_second(A);
+             }));
+      announce("snf_inv");
+      report("snf_inv", time_best(3, [&]() {
+               MyVector<T> V = SmithNormalFormInvariant(A);
              }));
     }
   }

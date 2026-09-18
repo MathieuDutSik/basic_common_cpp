@@ -102,6 +102,10 @@ template <> struct use_bareiss_for_determinants<mpq_class> {
   static const bool value = true;
 };
 
+template <> struct use_hnf_mod_D<mpz_class> {
+  static const bool value = true;
+};
+
 // gmpxx does not fuse `acc += a*b`; it allocates a temporary for the product on
 // every evaluation. A reused scratch (prod = a*b; acc += prod) avoids that, so
 // the scratch form is preferred for both mpz_class and mpq_class.

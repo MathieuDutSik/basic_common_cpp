@@ -31,6 +31,21 @@
 
 class fmpq_class;
 
+// Deferred products (light expression templates): a * b between two
+// fmpz_class (resp. fmpq_class) returns a proxy holding the two operands,
+// and the consuming operation picks the fused flint call:
+//   acc += a * b        -> fmpz_addmul
+//   acc -= a * b        -> fmpz_submul
+//   x    = a * b        -> fmpz_mul, no temporary
+//   x = a*b + c, a*b - c*d, ...  -> mul/addmul/submul chains
+// Anything else converts the proxy to the concrete class (one temporary,
+// the behavior before the proxies existed), so the generic code and Eigen
+// keep compiling unchanged. Same caveat as the gmpxx expression templates:
+// the proxy references its operands, so `auto p = a * b;` kept beyond the
+// full expression dangles -- write the target type instead of auto.
+class fmpz_product;
+class fmpq_product;
+
 class fmpz_class {
 private:
   fmpz_t a;
@@ -165,11 +180,11 @@ public:
     fmpz_neg(z.a, x.a);
     return z;
   }
-  friend fmpz_class operator*(fmpz_class const &x, fmpz_class const &y) {
-    fmpz_class z;
-    fmpz_mul(z.a, x.a, y.a);
-    return z;
-  }
+  friend fmpz_product operator*(fmpz_class const &x, fmpz_class const &y);
+  fmpz_class(fmpz_product const &p);
+  fmpz_class &operator=(fmpz_product const &p);
+  fmpz_class &operator+=(fmpz_product const &p);
+  fmpz_class &operator-=(fmpz_product const &p);
   friend fmpz_class operator*(fmpz_class const &x, int const &y) {
     fmpz_class z;
     fmpz_mul_si(z.a, x.a, y);
@@ -408,11 +423,11 @@ public:
     fmpq_neg(z.a, x.a);
     return z;
   }
-  friend fmpq_class operator*(fmpq_class const &x, fmpq_class const &y) {
-    fmpq_class z;
-    fmpq_mul(z.a, x.a, y.a);
-    return z;
-  }
+  friend fmpq_product operator*(fmpq_class const &x, fmpq_class const &y);
+  fmpq_class(fmpq_product const &p);
+  fmpq_class &operator=(fmpq_product const &p);
+  fmpq_class &operator+=(fmpq_product const &p);
+  fmpq_class &operator-=(fmpq_product const &p);
   friend fmpq_class operator*(fmpq_class const &x, int const &y) {
     fmpq_class z, b;
     b = y;
@@ -534,6 +549,275 @@ public:
   }
 };
 
+// The deferred product proxies. They hold plain pointers to the operands:
+// valid within the full expression that created them, which is the only
+// place they are supposed to live.
+
+class fmpz_product {
+  friend class fmpz_class;
+  friend fmpz_product operator*(fmpz_class const &x, fmpz_class const &y);
+  const fmpz *x;
+  const fmpz *y;
+  fmpz_product(const fmpz *x, const fmpz *y) : x(x), y(y) {}
+  // The conversion to fmpz_class goes through the converting constructor
+  // of fmpz_class; a conversion operator here as well would make the
+  // conversion ambiguous.
+};
+
+inline fmpz_product operator*(fmpz_class const &x, fmpz_class const &y) {
+  return {x.get_fmpz_t(), y.get_fmpz_t()};
+}
+
+inline fmpz_class::fmpz_class(fmpz_product const &p) {
+  fmpz_init(a);
+  fmpz_mul(a, p.x, p.y);
+}
+
+inline fmpz_class &fmpz_class::operator=(fmpz_product const &p) {
+  fmpz_mul(a, p.x, p.y);
+  return *this;
+}
+
+inline fmpz_class &fmpz_class::operator+=(fmpz_product const &p) {
+  // acc += acc * y needs the product materialized first.
+  if (p.x == a || p.y == a) {
+    fmpz_class tmp(p);
+    fmpz_add(a, a, tmp.get_fmpz_t());
+  } else {
+    fmpz_addmul(a, p.x, p.y);
+  }
+  return *this;
+}
+
+inline fmpz_class &fmpz_class::operator-=(fmpz_product const &p) {
+  if (p.x == a || p.y == a) {
+    fmpz_class tmp(p);
+    fmpz_sub(a, a, tmp.get_fmpz_t());
+  } else {
+    fmpz_submul(a, p.x, p.y);
+  }
+  return *this;
+}
+
+// The sums and differences involving a product go through the fused calls.
+// The overloads taking int exist to keep expressions like a*b + 1
+// unambiguous (both operator+(T, int) and operator+(product, T) would
+// otherwise be equally good).
+
+inline fmpz_class operator+(fmpz_class const &c, fmpz_product const &p) {
+  fmpz_class z(c);
+  z += p;
+  return z;
+}
+
+inline fmpz_class operator+(fmpz_product const &p, fmpz_class const &c) {
+  fmpz_class z(c);
+  z += p;
+  return z;
+}
+
+inline fmpz_class operator+(fmpz_product const &p, fmpz_product const &q) {
+  fmpz_class z(p);
+  z += q;
+  return z;
+}
+
+inline fmpz_class operator+(fmpz_product const &p, int const &c) {
+  fmpz_class z(p);
+  fmpz_add_si(z.get_fmpz_t(), z.get_fmpz_t(), c);
+  return z;
+}
+
+inline fmpz_class operator+(int const &c, fmpz_product const &p) {
+  return p + c;
+}
+
+inline fmpz_class operator-(fmpz_class const &c, fmpz_product const &p) {
+  fmpz_class z(c);
+  z -= p;
+  return z;
+}
+
+inline fmpz_class operator-(fmpz_product const &p, fmpz_class const &c) {
+  fmpz_class z(p);
+  z -= c;
+  return z;
+}
+
+inline fmpz_class operator-(fmpz_product const &p, fmpz_product const &q) {
+  fmpz_class z(p);
+  z -= q;
+  return z;
+}
+
+inline fmpz_class operator-(fmpz_product const &p, int const &c) {
+  fmpz_class z(p);
+  fmpz_sub_si(z.get_fmpz_t(), z.get_fmpz_t(), c);
+  return z;
+}
+
+inline fmpz_class operator-(int const &c, fmpz_product const &p) {
+  fmpz_class z(p);
+  fmpz_sub_si(z.get_fmpz_t(), z.get_fmpz_t(), c);
+  fmpz_neg(z.get_fmpz_t(), z.get_fmpz_t());
+  return z;
+}
+
+inline fmpz_class operator-(fmpz_product const &p) {
+  fmpz_class z(p);
+  fmpz_neg(z.get_fmpz_t(), z.get_fmpz_t());
+  return z;
+}
+
+// Comparisons between two products (the cross-multiplication pattern
+// a*d < c*b): the hidden friends of fmpz_class are not found by ADL when
+// both arguments are proxies, so these exist explicitly.
+
+inline bool operator==(fmpz_product const &p, fmpz_product const &q) {
+  return fmpz_class(p) == fmpz_class(q);
+}
+inline bool operator!=(fmpz_product const &p, fmpz_product const &q) {
+  return fmpz_class(p) != fmpz_class(q);
+}
+inline bool operator<(fmpz_product const &p, fmpz_product const &q) {
+  return fmpz_class(p) < fmpz_class(q);
+}
+inline bool operator<=(fmpz_product const &p, fmpz_product const &q) {
+  return fmpz_class(p) <= fmpz_class(q);
+}
+inline bool operator>(fmpz_product const &p, fmpz_product const &q) {
+  return fmpz_class(p) > fmpz_class(q);
+}
+inline bool operator>=(fmpz_product const &p, fmpz_product const &q) {
+  return fmpz_class(p) >= fmpz_class(q);
+}
+
+class fmpq_product {
+  friend class fmpq_class;
+  friend fmpq_product operator*(fmpq_class const &x, fmpq_class const &y);
+  const fmpq *x;
+  const fmpq *y;
+  fmpq_product(const fmpq *x, const fmpq *y) : x(x), y(y) {}
+};
+
+inline fmpq_product operator*(fmpq_class const &x, fmpq_class const &y) {
+  return {x.get_fmpq_t(), y.get_fmpq_t()};
+}
+
+inline fmpq_class::fmpq_class(fmpq_product const &p) {
+  fmpq_init(a);
+  fmpq_mul(a, p.x, p.y);
+}
+
+inline fmpq_class &fmpq_class::operator=(fmpq_product const &p) {
+  fmpq_mul(a, p.x, p.y);
+  return *this;
+}
+
+inline fmpq_class &fmpq_class::operator+=(fmpq_product const &p) {
+  if (p.x == a || p.y == a) {
+    fmpq_class tmp(p);
+    fmpq_add(a, a, tmp.get_fmpq_t());
+  } else {
+    fmpq_addmul(a, p.x, p.y);
+  }
+  return *this;
+}
+
+inline fmpq_class &fmpq_class::operator-=(fmpq_product const &p) {
+  if (p.x == a || p.y == a) {
+    fmpq_class tmp(p);
+    fmpq_sub(a, a, tmp.get_fmpq_t());
+  } else {
+    fmpq_submul(a, p.x, p.y);
+  }
+  return *this;
+}
+
+inline fmpq_class operator+(fmpq_class const &c, fmpq_product const &p) {
+  fmpq_class z(c);
+  z += p;
+  return z;
+}
+
+inline fmpq_class operator+(fmpq_product const &p, fmpq_class const &c) {
+  fmpq_class z(c);
+  z += p;
+  return z;
+}
+
+inline fmpq_class operator+(fmpq_product const &p, fmpq_product const &q) {
+  fmpq_class z(p);
+  z += q;
+  return z;
+}
+
+inline fmpq_class operator+(fmpq_product const &p, int const &c) {
+  fmpq_class z(p);
+  fmpq_add_si(z.get_fmpq_t(), z.get_fmpq_t(), c);
+  return z;
+}
+
+inline fmpq_class operator+(int const &c, fmpq_product const &p) {
+  return p + c;
+}
+
+inline fmpq_class operator-(fmpq_class const &c, fmpq_product const &p) {
+  fmpq_class z(c);
+  z -= p;
+  return z;
+}
+
+inline fmpq_class operator-(fmpq_product const &p, fmpq_class const &c) {
+  fmpq_class z(p);
+  z -= c;
+  return z;
+}
+
+inline fmpq_class operator-(fmpq_product const &p, fmpq_product const &q) {
+  fmpq_class z(p);
+  z -= q;
+  return z;
+}
+
+inline fmpq_class operator-(fmpq_product const &p, int const &c) {
+  fmpq_class z(p);
+  fmpq_sub_si(z.get_fmpq_t(), z.get_fmpq_t(), c);
+  return z;
+}
+
+inline fmpq_class operator-(int const &c, fmpq_product const &p) {
+  fmpq_class z(p);
+  fmpq_sub_si(z.get_fmpq_t(), z.get_fmpq_t(), c);
+  fmpq_neg(z.get_fmpq_t(), z.get_fmpq_t());
+  return z;
+}
+
+inline fmpq_class operator-(fmpq_product const &p) {
+  fmpq_class z(p);
+  fmpq_neg(z.get_fmpq_t(), z.get_fmpq_t());
+  return z;
+}
+
+inline bool operator==(fmpq_product const &p, fmpq_product const &q) {
+  return fmpq_class(p) == fmpq_class(q);
+}
+inline bool operator!=(fmpq_product const &p, fmpq_product const &q) {
+  return fmpq_class(p) != fmpq_class(q);
+}
+inline bool operator<(fmpq_product const &p, fmpq_product const &q) {
+  return fmpq_class(p) < fmpq_class(q);
+}
+inline bool operator<=(fmpq_product const &p, fmpq_product const &q) {
+  return fmpq_class(p) <= fmpq_class(q);
+}
+inline bool operator>(fmpq_product const &p, fmpq_product const &q) {
+  return fmpq_class(p) > fmpq_class(q);
+}
+inline bool operator>=(fmpq_product const &p, fmpq_product const &q) {
+  return fmpq_class(p) >= fmpq_class(q);
+}
+
 // The sgn / abs free functions that gmpxx provides for its types.
 
 inline int sgn(fmpz_class const &x) { return fmpz_sgn(x.get_fmpz_t()); }
@@ -570,6 +854,14 @@ inline size_t get_bit(fmpz_class const &v) {
 
 // Traits: same choices as for mpz_class / mpq_class.
 
+template <> struct is_fmpz_class<fmpz_class> {
+  static const bool value = true;
+};
+
+template <> struct is_fmpq_class<fmpq_class> {
+  static const bool value = true;
+};
+
 template <> struct is_implementation_of_Z<fmpz_class> {
   static const bool value = true;
 };
@@ -603,6 +895,10 @@ template <> struct is_ring_field<fmpq_class> {
 };
 
 template <> struct use_bareiss_for_determinants<fmpq_class> {
+  static const bool value = true;
+};
+
+template <> struct use_hnf_mod_D<fmpz_class> {
   static const bool value = true;
 };
 

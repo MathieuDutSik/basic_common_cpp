@@ -3,6 +3,9 @@
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheory.h"
 #include "NumberTheorySafeInt.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -225,6 +228,10 @@ int main(int argc, char *argv[]) {
         return process<SafeInt64>(n);
       if (arith == "boost_cpp_int")
         return process<boost::multiprecision::cpp_int>(n);
+#ifdef ENABLE_FLINT_SUPPORT
+      if (arith == "flint_integer")
+        return process<fmpz_class>(n);
+#endif
       std::cerr << "Failed to find a matching entry\n";
       throw TerminalException{1};
     };

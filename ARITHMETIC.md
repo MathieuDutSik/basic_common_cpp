@@ -191,11 +191,62 @@ the link flags, the defaults assume flint installed next to gmp). The
 programs then accept the arithmetic names `flint_integer` and
 `flint_rational` next to `integer` / `rational`, and
 `src_matrix/Bench_matrix_arithmetic` benchmarks the two families on
-identical inputs. Measured on random matrices (Apple M-series, flint 3.6):
-the small-entry matrix product is ~6x (integer) to ~14x (rational) faster
-than gmp, determinants ~2x, ~90-bit-entry products ~1.4-3x, while
-Hermite normal form and the rational inverse/nullspace, dominated by very
-large coefficients, are within ~10% of gmp either way.
+identical inputs.
+
+Three mechanisms stack on top of the plain wrappers:
+
+  * **Deferred products.** `a * b` between two flint values returns a
+    lightweight proxy, and the consuming operation picks the fused call:
+    `acc += a*b` becomes `fmpz_addmul`, `x = a*b - c*d` a mul/submul
+    chain, with no temporaries. Any other use converts the proxy back to
+    the concrete class, so generic code and Eigen compile unchanged. Same
+    caveat as the gmpxx expression templates: do not store `auto p = a*b;`
+    beyond the full expression.
+  * **Native matrix backend** (`src_matrix/MAT_MatrixFlint.h`). The named
+    generic operations dispatch `MyMatrix<fmpz_class>` /
+    `MyMatrix<fmpq_class>` to `fmpz_mat` / `fmpq_mat`, which carry the
+    machine-word and multimodular algorithms: `MatrixProduct`,
+    `DeterminantMat`, the row and column Hermite normal forms (all
+    variants; the column form goes through the transpose, whose convention
+    is the exact mirror), `SmithNormalFormInvariant`, `Inverse` (both
+    types; the inverse is unique so the result is identical to the generic
+    one) and `NullspaceTrMat` / `NullspaceMat` (through `fmpq_mat_rref`;
+    the reduced row echelon form is unique and the kernel extraction uses
+    the same formula, so the basis is identical to the generic one). The
+    call sites stay fully generic; the marshalling is O(n^2) word copies,
+    measured below 3% of the cheapest routed operation. Measured against
+    the gmp types on identical inputs: small-entry 120x120 products
+    73ms -> 0.6ms (integer) and 273ms -> 0.9ms (rational), 60x60
+    determinants 5.8ms -> 0.45ms and 18.6ms -> 0.46ms, 32x32
+    HNF-with-transform 1.13s -> 0.66ms (the modular HNF has no coefficient
+    explosion), 50x50 rational inverse 62ms -> 5ms and 60x90 rational
+    nullspace 54ms -> 2ms.
+  * **Modulo-D Hermite normal form** (generic, in `MAT_MatrixInt.h`).
+    `HermiteNormalFormModD_or_none` implements the Domich-Kannan-Trotter
+    scheme for ANY exact euclidean domain opting in through
+    `use_hnf_mod_D<T>` (currently `mpz_class` and `fmpz_class`; a future
+    Z[i] can opt in): all intermediate entries stay bounded by the
+    determinant D of a row selection, and a final back-substitution
+    certificate proves the result exact (falling back to the generic
+    kernel otherwise). All the Hermite entry points dispatch to it: the
+    H-only forms directly, the column forms through the transpose, and
+    the (U, H) pair forms for a square nonsingular M, where the unique
+    transform U = H M^{-1} is recovered by one inversion over the
+    overlying field. For mpz_class this took the 32x32 HNF from ~1.1s to
+    ~4ms and makes 100x100 (formerly out of reach) run in ~0.3s.
+
+    The same machinery extends to the Smith invariant factors:
+    `SmithNormalFormInvariantModD_or_none` runs the Kannan-Bachem
+    alternation of modulo-D Hermite reductions (each pass a certified
+    one-sided unimodular equivalence) until the matrix is diagonal, then
+    reads the invariants off the gcd/lcm cascade of the diagonal. It is
+    gated by its own trait `use_snf_mod_D<T>`, which currently NO type
+    sets: unlike the row-only Hermite elimination, the generic Smith
+    kernel reduces from both sides, shows no coefficient explosion, and
+    beats the alternation by ~1.2-2x at every size probed (16..96,
+    spreads 10..10^6). The machinery is kept for a ring whose generic
+    Smith kernel does blow up; `fmpz_class` uses the native
+    `fmpz_mat_snf` instead.
 
 ### Boost.Multiprecision types
 

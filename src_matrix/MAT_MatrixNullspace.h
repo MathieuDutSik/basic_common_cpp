@@ -5,6 +5,9 @@
 // clang-format off
 #include "MAT_MatrixFund.h"
 #include "MAT_NonUniqueRescale.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "MAT_MatrixFlint.h"
+#endif
 #include <limits>
 #include <utility>
 #include <vector>
@@ -255,6 +258,13 @@ MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
 template <typename T>
 requires is_ring_field<T>::value
 inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
+#ifdef ENABLE_FLINT_SUPPORT
+  // The reduced row echelon form is unique and the kernel extraction is
+  // the same formula, so the routed result matches the generic one.
+  if constexpr (is_fmpq_class<T>::value) {
+    return FlintNullspaceTrMat(Input);
+  }
+#endif
   size_t nbRow = Input.rows();
   size_t nbCol = Input.cols();
   auto f = [&](MyMatrix<T> &M, size_t eRank, size_t iRow) -> void {
@@ -270,12 +280,21 @@ inline MyMatrix<T> NullspaceTrMat(MyMatrix<T> const &Input) {
   size_t nbRow = Input.rows();
   int nbCol_i = Input.cols();
   size_t nbCol = nbCol_i;
-  auto f = [&](MyMatrix<Tfield> &M, size_t eRank, size_t iRow) -> void {
-    for (int iCol=0; iCol<nbCol_i; iCol++) {
-      M(eRank, iCol) = UniversalScalarConversion<Tfield,T>(Input(iRow,iCol));
+  auto get_nsp_field = [&]() -> MyMatrix<Tfield> {
+#ifdef ENABLE_FLINT_SUPPORT
+    if constexpr (is_fmpz_class<T>::value) {
+      MyMatrix<Tfield> InputF = UniversalMatrixConversion<Tfield, T>(Input);
+      return FlintNullspaceTrMat(InputF);
     }
+#endif
+    auto f = [&](MyMatrix<Tfield> &M, size_t eRank, size_t iRow) -> void {
+      for (int iCol=0; iCol<nbCol_i; iCol++) {
+        M(eRank, iCol) = UniversalScalarConversion<Tfield,T>(Input(iRow,iCol));
+      }
+    };
+    return NullspaceTrMat_Kernel<Tfield, decltype(f)>(nbRow, nbCol, f);
   };
-  MyMatrix<Tfield> NSP_field = NullspaceTrMat_Kernel<Tfield, decltype(f)>(nbRow, nbCol, f);
+  MyMatrix<Tfield> NSP_field = get_nsp_field();
   int dim = NSP_field.rows();
   MyMatrix<T> NSP(dim, NSP_field.cols());
   for (int iNSP=0; iNSP<dim; iNSP++) {

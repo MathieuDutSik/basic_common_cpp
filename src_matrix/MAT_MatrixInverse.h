@@ -12,6 +12,9 @@
 
 // clang-format off
 #include "MAT_MatrixFund.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "MAT_MatrixFlint.h"
+#endif
 #include <optional>
 #include <utility>
 #include <vector>
@@ -454,6 +457,11 @@ template <typename T> MyMatrix<T> InverseFractionFreeLU(MyMatrix<T> const &Input
 template <typename T>
 requires (use_fraction_free_lu<T>::value)
 inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintInverse(Input);
+  }
+#endif
   return InverseFractionFreeLU(Input);
 }
 
@@ -463,6 +471,12 @@ inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
 template <typename T>
 requires (!use_fraction_free_lu<T>::value && is_ring_field<T>::value)
 inline MyMatrix<T> Inverse(MyMatrix<T> const &Input) {
+#ifdef ENABLE_FLINT_SUPPORT
+  // The inverse is unique, so the routed result matches the generic one.
+  if constexpr (is_fmpq_class<T>::value) {
+    return FlintInverse(Input);
+  }
+#endif
   return InverseKernel(Input);
 }
 

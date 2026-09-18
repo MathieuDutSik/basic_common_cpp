@@ -6,8 +6,12 @@
 #include "Boost_bitset.h"
 #include "MAT_Matrix.h"
 #include "MAT_MatrixRankmat.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "MAT_MatrixFlint.h"
+#endif
 #include <algorithm>
 #include <limits>
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -801,9 +805,44 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
 #endif
 }
 
+// The pair (U, H) through the modulo-D form: for a square nonsingular M
+// the transform U = H M^{-1} is unique and integral (the rows of H lie in
+// the row lattice of M), so it is recovered by one inversion over the
+// overlying field. The rectangular / singular cases keep the generic
+// kernel, whose U is a choice among many.
+template <typename T>
+std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>>
+HermiteNormalFormModDTransform_or_none(MyMatrix<T> const &M) {
+  if (M.rows() != M.cols())
+    return {};
+  std::optional<MyMatrix<T>> optH = HermiteNormalFormModD_or_none(M);
+  if (!optH)
+    return {};
+  using Tfield = typename overlying_field<T>::field_type;
+  MyMatrix<Tfield> M_f = UniversalMatrixConversion<Tfield, T>(M);
+  MyMatrix<Tfield> Minv_f = Inverse(M_f);
+  MyMatrix<Tfield> H_f = UniversalMatrixConversion<Tfield, T>(*optH);
+  MyMatrix<Tfield> U_f = MatrixProduct(H_f, Minv_f);
+  MyMatrix<T> U = UniversalMatrixConversion<T, Tfield>(U_f);
+  return std::pair<MyMatrix<T>, MyMatrix<T>>{std::move(U), std::move(*optH)};
+}
+
 template <typename T>
 std::pair<MyMatrix<T>, MyMatrix<T>>
 ComputeRowHermiteNormalForm(MyMatrix<T> const &M) {
+#ifdef ENABLE_FLINT_SUPPORT
+  // Modular HNF, no coefficient explosion: H is identical to the one of the
+  // generic kernel; for a rank deficient M the (non-unique) U may differ.
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintRowHermiteNormalFormTransform(M);
+  }
+#endif
+  if constexpr (use_hnf_mod_D<T>::value) {
+    std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>> opt =
+        HermiteNormalFormModDTransform_or_none(M);
+    if (opt)
+      return std::move(*opt);
+  }
   int nbRow = M.rows();
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbRow);
@@ -817,6 +856,17 @@ ComputeRowHermiteNormalForm(MyMatrix<T> const &M) {
 
 template <typename T>
 MyMatrix<T> ComputeRowHermiteNormalForm_first(MyMatrix<T> const &M) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintRowHermiteNormalFormTransform(M).first;
+  }
+#endif
+  if constexpr (use_hnf_mod_D<T>::value) {
+    std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>> opt =
+        HermiteNormalFormModDTransform_or_none(M);
+    if (opt)
+      return std::move(opt->first);
+  }
   int nbRow = M.rows();
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbRow);
@@ -828,8 +878,157 @@ MyMatrix<T> ComputeRowHermiteNormalForm_first(MyMatrix<T> const &M) {
   return U;
 }
 
+// ---- The modulo-D Hermite normal form (Domich-Kannan-Trotter) ----
+//
+// For M with full column rank n over an exact euclidean domain, let B be a
+// nonsingular n x n submatrix of its rows and D = |det B|. The adjugate
+// identity adj(B) B = (det B) I expresses every D e_j as an integer
+// combination of rows of B, so D Z^n is contained in the row lattice L of
+// M. Two consequences drive the algorithm:
+//   --- a row D e_c can be appended to the generating set at any moment;
+//   --- any entry can be reduced modulo D (subtracting multiples of the
+//       lattice vectors D e_j), so nothing ever grows beyond ~D^2.
+// The elimination is then the standard xgcd row reduction, with one fresh
+// D e_c row appended per column (which also guarantees a pivot in every
+// column) and a mod D reduction after every row operation.
+//
+// The mod D reductions can in principle drop the computed lattice L' below
+// L (they subtract lattice vectors, so L' is a sublattice of L). The final
+// certificate closes that gap: back-substituting every original row of M
+// against the computed H proves L is a subset of L', hence L' = L, and by
+// the uniqueness of the Hermite normal form H is THE HNF of M. When the
+// certificate fails (or the matrix does not have full column rank) the
+// caller falls back to the generic kernel, so the routine is an
+// optimization, never a change of behavior.
+
+// The absolute determinant of a nonsingular n x n row-submatrix, by
+// fraction-free Bareiss elimination with row pivoting (all divisions are
+// exact, the entries stay polynomially bounded). Returns nothing when the
+// rank is below the column count.
+template <typename T>
+std::optional<T> HNF_ModD_AbsRowSelectionDeterminant(MyMatrix<T> const &M) {
+  int m = M.rows();
+  int n = M.cols();
+  if (n == 0 || m < n)
+    return {};
+  MyMatrix<T> W = M;
+  T prev(1);
+  for (int c = 0; c < n; c++) {
+    int pivot = -1;
+    for (int r = c; r < m; r++)
+      if (W(r, c) != 0) {
+        pivot = r;
+        break;
+      }
+    if (pivot == -1)
+      return {};
+    if (pivot != c)
+      W.row(c).swap(W.row(pivot));
+    for (int r = c + 1; r < m; r++) {
+      for (int j = c + 1; j < n; j++)
+        W(r, j) = (W(c, c) * W(r, j) - W(r, c) * W(c, j)) / prev;
+      W(r, c) = 0;
+    }
+    prev = W(c, c);
+  }
+  return T_abs(prev);
+}
+
+template <typename T>
+std::optional<MyMatrix<T>> HermiteNormalFormModD_or_none(MyMatrix<T> const &M) {
+  int m = M.rows();
+  int n = M.cols();
+  std::optional<T> optD = HNF_ModD_AbsRowSelectionDeterminant(M);
+  if (!optD)
+    return {};
+  T const &D = *optD;
+  // Work matrix: the m rows of M reduced mod D, then room for the n
+  // appended D e_c rows.
+  MyMatrix<T> W = MyMatrix<T>::Zero(m + n, n);
+  for (int i = 0; i < m; i++)
+    for (int j = 0; j < n; j++)
+      W(i, j) = ResInt(M(i, j), D);
+  auto reduce_row = [&](int r, int c_start) -> void {
+    for (int j = c_start; j < n; j++)
+      W(r, j) = ResInt(W(r, j), D);
+  };
+  int n_active = m;
+  for (int c = 0; c < n; c++) {
+    // The fresh D e_c row (its slot is still zero-initialized).
+    W(n_active, c) = D;
+    n_active++;
+    int top = c;
+    for (int r = top + 1; r < n_active; r++) {
+      if (W(r, c) == 0)
+        continue;
+      if (W(top, c) == 0) {
+        W.row(top).swap(W.row(r));
+        continue;
+      }
+      T a = W(top, c);
+      T b = W(r, c);
+      PairGCD_dot<T> pg = ComputePairGcdDot(a, b);
+      T ag = a / pg.gcd;
+      T bg = b / pg.gcd;
+      for (int j = c; j < n; j++) {
+        T vt = W(top, j);
+        T vr = W(r, j);
+        W(top, j) = pg.a * vt + pg.b * vr;
+        W(r, j) = ag * vr - bg * vt;
+      }
+      reduce_row(top, c + 1);
+      reduce_row(r, c + 1);
+    }
+    // The appended row guarantees the column is nonzero, so a pivot exists.
+    T eCanUnit = CanonicalizationUnit(W(top, c));
+    if (eCanUnit != 1)
+      for (int j = c; j < n; j++)
+        W(top, j) = eCanUnit * W(top, j);
+    T const &ThePivot = W(top, c);
+    for (int r = 0; r < top; r++) {
+      T TheQ = QuoInt(W(r, c), ThePivot);
+      if (TheQ != 0)
+        for (int j = c; j < n; j++)
+          W(r, j) -= TheQ * W(top, j);
+    }
+  }
+  // Certificate: every row of M reduces to zero against the triangular
+  // top n rows, proving the computed lattice contains (hence equals) the
+  // row lattice of M.
+  MyVector<T> v(n);
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < n; j++)
+      v(j) = M(i, j);
+    for (int p = 0; p < n; p++) {
+      T TheQ = QuoInt(v(p), W(p, p));
+      if (TheQ != 0)
+        for (int j = p; j < n; j++)
+          v(j) -= TheQ * W(p, j);
+      if (v(p) != 0)
+        return {};
+    }
+  }
+  // Same shape as the generic kernel output: the n pivot rows on top,
+  // zero rows below.
+  MyMatrix<T> H = MyMatrix<T>::Zero(m, n);
+  for (int i = 0; i < n; i++)
+    for (int j = i; j < n; j++)
+      H(i, j) = W(i, j);
+  return H;
+}
+
 template <typename T>
 MyMatrix<T> ComputeRowHermiteNormalForm_second(MyMatrix<T> const &M) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintRowHermiteNormalForm(M);
+  }
+#endif
+  if constexpr (use_hnf_mod_D<T>::value) {
+    std::optional<MyMatrix<T>> opt = HermiteNormalFormModD_or_none(M);
+    if (opt)
+      return std::move(*opt);
+  }
   MyMatrix<T> H = M;
   auto f = [&](auto g) -> void { g(H); };
   ComputeRowHermiteNormalForm_Kernel(H, f);
@@ -924,6 +1123,19 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
 template <typename T>
 std::pair<MyMatrix<T>, MyMatrix<T>>
 ComputeColHermiteNormalForm(MyMatrix<T> const &M) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintColHermiteNormalFormTransform(M);
+  }
+#endif
+  // The column convention is the mirror of the row one (M U = H), so the
+  // fast path goes through the transpose.
+  if constexpr (use_hnf_mod_D<T>::value) {
+    std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>> opt =
+        HermiteNormalFormModDTransform_or_none(TransposedMat(M));
+    if (opt)
+      return {TransposedMat(opt->first), TransposedMat(opt->second)};
+  }
   int nbCol = M.cols();
   MyMatrix<T> H = M;
   MyMatrix<T> U = IdentityMat<T>(nbCol);
@@ -937,6 +1149,17 @@ ComputeColHermiteNormalForm(MyMatrix<T> const &M) {
 
 template <typename T>
 MyMatrix<T> ComputeColHermiteNormalForm_second(MyMatrix<T> const &M) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintColHermiteNormalForm(M);
+  }
+#endif
+  if constexpr (use_hnf_mod_D<T>::value) {
+    std::optional<MyMatrix<T>> opt =
+        HermiteNormalFormModD_or_none(TransposedMat(M));
+    if (opt)
+      return TransposedMat(*opt);
+  }
   MyMatrix<T> H = M;
   auto f = [&](auto g) -> void { g(H); };
   ComputeColHermiteNormalForm_Kernel(H, f);
@@ -1142,8 +1365,74 @@ ResultSmithNormalForm<T> SmithNormalForm(MyMatrix<T> const &M) {
   return {ROW, COL, Invariant};
 }
 
+// The Smith invariant factors through the modulo-D machinery, by the
+// Kannan-Bachem alternation: a row Hermite reduction of the matrix, then
+// of its transpose, and so on. Every pass is a one-sided unimodular
+// equivalence (the modulo-D HNF certifies the row lattice is preserved,
+// which is exactly left equivalence), so the Smith class never changes;
+// the alternation drives the off-diagonal mass to zero (Kannan-Bachem),
+// and the invariant factors of the resulting diagonal are its gcd / lcm
+// cascade. Rank deficiency or non-convergence returns nothing and the
+// caller falls back to the generic kernel.
+template <typename T>
+std::optional<MyVector<T>>
+SmithNormalFormInvariantModD_or_none(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  if (nbRow == 0 || nbCol == 0)
+    return {};
+  MyMatrix<T> W;
+  if (nbRow < nbCol)
+    W = TransposedMat(M);
+  else
+    W = M;
+  int const max_iter = 100;
+  for (int iter = 0; iter < max_iter; iter++) {
+    std::optional<MyMatrix<T>> opt = HermiteNormalFormModD_or_none(W);
+    if (!opt)
+      return {};
+    int k = W.cols();
+    MyMatrix<T> H(k, k);
+    for (int i = 0; i < k; i++)
+      for (int j = 0; j < k; j++)
+        H(i, j) = (*opt)(i, j);
+    bool is_diagonal = true;
+    for (int i = 0; i < k && is_diagonal; i++)
+      for (int j = i + 1; j < k; j++)
+        if (H(i, j) != 0) {
+          is_diagonal = false;
+          break;
+        }
+    if (is_diagonal) {
+      MyVector<T> V(k);
+      for (int i = 0; i < k; i++)
+        V(i) = H(i, i);
+      for (int i = 0; i < k; i++)
+        for (int j = i + 1; j < k; j++) {
+          T g = GcdPair(V(i), V(j));
+          T l = (V(i) / g) * V(j);
+          V(i) = g;
+          V(j) = l;
+        }
+      return V;
+    }
+    W = TransposedMat(H);
+  }
+  return {};
+}
+
 template <typename T>
 MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
+#ifdef ENABLE_FLINT_SUPPORT
+  if constexpr (is_fmpz_class<T>::value) {
+    return FlintSmithNormalFormInvariant(M);
+  }
+#endif
+  if constexpr (use_snf_mod_D<T>::value) {
+    std::optional<MyVector<T>> opt = SmithNormalFormInvariantModD_or_none(M);
+    if (opt)
+      return std::move(*opt);
+  }
   auto f_row_oper = [&]([[maybe_unused]] int row1, [[maybe_unused]] int row2,
                         [[maybe_unused]] T val) -> void {};
   auto f_row_flip = [&]([[maybe_unused]] int row1,

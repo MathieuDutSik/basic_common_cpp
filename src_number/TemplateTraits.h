@@ -21,6 +21,18 @@ template <typename T> struct is_mpz_class {
   static const bool value = false;
 };
 
+// The flint types (NumberTheoryFlint.h, with ENABLE_FLINT_SUPPORT). The
+// primary templates live here so that the matrix code can test them
+// without the flint headers in scope, exactly like is_mpz_class.
+
+template <typename T> struct is_fmpz_class {
+  static const bool value = false;
+};
+
+template <typename T> struct is_fmpq_class {
+  static const bool value = false;
+};
+
 template <typename T> struct is_boost_cpp_int {
   static const bool value = false;
 };
@@ -336,6 +348,31 @@ template <typename T> struct determinant_division_free {
 // the t = 0 coefficient. This is the bridge that lets generic code (e.g. the
 // division-free determinant dispatch) build the constant-term matrix.
 template <typename T> T const &constant_term(T const &x) { return x; }
+
+// Whether ComputeRowHermiteNormalForm_second uses the modulo-D algorithm
+// (Domich-Kannan-Trotter, see HermiteNormalFormModD_or_none): all the
+// intermediate entries stay bounded by (a multiple of) the lattice
+// determinant D, which removes the coefficient explosion of the naive
+// elimination. The requirements are an exact euclidean domain with
+// ComputePairGcdDot / ResInt / QuoInt, so the types opt in explicitly in
+// their own headers (mpz_class, fmpz_class); the bounded types stay out
+// because the Bareiss determinant D overflows before the naive elimination
+// would.
+template <typename T> struct use_hnf_mod_D {
+  static const bool value = false;
+};
+
+// Whether SmithNormalFormInvariant uses the Kannan-Bachem alternation of
+// modulo-D Hermite reductions (SmithNormalFormInvariantModD_or_none).
+// Benchmarked OFF for mpz_class: unlike the row-only Hermite elimination,
+// the generic Smith kernel reduces from both sides and shows no
+// coefficient explosion, and it beats the alternation by ~1.2-2x at every
+// size probed (16..96, spreads 10..10^6). The machinery stays available
+// for a ring whose generic Smith kernel does blow up: opting in is this
+// one trait.
+template <typename T> struct use_snf_mod_D {
+  static const bool value = false;
+};
 
 // Trait of totally ordered set
 
