@@ -11,7 +11,9 @@
 #endif
 #include <algorithm>
 #include <limits>
+#include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1365,6 +1367,205 @@ ResultSmithNormalForm<T> SmithNormalForm(MyMatrix<T> const &M) {
   return {ROW, COL, Invariant};
 }
 
+// ---- Sparse unit-pivot pre-elimination for the Smith normal form ----
+//
+// If M has an entry u = M(p, q) that is a unit of the ring, then column q
+// can be cleared by row operations and row p by column operations, both
+// unimodular, which leaves
+//     [ u  0 ]
+//     [ 0  B ]
+// so the invariant factors of M are one 1 followed by those of B. Clearing
+// the row after the column does not touch B (the column operations
+// subtract multiples of a column whose only nonzero entry is the pivot),
+// so B is simply M with row p and column q deleted.
+//
+// Iterating this strips the trivial part of the Smith form. The gain is in
+// the sparsity: the elimination of a pivot only touches the entries of its
+// row and column, so for the boundary matrices of a chain complex -- very
+// sparse, entries +-1, invariant factors nearly all 1 -- the computation
+// collapses here and the backend receives a tiny core. That is the regime
+// where the dense backends (the generic Smith kernel as much as
+// fmpz_mat_snf) are at their worst, since their cost follows the
+// dimensions and not the number of nonzero entries.
+//
+// The pivot is chosen by the Markowitz criterion, minimizing
+// (|row p| - 1) * (|col q| - 1), the number of entries that its
+// elimination can fill in. The search looks at the sparsest rows only, and
+// the pass stops as soon as no pivot below the fill bound is left, so a
+// dense matrix falls through to the backend after a single search.
+
+// Whether x is a unit of the ring, hence usable as a pivot here. The
+// default holds in any ring with a 1 and is exact for every subring of Z;
+// a ring with more units (Z[i], whose units are +-1 and +-i) can overload
+// this for its own type to expose them. Reporting fewer units than the
+// ring has costs pivots, never correctness.
+template <typename T> inline bool IsUnitForPivot(T const &x) {
+  return x == 1 || x == -1;
+}
+
+template <typename T> struct SmithUnitPivotReduction {
+  // The number of unit pivots removed, i.e. of invariant factors 1 split
+  // off, and the matrix that remains.
+  int nb_unit;
+  MyMatrix<T> core;
+};
+
+template <typename T>
+SmithUnitPivotReduction<T>
+SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
+                        int nb_candidates) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  // Sparse image of M: the entries by row, and the occupied rows by
+  // column for the column access the Markowitz cost and the elimination
+  // both need.
+  std::vector<std::map<int, T>> rows(nbRow);
+  std::vector<std::set<int>> cols(nbCol);
+  for (int i = 0; i < nbRow; i++)
+    for (int j = 0; j < nbCol; j++)
+      if (M(i, j) != 0) {
+        rows[i].emplace(j, M(i, j));
+        cols[j].insert(i);
+      }
+  std::vector<uint8_t> row_alive(nbRow, 1), col_alive(nbCol, 1);
+  // The live rows and columns ordered by their number of entries, so that
+  // the pivot search can start from the sparsest ones. The search has to
+  // be symmetric in the two: a boundary matrix of a graph, for instance,
+  // has a dozen entries per row but exactly two per column, and its cheap
+  // pivots are only visible from the column side. Empty rows and columns
+  // are left out, they host no pivot.
+  std::set<std::pair<size_t, int>> by_size_row, by_size_col;
+  for (int i = 0; i < nbRow; i++)
+    if (!rows[i].empty())
+      by_size_row.emplace(rows[i].size(), i);
+  for (int j = 0; j < nbCol; j++)
+    if (!cols[j].empty())
+      by_size_col.emplace(cols[j].size(), j);
+  auto update_row_key = [&](int i, size_t old_size) -> void {
+    if (old_size > 0)
+      by_size_row.erase({old_size, i});
+    if (!rows[i].empty())
+      by_size_row.emplace(rows[i].size(), i);
+  };
+  auto col_insert = [&](int j, int i) -> void {
+    size_t old_size = cols[j].size();
+    cols[j].insert(i);
+    if (old_size > 0)
+      by_size_col.erase({old_size, j});
+    by_size_col.emplace(cols[j].size(), j);
+  };
+  auto col_erase = [&](int j, int i) -> void {
+    size_t old_size = cols[j].size();
+    cols[j].erase(i);
+    by_size_col.erase({old_size, j});
+    if (!cols[j].empty())
+      by_size_col.emplace(cols[j].size(), j);
+  };
+  int nb_unit = 0;
+  while (true) {
+    int best_p = -1, best_q = -1;
+    size_t best_cost = 0;
+    auto consider = [&](int i, int j) -> void {
+      size_t cost = (rows[i].size() - 1) * (cols[j].size() - 1);
+      if (best_p == -1 || cost < best_cost) {
+        best_p = i;
+        best_q = j;
+        best_cost = cost;
+      }
+    };
+    // Markowitz search over the sparsest rows, then over the sparsest
+    // columns. A pivot of cost zero cannot be beaten, so it ends the
+    // search immediately.
+    int seen = 0;
+    for (auto &kv : by_size_row) {
+      if (seen >= nb_candidates)
+        break;
+      seen++;
+      int i = kv.second;
+      for (auto &ent : rows[i])
+        if (IsUnitForPivot(ent.second))
+          consider(i, ent.first);
+      if (best_p != -1 && best_cost == 0)
+        break;
+    }
+    if (best_p == -1 || best_cost > 0) {
+      seen = 0;
+      for (auto &kv : by_size_col) {
+        if (seen >= nb_candidates)
+          break;
+        seen++;
+        int j = kv.second;
+        for (int i : cols[j])
+          if (IsUnitForPivot(rows[i].at(j)))
+            consider(i, j);
+        if (best_p != -1 && best_cost == 0)
+          break;
+      }
+    }
+    if (best_p == -1 || best_cost > markowitz_bound)
+      break;
+    // Clear column best_q with the pivot row.
+    T u = rows[best_p].at(best_q);
+    std::vector<int> to_update(cols[best_q].begin(), cols[best_q].end());
+    for (int i : to_update) {
+      if (i == best_p)
+        continue;
+      auto it_iq = rows[i].find(best_q);
+      // Exact division, the pivot being a unit.
+      T f = it_iq->second / u;
+      size_t old_size = rows[i].size();
+      // The entry in the pivot column becomes zero by construction.
+      rows[i].erase(it_iq);
+      col_erase(best_q, i);
+      for (auto &ent : rows[best_p]) {
+        int j = ent.first;
+        if (j == best_q)
+          continue;
+        auto it = rows[i].find(j);
+        if (it == rows[i].end()) {
+          T prod = f * ent.second;
+          rows[i].emplace(j, -prod);
+          col_insert(j, i);
+        } else {
+          it->second -= f * ent.second;
+          if (it->second == 0) {
+            rows[i].erase(it);
+            col_erase(j, i);
+          }
+        }
+      }
+      update_row_key(i, old_size);
+    }
+    // Drop the pivot row and the pivot column.
+    size_t old_p = rows[best_p].size();
+    for (auto &ent : rows[best_p])
+      col_erase(ent.first, best_p);
+    rows[best_p].clear();
+    update_row_key(best_p, old_p);
+    row_alive[best_p] = 0;
+    col_alive[best_q] = 0;
+    nb_unit++;
+  }
+  // The core, over the surviving rows and columns.
+  std::vector<int> keep_rows, keep_cols;
+  for (int i = 0; i < nbRow; i++)
+    if (row_alive[i])
+      keep_rows.push_back(i);
+  std::vector<int> col_pos(nbCol, -1);
+  for (int j = 0; j < nbCol; j++)
+    if (col_alive[j]) {
+      col_pos[j] = keep_cols.size();
+      keep_cols.push_back(j);
+    }
+  int n_row_core = keep_rows.size();
+  int n_col_core = keep_cols.size();
+  MyMatrix<T> core = MyMatrix<T>::Zero(n_row_core, n_col_core);
+  for (int idx = 0; idx < n_row_core; idx++)
+    for (auto &ent : rows[keep_rows[idx]])
+      core(idx, col_pos[ent.first]) = ent.second;
+  return {nb_unit, std::move(core)};
+}
+
 // The Smith invariant factors through the modulo-D machinery, by the
 // Kannan-Bachem alternation: a row Hermite reduction of the matrix, then
 // of its transpose, and so on. Every pass is a one-sided unimodular
@@ -1421,8 +1622,10 @@ SmithNormalFormInvariantModD_or_none(MyMatrix<T> const &M) {
   return {};
 }
 
+// The backend for the invariant factors, and the stop of the unit-pivot
+// pre-elimination that wraps it.
 template <typename T>
-MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
+MyVector<T> SmithNormalFormInvariant_Kernel(MyMatrix<T> const &M) {
 #ifdef ENABLE_FLINT_SUPPORT
   if constexpr (is_fmpz_class<T>::value) {
     return FlintSmithNormalFormInvariant(M);
@@ -1447,6 +1650,67 @@ MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
           M, f_row_oper, f_row_flip, f_col_oper, f_col_flip);
   MyVector<T> Invariant = GetDiagonalInvariant(H);
   return Invariant;
+}
+
+// The bound on the fill a single unit pivot may create, and the number of
+// rows and of columns the Markowitz search looks at. Both were set by
+// measuring on the two regimes (the sparse boundary matrices of a chain
+// complex, and dense random matrices): the sparse inputs are consumed
+// entirely long before the bound bites, while a dense input exceeds it on
+// its very first search and falls through to the backend at the cost of
+// that one search. Widening the candidate window past 64 was measured to
+// buy no further pivots while making every search proportionally slower.
+inline constexpr size_t smith_unit_pivot_markowitz_bound = 1024;
+inline constexpr int smith_unit_pivot_nb_candidates = 64;
+
+// The density above which the pre-elimination is not even attempted: the
+// sparse image of the matrix would cost more to build than the pass can
+// save, and a dense matrix is the regime the backends are good at.
+inline constexpr double smith_unit_pivot_max_density = 0.25;
+
+template <typename T>
+MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
+  int nbRow = M.rows();
+  int nbCol = M.cols();
+  int min_dim = std::min(nbRow, nbCol);
+  if constexpr (use_unit_pivot_preelimination<T>::value) {
+    if (min_dim > 0) {
+      // The cheap scan first: building the sparse image of a dense matrix
+      // is a pure loss, so the density decides before any allocation.
+      size_t nnz = 0;
+      for (int i = 0; i < nbRow; i++)
+        for (int j = 0; j < nbCol; j++)
+          if (M(i, j) != 0)
+            nnz++;
+      double density =
+          static_cast<double>(nnz) /
+          (static_cast<double>(nbRow) * static_cast<double>(nbCol));
+      if (density <= smith_unit_pivot_max_density) {
+        SmithUnitPivotReduction<T> red = SmithUnitPivotEliminate(
+            M, smith_unit_pivot_markowitz_bound,
+            smith_unit_pivot_nb_candidates);
+        if (red.nb_unit > 0) {
+          MyVector<T> V(min_dim);
+          for (int i = 0; i < red.nb_unit; i++)
+            V(i) = 1;
+          // Each unit pivot contributes an invariant factor 1, and 1
+          // divides everything, so prefixing them to the invariants of the
+          // core preserves the divisibility chain.
+          if (red.core.rows() > 0 && red.core.cols() > 0) {
+            MyVector<T> core_inv = SmithNormalFormInvariant_Kernel(red.core);
+            for (int i = 0; i < core_inv.size(); i++)
+              V(red.nb_unit + i) = core_inv(i);
+          } else {
+            // An empty core: the remaining invariant factors are zero.
+            for (int i = red.nb_unit; i < min_dim; i++)
+              V(i) = 0;
+          }
+          return V;
+        }
+      }
+    }
+  }
+  return SmithNormalFormInvariant_Kernel(M);
 }
 
 /*

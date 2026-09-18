@@ -235,6 +235,37 @@ Three mechanisms stack on top of the plain wrappers:
     overlying field. For mpz_class this took the 32x32 HNF from ~1.1s to
     ~4ms and makes 100x100 (formerly out of reach) run in ~0.3s.
 
+  * **Sparse unit-pivot pre-elimination for the Smith form** (generic, in
+    `MAT_MatrixInt.h`). A unit entry u = M(p, q) splits off an invariant
+    factor 1 by a pair of unimodular operations and leaves M without its
+    row p and column q, so `SmithUnitPivotEliminate` peels those off before
+    the backend sees anything. It works on a sparse image of the matrix and
+    chooses its pivot by the Markowitz criterion, minimizing
+    (|row p| - 1) * (|col q| - 1); the search is symmetric in rows and
+    columns, which matters because a boundary matrix of a graph has a dozen
+    entries per row and exactly two per column, so its cheap pivots are
+    only visible from the column side. A density guard and a fill bound
+    make the pass fall through after a single search on a dense matrix.
+    `use_unit_pivot_preelimination<T>` gates it, on by default for every
+    implementation of Z, and `IsUnitForPivot` is the customization point
+    for a ring with more units than +-1 (Z[i]).
+
+    This is the regime where both dense backends are at their worst, their
+    cost following the dimensions rather than the number of nonzero
+    entries. On the boundary matrices of a chain complex (0.2% to 2%
+    dense, entries almost all +-1, invariant factors nearly all 1) the
+    computation collapses in the pre-elimination, the backend receiving
+    only what is left:
+
+        matrix        backend alone      with the pre-elimination
+        1477x126      75 ms mpz          2.4 ms mpz
+                      691 ms flint       2.6 ms flint
+        870x5253      21.0 s mpz         115 ms mpz / 50 ms flint
+        6285x1477     48.9 s mpz         169 ms mpz / 198 ms flint
+
+    The invariant factors are identical to the ones of the backend alone on
+    all three.
+
     The same machinery extends to the Smith invariant factors:
     `SmithNormalFormInvariantModD_or_none` runs the Kannan-Bachem
     alternation of modulo-D Hermite reductions (each pass a certified

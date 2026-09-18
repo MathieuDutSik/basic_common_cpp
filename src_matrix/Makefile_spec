@@ -21,7 +21,8 @@
 #PROGRAM		= SmithNormalForm SmithNormalFormInvariant
 #PROGRAM		= SelectRowColMatModHadamard
 #PROGRAM		= SmithNormalFormIntegerMat
-PROGRAM		= Test_ReadListMat
+PROGRAM		= SmithNormalFormInvariant
+#PROGRAM		= Test_ReadListMat
 
 OBJECTS		= $(PROGRAM:%=%.o)
 
@@ -37,12 +38,13 @@ OUTPUTFLAG 	= -o
 
 CLOCAL          = -I../src_basic -I../src_number -I../src_comb -I.
 #CDEFS           = -DDEBUG_MATRIX_INT
-CDEFS           = -DDEBUG
+#CDEFS           = -DDEBUG
+CDEFS           = -DENABLE_FLINT_SUPPORT
 
 
 CFLAGS 		= -I$(GMP_INCDIR) -I$(BOOST_INCDIR) -I$(EIGEN_PATH) $(FLINT_INCLUDE)
 
-LIBS		= -lm $(GMP_CXX_LINK) -pthread $(FLINT_LINK) $(BOOST_LINK)
+LIBS		= -lm $(GMP_CXX_LINK) -pthread $(FLINT_LINK) $(BOOST_LINK) -lflint
 
 %.o: %.cpp
 	@echo

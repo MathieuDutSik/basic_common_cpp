@@ -5,6 +5,9 @@
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
 #include "NumberTheoryQuadField.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "MAT_MatrixInt.h"
 // clang-format on
 
@@ -37,7 +40,8 @@ int main(int argc, char *argv[]) {
       std::cerr << "This program is used as\n";
       std::cerr << "SmithNormalForm [arith] [inputMat]\n";
       std::cerr << "---\n";
-      std::cerr << "arith: mpz_class, mpq_class, safe_integer, safe_rational\n";
+      std::cerr << "arith: mpz_class, mpq_class, safe_integer, safe_rational";
+      std::cerr << ", flint_integer (with flint support)\n";
       return -1;
     }
     std::string arith = argv[1];
@@ -51,6 +55,10 @@ int main(int argc, char *argv[]) {
         return process<SafeInt64>(FileI);
       if (arith == "safe_rational")
         return process<Rational<SafeInt64>>(FileI);
+#ifdef ENABLE_FLINT_SUPPORT
+      if (arith == "flint_integer")
+        return process<fmpz_class>(FileI);
+#endif
       std::cerr << "Failed to find a matching type\n";
       throw TerminalException{1};
     };

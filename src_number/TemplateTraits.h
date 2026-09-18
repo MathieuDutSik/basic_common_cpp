@@ -374,6 +374,18 @@ template <typename T> struct use_snf_mod_D {
   static const bool value = false;
 };
 
+// Whether SmithNormalFormInvariant runs the sparse unit-pivot
+// pre-elimination (SmithUnitPivotEliminate) before handing what is left to
+// its backend. A unit pivot splits off an invariant factor 1 by a pair of
+// unimodular operations, and on a sparse matrix the elimination touches
+// almost nothing, so the trivial part of the Smith form is stripped at
+// negligible cost. The pass is self-limiting (it gives up on a dense or
+// unit-free matrix after the first pivot search), hence it is on by
+// default for every implementation of Z.
+template <typename T> struct use_unit_pivot_preelimination {
+  static const bool value = is_implementation_of_Z<T>::value;
+};
+
 // Trait of totally ordered set
 
 template <typename T> struct is_totally_ordered {
