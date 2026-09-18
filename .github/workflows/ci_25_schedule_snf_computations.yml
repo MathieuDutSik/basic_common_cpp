@@ -1,0 +1,48 @@
+name: SNF Computations
+
+on:
+  # Every 25th of the month at midnight
+  schedule:
+    - cron: "0 0 25 * *"
+  # Manually triggered
+  workflow_dispatch:
+
+jobs:
+  snf-computations:
+    runs-on: ubuntu-latest
+    env:
+      GMP_INCDIR: /usr/include
+      GMP_CXX_LINK: "-lm -lgmp -lgmpxx"
+      BOOST_INCDIR: "/usr/include"
+      BOOST_LINK: "/usr/lib/x86_64-linux-gnu/libboost_serialization.a"
+      EIGEN_PATH: /home/runner/work/opt/eigen
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install standard dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential libgmp-dev libeigen3-dev libboost-all-dev
+
+    - name: Install non-standard dependencies
+      run: |
+        mkdir -p /home/runner/work/opt
+        # We need specific version 3.3.9 because of a bug in 3.4.0 for algebraic data types.
+        wget -q https://gitlab.com/libeigen/eigen/-/archive/3.3.9/eigen-3.3.9.tar.gz
+        tar -xzf eigen-3.3.9.tar.gz
+        mv eigen-3.3.9 /home/runner/work/opt/eigen
+        pwd
+        echo "After eigen-3.3.9 set up"
+
+    # The Smith invariant factors of the boundary matrices of a chain
+    # complex, from CI_tests/SNF_computations. Those matrices are the
+    # regime the sparse input path and the unit-pivot pre-elimination
+    # exist for: between 0.06% and 1.8% dense, entries almost all +-1,
+    # invariant factors nearly all 1. The script builds
+    # SmithNormalFormInvariant_sparse itself and checks the invariant
+    # factors of every matrix of the complex against recorded values, for
+    # two arithmetics. Set SNF_QUICK=1 to leave out the two expensive
+    # ones (Matrix3_8 and Matrix4_8).
+    - name: Test_SNF_computations
+      run: ./CI_tests/SNF_computations/run_test.sh

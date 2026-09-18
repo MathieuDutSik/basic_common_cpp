@@ -213,7 +213,10 @@ void WriteSparseMatrix(std::ostream &os, MySparseMatrix<T> const &eMat) {
   int nbRow = eMat.rows();
   int nbCol = eMat.cols();
   int nnz = eMat.nonZeros();
-  os << nbRow << " " << nbCol << " " << nnz;
+  // The newline matters: without it the entry count and the row index of
+  // the first entry are written back to back and ReadSparseMatrix reads
+  // the concatenation as a single number.
+  os << nbRow << " " << nbCol << " " << nnz << "\n";
   int nb = 0;
   for (int k = 0; k < eMat.outerSize(); ++k) {
     for (typename MySparseMatrix<T>::InnerIterator it(eMat, k); it; ++it) {

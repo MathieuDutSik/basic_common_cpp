@@ -1405,29 +1405,55 @@ template <typename T> inline bool IsUnitForPivot(T const &x) {
 
 template <typename T> struct SmithUnitPivotReduction {
   // The number of unit pivots removed, i.e. of invariant factors 1 split
-  // off, and the matrix that remains.
+  // off, the matrix that remains, and its number of nonzero entries (the
+  // elimination knows it, and a zero core means there is nothing left for
+  // the backend to do).
   int nb_unit;
   MyMatrix<T> core;
+  size_t core_nnz;
+};
+
+// The working structure of the elimination: the entries by row, and the
+// occupied rows by column for the column access that the Markowitz cost
+// and the elimination both need. It is filled either from a MyMatrix or
+// directly from a MySparseMatrix (see MAT_MatrixIntSparse.h), which is
+// the point of having it separate: the sparse input never has to be
+// expanded to its dense form.
+template <typename T> struct SmithSparseWork {
+  int nbRow;
+  int nbCol;
+  std::vector<std::map<int, T>> rows;
+  std::vector<std::set<int>> cols;
+  size_t nnz;
+  SmithSparseWork(int nbRow, int nbCol)
+      : nbRow(nbRow), nbCol(nbCol), rows(nbRow), cols(nbCol), nnz(0) {}
+  void set_entry(int i, int j, T const &val) {
+    rows[i].emplace(j, val);
+    cols[j].insert(i);
+    nnz++;
+  }
+};
+
+// What the elimination leaves behind: the number of unit pivots removed
+// and the surviving rows and columns, the core being read off the work
+// structure by the caller in whatever representation it wants.
+struct SmithUnitPivotLayout {
+  int nb_unit;
+  std::vector<int> keep_rows;
+  std::vector<int> keep_cols;
 };
 
 template <typename T>
-SmithUnitPivotReduction<T>
-SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
-                        int nb_candidates) {
-  int nbRow = M.rows();
-  int nbCol = M.cols();
-  // Sparse image of M: the entries by row, and the occupied rows by
-  // column for the column access the Markowitz cost and the elimination
-  // both need.
-  std::vector<std::map<int, T>> rows(nbRow);
-  std::vector<std::set<int>> cols(nbCol);
-  for (int i = 0; i < nbRow; i++)
-    for (int j = 0; j < nbCol; j++)
-      if (M(i, j) != 0) {
-        rows[i].emplace(j, M(i, j));
-        cols[j].insert(i);
-      }
+SmithUnitPivotLayout SmithUnitPivotEliminate_Work(SmithSparseWork<T> &W,
+                                                  size_t markowitz_bound,
+                                                  int nb_candidates,
+                                                  double switch_density) {
+  int nbRow = W.nbRow;
+  int nbCol = W.nbCol;
+  std::vector<std::map<int, T>> &rows = W.rows;
+  std::vector<std::set<int>> &cols = W.cols;
   std::vector<uint8_t> row_alive(nbRow, 1), col_alive(nbCol, 1);
+  int n_row_live = nbRow, n_col_live = nbCol;
   // The live rows and columns ordered by their number of entries, so that
   // the pivot search can start from the sparsest ones. The search has to
   // be symmetric in the two: a boundary matrix of a graph, for instance,
@@ -1463,6 +1489,18 @@ SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
   };
   int nb_unit = 0;
   while (true) {
+    // The elimination is worth running only while what is left is sparse.
+    // Once the fill has made it dense, the dense backend is the better
+    // tool and the pass hands over. Measured on the boundary matrices of a
+    // chain complex, the density climbs from about 0.06% to at most 5%
+    // before the unit pivots run out, so this rarely fires; it is the
+    // guard for the inputs where the fill does run away.
+    if (n_row_live > 0 && n_col_live > 0) {
+      double density = static_cast<double>(W.nnz) /
+                       (static_cast<double>(n_row_live) * n_col_live);
+      if (density > switch_density)
+        break;
+    }
     int best_p = -1, best_q = -1;
     size_t best_cost = 0;
     auto consider = [&](int i, int j) -> void {
@@ -1517,6 +1555,7 @@ SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
       // The entry in the pivot column becomes zero by construction.
       rows[i].erase(it_iq);
       col_erase(best_q, i);
+      W.nnz--;
       for (auto &ent : rows[best_p]) {
         int j = ent.first;
         if (j == best_q)
@@ -1526,11 +1565,13 @@ SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
           T prod = f * ent.second;
           rows[i].emplace(j, -prod);
           col_insert(j, i);
+          W.nnz++;
         } else {
           it->second -= f * ent.second;
           if (it->second == 0) {
             rows[i].erase(it);
             col_erase(j, i);
+            W.nnz--;
           }
         }
       }
@@ -1538,32 +1579,58 @@ SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
     }
     // Drop the pivot row and the pivot column.
     size_t old_p = rows[best_p].size();
+    W.nnz -= rows[best_p].size();
     for (auto &ent : rows[best_p])
       col_erase(ent.first, best_p);
     rows[best_p].clear();
     update_row_key(best_p, old_p);
     row_alive[best_p] = 0;
     col_alive[best_q] = 0;
+    n_row_live--;
+    n_col_live--;
     nb_unit++;
   }
-  // The core, over the surviving rows and columns.
-  std::vector<int> keep_rows, keep_cols;
+  // The surviving rows and columns; the core itself is read off the work
+  // structure by the caller.
+  SmithUnitPivotLayout layout;
+  layout.nb_unit = nb_unit;
   for (int i = 0; i < nbRow; i++)
     if (row_alive[i])
-      keep_rows.push_back(i);
-  std::vector<int> col_pos(nbCol, -1);
+      layout.keep_rows.push_back(i);
   for (int j = 0; j < nbCol; j++)
-    if (col_alive[j]) {
-      col_pos[j] = keep_cols.size();
-      keep_cols.push_back(j);
-    }
-  int n_row_core = keep_rows.size();
-  int n_col_core = keep_cols.size();
+    if (col_alive[j])
+      layout.keep_cols.push_back(j);
+  return layout;
+}
+
+// The core as a dense matrix, over the surviving rows and columns.
+template <typename T>
+MyMatrix<T> SmithCoreDense(SmithSparseWork<T> const &W,
+                           SmithUnitPivotLayout const &layout) {
+  std::vector<int> col_pos(W.nbCol, -1);
+  for (size_t idx = 0; idx < layout.keep_cols.size(); idx++)
+    col_pos[layout.keep_cols[idx]] = idx;
+  int n_row_core = layout.keep_rows.size();
+  int n_col_core = layout.keep_cols.size();
   MyMatrix<T> core = MyMatrix<T>::Zero(n_row_core, n_col_core);
   for (int idx = 0; idx < n_row_core; idx++)
-    for (auto &ent : rows[keep_rows[idx]])
+    for (auto &ent : W.rows[layout.keep_rows[idx]])
       core(idx, col_pos[ent.first]) = ent.second;
-  return {nb_unit, std::move(core)};
+  return core;
+}
+
+template <typename T>
+SmithUnitPivotReduction<T>
+SmithUnitPivotEliminate(MyMatrix<T> const &M, size_t markowitz_bound,
+                        int nb_candidates, double switch_density) {
+  SmithSparseWork<T> W(M.rows(), M.cols());
+  for (int i = 0; i < M.rows(); i++)
+    for (int j = 0; j < M.cols(); j++)
+      if (M(i, j) != 0)
+        W.set_entry(i, j, M(i, j));
+  SmithUnitPivotLayout layout = SmithUnitPivotEliminate_Work(
+      W, markowitz_bound, nb_candidates, switch_density);
+  return {layout.nb_unit, SmithCoreDense(W, layout), W.nnz};
 }
 
 // The Smith invariant factors through the modulo-D machinery, by the
@@ -1652,20 +1719,52 @@ MyVector<T> SmithNormalFormInvariant_Kernel(MyMatrix<T> const &M) {
   return Invariant;
 }
 
-// The bound on the fill a single unit pivot may create, and the number of
-// rows and of columns the Markowitz search looks at. Both were set by
-// measuring on the two regimes (the sparse boundary matrices of a chain
-// complex, and dense random matrices): the sparse inputs are consumed
-// entirely long before the bound bites, while a dense input exceeds it on
-// its very first search and falls through to the backend at the cost of
-// that one search. Widening the candidate window past 64 was measured to
-// buy no further pivots while making every search proportionally slower.
-inline constexpr size_t smith_unit_pivot_markowitz_bound = 1024;
+// The bound on the fill a single unit pivot may create, the number of
+// rows and of columns the Markowitz search looks at, and the density at
+// which the sparse phase hands over to the dense backend.
+//
+// The fill bound only rules out a single catastrophic step; the stopping
+// rule that matters is the density. A tight fill bound was measured to be
+// actively harmful: at 1024 the elimination of a 5253x11568 boundary
+// matrix stopped with 4353 of its 4384 pivots and left a core that cost
+// the backend 2.1 seconds, where letting it run to the end costs the same
+// pre-elimination time and leaves nothing at all to do.
+//
+// Widening the candidate window past 64 was measured to buy no further
+// pivots while making every search proportionally slower.
+inline constexpr size_t smith_unit_pivot_markowitz_bound = 1 << 20;
 inline constexpr int smith_unit_pivot_nb_candidates = 64;
+inline constexpr double smith_unit_pivot_switch_density = 0.25;
 
-// The density above which the pre-elimination is not even attempted: the
-// sparse image of the matrix would cost more to build than the pass can
-// save, and a dense matrix is the regime the backends are good at.
+// The invariant factors of a matrix from those of its pre-elimination
+// core: nb_unit factors 1, then the invariants of the core, then the
+// zeros. A factor 1 divides everything, so prefixing them keeps the
+// divisibility chain, and the lengths match since the core has both its
+// dimensions shortened by nb_unit.
+template <typename T>
+MyVector<T> SmithInvariantFromCore(int min_dim, int nb_unit,
+                                   MyMatrix<T> const &core, size_t core_nnz) {
+  MyVector<T> V(min_dim);
+  for (int i = 0; i < nb_unit; i++)
+    V(i) = 1;
+  for (int i = nb_unit; i < min_dim; i++)
+    V(i) = 0;
+  // A core that is empty or identically zero contributes only zeros, and
+  // there is no reason to hand it to a backend.
+  if (core_nnz > 0 && core.rows() > 0 && core.cols() > 0) {
+    MyVector<T> core_inv = SmithNormalFormInvariant_Kernel(core);
+    for (int i = 0; i < core_inv.size(); i++)
+      V(nb_unit + i) = core_inv(i);
+  }
+  return V;
+}
+
+// The density above which the pre-elimination is not even attempted.
+// This is the cheap outer guard of the dense entry point: it decides from
+// a plain count of the nonzero entries, before the sparse image of the
+// matrix is built at all. Its companion inside the elimination,
+// smith_unit_pivot_switch_density, is what stops a pass whose fill has
+// made the remaining core dense along the way.
 inline constexpr double smith_unit_pivot_max_density = 0.25;
 
 template <typename T>
@@ -1688,25 +1787,11 @@ MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
       if (density <= smith_unit_pivot_max_density) {
         SmithUnitPivotReduction<T> red = SmithUnitPivotEliminate(
             M, smith_unit_pivot_markowitz_bound,
-            smith_unit_pivot_nb_candidates);
-        if (red.nb_unit > 0) {
-          MyVector<T> V(min_dim);
-          for (int i = 0; i < red.nb_unit; i++)
-            V(i) = 1;
-          // Each unit pivot contributes an invariant factor 1, and 1
-          // divides everything, so prefixing them to the invariants of the
-          // core preserves the divisibility chain.
-          if (red.core.rows() > 0 && red.core.cols() > 0) {
-            MyVector<T> core_inv = SmithNormalFormInvariant_Kernel(red.core);
-            for (int i = 0; i < core_inv.size(); i++)
-              V(red.nb_unit + i) = core_inv(i);
-          } else {
-            // An empty core: the remaining invariant factors are zero.
-            for (int i = red.nb_unit; i < min_dim; i++)
-              V(i) = 0;
-          }
-          return V;
-        }
+            smith_unit_pivot_nb_candidates,
+            smith_unit_pivot_switch_density);
+        if (red.nb_unit > 0)
+          return SmithInvariantFromCore(min_dim, red.nb_unit, red.core,
+                                        red.core_nnz);
       }
     }
   }

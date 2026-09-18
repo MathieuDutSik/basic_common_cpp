@@ -250,9 +250,32 @@ Three mechanisms stack on top of the plain wrappers:
     implementation of Z, and `IsUnitForPivot` is the customization point
     for a ring with more units than +-1 (Z[i]).
 
+    The pass stops on two conditions: no unit pivot is left, or the fill
+    has made what remains dense (`smith_unit_pivot_switch_density`), which
+    is the point where handing over to a dense backend is the better
+    move. The per-pivot fill bound only rules out a single catastrophic
+    step -- setting it tightly was measured to be actively harmful, since
+    it strands the elimination with a core that costs the backend far more
+    than finishing would have cost.
+
+    A sparse input path avoids the dense form altogether:
+    `SmithNormalFormInvariant_sparse` in `MAT_MatrixIntSparse.h` takes a
+    `MySparseMatrix`, runs the same elimination on it, and expands only
+    the core, if any is left. This matters because the whole dense
+    pipeline costs time proportional to the number of CELLS: parsing the
+    file, constructing that many number objects, scanning for the density
+    and building the sparse image. On an 11568 x 12119 boundary matrix the
+    elimination itself is 1.7 s of a 7.9 s dense-input run, so about 78%
+    of the work was handling a dense form of a matrix that is not dense.
+    `ConvertMatrixDenseToSparse` rewrites a dense matrix file into the
+    sparse format, streaming the entries so that a matrix too large to
+    hold densely can still be converted, and
+    `CI_tests/SNF_computations` holds one chain complex in that form
+    (582 MB of dense text becomes 2.9 MB).
+
     This is the regime where both dense backends are at their worst, their
     cost following the dimensions rather than the number of nonzero
-    entries. On the boundary matrices of a chain complex (0.2% to 2%
+    entries. On the boundary matrices of a chain complex (0.06% to 2%
     dense, entries almost all +-1, invariant factors nearly all 1) the
     computation collapses in the pre-elimination, the backend receiving
     only what is left:
