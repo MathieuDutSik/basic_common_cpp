@@ -428,6 +428,84 @@ MyMatrix<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
   return NSP;
 }
 
+/*
+  Membership in a space defined modulo p, asked many times for one space.
+
+  The space is the one spanned by the rows of Space inside (Z/pZ)^n. What
+  the structure stores is not that spanning family but the equations
+  cutting the space out: the rows of NSP are the linear forms vanishing
+  on it, that is the w with Space w^T = 0 modulo p. They are obtained by
+  the Gaussian elimination of NullspaceTrMatMod, whose pivots are
+  normalized with mod_inv.
+
+  That p is prime is what makes the reformulation legitimate: Z/pZ is
+  then a field, the orthogonal of the orthogonal of the space is the
+  space itself, and a vector belongs to it if and only if every one of
+  those forms vanishes on it. For a composite modulus the equations would
+  still be necessary but no longer sufficient.
+
+  Building the equations costs one elimination, after which each
+  membership test is a matrix vector product, which is the point of
+  keeping the structure around rather than solving a system every time.
+ */
+template <typename T> struct RecSolutionMatMod {
+private:
+  T TheMod;
+  int n;
+  MyMatrix<T> NSP;
+
+public:
+  RecSolutionMatMod(MyMatrix<T> const &Space, T const &_TheMod) {
+    TheMod = _TheMod;
+    n = Space.cols();
+    NSP = NullspaceTrMatMod(Space, TheMod);
+  }
+  bool has_solution_v(MyVector<T> const &V) const {
+#ifdef DEBUG_MATRIX_MOD
+    if (V.size() != n) {
+      std::cerr << "RECSOLMOD: V has size " << V.size()
+                << " but the space lives in dimension " << n << "\n";
+      throw TerminalException{1};
+    }
+#endif
+    MyVector<T> Vred = VectorMod(V, TheMod);
+    int n_equa = NSP.rows();
+    for (int i_equa = 0; i_equa < n_equa; i_equa++) {
+      T sum(0);
+      for (int i = 0; i < n; i++) {
+        // Reduced at every term so that nothing grows past TheMod^2,
+        // which is what the small integer types are chosen against.
+        T val = sum + NSP(i_equa, i) * Vred(i);
+        sum = ResInt(val, TheMod);
+      }
+      if (sum != 0) {
+        return false;
+      }
+    }
+    return true;
+  }
+  bool is_containing_m(MyMatrix<T> const &M) const {
+#ifdef DEBUG_MATRIX_MOD
+    if (M.cols() != n) {
+      std::cerr << "RECSOLMOD: M has " << M.cols()
+                << " columns but the space lives in dimension " << n << "\n";
+      throw TerminalException{1};
+    }
+#endif
+    int n_row = M.rows();
+    MyVector<T> V(n);
+    for (int i_row = 0; i_row < n_row; i_row++) {
+      for (int i = 0; i < n; i++) {
+        V(i) = M(i_row, i);
+      }
+      if (!has_solution_v(V)) {
+        return false;
+      }
+    }
+    return true;
+  }
+};
+
 template <typename T>
 T DeterminantMatMod(MyMatrix<T> const &TheMat, T const &TheMod) {
   int n = TheMat.rows();

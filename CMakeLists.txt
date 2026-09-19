@@ -227,6 +227,7 @@ set(
   RemoveFractionMatrix
   SolutionMatRepetitive
   Test_FindIsotropicMod
+  Test_MatrixMod
   Test_EquaSpace
   RankMat
   Matrix_As_SetPosScal

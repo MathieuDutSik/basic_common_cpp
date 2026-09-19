@@ -97,13 +97,15 @@ run_step "Build Matrix Tests" make -C src_matrix \
   Test_HilbertMatrix \
   Test_NullspaceComputation \
   Test_SubspaceCompletion \
-  Test_FindIsotropicMod
+  Test_FindIsotropicMod \
+  Test_MatrixMod
 
 run_step "Test_MatrixInverse" ./src_matrix/Test_MatrixInverse mpz_class 10
 run_step "Test_PerformanceHNF" ./src_matrix/Test_PerformanceHNF 10 10
 run_step "Test_HilbertMatrix" ./src_matrix/Test_HilbertMatrix mpq_class 10
 run_step "Test_NullspaceComputation" ./src_matrix/Test_NullspaceComputation
 run_step "Test_SubspaceCompletion" ./src_matrix/Test_SubspaceCompletion 15 10
+run_step "Test_MatrixMod" ./src_matrix/Test_MatrixMod mpz_class
 
 echo
 echo "CI test sequence completed successfully."
