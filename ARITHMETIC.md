@@ -188,6 +188,12 @@ The support is compiled only when `ENABLE_FLINT_SUPPORT` is defined; in
 `src_matrix` this is done with `make ENABLE_FLINT_SUPPORT=1` (the
 `FLINT_INCDIR` / `FLINT_LINK` variables override the include directory and
 the link flags, the defaults assume flint installed next to gmp). The
+CMake build decides on its own: flint is looked up through `pkg-config`
+and, failing that, by hand, the routines the two headers call are compiled
+as a check, and the support is turned on when that succeeds. Pass
+`-DENABLE_FLINT_SUPPORT=OFF` to build without it even when it is
+installed, or `=ON` to make its absence a configuration error rather than
+a silent fallback. The
 programs then accept the arithmetic names `flint_integer` and
 `flint_rational` next to `integer` / `rational`, and
 `src_matrix/Bench_matrix_arithmetic` benchmarks the two families on
