@@ -223,7 +223,6 @@ set(
   NullspaceComputationExperiment
   SelectRowColMatModHadamard
   SmithNormalForm
-  SmithNormalFormIntegerMat
   Test_SubspaceCompletion
   RemoveFractionMatrix
   SolutionMatRepetitive

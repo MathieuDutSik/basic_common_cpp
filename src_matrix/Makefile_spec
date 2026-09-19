@@ -20,7 +20,6 @@
 #PROGRAM		= RankMat
 #PROGRAM		= SmithNormalForm SmithNormalFormInvariant
 #PROGRAM		= SelectRowColMatModHadamard
-#PROGRAM		= SmithNormalFormIntegerMat
 PROGRAM		= SmithNormalFormInvariant
 #PROGRAM		= Test_ReadListMat
 

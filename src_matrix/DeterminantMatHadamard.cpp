@@ -7,7 +7,7 @@
 #ifdef ENABLE_FLINT_SUPPORT
 #include "NumberTheoryFlint.h"
 #endif
-#include "MAT_MatrixMod.h"
+#include "MAT_MatrixModReconstruction.h"
 #include "MAT_MatrixInt.h"
 // clang-format on
 
