@@ -25,26 +25,47 @@ template <typename T> T GenericGcd(T const &m, T const &n) {
   return f;
 }
 
+/*
+  The inverse of a modulo P, or zero when a is not invertible.
+
+  The classical extended Euclid carries a Bezout coefficient whose sign
+  alternates, which is fine over the integers but wraps around on an
+  unsigned type, where a negative value is not representable and the
+  comparison against zero can never hold. So the recursion here is run on
+  the magnitudes only,
+     t_{k+1} = t_{k-1} + q_k t_k,
+  which is non decreasing and stays bounded by P, so it neither goes
+  negative nor leaves the range of a type that holds P. The sign that was
+  dropped is recovered at the end from the number of steps, the identity
+  being a t_k = (-1)^k gcd modulo P.
+
+  The operands of the division are non negative throughout, so the
+  truncation is the floor and the quotient is the Euclidean one for the
+  signed and the unsigned types alike.
+ */
 template <typename T> T mod_inv(T const &a, T const &P) {
-  T t(0);
-  T newt(1);
-  T r = P;
-  T newr = a;
-  T q, tmp;
-  while (newr != 0) {
-    q = QuoInt(r, newr);
-    tmp = t;
-    t = newt;
-    newt = tmp - q * newt;
-    tmp = r;
-    r = newr;
-    newr = tmp - q * newr;
+  T r0 = P;
+  T r1 = ResInt(a, P);
+  T t0(0);
+  T t1(1);
+  size_t n_step = 0;
+  while (r1 != 0) {
+    T q = r0 / r1;
+    T r2 = r0 - q * r1;
+    T t2 = t0 + q * t1;
+    r0 = r1;
+    r1 = r2;
+    t0 = t1;
+    t1 = t2;
+    n_step++;
   }
-  if (r > 1)
+  if (r0 != 1) {
     return T(0);
-  if (t < 0)
-    t = t + P;
-  return t;
+  }
+  if (n_step % 2 == 1) {
+    return t0;
+  }
+  return P - t0;
 }
 
 template <typename T>

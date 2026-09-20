@@ -118,6 +118,12 @@ template <typename T> T QuoInt_C_integer(T const &a, T const &b) {
   return quo2;
 }
 
+// On an unsigned type both operands are non negative, so the truncation
+// of the division is already the floor and no correction is needed.
+template <typename T> T QuoInt_C_unsigned_integer(T const &a, T const &b) {
+  return a / b;
+}
+
 template <typename T> T QuoInt_Generic(T const &a, T const &b) {
   T res = ResInt_Generic(a, b);
   return (a - res) / b;
@@ -137,6 +143,25 @@ inline void QUO_INT(stc<int32_t> const &a, stc<int32_t> const &b, int32_t &q) {
 
 inline void QUO_INT(stc<int64_t> const &a, stc<int64_t> const &b, int64_t &q) {
   q = QuoInt_C_integer<int64_t>(a.val, b.val);
+}
+
+inline void QUO_INT(stc<uint8_t> const &a, stc<uint8_t> const &b, uint8_t &q) {
+  q = QuoInt_C_unsigned_integer<uint8_t>(a.val, b.val);
+}
+
+inline void QUO_INT(stc<uint16_t> const &a, stc<uint16_t> const &b,
+                    uint16_t &q) {
+  q = QuoInt_C_unsigned_integer<uint16_t>(a.val, b.val);
+}
+
+inline void QUO_INT(stc<uint32_t> const &a, stc<uint32_t> const &b,
+                    uint32_t &q) {
+  q = QuoInt_C_unsigned_integer<uint32_t>(a.val, b.val);
+}
+
+inline void QUO_INT(stc<uint64_t> const &a, stc<uint64_t> const &b,
+                    uint64_t &q) {
+  q = QuoInt_C_unsigned_integer<uint64_t>(a.val, b.val);
 }
 
 #include "QuoIntFcts.h"

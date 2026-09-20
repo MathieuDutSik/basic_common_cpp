@@ -335,7 +335,13 @@ SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
       T eVal1 = Mwork(eRank, eCol);
       if (eVal1 != 0) {
         for (int iCol = 0; iCol < n_col; iCol++) {
-          T val = Mwork(eRank, iCol) - eVal1 * Mwork(iRank, iCol);
+          // Written as an addition of the complement rather than a
+          // subtraction: on an unsigned type a negative intermediate wraps
+          // to a huge value whose residue is not the one wanted. Both
+          // terms are reduced, so the sum stays below twice TheMod.
+          T prod_raw = eVal1 * Mwork(iRank, iCol);
+          T prod = ResInt(prod_raw, TheMod);
+          T val = Mwork(eRank, iCol) + TheMod - prod;
           Mwork(eRank, iCol) = ResInt(val, TheMod);
         }
       }
@@ -364,7 +370,9 @@ SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
         if (eVal1 != 0) {
           int StartCol = ListColSelect[iRank];
           for (int iCol = StartCol; iCol < n_col; iCol++) {
-            T val = Mwork(iRank, iCol) - eVal1 * Mwork(eRank, iCol);
+            T prod_raw = eVal1 * Mwork(eRank, iCol);
+            T prod = ResInt(prod_raw, TheMod);
+            T val = Mwork(iRank, iCol) + TheMod - prod;
             Mwork(iRank, iCol) = ResInt(val, TheMod);
           }
         }
