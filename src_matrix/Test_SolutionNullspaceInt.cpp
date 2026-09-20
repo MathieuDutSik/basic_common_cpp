@@ -201,6 +201,60 @@ template <typename T> void process_zbasis(int n, int nb) {
         throw TerminalException{1};
       }
     }
+    // Conditioning below the full rank. The basis is then built in the
+    // coordinates of r independent rows of the family, where the
+    // coefficients are in [0, 1], so every entry is bounded by r times the
+    // largest entry of the family. The Hermite normal form of the ambient
+    // space would break that by orders of magnitude (its entries are of the
+    // size of the r x r minors), so this is what pins down the choice.
+    if (Basis.rows() < n) {
+      T MaxGens(0);
+      for (int k = 0; k < m; k++)
+        for (int j = 0; j < n; j++)
+          MaxGens = T_max(MaxGens, T_abs(Gens(k, j)));
+      T MaxBasis(0);
+      for (int k = 0; k < Basis.rows(); k++)
+        for (int j = 0; j < n; j++)
+          MaxBasis = T_max(MaxBasis, T_abs(Basis(k, j)));
+      if (MaxBasis > T(Basis.rows()) * MaxGens) {
+        std::cerr << "GetZbasis returns a badly conditioned basis: MaxBasis="
+                  << MaxBasis << " MaxGens=" << MaxGens
+                  << " rank=" << Basis.rows() << "\n";
+        throw TerminalException{1};
+      }
+    }
+    // The same family over the overlying field, scaled by 1/q: the lattice
+    // is scaled with it, so q times the basis of the scaled family is a
+    // basis of the lattice of the integral one. This is the path clearing
+    // the denominators.
+    using Tfield = typename overlying_field<T>::field_type;
+    Tfield q(3);
+    MyMatrix<Tfield> Gens_f(m, n);
+    for (int k = 0; k < m; k++)
+      for (int j = 0; j < n; j++)
+        Gens_f(k, j) = UniversalScalarConversion<Tfield, T>(Gens(k, j)) / q;
+    MyMatrix<Tfield> Basis_f = GetZbasis(Gens_f);
+    if (Basis_f.rows() != Basis.rows()) {
+      std::cerr << "GetZbasis over the field has the wrong rank\n";
+      throw TerminalException{1};
+    }
+    MyMatrix<Tfield> Basis_fs(Basis_f.rows(), n);
+    for (int k = 0; k < Basis_f.rows(); k++)
+      for (int j = 0; j < n; j++)
+        Basis_fs(k, j) = q * Basis_f(k, j);
+    if (!IsIntegralMatrix(Basis_fs)) {
+      std::cerr << "The rescaled basis over the field should be integral\n";
+      throw TerminalException{1};
+    }
+    MyMatrix<T> Basis_back = UniversalMatrixConversion<T, Tfield>(Basis_fs);
+    for (int k = 0; k < Basis.rows(); k++) {
+      MyVector<T> v1 = GetMatrixRow(Basis, k);
+      MyVector<T> v2 = GetMatrixRow(Basis_back, k);
+      if (!SolutionIntMat(Basis_back, v1) || !SolutionIntMat(Basis, v2)) {
+        std::cerr << "The field path and the ring path disagree\n";
+        throw TerminalException{1};
+      }
+    }
   }
 }
 
