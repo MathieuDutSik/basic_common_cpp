@@ -103,6 +103,62 @@ template <> struct underlying_ring<int8_t> {
   using ring_type = int8_t;
 };
 
+// underlying_z_ring and underlying_q_field
+//
+// The rational integers Z and the rational numbers Q sitting inside T. These
+// answer a different question from underlying_ring, and the two only look
+// alike because they agree on every type whose scalars are already rational.
+//
+//   underlying_ring<T>    a ring inside T over which the computation can run
+//                         without denominators, for Bareiss and the other
+//                         fraction-free paths. It stays as close to T as it
+//                         can: for QuadField<mpq_class, d> it is
+//                         Z[sqrt(d)] = QuadField<mpz_class, d>, and for a real
+//                         algebraic field it is the order Z[x].
+//   underlying_z_ring<T>  the rational integers inside T, so mpz_class for
+//                         mpq_class and equally for QuadField<mpq_class, d> or
+//                         RealField: the algebraic extension is left behind.
+//   underlying_q_field<T> the rational numbers inside T, mpq_class in the same
+//                         three cases.
+//
+// The distinction matters wherever the object being computed is a lattice over
+// Z rather than a module over the ring of T -- the basis transformation of an
+// LLL reduction, the index of a sublattice being factored, the integral lift
+// of a permutation of short vectors. All of those are rational whatever field
+// the quadratic form takes its values in, and asking underlying_ring for them
+// lands in Z[sqrt(d)], which is not even a euclidean domain for most d.
+//
+// underlying_q_field is left undefined for a ring, which does not contain Q,
+// and both are left undefined for a type with no rational scalars at all --
+// double and float, the finite field Fp, ThresholdField and jet. That is a
+// hard error rather than a silent answer, as for the other traits of this
+// file. Code that has to branch can detect the absence:
+//
+//   template <typename T>
+//   concept HasUnderlyingQField = requires {
+//     typename underlying_q_field<T>::field_type;
+//   };
+
+template <typename T> struct underlying_z_ring {};
+
+template <> struct underlying_z_ring<int64_t> {
+  using ring_type = int64_t;
+};
+
+template <> struct underlying_z_ring<int32_t> {
+  using ring_type = int32_t;
+};
+
+template <> struct underlying_z_ring<int16_t> {
+  using ring_type = int16_t;
+};
+
+template <> struct underlying_z_ring<int8_t> {
+  using ring_type = int8_t;
+};
+
+template <typename T> struct underlying_q_field {};
+
 // Trait definition for subset of integers
 
 template <typename T> struct is_implementation_of_Z {};

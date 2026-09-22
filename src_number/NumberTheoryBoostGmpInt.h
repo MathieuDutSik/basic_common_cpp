@@ -177,6 +177,19 @@ template <> struct underlying_ring<boost::multiprecision::mpq_rational> {
   typedef boost::multiprecision::mpz_int ring_type;
 };
 
+template <> struct underlying_z_ring<boost::multiprecision::mpz_int> {
+  typedef boost::multiprecision::mpz_int ring_type;
+};
+
+template <> struct underlying_z_ring<boost::multiprecision::mpq_rational> {
+  typedef boost::multiprecision::mpz_int ring_type;
+};
+
+// mpz_int is a ring and contains no Q, so it gets no underlying_q_field.
+template <> struct underlying_q_field<boost::multiprecision::mpq_rational> {
+  typedef boost::multiprecision::mpq_rational field_type;
+};
+
 template <> struct overlying_field<boost::multiprecision::mpz_int> {
   typedef boost::multiprecision::mpq_rational field_type;
 };

@@ -19,6 +19,46 @@ to classify types at compile time. The key traits are:
     computation can be run without denominators. It is not canonical and it
     need not be the ring of integers: for a real algebraic field it is the
     order spanned by the powers of the generator (see `RealRing` below).
+  * `underlying_z_ring<T>` -- the rational integers Z inside `T`.
+  * `underlying_q_field<T>` -- the rational numbers Q inside `T`. Undefined
+    for a ring, which contains no Q.
+
+### `underlying_ring` against `underlying_z_ring`
+
+These two answer different questions and only look alike because they agree on
+every type whose scalars are already rational. `underlying_ring` stays as close
+to `T` as it can, because its job is to drop the denominators and keep the
+arithmetic: for `QuadField<mpq_class, d>` it is `Z[sqrt(d)]` and for a real
+algebraic field it is the order `Z[x]`. `underlying_z_ring` leaves the
+algebraic extension behind: `mpz_class` in both cases.
+
+The distinction matters wherever the object being computed is a lattice over Z
+rather than a module over the ring of `T` -- the basis transformation of an LLL
+reduction, the index of a sublattice being factored, the integral lift of a
+permutation of short vectors. Those are rational whatever field the quadratic
+form takes its values in, and asking `underlying_ring` for them lands in
+`Z[sqrt(d)]`, which is not even a euclidean domain for most `d`.
+
+Both traits are left undefined for a type with no rational scalars at all --
+`double`, `float`, the finite field `Fp`, `ThresholdField`, `jet` -- and
+`underlying_q_field` additionally for every ring. That is a hard error rather
+than a silent answer. Code that has to branch detects the absence:
+
+```cpp
+template <typename T>
+concept HasUnderlyingQField = requires {
+  typename underlying_q_field<T>::field_type;
+};
+```
+
+For this to work the specialization itself must not apply, rather than provide
+a member typedef that is an error to instantiate, which is what the `requires`
+clause on the `QuadField` case of `underlying_q_field` is for.
+
+`src_number/Test_UnderlyingTraits.cpp`, run by
+`CI_tests/RealAlgebraicField/run_test.sh`, checks the mapping of every type
+that has one, the absences, and the laws tying the three traits together --
+which is what keeps a new specialization from drifting away from the others.
 
 These traits drive `static_assert` checks and `if constexpr` / SFINAE dispatch
 throughout the library.

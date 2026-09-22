@@ -332,6 +332,12 @@ template <> struct underlying_ring<SafeInt64> {
 //
 //
 
+// SafeInt64 is a ring and contains no Q, so it gets no underlying_q_field.
+// Rational<SafeInt64> is covered by the generic Rational<Tint> of rational.h.
+template <> struct underlying_z_ring<SafeInt64> {
+  typedef SafeInt64 ring_type;
+};
+
 template <> struct overlying_field<SafeInt64> {
   typedef Rational<SafeInt64> field_type;
 };

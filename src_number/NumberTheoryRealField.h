@@ -997,6 +997,21 @@ template <int i_field> struct underlying_ring<RealField<i_field>> {
   typedef RealRing<i_field> ring_type;
 };
 
+// The rational scalars, where underlying_ring above and underlying_z_ring
+// part ways: the ring for the fraction-free paths keeps the generator and is
+// the order Z[x], while the rational integers of the field are plain Z. Code
+// working on a lattice over Z wants this one. Unlike QuadField these cannot
+// follow a base type -- the representation fixes its coefficients to
+// Tint_real_field / Trat_real_field, chosen by the build configuration at the
+// top of this file -- so they are what the traits return.
+template <int i_field> struct underlying_z_ring<RealField<i_field>> {
+  typedef Tint_real_field ring_type;
+};
+
+template <int i_field> struct underlying_q_field<RealField<i_field>> {
+  typedef Trat_real_field field_type;
+};
+
 template <int i_field>
 inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
@@ -1487,6 +1502,12 @@ template <int i_field> struct overlying_field<RealRing<i_field>> {
 // Z[x] is its own underlying ring.
 template <int i_field> struct underlying_ring<RealRing<i_field>> {
   typedef RealRing<i_field> ring_type;
+};
+
+// The rational integers of Z[x] are plain Z. Being a ring it contains no Q,
+// so it gets no underlying_q_field.
+template <int i_field> struct underlying_z_ring<RealRing<i_field>> {
+  typedef Tint_real_field ring_type;
 };
 
 template <int i_field>

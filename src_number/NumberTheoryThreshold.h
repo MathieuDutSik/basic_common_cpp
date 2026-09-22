@@ -287,8 +287,11 @@ inline void serialize(Archive &ar, ThresholdField<i_field> &val,
 
 // Turning into something rational
 
+// The value carries no fraction to clear, so no scaling is ever needed and
+// the argument is unused, as in the RealRing case.
 template <typename Tring, int i_field>
-void ScalingInteger_Kernel(stc<ThresholdField<i_field>> const &x, Tring &x_res) {
+void ScalingInteger_Kernel(
+    [[maybe_unused]] stc<ThresholdField<i_field>> const &x, Tring &x_res) {
   x_res = 1;
 }
 

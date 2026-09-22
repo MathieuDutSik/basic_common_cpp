@@ -17,6 +17,13 @@
 #                                 is neither a field nor a euclidean domain.
 #                                 Run for the cubic field against Z[x] and for
 #                                 Q(sqrt(d)) against Z[sqrt(d)], d = 2, 3, 5.
+#   * Test_UnderlyingTraits:      underlying_z_ring and underlying_q_field, the
+#                                 rational integers Z and the rational numbers
+#                                 Q inside a type, against underlying_ring,
+#                                 which answers a different question. Nearly
+#                                 all static_assert, over the plain rational
+#                                 types, Q(sqrt(d)), the cubic field and the
+#                                 types that have neither.
 #   * Test_AlgebraicConversion:   the conversions between the algebraic types
 #                                 (QuadField, RealField, RealRing) and the
 #                                 types that are not algebraic, in both
@@ -68,7 +75,7 @@ BENCH_SIZE="${2:-8}"
 cd "$ROOT"
 
 for prog in src_number/Test_RealCubicField src_number/Test_RealRing \
-            src_matrix/Test_RingConsistency \
+            src_matrix/Test_RingConsistency src_number/Test_UnderlyingTraits \
             src_number/Test_AlgebraicConversion src_number/Bench_real_ring; do
   name="$(basename "$prog")"
   echo "Building $name ..."
@@ -86,6 +93,10 @@ echo "===== Test_RealRing ====="
 echo
 echo "===== Test_RingConsistency ($N_TRIALS trials per section) ====="
 "$WORK/Test_RingConsistency" "$N_TRIALS"
+
+echo
+echo "===== Test_UnderlyingTraits ====="
+"$WORK/Test_UnderlyingTraits"
 
 echo
 echo "===== Test_AlgebraicConversion ====="

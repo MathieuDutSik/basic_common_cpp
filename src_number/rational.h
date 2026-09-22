@@ -568,6 +568,17 @@ template <typename Tint> struct underlying_ring<Rational<Tint>> {
   typedef Tint ring_type;
 };
 
+// The rational scalars of Rational<Tint> are Tint and Rational<Tint> itself,
+// so both traits are answered here. The integer types Tint themselves are a
+// ring: they get underlying_z_ring in TemplateTraits.h and no q field.
+template <typename Tint> struct underlying_z_ring<Rational<Tint>> {
+  typedef Tint ring_type;
+};
+
+template <typename Tint> struct underlying_q_field<Rational<Tint>> {
+  typedef Rational<Tint> field_type;
+};
+
 template <typename Tint>
 struct underlying_totally_ordered_ring<Rational<Tint>> {
   typedef Rational<Tint> real_type;

@@ -397,6 +397,12 @@ template <class Pol> struct underlying_ring<TryIntGen<Pol>> {
   typedef TryIntGen<Pol> ring_type;
 };
 
+// An implementation of Z, so it is its own rational integers and it contains
+// no Q.
+template <class Pol> struct underlying_z_ring<TryIntGen<Pol>> {
+  typedef TryIntGen<Pol> ring_type;
+};
+
 // The totally-ordered-ring self map and the generalized norm (absolute value),
 // needed by the ring-arithmetic linear algebra that runs over the try-types
 // (e.g. NullspaceIntTrMat's magnitude-based pivot selection). These do NOT

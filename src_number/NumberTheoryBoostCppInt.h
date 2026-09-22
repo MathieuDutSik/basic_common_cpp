@@ -187,6 +187,19 @@ template <> struct underlying_ring<boost::multiprecision::cpp_rational> {
   typedef boost::multiprecision::cpp_int ring_type;
 };
 
+template <> struct underlying_z_ring<boost::multiprecision::cpp_int> {
+  typedef boost::multiprecision::cpp_int ring_type;
+};
+
+template <> struct underlying_z_ring<boost::multiprecision::cpp_rational> {
+  typedef boost::multiprecision::cpp_int ring_type;
+};
+
+// cpp_int is a ring and contains no Q, so it gets no underlying_q_field.
+template <> struct underlying_q_field<boost::multiprecision::cpp_rational> {
+  typedef boost::multiprecision::cpp_rational field_type;
+};
+
 template <> struct overlying_field<boost::multiprecision::cpp_int> {
   typedef boost::multiprecision::cpp_rational field_type;
 };

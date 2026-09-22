@@ -168,6 +168,19 @@ template <> struct underlying_ring<mpq_class> {
 //
 //
 
+template <> struct underlying_z_ring<mpz_class> {
+  typedef mpz_class ring_type;
+};
+
+template <> struct underlying_z_ring<mpq_class> {
+  typedef mpz_class ring_type;
+};
+
+// mpz_class is a ring and contains no Q, so it gets no underlying_q_field.
+template <> struct underlying_q_field<mpq_class> {
+  typedef mpq_class field_type;
+};
+
 template <> struct overlying_field<mpz_class> {
   typedef mpq_class field_type;
 };

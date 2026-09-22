@@ -417,6 +417,27 @@ template <typename T, int d> struct underlying_ring<QuadField<T, d>> {
   typedef QuadField<typename underlying_ring<T>::ring_type, d> ring_type;
 };
 
+// The rational scalars, where underlying_ring above and underlying_z_ring
+// part ways: the ring for the fraction-free paths keeps sqrt(d) and is
+// Z[sqrt(d)], while the rational integers of Q(sqrt(d)) are plain Z. Code
+// working on a lattice over Z -- the basis transformation of an LLL
+// reduction, the index of a sublattice being factored -- wants this one, and
+// running it over Z[sqrt(d)] would ask a euclidean division of a ring that
+// has none for most d.
+template <typename T, int d> struct underlying_z_ring<QuadField<T, d>> {
+  typedef typename underlying_z_ring<T>::ring_type ring_type;
+};
+
+// Only over a base that is a field, Z[sqrt(d)] containing no Q. The requires
+// clause is what makes that a plain absence -- the specialization does not
+// apply and the empty primary is chosen -- rather than a member typedef that
+// is an error to instantiate, which no detection idiom could see.
+template <typename T, int d>
+requires requires { typename underlying_q_field<T>::field_type; }
+struct underlying_q_field<QuadField<T, d>> {
+  typedef typename underlying_q_field<T>::field_type field_type;
+};
+
 // Answers "is this type a QuadField". The primary has to carry a false value
 // rather than be left empty: the trait is read from the requires clause of the
 // conversion out of QuadField below, and on a type that never specializes it a
