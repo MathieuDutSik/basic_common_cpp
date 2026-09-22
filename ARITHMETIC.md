@@ -31,6 +31,32 @@ Conversions between arithmetic types go through the function
 This mechanism avoids implicit narrowing and provides a single point of
 control for all inter-type conversions.
 
+An algebraic type converts both ways against a type that is not one. Out of
+the field, only an element that is a rational number converts, and anything
+else raises `ConversionException`. Into the field, the scalar becomes the
+constant coefficient, and only the conversion of that coefficient can refuse
+-- so a fraction enters `QuadField<mpq_class, d>` or `RealField` and is
+refused by `QuadField<mpz_class, d>` or `RealRing`. The overloads are guarded
+by `is_quad_field<T>` and `is_real_algebraic_field<T>`, whose primary
+templates carry `value = false`: an empty primary makes the guard a
+substitution failure on every type that does not specialize the trait, which
+drops the conversion from the overload set instead of selecting it.
+
+`NearestInteger` out of `QuadField` and `RealField` returns the nearest
+rational integer, in the field itself, in the underlying ring, or in a plain
+integer type. The last of the three is what an LLL reduction over such a
+field asks for: the lattice being reduced is Z^n whatever field the form
+takes its values in, so the basis transformation stays in Z. The starting
+point is the floating point evaluation when it determines the integer, and
+`TruncationTowardZero` -- a bracketing by a power of two followed by a
+bisection, both with exact comparisons only -- otherwise; the adjustment that
+follows is exact either way. A tie goes to the value of larger absolute
+value, except in the same-type `QuadField` overload, which predates these and
+goes the other way; both are within 1/2, which is all the size reduction asks.
+
+`CI_tests/RealAlgebraicField/run_test.sh` exercises all of this through
+`src_number/Test_AlgebraicConversion.cpp`.
+
 ## Functional types (algebraic number fields)
 
 ### Quadratic fields -- `QuadField<T, d>`

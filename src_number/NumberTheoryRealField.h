@@ -1671,6 +1671,17 @@ inline void TYPE_CONVERSION(stc<RealRing<i_field>> const &x1, T2 &x2) {
   TYPE_CONVERSION(a1, x2);
 }
 
+// The other direction: a scalar that is not a real algebraic element enters
+// the ring as its constant coefficient. The conversion to the integers of the
+// ring refuses anything that is not one, so a fraction is rejected there.
+template <typename T1, int i_field>
+requires (!is_real_algebraic_field<T1>::value)
+inline void TYPE_CONVERSION(stc<T1> const &x1, RealRing<i_field> &x2) {
+  Tint_real_field val;
+  TYPE_CONVERSION(x1, val);
+  x2 = RealRing<i_field>(val);
+}
+
 // A ring element carries no fraction, so no scaling is ever needed.
 template <typename Tring, int i_field>
 void ScalingInteger_Kernel([[maybe_unused]] stc<RealRing<i_field>> const &x,
@@ -1759,6 +1770,114 @@ inline void TYPE_CONVERSION(stc<RealField<i_field>> const &x1, T2 &x2) {
       Trat_real_field(num[0]) / Trat_real_field(x1.val.get_den());
   stc<Trat_real_field> a1{val};
   TYPE_CONVERSION(a1, x2);
+}
+
+// The other direction: a scalar that is not a real algebraic element enters
+// the field as its constant coefficient. Always defined, no check needed, the
+// conversion to the rationals of the field alone can refuse. This is what lets
+// a computation carry an integral quantity into a matrix over the field, the
+// LLL size reduction of a form over it being the first user: the reduction
+// coefficient is a rational integer and has to be multiplied into the field.
+template <typename T1, int i_field>
+requires (!is_real_algebraic_field<T1>::value)
+inline void TYPE_CONVERSION(stc<T1> const &x1, RealField<i_field> &x2) {
+  Trat_real_field val;
+  TYPE_CONVERSION(x1, val);
+  x2 = RealField<i_field>(val);
+}
+
+// The truncation of xI toward zero, as an element of the field. Only exact
+// comparisons are used, so no approximation of the generator is needed: the
+// value is bracketed by a power of two and then the bits of the answer are
+// laid down from the top. Both loops are logarithmic in the value, which is
+// what makes the rounding below safe on an element no double can locate.
+template <int i_field>
+inline RealField<i_field>
+TruncationTowardZero(RealField<i_field> const &xI) {
+  using Tfield = RealField<i_field>;
+  Tfield ax = T_abs(xI);
+  // Smallest power of two strictly above ax, so the answer lies in [0, step).
+  Tint_real_field step(1);
+  while (Tfield(Trat_real_field(step)) <= ax) {
+    step *= 2;
+  }
+  Tint_real_field cur(0);
+  while (step >= 1) {
+    step /= 2;
+    if (step < 1) {
+      break;
+    }
+    Tint_real_field cand = cur + step;
+    if (Tfield(Trat_real_field(cand)) <= ax) {
+      cur = cand;
+    }
+  }
+  Tfield res{Trat_real_field(cur)};
+  if (xI < 0) {
+    return -res;
+  }
+  return res;
+}
+
+// The nearest rational integer to an element of the field, as an element of
+// that same field. Being the nearest element of Z to a real number it is
+// within 1/2, which is the property the LLL size reduction relies on.
+//
+// The floating point evaluation gives the starting point when it determines
+// the integer, and the exact truncation above gives it otherwise; either way
+// the adjustment below is a couple of steps and is itself exact, so a poor
+// estimate costs time and never correctness.
+template <int i_field>
+inline RealField<i_field>
+NearestRationalInteger(RealField<i_field> const &xI) {
+  using Tfield = RealField<i_field>;
+  Tfield cur(0);
+  double x_d;
+  TYPE_CONVERSION(stc<Tfield>{xI}, x_d);
+  if (std::isfinite(x_d) && std::abs(x_d) < 9e15) {
+    int64_t start = static_cast<int64_t>(std::llround(x_d));
+    cur = Tfield(UniversalScalarConversion<Trat_real_field, int64_t>(start));
+  } else {
+    cur = TruncationTowardZero(xI);
+  }
+  while (true) {
+    Tfield err = T_abs(xI - cur);
+    Tfield delta = (xI > cur) ? Tfield(1) : Tfield(-1);
+    Tfield cand = cur + delta;
+    if (T_abs(cand - xI) >= err) {
+      break;
+    }
+    cur = cand;
+  }
+  return cur;
+}
+
+// The rounding in the three output types the callers ask for: the field
+// itself, the order Z[x] that underlying_ring makes its ring, and a plain
+// integer type. The lattice an LLL reduction works on is Z^n whatever field
+// the form takes its values in, so the basis transformation stays in Z and
+// the reduction asks for the last of the three; without it the size reduction
+// of a form over a real algebraic field has no rounding to call at all.
+template <int i_field>
+inline void NearestInteger(RealField<i_field> const &xI,
+                           RealField<i_field> &xO) {
+  xO = NearestRationalInteger(xI);
+}
+
+template <int i_field>
+inline void NearestInteger(RealField<i_field> const &xI,
+                           RealRing<i_field> &xO) {
+  RealField<i_field> cur = NearestRationalInteger(xI);
+  // cur is a rational integer, so the conversion cannot refuse.
+  TYPE_CONVERSION(stc<RealField<i_field>>{cur}, xO);
+}
+
+template <typename Tint, int i_field>
+requires (!is_real_algebraic_field<Tint>::value)
+inline void NearestInteger(RealField<i_field> const &xI, Tint &xO) {
+  RealField<i_field> cur = NearestRationalInteger(xI);
+  // cur is a rational integer, so the conversion cannot refuse.
+  TYPE_CONVERSION(stc<RealField<i_field>>{cur}, xO);
 }
 
 // Serialization stuff. The archive contains the coefficients over the powers

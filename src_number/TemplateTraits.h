@@ -301,8 +301,17 @@ template <typename T> struct has_ring_canonicalization {
 // RealField: NumberTheoryThreshold.h specializes it without depending on
 // NumberTheoryRealField.h, and a specialization of an undeclared template is
 // an error.
+//
+// Unlike is_ring_field and the other traits of this file, this one answers
+// "is this one of the real algebraic types" and so has to be false for every
+// type that never specializes it. An empty primary would not do: the trait is
+// read from the requires clauses guarding the conversions out of RealField and
+// RealRing, and a missing value member there is a substitution failure, which
+// silently drops the conversion instead of selecting it.
 
-template <typename T> struct is_real_algebraic_field {};
+template <typename T> struct is_real_algebraic_field {
+  static const bool value = false;
+};
 
 // Trait definition for fields
 

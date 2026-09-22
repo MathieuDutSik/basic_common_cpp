@@ -417,6 +417,19 @@ template <typename T, int d> struct underlying_ring<QuadField<T, d>> {
   typedef QuadField<typename underlying_ring<T>::ring_type, d> ring_type;
 };
 
+// Answers "is this type a QuadField". The primary has to carry a false value
+// rather than be left empty: the trait is read from the requires clause of the
+// conversion out of QuadField below, and on a type that never specializes it a
+// missing value member is a substitution failure, which drops that conversion
+// from the overload set instead of selecting it.
+template <typename T> struct is_quad_field {
+  static const bool value = false;
+};
+
+template <typename T, int d> struct is_quad_field<QuadField<T, d>> {
+  static const bool value = true;
+};
+
 template <typename T, int d>
 inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &x1, double &x2) {
   stc<T> a1{x1.val.get_const_a()};
@@ -450,20 +463,55 @@ inline void NearestInteger(QuadField<T, d> const &xI, QuadField<T, d> &xO) {
   }
 }
 
-// The nearest integer of the underlying ring to an element of the field.
-// Since underlying_ring made Z[sqrt(d)] the ring of QuadField, the LLL size
-// reduction now asks for the rounding of a Q(sqrt(d)) element into a
-// Z[sqrt(d)] one, which the same-type overload above cannot express.
+// The truncation of xI toward zero, as an element of the field. Only exact
+// comparisons are used, so no approximation of sqrt(d) is needed: the value is
+// bracketed by a power of two and then the bits of the answer are laid down
+// from the top. Both loops are logarithmic in the value, which is what makes
+// the rounding below safe on an element no double can locate -- walking from
+// zero one unit at a time does not come back on such an element.
+template <typename T, int d>
+inline QuadField<T, d> TruncationTowardZero(QuadField<T, d> const &xI) {
+  using Tfield = QuadField<T, d>;
+  Tfield ax = T_abs(xI);
+  // Smallest power of two strictly above ax, so the answer lies in [0, step).
+  T step(1);
+  while (Tfield(step) <= ax) {
+    step *= 2;
+  }
+  // step stays a power of two down to 1, so the halving is exact whether T is
+  // a ring or a field, and cur only ever takes integer values.
+  T cur(0);
+  while (step >= 1) {
+    step /= 2;
+    if (step < 1) {
+      break;
+    }
+    T cand = cur + step;
+    if (Tfield(cand) <= ax) {
+      cur = cand;
+    }
+  }
+  Tfield res(cur);
+  if (xI < 0) {
+    return -res;
+  }
+  return res;
+}
+
+// The nearest rational integer to an element of the field, as an element of
+// that same field. Being the nearest element of Z to a real number it is
+// within 1/2, which is the property the LLL size reduction relies on.
 //
-// The value returned is the nearest rational integer, exactly as the
-// same-type overload: it belongs to Z[sqrt(d)], and being the nearest
-// element of Z to a real number it is within 1/2, which is the property
-// the size reduction relies on. Starting from the floating point
-// evaluation keeps the exact adjustment below to a couple of steps
-// instead of walking from zero one unit at a time; the adjustment is
-// exact, so an unusable estimate costs time and never correctness.
-template <typename T, typename Tring, int d>
-inline void NearestInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
+// The floating point evaluation gives the starting point when it determines
+// the integer, and the exact truncation above gives it otherwise; either way
+// the adjustment below is a couple of steps and is itself exact, so a poor
+// estimate costs time and never correctness.
+//
+// On a tie the value of larger absolute value is returned, which is what
+// llround does; the same-type NearestInteger overload above breaks a tie the
+// other way. Either is within 1/2 and the size reduction accepts both.
+template <typename T, int d>
+inline QuadField<T, d> NearestRationalInteger(QuadField<T, d> const &xI) {
   using Tfield = QuadField<T, d>;
   Tfield cur(0);
   double x_d;
@@ -471,6 +519,8 @@ inline void NearestInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
   if (std::isfinite(x_d) && std::abs(x_d) < 9e15) {
     int64_t start = static_cast<int64_t>(std::llround(x_d));
     cur = Tfield(UniversalScalarConversion<T, int64_t>(start));
+  } else {
+    cur = TruncationTowardZero(xI);
   }
   while (true) {
     Tfield err = T_abs(xI - cur);
@@ -481,8 +531,31 @@ inline void NearestInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
     }
     cur = cand;
   }
+  return cur;
+}
+
+// The nearest integer of the underlying ring to an element of the field.
+// Since underlying_ring made Z[sqrt(d)] the ring of QuadField, the LLL size
+// reduction now asks for the rounding of a Q(sqrt(d)) element into a
+// Z[sqrt(d)] one, which the same-type overload above cannot express.
+template <typename T, typename Tring, int d>
+inline void NearestInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
+  QuadField<T, d> cur = NearestRationalInteger(xI);
   // cur is a rational integer, so the component wise conversion is exact.
-  TYPE_CONVERSION(stc<Tfield>{cur}, xO);
+  TYPE_CONVERSION(stc<QuadField<T, d>>{cur}, xO);
+}
+
+// The same rounding, returned in a type that is not a quadratic field. The
+// lattice an LLL reduction works on is Z^n whatever field the form takes its
+// values in, so the basis transformation stays in Z and the reduction asks
+// for the rounding directly in the integer type. Without this the size
+// reduction of a form over Q(sqrt(d)) has no rounding to call at all.
+template <typename T, typename Tint, int d>
+requires (!is_quad_field<Tint>::value)
+inline void NearestInteger(QuadField<T, d> const &xI, Tint &xO) {
+  QuadField<T, d> cur = NearestRationalInteger(xI);
+  // cur is a rational integer, so the conversion cannot refuse.
+  TYPE_CONVERSION(stc<QuadField<T, d>>{cur}, xO);
 }
 
 template <typename T, int d> struct is_totally_ordered<QuadField<T, d>> {
@@ -566,11 +639,6 @@ template <typename T, int d> struct hash<QuadField<T, d>> {
 
 // Local typing info
 
-template <typename T> struct is_quad_field {};
-
-template <typename T, int d> struct is_quad_field<QuadField<T, d>> {
-  static const bool value = true;
-};
 
 // Some functionality
 
@@ -600,6 +668,19 @@ inline void TYPE_CONVERSION(stc<QuadField<T1, d>> const &x1, T2 &x2) {
   }
   stc<T1> a1{x1.val.get_const_a()};
   TYPE_CONVERSION(a1, x2);
+}
+
+// The other direction: a scalar that is not a quadratic field element enters
+// the field as a + 0 sqrt(d). Always defined, no check needed, the base
+// conversion alone can refuse. This is what lets a computation carry an
+// integral quantity into a Q(sqrt(d)) matrix, the LLL size reduction of a
+// form over the field being the first user: the reduction coefficient is a
+// rational integer and has to be multiplied into the field.
+template <typename T1, typename T2, int d>
+requires (!is_quad_field<T1>::value)
+inline void TYPE_CONVERSION(stc<T1> const &x1, QuadField<T2, d> &x2) {
+  TYPE_CONVERSION(x1, x2.get_a());
+  x2.get_b() = 0;
 }
 
 // Serialization stuff
