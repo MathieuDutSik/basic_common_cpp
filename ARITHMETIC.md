@@ -82,17 +82,25 @@ templates carry `value = false`: an empty primary makes the guard a
 substitution failure on every type that does not specialize the trait, which
 drops the conversion from the overload set instead of selecting it.
 
-`NearestInteger` out of `QuadField` and `RealField` returns the nearest
-rational integer, in the field itself, in the underlying ring, or in a plain
+`FloorInteger`, `CeilInteger` and `NearestInteger` out of `RealField` return
+an element of Z, in the field itself, in the underlying ring, or in a plain
 integer type. The last of the three is what an LLL reduction over such a
 field asks for: the lattice being reduced is Z^n whatever field the form
-takes its values in, so the basis transformation stays in Z. The starting
-point is the floating point evaluation when it determines the integer, and
-`TruncationTowardZero` -- a bracketing by a power of two followed by a
-bisection, both with exact comparisons only -- otherwise; the adjustment that
-follows is exact either way. A tie goes to the value of larger absolute
-value, except in the same-type `QuadField` overload, which predates these and
-goes the other way; both are within 1/2, which is all the size reduction asks.
+takes its values in, so the basis transformation stays in Z. The floor is the
+primitive: the largest n in Z with n <= x, found from the floating point
+evaluation when it locates the integer and otherwise by a bracketing by
+powers of two followed by a bisection, the answer being fixed by exact
+comparisons either way. It commutes with the translations by Z,
+`Floor(x + n) = Floor(x) + n`, which a reduction modulo Z relies on; the
+ceiling is `-Floor(-x)` and the nearest integer is `Ceil(x - 1/2)`, so a tie
+`y + 1/2` goes to `y`, as for `mpq_class`, and both commute with Z as well.
+
+`NearestInteger` out of `QuadField` has not been reworked yet. Into the ring
+and into a plain integer type it starts from the floating point evaluation or
+from `TruncationTowardZero`, and breaks a tie toward the larger absolute value
+from the first start and the smaller from the second; the same-type overload
+walks from zero and breaks it toward the smaller. All are within 1/2, which is
+all the size reduction asks, but none commutes with Z.
 
 `CI_tests/RealAlgebraicField/run_test.sh` exercises all of this through
 `src_number/Test_AlgebraicConversion.cpp`.

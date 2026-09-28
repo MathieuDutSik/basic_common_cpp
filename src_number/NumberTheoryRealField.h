@@ -1807,98 +1807,134 @@ inline void TYPE_CONVERSION(stc<T1> const &x1, RealField<i_field> &x2) {
   x2 = RealField<i_field>(val);
 }
 
-// The truncation of xI toward zero, as an element of the field. Only exact
-// comparisons are used, so no approximation of the generator is needed: the
-// value is bracketed by a power of two and then the bits of the answer are
-// laid down from the top. Both loops are logarithmic in the value, which is
-// what makes the rounding below safe on an element no double can locate.
-template <int i_field>
-inline RealField<i_field>
-TruncationTowardZero(RealField<i_field> const &xI) {
-  using Tfield = RealField<i_field>;
-  Tfield ax = T_abs(xI);
-  // Smallest power of two strictly above ax, so the answer lies in [0, step).
-  Tint_real_field step(1);
-  while (Tfield(Trat_real_field(step)) <= ax) {
-    step *= 2;
-  }
-  Tint_real_field cur(0);
-  while (step >= 1) {
-    step /= 2;
-    if (step < 1) {
-      break;
-    }
-    Tint_real_field cand = cur + step;
-    if (Tfield(Trat_real_field(cand)) <= ax) {
-      cur = cand;
-    }
-  }
-  Tfield res{Trat_real_field(cur)};
-  if (xI < 0) {
-    return -res;
-  }
-  return res;
-}
-
-// The nearest rational integer to an element of the field, as an element of
-// that same field. Being the nearest element of Z to a real number it is
-// within 1/2, which is the property the LLL size reduction relies on.
+// The rounding of an element of the field to an element of Z, in the three
+// output types the callers ask for: the field itself, the order Z[x] that
+// underlying_ring makes its ring, and a plain integer type. The lattice an LLL
+// reduction works on is Z^n whatever field the form takes its values in, so
+// the basis transformation stays in Z and the reduction asks for the last of
+// the three.
 //
-// The floating point evaluation gives the starting point when it determines
-// the integer, and the exact truncation above gives it otherwise; either way
-// the adjustment below is a couple of steps and is itself exact, so a poor
-// estimate costs time and never correctness.
+// The floor is the primitive one: the largest n in Z with n <= xI. It
+// commutes with the integer translations, Floor(x + n) = Floor(x) + n, which
+// is what a reduction modulo Z relies on, and the ceiling and the nearest
+// integer are derived from it so that they commute with them too.
+//
+// The floor is characterized by two exact comparisons, n <= xI < n + 1, so
+// the value returned does not depend on how the search for it starts. The
+// floating point evaluation gives the start when it is finite and small
+// enough for the integers to be exact in a double; otherwise xI is bracketed
+// by powers of two and the bracket is halved, both logarithmic in the value,
+// which is what makes it safe on an element no double can locate.
 template <int i_field>
-inline RealField<i_field>
-NearestRationalInteger(RealField<i_field> const &xI) {
+inline void FloorInteger(RealField<i_field> const &xI,
+                         RealField<i_field> &xO) {
   using Tfield = RealField<i_field>;
-  Tfield cur(0);
+  auto to_field = [](Tint_real_field const &n) -> Tfield {
+    return Tfield(Trat_real_field(n));
+  };
   double x_d;
   TYPE_CONVERSION(stc<Tfield>{xI}, x_d);
   if (std::isfinite(x_d) && std::abs(x_d) < 9e15) {
-    int64_t start = static_cast<int64_t>(std::llround(x_d));
-    cur = Tfield(UniversalScalarConversion<Trat_real_field, int64_t>(start));
-  } else {
-    cur = TruncationTowardZero(xI);
-  }
-  while (true) {
-    Tfield err = T_abs(xI - cur);
-    Tfield delta = (xI > cur) ? Tfield(1) : Tfield(-1);
-    Tfield cand = cur + delta;
-    if (T_abs(cand - xI) >= err) {
-      break;
+    Tint_real_field n(static_cast<long>(std::floor(x_d)));
+    while (to_field(n) > xI) {
+      n -= 1;
     }
-    cur = cand;
+    while (to_field(n + 1) <= xI) {
+      n += 1;
+    }
+    xO = to_field(n);
+    return;
   }
-  return cur;
+  // The bracket lo <= xI < hi, with lo and hi integers.
+  Tint_real_field lo(-1);
+  Tint_real_field hi(1);
+  while (to_field(lo) > xI) {
+    lo *= 2;
+  }
+  while (to_field(hi) <= xI) {
+    hi *= 2;
+  }
+  while (hi - lo > 1) {
+    // Strictly between lo and hi since hi - lo >= 2, whichever way the
+    // division rounds.
+    Tint_real_field mid = (lo + hi) / 2;
+    if (to_field(mid) <= xI) {
+      lo = mid;
+    } else {
+      hi = mid;
+    }
+  }
+  xO = to_field(lo);
 }
 
-// The rounding in the three output types the callers ask for: the field
-// itself, the order Z[x] that underlying_ring makes its ring, and a plain
-// integer type. The lattice an LLL reduction works on is Z^n whatever field
-// the form takes its values in, so the basis transformation stays in Z and
-// the reduction asks for the last of the three; without it the size reduction
-// of a form over a real algebraic field has no rounding to call at all.
+template <int i_field>
+inline void FloorInteger(RealField<i_field> const &xI,
+                         RealRing<i_field> &xO) {
+  RealField<i_field> n;
+  FloorInteger(xI, n);
+  // n is in Z, so the conversion cannot refuse.
+  TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
+}
+
+template <typename Tint, int i_field>
+requires (!is_real_algebraic_field<Tint>::value)
+inline void FloorInteger(RealField<i_field> const &xI, Tint &xO) {
+  RealField<i_field> n;
+  FloorInteger(xI, n);
+  // n is in Z, so the conversion cannot refuse.
+  TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
+}
+
+// The smallest n in Z with xI <= n, that is -Floor(-xI).
+template <int i_field>
+inline void CeilInteger(RealField<i_field> const &xI,
+                        RealField<i_field> &xO) {
+  RealField<i_field> n;
+  FloorInteger(RealField<i_field>(-xI), n);
+  xO = -n;
+}
+
+template <int i_field>
+inline void CeilInteger(RealField<i_field> const &xI,
+                        RealRing<i_field> &xO) {
+  RealField<i_field> n;
+  CeilInteger(xI, n);
+  TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
+}
+
+template <typename Tint, int i_field>
+requires (!is_real_algebraic_field<Tint>::value)
+inline void CeilInteger(RealField<i_field> const &xI, Tint &xO) {
+  RealField<i_field> n;
+  CeilInteger(xI, n);
+  TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
+}
+
+// The nearest n in Z, within 1/2 of xI, which is the property the LLL size
+// reduction relies on. A tie y + 1/2 goes to y, as for mpq_class
+// (NearestInteger_rni): the value is Ceil(xI - 1/2), so it commutes with the
+// integer translations as well.
 template <int i_field>
 inline void NearestInteger(RealField<i_field> const &xI,
                            RealField<i_field> &xO) {
-  xO = NearestRationalInteger(xI);
+  RealField<i_field> half(Trat_real_field(1, 2));
+  CeilInteger(RealField<i_field>(xI - half), xO);
 }
 
 template <int i_field>
 inline void NearestInteger(RealField<i_field> const &xI,
                            RealRing<i_field> &xO) {
-  RealField<i_field> cur = NearestRationalInteger(xI);
-  // cur is a rational integer, so the conversion cannot refuse.
-  TYPE_CONVERSION(stc<RealField<i_field>>{cur}, xO);
+  RealField<i_field> n;
+  NearestInteger(xI, n);
+  TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
 }
 
 template <typename Tint, int i_field>
 requires (!is_real_algebraic_field<Tint>::value)
 inline void NearestInteger(RealField<i_field> const &xI, Tint &xO) {
-  RealField<i_field> cur = NearestRationalInteger(xI);
-  // cur is a rational integer, so the conversion cannot refuse.
-  TYPE_CONVERSION(stc<RealField<i_field>>{cur}, xO);
+  RealField<i_field> n;
+  NearestInteger(xI, n);
+  TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
 }
 
 // Serialization stuff. The archive contains the coefficients over the powers

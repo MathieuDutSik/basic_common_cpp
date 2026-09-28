@@ -19,7 +19,11 @@
 //       whatever the field the form takes its values in, so the basis
 //       transformation stays in Z.
 //   --- the rounding of a value that no double can locate, where the start
-//       comes from the exact truncation rather than from the estimate.
+//       comes from an exact search rather than from the estimate.
+//   --- FloorInteger and CeilInteger out of RealField, and the commutation of
+//       the floor, the ceiling and the nearest integer with the translations
+//       by Z, which also pins the tie of the nearest integer, y + 1/2 going to
+//       y, on both sides of the range a double locates.
 
 // clang-format off
 #include "NumberTheory.h"
@@ -167,6 +171,66 @@ static void process_real(std::string const &eFile) {
   check(IsNearestInteger(big_irr,
                          UniversalNearestScalarInteger<T_int, T>(big_irr)),
         pre + "2^400 + x rounds to within 1/2");
+  // Floor and ceiling, on exact values: x = 2 cos(2 pi / 7) = 1.2469...
+  auto floor_z = [](T const &v) -> T_int {
+    return UniversalFloorScalarInteger<T_int, T>(v);
+  };
+  auto ceil_z = [](T const &v) -> T_int {
+    return UniversalCeilScalarInteger<T_int, T>(v);
+  };
+  auto nearest_z = [](T const &v) -> T_int {
+    return UniversalNearestScalarInteger<T_int, T>(v);
+  };
+  check(floor_z(x) == 1 && ceil_z(x) == 2, pre + "floor and ceil of x");
+  check(floor_z(-x) == -2 && ceil_z(-x) == -1, pre + "floor and ceil of -x");
+  check(floor_z(x3) == 3 && ceil_z(x3) == 4, pre + "floor and ceil of 3 x");
+  check(floor_z(seven) == 7 && ceil_z(seven) == 7,
+        pre + "an integer is its own floor and ceil");
+  T mseven(T_rat(-7));
+  check(floor_z(mseven) == -7 && ceil_z(mseven) == -7,
+        pre + "a negative integer is its own floor and ceil");
+  T half(T_rat(1, 2));
+  check(floor_z(half) == 0 && ceil_z(half) == 1, pre + "floor and ceil of 1/2");
+  check(floor_z(-half) == -1 && ceil_z(-half) == 0,
+        pre + "floor and ceil of -1/2");
+  // The three output types agree.
+  check(UniversalFloorScalarInteger<Tring, T>(x3) == Tring(floor_z(x3)),
+        pre + "the ring typed and integer typed floors agree");
+  check(UniversalFloorScalarInteger<T, T>(x3) == T(T_rat(floor_z(x3))),
+        pre + "the field typed and integer typed floors agree");
+  check(UniversalCeilScalarInteger<Tring, T>(x3) == Tring(ceil_z(x3)),
+        pre + "the ring typed and integer typed ceils agree");
+  // Floor(v + n) = Floor(v) + n, and the same for the ceiling and the nearest
+  // integer, on both sides of the range where a double locates the integer.
+  // On the halves it pins the tie as well: y + 1/2 goes to y, whatever the
+  // magnitude.
+  std::vector<T_rat> l_shift{T_rat(0), T_rat(1), T_rat(-1), T_rat(1000003),
+                             T_rat(-1000003), big, -big};
+  std::vector<T> l_val{x, -x, x3, half, -half, T(T_rat(3, 2)),
+                       T(T_rat(-5, 2)), T(T_rat(7, 3))};
+  bool is_covariant = true;
+  for (auto &shift : l_shift) {
+    T_int shift_z = UniversalScalarConversion<T_int, T_rat>(shift);
+    T shift_f(shift);
+    for (auto &v : l_val) {
+      T w = v + shift_f;
+      if (floor_z(w) != floor_z(v) + shift_z ||
+          ceil_z(w) != ceil_z(v) + shift_z ||
+          nearest_z(w) != nearest_z(v) + shift_z) {
+        std::cerr << "shift=" << shift << " v=" << v << "\n";
+        is_covariant = false;
+      }
+    }
+  }
+  check(is_covariant, pre + "floor, ceil and nearest commute with Z");
+  check(nearest_z(half) == 0 && nearest_z(-half) == -1 &&
+            nearest_z(T(T_rat(5, 2))) == 2 &&
+            nearest_z(T(T_rat(-5, 2))) == -3,
+        pre + "a tie y + 1/2 goes to y");
+  check(nearest_z(big_f + half) == UniversalScalarConversion<T_int, T_rat>(big),
+        pre + "2^400 + 1/2 goes to 2^400, as the small ties do");
+  check(floor_z(big_irr) == UniversalScalarConversion<T_int, T_rat>(big) + 1,
+        pre + "the floor of 2^400 + x is 2^400 + 1");
 }
 
 int main() {
