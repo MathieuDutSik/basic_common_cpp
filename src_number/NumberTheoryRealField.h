@@ -11,6 +11,7 @@
 #endif
 #include "Temp_common.h"
 #include "InputOutput.h"
+#include "IntegerSearch.h"
 #include <boost/container/small_vector.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <map>
@@ -1814,65 +1815,64 @@ inline void TYPE_CONVERSION(stc<T1> const &x1, RealField<i_field> &x2) {
 // the basis transformation stays in Z and the reduction asks for the last of
 // the three.
 //
-// The floor is the primitive one: the largest n in Z with n <= xI. It
-// commutes with the integer translations, Floor(x + n) = Floor(x) + n, which
-// is what a reduction modulo Z relies on, and the ceiling and the nearest
-// integer are derived from it so that they commute with them too.
-//
-// The floor is characterized by two exact comparisons, n <= xI < n + 1, so
-// the value returned does not depend on how the search for it starts. The
-// floating point evaluation gives the start when it is finite and small
-// enough for the integers to be exact in a double; otherwise xI is bracketed
-// by powers of two and the bracket is halved, both logarithmic in the value,
-// which is what makes it safe on an element no double can locate.
+// Each rounding is one exact search of helper_largest_integer_satisfying,
+// comparing xI to integers or to half integers, with no arithmetic on xI:
+//   --- the floor, the largest n in Z with n <= xI,
+//   --- the ceiling, the smallest n in Z with xI <= n,
+//   --- the nearest integer, a tie y + 1/2 going to y, as for mpq_class.
+// All three commute with the integer translations, Floor(x + n) = Floor(x) +
+// n and so on, which is what a reduction modulo Z relies on.
+template <int i_field>
+inline RealField<i_field>
+helper_real_field_of_rational(Tint_real_field const &num,
+                              Tint_real_field const &den) {
+  return RealField<i_field>(Trat_real_field(num) / Trat_real_field(den));
+}
+
 template <int i_field>
 inline void FloorInteger(RealField<i_field> const &xI,
                          RealField<i_field> &xO) {
-  using Tfield = RealField<i_field>;
-  auto to_field = [](Tint_real_field const &n) -> Tfield {
-    return Tfield(Trat_real_field(n));
+  auto pred = [&](Tint_real_field const &n) -> bool {
+    return RealField<i_field>(Trat_real_field(n)) <= xI;
   };
-  double x_d;
-  TYPE_CONVERSION(stc<Tfield>{xI}, x_d);
-  if (std::isfinite(x_d) && std::abs(x_d) < 9e15) {
-    Tint_real_field n(static_cast<long>(std::floor(x_d)));
-    while (to_field(n) > xI) {
-      n -= 1;
-    }
-    while (to_field(n + 1) <= xI) {
-      n += 1;
-    }
-    xO = to_field(n);
-    return;
-  }
-  // The bracket lo <= xI < hi, with lo and hi integers.
-  Tint_real_field lo(-1);
-  Tint_real_field hi(1);
-  while (to_field(lo) > xI) {
-    lo *= 2;
-  }
-  while (to_field(hi) <= xI) {
-    hi *= 2;
-  }
-  while (hi - lo > 1) {
-    // Strictly between lo and hi since hi - lo >= 2, whichever way the
-    // division rounds.
-    Tint_real_field mid = (lo + hi) / 2;
-    if (to_field(mid) <= xI) {
-      lo = mid;
-    } else {
-      hi = mid;
-    }
-  }
-  xO = to_field(lo);
+  Tint_real_field n = helper_largest_integer_satisfying<Tint_real_field>(
+      std::floor(xI.get_d()), pred);
+  xO = RealField<i_field>(Trat_real_field(n));
 }
 
+template <int i_field>
+inline void CeilInteger(RealField<i_field> const &xI,
+                        RealField<i_field> &xO) {
+  // The largest n with n < xI, one below the ceiling.
+  auto pred = [&](Tint_real_field const &n) -> bool {
+    return RealField<i_field>(Trat_real_field(n)) < xI;
+  };
+  Tint_real_field n = helper_largest_integer_satisfying<Tint_real_field>(
+      std::ceil(xI.get_d()) - 1, pred);
+  xO = RealField<i_field>(Trat_real_field(n + 1));
+}
+
+template <int i_field>
+inline void NearestInteger(RealField<i_field> const &xI,
+                           RealField<i_field> &xO) {
+  // The largest n with n - 1/2 < xI.
+  Tint_real_field two(2);
+  auto pred = [&](Tint_real_field const &n) -> bool {
+    Tint_real_field num = 2 * n - 1;
+    return helper_real_field_of_rational<i_field>(num, two) < xI;
+  };
+  Tint_real_field n = helper_largest_integer_satisfying<Tint_real_field>(
+      std::floor(xI.get_d() + 0.5), pred);
+  xO = RealField<i_field>(Trat_real_field(n));
+}
+
+// The other two output types, from the field one. The value is in Z, so the
+// conversions cannot refuse.
 template <int i_field>
 inline void FloorInteger(RealField<i_field> const &xI,
                          RealRing<i_field> &xO) {
   RealField<i_field> n;
   FloorInteger(xI, n);
-  // n is in Z, so the conversion cannot refuse.
   TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
 }
 
@@ -1881,17 +1881,7 @@ requires (!is_real_algebraic_field<Tint>::value)
 inline void FloorInteger(RealField<i_field> const &xI, Tint &xO) {
   RealField<i_field> n;
   FloorInteger(xI, n);
-  // n is in Z, so the conversion cannot refuse.
   TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
-}
-
-// The smallest n in Z with xI <= n, that is -Floor(-xI).
-template <int i_field>
-inline void CeilInteger(RealField<i_field> const &xI,
-                        RealField<i_field> &xO) {
-  RealField<i_field> n;
-  FloorInteger(RealField<i_field>(-xI), n);
-  xO = -n;
 }
 
 template <int i_field>
@@ -1908,17 +1898,6 @@ inline void CeilInteger(RealField<i_field> const &xI, Tint &xO) {
   RealField<i_field> n;
   CeilInteger(xI, n);
   TYPE_CONVERSION(stc<RealField<i_field>>{n}, xO);
-}
-
-// The nearest n in Z, within 1/2 of xI, which is the property the LLL size
-// reduction relies on. A tie y + 1/2 goes to y, as for mpq_class
-// (NearestInteger_rni): the value is Ceil(xI - 1/2), so it commutes with the
-// integer translations as well.
-template <int i_field>
-inline void NearestInteger(RealField<i_field> const &xI,
-                           RealField<i_field> &xO) {
-  RealField<i_field> half(Trat_real_field(1, 2));
-  CeilInteger(RealField<i_field>(xI - half), xO);
 }
 
 template <int i_field>

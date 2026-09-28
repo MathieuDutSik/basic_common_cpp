@@ -4,6 +4,7 @@
 // clang-format off
 #include "Temp_common.h"
 #include "InputOutput.h"
+#include "IntegerSearch.h"
 #include "MatrixTypes.h"
 #include <boost/serialization/nvp.hpp>
 #include <cmath>
@@ -461,122 +462,128 @@ inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &x1, double &x2) {
   x2 = a2 + sqrt(d) * b2;
 }
 
+// The rounding of an element of Q(sqrt(d)) to an element of Z, in the three
+// output types the callers ask for: the field itself, the ring Z[sqrt(d)] that
+// underlying_ring makes its ring, and a plain integer type. The lattice an LLL
+// reduction works on is Z^n whatever field the form takes its values in, so
+// the basis transformation stays in Z and the reduction asks for the last of
+// the three.
+//
+// Each rounding is one exact search of helper_largest_integer_satisfying,
+// comparing xI to integers, with no approximation of sqrt(d):
+//   --- the floor, the largest n in Z with n <= xI,
+//   --- the ceiling, the smallest n in Z with xI <= n,
+//   --- the nearest integer, a tie y + 1/2 going to y, as for mpq_class.
+// All three commute with the integer translations, Floor(x + n) = Floor(x) +
+// n and so on. The helpers return the integer; the overloads below put it in
+// the output type.
+template <typename T, int d>
+inline double helper_quad_field_double(QuadField<T, d> const &xI) {
+  double x_d;
+  TYPE_CONVERSION(stc<QuadField<T, d>>{xI}, x_d);
+  return x_d;
+}
+
+template <typename T, int d>
+inline typename underlying_z_ring<T>::ring_type
+helper_quad_field_floor(QuadField<T, d> const &xI) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  auto pred = [&](Tint const &n) -> bool {
+    return QuadField<T, d>(UniversalScalarConversion<T, Tint>(n)) <= xI;
+  };
+  return helper_largest_integer_satisfying<Tint>(
+      std::floor(helper_quad_field_double(xI)), pred);
+}
+
+template <typename T, int d>
+inline typename underlying_z_ring<T>::ring_type
+helper_quad_field_ceil(QuadField<T, d> const &xI) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  // The largest n with n < xI, one below the ceiling.
+  auto pred = [&](Tint const &n) -> bool {
+    return QuadField<T, d>(UniversalScalarConversion<T, Tint>(n)) < xI;
+  };
+  Tint n = helper_largest_integer_satisfying<Tint>(
+      std::ceil(helper_quad_field_double(xI)) - 1, pred);
+  return n + 1;
+}
+
+template <typename T, int d>
+inline typename underlying_z_ring<T>::ring_type
+helper_quad_field_nearest(QuadField<T, d> const &xI) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  // The largest n with n - 1/2 < xI, that is 2 n - 1 < 2 xI: T may be a ring
+  // with no 1/2 in it.
+  QuadField<T, d> x2 = xI + xI;
+  auto pred = [&](Tint const &n) -> bool {
+    Tint num = 2 * n - 1;
+    return QuadField<T, d>(UniversalScalarConversion<T, Tint>(num)) < x2;
+  };
+  return helper_largest_integer_satisfying<Tint>(
+      std::floor(helper_quad_field_double(xI) + 0.5), pred);
+}
+
+template <typename T, int d>
+inline void FloorInteger(QuadField<T, d> const &xI, QuadField<T, d> &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = QuadField<T, d>(
+      UniversalScalarConversion<T, Tint>(helper_quad_field_floor(xI)));
+}
+
+template <typename T, typename Tring, int d>
+inline void FloorInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = QuadField<Tring, d>(
+      UniversalScalarConversion<Tring, Tint>(helper_quad_field_floor(xI)));
+}
+
+template <typename T, typename Tout, int d>
+requires (!is_quad_field<Tout>::value)
+inline void FloorInteger(QuadField<T, d> const &xI, Tout &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = UniversalScalarConversion<Tout, Tint>(helper_quad_field_floor(xI));
+}
+
+template <typename T, int d>
+inline void CeilInteger(QuadField<T, d> const &xI, QuadField<T, d> &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = QuadField<T, d>(
+      UniversalScalarConversion<T, Tint>(helper_quad_field_ceil(xI)));
+}
+
+template <typename T, typename Tring, int d>
+inline void CeilInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = QuadField<Tring, d>(
+      UniversalScalarConversion<Tring, Tint>(helper_quad_field_ceil(xI)));
+}
+
+template <typename T, typename Tout, int d>
+requires (!is_quad_field<Tout>::value)
+inline void CeilInteger(QuadField<T, d> const &xI, Tout &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = UniversalScalarConversion<Tout, Tint>(helper_quad_field_ceil(xI));
+}
+
 template <typename T, int d>
 inline void NearestInteger(QuadField<T, d> const &xI, QuadField<T, d> &xO) {
-  using Teff = QuadField<T, d>;
-  xO = 0;
-  while (true) {
-    Teff err = T_abs(xI - xO);
-    auto get_move = [&]() -> Teff {
-      if (xI > xO) {
-        return Teff(1);
-      } else {
-        return Teff(-1);
-      }
-    };
-    Teff delta = get_move();
-    Teff xB = xO + delta;
-    Teff err_B = T_abs(xB - xI);
-    if (err_B >= err) {
-      return;
-    }
-    xO = xB;
-  }
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = QuadField<T, d>(
+      UniversalScalarConversion<T, Tint>(helper_quad_field_nearest(xI)));
 }
 
-// The truncation of xI toward zero, as an element of the field. Only exact
-// comparisons are used, so no approximation of sqrt(d) is needed: the value is
-// bracketed by a power of two and then the bits of the answer are laid down
-// from the top. Both loops are logarithmic in the value, which is what makes
-// the rounding below safe on an element no double can locate -- walking from
-// zero one unit at a time does not come back on such an element.
-template <typename T, int d>
-inline QuadField<T, d> TruncationTowardZero(QuadField<T, d> const &xI) {
-  using Tfield = QuadField<T, d>;
-  Tfield ax = T_abs(xI);
-  // Smallest power of two strictly above ax, so the answer lies in [0, step).
-  T step(1);
-  while (Tfield(step) <= ax) {
-    step *= 2;
-  }
-  // step stays a power of two down to 1, so the halving is exact whether T is
-  // a ring or a field, and cur only ever takes integer values.
-  T cur(0);
-  while (step >= 1) {
-    step /= 2;
-    if (step < 1) {
-      break;
-    }
-    T cand = cur + step;
-    if (Tfield(cand) <= ax) {
-      cur = cand;
-    }
-  }
-  Tfield res(cur);
-  if (xI < 0) {
-    return -res;
-  }
-  return res;
-}
-
-// The nearest rational integer to an element of the field, as an element of
-// that same field. Being the nearest element of Z to a real number it is
-// within 1/2, which is the property the LLL size reduction relies on.
-//
-// The floating point evaluation gives the starting point when it determines
-// the integer, and the exact truncation above gives it otherwise; either way
-// the adjustment below is a couple of steps and is itself exact, so a poor
-// estimate costs time and never correctness.
-//
-// On a tie the value of larger absolute value is returned, which is what
-// llround does; the same-type NearestInteger overload above breaks a tie the
-// other way. Either is within 1/2 and the size reduction accepts both.
-template <typename T, int d>
-inline QuadField<T, d> NearestRationalInteger(QuadField<T, d> const &xI) {
-  using Tfield = QuadField<T, d>;
-  Tfield cur(0);
-  double x_d;
-  TYPE_CONVERSION(stc<Tfield>{xI}, x_d);
-  if (std::isfinite(x_d) && std::abs(x_d) < 9e15) {
-    int64_t start = static_cast<int64_t>(std::llround(x_d));
-    cur = Tfield(UniversalScalarConversion<T, int64_t>(start));
-  } else {
-    cur = TruncationTowardZero(xI);
-  }
-  while (true) {
-    Tfield err = T_abs(xI - cur);
-    Tfield delta = (xI > cur) ? Tfield(1) : Tfield(-1);
-    Tfield cand = cur + delta;
-    if (T_abs(cand - xI) >= err) {
-      break;
-    }
-    cur = cand;
-  }
-  return cur;
-}
-
-// The nearest integer of the underlying ring to an element of the field.
-// Since underlying_ring made Z[sqrt(d)] the ring of QuadField, the LLL size
-// reduction now asks for the rounding of a Q(sqrt(d)) element into a
-// Z[sqrt(d)] one, which the same-type overload above cannot express.
 template <typename T, typename Tring, int d>
 inline void NearestInteger(QuadField<T, d> const &xI, QuadField<Tring, d> &xO) {
-  QuadField<T, d> cur = NearestRationalInteger(xI);
-  // cur is a rational integer, so the component wise conversion is exact.
-  TYPE_CONVERSION(stc<QuadField<T, d>>{cur}, xO);
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = QuadField<Tring, d>(
+      UniversalScalarConversion<Tring, Tint>(helper_quad_field_nearest(xI)));
 }
 
-// The same rounding, returned in a type that is not a quadratic field. The
-// lattice an LLL reduction works on is Z^n whatever field the form takes its
-// values in, so the basis transformation stays in Z and the reduction asks
-// for the rounding directly in the integer type. Without this the size
-// reduction of a form over Q(sqrt(d)) has no rounding to call at all.
-template <typename T, typename Tint, int d>
-requires (!is_quad_field<Tint>::value)
-inline void NearestInteger(QuadField<T, d> const &xI, Tint &xO) {
-  QuadField<T, d> cur = NearestRationalInteger(xI);
-  // cur is a rational integer, so the conversion cannot refuse.
-  TYPE_CONVERSION(stc<QuadField<T, d>>{cur}, xO);
+template <typename T, typename Tout, int d>
+requires (!is_quad_field<Tout>::value)
+inline void NearestInteger(QuadField<T, d> const &xI, Tout &xO) {
+  using Tint = typename underlying_z_ring<T>::ring_type;
+  xO = UniversalScalarConversion<Tout, Tint>(helper_quad_field_nearest(xI));
 }
 
 template <typename T, int d> struct is_totally_ordered<QuadField<T, d>> {

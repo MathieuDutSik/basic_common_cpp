@@ -110,6 +110,73 @@ template <int d> static void process_quad(std::string const &name) {
   check(IsNearestInteger(big_irr,
                          UniversalNearestScalarInteger<T_int, T>(big_irr)),
         pre + "2^400 + sqrt(d) rounds to within 1/2");
+  // Floor and ceiling. On these small values the double is exact enough to
+  // give the expected answer.
+  auto floor_z = [](T const &v) -> T_int {
+    return UniversalFloorScalarInteger<T_int, T>(v);
+  };
+  auto ceil_z = [](T const &v) -> T_int {
+    return UniversalCeilScalarInteger<T_int, T>(v);
+  };
+  auto nearest_z = [](T const &v) -> T_int {
+    return UniversalNearestScalarInteger<T_int, T>(v);
+  };
+  auto to_z = [](double v) -> T_int { return T_int(static_cast<long>(v)); };
+  double sq_d = std::sqrt(static_cast<double>(d));
+  check(floor_z(sq) == to_z(std::floor(sq_d)) &&
+            ceil_z(sq) == to_z(std::ceil(sq_d)),
+        pre + "floor and ceil of sqrt(d)");
+  check(floor_z(-sq3) == to_z(std::floor(-3 * sq_d)) &&
+            ceil_z(-sq3) == to_z(std::ceil(-3 * sq_d)),
+        pre + "floor and ceil of -3 sqrt(d)");
+  check(floor_z(seven) == 7 && ceil_z(seven) == 7,
+        pre + "an integer is its own floor and ceil");
+  // The three output types agree.
+  check(UniversalFloorScalarInteger<Tring, T>(sq3) ==
+            Tring(floor_z(sq3), T_int(0)),
+        pre + "the ring typed and integer typed floors agree");
+  check(UniversalFloorScalarInteger<T, T>(sq3) ==
+            T(T_rat(floor_z(sq3)), T_rat(0)),
+        pre + "the field typed and integer typed floors agree");
+  check(UniversalCeilScalarInteger<Tring, T>(sq3) ==
+            Tring(ceil_z(sq3), T_int(0)),
+        pre + "the ring typed and integer typed ceils agree");
+  check(UniversalNearestScalarInteger<T, T>(sq3) ==
+            T(T_rat(nearest_z(sq3)), T_rat(0)),
+        pre + "the field typed and integer typed nearest agree");
+  // Floor(v + n) = Floor(v) + n, and the same for the ceiling and the nearest
+  // integer, on both sides of the range where a double locates the integer.
+  // On the halves it pins the tie as well: y + 1/2 goes to y, whatever the
+  // magnitude.
+  T one_half(T_rat(1, 2), T_rat(0));
+  std::vector<T_rat> l_shift{T_rat(0), T_rat(1), T_rat(-1), T_rat(1000003),
+                             T_rat(-1000003), big, -big};
+  std::vector<T> l_val{sq, -sq, sq3, one_half, -one_half, half,
+                       T(T_rat(-5, 2), T_rat(0)), T(T_rat(7, 3), T_rat(1))};
+  bool is_covariant = true;
+  for (auto &shift : l_shift) {
+    T_int shift_z = UniversalScalarConversion<T_int, T_rat>(shift);
+    T shift_f(shift, T_rat(0));
+    for (auto &v : l_val) {
+      T w = v + shift_f;
+      if (floor_z(w) != floor_z(v) + shift_z ||
+          ceil_z(w) != ceil_z(v) + shift_z ||
+          nearest_z(w) != nearest_z(v) + shift_z) {
+        std::cerr << "shift=" << shift << " v=" << v << "\n";
+        is_covariant = false;
+      }
+    }
+  }
+  check(is_covariant, pre + "floor, ceil and nearest commute with Z");
+  check(nearest_z(one_half) == 0 && nearest_z(-one_half) == -1 &&
+            nearest_z(half) == 2 && nearest_z(-half) == -3,
+        pre + "a tie y + 1/2 goes to y");
+  check(nearest_z(big_f + one_half) ==
+            UniversalScalarConversion<T_int, T_rat>(big),
+        pre + "2^400 + 1/2 goes to 2^400, as the small ties do");
+  check(floor_z(big_irr) ==
+            UniversalScalarConversion<T_int, T_rat>(big) + to_z(sq_d),
+        pre + "the floor of 2^400 + sqrt(d) is 2^400 + floor(sqrt(d))");
 }
 
 static void process_real(std::string const &eFile) {

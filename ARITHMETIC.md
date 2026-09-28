@@ -82,25 +82,22 @@ templates carry `value = false`: an empty primary makes the guard a
 substitution failure on every type that does not specialize the trait, which
 drops the conversion from the overload set instead of selecting it.
 
-`FloorInteger`, `CeilInteger` and `NearestInteger` out of `RealField` return
-an element of Z, in the field itself, in the underlying ring, or in a plain
-integer type. The last of the three is what an LLL reduction over such a
-field asks for: the lattice being reduced is Z^n whatever field the form
-takes its values in, so the basis transformation stays in Z. The floor is the
-primitive: the largest n in Z with n <= x, found from the floating point
-evaluation when it locates the integer and otherwise by a bracketing by
-powers of two followed by a bisection, the answer being fixed by exact
-comparisons either way. It commutes with the translations by Z,
-`Floor(x + n) = Floor(x) + n`, which a reduction modulo Z relies on; the
-ceiling is `-Floor(-x)` and the nearest integer is `Ceil(x - 1/2)`, so a tie
-`y + 1/2` goes to `y`, as for `mpq_class`, and both commute with Z as well.
-
-`NearestInteger` out of `QuadField` has not been reworked yet. Into the ring
-and into a plain integer type it starts from the floating point evaluation or
-from `TruncationTowardZero`, and breaks a tie toward the larger absolute value
-from the first start and the smaller from the second; the same-type overload
-walks from zero and breaks it toward the smaller. All are within 1/2, which is
-all the size reduction asks, but none commutes with Z.
+`FloorInteger`, `CeilInteger` and `NearestInteger` out of `QuadField` and
+`RealField` return an element of Z, in the field itself, in the underlying
+ring, or in a plain integer type. The last of the three is what an LLL
+reduction over such a field asks for: the lattice being reduced is Z^n
+whatever field the form takes its values in, so the basis transformation
+stays in Z. Each is one exact search, `helper_largest_integer_satisfying` in
+`src_number/IntegerSearch.h`, for the largest n in Z satisfying a comparison
+with x: `n <= x` for the floor, `n < x` for the ceiling (plus one), and
+`n - 1/2 < x` for the nearest integer, so a tie `y + 1/2` goes to `y`, as for
+`mpq_class`. No arithmetic is done on x. The answer is fixed by the comparison
+alone: the floating point evaluation gives the start when it locates the
+integer, and a bracketing by powers of two followed by a bisection otherwise.
+All three commute with the translations by Z, `Floor(x + n) = Floor(x) + n`,
+which a reduction modulo Z relies on. Callers outside `src_number` use
+`UniversalFloorScalarInteger`, `UniversalCeilScalarInteger` and
+`UniversalNearestScalarInteger`, not the `helper_` functions.
 
 `CI_tests/RealAlgebraicField/run_test.sh` exercises all of this through
 `src_number/Test_AlgebraicConversion.cpp`.
