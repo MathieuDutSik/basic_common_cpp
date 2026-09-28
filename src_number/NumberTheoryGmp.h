@@ -767,6 +767,18 @@ inline void TYPE_CONVERSION(stc<mpz_class> const &a1, double &a2) {
   a2 = a1.val.get_d();
 }
 
+// See T_frexp in TypeConversion.h.
+inline double T_frexp(mpz_class const &x, long &e) {
+  return mpz_get_d_2exp(&e, x.get_mpz_t());
+}
+
+inline double T_frexp(mpq_class const &x, long &e) {
+  long e_num, e_den;
+  double m_num = mpz_get_d_2exp(&e_num, x.get_num_mpz_t());
+  double m_den = mpz_get_d_2exp(&e_den, x.get_den_mpz_t());
+  return T_frexp_quotient(m_num, e_num, m_den, e_den, e);
+}
+
 inline void TYPE_CONVERSION(stc<mpz_class> const &a1, uint64_t &a2) {
   mpz_class_to_small_integer(a1.val, a2);
 }

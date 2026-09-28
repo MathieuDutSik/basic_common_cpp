@@ -388,6 +388,24 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
 }
+
+// See T_frexp in TypeConversion.h. The 64 leading bits of |x| carry all that
+// a double can hold; they are converted and the shift goes to the exponent.
+inline double T_frexp(boost::multiprecision::cpp_int const &x, long &e) {
+  if (x == 0) {
+    e = 0;
+    return 0.0;
+  }
+  boost::multiprecision::cpp_int x_abs = abs(x);
+  long n_bit = static_cast<long>(boost::multiprecision::msb(x_abs)) + 1;
+  long shift = n_bit > 64 ? n_bit - 64 : 0;
+  boost::multiprecision::cpp_int top = x_abs >> shift;
+  double m = static_cast<double>(top.convert_to<uint64_t>());
+  if (x < 0) {
+    m = -m;
+  }
+  return T_frexp_normalize(m, shift, e);
+}
 // double as input.
 // This mirrors the conversion in NumberTheoryGmp.h: the double value is
 // truncated to int64_t before being assigned to the big integer. This
@@ -436,6 +454,15 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_int> const &a1,
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
+}
+
+// See T_frexp in TypeConversion.h.
+inline double T_frexp(boost::multiprecision::cpp_rational const &x, long &e) {
+  long e_num, e_den;
+  double m_num = T_frexp(boost::multiprecision::cpp_int(numerator(x)), e_num);
+  double m_den =
+      T_frexp(boost::multiprecision::cpp_int(denominator(x)), e_den);
+  return T_frexp_quotient(m_num, e_num, m_den, e_den, e);
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::cpp_rational> const &a1,
                             boost::multiprecision::cpp_int &a2) {

@@ -781,6 +781,15 @@ inline void TYPE_CONVERSION(stc<int64_t> const &a1, Rational<int64_t> &a2) {
   a2 = a1.val;
 }
 
+// See T_frexp in TypeConversion.h.
+template <typename Tint>
+inline double T_frexp(Rational<Tint> const &x, long &e) {
+  long e_num, e_den;
+  double m_num = T_frexp(x.get_const_num(), e_num);
+  double m_den = T_frexp(x.get_const_den(), e_den);
+  return T_frexp_quotient(m_num, e_num, m_den, e_den, e);
+}
+
 // Obtention of denominators / numerators
 
 template <typename Tint>

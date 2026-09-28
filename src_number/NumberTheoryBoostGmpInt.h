@@ -377,6 +377,11 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
 }
+
+// See T_frexp in TypeConversion.h. The backend is a GMP integer.
+inline double T_frexp(boost::multiprecision::mpz_int const &x, long &e) {
+  return mpz_get_d_2exp(&e, x.backend().data());
+}
 // double as input.
 // This mirrors the conversion in NumberTheoryGmp.h: the double value is
 // truncated to int64_t before being assigned to the big integer. This
@@ -425,6 +430,14 @@ inline void TYPE_CONVERSION(stc<boost::multiprecision::mpz_int> const &a1,
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             double &a2) {
   a2 = a1.val.template convert_to<double>();
+}
+
+// See T_frexp in TypeConversion.h. The backend is a GMP rational.
+inline double T_frexp(boost::multiprecision::mpq_rational const &x, long &e) {
+  long e_num, e_den;
+  double m_num = mpz_get_d_2exp(&e_num, mpq_numref(x.backend().data()));
+  double m_den = mpz_get_d_2exp(&e_den, mpq_denref(x.backend().data()));
+  return T_frexp_quotient(m_num, e_num, m_den, e_den, e);
 }
 inline void TYPE_CONVERSION(stc<boost::multiprecision::mpq_rational> const &a1,
                             boost::multiprecision::mpz_int &a2) {

@@ -462,6 +462,30 @@ inline void TYPE_CONVERSION(stc<QuadField<T, d>> const &x1, double &x2) {
   x2 = a2 + sqrt(d) * b2;
 }
 
+// See T_frexp in TypeConversion.h. For x = a + b sqrt(d) with a and b of the
+// same sign the two terms are added. With opposite signs they would cancel,
+// so the exact identity x = (a^2 - d b^2) / (a - b sqrt(d)) is used instead:
+// the norm a^2 - d b^2 is computed exactly in T, and the denominator adds two
+// terms of the same sign. Either way no digit is lost to cancellation and the
+// result has the accuracy of a double.
+template <typename T, int d>
+inline double T_frexp(QuadField<T, d> const &x, long &e) {
+  T const &a = x.get_const_a();
+  T const &b = x.get_const_b();
+  long e_a, e_b;
+  double m_a = T_frexp(a, e_a);
+  double m_b = T_frexp(b, e_b) * std::sqrt(static_cast<double>(d));
+  bool same_sign = (a >= 0 && b >= 0) || (a <= 0 && b <= 0);
+  if (same_sign) {
+    return T_frexp_sum(m_a, e_a, m_b, e_b, e);
+  }
+  T norm = a * a - T(d) * b * b;
+  long e_norm, e_conj;
+  double m_norm = T_frexp(norm, e_norm);
+  double m_conj = T_frexp_sum(m_a, e_a, -m_b, e_b, e_conj);
+  return T_frexp_quotient(m_norm, e_norm, m_conj, e_conj, e);
+}
+
 // The rounding of an element of Q(sqrt(d)) to an element of Z, in the three
 // output types the callers ask for: the field itself, the ring Z[sqrt(d)] that
 // underlying_ring makes its ring, and a plain integer type. The lattice an LLL

@@ -463,6 +463,24 @@ public:
                  "please produce better approximants\n";
     throw TerminalException{1};
   }
+  // evaluate_as_double in the form of T_frexp: the coefficients and the
+  // denominator enter through their own T_frexp, so nothing overflows however
+  // large they are. The accuracy is that of evaluate_as_double.
+  template <typename Tvect>
+  double evaluate_frexp(Tvect const &num, Tz const &den, long &e) const {
+    double m_sum = 0;
+    long e_sum = 0;
+    double pow_double = 1.0;
+    for (int i = 0; i < deg; i++) {
+      long e_i;
+      double m_i = T_frexp(num[i], e_i);
+      m_sum = T_frexp_sum(m_sum, e_sum, m_i * pow_double, e_i, e_sum);
+      pow_double *= val_double_y;
+    }
+    long e_den;
+    double m_den = T_frexp(den, e_den);
+    return T_frexp_quotient(m_sum, e_sum, m_den, e_den, e);
+  }
   template <typename Tvect>
   double evaluate_as_double(Tvect const &num, Tz const &den) const {
     double ret_val = 0;
@@ -776,6 +794,9 @@ public:
     return res;
   }
   double get_d() const { return get_hcrf().evaluate_as_double(num, den); }
+  double get_d_2exp(long &e) const {
+    return get_hcrf().evaluate_frexp(num, den, e);
+  }
   void operator*=(RealField<i_field> const &x) {
     HelperClassRealField<T> const &hcrf = get_hcrf();
     static thread_local Tvec_real_field conv;
@@ -1016,6 +1037,12 @@ template <int i_field> struct underlying_q_field<RealField<i_field>> {
 template <int i_field>
 inline void TYPE_CONVERSION(stc<RealField<i_field>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
+}
+
+// See T_frexp in TypeConversion.h.
+template <int i_field>
+inline double T_frexp(RealField<i_field> const &x, long &e) {
+  return x.get_d_2exp(e);
 }
 
 template <int i_field>
@@ -1326,6 +1353,9 @@ public:
     return RealRingProd<i_field>{x, y};
   }
   double get_d() const { return get_hcrf().evaluate_as_double(num, Tz(1)); }
+  double get_d_2exp(long &e) const {
+    return get_hcrf().evaluate_frexp(num, Tz(1), e);
+  }
   friend std::ostream &operator<<(std::ostream &os,
                                   RealRing<i_field> const &v) {
     std::vector<Tz> V(v.num.begin(), v.num.end());
@@ -1514,6 +1544,12 @@ template <int i_field> struct underlying_z_ring<RealRing<i_field>> {
 template <int i_field>
 inline void TYPE_CONVERSION(stc<RealRing<i_field>> const &eQ, double &eD) {
   eD = eQ.val.get_d();
+}
+
+// See T_frexp in TypeConversion.h.
+template <int i_field>
+inline double T_frexp(RealRing<i_field> const &x, long &e) {
+  return x.get_d_2exp(e);
 }
 
 template <int i_field>

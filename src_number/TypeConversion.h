@@ -6,6 +6,7 @@
 #include "BasicNumberTypes.h"
 #include "ExceptionsFunc.h"
 #include "TemplateTraits.h"
+#include <cmath>
 #include <cstdint>
 #include <iostream>
 #include <math.h>
@@ -529,6 +530,73 @@ template <typename T1, typename T2> T1 UniversalScalarConversion(T2 const &a) {
     }
     return ret;
   }
+}
+
+/*
+  T_frexp(x, e) returns m with x = m 2^e and 1/2 <= |m| < 1, or m = 0 and
+  e = 0 for x = 0: std::frexp for any number type.
+
+  Unlike UniversalScalarConversion<double, T> it cannot overflow. An exact
+  type holds values far beyond the range of a double, and a caller needing
+  only the magnitude of a quotient or a square root of such values forms it
+  from the mantissas and exponents, which stay in range whenever the result
+  does.
+
+  The accuracy is that of a double for the native, integer and rational
+  types, and for QuadField. For RealField and RealRing it is that of their
+  evaluation at the double approximation of the generator, as for get_d: no
+  overflow, but a sum that cancels loses the digits it cancels.
+
+  The generic form below goes through a double, so it is right only for a
+  type whose values fit one, which covers the native types. Every other type
+  overloads it next to its double conversion. The helpers that follow
+  combine numbers already in this form, so that no overload has to form a
+  double of a large quantity.
+ */
+
+// ldexp with the exponent clamped to where the result is already 0 or
+// infinite, so that an exponent held in a long cannot overflow the int.
+inline double T_frexp_ldexp(double const &m, long const &e) {
+  long const e_max = 4096;
+  long e_clamp = e < -e_max ? -e_max : (e > e_max ? e_max : e);
+  return std::ldexp(m, static_cast<int>(e_clamp));
+}
+
+// m 2^e for any finite double m, returned in the form of T_frexp.
+inline double T_frexp_normalize(double const &m, long const &e,
+                                long &e_out) {
+  int k;
+  double r = std::frexp(m, &k);
+  e_out = (r == 0) ? 0 : e + k;
+  return r;
+}
+
+// The quotient (m1 2^e1) / (m2 2^e2), m2 nonzero, in the form of T_frexp.
+inline double T_frexp_quotient(double const &m1, long const &e1,
+                               double const &m2, long const &e2, long &e) {
+  return T_frexp_normalize(m1 / m2, e1 - e2, e);
+}
+
+// The sum m1 2^e1 + m2 2^e2 in the form of T_frexp. The mantissas need not
+// be normalized. A sum that cancels loses what it cancels, as in a double.
+inline double T_frexp_sum(double const &m1, long const &e1, double const &m2,
+                          long const &e2, long &e) {
+  if (m1 == 0) {
+    return T_frexp_normalize(m2, e2, e);
+  }
+  if (m2 == 0) {
+    return T_frexp_normalize(m1, e1, e);
+  }
+  long e_max = e1 > e2 ? e1 : e2;
+  double s = T_frexp_ldexp(m1, e1 - e_max) + T_frexp_ldexp(m2, e2 - e_max);
+  return T_frexp_normalize(s, e_max, e);
+}
+
+template <typename T> inline double T_frexp(T const &x, long &e) {
+  int e_int;
+  double m = std::frexp(UniversalScalarConversion<double, T>(x), &e_int);
+  e = e_int;
+  return m;
 }
 
 template <typename T1, typename T2>
