@@ -34,14 +34,41 @@ MyMatrix<T> NullspaceMatSingleVector(MyVector<T> const &V) {
   throw TerminalException{1};
 }
 
-template <typename T, typename F>
-MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
+/*
+  The kernel of the transpose of a matrix given row by row, by Gaussian
+  elimination: f(provMat, eRank, iRow) writes the row iRow of the matrix into
+  the row eRank of provMat. It is called once per row, in order, and the
+  callers rely on that since they walk a face as they go.
+
+  Every row is reduced by the pivots found so far; if it is not zero, its
+  first nonzero column becomes a new pivot, the row is normalized and the
+  previous pivot rows are reduced by it. When the rows are exhausted,
+  f_extract turns the eliminated rows into kernel vectors, one per column
+  that is not a pivot.
+
+  With a target_rank, the caller knows that the rank is at most target_rank
+  and the elimination stops as soon as it is reached, without calling f on
+  the remaining rows. No target is npos. A target_rank of 0 would never be
+  reached by the test, which comes after a pivot has been added; it means no
+  target either, so that the matrix is sized for the full elimination.
+
+  provMat needs a row for every pivot, and one more for the row being
+  reduced: maxRank + 1 rows, maxRank = min(nbRow, nbCol). With a target the
+  last row written is target_rank - 1, so target_rank rows suffice.
+ */
+template <typename T, typename F, typename Fextract>
+auto NullspaceTrMat_Elimination(size_t nbRow, size_t nbCol, size_t target_rank,
+                                F f, Fextract f_extract) {
   static_assert(is_ring_field<T>::value,
-                "Requires T to be a field in NullspaceTrMat_Kernel");
+                "Requires T to be a field in NullspaceTrMat_Elimination");
   size_t maxRank = nbRow;
   if (nbCol < maxRank)
     maxRank = nbCol;
   size_t sizMat = maxRank + 1;
+  if (target_rank == 0)
+    target_rank = std::numeric_limits<size_t>::max();
+  if (target_rank < sizMat)
+    sizMat = target_rank;
   MyMatrix<T> provMat(sizMat, nbCol);
   std::vector<size_t> ListColSelect;
   std::vector<uint8_t> ListColSelect01(nbCol, 0);
@@ -80,179 +107,91 @@ MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
         }
       }
       eRank++;
+      if (eRank == target_rank) {
+        return f_extract(provMat, ListColSelect, ListColSelect01, eRank);
+      }
     }
   }
-  size_t nbVectZero = nbCol - eRank;
-  MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, nbCol);
+  return f_extract(provMat, ListColSelect, ListColSelect01, eRank);
+}
+
+// The kernel vector of the free column iCol, from the eliminated rows.
+template <typename T, typename Fset>
+void NullspaceTrMat_KernelVector(MyMatrix<T> const &provMat,
+                                 std::vector<size_t> const &ListColSelect,
+                                 size_t eRank, size_t iCol, Fset f_set) {
+  f_set(iCol, -1);
+  for (size_t iRank = 0; iRank < eRank; iRank++) {
+    size_t eCol = ListColSelect[iRank];
+    f_set(eCol, provMat(iRank, iCol));
+  }
+}
+
+// All the kernel vectors, one row per free column.
+template <typename T>
+MyMatrix<T> NullspaceTrMat_ExtractAll(MyMatrix<T> const &provMat,
+                                      std::vector<size_t> const &ListColSelect,
+                                      std::vector<uint8_t> const &ListColSelect01,
+                                      size_t eRank) {
+  size_t nbCol = ListColSelect01.size();
+  MyMatrix<T> NSP = ZeroMatrix<T>(nbCol - eRank, nbCol);
   size_t nbVect = 0;
-  for (size_t iCol = 0; iCol < nbCol; iCol++)
+  for (size_t iCol = 0; iCol < nbCol; iCol++) {
     if (ListColSelect01[iCol] == 0) {
-      NSP(nbVect, iCol) = -1;
-      for (size_t iRank = 0; iRank < eRank; iRank++) {
-        size_t eCol = ListColSelect[iRank];
-        NSP(nbVect, eCol) = provMat(iRank, iCol);
-      }
+      auto f_set = [&](size_t jCol, auto const &val) -> void {
+        NSP(nbVect, jCol) = val;
+      };
+      NullspaceTrMat_KernelVector(provMat, ListColSelect, eRank, iCol, f_set);
       nbVect++;
     }
+  }
   return NSP;
 }
 
-//
+// The kernel vector of the first free column, zero if there is none.
+template <typename T>
+MyVector<T> NullspaceTrMat_ExtractFirst(MyMatrix<T> const &provMat,
+                                        std::vector<size_t> const &ListColSelect,
+                                        std::vector<uint8_t> const &ListColSelect01,
+                                        size_t eRank) {
+  size_t nbCol = ListColSelect01.size();
+  MyVector<T> Vzero = ZeroVector<T>(nbCol);
+  for (size_t iCol = 0; iCol < nbCol; iCol++) {
+    if (ListColSelect01[iCol] == 0) {
+      auto f_set = [&](size_t jCol, auto const &val) -> void {
+        Vzero(jCol) = val;
+      };
+      NullspaceTrMat_KernelVector(provMat, ListColSelect, eRank, iCol, f_set);
+      break;
+    }
+  }
+  return Vzero;
+}
+
+template <typename T, typename F>
+MyMatrix<T> NullspaceTrMat_Kernel(size_t nbRow, size_t nbCol, F f) {
+  return NullspaceTrMat_Elimination<T>(nbRow, nbCol,
+                                       std::numeric_limits<size_t>::max(), f,
+                                       NullspaceTrMat_ExtractAll<T>);
+}
+
+// The kernel when it is known to be of dimension at least target_zero: the
+// elimination stops once the rank reaches nbCol - target_zero. If the rank
+// turns out lower, the kernel is larger than expected and returned whole.
 template <typename T, typename F>
 MyMatrix<T> NullspaceTrMatTarget_Kernel(size_t nbRow, size_t nbCol,
                                         size_t target_zero, F f) {
-  static_assert(is_ring_field<T>::value,
-                "Requires T to be a field in NullspaceTrMat_Kernel");
-  size_t target_rank = nbCol - target_zero;
-  MyMatrix<T> provMat(target_rank, nbCol);
-  std::vector<size_t> ListColSelect;
-  std::vector<uint8_t> ListColSelect01(nbCol, 0);
-  size_t eRank = 0;
-  for (size_t iRow = 0; iRow < nbRow; iRow++) {
-    f(provMat, eRank, iRow);
-    for (size_t iRank = 0; iRank < eRank; iRank++) {
-      size_t eCol = ListColSelect[iRank];
-      T eVal1 = provMat(eRank, eCol);
-      if (eVal1 != 0) {
-        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
-          SubMul(provMat(eRank, iCol), eVal1, provMat(iRank, iCol));
-        }
-      }
-    }
-    auto get_firstnonzerocol_iife = [&]() -> size_t {
-      for (size_t iCol = 0; iCol < nbCol; iCol++) {
-        if (provMat(eRank, iCol) != 0)
-          return iCol;
-      }
-      return std::numeric_limits<size_t>::max();
-    };
-    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
-    if (FirstNonZeroCol != std::numeric_limits<size_t>::max()) {
-      ListColSelect.push_back(FirstNonZeroCol);
-      ListColSelect01[FirstNonZeroCol] = 1;
-      T eVal2 = 1 / provMat(eRank, FirstNonZeroCol);
-      for (size_t iCol = 0; iCol < nbCol; iCol++)
-        provMat(eRank, iCol) *= eVal2;
-      for (size_t iRank = 0; iRank < eRank; iRank++) {
-        T eVal1 = provMat(iRank, FirstNonZeroCol);
-        if (eVal1 != 0) {
-          size_t StartCol = ListColSelect[iRank];
-          for (size_t iCol = StartCol; iCol < nbCol; iCol++)
-            SubMul(provMat(iRank, iCol), eVal1, provMat(eRank, iCol));
-        }
-      }
-      eRank++;
-      if (eRank == target_rank) {
-        // We reach the expected rank. So now returning.
-        MyMatrix<T> NSP = ZeroMatrix<T>(target_zero, nbCol);
-        size_t nbVect = 0;
-        for (size_t iCol = 0; iCol < nbCol; iCol++) {
-          if (ListColSelect01[iCol] == 0) {
-            NSP(nbVect, iCol) = -1;
-            for (size_t iRank = 0; iRank < eRank; iRank++) {
-              size_t eCol = ListColSelect[iRank];
-              NSP(nbVect, eCol) = provMat(iRank, iCol);
-            }
-            nbVect++;
-          }
-        }
-        return NSP;
-      }
-    }
-  }
-  // The target was not achieved, we get a larger kernel than expected.
-  // It could be a problem down the line, but such is life.
-  size_t nbVectZero = nbCol - eRank;
-  MyMatrix<T> NSP = ZeroMatrix<T>(nbVectZero, nbCol);
-  size_t nbVect = 0;
-  for (size_t iCol = 0; iCol < nbCol; iCol++)
-    if (ListColSelect01[iCol] == 0) {
-      NSP(nbVect, iCol) = -1;
-      for (size_t iRank = 0; iRank < eRank; iRank++) {
-        size_t eCol = ListColSelect[iRank];
-        NSP(nbVect, eCol) = provMat(iRank, iCol);
-      }
-      nbVect++;
-    }
-  return NSP;
+  return NullspaceTrMat_Elimination<T>(nbRow, nbCol, nbCol - target_zero, f,
+                                       NullspaceTrMat_ExtractAll<T>);
 }
 
+// One kernel vector when the kernel is known to be of dimension at least 1.
+// If it is larger, the vector of the first free column is returned, to be
+// processed down the line.
 template <typename T, typename F>
 MyVector<T> NullspaceTrMatTargetOne_Kernel(size_t nbRow, size_t nbCol, F f) {
-  static_assert(is_ring_field<T>::value,
-                "Requires T to be a field in NullspaceTrMat_Kernel");
-  size_t target_rank = nbCol - 1;
-  MyMatrix<T> provMat(target_rank, nbCol);
-  std::vector<size_t> ListColSelect;
-  std::vector<uint8_t> ListColSelect01(nbCol, 0);
-  size_t eRank = 0;
-  for (size_t iRow = 0; iRow < nbRow; iRow++) {
-    f(provMat, eRank, iRow);
-    for (size_t iRank = 0; iRank < eRank; iRank++) {
-      size_t eCol = ListColSelect[iRank];
-      T eVal1 = provMat(eRank, eCol);
-      if (eVal1 != 0) {
-        for (size_t iCol = eCol; iCol < nbCol; iCol++) {
-          SubMul(provMat(eRank, iCol), eVal1, provMat(iRank, iCol));
-        }
-      }
-    }
-    auto get_firstnonzerocol_iife = [&]() -> size_t {
-      for (size_t iCol = 0; iCol < nbCol; iCol++) {
-        if (provMat(eRank, iCol) != 0)
-          return iCol;
-      }
-      return std::numeric_limits<size_t>::max();
-    };
-    size_t FirstNonZeroCol = get_firstnonzerocol_iife();
-    if (FirstNonZeroCol != std::numeric_limits<size_t>::max()) {
-      ListColSelect.push_back(FirstNonZeroCol);
-      ListColSelect01[FirstNonZeroCol] = 1;
-      T eVal2 = 1 / provMat(eRank, FirstNonZeroCol);
-      for (size_t iCol = 0; iCol < nbCol; iCol++)
-        provMat(eRank, iCol) *= eVal2;
-      for (size_t iRank = 0; iRank < eRank; iRank++) {
-        T eVal1 = provMat(iRank, FirstNonZeroCol);
-        if (eVal1 != 0) {
-          size_t StartCol = ListColSelect[iRank];
-          for (size_t iCol = StartCol; iCol < nbCol; iCol++)
-            SubMul(provMat(iRank, iCol), eVal1, provMat(eRank, iCol));
-        }
-      }
-      eRank++;
-      if (eRank == target_rank) {
-        // We reach the expected rank. So now returning.
-        MyVector<T> Vzero = ZeroVector<T>(nbCol);
-        for (size_t iCol = 0; iCol < nbCol; iCol++) {
-          if (ListColSelect01[iCol] == 0) {
-            Vzero(iCol) = -1;
-            for (size_t iRank = 0; iRank < eRank; iRank++) {
-              size_t eCol = ListColSelect[iRank];
-              Vzero(eCol) = provMat(iRank, iCol);
-            }
-            return Vzero;
-          }
-        }
-      }
-    }
-  }
-  // The target was not achieved, we get a larger kernel than expected.
-  // We select one vector and it has to be processed down the line
-  MyVector<T> Vzero = ZeroVector<T>(nbCol);
-  auto set_vzero = [&]() -> void {
-    for (size_t iCol = 0; iCol < nbCol; iCol++) {
-      if (ListColSelect01[iCol] == 0) {
-        Vzero(iCol) = -1;
-        for (size_t iRank = 0; iRank < eRank; iRank++) {
-          size_t eCol = ListColSelect[iRank];
-          Vzero(eCol) = provMat(iRank, iCol);
-        }
-        return;
-      }
-    }
-  };
-  set_vzero();
-  return Vzero;
+  return NullspaceTrMat_Elimination<T>(nbRow, nbCol, nbCol - 1, f,
+                                       NullspaceTrMat_ExtractFirst<T>);
 }
 
 template <typename T>
