@@ -714,6 +714,60 @@ inline bool operator>=(fmpz_product const &p, fmpz_product const &q) {
   return fmpz_class(p) >= fmpz_class(q);
 }
 
+// A product times or over anything else: evaluated, so that the result
+// never holds pointers to temporaries. Without these, a * b * c or
+// a * b / 2 did not compile, as they do with the GMP types.
+inline fmpz_class operator*(fmpz_product const &p, fmpz_class const &c) {
+  fmpz_class z(p);
+  z *= c;
+  return z;
+}
+inline fmpz_class operator*(fmpz_class const &c, fmpz_product const &p) {
+  fmpz_class z(c);
+  z *= fmpz_class(p);
+  return z;
+}
+inline fmpz_class operator*(fmpz_product const &p, fmpz_product const &q) {
+  fmpz_class z(p);
+  z *= fmpz_class(q);
+  return z;
+}
+inline fmpz_class operator*(fmpz_product const &p, int const &c) {
+  fmpz_class z(p);
+  z *= fmpz_class(c);
+  return z;
+}
+inline fmpz_class operator*(int const &c, fmpz_product const &p) {
+  fmpz_class z(c);
+  z *= fmpz_class(p);
+  return z;
+}
+inline fmpz_class operator/(fmpz_product const &p, fmpz_class const &c) {
+  fmpz_class z(p);
+  z /= c;
+  return z;
+}
+inline fmpz_class operator/(fmpz_class const &c, fmpz_product const &p) {
+  fmpz_class z(c);
+  z /= fmpz_class(p);
+  return z;
+}
+inline fmpz_class operator/(fmpz_product const &p, fmpz_product const &q) {
+  fmpz_class z(p);
+  z /= fmpz_class(q);
+  return z;
+}
+inline fmpz_class operator/(fmpz_product const &p, int const &c) {
+  fmpz_class z(p);
+  z /= fmpz_class(c);
+  return z;
+}
+inline fmpz_class operator/(int const &c, fmpz_product const &p) {
+  fmpz_class z(c);
+  z /= fmpz_class(p);
+  return z;
+}
+
 class fmpq_product {
   friend class fmpq_class;
   friend fmpq_product operator*(fmpq_class const &x, fmpq_class const &y);
@@ -838,6 +892,60 @@ inline bool operator>(fmpq_product const &p, fmpq_product const &q) {
 }
 inline bool operator>=(fmpq_product const &p, fmpq_product const &q) {
   return fmpq_class(p) >= fmpq_class(q);
+}
+
+// A product times or over anything else: evaluated, so that the result
+// never holds pointers to temporaries. Without these, a * b * c or
+// a * b / 2 did not compile, as they do with the GMP types.
+inline fmpq_class operator*(fmpq_product const &p, fmpq_class const &c) {
+  fmpq_class z(p);
+  z *= c;
+  return z;
+}
+inline fmpq_class operator*(fmpq_class const &c, fmpq_product const &p) {
+  fmpq_class z(c);
+  z *= fmpq_class(p);
+  return z;
+}
+inline fmpq_class operator*(fmpq_product const &p, fmpq_product const &q) {
+  fmpq_class z(p);
+  z *= fmpq_class(q);
+  return z;
+}
+inline fmpq_class operator*(fmpq_product const &p, int const &c) {
+  fmpq_class z(p);
+  z *= fmpq_class(c);
+  return z;
+}
+inline fmpq_class operator*(int const &c, fmpq_product const &p) {
+  fmpq_class z(c);
+  z *= fmpq_class(p);
+  return z;
+}
+inline fmpq_class operator/(fmpq_product const &p, fmpq_class const &c) {
+  fmpq_class z(p);
+  z /= c;
+  return z;
+}
+inline fmpq_class operator/(fmpq_class const &c, fmpq_product const &p) {
+  fmpq_class z(c);
+  z /= fmpq_class(p);
+  return z;
+}
+inline fmpq_class operator/(fmpq_product const &p, fmpq_product const &q) {
+  fmpq_class z(p);
+  z /= fmpq_class(q);
+  return z;
+}
+inline fmpq_class operator/(fmpq_product const &p, int const &c) {
+  fmpq_class z(p);
+  z /= fmpq_class(c);
+  return z;
+}
+inline fmpq_class operator/(int const &c, fmpq_product const &p) {
+  fmpq_class z(c);
+  z /= fmpq_class(p);
+  return z;
 }
 
 // The sgn / abs free functions that gmpxx provides for its types.
