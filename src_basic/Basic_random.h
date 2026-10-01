@@ -2,10 +2,12 @@
 #ifndef SRC_BASIC_BASIC_RANDOM_H_
 #define SRC_BASIC_BASIC_RANDOM_H_
 
+#include <atomic>
+#include <cstdint>
 #include <cstdlib>
-#ifdef _WIN32
 #include <random>
-#endif
+#include <utility>
+#include <vector>
 #ifndef WASM_PLATFORM
 #include <thread>
 #endif
@@ -45,6 +47,128 @@ inline unsigned get_random_seed() {
 inline void srand_random_set() {
   unsigned val = get_random_seed();
   srand(val);
+}
+
+/*
+  The random numbers of the code, the same on every platform.
+
+  rand() and random() are two generators that POSIX keeps apart and whose
+  sequences it does not specify: glibc shares one state between them, macOS
+  does not, so srand() does not seed random() there and a seed gives
+  different numbers on different systems. Instead every draw goes to a
+  std::mt19937_64, whose output the C++ standard fixes exactly, and the
+  ranges are formed here rather than by the std distributions, whose
+  algorithms are left to each library. A seed therefore gives the same
+  numbers with libstdc++, libc++ and MSVC.
+
+  Each thread has its own engine, seeded from the main seed and the index of
+  the thread (the order in which threads first draw), so threads draw
+  without sharing state. The default seed is fixed: a run that does not
+  call set_random_seed is deterministic, as random() is when unseeded.
+  set_random_seed(seed) reseeds every thread at its next draw, and
+  set_random_seed_nondeterministic() seeds from the time and the thread id.
+ */
+namespace basic_random_detail {
+
+inline constexpr uint64_t default_seed = 0x5eed5eed5eed5eedULL;
+
+inline std::atomic<uint64_t> &main_seed() {
+  static std::atomic<uint64_t> seed{default_seed};
+  return seed;
+}
+
+// Incremented by every set_random_seed, so that each thread engine sees that
+// it has to be reseeded.
+inline std::atomic<uint64_t> &seed_generation() {
+  static std::atomic<uint64_t> generation{0};
+  return generation;
+}
+
+inline std::atomic<uint64_t> &thread_counter() {
+  static std::atomic<uint64_t> counter{0};
+  return counter;
+}
+
+// The splitmix64 finalizer: spreads the bits of the seed and the thread index
+// over the 64-bit engine seed.
+inline uint64_t splitmix64(uint64_t x) {
+  x += 0x9e3779b97f4a7c15ULL;
+  x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+  x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+  return x ^ (x >> 31);
+}
+
+struct ThreadEngine {
+  std::mt19937_64 engine;
+  uint64_t index;
+  // A generation that never occurs, so that the first access seeds.
+  uint64_t generation = UINT64_MAX;
+};
+
+inline std::mt19937_64 &thread_engine() {
+  thread_local ThreadEngine te{std::mt19937_64(),
+                               thread_counter().fetch_add(1)};
+  uint64_t generation = seed_generation().load(std::memory_order_acquire);
+  if (te.generation != generation) {
+    uint64_t seed = main_seed().load(std::memory_order_relaxed);
+    te.engine.seed(splitmix64(seed ^ splitmix64(te.index)));
+    te.generation = generation;
+  }
+  return te.engine;
+}
+
+} // namespace basic_random_detail
+
+inline void set_random_seed(uint64_t seed) {
+  basic_random_detail::main_seed().store(seed, std::memory_order_relaxed);
+  basic_random_detail::seed_generation().fetch_add(1,
+                                                   std::memory_order_release);
+  // The calling thread takes its index now, so the thread that seeds is
+  // thread 0 when it seeds before any other draw.
+  basic_random_detail::thread_engine();
+}
+
+inline void set_random_seed_nondeterministic() {
+  set_random_seed(get_random_seed());
+}
+
+// The engine of the calling thread, for the code that needs an engine. The
+// std distributions applied to it are not portable: prefer the functions
+// below.
+inline std::mt19937_64 &get_random_engine() {
+  return basic_random_detail::thread_engine();
+}
+
+inline uint64_t random_u64() { return basic_random_detail::thread_engine()(); }
+
+// Uniform in [0, n), n > 0, without bias: the draws below 2^64 mod n are
+// rejected, so that the accepted ones cover every residue equally often (the
+// method of OpenBSD's arc4random_uniform, in 64-bit arithmetic only).
+inline uint64_t random_index(uint64_t n) {
+  uint64_t threshold = (0 - n) % n;
+  while (true) {
+    uint64_t x = random_u64();
+    if (x >= threshold)
+      return x % n;
+  }
+}
+
+inline bool random_bool() { return (random_u64() >> 63) != 0; }
+
+// Uniform in [0, 1), from the top 53 bits.
+inline double random_unit() {
+  return static_cast<double>(random_u64() >> 11) * 0x1.0p-53;
+}
+
+// Fisher-Yates, with random_index: the same permutation on every platform,
+// unlike std::shuffle whose algorithm is left to the library.
+template <typename T> void random_shuffle_vector(std::vector<T> &V) {
+  size_t len = V.size();
+  for (size_t i = len; i > 1; i--) {
+    size_t j = random_index(i);
+    using std::swap;
+    swap(V[i - 1], V[j]);
+  }
 }
 
 #ifdef _WIN32
