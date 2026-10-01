@@ -2,7 +2,9 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
 #define SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
 // clang-format off
-#ifdef ENABLE_FLINT_SUPPORT
+#if defined(OSCAR_USE_BOOST_GMP_BINDINGS)
+#include "NumberTheoryBoostGmpInt.h"
+#elif defined(ENABLE_FLINT_SUPPORT)
 #include "NumberTheoryFlint.h"
 #else
 #include "NumberTheory.h"
@@ -19,10 +21,13 @@
 // clang-format on
 
 // The rationals the quadratic fields of the programs (their Qsqrt2, Qsqrt5
-// arithmetics) are built on: the flint ones when flint is available, they
-// are 3 to 8 times faster on the matrix operations, the GMP ones otherwise.
-// QuadField itself takes any rational type.
-#ifdef ENABLE_FLINT_SUPPORT
+// arithmetics) are built on, chosen as for Trat_real_field: the boost GMP
+// bindings for OSCAR, else the flint ones when flint is available, they are
+// 3 to 8 times faster on the matrix operations, else the GMP ones. QuadField
+// itself takes any rational type.
+#if defined(OSCAR_USE_BOOST_GMP_BINDINGS)
+using Trat_quad_field = boost::multiprecision::mpq_rational;
+#elif defined(ENABLE_FLINT_SUPPORT)
 using Trat_quad_field = fmpq_class;
 #else
 using Trat_quad_field = mpq_class;
