@@ -34,7 +34,7 @@ void process_by_numeric_type(std::string const &arith, F f, Targs... args) {
                 << " is missing\n";
       throw TerminalException{1};
     }
-    using T_rat = mpq_class;
+    using T_rat = Trat_real_field;
     HelperClassRealField<T_rat> hcrf(FileAlgebraicField);
     int const idx_real_algebraic_field = 1;
     insert_helper_real_algebraic_field(idx_real_algebraic_field, hcrf);

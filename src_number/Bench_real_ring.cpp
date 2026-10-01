@@ -14,8 +14,8 @@
 // the program checks that they agree on the determinant.
 //
 // The integers and rationals the elements are built on are GMP by default,
-// flint when compiled with -DENABLE_FLINT_SUPPORT -DREALFIELD_USE_FLINT
-// (make ENABLE_FLINT_SUPPORT=1 REALFIELD_USE_FLINT=1). Every result is folded
+// flint when compiled with -DENABLE_FLINT_SUPPORT (make
+// ENABLE_FLINT_SUPPORT=1). Every result is folded
 // into a checksum, printed on stderr, so that two builds can be compared
 // value for value.
 //
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
     }
     insert_helper_real_algebraic_field(idx_bench_field, hcrf);
     int deg = hcrf.deg;
-#ifdef REALFIELD_USE_FLINT
+#ifdef ENABLE_FLINT_SUPPORT
     std::string arith = "flint";
 #else
     std::string arith = "gmp";

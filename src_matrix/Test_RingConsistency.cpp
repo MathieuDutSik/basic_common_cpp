@@ -448,7 +448,6 @@ static void run_suite(std::string const &name, int deg, int nb) {
 int main(int argc, char *argv[]) {
   HumanTime time;
   try {
-    using T_rat = mpq_class;
     std::string eFile = "CI_tests/RealAlgebraicField/CubicFieldDisc_49";
     bool found = false;
     for (int level = 0; level <= 10; level++) {
@@ -463,7 +462,7 @@ int main(int argc, char *argv[]) {
                    "paths from CI_tests/ up to 10 parent levels\n";
       throw TerminalException{1};
     }
-    HelperClassRealField<T_rat> hcrf(eFile);
+    HelperClassRealField<Trat_real_field> hcrf(eFile);
     insert_helper_real_algebraic_field(idx_field, hcrf);
     check(hcrf.is_monic(), "the minimal polynomial is monic");
     //

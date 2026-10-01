@@ -44,17 +44,13 @@ LIBS		= -lm $(GMP_CXX_LINK) $(BOOST_LINK)
 
 # Optional flint arithmetic: build with `make ENABLE_FLINT_SUPPORT=1`.
 # FLINT_INCDIR / FLINT_LINK can be set in the environment; the defaults
-# assume flint is installed next to gmp. With REALFIELD_USE_FLINT=1 on top,
-# the real algebraic fields are built on fmpz_class / fmpq_class instead of
-# mpz_class / mpq_class.
+# assume flint is installed next to gmp. The real algebraic fields are then
+# built on fmpz_class / fmpq_class instead of mpz_class / mpq_class.
 ifeq ($(ENABLE_FLINT_SUPPORT),1)
 FLINT_INCDIR	?= $(GMP_INCDIR)
 FLINT_LINK	?= -lflint
 CFLAGS		+= -DENABLE_FLINT_SUPPORT -I$(FLINT_INCDIR)
 LIBS		+= $(FLINT_LINK)
-ifeq ($(REALFIELD_USE_FLINT),1)
-CFLAGS		+= -DREALFIELD_USE_FLINT
-endif
 endif
 
 

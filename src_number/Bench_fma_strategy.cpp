@@ -143,14 +143,16 @@ int main() {
     for (int lev = 0; lev <= 10 && !FILE_IsExistingFile(eFile); lev++)
       eFile = "../" + eFile;
     if (FILE_IsExistingFile(eFile)) {
-      HelperClassRealField<Tq> hcrf(eFile);
+      // The field is built on Trat_real_field, not necessarily Tq.
+      using Tqf = Trat_real_field;
+      HelperClassRealField<Tqf> hcrf(eFile);
       int const idx = 1;
       insert_helper_real_algebraic_field(idx, hcrf);
       using Trf = RealField<idx>;
       std::vector<Trf> rfa(m), rfb(m);
       for (int i = 0; i < m; i++) {
-        rfa[i] = Trf(std::vector<Tq>{Tq(i * 7 + 3, i + 2), Tq(i + 1, 3), Tq(2, i + 5)});
-        rfb[i] = Trf(std::vector<Tq>{Tq(i * 5 + 11, i + 3), Tq(i + 2, 5), Tq(3, i + 7)});
+        rfa[i] = Trf(std::vector<Tqf>{Tqf(i * 7 + 3, i + 2), Tqf(i + 1, 3), Tqf(2, i + 5)});
+        rfb[i] = Trf(std::vector<Tqf>{Tqf(i * 5 + 11, i + 3), Tqf(i + 2, 5), Tqf(3, i + 7)});
       }
       bench<Trf>("RealField<cubic>", rfa, rfb, outer);
     } else {

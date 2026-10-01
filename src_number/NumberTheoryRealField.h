@@ -9,7 +9,7 @@
 #else
 # include "NumberTheory.h"
 #endif
-#ifdef REALFIELD_USE_FLINT
+#ifdef ENABLE_FLINT_SUPPORT
 # include "NumberTheoryFlint.h"
 #endif
 #include "Temp_common.h"
@@ -46,12 +46,13 @@
 double threshold_real_alg_check = 0.0001;
 #endif
 
-// The rationals and integers the elements are built on. GMP by default;
-// REALFIELD_USE_FLINT (with ENABLE_FLINT_SUPPORT) selects the flint types.
+// The rationals and integers the elements are built on: the flint types
+// when flint is available, they are 2 to 4 times faster on the matrix
+// operations (see Bench_real_ring), and the GMP ones otherwise.
 #if defined(OSCAR_USE_BOOST_GMP_BINDINGS)
 using Trat_real_field = boost::multiprecision::mpq_rational;
 using Tint_real_field = boost::multiprecision::mpz_int;
-#elif defined(REALFIELD_USE_FLINT)
+#elif defined(ENABLE_FLINT_SUPPORT)
 using Trat_real_field = fmpq_class;
 using Tint_real_field = fmpz_class;
 #else

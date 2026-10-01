@@ -51,9 +51,9 @@ static void check(bool test, std::string const &name) {
 // The rounding is correct when it lands on an integer no further than 1/2
 // from the value. That is the property the size reduction relies on and it
 // does not depend on how the tie is broken.
-template <typename Tfield>
-static bool IsNearestInteger(Tfield const &x, T_int const &n) {
-  Tfield n_f = UniversalScalarConversion<Tfield, T_int>(n);
+template <typename Tfield, typename Tint>
+static bool IsNearestInteger(Tfield const &x, Tint const &n) {
+  Tfield n_f = UniversalScalarConversion<Tfield, Tint>(n);
   Tfield two(2);
   return T_abs(x - n_f) * two <= Tfield(1);
 }
@@ -180,6 +180,9 @@ template <int d> static void process_quad(std::string const &name) {
 }
 
 static void process_real(std::string const &eFile) {
+  // The rationals and integers the field is built on.
+  using T_rat = Trat_real_field;
+  using T_int = Tint_real_field;
   using T = RealField<idx_field>;
   using Tring = RealRing<idx_field>;
   HelperClassRealField<T_rat> hcrf(eFile);

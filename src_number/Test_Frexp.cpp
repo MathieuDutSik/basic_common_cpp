@@ -155,12 +155,13 @@ void test_real_field() {
     std::cerr << "Failed to find RealAlgebraicField test data\n";
     throw TerminalException{1};
   }
-  HelperClassRealField<mpq_class> hcrf(eFile);
+  HelperClassRealField<Trat_real_field> hcrf(eFile);
   insert_helper_real_algebraic_field(idx_field, hcrf);
   double theta = 2 * std::cos(2 * M_PI / 7);
   // 3^900 (1 + theta), with 3^900 about 2^1426.
-  mpq_class big = power(mpq_class(3), 900);
-  Tfield x(std::vector<mpq_class>{big, big, mpq_class(0)});
+  using Tq = Trat_real_field;
+  Tq big = power(Tq(3), 900);
+  Tfield x(std::vector<Tq>{big, big, Tq(0)});
   double expected = 900.0 * std::log2(3.0) + std::log2(1.0 + theta);
   check(std::abs(log2_abs<Tfield>(x) - expected) < 1e-12, "RealField: 3^900 (1+x)");
   check(std::abs(log2_abs<Tfield>(Tfield(1) / x) + expected) < 1e-12,
