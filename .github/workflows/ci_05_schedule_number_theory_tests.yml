@@ -23,7 +23,7 @@ jobs:
     - name: Install standard dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential libgmp-dev libeigen3-dev libboost-all-dev
+        sudo apt-get install -y build-essential libgmp-dev libmpfr-dev libeigen3-dev libboost-all-dev
 
     - name: Install non-standard dependencies
       run: |
@@ -35,6 +35,18 @@ jobs:
         mv eigen-3.3.9 /home/runner/work/opt/eigen
         pwd
         echo "After eigen-3.3.9 set up"
+
+    # flint, for the real algebraic fields built on fmpz_class / fmpq_class.
+    # The release used for development rather than the older one of the
+    # distribution.
+    - name: Install flint
+      run: |
+        wget -q https://github.com/flintlib/flint/releases/download/v3.6.0/flint-3.6.0.tar.gz
+        tar -xzf flint-3.6.0.tar.gz
+        cd flint-3.6.0
+        ./configure --prefix=/home/runner/opt/flint --disable-static
+        make -j"$(nproc)"
+        make install
 
     - name: Build number theory tests
       run: |
@@ -90,6 +102,15 @@ jobs:
     # tests, the field/ring consistency of every code path that moves the
     # computation to the ring, and the timing comparison of the two.
     - name: Test_RealAlgebraicField
+      run: ./CI_tests/RealAlgebraicField/run_test.sh
+
+    # The same tests with the fields built on flint, which is what a build
+    # with ENABLE_FLINT_SUPPORT uses.
+    - name: Test_RealAlgebraicField with flint
+      env:
+        ENABLE_FLINT_SUPPORT: "1"
+        FLINT_INCDIR: /home/runner/opt/flint/include
+        FLINT_LINK: "-L/home/runner/opt/flint/lib -lflint -Wl,-rpath,/home/runner/opt/flint/lib"
       run: ./CI_tests/RealAlgebraicField/run_test.sh
 
     - name: Test_QuadField

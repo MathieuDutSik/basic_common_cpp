@@ -32,11 +32,11 @@
 #                                 what an LLL reduction over such a field
 #                                 needs. Covers Q(sqrt(2)), Q(sqrt(5)) and the
 #                                 cubic field.
-#   * Bench_real_ring:            the field against the ring on the same
-#                                 matrices, printing the timing comparison and
-#                                 checking that both compute the same
-#                                 determinant. The timings are reported, never
-#                                 asserted: they vary with the runner.
+#   * Bench_real_ring:            the matrix operations over the field and over
+#                                 the ring on the same matrices, printing the
+#                                 timings and checking that both compute the
+#                                 same determinant. The timings are reported,
+#                                 never asserted: they vary with the runner.
 #
 # All of it runs on the cubic field of discriminant 49 described by
 # CubicFieldDisc_49 in this directory (the generator is 2*cos(2*pi/7), of
@@ -46,7 +46,9 @@
 #
 # Honours the same environment variables as src_matrix/Makefile
 # (CXX, GMP_INCDIR, BOOST_INCDIR, EIGEN_PATH, GMP_CXX_LINK); Homebrew
-# defaults are used when they are unset.
+# defaults are used when they are unset. With ENABLE_FLINT_SUPPORT=1 the
+# fields are built on the flint integers and rationals instead of the GMP
+# ones, and FLINT_INCDIR / FLINT_LINK are honoured as in the Makefiles.
 set -e
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -66,6 +68,13 @@ trap 'rm -rf "$WORK"' EXIT
 
 CXXFLAGS="-std=c++20 -Wall -Wextra -O3 -I${ROOT}/src_basic -I${ROOT}/src_number -I${ROOT}/src_matrix -I${ROOT}/src_comb -I${GMP_INCDIR} -I${BOOST_INCDIR} -I${EIGEN_PATH}"
 LDFLAGS="-lm ${GMP_CXX_LINK} ${BOOST_LINK} -pthread"
+if [ "${ENABLE_FLINT_SUPPORT:-0}" = "1" ]; then
+  : "${FLINT_INCDIR:=${GMP_INCDIR}}"
+  : "${FLINT_LINK:=-lflint}"
+  CXXFLAGS="${CXXFLAGS} -DENABLE_FLINT_SUPPORT -I${FLINT_INCDIR}"
+  LDFLAGS="${LDFLAGS} ${FLINT_LINK}"
+  echo "The fields are built on the flint integers and rationals"
+fi
 
 N_TRIALS="${1:-50}"
 BENCH_SIZE="${2:-8}"
@@ -104,7 +113,7 @@ echo "===== Test_AlgebraicConversion ====="
 
 echo
 echo "===== Bench_real_ring (RealField against RealRing) ====="
-"$WORK/Bench_real_ring" "$BENCH_SIZE" 20 20
+"$WORK/Bench_real_ring" "$HERE/CubicFieldDisc_49" "$BENCH_SIZE" 5
 
 echo
 echo "All the real algebraic field and ring tests passed"
