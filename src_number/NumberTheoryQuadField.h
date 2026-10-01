@@ -103,21 +103,20 @@ public:
     b = x.b;
     return *this;
   }
-  // Assign from a lazy product a*b: multiply in place, reusing this->a / this->b
-  // (only one temporary, as in operator*=). Aliasing-safe when this == x or y:
-  // the new a is computed into a temporary and stored last, and the new b reads
-  // this->a before it is overwritten.
+  // Assign from a lazy product a*b, through reused thread local scratches.
+  // Aliasing-safe when this == x or y: both new coordinates are formed in the
+  // scratches from the operands, and only then stored.
   QuadField<T, d> &operator=(QuadProd<Tinp, d> const &e) {
-    static thread_local T na, ph;
+    static thread_local T na, nb, ph;
     na = e.x.a * e.y.a;
     ph = e.x.b * e.y.b;
     ph *= d;
     na += ph;
-    ph = e.x.a * e.y.b;
-    b = ph;
+    nb = e.x.a * e.y.b;
     ph = e.x.b * e.y.a;
-    b += ph;
+    nb += ph;
     a = na;
+    b = nb;
     return *this;
   }
   //
