@@ -47,13 +47,14 @@ static Tring MakeRing(int a, int b, int c) {
 }
 
 static Tfield MakeField(int a, int b, int c) {
-  std::vector<mpq_class> V{mpq_class(a), mpq_class(b), mpq_class(c)};
+  std::vector<Trat_real_field> V{Trat_real_field(a), Trat_real_field(b),
+                                 Trat_real_field(c)};
   return Tfield(V);
 }
 
 int main() {
   try {
-    using T_rat = mpq_class;
+    using T_rat = Trat_real_field;
     std::string eFile = "CI_tests/RealAlgebraicField/CubicFieldDisc_49";
     bool found = false;
     for (int level = 0; level <= 10; level++) {

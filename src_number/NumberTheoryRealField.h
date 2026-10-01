@@ -9,6 +9,9 @@
 #else
 # include "NumberTheory.h"
 #endif
+#ifdef REALFIELD_USE_FLINT
+# include "NumberTheoryFlint.h"
+#endif
 #include "Temp_common.h"
 #include "InputOutput.h"
 #include "IntegerSearch.h"
@@ -43,9 +46,14 @@
 double threshold_real_alg_check = 0.0001;
 #endif
 
-#ifdef OSCAR_USE_BOOST_GMP_BINDINGS
+// The rationals and integers the elements are built on. GMP by default;
+// REALFIELD_USE_FLINT (with ENABLE_FLINT_SUPPORT) selects the flint types.
+#if defined(OSCAR_USE_BOOST_GMP_BINDINGS)
 using Trat_real_field = boost::multiprecision::mpq_rational;
 using Tint_real_field = boost::multiprecision::mpz_int;
+#elif defined(REALFIELD_USE_FLINT)
+using Trat_real_field = fmpq_class;
+using Tint_real_field = fmpz_class;
 #else
 using Trat_real_field = mpq_class;
 using Tint_real_field = mpz_class;

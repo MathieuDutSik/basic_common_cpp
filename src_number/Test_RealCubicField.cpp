@@ -10,7 +10,7 @@
 
 int main() {
   try {
-    using T_rat = mpq_class;
+    using T_rat = Trat_real_field;
     std::string eFile = "CI_tests/RealAlgebraicField/CubicFieldDisc_49";
     bool found = false;
     for (int level = 0; level <= 10; level++) {
