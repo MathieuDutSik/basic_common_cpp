@@ -71,6 +71,18 @@ public:
     fmpz_init(a);
     fmpz_set_si(a, u);
   }
+  // The unsigned types, as mpz_class has them: without them an unsigned
+  // value converts equally well through int and long, and the ambiguity is
+  // a hard error in the is_convertible test of Eigen 3.3 (a MyVector<T>
+  // built from a size_t).
+  fmpz_class(unsigned int const &u) {
+    fmpz_init(a);
+    fmpz_set_ui(a, u);
+  }
+  fmpz_class(unsigned long const &u) {
+    fmpz_init(a);
+    fmpz_set_ui(a, u);
+  }
   fmpz_class(std::string const &str) {
     fmpz_init(a);
     if (fmpz_set_str(a, str.c_str(), 10) != 0) {
@@ -317,6 +329,16 @@ public:
   fmpq_class(long const &u) {
     fmpq_init(a);
     fmpq_set_si(a, u, 1);
+  }
+  // The unsigned types, for the reason given at fmpz_class. fmpq_init sets
+  // the denominator to 1.
+  fmpq_class(unsigned int const &u) {
+    fmpq_init(a);
+    fmpz_set_ui(fmpq_numref(a), u);
+  }
+  fmpq_class(unsigned long const &u) {
+    fmpq_init(a);
+    fmpz_set_ui(fmpq_numref(a), u);
   }
   fmpq_class(fmpz_class const &u) {
     fmpq_init(a);
