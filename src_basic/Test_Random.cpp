@@ -39,6 +39,44 @@ void test_reference_values() {
         "random_shuffle_vector reference permutation");
 }
 
+void test_random_int() {
+  set_random_seed(777);
+  for (int ref : {1282271111, 287147645, 530360574, 1674523095})
+    check(random_int() == ref, "random_int() reference values");
+  for (int ref : {-5, -4, 8, -5, 4, -8, 9, -4, 9, 0})
+    check(random_int(-10, 10) == ref, "random_int(-10, 10) reference values");
+  for (int ref : {2002814411, 950268971, 1571890902})
+    check(random_int(INT32_MIN, INT32_MAX) == ref,
+          "random_int(INT32_MIN, INT32_MAX) reference values");
+  // The bounds are reached and never passed.
+  set_random_seed(31);
+  bool seen_lo = false, seen_hi = false;
+  for (int i = 0; i < 10000; i++) {
+    int x = random_int(-3, 3);
+    check(-3 <= x && x <= 3, "random_int(-3, 3) range");
+    if (x == -3)
+      seen_lo = true;
+    if (x == 3)
+      seen_hi = true;
+  }
+  check(seen_lo && seen_hi, "random_int(-3, 3) reaches its bounds");
+  for (int i = 0; i < 1000; i++) {
+    check(random_int(5, 5) == 5, "random_int(5, 5)");
+    int x = random_int();
+    check(0 <= x && x <= 2147483647, "random_int() range");
+  }
+  // The same draws as random_index over the same width.
+  set_random_seed(4);
+  std::vector<int> V1;
+  for (int i = 0; i < 20; i++)
+    V1.push_back(random_int(0, 999));
+  set_random_seed(4);
+  std::vector<int> V2;
+  for (int i = 0; i < 20; i++)
+    V2.push_back(static_cast<int>(random_index(1000)));
+  check(V1 == V2, "random_int(0, n-1) agrees with random_index(n)");
+}
+
 void test_reseed() {
   // The same seed gives the same sequence, a different seed another one.
   auto draw = [](uint64_t seed) -> std::vector<uint64_t> {
@@ -56,10 +94,11 @@ void test_ranges() {
   set_random_seed(2024);
   for (int i = 0; i < 1000; i++)
     check(random_index(1) == 0, "random_index(1)");
-  // Moduli where the rejection threshold 2^64 mod n is large.
+  // Moduli where the rejection threshold 2^64 mod n is large, on the 64-bit
+  // kernel under random_index and random_int.
   for (uint64_t n : {uint64_t(3), (uint64_t(1) << 63) + 1, UINT64_MAX}) {
     for (int i = 0; i < 1000; i++)
-      check(random_index(n) < n, "random_index(n) < n");
+      check(basic_random_detail::random_below(n) < n, "random_below(n) < n");
   }
   for (int i = 0; i < 1000; i++) {
     double x = random_unit();
@@ -106,6 +145,7 @@ int main() {
   try {
     test_standard_engine();
     test_reference_values();
+    test_random_int();
     test_reseed();
     test_ranges();
     test_threads();

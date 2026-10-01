@@ -12,13 +12,23 @@
 #include <thread>
 #endif
 
+#ifdef SANITY_CHECK
+#define SANITY_CHECK_BASIC_RANDOM
+#endif
+
+#ifdef SANITY_CHECK_BASIC_RANDOM
+#include "ExceptionsFunc.h"
+#include <iostream>
+#endif
+
 inline unsigned get_random_time_seed() {
 #ifdef USE_NANOSECOND_RAND
   std::timespec ts;
   std::timespec_get(&ts, TIME_UTC);
-  unsigned val = ts.tv_nsec;
+  // A seed: the truncation to unsigned is intended.
+  unsigned val = static_cast<unsigned>(ts.tv_nsec);
 #else
-  unsigned val = time(nullptr);
+  unsigned val = static_cast<unsigned>(time(nullptr));
 #endif
   return val;
 }
@@ -141,16 +151,55 @@ inline std::mt19937_64 &get_random_engine() {
 
 inline uint64_t random_u64() { return basic_random_detail::thread_engine()(); }
 
+namespace basic_random_detail {
+
 // Uniform in [0, n), n > 0, without bias: the draws below 2^64 mod n are
 // rejected, so that the accepted ones cover every residue equally often (the
-// method of OpenBSD's arc4random_uniform, in 64-bit arithmetic only).
-inline uint64_t random_index(uint64_t n) {
+// method of OpenBSD's arc4random_uniform, in 64-bit arithmetic only). All the
+// bounded draws below go through it, with their conversions written once.
+inline uint64_t random_below(uint64_t n) {
   uint64_t threshold = (0 - n) % n;
   while (true) {
     uint64_t x = random_u64();
     if (x >= threshold)
       return x % n;
   }
+}
+
+} // namespace basic_random_detail
+
+static_assert(sizeof(int) >= 4, "random_int needs a 32-bit int");
+
+// Uniform in the closed range [lo, hi], lo <= hi. The width hi - lo + 1 is at
+// most 2^32 and is formed in 64 bits, so that the full int range is valid.
+inline int random_int(int lo, int hi) {
+#ifdef SANITY_CHECK_BASIC_RANDOM
+  if (lo > hi) {
+    std::cerr << "RANDOM: random_int with lo=" << lo << " > hi=" << hi << "\n";
+    throw TerminalException{1};
+  }
+#endif
+  int64_t lo64 = lo;
+  int64_t hi64 = hi;
+  uint64_t width = static_cast<uint64_t>(hi64 - lo64) + 1;
+  int64_t offset =
+      static_cast<int64_t>(basic_random_detail::random_below(width));
+  return static_cast<int>(lo64 + offset);
+}
+
+// Uniform in [0, 2^31 - 1], the range of random(), on every platform.
+inline int random_int() { return random_int(0, 2147483647); }
+
+// Uniform in [0, n), n > 0: an index into a container of size n.
+inline size_t random_index(size_t n) {
+#ifdef SANITY_CHECK_BASIC_RANDOM
+  if (n == 0) {
+    std::cerr << "RANDOM: random_index with n=0\n";
+    throw TerminalException{1};
+  }
+#endif
+  return static_cast<size_t>(
+      basic_random_detail::random_below(static_cast<uint64_t>(n)));
 }
 
 inline bool random_bool() { return (random_u64() >> 63) != 0; }
