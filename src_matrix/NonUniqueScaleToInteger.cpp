@@ -6,7 +6,7 @@
 // clang-format on
 
 int main() {
-  using Trat = mpq_class;
+  using Trat = Trat_quad_field;
   using T = QuadField<Trat, 5>;
   try {
     MyVector<T> V(5);

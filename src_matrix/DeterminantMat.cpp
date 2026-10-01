@@ -70,12 +70,12 @@ void compute_determinant(std::string const &arithmetic,
     return compute_determinant_kernel<T>(eFile);
   }
   if (arithmetic == "Qsqrt5") {
-    using Trat = mpq_class;
+    using Trat = Trat_quad_field;
     using T = QuadField<Trat, 5>;
     return compute_determinant_kernel<T>(eFile);
   }
   if (arithmetic == "Qsqrt2") {
-    using Trat = mpq_class;
+    using Trat = Trat_quad_field;
     using T = QuadField<Trat, 2>;
     return compute_determinant_kernel<T>(eFile);
   }

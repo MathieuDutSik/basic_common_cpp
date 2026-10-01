@@ -65,12 +65,12 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
     return full_process_type<T>(M);
   }
   if (arith == "Qsqrt5") {
-    using Trat = mpq_class;
+    using Trat = Trat_quad_field;
     using T = QuadField<Trat, 5>;
     return full_process_type<T>(M);
   }
   if (arith == "Qsqrt2") {
-    using Trat = mpq_class;
+    using Trat = Trat_quad_field;
     using T = QuadField<Trat, 2>;
     return full_process_type<T>(M);
   }

@@ -32,6 +32,10 @@
 #                                 what an LLL reduction over such a field
 #                                 needs. Covers Q(sqrt(2)), Q(sqrt(5)) and the
 #                                 cubic field.
+#   * Test_QuadField:             the quadratic field Q(sqrt(5)) over the
+#                                 rational types, fmpq_class included with
+#                                 flint, since the Qsqrt2 and Qsqrt5
+#                                 arithmetics are built on flint then.
 #   * Bench_real_ring:            the matrix operations over the field and over
 #                                 the ring on the same matrices, printing the
 #                                 timings and checking that both compute the
@@ -85,7 +89,8 @@ cd "$ROOT"
 
 for prog in src_number/Test_RealCubicField src_number/Test_RealRing \
             src_matrix/Test_RingConsistency src_number/Test_UnderlyingTraits \
-            src_number/Test_AlgebraicConversion src_number/Bench_real_ring; do
+            src_number/Test_AlgebraicConversion src_number/Test_QuadField \
+            src_number/Bench_real_ring; do
   name="$(basename "$prog")"
   echo "Building $name ..."
   "$CXX" $CXXFLAGS "$ROOT/$prog.cpp" -o "$WORK/$name" $LDFLAGS
@@ -110,6 +115,10 @@ echo "===== Test_UnderlyingTraits ====="
 echo
 echo "===== Test_AlgebraicConversion ====="
 "$WORK/Test_AlgebraicConversion"
+
+echo
+echo "===== Test_QuadField ====="
+"$WORK/Test_QuadField"
 
 echo
 echo "===== Bench_real_ring (RealField against RealRing) ====="

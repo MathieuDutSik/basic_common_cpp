@@ -2,6 +2,11 @@
 #ifndef SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
 #define SRC_NUMBER_NUMBERTHEORYQUADFIELD_H_
 // clang-format off
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#else
+#include "NumberTheory.h"
+#endif
 #include "Temp_common.h"
 #include "InputOutput.h"
 #include "IntegerSearch.h"
@@ -12,6 +17,16 @@
 #include <limits>
 #include <string>
 // clang-format on
+
+// The rationals the quadratic fields of the programs (their Qsqrt2, Qsqrt5
+// arithmetics) are built on: the flint ones when flint is available, they
+// are 3 to 8 times faster on the matrix operations, the GMP ones otherwise.
+// QuadField itself takes any rational type.
+#ifdef ENABLE_FLINT_SUPPORT
+using Trat_quad_field = fmpq_class;
+#else
+using Trat_quad_field = mpq_class;
+#endif
 
 template <typename Tinp, int d> class QuadField;
 

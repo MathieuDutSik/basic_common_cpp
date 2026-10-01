@@ -75,12 +75,12 @@ void compute_inverse(std::string const &arithmetic, std::string const &eFile) {
     return compute_inverse_kernel<T>(eFile);
   }
   if (arithmetic == "Qsqrt5") {
-    using Trat = mpq_class;
+    using Trat = Trat_quad_field;
     using T = QuadField<Trat, 5>;
     return compute_inverse_kernel<T>(eFile);
   }
   if (arithmetic == "Qsqrt2") {
-    using Trat = mpq_class;
+    using Trat = Trat_quad_field;
     using T = QuadField<Trat, 2>;
     return compute_inverse_kernel<T>(eFile);
   }

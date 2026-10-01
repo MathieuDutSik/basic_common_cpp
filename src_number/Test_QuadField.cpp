@@ -26,6 +26,9 @@ template <typename Trat> void process(std::string const &name) {
 int main() {
   try {
     process<mpq_class>("mpq_class");
+#ifdef ENABLE_FLINT_SUPPORT
+    process<fmpq_class>("fmpq_class");
+#endif
     process<Rational<SafeInt64>>("Rational<SafeInt64>");
   } catch (TerminalException const &e) {
     exit(e.eVal);
