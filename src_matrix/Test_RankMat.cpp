@@ -18,18 +18,18 @@ template <typename T> MyMatrix<T> RandomMatrix(int n_row, int n_col, int amp) {
   MyMatrix<T> A(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++)
-      A(i, j) = T((random() % (2 * amp + 1)) - amp);
+      A(i, j) = T(random_int(-amp, amp));
   return A;
 }
 
 template <typename T> MyMatrix<T> MildUnimodularMatrix(int n) {
   MyMatrix<T> RetMat = IdentityMat<T>(n);
   for (int iter = 0; iter < n; iter++) {
-    int idx1 = random() % n;
-    int idx2 = random() % n;
+    int idx1 = random_int(0, n - 1);
+    int idx2 = random_int(0, n - 1);
     if (idx1 != idx2) {
       MyMatrix<T> eMat = IdentityMat<T>(n);
-      eMat(idx1, idx2) = T((random() % 5) - 2);
+      eMat(idx1, idx2) = T(random_int(-2, 2));
       RetMat = eMat * RetMat;
     }
   }
@@ -50,7 +50,7 @@ template <typename T> void process(int n) {
     // A planted factorization M = C B of rank at most r.
     int n_row = n + (i % 3);
     int n_col = n + 1;
-    int r = 1 + (random() % n);
+    int r = random_int(1, n);
     MyMatrix<T> C = RandomMatrix<T>(n_row, r, 4);
     MyMatrix<T> B = RandomMatrix<T>(r, n_col, 4);
     MyMatrix<T> M = C * B;

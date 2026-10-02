@@ -66,8 +66,8 @@ int main() {
     int siz = 10000;
     for (int i = 0; i < nb; i++) {
       std::cerr << "i=" << i << "/" << nb << "\n";
-      int a = random() % (2 * siz + 1) - siz;
-      int b = random() % (2 * siz + 1) - siz;
+      int a = random_int(-siz, siz);
+      int b = random_int(-siz, siz);
       TestCons(a, b);
     }
     for (int a = -10; a < 10; a++)

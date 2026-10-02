@@ -127,7 +127,7 @@ MyMatrix<int> get_random_matrix(int m, int n) {
   MyMatrix<int> M(m, n);
   for (int i = 0; i < m; i++) {
     for (int j = 0; j < n; j++) {
-      int val = rand() % 11 - 5;
+      int val = random_int(-5, 5);
       M(i, j) = val;
     }
   }

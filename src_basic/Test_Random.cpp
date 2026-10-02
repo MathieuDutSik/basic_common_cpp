@@ -75,6 +75,25 @@ void test_random_int() {
   for (int i = 0; i < 20; i++)
     V2.push_back(static_cast<int>(random_index(1000)));
   check(V1 == V2, "random_int(0, n-1) agrees with random_index(n)");
+  // random_int64 draws as random_int over a range of int, and covers ranges
+  // beyond int, the full one included.
+  set_random_seed(5);
+  std::vector<int64_t> W1;
+  for (int i = 0; i < 20; i++)
+    W1.push_back(random_int(-1000, 1000));
+  set_random_seed(5);
+  std::vector<int64_t> W2;
+  for (int i = 0; i < 20; i++)
+    W2.push_back(random_int64(-1000, 1000));
+  check(W1 == W2, "random_int64 agrees with random_int");
+  int64_t big = 1000000000000000;
+  for (int i = 0; i < 1000; i++) {
+    int64_t x = random_int64(-big, big);
+    check(-big <= x && x <= big, "random_int64(-10^15, 10^15) range");
+    random_int64(INT64_MIN, INT64_MAX);
+    check(random_int64(INT64_MAX, INT64_MAX) == INT64_MAX,
+          "random_int64(INT64_MAX, INT64_MAX)");
+  }
 }
 
 void test_reseed() {

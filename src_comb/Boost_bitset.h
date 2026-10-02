@@ -77,8 +77,7 @@ Face ReadFaceFile(std::string const &eFile) {
 Face RandomFace(int n) {
   Face f(n);
   for (int i = 0; i < n; i++) {
-    int eVal = random() % 2;
-    f[i] = eVal;
+    f[i] = random_bool();
   }
   return f;
 }
@@ -97,7 +96,7 @@ Face RandomKFace(int n, int k) {
   if (2 * k < n) {
     int n_done = 0;
     while (true) {
-      int pos = random() % n;
+      int pos = random_int(0, n - 1);
       if (f[pos] == 0) {
         f[pos] = 1;
         n_done++;
@@ -110,7 +109,7 @@ Face RandomKFace(int n, int k) {
       f[i] = 1;
     int n_done = n;
     while (true) {
-      int pos = random() % n;
+      int pos = random_int(0, n - 1);
       if (f[pos] == 1) {
         f[pos] = 0;
         n_done--;

@@ -96,9 +96,9 @@ int main() {
     int nb = 100;
     int siz = 100;
     for (int i = 0; i < nb; i++) {
-      int a = random() % (2 * siz + 1) - siz;
-      int b = random() % (2 * siz + 1) - siz;
-      int c = random() % (2 * siz + 1) - siz;
+      int a = random_int(-siz, siz);
+      int b = random_int(-siz, siz);
+      int c = random_int(-siz, siz);
       TestCons(a, b, c);
     }
     for (int a = -10; a <= 10; a++)

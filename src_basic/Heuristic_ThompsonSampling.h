@@ -816,11 +816,7 @@ struct SingleThompsonSamplingState {
     n_insert++;
   }
   //
-  double get_random() {
-    size_t N = 1000000000;
-    size_t val = random() % N;
-    return static_cast<double>(val) / static_cast<double>(N);
-  }
+  double get_random() { return random_unit(); }
   std::string get_lowest_sampling_raw() {
     double best_val = std::numeric_limits<double>::max();
     std::string ret = "unset";

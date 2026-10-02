@@ -19,8 +19,8 @@
 template <typename T> MyVector<T> RandomFractionalVector(int n) {
   MyVector<T> V(n);
   for (int i = 0; i < n; i++) {
-    T num = T((random() % 21) - 10);
-    T den = T(1 + (random() % 8));
+    T num = T(random_int(-10, 10));
+    T den = T(random_int(1, 8));
     V(i) = num / den;
   }
   return V;
@@ -30,16 +30,16 @@ template <typename T> MyMatrix<T> RandomFractionalMatrix(int n_row, int n_col) {
   MyMatrix<T> M(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++) {
-      T num = T((random() % 21) - 10);
-      T den = T(1 + (random() % 8));
+      T num = T(random_int(-10, 10));
+      T den = T(random_int(1, 8));
       M(i, j) = num / den;
     }
   return M;
 }
 
 template <typename T> T RandomPositiveScalar() {
-  T num = T(1 + (random() % 9));
-  T den = T(1 + (random() % 9));
+  T num = T(random_int(1, 9));
+  T den = T(random_int(1, 9));
   return num / den;
 }
 

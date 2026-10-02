@@ -89,7 +89,7 @@ static void test_hnf_roundtrip() {
     MyMatrix<cpp_int> M(n, m);
     for (int i = 0; i < n; i++)
       for (int j = 0; j < m; j++)
-        M(i, j) = cpp_int(rand() % 11 - 5);
+        M(i, j) = cpp_int(random_int(-5, 5));
     auto [P, H] = ComputeRowHermiteNormalForm(M);
     MyMatrix<cpp_int> ProdH = P * M;
     CHECK(TestEqualityMatrix(ProdH, H));

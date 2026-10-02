@@ -24,7 +24,7 @@ template <typename T> MyMatrix<T> RandomSquareMatrix(int n, int amp) {
     MyMatrix<T> A(n, n);
     for (int i = 0; i < n; i++)
       for (int j = 0; j < n; j++)
-        A(i, j) = T((random() % (2 * amp + 1)) - amp);
+        A(i, j) = T(random_int(-amp, amp));
     if (DeterminantMat(A) != 0)
       return A;
   }
@@ -100,7 +100,7 @@ template <typename T> void process_fraction_free_solve(int n, int nb) {
     MyMatrix<T> A = RandomSquareMatrix<T>(n, 5);
     MyVector<T> x(n);
     for (int u = 0; u < n; u++)
-      x(u) = T((random() % 11) - 5);
+      x(u) = T(random_int(-5, 5));
     MyVector<T> b = A * x;
     // The scaled solution.
     std::pair<MyVector<T>, T> pair = SolveScaledFractionFree(A, b);
@@ -152,7 +152,7 @@ template <typename T> MyMatrix<T> RandomRectangularMatrix(int n_row, int n_col) 
     MyMatrix<T> M(n_row, n_col);
     for (int i = 0; i < n_row; i++)
       for (int j = 0; j < n_col; j++)
-        M(i, j) = T((random() % 13) - 6);
+        M(i, j) = T(random_int(-6, 6));
     // A duplicated row and a scaled row to exercise the selection.
     if (n_row > n_col + 1) {
       M.row(n_col) = M.row(0);

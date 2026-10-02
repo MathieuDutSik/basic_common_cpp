@@ -7,7 +7,7 @@ int main() {
   size_t n = 20;
   Face f1(n);
   for (size_t i = 0; i < n; i++)
-    f1[i] = random() % 2;
+    f1[i] = random_bool();
   std::string filename = "/tmp/Face_filename.boost_archive";
 
   //

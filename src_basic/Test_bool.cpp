@@ -28,7 +28,7 @@ void test_specific_size(int const &m) {
   //
   Face f(m);
   for (int i = 0; i < m; i++)
-    f[i] = random() % 2;
+    f[i] = random_bool();
   //
   CreateFile(TestFile, f);
   Face f_read = ReadFile(TestFile, m);
@@ -47,8 +47,8 @@ void test_specific_size_randaccess(int const &m) {
   Face f(m);
   std::vector<int> Status(m, 0);
   for (size_t iter = 0; iter < 1000; iter++) {
-    size_t pos = random() % m;
-    bool val = random() % 2;
+    int pos = random_int(0, m - 1);
+    bool val = random_bool();
     f[pos] = val;
     Status[pos] = 1;
     fb.setbit(pos, val);
@@ -69,7 +69,7 @@ void test_specific_size_randaccess(int const &m) {
 int main() {
   //
   for (size_t iter = 0; iter < 100; iter++) {
-    int m = 100 + random() % 200;
+    int m = random_int(100, 299);
     test_specific_size(m);
     test_specific_size_randaccess(m);
   }

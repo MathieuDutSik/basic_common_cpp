@@ -26,7 +26,7 @@ void test_specific_size(int const &m, int const &n) {
   for (int i = 0; i < n; i++) {
     Face f(m);
     for (int i = 0; i < m; i++) {
-      bool rnd = random() % 2;
+      bool rnd = random_bool();
       f[i] = rnd;
     }
     ListFace.push_back(f);
@@ -73,10 +73,10 @@ void test_specific_size_randaccess(int const &m, int const &n) {
   FILE_RemoveFileIfExist(TestFile);
   FileFace ff(TestFile, m);
   for (size_t iter = 0; iter < 1000; iter++) {
-    size_t pos = random() % n;
+    int pos = random_int(0, n - 1);
     Face f(m);
     for (int i = 0; i < m; i++)
-      f[i] = random() % 2;
+      f[i] = random_bool();
     ListFace[pos] = f;
     Status[pos] = 1;
     std::cerr << "iter=" << iter << " pos=" << pos << " f=" << get_string(f)
@@ -97,8 +97,8 @@ void test_specific_size_randaccess(int const &m, int const &n) {
 
 int main() {
   for (size_t i = 0; i < 100; i++) {
-    int n = 10 + random() % 20;
-    int m = 20 + random() % 20;
+    int n = random_int(10, 29);
+    int m = random_int(20, 39);
     std::cerr << "n=" << n << " m=" << m << "\n";
     //    test_specific_size(m, n);
     test_specific_size_randaccess(m, n);

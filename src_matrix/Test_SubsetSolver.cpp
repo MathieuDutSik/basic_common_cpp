@@ -24,7 +24,7 @@ MyMatrix<T> RandomIntegralMatrix(int n_row, int n_col, int amp) {
   MyMatrix<T> A(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++)
-      A(i, j) = T((random() % (2 * amp + 1)) - amp);
+      A(i, j) = T(random_int(-amp, amp));
   return A;
 }
 
@@ -39,7 +39,7 @@ template <typename T> Face RandomCoRankOneFace(MyMatrix<T> const &EXT) {
     for (int i = 0; i < n_row; i++)
       idx[i] = i;
     for (int i = n_row - 1; i > 0; i--) {
-      int j = random() % (i + 1);
+      int j = random_int(0, i);
       std::swap(idx[i], idx[j]);
     }
     Face f(n_row);

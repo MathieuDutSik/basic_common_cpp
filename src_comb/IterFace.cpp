@@ -6,7 +6,7 @@ int main() {
   size_t n = 20;
   Face f(n);
   for (size_t i = 0; i < n; i++)
-    f[i] = random() % 2;
+    f[i] = random_bool();
 
   std::cerr << "f (V1) =";
   for (size_t i = 0; i < n; i++)

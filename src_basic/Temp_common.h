@@ -72,7 +72,7 @@ template <typename T> struct is_mymatrix {
 inline std::string random_string_kernel(std::string const &strChoice, size_t length) {
   const size_t n_index = strChoice.size();
   auto randchar = [&]() -> char {
-    size_t pos = size_t(random()) % n_index;
+    size_t pos = random_index(n_index);
     return strChoice[pos];
   };
   std::string str(length, 0);

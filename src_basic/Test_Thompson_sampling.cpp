@@ -35,7 +35,7 @@ int main(int argc, char *argv[]) {
       for (auto &eKey : l_input) {
         auto &e_vect = l_poss[eKey];
         size_t len = e_vect.size();
-        size_t pos = random() % len;
+        size_t pos = random_index(len);
         T val = e_vect[pos];
         TheCand[eKey] = val;
       }

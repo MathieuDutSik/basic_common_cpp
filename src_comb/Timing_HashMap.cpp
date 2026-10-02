@@ -45,7 +45,7 @@ int main() {
   for (int i = 0; i < N; i++) {
     Face f(m);
     for (int j = 0; j < m; j++) {
-      int rnd = random() % 2;
+      int rnd = random_int(0, 1);
       f[j] = rnd;
     }
     eMap[f] = i;

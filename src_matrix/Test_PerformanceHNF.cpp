@@ -17,7 +17,7 @@ template <typename T> void process(int n, int m) {
     MyMatrix<T> eMat(n, m);
     for (int i = 0; i < n; i++)
       for (int j = 0; j < m; j++)
-        eMat(i, j) = random() % (2 * siz + 1) - siz;
+        eMat(i, j) = random_int(-siz, siz);
     std::pair<MyMatrix<T>, MyMatrix<T>> ePair =
         ComputeRowHermiteNormalForm(eMat);
   }

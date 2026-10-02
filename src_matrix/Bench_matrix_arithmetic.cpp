@@ -27,7 +27,6 @@
 #include "MAT_MatrixInt.h"
 // clang-format on
 #include <chrono>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -37,11 +36,10 @@ static double ms(std::chrono::steady_clock::duration d) {
 }
 
 std::vector<int> random_entries(size_t cnt, int spread, unsigned int seed) {
-  std::mt19937 gen(seed);
-  std::uniform_int_distribution<int> dist(-spread, spread);
+  set_random_seed(seed);
   std::vector<int> ent(cnt);
   for (auto &x : ent)
-    x = dist(gen);
+    x = random_int(-spread, spread);
   return ent;
 }
 

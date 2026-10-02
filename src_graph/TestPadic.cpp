@@ -12,7 +12,7 @@ template <typename T> void process() {
   std::vector<T> ListVal;
   int n_vert = 100;
   for (int i = 0; i < n_vert; i++) {
-    int val = rand() % 1000;
+    int val = random_int(0, 999);
     std::cerr << "i=" << i << " val=" << val << "\n";
     T val_T = UniversalScalarConversion<T, int>(val);
     ListVal.push_back(val_T);

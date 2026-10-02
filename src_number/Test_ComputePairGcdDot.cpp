@@ -5,12 +5,11 @@
 #include "NumberTheory.h"
 #include "NumberTheorySafeInt.h"
 #include "TypeConversion.h"
-#include <random>
 // clang-format on
 
 template <typename T> void Test_ComputePairGcdDot() {
-  std::random_device rd;
-  std::mt19937 gen(rd());
+  // A new draw each run, as with the std::random_device seed before.
+  set_random_seed_nondeterministic();
 
   // Test with various ranges
   std::vector<std::pair<int, int>> ranges = {
@@ -20,11 +19,9 @@ template <typename T> void Test_ComputePairGcdDot() {
   size_t n_tests = 0;
 
   for (auto const &range : ranges) {
-    std::uniform_int_distribution<int> dis(range.first, range.second);
-
     for (int i = 0; i < 100; i++) {
-      int m_int = dis(gen);
-      int n_int = dis(gen);
+      int m_int = random_int(range.first, range.second);
+      int n_int = random_int(range.first, range.second);
 
       // Skip the case where both are zero (handled separately)
       if (m_int == 0 && n_int == 0)

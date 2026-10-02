@@ -4,7 +4,6 @@
 #include "NumberTheory.h"
 #include "NumberTheorySafeInt.h"
 #include "MAT_MatrixMod.h"
-#include <random>
 #include <string>
 #include <vector>
 // clang-format on
@@ -21,21 +20,13 @@
   the tests are about.
  */
 
-static std::mt19937 &get_generator() {
-  // Fixed seed: a failure has to be reproducible, and the point of the
-  // test is coverage over many shapes rather than a new draw each run.
-  static std::mt19937 gen(20250919);
-  return gen;
-}
-
 template <typename T>
 MyMatrix<T> get_random_matrix(int n_row, int n_col, T const &TheMod) {
   int mod_i = UniversalScalarConversion<int, T>(TheMod);
-  std::uniform_int_distribution<int> distr(0, mod_i - 1);
   MyMatrix<T> M(n_row, n_col);
   for (int i = 0; i < n_row; i++) {
     for (int j = 0; j < n_col; j++) {
-      M(i, j) = T(distr(get_generator()));
+      M(i, j) = T(random_int(0, mod_i - 1));
     }
   }
   return M;
@@ -180,12 +171,11 @@ void test_reduction_is_applied(MyMatrix<T> const &Space, T const &TheMod,
   int n = Space.cols();
   RecSolutionMatMod<T> rec(Space, TheMod);
   int64_t max_shift = 1000000000000000;
-  std::uniform_int_distribution<int64_t> distr(-max_shift, max_shift);
   for (int i_test = 0; i_test < n_test; i_test++) {
     MyVector<T> V = get_random_vector<T>(n, TheMod);
     MyVector<T> Vshift(n);
     for (int i = 0; i < n; i++) {
-      int64_t shift = distr(get_generator());
+      int64_t shift = random_int64(-max_shift, max_shift);
       T shift_T = UniversalScalarConversion<T, int64_t>(shift);
       Vshift(i) = V(i) + shift_T * TheMod;
     }
@@ -302,6 +292,10 @@ void process(std::string const &arith, int n_iter) {
 
 int main(int argc, char *argv[]) {
   HumanTime time;
+  // Fixed seed: a failure has to be reproducible, on every platform, and the
+  // point of the test is coverage over many shapes rather than a new draw
+  // each run.
+  set_random_seed(20250919);
   try {
     if (argc != 2 && argc != 3) {
       std::cerr << "This program is used as\n";

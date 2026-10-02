@@ -2821,7 +2821,8 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
   std::vector<int> UsedNumber(nbRow, 0);
   auto GetRandomNumber = [&]() -> int {
     for (int iter = 0; iter < nbIter; iter++) {
-      int eVal = random() % nbRow;
+      // An index in [0, nbRow), as int for the -1 sentinel of the callers.
+      int eVal = static_cast<int>(random_index(nbRow));
       if (UsedNumber[eVal] == 0 && RowStatus[eVal] == 0)
         return eVal;
     }
@@ -2855,10 +2856,10 @@ template <typename T> MyMatrix<T> RandomUnimodularMatrix(int const &n) {
   int n_iter = 3 * n;
   for (int iter = 0; iter < n_iter; iter++) {
     MyMatrix<T> eMat = IdentityMat<T>(n);
-    int idx1 = random() % n;
-    int idx2 = random() % n;
+    int idx1 = random_int(0, n - 1);
+    int idx2 = random_int(0, n - 1);
     if (idx1 != idx2) {
-      int pivot = (random() % 21) - 10;
+      int pivot = random_int(-10, 10);
       eMat(idx1, idx2) = pivot;
     }
     RetMat = eMat * RetMat;

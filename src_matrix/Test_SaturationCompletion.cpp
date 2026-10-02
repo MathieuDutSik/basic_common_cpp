@@ -21,14 +21,14 @@ template <typename T> MyMatrix<T> RandomMatrix(int n_row, int n_col, int amp) {
   MyMatrix<T> A(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++)
-      A(i, j) = T((random() % (2 * amp + 1)) - amp);
+      A(i, j) = T(random_int(-amp, amp));
   return A;
 }
 
 template <typename T> MyVector<T> RandomVector(int n, int amp) {
   MyVector<T> V(n);
   for (int i = 0; i < n; i++)
-    V(i) = T((random() % (2 * amp + 1)) - amp);
+    V(i) = T(random_int(-amp, amp));
   return V;
 }
 
@@ -126,7 +126,7 @@ template <typename T> void process_rec_int(int n, int nb) {
 template <typename T> void process_saturation(int n, int nb) {
   using Tfield = typename overlying_field<T>::field_type;
   for (int i = 0; i < nb; i++) {
-    int r = 1 + (random() % (n - 1));
+    int r = random_int(1, n - 1);
     MyMatrix<T> M(r, n);
     while (true) {
       M = RandomMatrix<T>(r, n, 4);
@@ -151,8 +151,8 @@ template <typename T> void process_saturation(int n, int nb) {
     // combination of the saturation basis.
     MyVector<Tfield> wf = ZeroVector<Tfield>(n);
     for (int k = 0; k < r; k++) {
-      Tfield num = Tfield((random() % 9) - 4);
-      Tfield den = Tfield(1 + (random() % 4));
+      Tfield num = Tfield(random_int(-4, 4));
+      Tfield den = Tfield(random_int(1, 4));
       for (int j = 0; j < n; j++)
         wf(j) += (num / den) * Sf(k, j);
     }

@@ -197,7 +197,7 @@ MyVector<T> FindIsotropicVectorModRandom(MyMatrix<T> const &M,
     // We set up the first n-1 coordinates at random
     // Then we solve the equation for finding the last one.
     for (int i = 0; i < n - 1; i++) {
-      int val = rand();
+      int val = random_int();
       T val_T(val);
       V(i) = val_T;
     }

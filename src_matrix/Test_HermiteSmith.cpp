@@ -23,7 +23,7 @@ template <typename T> MyMatrix<T> RandomMatrix(int n_row, int n_col, int amp) {
   MyMatrix<T> A(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++)
-      A(i, j) = T((random() % (2 * amp + 1)) - amp);
+      A(i, j) = T(random_int(-amp, amp));
   return A;
 }
 
@@ -32,11 +32,11 @@ template <typename T> MyMatrix<T> RandomMatrix(int n_row, int n_col, int amp) {
 template <typename T> MyMatrix<T> MildUnimodularMatrix(int n) {
   MyMatrix<T> RetMat = IdentityMat<T>(n);
   for (int iter = 0; iter < n; iter++) {
-    int idx1 = random() % n;
-    int idx2 = random() % n;
+    int idx1 = random_int(0, n - 1);
+    int idx2 = random_int(0, n - 1);
     if (idx1 != idx2) {
       MyMatrix<T> eMat = IdentityMat<T>(n);
-      eMat(idx1, idx2) = T((random() % 5) - 2);
+      eMat(idx1, idx2) = T(random_int(-2, 2));
       RetMat = eMat * RetMat;
     }
   }
@@ -128,7 +128,7 @@ template <typename T> void process_smith(int n, int nb) {
       // A rank deficient input: last row a combination of the others.
       MyVector<T> comb = ZeroVector<T>(n);
       for (int k = 0; k + 1 < n_row; k++) {
-        T c = T((random() % 5) - 2);
+        T c = T(random_int(-2, 2));
         for (int j = 0; j < n; j++)
           comb(j) += c * M(k, j);
       }

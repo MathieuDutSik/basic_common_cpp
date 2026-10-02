@@ -10,7 +10,7 @@ int main() {
   MyMatrix<T> M(n_rows, n_cols);
   for (size_t i_row = 0; i_row < n_rows; i_row++)
     for (size_t i_col = 0; i_col < n_cols; i_col++) {
-      T val = random() % 100;
+      T val = random_int(0, 99);
       M(i_row, i_col) = val;
     }
   MyVector<T> V(n_cols);

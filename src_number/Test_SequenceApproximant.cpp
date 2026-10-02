@@ -12,11 +12,11 @@ template <typename T> std::string test(std::string name_numeric) {
   HumanTime time;
   std::stringstream os;
   for (int n = 1; n < 100; n++) {
-    int num = rand() % 10000;
-    int den = rand() % 10000;
+    int num = random_int(0, 9999);
+    int den = random_int(0, 9999);
     if (den == 0)
       continue;
-    int choice = rand() % 2;
+    int choice = random_int(0, 1);
     int sign = 2 * choice - 1;
     T num_T(num);
     T den_T(den);
@@ -55,15 +55,15 @@ int main(int argc, char *argv[]) {
       if (oper == "check") {
         std::unordered_map<std::string, std::string> map;
         unsigned int seed = 1;
-        srand(seed);
+        set_random_seed(seed);
         map[test<mpq_class>("mpz_class")] = "mpq_class";
-        srand(seed);
+        set_random_seed(seed);
         map[test<boost::multiprecision::mpq_rational>("mpq_rational")] =
             "boost::mpq_rational";
-        srand(seed);
+        set_random_seed(seed);
         map[test<boost::multiprecision::cpp_rational>("cpp_rational")] =
             "boost::cpp_rational";
-        srand(seed);
+        set_random_seed(seed);
         map[test<Rational<SafeInt64>>("Rational<SafeInt64>")] =
             "Rational<SafeInt64>";
         if (map.size() != 1) {

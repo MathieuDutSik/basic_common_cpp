@@ -57,7 +57,7 @@ template <typename T> void test_type_mymatrix_myvector() {
   MyMatrix<T> M(n_row, n_col);
   for (size_t i_row = 0; i_row < n_row; i_row++) {
     for (size_t i_col = 0; i_col < n_col; i_col++) {
-      int64_t val1 = random() % 20;
+      int64_t val1 = random_int(0, 19);
       T val = UniversalScalarConversion<T,int64_t>(val1);
       M(i_row, i_col) = val;
     }
@@ -66,7 +66,7 @@ template <typename T> void test_type_mymatrix_myvector() {
   //
   MyVector<T> V(n_row);
   for (size_t i_row = 0; i_row < n_row; i_row++) {
-    int64_t val1 = random() % 20;
+    int64_t val1 = random_int(0, 19);
     T val = UniversalScalarConversion<T,int64_t>(val1);
     V(i_row) = val;
   }

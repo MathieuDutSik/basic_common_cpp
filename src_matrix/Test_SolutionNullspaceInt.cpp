@@ -23,14 +23,14 @@ template <typename T> MyMatrix<T> RandomMatrix(int n_row, int n_col, int amp) {
   MyMatrix<T> A(n_row, n_col);
   for (int i = 0; i < n_row; i++)
     for (int j = 0; j < n_col; j++)
-      A(i, j) = T((random() % (2 * amp + 1)) - amp);
+      A(i, j) = T(random_int(-amp, amp));
   return A;
 }
 
 template <typename T> MyVector<T> RandomVector(int n, int amp) {
   MyVector<T> V(n);
   for (int i = 0; i < n; i++)
-    V(i) = T((random() % (2 * amp + 1)) - amp);
+    V(i) = T(random_int(-amp, amp));
   return V;
 }
 
@@ -112,7 +112,7 @@ template <typename T> void process_nullspace_int(int n, int nb) {
   for (int i = 0; i < nb; i++) {
     // A matrix of controlled rank r in dimension n x n_col.
     int n_col = n + 1 + (i % 2);
-    int r = 1 + (random() % (n - 1));
+    int r = random_int(1, n - 1);
     MyMatrix<T> B = RandomMatrix<T>(r, n_col, 4);
     MyMatrix<T> C = RandomMatrix<T>(n, r, 3);
     MyMatrix<T> M = C * B;
@@ -149,7 +149,7 @@ template <typename T> void process_nullspace_int(int n, int nb) {
     if (NSProw.rows() > 0) {
       MyVector<T> w = ZeroVector<T>(M.rows());
       for (int k = 0; k < NSProw.rows(); k++) {
-        T c = T((random() % 7) - 3);
+        T c = T(random_int(-3, 3));
         for (int j = 0; j < M.rows(); j++)
           w(j) += c * NSProw(k, j);
       }
@@ -164,8 +164,8 @@ template <typename T> void process_nullspace_int(int n, int nb) {
 template <typename T> void process_zbasis(int n, int nb) {
   for (int i = 0; i < nb; i++) {
     // Generators: r independent rows and integer combinations of them.
-    int r = 1 + (random() % n);
-    int m = r + 2 + (random() % 3);
+    int r = random_int(1, n);
+    int m = r + random_int(2, 4);
     MyMatrix<T> B = RandomMatrix<T>(r, n, 4);
     MyMatrix<T> Gens(m, n);
     for (int k = 0; k < m; k++) {
@@ -174,7 +174,7 @@ template <typename T> void process_zbasis(int n, int nb) {
       } else {
         MyVector<T> comb = ZeroVector<T>(n);
         for (int l = 0; l < r; l++) {
-          T c = T((random() % 5) - 2);
+          T c = T(random_int(-2, 2));
           for (int j = 0; j < n; j++)
             comb(j) += c * B(l, j);
         }

@@ -27,7 +27,7 @@ template <typename T> void process() {
         throw TerminalException{1};
       };
       if (IsPrime(p)) {
-        int val_i = 1 + rand() % 1000;
+        int val_i = random_int(1, 1000);
         T val1(val_i);
         Padic<T> val2 = Padic_from_positive_integer(val1, p);
         size_t pos = get_class(val2);

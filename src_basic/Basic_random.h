@@ -54,11 +54,6 @@ inline unsigned get_random_seed() {
   return seed;
 }
 
-inline void srand_random_set() {
-  unsigned val = get_random_seed();
-  srand(val);
-}
-
 /*
   The random numbers of the code, the same on every platform.
 
@@ -142,6 +137,14 @@ inline void set_random_seed_nondeterministic() {
   set_random_seed(get_random_seed());
 }
 
+// A nondeterministic seed for the portable generator and, for the draws not
+// yet moved to it, for rand().
+inline void srand_random_set() {
+  unsigned val = get_random_seed();
+  set_random_seed(val);
+  srand(val);
+}
+
 // The engine of the calling thread, for the code that needs an engine. The
 // std distributions applied to it are not portable: prefer the functions
 // below.
@@ -189,6 +192,24 @@ inline int random_int(int lo, int hi) {
 
 // Uniform in [0, 2^31 - 1], the range of random(), on every platform.
 inline int random_int() { return random_int(0, 2147483647); }
+
+// Uniform in the closed range [lo, hi] of int64_t, lo <= hi. The width
+// hi - lo + 1 is formed modulo 2^64, where it is 0 only for the full range.
+// Over a range of int it draws as random_int does.
+inline int64_t random_int64(int64_t lo, int64_t hi) {
+#ifdef SANITY_CHECK_BASIC_RANDOM
+  if (lo > hi) {
+    std::cerr << "RANDOM: random_int64 with lo=" << lo << " > hi=" << hi
+              << "\n";
+    throw TerminalException{1};
+  }
+#endif
+  uint64_t lo_u = static_cast<uint64_t>(lo);
+  uint64_t width = static_cast<uint64_t>(hi) - lo_u + 1;
+  uint64_t offset =
+      width == 0 ? random_u64() : basic_random_detail::random_below(width);
+  return static_cast<int64_t>(lo_u + offset);
+}
 
 // Uniform in [0, n), n > 0: an index into a container of size n.
 inline size_t random_index(size_t n) {

@@ -16,7 +16,7 @@ void process() {
     while (true) {
       for (int i = 0; i < n; i++)
         for (int j = 0; j < n; j++)
-          M(i, j) = random() % 7;
+          M(i, j) = random_int(0, 6);
       if (RankMat(M) == n)
         return M;
     }
