@@ -68,4 +68,4 @@ jobs:
       run: cd src_matrix && ./Test_NullspaceComputation
 
     - name: Test_SubspaceCompletion
-      run: cd src_matrix && ./Test_SubspaceCompletion mpq_class 15 10
+      run: cd src_matrix && ./Test_SubspaceCompletion mpz_class 15 10
