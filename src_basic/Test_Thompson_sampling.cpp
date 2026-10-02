@@ -5,7 +5,7 @@
 #include "NumberTheoryGmp.h"
 
 int main(int argc, char *argv[]) {
-  srand_random_set();
+  set_random_seed_nondeterministic();
   HumanTime time;
   try {
     //  using T = mpq_class;

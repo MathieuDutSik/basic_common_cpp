@@ -3,7 +3,7 @@
 #include "Heuristic_ThompsonSampling.h"
 
 int main() {
-  srand_random_set();
+  set_random_seed_nondeterministic();
   HumanTime time;
   try {
     size_t n_max = 3;

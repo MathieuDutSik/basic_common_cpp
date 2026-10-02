@@ -96,6 +96,44 @@ void test_random_int() {
   }
 }
 
+void test_local_engine() {
+  // A stream of its own: the same values for the same engine seed, and no
+  // effect on the draws of the thread.
+  std::mt19937_64 eng(2026);
+  for (int ref : {-20, 92, -52, -23, 70, 50})
+    check(random_int(eng, -100, 100) == ref, "random_int(engine) references");
+  for (double ref :
+       {-0.54591112459201607, 2.6242259009096074, 1.8166949843926745})
+    check(random_real(eng, -2.0, 3.0) == ref, "random_real references");
+  // std::log and std::cos may round differently in the last bit.
+  for (double ref : {-0.3058648000446515, -0.26468486319168938,
+                     0.88951356600948661, -0.84270929941688111})
+    check(std::abs(random_normal(eng) - ref) < 1e-12,
+          "random_normal references");
+  set_random_seed(12345);
+  std::mt19937_64 eng2(1);
+  for (int i = 0; i < 100; i++)
+    random_int(eng2, 0, 9);
+  check(random_u64() == 970638883550249018ULL,
+        "a local engine leaves the thread draws alone");
+  // Ranges and moments.
+  set_random_seed(6);
+  int n_draw = 400000;
+  double sum = 0, sum2 = 0;
+  for (int i = 0; i < n_draw; i++) {
+    double x = random_real(-2.0, 3.0);
+    check(-2.0 <= x && x < 3.0, "random_real range");
+    double z = random_normal();
+    check(std::isfinite(z), "random_normal is finite");
+    sum += z;
+    sum2 += z * z;
+  }
+  double mean = sum / n_draw;
+  double var = sum2 / n_draw - mean * mean;
+  check(std::abs(mean) < 0.01 && std::abs(var - 1) < 0.01,
+        "random_normal mean 0 and variance 1");
+}
+
 void test_reseed() {
   // The same seed gives the same sequence, a different seed another one.
   auto draw = [](uint64_t seed) -> std::vector<uint64_t> {
@@ -165,6 +203,7 @@ int main() {
     test_standard_engine();
     test_reference_values();
     test_random_int();
+    test_local_engine();
     test_reseed();
     test_ranges();
     test_threads();

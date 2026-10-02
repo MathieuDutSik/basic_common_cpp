@@ -3,8 +3,10 @@
 #define SRC_BASIC_BASIC_RANDOM_H_
 
 #include <atomic>
+#include <cmath>
 #include <cstdint>
 #include <cstdlib>
+#include <ctime>
 #include <random>
 #include <utility>
 #include <vector>
@@ -137,14 +139,6 @@ inline void set_random_seed_nondeterministic() {
   set_random_seed(get_random_seed());
 }
 
-// A nondeterministic seed for the portable generator and, for the draws not
-// yet moved to it, for rand().
-inline void srand_random_set() {
-  unsigned val = get_random_seed();
-  set_random_seed(val);
-  srand(val);
-}
-
 // The engine of the calling thread, for the code that needs an engine. The
 // std distributions applied to it are not portable: prefer the functions
 // below.
@@ -152,7 +146,16 @@ inline std::mt19937_64 &get_random_engine() {
   return basic_random_detail::thread_engine();
 }
 
-inline uint64_t random_u64() { return basic_random_detail::thread_engine()(); }
+/*
+  Every draw exists in two forms: with an engine as first argument, for the
+  code that keeps a stream of its own (a std::mt19937_64 seeded for one
+  search, independent of the other draws), and without, on the engine of the
+  calling thread. The same engine state gives the same values on every
+  platform; random_normal goes through std::log and std::cos, which the
+  libraries may round differently in the last bit.
+ */
+
+inline uint64_t random_u64(std::mt19937_64 &engine) { return engine(); }
 
 namespace basic_random_detail {
 
@@ -160,13 +163,17 @@ namespace basic_random_detail {
 // rejected, so that the accepted ones cover every residue equally often (the
 // method of OpenBSD's arc4random_uniform, in 64-bit arithmetic only). All the
 // bounded draws below go through it, with their conversions written once.
-inline uint64_t random_below(uint64_t n) {
+inline uint64_t random_below(std::mt19937_64 &engine, uint64_t n) {
   uint64_t threshold = (0 - n) % n;
   while (true) {
-    uint64_t x = random_u64();
+    uint64_t x = engine();
     if (x >= threshold)
       return x % n;
   }
+}
+
+inline uint64_t random_below(uint64_t n) {
+  return random_below(thread_engine(), n);
 }
 
 } // namespace basic_random_detail
@@ -175,7 +182,7 @@ static_assert(sizeof(int) >= 4, "random_int needs a 32-bit int");
 
 // Uniform in the closed range [lo, hi], lo <= hi. The width hi - lo + 1 is at
 // most 2^32 and is formed in 64 bits, so that the full int range is valid.
-inline int random_int(int lo, int hi) {
+inline int random_int(std::mt19937_64 &engine, int lo, int hi) {
 #ifdef SANITY_CHECK_BASIC_RANDOM
   if (lo > hi) {
     std::cerr << "RANDOM: random_int with lo=" << lo << " > hi=" << hi << "\n";
@@ -186,17 +193,14 @@ inline int random_int(int lo, int hi) {
   int64_t hi64 = hi;
   uint64_t width = static_cast<uint64_t>(hi64 - lo64) + 1;
   int64_t offset =
-      static_cast<int64_t>(basic_random_detail::random_below(width));
+      static_cast<int64_t>(basic_random_detail::random_below(engine, width));
   return static_cast<int>(lo64 + offset);
 }
-
-// Uniform in [0, 2^31 - 1], the range of random(), on every platform.
-inline int random_int() { return random_int(0, 2147483647); }
 
 // Uniform in the closed range [lo, hi] of int64_t, lo <= hi. The width
 // hi - lo + 1 is formed modulo 2^64, where it is 0 only for the full range.
 // Over a range of int it draws as random_int does.
-inline int64_t random_int64(int64_t lo, int64_t hi) {
+inline int64_t random_int64(std::mt19937_64 &engine, int64_t lo, int64_t hi) {
 #ifdef SANITY_CHECK_BASIC_RANDOM
   if (lo > hi) {
     std::cerr << "RANDOM: random_int64 with lo=" << lo << " > hi=" << hi
@@ -206,13 +210,14 @@ inline int64_t random_int64(int64_t lo, int64_t hi) {
 #endif
   uint64_t lo_u = static_cast<uint64_t>(lo);
   uint64_t width = static_cast<uint64_t>(hi) - lo_u + 1;
-  uint64_t offset =
-      width == 0 ? random_u64() : basic_random_detail::random_below(width);
+  uint64_t offset = width == 0
+                        ? engine()
+                        : basic_random_detail::random_below(engine, width);
   return static_cast<int64_t>(lo_u + offset);
 }
 
 // Uniform in [0, n), n > 0: an index into a container of size n.
-inline size_t random_index(size_t n) {
+inline size_t random_index(std::mt19937_64 &engine, size_t n) {
 #ifdef SANITY_CHECK_BASIC_RANDOM
   if (n == 0) {
     std::cerr << "RANDOM: random_index with n=0\n";
@@ -220,36 +225,82 @@ inline size_t random_index(size_t n) {
   }
 #endif
   return static_cast<size_t>(
-      basic_random_detail::random_below(static_cast<uint64_t>(n)));
+      basic_random_detail::random_below(engine, static_cast<uint64_t>(n)));
 }
 
-inline bool random_bool() { return (random_u64() >> 63) != 0; }
+inline bool random_bool(std::mt19937_64 &engine) {
+  return (engine() >> 63) != 0;
+}
 
 // Uniform in [0, 1), from the top 53 bits.
-inline double random_unit() {
-  return static_cast<double>(random_u64() >> 11) * 0x1.0p-53;
+inline double random_unit(std::mt19937_64 &engine) {
+  return static_cast<double>(engine() >> 11) * 0x1.0p-53;
+}
+
+// Uniform in [lo, hi), lo < hi.
+inline double random_real(std::mt19937_64 &engine, double lo, double hi) {
+  return lo + (hi - lo) * random_unit(engine);
+}
+
+// Standard normal, by Box-Muller: u1 in (0, 1] keeps the logarithm finite.
+// One value per call, two uniform draws each, so that the stream does not
+// depend on a cached second value.
+inline double random_normal(std::mt19937_64 &engine) {
+  double u1 = 1.0 - random_unit(engine);
+  double u2 = random_unit(engine);
+  constexpr double two_pi = 6.283185307179586476925286766559;
+  return std::sqrt(-2.0 * std::log(u1)) * std::cos(two_pi * u2);
 }
 
 // Fisher-Yates, with random_index: the same permutation on every platform,
 // unlike std::shuffle whose algorithm is left to the library.
-template <typename T> void random_shuffle_vector(std::vector<T> &V) {
+template <typename T>
+void random_shuffle_vector(std::mt19937_64 &engine, std::vector<T> &V) {
   size_t len = V.size();
   for (size_t i = len; i > 1; i--) {
-    size_t j = random_index(i);
+    size_t j = random_index(engine, i);
     using std::swap;
     swap(V[i - 1], V[j]);
   }
 }
 
-#ifdef _WIN32
-// POSIX random() is not provided by the MinGW / MSVC C runtimes. Supply a
-// portable shim with the same signature (long in [0, 2^31 - 1]) so call sites
-// can use random() uniformly across platforms.
-inline long random() {
-  thread_local std::mt19937 gen{get_random_seed()};
-  return static_cast<long>(gen() & 0x7FFFFFFFL);
+// The same draws on the engine of the calling thread.
+inline uint64_t random_u64() { return basic_random_detail::thread_engine()(); }
+
+inline int random_int(int lo, int hi) {
+  return random_int(basic_random_detail::thread_engine(), lo, hi);
 }
-#endif
+
+// Uniform in [0, 2^31 - 1], the range of random(), on every platform.
+inline int random_int() { return random_int(0, 2147483647); }
+
+inline int64_t random_int64(int64_t lo, int64_t hi) {
+  return random_int64(basic_random_detail::thread_engine(), lo, hi);
+}
+
+inline size_t random_index(size_t n) {
+  return random_index(basic_random_detail::thread_engine(), n);
+}
+
+inline bool random_bool() {
+  return random_bool(basic_random_detail::thread_engine());
+}
+
+inline double random_unit() {
+  return random_unit(basic_random_detail::thread_engine());
+}
+
+inline double random_real(double lo, double hi) {
+  return random_real(basic_random_detail::thread_engine(), lo, hi);
+}
+
+inline double random_normal() {
+  return random_normal(basic_random_detail::thread_engine());
+}
+
+template <typename T> void random_shuffle_vector(std::vector<T> &V) {
+  random_shuffle_vector(basic_random_detail::thread_engine(), V);
+}
 
 // clang-format off
 #endif  // SRC_BASIC_BASIC_RANDOM_H_
