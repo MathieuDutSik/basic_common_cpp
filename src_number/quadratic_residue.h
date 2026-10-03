@@ -91,10 +91,6 @@ std::optional<T> find_quadratic_residue_exhaustive_kernel(T const &a,
   std::cerr << "QUADRES: upper=" << upper << "\n";
 #endif
   while (x != upper) {
-#ifdef DEBUG_QUADRATIC_RESIDUE_DISABLE
-    std::cerr << "QUADRES: x=" << x << " xSqr=" << xSqr << " a=" << a
-              << " m=" << m << "\n";
-#endif
     if (xSqr == a) {
       return x;
     }

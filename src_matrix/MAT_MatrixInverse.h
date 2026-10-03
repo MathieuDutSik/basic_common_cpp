@@ -33,9 +33,6 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
   int nbRow = Input.rows();
   int nbCol = Input.cols();
   T prov1;
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-  std::cerr << "TMat_Inverse_destroy, step 1\n";
-#endif
 #ifdef SANITY_CHECK_MAT_MATRIX
   if (nbRow != nbCol) {
     std::cerr << "Error on nbRow, nbCol in TMat_Inverse_destroy";
@@ -50,16 +47,8 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
         prov1 = 0;
       Output(iRow, iCol) = prov1;
     }
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-  std::cerr << "TMat_Inverse_destroy, step 2\n";
-#endif
   int iColFound;
   for (iRow = 0; iRow < nbRow; iRow++) {
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-    std::cerr << "iRow=" << iRow << "\n";
-    std::cerr << "Input=\n";
-    WriteMatrix(std::cerr, Input);
-#endif
     iColFound = SelectBestPivot<T>(
         nbCol, [&](int iCol) -> T const & { return Input(iRow, iCol); },
         [&](int iCol) -> bool { return iCol >= iRow; });
@@ -94,9 +83,6 @@ void TMat_Inverse_destroy(MyMatrix<T> &Input, MyMatrix<T> &Output) {
         std::swap(Input(iRowB, iColFound), Input(iRowB, iRow));
     }
   }
-#ifdef DEBUG_MAT_MATRIX_DISABLE
-  std::cerr << "TMat_Inverse_destroy, step 3\n";
-#endif
 }
 
 template <typename T> MyMatrix<T> InverseKernel(MyMatrix<T> const &Input) {
