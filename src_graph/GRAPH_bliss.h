@@ -3,6 +3,7 @@
 #define SRC_GRAPH_GRAPH_BLISS_H_
 
 #include "ExceptionsFunc.h"
+#include "GRAPH_GeneratorsOrder.h"
 #include "defs.hh"
 #include "graph.hh"
 #include "partition.hh"
@@ -130,11 +131,28 @@ get_generators(bliss::Graph &g, bliss::Stats &stats, size_t n_last) {
 }
 
 template <typename Tgr, typename TidxG>
-std::vector<std::vector<TidxG>> BLISS_GetListGenerators(Tgr const &eGR,
-                                                        size_t const &n_last) {
+GraphGeneratorsOrder<TidxG>
+BLISS_GetListGeneratorsOrder(Tgr const &eGR, size_t const &n_last) {
   bliss::Graph g = GetBlissGraphFromGraph(eGR);
   bliss::Stats stats;
-  return get_generators<TidxG>(g, stats, n_last);
+  std::vector<std::vector<TidxG>> ListGen =
+      get_generators<TidxG>(g, stats, n_last);
+  // The exact order is the product of the factors that the default bliss
+  // BigNum keeps; with the GMP or long double BigNum it is reported unknown.
+  if constexpr (requires(bliss::Stats const &s) {
+                  s.get_group_size().get_factors();
+                }) {
+    return {std::move(ListGen), true,
+            GetGraphOrderFactors(stats.get_group_size().get_factors())};
+  } else {
+    return {std::move(ListGen), false, {}};
+  }
+}
+
+template <typename Tgr, typename TidxG>
+std::vector<std::vector<TidxG>> BLISS_GetListGenerators(Tgr const &eGR,
+                                                        size_t const &n_last) {
+  return BLISS_GetListGeneratorsOrder<Tgr, TidxG>(eGR, n_last).ListGen;
 }
 
 template <typename Tgr, typename TidxC, typename TidxG>

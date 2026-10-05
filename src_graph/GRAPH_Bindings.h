@@ -126,6 +126,23 @@ GRAPH_GetListGenerators_Simp(SimplifiedVertexColoredGraph const &s,
 #endif
 }
 
+// The generators with the exact order of the group when known, see
+// GraphGeneratorsOrder.
+template <typename TidxG>
+GraphGeneratorsOrder<TidxG>
+GRAPH_GetListGeneratorsOrder_Simp(SimplifiedVertexColoredGraph const &s,
+                                  size_t const &nbRow,
+                                  [[maybe_unused]] std::ostream &os) {
+#ifdef USE_BLISS
+  GraphListAdj eGR = GetGraphListAdj_from_simplified(s);
+  return BLISS_GetListGeneratorsOrder<GraphListAdj, TidxG>(eGR, nbRow);
+#endif
+#ifdef USE_TRACES
+  DataTraces DT = GetDataTraces(s);
+  return TRACES_GetListGeneratorsOrder_Arr<TidxG>(DT, nbRow, os);
+#endif
+}
+
 template <typename Tgr, typename TidxC>
 std::vector<TidxC>
 GRAPH_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream &os) {
@@ -160,6 +177,18 @@ GRAPH_GetListGenerators(Tgr const &eGR, size_t const &nbRow,
 #endif
 #ifdef USE_TRACES
   return TRACES_GetListGenerators<Tgr, TidxG>(eGR, nbRow, os);
+#endif
+}
+
+template <typename Tgr, typename TidxG>
+GraphGeneratorsOrder<TidxG>
+GRAPH_GetListGeneratorsOrder(Tgr const &eGR, size_t const &nbRow,
+                             [[maybe_unused]] std::ostream &os) {
+#ifdef USE_BLISS
+  return BLISS_GetListGeneratorsOrder<Tgr, TidxG>(eGR, nbRow);
+#endif
+#ifdef USE_TRACES
+  return TRACES_GetListGeneratorsOrder<Tgr, TidxG>(eGR, nbRow, os);
 #endif
 }
 

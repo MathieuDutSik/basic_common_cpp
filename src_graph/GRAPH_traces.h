@@ -3,6 +3,7 @@
 #define SRC_GRAPH_GRAPH_TRACES_H_
 
 #include "ExceptionsFunc.h"
+#include "GRAPH_GeneratorsOrder.h"
 #include "Timings.h"
 #include "traces.h"
 #include <iostream>
@@ -14,6 +15,35 @@
 #ifdef TIMINGS
 #define TIMINGS_TRACES
 #endif
+
+/*
+  The exact order of the automorphism group: a Traces with the field cnt in
+  TracesStats records the integer factors of the group size there,
+  |G| = prod_k k^cnt[k], cnt being an array of length 2n+1. Without it, only
+  the floating point grpsize1 * 10^grpsize2 is available and the order is
+  reported as unknown.
+ */
+template <typename T>
+concept TracesStatsHasCnt = requires(T s) { s.cnt; };
+
+struct TracesOrderCounter {
+  std::vector<int> cnt;
+  // A template, so that the access to cnt is discarded when it is absent.
+  template <typename Tstats> void attach(Tstats &stats, size_t n) {
+    if constexpr (TracesStatsHasCnt<Tstats>) {
+      cnt.assign(2 * n + 1, 0);
+      stats.cnt = cnt.data();
+    }
+  }
+  bool has_order() const { return TracesStatsHasCnt<TracesStats>; }
+  std::vector<std::pair<size_t, size_t>> order_factors() const {
+    std::vector<std::pair<size_t, size_t>> factors;
+    for (size_t k = 2; k < cnt.size(); k++)
+      if (cnt[k] > 0)
+        factors.push_back({k, static_cast<size_t>(cnt[k])});
+    return factors;
+  }
+};
 
 struct DataTraces {
 public:
@@ -125,7 +155,7 @@ TRACES_GetCanonicalOrdering_Arr(DataTraces &DT,
   MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
-  TracesStats stats;
+  TracesStats stats{};
 
   options.getcanon = TRUE;
   options.defaultptn = FALSE;
@@ -220,7 +250,7 @@ TRACES_GetCanonicalOrdering(Tgr const &eGR, [[maybe_unused]] std::ostream &os) {
   DYNALLSTAT(int, ptn, ptn_sz);
   DYNALLSTAT(int, orbits, orbits_sz);
   static DEFAULTOPTIONS_TRACES(options);
-  TracesStats stats;
+  TracesStats stats{};
   /* Declare and initialize sparse graph structures */
   SG_DECL(sg1);
   SG_DECL(cg1);
@@ -273,15 +303,15 @@ std::vector<Tidx> TRACES_GetCanonicalOrdering_Arr_Test(Tgr const &eGR) {
 }
 
 template <typename Tidx>
-std::vector<std::vector<Tidx>>
-TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
-                             [[maybe_unused]] std::ostream &os) {
+GraphGeneratorsOrder<Tidx>
+TRACES_GetListGeneratorsOrder_Arr(DataTraces &DT, size_t const &n_last,
+                                  [[maybe_unused]] std::ostream &os) {
   TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS_TRACES
   MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
-  TracesStats stats;
+  TracesStats stats{};
   permnode *gens;
   options.generators = &gens;
   gens = NULL;
@@ -289,6 +319,8 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
   options.getcanon = FALSE;
 
   options.defaultptn = FALSE;
+  TracesOrderCounter counter;
+  counter.attach(stats, DT.n);
 
   Traces(&DT.sg1, DT.lab1, DT.ptn, DT.orbits, &options, &stats, NULL);
 
@@ -309,7 +341,14 @@ TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
 #ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetListGenerators_Arr|=" << time << "\n";
 #endif
-  return ListGen;
+  return {std::move(ListGen), counter.has_order(), counter.order_factors()};
+}
+
+template <typename Tidx>
+std::vector<std::vector<Tidx>>
+TRACES_GetListGenerators_Arr(DataTraces &DT, size_t const &n_last,
+                             std::ostream &os) {
+  return TRACES_GetListGeneratorsOrder_Arr<Tidx>(DT, n_last, os).ListGen;
 }
 
 template <typename Tidx>
@@ -329,9 +368,9 @@ void ReadListGen(permnode *gens, std::vector<std::vector<Tidx>> &ListGen,
 }
 
 template <typename Tgr, typename Tidx>
-std::vector<std::vector<Tidx>>
-TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
-                         [[maybe_unused]] std::ostream &os) {
+GraphGeneratorsOrder<Tidx>
+TRACES_GetListGeneratorsOrder(Tgr const &eGR, size_t const &n_last,
+                              [[maybe_unused]] std::ostream &os) {
   TRACES_LimitCheck<Tidx>(n_last);
 #ifdef TIMINGS_TRACES
   MicrosecondTime time;
@@ -340,7 +379,7 @@ TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
   DYNALLSTAT(int, ptn, ptn_sz);
   DYNALLSTAT(int, orbits, orbits_sz);
   static DEFAULTOPTIONS_TRACES(options);
-  TracesStats stats;
+  TracesStats stats{};
   /* Declare the generator stuff */
   permnode *gens;
   options.generators = &gens;
@@ -379,6 +418,8 @@ TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
   sg1.nv = n_i;           /* Number of vertices */
   sg1.nde = nbAdjacent_i; /* Number of directed edges */
   Assign_sg(eGR, &sg1);
+  TracesOrderCounter counter;
+  counter.attach(stats, n);
   /* Calling Traces */
   Traces(&sg1, lab1, ptn, orbits, &options, &stats, NULL);
   /* Extracting the list of generators */
@@ -394,7 +435,14 @@ TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
 #ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetListGenerators|=" << time << "\n";
 #endif
-  return ListGen;
+  return {std::move(ListGen), counter.has_order(), counter.order_factors()};
+}
+
+template <typename Tgr, typename Tidx>
+std::vector<std::vector<Tidx>>
+TRACES_GetListGenerators(Tgr const &eGR, size_t const &n_last,
+                         std::ostream &os) {
+  return TRACES_GetListGeneratorsOrder<Tgr, Tidx>(eGR, n_last, os).ListGen;
 }
 
 template <typename Tgr, typename Tidx>
@@ -415,7 +463,7 @@ TRACES_GetCanonicalOrdering_ListGenerators_Arr(
   MicrosecondTime time;
 #endif
   static DEFAULTOPTIONS_TRACES(options);
-  TracesStats stats;
+  TracesStats stats{};
   permnode *gens;
   options.generators = &gens;
   gens = NULL;
@@ -453,7 +501,7 @@ TRACES_GetCanonicalOrdering_ListGenerators(Tgr const &eGR, size_t n_last,
   DYNALLSTAT(int, ptn, ptn_sz);
   DYNALLSTAT(int, orbits, orbits_sz);
   static DEFAULTOPTIONS_TRACES(options);
-  TracesStats stats;
+  TracesStats stats{};
   /* Declare the generator stuff */
   permnode *gens;
   options.generators = &gens;
