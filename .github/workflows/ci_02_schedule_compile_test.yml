@@ -21,7 +21,7 @@ jobs:
       EIGEN_PATH: /home/runner/work/opt/eigen
       NAUTY_PATH: /home/runner/work/opt/nauty
       NAUTY_INCLUDE: "-I/home/runner/work/opt/nauty/include"
-      NAUTY_LINK: "/home/runner/work/opt/nauty/lib/libnauty_static.a"
+      NAUTY_LINK: "/home/runner/work/opt/nauty/lib/libnauty.a"
       LIBBLISS_PATH: /home/runner/opt/libbliss
       LIBBLISS_INCDIR: /home/runner/opt/libbliss/include
       LIBBLISS_LINK: "-L/home/runner/opt/libbliss/lib -lbliss -Wl,-rpath,/home/runner/opt/libbliss/lib"
@@ -50,9 +50,10 @@ jobs:
           pwd
           echo "After pwd"
 
-          # NAUTY
-          mkdir ExternalLib/nauty/build
-          cd ExternalLib/nauty/build && cmake -DCMAKE_INSTALL_PREFIX:PATH=$NAUTY_PATH .. && make all install && cd ../../..
+          # NAUTY, from the branch traces-grpsize-factors (exact factors of
+          # the group order from Traces)
+          git clone --depth 1 --branch traces-grpsize-factors https://github.com/MathieuDutSik/nauty $RUNNER_TEMP/nauty_src
+          (cd $RUNNER_TEMP/nauty_src && ./configure --prefix=$NAUTY_PATH && make -j"$(nproc)" && make install)
           pwd
           echo "After nauty compilation"
 
