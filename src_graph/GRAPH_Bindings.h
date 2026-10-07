@@ -43,6 +43,7 @@ GraphListAdj
 GetGraphListAdj_from_simplified(SimplifiedVertexColoredGraph const &s) {
   size_t nbVert = s.nbVert;
   GraphListAdj eGR(nbVert);
+  eGR.SetHasColor(true);
   size_t pos = 0;
   size_t i_color = 0;
   for (auto &blk_size : s.ListBlockSize) {
