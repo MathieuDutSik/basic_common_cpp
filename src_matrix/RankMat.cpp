@@ -2,7 +2,9 @@
 // clang-format off
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 #include "NumberTheorySafeInt.h"
 #ifdef ENABLE_FLINT_SUPPORT
 #include "NumberTheoryFlint.h"
@@ -35,6 +37,7 @@ void compute_rankmat(std::string const &arithmetic, std::string const &eFile) {
     return compute_rankmat_kernel<T>(eFile);
   }
 #endif
+#ifdef QUADRATIC_FIELDS
   if (arithmetic == "Qsqrt5") {
     using Trat = Trat_quad_field;
     using T = QuadField<Trat, 5>;
@@ -45,6 +48,7 @@ void compute_rankmat(std::string const &arithmetic, std::string const &eFile) {
     using T = QuadField<Trat, 2>;
     return compute_rankmat_kernel<T>(eFile);
   }
+#endif
   std::optional<std::string> opt_realalgebraic =
       get_postfix(arithmetic, "RealAlgebraic=");
   if (opt_realalgebraic) {

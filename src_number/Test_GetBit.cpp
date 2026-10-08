@@ -5,7 +5,9 @@
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 // clang-format on
 
 template <typename T> void process_single(T const &val_t) {

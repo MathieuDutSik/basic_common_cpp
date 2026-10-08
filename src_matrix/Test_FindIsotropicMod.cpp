@@ -4,7 +4,9 @@
 #include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 #include "NumberTheorySafeInt.h"
 #include "MAT_MatrixMod.h"
 // clang-format on

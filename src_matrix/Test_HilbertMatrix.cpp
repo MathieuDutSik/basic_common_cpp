@@ -6,7 +6,9 @@
 #include "rational.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 #include "MAT_Matrix.h"
 // clang-format on
 

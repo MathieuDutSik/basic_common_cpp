@@ -4,7 +4,9 @@
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryRealField.h"
 #include "NumberTheorySafeInt.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 #include "MAT_Matrix_SubsetSolver.h"
 // clang-format on
 

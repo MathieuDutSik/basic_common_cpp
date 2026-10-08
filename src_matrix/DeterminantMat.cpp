@@ -3,7 +3,9 @@
 #include "NumberTheory.h"
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheoryRealField.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 #include "NumberTheorySafeInt.h"
 #ifdef ENABLE_FLINT_SUPPORT
 #include "NumberTheoryFlint.h"
@@ -69,6 +71,7 @@ void compute_determinant(std::string const &arithmetic,
     using T = mpq_class;
     return compute_determinant_kernel<T>(eFile);
   }
+#ifdef QUADRATIC_FIELDS
   if (arithmetic == "Qsqrt5") {
     using Trat = Trat_quad_field;
     using T = QuadField<Trat, 5>;
@@ -79,6 +82,7 @@ void compute_determinant(std::string const &arithmetic,
     using T = QuadField<Trat, 2>;
     return compute_determinant_kernel<T>(eFile);
   }
+#endif
   std::optional<std::string> opt_realalgebraic =
       get_postfix(arithmetic, "RealAlgebraic=");
   if (opt_realalgebraic) {

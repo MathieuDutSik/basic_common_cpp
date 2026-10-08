@@ -4,7 +4,9 @@
 #include "NumberTheoryBoostGmpInt.h"
 #include "NumberTheory.h"
 #include "NumberTheoryRealField.h"
+#ifdef QUADRATIC_FIELDS
 #include "NumberTheoryQuadField.h"
+#endif
 #include "NumberTheorySafeInt.h"
 #include "Fp.h"
 #ifdef ENABLE_FLINT_SUPPORT
@@ -64,6 +66,7 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
     using T = boost::multiprecision::mpq_rational;
     return full_process_type<T>(M);
   }
+#ifdef QUADRATIC_FIELDS
   if (arith == "Qsqrt5") {
     using Trat = Trat_quad_field;
     using T = QuadField<Trat, 5>;
@@ -74,6 +77,7 @@ std::string process(std::string const &arith, MyMatrix<int> const &M) {
     using T = QuadField<Trat, 2>;
     return full_process_type<T>(M);
   }
+#endif
   std::optional<std::string> opt_realalgebraic =
       get_postfix(arith, "RealAlgebraic=");
   if (opt_realalgebraic) {
@@ -141,8 +145,11 @@ int main() {
     //    "rational<long>", "rational", "Qsqrt5", "Qsqrt2"};
     std::vector<std::string> ListArith = {
         "rational<SafeInt64>", "rational<int64_t>", "rational",
-        "boost_cpp_rational",  "boost_mpq_rational", "Qsqrt5",
-        "Qsqrt2"};
+        "boost_cpp_rational", "boost_mpq_rational"};
+#ifdef QUADRATIC_FIELDS
+    ListArith.push_back("Qsqrt5");
+    ListArith.push_back("Qsqrt2");
+#endif
 #ifdef ENABLE_FLINT_SUPPORT
     ListArith.push_back("flint_rational");
 #endif
