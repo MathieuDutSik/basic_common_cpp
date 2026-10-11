@@ -57,39 +57,18 @@ template <typename T>
 std::vector<T> ReadVectorFromRealAlgebraicString(std::istream &is,
                                                  size_t const &deg) {
   size_t miss_val = std::numeric_limits<size_t>::max();
-  char c;
+  std::vector<T> V(deg, 0);
+  // The token, read as a string: the whitespace before it is skipped, and it
+  // stops at the next whitespace. A token ending at the end of the stream
+  // sets only eofbit; when there is no token, failbit is set and the zero
+  // vector is returned (the caller sees the failure on the stream).
   std::string s;
-  // First skipping the spaces
-  while (true) {
-    is.get(c);
-    if (c != ' ' && c != '\n') {
-      s += c;
-      break;
-    }
-  }
+  if (!(is >> s))
+    return V;
 #ifdef DEBUG_INPUT_OUTPUT
-  std::cerr << "RVFRAS: 1: s=" << s << "\n";
-#endif
-  // Second reading the data till a space or end.
-  while (true) {
-    if (is.eof()) {
-      break;
-    }
-    is.get(c);
-    // If number of characters read is 0, then we have reached eof.
-    if (is.gcount() == 0) {
-      break;
-    }
-    if (c == ' ' || c == '\n') {
-      break;
-    }
-    s += c;
-  }
-#ifdef DEBUG_INPUT_OUTPUT
-  std::cerr << "RVFRAS: 2: s=" << s << "\n";
+  std::cerr << "RVFRAS: s=" << s << "\n";
 #endif
   // Now parsing the data
-  std::vector<T> V(deg, 0);
   std::vector<size_t> W;
   for (size_t u = 1; u < s.size(); u++) {
     std::string echar = s.substr(u, 1);
