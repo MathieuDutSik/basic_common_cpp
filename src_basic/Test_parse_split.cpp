@@ -1,7 +1,7 @@
 // Copyright (C) 2022 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
 #include "Basic_string.h"
 
-int main(int argc, char *argv[]) {
+int main() {
   std::string eLine(
       "Reading existing matrix=37 8 4 1 4 1 1 4 1 1 2 4 -2 0 -2 -2 4 0 2 2 2 "
       "-1 4 2 0 1 1 -2 -1 4 2 0 1 1 -2 -1 1 4 idxMatrixCurrent=10893END");
