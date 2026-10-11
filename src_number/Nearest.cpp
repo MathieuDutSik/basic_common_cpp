@@ -25,7 +25,7 @@ void process() {
 
 
 
-int main(int argc, char *argv[]) {
+int main() {
   HumanTime time;
   try {
     {

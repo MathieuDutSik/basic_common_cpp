@@ -8,14 +8,8 @@
 
 
 int main() {
-  using T1 = mpq_class;
-  using T1_int = mpz_class;
-  using T2 = boost::multiprecision::mpq_rational;
-  using T2_int = boost::multiprecision::mpz_int;
-  using T3 = boost::multiprecision::cpp_rational;
   using T3_int = boost::multiprecision::cpp_int;
-
-
   size_t val = 3;
-  T3_int val_b = UniversalScalarConversion<T3_int,size_t>(val);
+  T3_int val_b = UniversalScalarConversion<T3_int, size_t>(val);
+  std::cerr << "val=" << val << " val_b=" << val_b << "\n";
 }
