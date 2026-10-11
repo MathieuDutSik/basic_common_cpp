@@ -21,6 +21,7 @@
 #include "Timings.h"
 #include "hash_functions.h"
 #include <algorithm>
+#include <sstream>
 #include <boost/serialization/nvp.hpp>
 #include <format>
 #include <functional>
@@ -291,14 +292,58 @@ MyMatrix<T> DropColumn(MyMatrix<T> const &M, int const &idx_drop) {
 // ReadWriteMatrices and vectors
 //
 
+// Reads one entry of type T, checking that it is a whole token: the entries
+// are separated by spaces, and the token has to be parsed entirely as a T.
+// Reading T directly from the stream could stop inside a token, leaving the
+// rest of it to the next reads and silently giving wrong values: for example
+// the rational reader on the Q(sqrt(5)) entry 3/4+1/4*x stops at '+', and the
+// following entries are then misread or keep the previous value.
+template <typename T>
+T read_entry_checked(std::istream &is, char const *context, size_t iRow,
+                     size_t iCol) {
+  std::string token;
+  if (!(is >> token)) {
+    std::cerr << context << ": failed to read the entry (" << iRow << ","
+              << iCol << ")\n";
+    throw TerminalException{1};
+  }
+  // The space after the token lets the readers that read up to the next
+  // space (the real algebraic and quadratic fields) stop there and not at the
+  // end of the stream, which sets the fail bit.
+  std::istringstream is_token(token + " ");
+  T eVal;
+  is_token >> eVal;
+  bool is_ok = !is_token.fail();
+  if (is_ok) {
+    is_token >> std::ws;
+    is_ok = is_token.peek() == std::char_traits<char>::eof();
+  }
+  if (!is_ok) {
+    std::cerr << context << ": the entry (" << iRow << "," << iCol
+              << ") is the token \"" << token
+              << "\", which is not a value of the type. Is the file of another "
+                 "numeric type?\n";
+    throw TerminalException{1};
+  }
+  return eVal;
+}
+
+// Checks that the dimensions were read.
+inline void check_read_dimensions(std::istream &is, char const *context) {
+  if (is.fail()) {
+    std::cerr << context << ": failed to read the dimensions\n";
+    throw TerminalException{1};
+  }
+}
+
 template <typename T> MyMatrix<T> ReadMatrix(std::istream &is) {
   if (!is.good()) {
     std::cerr << "ReadMatrix operation failed because stream is not valid\n";
     throw TerminalException{1};
   }
-  T eVal;
   int nbRow, nbCol;
   is >> nbRow >> nbCol;
+  check_read_dimensions(is, "ReadMatrix");
   if (nbRow < 0 || nbCol < 0) {
     std::cerr << "We should have nbRow > 0 and nbCol > 0\n";
     std::cerr << "But we have nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
@@ -306,10 +351,8 @@ template <typename T> MyMatrix<T> ReadMatrix(std::istream &is) {
   }
   MyMatrix<T> TheMat(nbRow, nbCol);
   for (int iRow = 0; iRow < nbRow; iRow++)
-    for (int iCol = 0; iCol < nbCol; iCol++) {
-      is >> eVal;
-      TheMat(iRow, iCol) = eVal;
-    }
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      TheMat(iRow, iCol) = read_entry_checked<T>(is, "ReadMatrix", iRow, iCol);
   return TheMat;
 }
 
@@ -387,9 +430,9 @@ void WriteListMatrixFile(std::string const &eFile,
 }
 
 template <typename T> std::pair<bool, T> ReadMatrixInfo(std::istream &is) {
-  T eVal;
   int nbRow, nbCol;
   is >> nbRow >> nbCol;
+  check_read_dimensions(is, "ReadMatrixInfo");
   if (nbRow < 0 || nbCol < 0) {
     std::cerr << "We should have nbRow > 0 and nbCol > 0\n";
     std::cerr << "But we have nbRow=" << nbRow << " nbCol=" << nbCol << "\n";
@@ -399,7 +442,7 @@ template <typename T> std::pair<bool, T> ReadMatrixInfo(std::istream &is) {
   T TheMax(0);
   for (int iRow = 0; iRow < nbRow; iRow++)
     for (int iCol = 0; iCol < nbCol; iCol++) {
-      is >> eVal;
+      T eVal = read_entry_checked<T>(is, "ReadMatrixInfo", iRow, iCol);
       if (!IsInteger(eVal))
         is_integral = false;
       T eValAbs = T_abs(eVal);
@@ -433,6 +476,7 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
   int nbRow, nbCol;
   std::string str;
   is >> nbRow >> nbCol >> str;
+  check_read_dimensions(is, "ReadMatrixLrsCdd");
   if (str != "integer" && str != "rational" && str != "double") {
     std::cerr << "Error while reading\n";
     std::cerr << "str = " << str << "\n";
@@ -442,11 +486,9 @@ template <typename T> MyMatrix<T> ReadMatrixLrsCdd(std::istream &is) {
   }
   MyMatrix<T> TheMat(nbRow, nbCol);
   for (int iRow = 0; iRow < nbRow; iRow++)
-    for (int iCol = 0; iCol < nbCol; iCol++) {
-      T eVal;
-      is >> eVal;
-      TheMat(iRow, iCol) = eVal;
-    }
+    for (int iCol = 0; iCol < nbCol; iCol++)
+      TheMat(iRow, iCol) =
+          read_entry_checked<T>(is, "ReadMatrixLrsCdd", iRow, iCol);
   //
   std::string footer;
   is >> footer;
@@ -493,14 +535,12 @@ template <typename T> MyVector<T> ReadVector(std::istream &is) {
     std::cerr << "ReadVector operation failed because stream is not valid\n";
     throw TerminalException{1};
   }
-  T eVal;
   size_t nbRow;
   is >> nbRow;
+  check_read_dimensions(is, "ReadVector");
   MyVector<T> eVect = MyVector<T>(nbRow);
-  for (size_t iRow = 0; iRow < nbRow; iRow++) {
-    is >> eVal;
-    eVect(iRow) = eVal;
-  }
+  for (size_t iRow = 0; iRow < nbRow; iRow++)
+    eVect(iRow) = read_entry_checked<T>(is, "ReadVector", iRow, 0);
   return eVect;
 }
 
@@ -519,14 +559,12 @@ template <typename T> std::vector<T> ReadStdVector(std::istream &is) {
     std::cerr << "ReadStdVector operation failed because stream is not valid\n";
     throw TerminalException{1};
   }
-  T eVal;
   size_t nbRow;
   is >> nbRow;
+  check_read_dimensions(is, "ReadStdVector");
   std::vector<T> eVect(nbRow);
-  for (size_t iRow = 0; iRow < nbRow; iRow++) {
-    is >> eVal;
-    eVect[iRow] = eVal;
-  }
+  for (size_t iRow = 0; iRow < nbRow; iRow++)
+    eVect[iRow] = read_entry_checked<T>(is, "ReadStdVector", iRow, 0);
   return eVect;
 }
 
