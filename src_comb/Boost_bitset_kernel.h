@@ -398,6 +398,7 @@ template <typename Tidx> std::vector<Tidx> FaceToVector(Face const &eSet) {
   return eList;
 }
 
+// The faces as the lists of their elements, 1-based as GAP indexes.
 inline void WriteVectfaceGAP(std::ostream &os, vectface const &vf) {
   bool IsFirst = true;
   os << "[";
@@ -407,6 +408,8 @@ inline void WriteVectfaceGAP(std::ostream &os, vectface const &vf) {
     }
     IsFirst = false;
     std::vector<size_t> eList = FaceToVector<size_t>(trig);
+    for (auto &idx : eList)
+      idx++;
     os << StringStdVectorGAP(eList);
   }
   os << "]";
