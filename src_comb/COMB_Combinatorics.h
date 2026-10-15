@@ -161,7 +161,17 @@ public:
   //
   // hand written loop functionality
   //
+  // There is no element when a size is zero (or negative), and a single
+  // one, the empty tuple, when there is no coordinate.
+  bool is_empty() const {
+    for (size_t i = 0; i < dim; i++)
+      if (VectSiz[i] <= 0)
+        return true;
+    return false;
+  }
   size_t size() const {
+    if (is_empty())
+      return 0;
     size_t eRet = 1;
     for (size_t i = 0; i < dim; i++)
       eRet *= VectSiz[i];
@@ -172,23 +182,25 @@ public:
   //
   struct IteratorContain {
   private:
-    size_t dim_iter;
     std::vector<int> VectSiz;
     std::vector<int> U;
+    // The end is a flag rather than an empty U, since the empty tuple is
+    // the single element when there is no coordinate.
+    bool is_end;
     void single_increase() {
-      for (size_t i = 0; i < dim_iter; i++)
+      for (size_t i = 0; i < VectSiz.size(); i++)
         if (U[i] < VectSiz[i] - 1) {
           U[i]++;
           for (size_t j = 0; j < i; j++)
             U[j] = 0;
           return;
         }
-      U = {};
+      is_end = true;
     }
 
   public:
-    IteratorContain(std::vector<int> const &VectSiz, std::vector<int> const &U)
-        : dim_iter(VectSiz.size()), VectSiz(VectSiz), U(U) {}
+    IteratorContain(std::vector<int> const &VectSiz, bool is_end)
+        : VectSiz(VectSiz), U(VectSiz.size(), 0), is_end(is_end) {}
     std::vector<int> const &operator*() { return U; }
     IteratorContain &operator++() {
       single_increase();
@@ -199,31 +211,13 @@ public:
       single_increase();
       return tmp;
     }
-    bool operator!=(IteratorContain const &iter) {
-      if (dim_iter != iter.dim_iter)
-        return true;
-      for (size_t i = 0; i < dim_iter; i++)
-        if (VectSiz[i] != iter.VectSiz[i])
-          return true;
-      if (U.size() != iter.U.size())
-        return true;
-      for (size_t i = 0; i < U.size(); i++)
-        if (U[i] != iter.U[i])
-          return true;
-      return false;
+    bool operator==(IteratorContain const &iter) const {
+      if (is_end || iter.is_end)
+        return is_end == iter.is_end;
+      return U == iter.U;
     }
-    bool operator==(IteratorContain const &iter) {
-      if (dim_iter != iter.dim_iter)
-        return false;
-      for (size_t i = 0; i < dim_iter; i++)
-        if (VectSiz[i] != iter.VectSiz[i])
-          return false;
-      if (U.size() != iter.U.size())
-        return false;
-      for (size_t i = 0; i < dim_iter; i++)
-        if (U[i] != iter.U[i])
-          return false;
-      return true;
+    bool operator!=(IteratorContain const &iter) const {
+      return !(*this == iter);
     }
   };
 
@@ -231,14 +225,10 @@ public:
   // The iterator business
   using iterator = IteratorContain;
   using const_iterator = IteratorContain;
-  const_iterator cbegin() const {
-    return IteratorContain(VectSiz, std::vector<int>(dim, 0));
-  }
-  const_iterator cend() const { return IteratorContain(VectSiz, {}); }
-  const_iterator begin() const {
-    return IteratorContain(VectSiz, std::vector<int>(dim, 0));
-  }
-  const_iterator end() const { return IteratorContain(VectSiz, {}); }
+  const_iterator cbegin() const { return IteratorContain(VectSiz, is_empty()); }
+  const_iterator cend() const { return IteratorContain(VectSiz, true); }
+  const_iterator begin() const { return IteratorContain(VectSiz, is_empty()); }
+  const_iterator end() const { return IteratorContain(VectSiz, true); }
 
 private:
   size_t dim;
