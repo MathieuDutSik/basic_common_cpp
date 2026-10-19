@@ -4,6 +4,7 @@
 // clang-format off
 #include "Basic_functions.h"
 #include "TemplateTraits.h"
+#include "QuoIntFcts.h"
 #include <vector>
 #include <optional>
 #include <limits>
@@ -39,9 +40,11 @@ template <typename T> T GenericGcd(T const &m, T const &n) {
   dropped is recovered at the end from the number of steps, the identity
   being a t_k = (-1)^k gcd modulo P.
 
-  The operands of the division are non negative throughout, so the
-  truncation is the floor and the quotient is the Euclidean one for the
-  signed and the unsigned types alike.
+  The quotient is QuoInt and not the operator /, which on a field type
+  such as mpq_class is the exact division: the remainder would then be zero
+  after one step and every element would be declared non invertible. The
+  operands are non negative throughout, so QuoInt is the Euclidean quotient
+  for the signed and the unsigned types alike.
  */
 template <typename T> T mod_inv(T const &a, T const &P) {
   T r0 = P;
@@ -50,7 +53,7 @@ template <typename T> T mod_inv(T const &a, T const &P) {
   T t1(1);
   size_t n_step = 0;
   while (r1 != 0) {
-    T q = r0 / r1;
+    T q = QuoInt(r0, r1);
     T r2 = r0 - q * r1;
     T t2 = t0 + q * t1;
     r0 = r1;
