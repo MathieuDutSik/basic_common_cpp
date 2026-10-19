@@ -148,6 +148,9 @@ struct underlying_totally_ordered_ring<NT_BOOST_RAT> {
   typedef NT_BOOST_RAT real_type;
 };
 
+// In the namespace of the boost types, so that argument dependent lookup
+// finds the function from the templates defined before this header.
+namespace boost::multiprecision {
 inline NT_BOOST_INT
 CanonicalizationUnit(NT_BOOST_INT const &eVal) {
   if (eVal < 0)
@@ -160,6 +163,7 @@ CanonicalizationUnit(NT_BOOST_RAT const &eVal) {
     return -1;
   return 1;
 }
+}  // namespace boost::multiprecision
 
 namespace boost::multiprecision {
 inline void ResInt_Kernel(NT_BOOST_INT const &a,
@@ -255,6 +259,9 @@ void QUO_INT(stc<NT_BOOST_RAT> const &a,
 
 #include "QuoIntFcts.h"
 
+// In the namespace of the boost types, so that argument dependent lookup
+// finds the function from the templates defined before this header.
+namespace boost::multiprecision {
 inline bool IsInteger(NT_BOOST_RAT const &x) {
   NT_BOOST_INT one = 1;
   NT_BOOST_INT eDen = denominator(x);
@@ -312,6 +319,7 @@ inline NT_BOOST_INT
 GetDenominator_z([[maybe_unused]] NT_BOOST_INT const &x) {
   return 1;
 }
+}  // namespace boost::multiprecision
 
 //
 
@@ -734,6 +742,9 @@ NT_BOOST_CEIL_RAT(NT_BOOST_RAT const &x) {
   return 1 + x - eFrac;
 }
 
+// In the namespace of the boost types, so that argument dependent lookup
+// finds the function from the templates defined before this header.
+namespace boost::multiprecision {
 inline void FloorInteger(NT_BOOST_RAT const &xI,
                          NT_BOOST_RAT &xO) {
   xO = NT_BOOST_FLOOR_RAT(xI);
@@ -838,6 +849,7 @@ bool universal_square_root(NT_BOOST_RAT &ret,
   ret = Tf(ret_n) / Tf(ret_d);
   return true;
 }
+}  // namespace boost::multiprecision
 
 #undef NT_BOOST_INT
 #undef NT_BOOST_RAT
