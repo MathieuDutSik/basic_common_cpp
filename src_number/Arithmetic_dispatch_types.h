@@ -78,6 +78,35 @@ void add_rational_arithmetics_by_library(ArithmeticDispatch &dispatch, F f) {
 #endif
 }
 
+// The rational fields with their integer rings, under the names of their
+// libraries; f is run as f.template operator()<T, Tint>().
+template <typename F>
+void add_rational_integer_arithmetics_by_library(ArithmeticDispatch &dispatch,
+                                                 F f) {
+  dispatch.add("gmp", "GMP mpq_class and mpz_class", [f]() -> void {
+    f.template operator()<mpq_class, mpz_class>();
+  });
+#ifdef ENABLE_BOOST_TYPES
+  dispatch.add("gmp_boost",
+               "boost::multiprecision::mpq_rational and mpz_int",
+               [f]() -> void {
+                 f.template operator()<boost::multiprecision::mpq_rational,
+                                       boost::multiprecision::mpz_int>();
+               });
+  dispatch.add("multi_boost",
+               "boost::multiprecision::cpp_rational and cpp_int",
+               [f]() -> void {
+                 f.template operator()<boost::multiprecision::cpp_rational,
+                                       boost::multiprecision::cpp_int>();
+               });
+#endif
+#ifdef ENABLE_FLINT_SUPPORT
+  dispatch.add("flint", "FLINT fmpq_class and fmpz_class", [f]() -> void {
+    f.template operator()<fmpq_class, fmpz_class>();
+  });
+#endif
+}
+
 // The integer rings: mpz_class, the boost ones, fmpz_class.
 template <typename F>
 void add_integer_arithmetics(ArithmeticDispatch &dispatch, F f) {
