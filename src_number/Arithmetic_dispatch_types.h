@@ -79,26 +79,30 @@ void add_rational_arithmetics_by_library(ArithmeticDispatch &dispatch, F f) {
 }
 
 // The rational fields with their integer rings, under the names of their
-// libraries; f is run as f.template operator()<T, Tint>().
-template <typename F>
+// libraries; f is run as f.template operator()<T, Tint>(). A program whose
+// code does not support the boost types passes with_boost = false, so that a
+// build with ENABLE_BOOST_TYPES does not instantiate it on them.
+template <bool with_boost = true, typename F>
 void add_rational_integer_arithmetics_by_library(ArithmeticDispatch &dispatch,
                                                  F f) {
   dispatch.add("gmp", "GMP mpq_class and mpz_class", [f]() -> void {
     f.template operator()<mpq_class, mpz_class>();
   });
 #ifdef ENABLE_BOOST_TYPES
-  dispatch.add("gmp_boost",
-               "boost::multiprecision::mpq_rational and mpz_int",
-               [f]() -> void {
-                 f.template operator()<boost::multiprecision::mpq_rational,
-                                       boost::multiprecision::mpz_int>();
-               });
-  dispatch.add("multi_boost",
-               "boost::multiprecision::cpp_rational and cpp_int",
-               [f]() -> void {
-                 f.template operator()<boost::multiprecision::cpp_rational,
-                                       boost::multiprecision::cpp_int>();
-               });
+  if constexpr (with_boost) {
+    dispatch.add("gmp_boost",
+                 "boost::multiprecision::mpq_rational and mpz_int",
+                 [f]() -> void {
+                   f.template operator()<boost::multiprecision::mpq_rational,
+                                         boost::multiprecision::mpz_int>();
+                 });
+    dispatch.add("multi_boost",
+                 "boost::multiprecision::cpp_rational and cpp_int",
+                 [f]() -> void {
+                   f.template operator()<boost::multiprecision::cpp_rational,
+                                         boost::multiprecision::cpp_int>();
+                 });
+  }
 #endif
 #ifdef ENABLE_FLINT_SUPPORT
   dispatch.add("flint", "FLINT fmpq_class and fmpz_class", [f]() -> void {
