@@ -152,13 +152,13 @@ inline PairGCD_dot<T> ComputePairGcdDot(T const &m, T const &n) {
 }
 
 template <typename T>
-requires (!is_mpz_class<T>::value)
+requires (!is_mpz_class<T>::value && is_euclidean_domain<T>::value)
 inline T KernelGcdPair(T const &a, T const &b) {
   return GenericGcd(a, b);
 }
 
 template <typename T>
-requires is_totally_ordered<T>::value
+requires (is_euclidean_domain<T>::value && is_totally_ordered<T>::value)
 inline T GcdPair(T const &a, T const &b) {
   T eGCD = KernelGcdPair(a, b);
   if (eGCD > 0)
@@ -167,13 +167,13 @@ inline T GcdPair(T const &a, T const &b) {
 }
 
 template <typename T>
-requires (!is_totally_ordered<T>::value)
+requires (is_euclidean_domain<T>::value && !is_totally_ordered<T>::value)
 inline T GcdPair(T const &a, T const &b) {
   return KernelGcdPair(a, b);
 }
 
 template <typename T>
-requires (!is_mpz_class<T>::value)
+requires (!is_mpz_class<T>::value && is_euclidean_domain<T>::value)
 inline T KernelLCMpair(T const &a, T const &b) {
   if (a == 0)
     return b;
@@ -183,13 +183,13 @@ inline T KernelLCMpair(T const &a, T const &b) {
 }
 
 template <typename T>
-requires (!is_totally_ordered<T>::value)
+requires (is_euclidean_domain<T>::value && !is_totally_ordered<T>::value)
 inline T LCMpair(T const &a, T const &b) {
   return KernelLCMpair(a, b);
 }
 
 template <typename T>
-requires is_totally_ordered<T>::value
+requires (is_euclidean_domain<T>::value && is_totally_ordered<T>::value)
 inline T LCMpair(T const &a, T const &b) {
   T eLCM = KernelLCMpair(a, b);
   if (eLCM > 0)

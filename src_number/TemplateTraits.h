@@ -70,6 +70,18 @@ template <> struct is_euclidean_domain<int16_t> {
 template <> struct is_euclidean_domain<int8_t> {
   static const bool value = true;
 };
+template <> struct is_euclidean_domain<uint64_t> {
+  static const bool value = true;
+};
+template <> struct is_euclidean_domain<uint32_t> {
+  static const bool value = true;
+};
+template <> struct is_euclidean_domain<uint16_t> {
+  static const bool value = true;
+};
+template <> struct is_euclidean_domain<uint8_t> {
+  static const bool value = true;
+};
 
 // overlying_field block
 

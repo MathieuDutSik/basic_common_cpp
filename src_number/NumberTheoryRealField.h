@@ -1991,11 +1991,12 @@ inline void serialize(Archive &ar, RealField<i_field> &val,
 
 template <typename Tring, int i_field>
 void ScalingInteger_Kernel(stc<RealField<i_field>> const &x, Tring &x_res) {
+  // The lcm of the denominators, which are positive integers.
   std::vector<Trat_real_field> V = x.val.get_x_basis();
-  std::vector<Tring> Vd;
+  Tring eLCM(1);
   for (auto &val : V)
-    Vd.push_back(GetDenominator_z(val));
-  x_res = LCMlist(Vd);
+    eLCM = KernelLCMpair(eLCM, GetDenominator_z(val));
+  x_res = eLCM;
 }
 
 // clang-format off

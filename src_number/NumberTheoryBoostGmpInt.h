@@ -9,6 +9,7 @@
 #include "TemplateTraits.h"
 #include "TypeConversion.h"
 #include "boost_serialization.h"
+#include "gmp_pool_allocator.h"
 #include <boost/multiprecision/gmp.hpp>
 #include <boost/serialization/nvp.hpp>
 #include <boost/serialization/split_free.hpp>

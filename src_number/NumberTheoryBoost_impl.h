@@ -163,6 +163,20 @@ CanonicalizationUnit(NT_BOOST_RAT const &eVal) {
     return -1;
   return 1;
 }
+// The gcd and the lcm of the integers, as NumberTheoryGmp.h and
+// NumberTheoryFlint.h provide them for their own integer types.
+inline NT_BOOST_INT KernelGcdPair(NT_BOOST_INT const &a,
+                                  NT_BOOST_INT const &b) {
+  return gcd(a, b);
+}
+inline NT_BOOST_INT KernelLCMpair(NT_BOOST_INT const &a,
+                                  NT_BOOST_INT const &b) {
+  if (a == 0)
+    return b;
+  if (b == 0)
+    return a;
+  return lcm(a, b);
+}
 }  // namespace boost::multiprecision
 
 namespace boost::multiprecision {

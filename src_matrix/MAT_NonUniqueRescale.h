@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "MAT_MatrixFund.h"
+#include "NumberTheoryGeneric.h"
 #include <utility>
 #include <vector>
 // clang-format on
