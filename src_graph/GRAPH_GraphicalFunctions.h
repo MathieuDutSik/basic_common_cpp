@@ -375,6 +375,8 @@ bool IsClique(Tgr const &GR, std::vector<size_t> const &eList) {
   return true;
 }
 
+// A starting cell for the inverse line graph computation, or an empty
+// vector if GR is not a line graph.
 template <typename Tgr> std::vector<size_t> StartingCell(Tgr const &GR) {
   std::vector<size_t> A = GR.Adjacency(0);
   size_t eC = A[0];
@@ -470,8 +472,8 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
   }
   std::vector<size_t> eCell = StartingCell(GR);
   if (eCell.size() == 0) {
-    std::cerr << "Failed to find starting cell\n";
-    throw TerminalException{1};
+    // No starting cell: GR is not a line graph.
+    return {{-1}};
   }
 #ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "eCell=";
@@ -479,9 +481,6 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
   std::cerr << "\n";
 #endif
   std::vector<size_t> eCellS = VectorAsSet(eCell);
-  if (eCell[0] == std::numeric_limits<size_t>::max()) {
-    return {{-1}};
-  }
   std::vector<std::vector<size_t>> P = {eCell};
   std::vector<std::vector<size_t>> TotalEdge(nbVert);
   for (size_t iVert = 0; iVert < nbVert; iVert++)

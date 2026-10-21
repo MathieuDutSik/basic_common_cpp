@@ -2,20 +2,20 @@
 #ifndef SRC_COMB_COMB_VECTORS_H_
 #define SRC_COMB_COMB_VECTORS_H_
 
+#include <algorithm>
 #include <set>
 #include <unordered_set>
 #include <vector>
 
+// The union of V1 and V2 as a sorted vector without repetitions, like the
+// Union of GAP. The callers rely on the order, for example to compare edges
+// {i, j} with i < j, so it must not be the order of a hash table.
 template <typename T>
 std::vector<T> UnionVect(std::vector<T> const &V1, std::vector<T> const &V2) {
-  std::unordered_set<T> eSet;
-  for (auto &eVal : V1)
-    eSet.insert(eVal);
-  for (auto &eVal : V2)
-    eSet.insert(eVal);
-  std::vector<T> eV;
-  for (auto &eVal : eSet)
-    eV.push_back(eVal);
+  std::vector<T> eV = V1;
+  eV.insert(eV.end(), V2.begin(), V2.end());
+  std::sort(eV.begin(), eV.end());
+  eV.erase(std::unique(eV.begin(), eV.end()), eV.end());
   return eV;
 }
 template <typename T>
@@ -89,13 +89,12 @@ bool IsEqualSet(std::vector<T> const &V1, std::vector<T> const &V2) {
   return true;
 }
 
+// The entries of V as a sorted vector without repetitions, like the Set of
+// GAP (see UnionVect for why the order matters).
 template <typename T> std::vector<T> VectorAsSet(std::vector<T> const &V) {
-  std::unordered_set<T> eSet;
-  for (auto &eVal : V)
-    eSet.insert(eVal);
-  std::vector<T> eV;
-  for (auto &eVal : eSet)
-    eV.push_back(eVal);
+  std::vector<T> eV = V;
+  std::sort(eV.begin(), eV.end());
+  eV.erase(std::unique(eV.begin(), eV.end()), eV.end());
   return eV;
 }
 
