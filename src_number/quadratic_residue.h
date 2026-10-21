@@ -175,7 +175,7 @@ std::optional<T> find_quadratic_residue_map(T const &a_in,
   }
   T x1 = chinese_remainder_theorem(a, m);
   T x2 = ResInt(x1, m_prod);
-#ifdef DEBUG_QUADRATIC_RESIDUE
+#ifdef SANITY_CHECK_QUADRATIC_RESIDUE
   T diff = x2 * x2 - a_in;
   T res = ResInt(diff, m_prod);
   if (res != 0) {
@@ -232,7 +232,7 @@ int get_legendre_symbol_power_two(size_t const &power, T const &P) {
   T val = P * P - 1;
   T eight(8);
   T quot = QuoInt(val, eight);
-#ifdef DEBUG_QUADRATIC_RESIDUE
+#ifdef SANITY_CHECK_QUADRATIC_RESIDUE
   T res = ResInt(val, eight);
   if (res != 0) {
     std::cerr << "The residue is not what we expected\n";
@@ -254,7 +254,7 @@ int get_legendre_symbol_power_two(size_t const &power, T const &P) {
 }
 
 template <typename T> bool compute_jacobi_symbol(T const &a_in, T const &m) {
-#ifdef DEBUG_QUADRATIC_RESIDUE
+#ifdef SANITY_CHECK_QUADRATIC_RESIDUE
   T gcd = T_abs(GcdPair(a_in, m));
   if (gcd != 1) {
     std::cerr << "The algorithm is not working for gcd > 1 right now\n";

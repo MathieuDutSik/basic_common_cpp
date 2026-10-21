@@ -148,7 +148,7 @@ template <typename T> MyMatrix<T> InverseBareiss(MyMatrix<T> const &Input) {
           continue;
         T val = pivot * M(i, j) - M(i, k) * M(k, j);
         T quot = val / prev; // exact division guaranteed by Bareiss's theorem
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MATRIX_INVERSE
         if (quot * prev != val) {
           std::cerr << "InverseBareiss: non-exact division, T is not an "
                        "integral domain\n";

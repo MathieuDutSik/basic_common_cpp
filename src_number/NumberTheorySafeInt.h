@@ -70,7 +70,7 @@ private:
 
 public:
   SafeInt64() : val(0) {
-#ifdef SANITY_CHECK_SAFETY_INTEGER
+#ifdef DEBUG_SAFETY_INTEGER
     std::cerr << "Default constructor for SafeInt64 val=" << val << "\n";
 #endif
   }
@@ -82,12 +82,12 @@ public:
   template <class U,
             std::enable_if_t<std::is_integral_v<U>, int> = 0>
   SafeInt64(U const &x) : val(static_cast<Tint>(x)) {
-#ifdef SANITY_CHECK_SAFETY_INTEGER
+#ifdef DEBUG_SAFETY_INTEGER
     std::cerr << "Integral constructor for SafeInt64 val=" << val << "\n";
 #endif
   }
   SafeInt64(SafeInt64 const &x) : val(x.val) {
-#ifdef SANITY_CHECK_SAFETY_INTEGER
+#ifdef DEBUG_SAFETY_INTEGER
     std::cerr << "SafeInt64 constructor for SafeInt64 val=" << x << "\n";
 #endif
   }

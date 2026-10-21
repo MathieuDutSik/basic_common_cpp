@@ -211,7 +211,7 @@ Padic<T> Padic_from_integer(T const &val, T const &p, size_t const &precision) {
 template <typename T>
 Padic<T> Padic_reduce_precision(Padic<T> const &x,
                                 size_t const &new_precision) {
-#ifdef DEBUG_PADIC
+#ifdef SANITY_CHECK_PADIC
   if (x.precision < new_precision) {
     std::cerr << "The precision can only be decreased\n";
     throw TerminalException{1};
@@ -348,7 +348,7 @@ Padic<T> Padic_addition([[maybe_unused]] Padic<T> const &x,
 
 // We assume that x is reduced
 template <typename T> bool Padic_is_square(Padic<T> const &x, T const &p) {
-#ifdef DEBUG_PADIC
+#ifdef SANITY_CHECK_PADIC
   if (x.coefficients[0] == 0) {
     std::cerr << "First coefficient has to be non-zero\n";
     throw TerminalException{1};
@@ -364,7 +364,7 @@ template <typename T> bool Padic_is_square(Padic<T> const &x, T const &p) {
     if (x.precision < 3) {
       throw PadicPrecisionException{5};
     }
-#ifdef DEBUG_PADIC
+#ifdef SANITY_CHECK_PADIC
     T coeff0 = Padic_coeff(x, 0);
     if (coeff0 != 1) {
       std::cerr << "Inconsistent value\n";

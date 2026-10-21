@@ -161,7 +161,7 @@ bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M,
     T const &y = *opt;
     T xn = y - lin;
     V(n - 1) = xn;
-#ifdef DEBUG_MOD_OPERATION
+#ifdef SANITY_CHECK_MATRIX_MOD
     T sum = 0;
     for (int i = 0; i < n; i++)
       for (int j = 0; j < n; j++)
@@ -407,6 +407,8 @@ SelectionRowCol<T> SelectRowColMatMod(MyMatrix<T> const &M, T const &TheMod) {
   }
 #ifdef DEBUG_MATRIX_MOD
   std::cerr << "MATMOD: NSP built\n";
+#endif
+#ifdef SANITY_CHECK_MATRIX_MOD
   MyMatrix<T> prod = M * NSP.transpose();
   if (!IsMatrixZeroMod(prod, TheMod)) {
     std::cerr << "SelectRowColMatMod: The matrix prod is not zero\n";
@@ -426,7 +428,7 @@ template <typename T>
 MyMatrix<T> NullspaceMatMod(MyMatrix<T> const &M, T const &TheMod) {
   MyMatrix<T> Mtr = M.transpose();
   MyMatrix<T> NSP = NullspaceTrMatMod(Mtr, TheMod);
-#ifdef DEBUG_MATRIX_MOD
+#ifdef SANITY_CHECK_MATRIX_MOD
   MyMatrix<T> prod = NSP * M;
   if (!IsMatrixZeroMod(prod, TheMod)) {
     std::cerr << "NullspaceMatProd: The matrix prod is not zero\n";
@@ -469,7 +471,7 @@ public:
     NSP = NullspaceTrMatMod(Space, TheMod);
   }
   bool has_solution_v(MyVector<T> const &V) const {
-#ifdef DEBUG_MATRIX_MOD
+#ifdef SANITY_CHECK_MATRIX_MOD
     if (V.size() != n) {
       std::cerr << "RECSOLMOD: V has size " << V.size()
                 << " but the space lives in dimension " << n << "\n";
@@ -493,7 +495,7 @@ public:
     return true;
   }
   bool is_containing_m(MyMatrix<T> const &M) const {
-#ifdef DEBUG_MATRIX_MOD
+#ifdef SANITY_CHECK_MATRIX_MOD
     if (M.cols() != n) {
       std::cerr << "RECSOLMOD: M has " << M.cols()
                 << " columns but the space lives in dimension " << n << "\n";

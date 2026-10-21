@@ -96,7 +96,7 @@ template <typename T> T DeterminantMatBareiss(MyMatrix<T> const &Input) {
       for (int j = k + 1; j < n; j++) {
         T val = M(i, j) * M(k, k) - M(i, k) * M(k, j);
         T quot = val / prev; // exact division guaranteed by Bareiss's theorem
-#ifdef DEBUG_MAT_MATRIX
+#ifdef SANITY_CHECK_MAT_MATRIX
         // For a deferred-checking type, report a pending overflow before the
         // exactness check: on wrapped values the division is legitimately
         // non-exact and must surface as TryIntException, not as a bug.

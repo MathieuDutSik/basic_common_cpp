@@ -225,7 +225,7 @@ template <typename T> std::optional<T> UniversalSquareRoot(T const &val) {
  */
 template <typename T>
 T chinese_remainder_theorem(std::vector<T> const &a, std::vector<T> const &m) {
-#ifdef DEBUG_NUMBER_THEORY_GENERIC
+#ifdef SANITY_CHECK_NB_THEORY_GENERIC
   if (a.size() != m.size()) {
     std::cerr << "a and m should be of equal lengths\n";
     throw TerminalException{1};
@@ -240,14 +240,14 @@ T chinese_remainder_theorem(std::vector<T> const &a, std::vector<T> const &m) {
   T m_prod = m[0];
   for (size_t i = 1; i < siz; i++) {
     PairGCD_dot<T> t = ComputePairGcdDot(m_prod, m[i]);
-#ifdef DEBUG_NUMBER_THEORY_GENERIC
+#ifdef SANITY_CHECK_NB_THEORY_GENERIC
     if (t.gcd != 1) {
       std::cerr << "The GCD should be equal to 1\n";
       throw TerminalException{1};
     }
 #endif
     x = x * t.b * m[i] + a[i] * t.a * m_prod;
-#ifdef DEBUG_NUMBER_THEORY_GENERIC
+#ifdef SANITY_CHECK_NB_THEORY_GENERIC
     T sum = t.b * m[i] + t.a * m_prod;
     if (sum != 1) {
       std::cerr << "The t is not correct\n";
@@ -256,7 +256,7 @@ T chinese_remainder_theorem(std::vector<T> const &a, std::vector<T> const &m) {
 #endif
     m_prod *= m[i];
   }
-#ifdef DEBUG_NUMBER_THEORY_GENERIC
+#ifdef SANITY_CHECK_NB_THEORY_GENERIC
   for (size_t i = 0; i < siz; i++) {
     T diff = x - a[i];
     T res = ResInt(diff, m[i]);

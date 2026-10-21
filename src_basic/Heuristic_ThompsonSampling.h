@@ -617,12 +617,16 @@ struct LimitedEmpiricalDistributionFunction {
 #ifdef DEBUG_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
     std::cerr << "LEDF: n_ins=" << n_ins << " |ListValWei|=" << len << "\n";
     std::cerr << "LEDF: ListValWei =";
-    size_t n_total = 0;
     for (auto &kv : ListValWei) {
       std::cerr << " (" << kv.first << "|" << kv.second << ")";
-      n_total += kv.second;
     }
     std::cerr << "\n";
+#endif
+#ifdef SANITY_CHECK_LIMITED_EMPIRICAL_DISTRIBUTION_FUNCTION
+    size_t n_total = 0;
+    for (auto &kv : ListValWei) {
+      n_total += kv.second;
+    }
     if (n_ins != n_total) {
       std::cerr << "LEDF: n_ins=" << n_ins << " n_total=" << n_total << "\n";
       throw TerminalException{1};

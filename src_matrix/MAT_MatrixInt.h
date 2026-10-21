@@ -2005,7 +2005,7 @@ MyVector<T> SmithNormalFormInvariant(MyMatrix<T> const &M) {
 template <typename T>
 MyMatrix<T> SubspaceCompletionInt(MyMatrix<T> const &M, int const &n) {
   int nbRow = M.rows();
-#ifdef DEBUG_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT
   if (nbRow > 0) {
     if (M.cols() != n) {
       std::cerr << "MAT_INT: We should have M.cols() = n\n";
@@ -3247,8 +3247,8 @@ MyMatrix<T> GetZbasis_Kernel(MyMatrix<T> const &ListElement) {
   }
 
   // That check is just too expensive. Skipping it.
-#ifdef SANITY_CHECK_EXTENSIVE_MATRIX_INT
-  std::cerr << "Before SANITY_CHECK_EXTENSIVE_MATRIX_INT of GetZbasis\n";
+#ifdef SANITY_CHECK_MATRIX_INT_EXTENSIVE
+  std::cerr << "Before SANITY_CHECK_MATRIX_INT_EXTENSIVE of GetZbasis\n";
   int DimSpace = TheBasis.rows();
   for (int iBas = 0; iBas < DimSpace; iBas++) {
     MyVector<T> eLine = GetMatrixRow(TheBasis, iBas);
@@ -3266,7 +3266,7 @@ MyMatrix<T> GetZbasis_Kernel(MyMatrix<T> const &ListElement) {
       throw TerminalException{1};
     }
   }
-  std::cerr << "After SANITY_CHECK_EXTENSIVE_MATRIX_INT of GetZbasis\n";
+  std::cerr << "After SANITY_CHECK_MATRIX_INT_EXTENSIVE of GetZbasis\n";
 #endif
   return TheBasis;
 }
@@ -3579,7 +3579,9 @@ MyMatrix<T> GetZbasis_Hermite(MyMatrix<T> const &ListElement) {
   } else {
     RetBasis = GetZbasis_Hermite_Deficient(ListElement, rec);
   }
-#ifdef SANITY_CHECK_EXTENSIVE_MATRIX_INT
+#ifdef SANITY_CHECK_MATRIX_INT_EXTENSIVE
+  std::cerr << "Before SANITY_CHECK_MATRIX_INT_EXTENSIVE of "
+               "GetZbasis_Hermite\n";
   int nbRow = ListElement.rows();
   for (int iRow = 0; iRow < nbRow; iRow++) {
     MyVector<T> eElt = GetMatrixRow(ListElement, iRow);
@@ -3599,6 +3601,7 @@ MyMatrix<T> GetZbasis_Hermite(MyMatrix<T> const &ListElement) {
       throw TerminalException{1};
     }
   }
+  std::cerr << "After SANITY_CHECK_MATRIX_INT_EXTENSIVE of GetZbasis_Hermite\n";
 #endif
   return RetBasis;
 }
