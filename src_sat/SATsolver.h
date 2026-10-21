@@ -7,6 +7,10 @@
 #include "minisat/core/Solver.h"
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_SAT_SOLVER
+#endif
+
 struct SATformulation {
   int nbVar;
   std::vector<std::vector<int>> ListExpr;
@@ -65,7 +69,9 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
   //  Solver *solver;
   //  solver = &S;
   int nbVar = eExpr.nbVar;
+#ifdef DEBUG_SAT_SOLVER
   std::cerr << "nbVar=" << nbVar << "\n";
+#endif
   std::vector<Minisat::Var> ListVar;
   for (int iVar = 0; iVar < nbVar; iVar++)
     ListVar.push_back(S.newVar());
@@ -81,8 +87,10 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
     }
     return Minisat::mkLit(ListVar[pos], val);
   };
+#ifdef DEBUG_SAT_SOLVER
   std::cerr << "nbClause=" << eExpr.ListExpr.size() << "\n";
-  int TotalSiz = 0;
+#endif
+  [[maybe_unused]] int TotalSiz = 0;
   for (auto &eList : eExpr.ListExpr) {
     int siz = eList.size();
     TotalSiz += siz;
@@ -97,7 +105,9 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
       S.addClause_(ListLit);
     }
   }
+#ifdef DEBUG_SAT_SOLVER
   std::cerr << "TotalSiz=" << TotalSiz << "\n";
+#endif
   int iter = 0;
   while (S.solve()) {
     Face eFace(nbVar);
@@ -125,7 +135,9 @@ void SATenumeration(SATformulation const &eExpr, int const &MAX_ITER,
       if (iter > MAX_ITER)
         break;
   }
+#ifdef DEBUG_SAT_SOLVER
   std::cerr << "iter=" << iter << "\n";
+#endif
 }
 
 // clang-format off

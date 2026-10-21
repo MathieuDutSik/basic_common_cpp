@@ -12,6 +12,10 @@
 #include <unordered_set>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_GRAPHICAL_FUNCTIONS
+#endif
+
 struct GraphFunctional {
 public:
   GraphFunctional() = delete;
@@ -469,9 +473,11 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
     std::cerr << "Failed to find starting cell\n";
     throw TerminalException{1};
   }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "eCell=";
   WriteVectorInt_GAP(std::cerr, eCell);
   std::cerr << "\n";
+#endif
   std::vector<size_t> eCellS = VectorAsSet(eCell);
   if (eCell[0] == std::numeric_limits<size_t>::max()) {
     return {{-1}};
@@ -488,7 +494,9 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
     PreTot += eSize;
   }
   size_t Tot = PreTot / 2;
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "Tot=" << Tot << "\n";
+#endif
   auto GetAdding = [&]() -> size_t {
     for (size_t &iVert : eCellS)
       if (TotalEdge[iVert].size() > 0)
@@ -497,11 +505,15 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
     throw TerminalException{1};
   };
   while (true) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Tot=" << Tot << "\n";
+#endif
     if (Tot == 0)
       break;
     size_t Adding = GetAdding();
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Adding=" << Adding << "\n";
+#endif
     eCell = UnionVect(TotalEdge[Adding], {Adding});
     for (auto &eVert : eCell)
       for (auto &fVert : eCell)
@@ -514,10 +526,14 @@ std::vector<std::vector<int>> InverseLineGraphConnected(Tgr const &GR) {
       TotalEdge[iV] = DifferenceVect(TotalEdge[iV], eCell);
     size_t Csiz = eCell.size();
     size_t nbEdge = Csiz * (Csiz - 1) / 2;
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Before Csiz=" << Csiz << " nbEdge=" << nbEdge
               << " Tot=" << Tot << "\n";
+#endif
     Tot -= nbEdge;
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "After Tot=" << Tot << "\n";
+#endif
   }
   for (size_t iVert = 0; iVert < nbVert; iVert++) {
     int nb = 0;
@@ -696,8 +712,10 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
   }
   MyMatrix<int> M =
       UniversalMatrixConversion<int, size_t>(ShortestPathDistanceMatrix(GR));
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "M=\n";
   WriteMatrix(std::cerr, M);
+#endif
   if (M(0, 0) == -1) {
     std::cerr << "The graph should be connected\n";
     return {};
@@ -705,13 +723,19 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
   std::vector<int> SetZero{0};
   std::vector<int> SetOne{1};
   std::vector<int> SetTwo{2};
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "****Start treating " << s << "-embedding\n";
+#endif
   size_t n = GR.GetNbVert();
   std::vector<std::vector<size_t>> ListEdge = GetEdgeSet(GR);
   size_t nbEdge = ListEdge.size();
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "nbEdge=" << nbEdge << "\n";
+#endif
   size_t DiamGraph = Diameter(GR);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "DiamGraph=" << DiamGraph << "\n";
+#endif
   auto EdgeDist = [&](size_t const &iEdge, size_t const &jEdge) -> int {
     size_t a, b, c, d, swp;
     a = ListEdge[iEdge][0];
@@ -747,11 +771,13 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     if (ListDistRed.size() == 0) {
       return -400;
     }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     if (ListDistRed.size() > 1) {
       std::cerr << "We find |ListDist|=" << ListDistRed.size() << "ListDist=";
       WriteVectorInt_GAP(std::cerr, ListDistRed);
       std::cerr << "\n";
     }
+#endif
     for (auto &eVal : ListDistRed)
       if (eVal >= 0)
         return eVal;
@@ -760,10 +786,12 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
   std::vector<std::vector<size_t>> ConSet(nbEdge);
   for (size_t iEdge = 0; iEdge < nbEdge; iEdge++)
     ConSet[iEdge] = {iEdge};
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   for (size_t iEdge = 0; iEdge < nbEdge; iEdge++) {
     std::cerr << "iEdge=" << iEdge << " e=" << ListEdge[iEdge][0] << ","
               << ListEdge[iEdge][1] << "\n";
   }
+#endif
   MyMatrix<std::vector<int>> MCE(nbEdge, nbEdge);
   int NbPrev = 0;
   int NbUnsolved = 0;
@@ -772,8 +800,10 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     for (size_t jEdge = iEdge + 1; jEdge < nbEdge; jEdge++) {
       int val = EdgeDist(iEdge, jEdge);
       std::vector<int> LVal;
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "iEdge=" << iEdge << " jEdge=" << jEdge << " val=" << val
                 << "\n";
+#endif
       if (val == -400) {
         LVal = {0, 1, 2};
         NbUnsolved++;
@@ -791,9 +821,11 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
       MCE(jEdge, iEdge) = LVal;
       NbPrev += 2;
     }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "NbUnsolved=" << NbUnsolved << "\n";
   std::cerr << "NbPrev    =" << NbPrev << "\n";
   std::cerr << "DiamGraph=" << DiamGraph << "\n";
+#endif
   size_t nbNegative = ListPairNegative.size();
   if (nbNegative > 0) {
     std::cerr
@@ -918,7 +950,9 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
         int dist2 = L1_distance(V1, V2);
         if (dist1 <= s) {
           if (2 * dist1 != dist2) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
             std::cerr << "Fail embedding at i=" << i << " j=" << j << "\n";
+#endif
             return false;
           }
         }
@@ -926,36 +960,62 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     return true;
   };
   if (DiamGraph == s_sz) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 0\n";
+#endif
     std::vector<std::vector<size_t>> ET = SpanningTree(GR);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 1\n";
+#endif
     GraphBitset Aspec = GetGraphIdentityEdge(ET, MCE);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 2\n";
+#endif
     std::vector<std::vector<size_t>> Cspec = ConnectedComponents_set(Aspec);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 3\n";
+#endif
     for (std::vector<size_t> &eList : Cspec)
       if (!IsClique(Aspec, eList)) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
         std::cerr << "Not a clique. So no embedding\n";
+#endif
         return {};
       }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 4\n";
+#endif
     if (!IsCoherentEdgeValues(Cspec, ET, MCE)) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "Non-coherency of values\n";
+#endif
       return {};
     }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 5\n";
+#endif
     GraphBitset Dspec = GraphIntersectionOne(Cspec, ET, MCE);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 6\n";
+#endif
     std::vector<std::vector<int>> PartListLabel = InverseLineGraph(Dspec);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 7\n";
+#endif
     if (PartListLabel[0][0] == -1) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "Not a line graph\n";
+#endif
       return {};
     }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 8\n";
+#endif
     std::vector<std::vector<int>> ListLabel =
         ExtendListLabel(Cspec, PartListLabel);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Direct embed, step 9\n";
+#endif
     MyMatrix<int> Embedding = CreateEmbedding(0, ET, ListLabel);
     bool res = CheckEmbedding(Embedding);
     if (!res) {
@@ -963,7 +1023,9 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
       throw TerminalException{1};
     }
     std::vector<MyMatrix<int>> ListEmbedding{Embedding};
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "|ListEmbedding|=" << ListEmbedding.size() << "\n";
+#endif
     return ListEmbedding;
   }
   auto RefinementBlock1 =
@@ -1125,7 +1187,9 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
                 nbOper++;
               }
               if (pos1 == -1 && !Type2feasible) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
                 std::cerr << "Finding false 1\n";
+#endif
                 return false;
               }
               if (MCEwork(dEdge, iEdge) != SetOne && !Type2feasible) {
@@ -1178,22 +1242,30 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     while (true) {
       int nbOper = 0;
       test = RefinementBlock1(MCEwork, nbOper);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "RefinementBlock1 test=" << test << " nbOper=" << nbOper
                 << "\n";
+#endif
       if (!test)
         return false;
       test = RefinementBlock2(MCEwork, nbOper);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "RefinementBlock2 test=" << test << " nbOper=" << nbOper
                 << "\n";
+#endif
       if (!test)
         return false;
       test = RefinementTriangles(MCEwork, nbOper);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "RefinementTriangles test=" << test << " nbOper=" << nbOper
                 << "\n";
+#endif
       if (!test)
         return false;
       test = IsAprioriFeasible(MCEwork);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "IsAprioriFeasible test=" << test << "\n";
+#endif
       if (!test)
         return false;
       if (nbOper == 0)
@@ -1228,22 +1300,34 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
        &ExtendListLabel,
        &CheckEmbedding](MyMatrix<std::vector<int>> const &MCEwork,
                         MyMatrix<int> &FinalEmbed) -> bool {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "GetEmbeddingMatrix, step 1\n";
     std::cerr << "GetEmbeddingMatrix, step 2\n";
+#endif
     GraphBitset Aspec = GetGraphIdentityEdge(ListEdge, MCEwork);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "GetEmbeddingMatrix, step 3\n";
+#endif
     std::vector<std::vector<size_t>> Cspec = ConnectedComponents_set(Aspec);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "GetEmbeddingMatrix, step 4 |Cspec|=" << Cspec.size() << "\n";
+#endif
     GraphBitset Dspec = GraphIntersectionOne(Cspec, ListEdge, MCEwork);
     std::vector<std::vector<int>> PartListLabel = InverseLineGraph(Dspec);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "GetEmbeddingMatrix, step 6\n";
+#endif
     if (PartListLabel[0][0] == -1) {
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "Embedding failure\n";
+#endif
       return false;
     }
     std::vector<std::vector<int>> ListLabel =
         ExtendListLabel(Cspec, PartListLabel);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "GetEmbeddingMatrix, step 7\n";
+#endif
     FinalEmbed = CreateEmbedding(0, ListEdge, ListLabel);
     bool res = CheckEmbedding(FinalEmbed);
     return res;
@@ -1261,8 +1345,11 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
       if (TheTree.size() == 0)
         return false;
       size_t len = TheTree.size();
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "TheTree len=" << len << "\n";
+#endif
       int lenPoss = static_cast<int>(TheTree[len - 1].ListPoss.size());
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "lenPoss=" << lenPoss << "\n";
       if (len == 1) {
         std::cerr << "ListPoss=";
@@ -1270,8 +1357,11 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
           std::cerr << " " << eVal;
         std::cerr << "\n";
       }
+#endif
       idx = TheTree[len - 1].idx;
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "idx=" << idx << "\n";
+#endif
       if (idx == lenPoss - 1) {
         TheTree.pop_back();
       } else {
@@ -1285,10 +1375,12 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
         } else {
           MCEnew = TheTree[len - 2].MCE;
         }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
         if (len == 1) {
           int eVal = TheTree[len - 1].ListPoss[idx];
           std::cerr << "1: Now operating with ListPoss=" << eVal << "\n";
         }
+#endif
         int eVal = TheTree[len - 1].ListPoss[idx];
         MCEnew(iEdge, jEdge) = {eVal};
         bool test = IterativeRefinementMCE(MCEnew);
@@ -1312,7 +1404,9 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     std::vector<size_t> ePairEdge = GetFirstNonZero(MCEstart);
     size_t iEdge = ePairEdge[0];
     size_t jEdge = ePairEdge[1];
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Assign iEdge=" << iEdge << " jEdge=" << jEdge << "\n";
+#endif
     std::vector<int> ListPoss = MCEstart(iEdge, jEdge);
     int idx = 0;
     MCEstart(iEdge, jEdge) = {ListPoss[idx]};
@@ -1325,26 +1419,36 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
     return true;
   };
   bool test = IterativeRefinementMCE(MCE);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "IterativeRefinementMCE test=" << test << "\n";
+#endif
   if (!test)
     return {};
   std::vector<MyMatrix<int>> ListEmbedding;
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   size_t nbChoice = nbEdge * (nbEdge - 1) / 2;
+#endif
   while (true) {
     MyMatrix<std::vector<int>> MCEstart = GetLatestMCE();
     bool testF = IsFinalState(MCEstart);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "IsFinalState test=" << testF << "\n";
+#endif
     if (testF) {
       MyMatrix<int> FinalEmbed;
       bool test2 = GetEmbeddingMatrix(MCEstart, FinalEmbed);
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
       std::cerr << "test2=" << test2 << "\n";
+#endif
       if (test2)
         ListEmbedding.push_back(FinalEmbed);
     }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
     std::cerr << "Passing by NextInTree nbEmbedding=" << ListEmbedding.size()
               << "\n";
     std::cerr << "|TheTree|=" << TheTree.size() << " nbChoice=" << nbChoice
               << " iter=" << iter << "\n";
+#endif
     if (iter > MaxIter)
       break;
     bool test2 = NextInTree();
@@ -1352,7 +1456,9 @@ std::vector<MyMatrix<int>> GRAPH_S_Embedding(Tgr const &GR, size_t const &s_sz,
       break;
     iter++;
   }
+#ifdef DEBUG_GRAPHICAL_FUNCTIONS
   std::cerr << "|ListEmbedding|=" << ListEmbedding.size() << "\n";
+#endif
   return ListEmbedding;
 }
 

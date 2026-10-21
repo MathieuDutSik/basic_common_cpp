@@ -9,6 +9,10 @@
 #include <unistd.h>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_BASIC_FILE
+#endif
+
 template <typename F>
 void FILE_PrintStderrStdoutFile(std::string const &FileOut, F f) {
   if (FileOut == "stderr")
@@ -172,8 +176,10 @@ FILE_DirectoryMatchingPrefixExtension(std::string const &ePrefix,
                                       std::string const &eExtension) {
   std::string eDir = FILE_GetDirectoryOfFileName(ePrefix);
   std::string eBeginStr = FILE_GetNakedFilename(ePrefix);
+#ifdef DEBUG_BASIC_FILE
   std::cerr << "ePrefix=" << ePrefix << "\n";
   std::cerr << "eDir=" << eDir << " eBeginStr=" << eBeginStr << "\n";
+#endif
   std::vector<std::string> ListFile = FILE_GetDirectoryListFile(eDir);
   std::vector<std::string> ListFile_RET;
   for (auto &eFile : ListFile) {

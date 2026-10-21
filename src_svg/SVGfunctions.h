@@ -6,6 +6,10 @@
 #include <string>
 #include <vector>
 
+#ifdef DEBUG
+#define DEBUG_SVG
+#endif
+
 struct coor {
   double x;
   double y;
@@ -207,12 +211,12 @@ void GeneralWriteSVGfile(std::string const &eFile,
         MinY = pt.y;
     }
   };
-  int nbClip = 0;
-  int nbLine = 0;
-  int nbPolyline = 0;
-  int nbBezier = 0;
-  int nbEllipse = 0;
-  int nbText = 0;
+  [[maybe_unused]] int nbClip = 0;
+  [[maybe_unused]] int nbLine = 0;
+  [[maybe_unused]] int nbPolyline = 0;
+  [[maybe_unused]] int nbBezier = 0;
+  [[maybe_unused]] int nbEllipse = 0;
+  [[maybe_unused]] int nbText = 0;
   for (auto &eGeneral : eSVGplot.ListGeneral) {
     if (eGeneral.svgtype == SvgType::clip) {
       nbClip++;
@@ -241,6 +245,7 @@ void GeneralWriteSVGfile(std::string const &eFile,
       nbText++;
     }
   }
+#ifdef DEBUG_SVG
   std::cerr << "nbClip = " << nbClip << "\n";
   std::cerr << "nbLine = " << nbLine << "\n";
   std::cerr << "nbPolyline = " << nbPolyline << "\n";
@@ -250,6 +255,7 @@ void GeneralWriteSVGfile(std::string const &eFile,
   //
   std::cerr << "SVG: X(min/max)=" << MinX << " / " << MaxX << "\n";
   std::cerr << "SVG: Y(min/max)=" << MinY << " / " << MaxY << "\n";
+#endif
   //
   // Second compute the FrameOption
   //
@@ -269,14 +275,18 @@ void GeneralWriteSVGfile(std::string const &eFile,
   if (eSVGplot.FrameOption == 1) {
     height = eSVGplot.height;
     width = eSVGplot.width;
+#ifdef DEBUG_SVG
     std::cerr << "height=" << height << " width=" << width << "\n";
+#endif
     double FrameX = eSVGplot.width;
     double FrameY = eSVGplot.height;
     double scale_factorX = FrameX / (MaxX - MinX);
     double scale_factorY = FrameY / (MaxY - MinY);
     double MidX = (MaxX + MinX) / 2;
     double MidY = (MaxY + MinY) / 2;
+#ifdef DEBUG_SVG
     std::cerr << "MidX=" << MidX << " MidY=" << MidY << "\n";
+#endif
     scale_factor = std::min(scale_factorX, scale_factorY);
     // add_offsetX + scale_factor*MidX = FrameX/2;
     add_offsetX = FrameX / 2 - scale_factor * MidX;

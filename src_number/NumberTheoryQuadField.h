@@ -286,7 +286,7 @@ public:
         return true;
     }
     std::cerr << "Major errors in the code\n";
-    return false;
+    throw TerminalException{1};
   }
   friend bool operator>=(QuadField<T, d> const &x, QuadField<T, d> const &y) {
     QuadField<T, d> z;

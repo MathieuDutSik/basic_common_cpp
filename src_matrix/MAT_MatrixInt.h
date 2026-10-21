@@ -20,6 +20,10 @@
 #include <vector>
 // clang-format on
 
+#ifdef DEBUG
+#define DEBUG_MATRIX_INT
+#endif
+
 // Now declarations of generic code.
 // The code below generally requires the field T to be the ring (or fraction
 // ring) of a factorial ring. Operations may work for fields and rings as well.
@@ -760,10 +764,12 @@ void CheckGCD_information(GCD_int<T> const &gi, std::vector<T> const &ListX) {
   if (!IsIntegralMatrix(gi.Pmat)) {
     std::cerr << "Matrix should be integral\n";
     print_inf();
+    throw TerminalException{1};
   }
   if (T_abs(DeterminantMat(gi.Pmat)) != 1) {
     std::cerr << "The determinant should be 1\n";
     print_inf();
+    throw TerminalException{1};
   }
   size_t len = ListX.size();
   MyVector<T> V(len);
@@ -779,6 +785,7 @@ void CheckGCD_information(GCD_int<T> const &gi, std::vector<T> const &ListX) {
       std::cerr << "We should have val=" << val << " but we have eP=" << eP(i)
                 << "\n";
       print_inf();
+      throw TerminalException{1};
     }
   }
 }
@@ -839,7 +846,7 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
   size_t nbCol = H.cols();
   Face StatusRow(nbRow);
   //
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
 
@@ -868,9 +875,8 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
           TheMat1(ListIdx[i], ListIdx[j]) = eGCD.Pmat(j, i);
       auto fct1 = [&](MyMatrix<T> &m) -> void { m = TheMat1 * m; };
       f(fct1);
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
-      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
       for (size_t i = 0; i < siz; i++)
@@ -903,8 +909,7 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
           f(fct3);
         }
       }
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
-      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
       //
@@ -913,7 +918,7 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
       TopPosition++;
     }
   }
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
   std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
 #endif
 }
@@ -1154,7 +1159,7 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
   size_t nbCol = H.cols();
   Face StatusRow(nbCol);
   //
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
   T MaxSizeCoeff = 0;
 #endif
 
@@ -1183,9 +1188,8 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
           TheMat1(ListIdx[i], ListIdx[j]) = eGCD.Pmat(i, j);
       auto fct1 = [&](MyMatrix<T> &m) -> void { m = m * TheMat1; };
       f(fct1);
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(TheMat1));
-      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
       for (size_t i = 0; i < siz; i++)
@@ -1218,8 +1222,7 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
           f(fct3);
         }
       }
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
-      MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(U));
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
       MaxSizeCoeff = T_max(MaxSizeCoeff, Linfinity_norm_mat(H));
 #endif
       //
@@ -1228,7 +1231,7 @@ void ComputeColHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
       TopPosition++;
     }
   }
-#ifdef TRACK_MAXIMUM_SIZE_COEFF
+#ifdef DEBUG_MATRIX_INT_MAX_SIZE_COEFF
   std::cerr << "MaxSizeCoeff = " << MaxSizeCoeff << "\n";
 #endif
 }
@@ -2870,7 +2873,9 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
   MyMatrix<T> EXTwork = EXT;
   std::vector<int> RowStatus(nbRow, 0);
   std::vector<int> ColumnStatus(nbCol, 1);
+#ifdef DEBUG_MATRIX_INT
   std::cerr << "Starting Kernel_ComputeAffineBasis\n";
+#endif
   MyVector<T> V1(nbCol);
   MyVector<T> V2(nbCol);
   MyVector<T> eExpr(nbCol);
@@ -2893,7 +2898,9 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
     }
 #endif
     V1 = EXTwork.row(iVect);
+#ifdef DEBUG_MATRIX_INT
     std::cerr << "V1 rows=" << V1.rows() << " cols=" << V1.cols() << "\n";
+#endif
     ListExp(iVect, idx) = 1;
     for (size_t iRow = 0; iRow < nbRow; iRow++)
       if (RowStatus[iRow] == 0) {
@@ -2920,11 +2927,13 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
         if (IsZero)
           RowStatus[iRow] = 1;
       }
+#ifdef DEBUG_MATRIX_INT
     size_t nbFinished = 0;
     for (size_t iRow = 0; iRow < nbRow; iRow++)
       if (RowStatus[iRow] == 1)
         nbFinished++;
     std::cerr << "nbFinished=" << nbFinished << "\n";
+#endif
     return true;
   };
   int nbIter = 1000;
@@ -2954,7 +2963,9 @@ AffineBasisResult Kernel_ComputeAffineBasis(MyMatrix<T> const &EXT) {
     return -1;
   };
   for (size_t i = 0; i < n; i++) {
+#ifdef DEBUG_MATRIX_INT
     std::cerr << "i=" << i << "\n";
+#endif
     int eVal = SetLocallyCorrectIndex(i);
     if (eVal == -1)
       return {false, {}};
