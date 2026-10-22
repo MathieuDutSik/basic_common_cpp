@@ -6,6 +6,7 @@
 #include "ExceptionsFunc.h"
 #include <functional>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -73,6 +74,32 @@ struct ArithmeticDispatch {
         os << " : " << entry.description;
       os << "\n";
     }
+  }
+  // Whether the name is an accepted (non-parametrized) entry.
+  bool has(std::string const &name) const {
+    for (auto &entry : entries)
+      if (entry.param.empty() && entry.name == name)
+        return true;
+    return false;
+  }
+  // The namelist documentation of a key choosing among the entries. The
+  // default is the first of l_preferred that is compiled in, and only the
+  // compiled entries are listed.
+  std::string doc(std::vector<std::string> const &l_preferred) const {
+    for (auto &name : l_preferred) {
+      if (has(name)) {
+        std::ostringstream os;
+        os << "Default: " << name << "\n";
+        os << "The arithmetic used for the computation. Possible values:\n";
+        print_descriptions(os);
+        std::string str = os.str();
+        str.pop_back(); // the final newline
+        return str;
+      }
+    }
+    std::cerr << "ArithmeticDispatch: none of the preferred names is "
+                 "compiled\n";
+    throw TerminalException{1};
   }
   void run(std::string const &name) const {
     for (auto &entry : entries) {

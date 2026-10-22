@@ -111,6 +111,17 @@ void add_rational_integer_arithmetics_by_library(ArithmeticDispatch &dispatch,
 #endif
 }
 
+// The namelist documentation of the arithmetic key of the programs using
+// add_rational_integer_arithmetics_by_library: flint by default when
+// compiled in, as it is usually faster, gmp otherwise.
+template <bool with_boost = true>
+std::string doc_rational_integer_arithmetics_by_library() {
+  ArithmeticDispatch dispatch;
+  add_rational_integer_arithmetics_by_library<with_boost>(
+      dispatch, []<typename T, typename Tint>() -> void {});
+  return dispatch.doc({"flint", "gmp"});
+}
+
 // The integer rings: mpz_class, the boost ones, fmpz_class.
 template <typename F>
 void add_integer_arithmetics(ArithmeticDispatch &dispatch, F f) {
