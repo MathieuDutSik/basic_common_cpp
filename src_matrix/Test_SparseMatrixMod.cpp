@@ -84,6 +84,40 @@ bool test_one(int n_row, int n_col, int n_nonzero) {
       return false;
     }
   }
+  // The reduced row echelon form: same rank, rows reducing to zero, and
+  // normal forms independent of the representative.
+  SparseRrefMod rref(p_test);
+  for (auto &v : l_row) {
+    rref.insert(v);
+  }
+  if (static_cast<int>(rref.rank()) != rank_dense) {
+    std::cerr << "The rank of the reduced echelon form " << rref.rank() << " differs from " << rank_dense << "\n";
+    return false;
+  }
+  for (auto &v : l_row) {
+    if (!rref.reduce(v).empty()) {
+      std::cerr << "A row does not reduce to zero in the reduced echelon form\n";
+      return false;
+    }
+  }
+  for (int k = 0; k < 10; k++) {
+    SparseVectorMod v = random_sparse_row(n_col, n_nonzero);
+    SparseVectorMod w = v;
+    for (int u = 0; u < 3; u++) {
+      int i = random_int(0, n_row_tot - 1);
+      w = SparseVectorAddMultipleMod(w, random_int(-7, 7), l_row[i], p_test);
+    }
+    if (rref.reduce(v) != rref.reduce(w)) {
+      std::cerr << "The normal form of the reduced echelon form depends on the representative\n";
+      return false;
+    }
+    for (auto &e : rref.reduce(v)) {
+      if (rref.is_pivot(e.first)) {
+        std::cerr << "A normal form has an entry at a pivot column\n";
+        return false;
+      }
+    }
+  }
   for (int k = 0; k < 10; k++) {
     SparseVectorMod v = random_sparse_row(n_col, n_nonzero);
     SparseVectorMod w = v;

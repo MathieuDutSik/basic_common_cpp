@@ -9,7 +9,9 @@
 #include <functional>
 #include <map>
 #include <queue>
+#include <algorithm>
 #include <unordered_map>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 // clang-format on
@@ -198,6 +200,142 @@ private:
   // Work space of reduce, zero between the calls.
   mutable std::vector<int64_t> buf;
   mutable std::vector<uint8_t> queued;
+};
+
+/*
+  A reduced row echelon form modulo p built incrementally: every row has
+  its pivot entry equal to 1 and no entry at the pivot columns of the
+  other rows. The reduction of a vector is then a single pass (the rows
+  added have no entry at a pivot column) and gives the normal form of the
+  vector modulo the span of the rows, with a zero entry at every pivot
+  column.
+
+  This is efficient when the space spanned has a small codimension in the
+  space of the entries met: the rows then have few entries (their pivot
+  and the columns that are not pivots). The pivot of a new row is the
+  column of the row met by the fewest other rows (the Markowitz criterion),
+  which keeps the elimination of that column from the other rows cheap.
+ */
+class SparseRrefMod {
+public:
+  explicit SparseRrefMod(int64_t const &_p) : p(_p) {}
+  int64_t prime() const { return p; }
+  size_t rank() const { return rows.size(); }
+  bool is_pivot(int const &col) const { return pivot_row.count(col) > 0; }
+  SparseVectorMod reduce(SparseVectorMod const &v) const {
+    std::vector<int> touched;
+    auto f_add = [&](int const &idx, int64_t const &val) -> void {
+      if (static_cast<size_t>(idx) >= buf.size()) {
+        buf.resize(2 * idx + 1, 0);
+        flag.resize(2 * idx + 1, 0);
+      }
+      if (flag[idx] == 0) {
+        flag[idx] = 1;
+        touched.push_back(idx);
+      }
+      buf[idx] = ResidueModPrime(buf[idx] + val, p);
+    };
+    for (auto &e : v) {
+      auto iter = pivot_row.find(e.first);
+      if (iter == pivot_row.end()) {
+        f_add(e.first, e.second);
+        continue;
+      }
+      int64_t c = ResidueModPrime(e.second, p);
+      for (auto &f : rows[iter->second]) {
+        if (f.first != e.first) {
+          f_add(f.first, p - (c * f.second) % p);
+        }
+      }
+    }
+    std::sort(touched.begin(), touched.end());
+    SparseVectorMod w;
+    for (auto &idx : touched) {
+      if (buf[idx] != 0) {
+        w.push_back({idx, buf[idx]});
+      }
+      buf[idx] = 0;
+      flag[idx] = 0;
+    }
+    return w;
+  }
+  // Inserts v. Returns whether v is independent of the rows.
+  bool insert(SparseVectorMod const &v) {
+    SparseVectorMod w = reduce(v);
+    if (w.empty()) {
+      return false;
+    }
+    // The pivot: the column of w contained in the fewest rows.
+    int col = -1;
+    size_t best = 0;
+    for (auto &e : w) {
+      auto iter = col_rows.find(e.first);
+      size_t cnt = (iter == col_rows.end()) ? 0 : iter->second.size();
+      if (col == -1 || cnt < best) {
+        col = e.first;
+        best = cnt;
+      }
+    }
+    int64_t val_col = 0;
+    for (auto &e : w) {
+      if (e.first == col) {
+        val_col = e.second;
+      }
+    }
+    SparseVectorMod w_norm = SparseVectorScaleMod(w, InverseModPrime(val_col, p), p);
+    size_t i_new = rows.size();
+    // The column col is eliminated from the rows containing it.
+    auto iter_col = col_rows.find(col);
+    if (iter_col != col_rows.end()) {
+      std::vector<size_t> l_row(iter_col->second.begin(), iter_col->second.end());
+      for (auto &i_row : l_row) {
+        SparseVectorMod const &r = rows[i_row];
+        int64_t coef = 0;
+        for (auto &e : r) {
+          if (e.first == col) {
+            coef = e.second;
+          }
+        }
+        SparseVectorMod r_new = SparseVectorAddMultipleMod(r, p - coef, w_norm, p);
+        // The changes of support of the row.
+        size_t i1 = 0, i2 = 0;
+        while (i1 < r.size() || i2 < r_new.size()) {
+          if (i2 == r_new.size() || (i1 < r.size() && r[i1].first < r_new[i2].first)) {
+            if (!is_pivot(r[i1].first)) {
+              col_rows[r[i1].first].erase(i_row);
+            }
+            i1 += 1;
+          } else if (i1 == r.size() || r_new[i2].first < r[i1].first) {
+            col_rows[r_new[i2].first].insert(i_row);
+            i2 += 1;
+          } else {
+            i1 += 1;
+            i2 += 1;
+          }
+        }
+        rows[i_row] = std::move(r_new);
+      }
+    }
+    col_rows.erase(col);
+    for (auto &e : w_norm) {
+      if (e.first != col) {
+        col_rows[e.first].insert(i_new);
+      }
+    }
+    pivot_row[col] = i_new;
+    rows.emplace_back(std::move(w_norm));
+    return true;
+  }
+
+private:
+  int64_t p;
+  std::unordered_map<int, size_t> pivot_row;
+  std::vector<SparseVectorMod> rows;
+  // For the columns that are not pivots, the rows containing them.
+  std::unordered_map<int, std::unordered_set<size_t>> col_rows;
+  // Work space of reduce, zero between the calls.
+  mutable std::vector<int64_t> buf;
+  mutable std::vector<uint8_t> flag;
 };
 
 /*
