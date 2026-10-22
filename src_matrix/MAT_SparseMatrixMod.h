@@ -6,7 +6,9 @@
 #include "ExceptionsFunc.h"
 #include <cstdint>
 #include <iostream>
+#include <functional>
 #include <map>
+#include <queue>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -131,20 +133,37 @@ public:
    */
   SparseVectorMod reduce(SparseVectorMod const &v,
                          std::vector<std::pair<size_t, int64_t>> *coeff = nullptr) const {
-    std::map<int, int64_t> acc;
-    for (auto &e : v) {
-      int64_t val = ResidueModPrime(e.second, p);
-      if (val != 0) {
-        acc[e.first] = val;
+    // A dense buffer of the residues with the indices to process in a
+    // min-heap: a row only adds entries after its pivot, so each index is
+    // processed once and in increasing order, which gives a sorted result.
+    std::priority_queue<int, std::vector<int>, std::greater<int>> heap;
+    auto f_add = [&](int const &idx, int64_t const &val) -> void {
+      if (static_cast<size_t>(idx) >= buf.size()) {
+        buf.resize(2 * idx + 1, 0);
+        queued.resize(2 * idx + 1, 0);
       }
+      buf[idx] = ResidueModPrime(buf[idx] + val, p);
+      if (queued[idx] == 0) {
+        queued[idx] = 1;
+        heap.push(idx);
+      }
+    };
+    for (auto &e : v) {
+      f_add(e.first, e.second);
     }
-    auto it = acc.begin();
-    while (it != acc.end()) {
-      int col = it->first;
-      int64_t c = it->second;
+    SparseVectorMod w;
+    while (!heap.empty()) {
+      int col = heap.top();
+      heap.pop();
+      queued[col] = 0;
+      int64_t c = buf[col];
+      buf[col] = 0;
+      if (c == 0) {
+        continue;
+      }
       auto iter_piv = pivot_row.find(col);
-      if (c == 0 || iter_piv == pivot_row.end()) {
-        ++it;
+      if (iter_piv == pivot_row.end()) {
+        w.push_back({col, c});
         continue;
       }
       size_t i_row = iter_piv->second;
@@ -152,18 +171,9 @@ public:
         coeff->push_back({i_row, c});
       }
       for (auto &e : rows[i_row]) {
-        if (e.first == col) {
-          continue;
+        if (e.first != col) {
+          f_add(e.first, p - (c * e.second) % p);
         }
-        int64_t &val = acc[e.first];
-        val = ResidueModPrime(val - c * e.second, p);
-      }
-      it = acc.erase(it);
-    }
-    SparseVectorMod w;
-    for (auto &kv : acc) {
-      if (kv.second != 0) {
-        w.push_back(kv);
       }
     }
     return w;
@@ -185,6 +195,9 @@ private:
   int64_t p;
   std::unordered_map<int, size_t> pivot_row;
   std::vector<SparseVectorMod> rows;
+  // Work space of reduce, zero between the calls.
+  mutable std::vector<int64_t> buf;
+  mutable std::vector<uint8_t> queued;
 };
 
 /*
