@@ -462,7 +462,7 @@ struct LimitedEmpiricalDistributionFunction {
       for (auto &eStr : LStr) {
         std::vector<std::string> LStrB = STRING_Split(eStr, "|");
         if (LStrB.size() != 2) {
-          std::cerr << "HTS: The string should be of the form val:mult\n";
+          std::cerr << "HTS: The string should be of the form val|mult\n";
           throw TerminalException{1};
         }
         double val = ParseScalar<double>(LStrB[0]);
@@ -486,7 +486,7 @@ struct LimitedEmpiricalDistributionFunction {
       throw TerminalException{1};
     }
     std::cerr << "HTS: Failed to find a matching for nature=" << nature << "\n";
-    std::cerr << "HTS: Authorized values are dirac, sampled, file_select and file\n";
+    std::cerr << "HTS: Authorized values are dirac and sampled\n";
     throw TerminalException{1};
   }
   void clear_entry() {
@@ -972,70 +972,89 @@ FullNamelist NAMELIST_ThompsonSamplingRuntime() {
   std::map<std::string, SingleBlock> ListBlock;
   // PROBABILITY DISTRIBUTIONS
   {
-    std::map<std::string, std::vector<std::string>> ListListStringValues;
-    std::map<std::string, std::vector<int>> ListListIntValues;
-    ListListStringValues["ListName"] = {"distri1", "distri2", "distri3",
-                                        "distri4"};
-    ListListIntValues["ListNmax"] = {100, 100, -1, -1};
-    ListListIntValues["ListNstart"] = {100, 100, -1, -1};
-    ListListStringValues["ListNature"] = {"dirac", "sampled", "file_select",
-                                          "file"};
-    ListListStringValues["ListDescription"] = {
-        "145.3", "130.2:50 145.87:30 150.34:20", "InputA_key1_val1_key2_val2",
-        "InputB"};
-    SingleBlock BlockPROBA;
-    BlockPROBA.setListListStringValues(ListListStringValues);
-    BlockPROBA.setListListIntValues(ListListIntValues);
-    ListBlock["PROBABILITY_DISTRIBUTIONS"] = BlockPROBA;
+    std::map<std::string, std::string> ListListStringValues_doc;
+    std::map<std::string, std::string> ListListIntValues_doc;
+    ListListStringValues_doc["ListName"] =
+        "The names of the prior distributions, used in the ListDescription of\n\
+THOMPSON_PRIOR. The five lists of the block have the same length, one\n\
+entry per distribution";
+    ListListIntValues_doc["ListNmax"] =
+        "The maximum number of values kept by each distribution, beyond\n\
+which the closest values are merged";
+    ListListIntValues_doc["ListNstart"] =
+        "The initial weight of each distribution. For the nature sampled,\n\
+the sum of the multiplicities, or 0 for it to be computed";
+    ListListStringValues_doc["ListNature"] =
+        "The nature of each distribution. Possible values:\n\
+dirac: a single value, given by ListDescription\n\
+sampled: the values and their multiplicities, ListDescription being of the\n\
+  form \"v1|m1 v2|m2 ...\"";
+    ListListStringValues_doc["ListDescription"] =
+        "The description of each distribution, see ListNature";
+    ListBlock["PROBABILITY_DISTRIBUTIONS"].setListListStringValues_doc(
+        ListListStringValues_doc);
+    ListBlock["PROBABILITY_DISTRIBUTIONS"].setListListIntValues_doc(
+        ListListIntValues_doc);
   }
   // SINGLE THOMPSON STATE
   {
-    std::map<std::string, std::vector<std::string>> ListListStringValues;
-    ListListStringValues["ListAnswer"] = {"cdd", "lrs"};
-    ListListStringValues["ListName"] = {"state1", "state2"};
-    ListListStringValues["ListDescription"] = {"cdd:distri1 lrs:distri2",
-                                               "cdd:distri1 lrs:distri3"};
-    SingleBlock BlockTHOMPSON;
-    BlockTHOMPSON.setListListStringValues(ListListStringValues);
-    ListBlock["THOMPSON_PRIOR"] = BlockTHOMPSON;
+    std::map<std::string, std::string> ListListStringValues_doc;
+    ListListStringValues_doc["ListName"] =
+        "The names of the states. The three lists of the block have the same\n\
+length, one entry per state";
+    ListListStringValues_doc["ListDescription"] =
+        "The description of each state. Either\n\
+\"choice:distribution choice:distribution ...\" with the distributions of\n\
+PROBABILITY_DISTRIBUTIONS, or \"noprior:XX\" for a state without prior,\n\
+whose first XX measurements are made before sampling";
+    ListListStringValues_doc["ListAnswer"] =
+        "The choices of the heuristic, used by the noprior states";
+    ListBlock["THOMPSON_PRIOR"].setListListStringValues_doc(
+        ListListStringValues_doc);
   }
   // KEY_COMPRESSION
   {
-    std::map<std::string, std::vector<std::string>> ListListStringValues;
-    ListListStringValues["ListKey"] = {"incidence", "groupsize"};
-    ListListStringValues["ListDescription"] = {"superfine",
-                                               "1-10,11-20,21-infinity"};
-    SingleBlock BlockCOMPRESSION;
-    BlockCOMPRESSION.setListListStringValues(ListListStringValues);
-    ListBlock["KEY_COMPRESSION"] = BlockCOMPRESSION;
+    std::map<std::string, std::string> ListListStringValues_doc;
+    ListListStringValues_doc["ListKey"] =
+        "The inputs of the heuristic, e.g. incidence or groupsize";
+    ListListStringValues_doc["ListDescription"] =
+        "The compression of each input into classes. Possible values:\n\
+superfine: each value is its own class\n\
+intervals: \"a-b,c-d,e-infinity\", one class per interval";
+    ListBlock["KEY_COMPRESSION"].setListListStringValues_doc(
+        ListListStringValues_doc);
   }
   // HEURISTIC PRIOR
   {
-    std::map<std::string, std::string> ListStringValues;
-    std::map<std::string, bool> ListBoolValues;
-    std::map<std::string, std::vector<std::string>> ListListStringValues;
-    ListStringValues["DefaultPrior"] = "noprior";
-    ListListStringValues["ListFullCond"] = {"incidence > 15 && groupsize > 10",
-                                            "incidence GroupEXT"};
-    ListListStringValues["ListConclusion"] = {"state1", "state2"};
-    SingleBlock BlockHEU;
-    BlockHEU.setListBoolValues(ListBoolValues);
-    BlockHEU.setListStringValues(ListStringValues);
-    BlockHEU.setListListStringValues(ListListStringValues);
-    ListBlock["HEURISTIC_PRIOR"] = BlockHEU;
+    std::map<std::string, std::string> ListStringValues_doc;
+    std::map<std::string, std::string> ListListStringValues_doc;
+    ListStringValues_doc["DefaultPrior"] =
+        "The state used when none of the conditions of ListFullCond holds";
+    ListListStringValues_doc["ListFullCond"] =
+        "The conditions choosing the initial state, of the form\n\
+\"key op value && key op value ...\" with key an entry of ListKey of\n\
+KEY_COMPRESSION, without parentheses. The first one that holds gives the\n\
+state of the same position in ListConclusion";
+    ListListStringValues_doc["ListConclusion"] =
+        "The states chosen by the conditions of ListFullCond";
+    ListBlock["HEURISTIC_PRIOR"].setListStringValues_doc(ListStringValues_doc);
+    ListBlock["HEURISTIC_PRIOR"].setListListStringValues_doc(
+        ListListStringValues_doc);
   }
   // IO
   {
-    std::map<std::string, std::string> ListStringValues;
-    std::map<std::string, bool> ListBoolValues;
-    ListStringValues["name"] = "split";
-    ListBoolValues["WriteLog"] = false;
-    ListBoolValues["ProcessExistingDataIfExist"] = false;
-    ListStringValues["LogFileToProcess"] = "irrelevant";
-    SingleBlock BlockIO;
-    BlockIO.setListBoolValues(ListBoolValues);
-    BlockIO.setListStringValues(ListStringValues);
-    ListBlock["IO"] = BlockIO;
+    std::map<std::string, std::string> ListStringValues_doc;
+    std::map<std::string, std::string> ListBoolValues_doc;
+    ListStringValues_doc["name"] = "Default: unset\n\
+The name of the heuristic in the logs";
+    ListBoolValues_doc["WriteLog"] = "Default: F\n\
+Whether to write the state of the distributions at the end";
+    ListBoolValues_doc["ProcessExistingDataIfExist"] = "Default: F\n\
+Whether to insert the measurements of LogFileToProcess at the start";
+    ListStringValues_doc["LogFileToProcess"] = "Default: unset\n\
+The log of a previous run, used if ProcessExistingDataIfExist = T";
+    ListBlock["IO"].setListStringValues_doc(ListStringValues_doc);
+    ListBlock["IO"].setListBoolValues_doc(ListBoolValues_doc);
   }
   // Merging all data
   return FullNamelist(ListBlock);
