@@ -23,6 +23,13 @@ void FILE_PrintStderrStdoutFile(std::string const &FileOut, F f) {
   return f(os);
 }
 
+// The namelist documentation of an output written by
+// FILE_PrintStderrStdoutFile.
+inline std::string doc_StderrStdoutFile(std::string const &default_value) {
+  return "Default: " + default_value + "\n\
+The output: stdout, stderr or the name of a file";
+}
+
 void FILE_CopyOperation(std::string const &SrcFile, std::string const &DstFile) {
   std::error_code ec;
   std::filesystem::copy_file(SrcFile, DstFile,
