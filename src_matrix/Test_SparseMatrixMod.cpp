@@ -13,7 +13,9 @@
   to a probability of order 1/p):
   - the number of independent rows found by SparseEchelonMod is the rank,
   - SparseLeftKernelMod returns n_row - rank vectors, all in the kernel,
-  - the normal form of v + (combination of the rows) is the one of v.
+  - the normal form of v + (combination of the rows) is the one of v,
+  - the same for the reduced echelon form,
+  - the quotient by the span of the rows (SparseQuotientMod).
  */
 
 int64_t const p_test = 2147483647;
@@ -118,6 +120,51 @@ bool test_one(int n_row, int n_col, int n_nonzero) {
       }
     }
   }
+  // The quotient by the span of the rows, with the dense phase from the
+  // start, after some sparse steps, or never: its dimension, the rows of
+  // class zero, the classes independent of the representative, the basis
+  // columns giving the unit coordinates, and a class zero exactly for the
+  // vectors of the span.
+  for (size_t max_dense_col : {size_t(0), size_t(3), size_t(8000)}) {
+    SparseQuotientMod quot(l_row, n_col, p_test, max_dense_col);
+    if (static_cast<int>(quot.rank()) != rank_dense || static_cast<int>(quot.dim()) != n_col - rank_dense) {
+      std::cerr << "max_dense_col=" << max_dense_col << " the quotient has rank " << quot.rank() << " and dimension "
+                << quot.dim() << " for a rank " << rank_dense << "\n";
+      return false;
+    }
+    std::vector<int64_t> zero(quot.dim(), 0);
+    for (auto &v : l_row) {
+      if (quot.coordinates(v) != zero) {
+        std::cerr << "max_dense_col=" << max_dense_col << " a row has a nonzero class\n";
+        return false;
+      }
+    }
+    std::vector<int> const &l_basis = quot.basis_columns();
+    for (size_t j = 0; j < l_basis.size(); j++) {
+      std::vector<int64_t> unit(quot.dim(), 0);
+      unit[j] = 1;
+      if (quot.coordinates(SparseVectorMod{{l_basis[j], 1}}) != unit) {
+        std::cerr << "max_dense_col=" << max_dense_col << " a basis column does not have unit coordinates\n";
+        return false;
+      }
+    }
+    for (int k = 0; k < 10; k++) {
+      SparseVectorMod v = random_sparse_row(n_col, n_nonzero);
+      SparseVectorMod w = v;
+      for (int u = 0; u < 3; u++) {
+        int i = random_int(0, n_row_tot - 1);
+        w = SparseVectorAddMultipleMod(w, random_int(-7, 7), l_row[i], p_test);
+      }
+      if (quot.coordinates(v) != quot.coordinates(w)) {
+        std::cerr << "max_dense_col=" << max_dense_col << " the class depends on the representative\n";
+        return false;
+      }
+      if ((quot.coordinates(v) == zero) != rref.reduce(v).empty()) {
+        std::cerr << "max_dense_col=" << max_dense_col << " the class is zero but not the normal form or conversely\n";
+        return false;
+      }
+    }
+  }
   for (int k = 0; k < 10; k++) {
     SparseVectorMod v = random_sparse_row(n_col, n_nonzero);
     SparseVectorMod w = v;
@@ -137,7 +184,7 @@ int main() {
   HumanTime time;
   try {
     int n_error = 0;
-    for (int iter = 0; iter < 50; iter++) {
+    for (int iter = 0; iter < 200; iter++) {
       int n_row = random_int(1, 60);
       int n_col = random_int(1, 60);
       int n_nonzero = random_int(1, 6);
