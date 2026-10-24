@@ -168,6 +168,37 @@ template <typename T> int process(int const &D, bool const &expected_euclidean) 
   if (expected_euclidean && n_division_fail > 0) {
     fail("a Euclidean division failed in a norm-Euclidean ring");
   }
+  // The ideals and their generators: for the class number 1 the gcd always
+  // exists, divides x and y and generates the same ideal; otherwise a
+  // generator found generates the ideal, and the non principal ideals
+  // give none.
+  bool class_number_one = (D == -3 || D == -4 || D == -7 || D == -8 || D == -11 || D == -19 ||
+                           D == -43 || D == -67 || D == -163);
+  size_t n_non_principal = 0;
+  for (int iter = 0; iter < 300; iter++) {
+    Elt x = random_elt(30), y = random_elt(30);
+    if (Ring::is_zero(x) && Ring::is_zero(y)) {
+      continue;
+    }
+    std::optional<Elt> opt_g = ring.gcd(std::vector<Elt>{x, y});
+    if (!opt_g) {
+      n_non_principal += 1;
+      if (class_number_one) {
+        fail("no gcd in a ring of class number 1 for " + str(x) + ", " + str(y));
+      }
+      continue;
+    }
+    Elt const &g = *opt_g;
+    if (!ring.divides(g, x) || !ring.divides(g, y)) {
+      fail("the gcd does not divide " + str(x) + ", " + str(y));
+    }
+    if (ring.ideal_lattice(std::vector<Elt>{g}) != ring.ideal_lattice(std::vector<Elt>{x, y})) {
+      fail("the gcd does not generate the ideal of " + str(x) + ", " + str(y));
+    }
+  }
+  if (!class_number_one && n_non_principal == 0) {
+    fail("no non principal ideal met in a ring of class number > 1");
+  }
   // The deep hole: x / y = hole has no remainder of norm < 1 when R2 >= 1.
   T den = UniversalFloorScalarInteger<T, T>(T(-4 * D));
   Elt y{den, T(0)};
@@ -181,7 +212,8 @@ template <typename T> int process(int const &D, bool const &expected_euclidean) 
   }
   std::cerr << "D=" << D << " s=" << ring.s << " p=" << ring.p << " R^2=" << R2
             << " euclidean=" << ring.is_norm_euclidean() << " n_unit=" << n_unit
-            << " n_division_fail=" << n_division_fail << " n_error=" << n_error << "\n";
+            << " n_division_fail=" << n_division_fail << " n_non_principal=" << n_non_principal
+            << " n_error=" << n_error << "\n";
   return n_error;
 }
 
