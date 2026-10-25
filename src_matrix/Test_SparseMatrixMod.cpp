@@ -15,7 +15,8 @@
   - SparseLeftKernelMod returns n_row - rank vectors, all in the kernel,
   - the normal form of v + (combination of the rows) is the one of v,
   - the same for the reduced echelon form,
-  - the quotient by the span of the rows (SparseQuotientMod).
+  - the quotient by the span of the rows (SparseQuotientMod),
+  - the kernel of the rows with its lifts (SparseKernelMod).
  */
 
 int64_t const p_test = 2147483647;
@@ -162,6 +163,43 @@ bool test_one(int n_row, int n_col, int n_nonzero) {
       if ((quot.coordinates(v) == zero) != rref.reduce(v).empty()) {
         std::cerr << "max_dense_col=" << max_dense_col << " the class is zero but not the normal form or conversely\n";
         return false;
+      }
+    }
+  }
+  // The kernel of the rows (the vectors orthogonal to all of them), with
+  // the same three choices of the dense phase: its dimension, the lifts
+  // orthogonal to the rows and equal to 1 at their free column and 0 at
+  // the other free columns.
+  for (size_t max_dense_col : {size_t(0), size_t(3), size_t(8000)}) {
+    SparseKernelMod ker(l_row, n_col, p_test, max_dense_col);
+    if (static_cast<int>(ker.rank()) != rank_dense || static_cast<int>(ker.dim()) != n_col - rank_dense) {
+      std::cerr << "max_dense_col=" << max_dense_col << " the kernel has rank " << ker.rank() << " and dimension "
+                << ker.dim() << " for a rank " << rank_dense << "\n";
+      return false;
+    }
+    std::vector<int> const &l_free = ker.free_columns();
+    for (size_t i = 0; i < l_free.size(); i++) {
+      SparseVectorMod v = ker.lift(i);
+      std::map<int, int64_t> map_v(v.begin(), v.end());
+      for (size_t j = 0; j < l_free.size(); j++) {
+        int64_t expected = (i == j) ? 1 : 0;
+        int64_t val = map_v.count(l_free[j]) ? map_v[l_free[j]] : 0;
+        if (val != expected) {
+          std::cerr << "max_dense_col=" << max_dense_col << " a lift is not a unit vector on the free columns\n";
+          return false;
+        }
+      }
+      for (auto &r : l_row) {
+        int64_t sum = 0;
+        for (auto &e : r) {
+          if (map_v.count(e.first)) {
+            sum = (sum + e.second * map_v[e.first]) % p_test;
+          }
+        }
+        if (sum != 0) {
+          std::cerr << "max_dense_col=" << max_dense_col << " a lift is not orthogonal to the rows\n";
+          return false;
+        }
       }
     }
   }
