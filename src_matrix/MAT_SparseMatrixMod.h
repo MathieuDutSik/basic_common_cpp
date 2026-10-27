@@ -353,9 +353,13 @@ private:
   - The dense phase: for a matrix of a small corank with many more rows
     than columns (the boundaries of a cell complex), the remaining rows,
     mostly dependent, fill in on the last columns. Once at most
-    max_dense_col columns remain, the annihilator K of the span of the
-    remaining rows in the space of those columns is computed densely,
-    starting from the whole space and imposing the rows one by one.
+    max_dense_col columns remain and at least as many rows as columns, the
+    annihilator K of the span of the remaining rows in the space of those
+    columns is computed densely, starting from the whole space and
+    imposing the rows one by one. With fewer rows than columns (the
+    constraints of a kernel) K is of a large dimension and its dense
+    computation cubic in it, so the sparse phase continues: each pivot
+    removes a row and the fill-in is bounded by the number of rows.
   The columns J of the dense phase are chosen such that the restrictions
   to J of a basis of K form an invertible matrix P.
  */
@@ -414,7 +418,7 @@ inline SparseEliminationMod SparseEliminationModCompute(std::vector<SparseVector
   //
   // The sparse phase
   //
-  while (!set_row.empty() && set_col.size() > max_dense_col) {
+  while (!set_row.empty() && (set_col.size() > max_dense_col || set_row.size() < set_col.size())) {
     int i_piv = -1;
     int c_piv = -1;
     if (set_row.begin()->first == 1) {
