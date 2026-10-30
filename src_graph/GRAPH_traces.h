@@ -17,25 +17,26 @@
 #endif
 
 /*
-  The exact order of the automorphism group: a Traces with the field cnt in
-  TracesStats records the integer factors of the group size there,
-  |G| = prod_k k^cnt[k], cnt being an array of length 2n+1. Without it, only
-  the floating point grpsize1 * 10^grpsize2 is available and the order is
-  reported as unknown.
+  The exact order of the automorphism group: the Traces of the nauty branch
+  traces-grpsize-factors of https://github.com/MathieuDutSik/nauty records
+  the integer factors of the group size in the field cnt of TracesStats,
+  |G| = prod_k k^cnt[k], cnt being an array of length 2n+1. The stock Traces
+  only has the floating point grpsize1 * 10^grpsize2, which is not enough.
  */
 template <typename T>
 concept TracesStatsHasCnt = requires(T s) { s.cnt; };
+static_assert(TracesStatsHasCnt<TracesStats>,
+              "The Traces in use has no field cnt in TracesStats, so it does "
+              "not give the exact order of the automorphism group. Use the "
+              "branch traces-grpsize-factors of "
+              "https://github.com/MathieuDutSik/nauty");
 
 struct TracesOrderCounter {
   std::vector<int> cnt;
-  // A template, so that the access to cnt is discarded when it is absent.
-  template <typename Tstats> void attach(Tstats &stats, size_t n) {
-    if constexpr (TracesStatsHasCnt<Tstats>) {
-      cnt.assign(2 * n + 1, 0);
-      stats.cnt = cnt.data();
-    }
+  void attach(TracesStats &stats, size_t n) {
+    cnt.assign(2 * n + 1, 0);
+    stats.cnt = cnt.data();
   }
-  bool has_order() const { return TracesStatsHasCnt<TracesStats>; }
   std::vector<std::pair<size_t, size_t>> order_factors() const {
     std::vector<std::pair<size_t, size_t>> factors;
     for (size_t k = 2; k < cnt.size(); k++)
@@ -341,7 +342,7 @@ TRACES_GetListGeneratorsOrder_Arr(DataTraces &DT, size_t const &n_last,
 #ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetListGenerators_Arr|=" << time << "\n";
 #endif
-  return {std::move(ListGen), counter.has_order(), counter.order_factors()};
+  return {std::move(ListGen), counter.order_factors()};
 }
 
 template <typename Tidx>
@@ -435,7 +436,7 @@ TRACES_GetListGeneratorsOrder(Tgr const &eGR, size_t const &n_last,
 #ifdef TIMINGS_TRACES
   os << "|TRA: TRACES_GetListGenerators|=" << time << "\n";
 #endif
-  return {std::move(ListGen), counter.has_order(), counter.order_factors()};
+  return {std::move(ListGen), counter.order_factors()};
 }
 
 template <typename Tgr, typename Tidx>

@@ -10,14 +10,13 @@
 // clang-format on
 
 // The generators of the automorphism group of a graph, restricted to its
-// first n_last vertices, with the order of the group when the graph program
-// gives it exactly (has_order): the product of k^m over the pairs (k, m) of
-// order_factors. It is the order of the group the generators generate when
-// the restriction to the first vertices is faithful, and a multiple of it
-// otherwise.
+// first n_last vertices, with the exact order of the automorphism group of
+// the graph: the product of k^m over the pairs (k, m) of order_factors. It
+// is the order of the group the generators generate when the restriction to
+// the first vertices is faithful, and a multiple of it otherwise. Both graph
+// programs give it, see GRAPH_bliss.h and GRAPH_traces.h.
 template <typename TidxG> struct GraphGeneratorsOrder {
   std::vector<std::vector<TidxG>> ListGen;
-  bool has_order;
   std::vector<std::pair<size_t, size_t>> order_factors;
 };
 

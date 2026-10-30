@@ -137,16 +137,14 @@ BLISS_GetListGeneratorsOrder(Tgr const &eGR, size_t const &n_last) {
   bliss::Stats stats;
   std::vector<std::vector<TidxG>> ListGen =
       get_generators<TidxG>(g, stats, n_last);
-  // The exact order is the product of the factors that the default bliss
-  // BigNum keeps; with the GMP or long double BigNum it is reported unknown.
-  if constexpr (requires(bliss::Stats const &s) {
-                  s.get_group_size().get_factors();
-                }) {
-    return {std::move(ListGen), true,
-            GetGraphOrderFactors(stats.get_group_size().get_factors())};
-  } else {
-    return {std::move(ListGen), false, {}};
-  }
+  // The exact order is the product of the factors that the default BigNum
+  // of bliss keeps. The GMP and the long double BigNum do not keep them.
+  static_assert(
+      requires(bliss::Stats const &s) { s.get_group_size().get_factors(); },
+      "The bliss in use does not keep the factors of the group order: build "
+      "it without BLISS_USE_GMP and without BLISS_BIGNUM_APPROX");
+  return {std::move(ListGen),
+          GetGraphOrderFactors(stats.get_group_size().get_factors())};
 }
 
 template <typename Tgr, typename TidxG>
