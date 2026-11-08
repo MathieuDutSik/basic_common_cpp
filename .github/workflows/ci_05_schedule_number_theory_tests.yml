@@ -113,6 +113,15 @@ jobs:
         FLINT_LINK: "-L/home/runner/opt/flint/lib -lflint -Wl,-rpath,/home/runner/opt/flint/lib"
       run: ./CI_tests/RealAlgebraicField/run_test.sh
 
+    # The products of MyMatrix<fmpz_class> / MyMatrix<fmpq_class>, which
+    # Eigen evaluates through fmpz_mat_mul / fmpq_mat_mul.
+    - name: Test_EigenFlintProduct with flint
+      env:
+        ENABLE_FLINT_SUPPORT: "1"
+        FLINT_INCDIR: /home/runner/opt/flint/include
+        FLINT_LINK: "-L/home/runner/opt/flint/lib -lflint -Wl,-rpath,/home/runner/opt/flint/lib"
+      run: ./CI_tests/EigenFlintProduct/run_test.sh
+
     - name: Test_QuadField
       run: cd src_number && ./Test_QuadField
 

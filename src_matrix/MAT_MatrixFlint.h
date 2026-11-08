@@ -4,9 +4,10 @@
 
 // The native flint matrix backend for MyMatrix<fmpz_class> and
 // MyMatrix<fmpq_class>. fmpz_mat / fmpq_mat carry the fast algorithms
-// (machine-word and multimodular products, modular determinants and
-// Hermite / Smith normal forms with no coefficient explosion), so the
-// generic entry points marshal into them, compute, and marshal back.
+// (modular determinants and Hermite / Smith normal forms with no
+// coefficient explosion), so the generic entry points marshal into them,
+// compute, and marshal back. The products need no entry point: a * b
+// itself reaches fmpz_mat_mul / fmpq_mat_mul (EigenFlintProduct.h).
 // The marshalling is O(n^2) single-word copies against the O(n^3)-and-up
 // operation itself, measured below 3% of the cheapest routed operation.
 //
@@ -48,40 +49,6 @@ inline MyMatrix<fmpq_class> FlintGetMatrix(fmpq_mat_t M) {
     for (int j = 0; j < ret.cols(); j++)
       fmpq_swap(ret(i, j).get_fmpq_t(), fmpq_mat_entry(M, i, j));
   return ret;
-}
-
-// Matrix product
-
-inline MyMatrix<fmpz_class> FlintProductMatrix(MyMatrix<fmpz_class> const &A,
-                                               MyMatrix<fmpz_class> const &B) {
-  fmpz_mat_t a, b, c;
-  fmpz_mat_init(a, A.rows(), A.cols());
-  fmpz_mat_init(b, B.rows(), B.cols());
-  fmpz_mat_init(c, A.rows(), B.cols());
-  FlintSetMatrix(a, A);
-  FlintSetMatrix(b, B);
-  fmpz_mat_mul(c, a, b);
-  MyMatrix<fmpz_class> C = FlintGetMatrix(c);
-  fmpz_mat_clear(a);
-  fmpz_mat_clear(b);
-  fmpz_mat_clear(c);
-  return C;
-}
-
-inline MyMatrix<fmpq_class> FlintProductMatrix(MyMatrix<fmpq_class> const &A,
-                                               MyMatrix<fmpq_class> const &B) {
-  fmpq_mat_t a, b, c;
-  fmpq_mat_init(a, A.rows(), A.cols());
-  fmpq_mat_init(b, B.rows(), B.cols());
-  fmpq_mat_init(c, A.rows(), B.cols());
-  FlintSetMatrix(a, A);
-  FlintSetMatrix(b, B);
-  fmpq_mat_mul(c, a, b);
-  MyMatrix<fmpq_class> C = FlintGetMatrix(c);
-  fmpq_mat_clear(a);
-  fmpq_mat_clear(b);
-  fmpq_mat_clear(c);
-  return C;
 }
 
 // Determinant

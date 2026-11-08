@@ -941,7 +941,7 @@ HermiteNormalFormModDTransform_or_none(MyMatrix<T> const &M) {
   MyMatrix<Tfield> M_f = UniversalMatrixConversion<Tfield, T>(M);
   MyMatrix<Tfield> Minv_f = Inverse(M_f);
   MyMatrix<Tfield> H_f = UniversalMatrixConversion<Tfield, T>(*optH);
-  MyMatrix<Tfield> U_f = MatrixProduct(H_f, Minv_f);
+  MyMatrix<Tfield> U_f = H_f * Minv_f;
   MyMatrix<T> U = UniversalMatrixConversion<T, Tfield>(U_f);
   return std::pair<MyMatrix<T>, MyMatrix<T>>{std::move(U), std::move(*optH)};
 }

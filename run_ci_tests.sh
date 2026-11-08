@@ -108,6 +108,7 @@ run_step "Test_HilbertMatrix" ./src_matrix/Test_HilbertMatrix mpq_class 10
 run_step "Test_NullspaceComputation" ./src_matrix/Test_NullspaceComputation
 run_step "Test_SubspaceCompletion" ./src_matrix/Test_SubspaceCompletion mpz_class 15 10
 run_step "Test_MatrixMod" ./src_matrix/Test_MatrixMod mpz_class
+run_step "Test_EigenFlintProduct" ./CI_tests/EigenFlintProduct/run_test.sh
 
 echo
 echo "CI test sequence completed successfully."

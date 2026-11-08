@@ -27,6 +27,7 @@
 // gate boost/multiprecision/eigen.hpp itself, so this header never drags in
 // GMP unless the caller already asked for it.
 
+#include "EigenProductThreshold.h"
 #include <Eigen/Core>
 #include <boost/multiprecision/eigen.hpp>
 

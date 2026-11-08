@@ -33,6 +33,11 @@ template <typename T> struct is_fmpq_class {
   static const bool value = false;
 };
 
+// The scalars with a native flint matrix backend.
+template <typename T> struct is_flint_type {
+  static const bool value = is_fmpz_class<T>::value || is_fmpq_class<T>::value;
+};
+
 template <typename T> struct is_boost_cpp_int {
   static const bool value = false;
 };

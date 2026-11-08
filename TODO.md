@@ -92,93 +92,64 @@ The hot type is `mpq_class` (jet coefficients: `jet<mpq_class, N>`). For it
 ## Matrix products of multiprecision types: `a * b * c` should be the fast path
 
 Found while speeding up the Weyl-chamber canonical form of polyhedral_common
-(2026-11, commit 112140f8 there). Over `fmpz_class` / `fmpq_class` the
-products written in the natural Eigen way, `G * B.transpose()` or
-`A * Ainv * B`, were among the main costs, and the fix was to write them as
-`MatrixProduct(MatrixProduct(A, Ainv), B)` and
-`MatrixProduct(G, TransposedMat(B))` (`src_matrix/MAT_MatrixFund.h`), which
-routes the flint types to `fmpz_mat_mul` / `fmpq_mat_mul`.
+(2026-11, commit 112140f8 there): over `fmpz_class` / `fmpq_class` the
+products written the natural Eigen way, `G * B.transpose()` or
+`A * Ainv * B`, were among the main costs, and they had been rewritten as
+`MatrixProduct(MatrixProduct(A, Ainv), B)` to reach `fmpz_mat_mul` /
+`fmpq_mat_mul`.
 
-That is not an acceptable way to write the code. The expression `a * b * c`
-is the one we want to write, and with working expression templates it should
-also be the fast one, with no intermediate type to name or to copy.
+### What was going on
 
-### Measurements (Apple Silicon, -O3, entries of a few bits)
+The gap was never about the transpose or about the intermediate of
+`A * B * C`: Eigen's `B.transpose()` is a free view, and `A * B * C` is
+evaluated as `(A * B) * C` into a temporary whatever the type, exactly as
+the nested `MatrixProduct`. It was the kernel: `A * B` ran Eigen's generic
+GEMM, one scalar `acc += a * b` per term (a call, the small/large check of
+the fmpz, a gcd per term for fmpq), while `MatrixProduct` called flint,
+which checks the bit sizes once and runs the inner loop on machine words
+(fmpz), or clears the denominators once and does one integer product
+(fmpq). For `int`, `mpz_class`, `mpq_class` both were the same code.
 
-| product                       | Eigen `A * B.transpose()` | `MatrixProduct(A, TransposedMat(B))` | of which `TransposedMat` |
-|-------------------------------|------:|------:|------:|
-| fmpz 19x19 * 19x1             |  2.7 us |  1.5 us | 0.06 us |
-| fmpz 19x19 * 19x4             | 10.9 us |  2.2 us | 0.20 us |
-| fmpz 19x19 * 19x12            | 29.7 us |  3.9 us | 0.45 us |
-| fmpz 19x19 * 19x19            | 46.7 us |  5.7 us | 0.87 us |
-| fmpq 19x19 * 19x4             | 21.3 us |  8.0 us | 0.27 us |
-| fmpq 19x19 * 19x12            | 62.1 us | 12.9 us | 0.76 us |
-| fmpq 19x19 * 19x19            |  108 us | 18.7 us | 1.41 us |
-| fmpz 5x5 * 5x5                |  1.35 us | 0.37 us | 0.07 us |
-| fmpq 5x5 * 5x5                |  2.18 us | 1.23 us | 0.11 us |
+### Done (2026-11): `a * b` itself goes to flint
 
-The results are equal. So the named product wins by 2x to 8x although it
-materializes the transpose, whose copy is under 10% of its cost.
+`src_matrix/EigenFlintProduct.h`, included by `MatrixTypes.h` with
+`ENABLE_FLINT_SUPPORT`: partial specializations, constrained to
+`is_flint_type<T>`, of `Eigen::internal::general_matrix_matrix_product`
+and `general_matrix_vector_product`, the class templates through which
+Eigen evaluates every matrix-matrix and matrix-vector product (as its BLAS
+backend does for float/double). They view the Eigen storage as a flint
+matrix without copying (`fmpz_class` is one `fmpz`, a flint matrix is
+row-major entries with a row stride, so a column-major Eigen matrix is
+viewed as its transpose and the product computed as `C^T = B^T A^T`); an
+operand in the other order is copied transposed. `EigenProductThreshold.h`
+makes Eigen's small-product cutoff (`EIGEN_GEMM_TO_COEFFBASED_THRESHOLD`)
+depend on the scalar so that the small products go there too.
+`MatrixProduct` and `FlintProductMatrix` are removed, and the call sites in
+polyhedral_common are back to `a * b * c`. Tested by
+`src_matrix/Test_EigenFlintProduct`.
 
-### Why the expression templates do not help
+Measurements (Apple Silicon, -O3, entries in [-7, 7], us):
 
-- Eigen's expression templates work at the level of the matrix
-  expression: `B.transpose()` is a lazy view and `A * B * C` is
-  evaluated as `(A * B) * C` into temporaries (a product is never fused
-  lazily). That part is fine. The cost is in the evaluation itself: for a
-  scalar type it does not know, Eigen's generic GEBP kernel does one scalar
-  `operator*` / `operator+=` call per term. For `fmpq_class` each of these
-  also canonicalizes (a gcd). flint's `fmpz_mat_mul` packs small entries
-  into machine words, and `fmpq_mat_mul` clears the denominators once and
-  multiplies integer matrices. Eigen has no way to know that these kernels
-  exist.
-- The scalar-level expression templates (gmpxx `__gmp_expr`, the
-  `fmpq_product` of `NumberTheoryFlint.h`) do not reach inside Eigen's
-  kernel either. Eigen forms `acc += a * b` on its own temporaries, which
-  is the unfused FMA described in the section above.
+| product        | Eigen generic | old `MatrixProduct` | now `*` |
+|----------------|------:|------:|------:|
+| fmpz 5x5 * 5x5     |  1.20 |  0.32 | 0.20 |
+| fmpz 19x19 * 19x19 |  55.6 |  5.09 | 3.87 |
+| fmpq 19x19 * 19x19 |  96.3 |  12.0 | 10.3 |
+| fmpz `A * B * C` 19 | 112  |  10.2 | 7.7 |
+| fmpz 60x60 * vector |  30.3 |  12.2 (n x 1) | 4.7 |
+| fmpq 60x60 * vector |  45.6 |  31.9 (n x 1) | 20.0 |
 
-### What a fix has to provide
+### Remaining
 
-- `a * b`, `a * b * c`, `a * b.transpose()`, matrix-vector products and,
-  ideally, `.dot()` evaluated by the native kernel for the flint types, with
-  no change at the call site. The natural route is to specialize Eigen's
-  product evaluator (`Eigen::internal::generic_product_impl<..., GemmProduct>`
-  and the `GemvProduct` case) for the `fmpz_class` / `fmpq_class` scalars,
-  as Eigen does for its BLAS backends. Check whether `fmpz_class` has the
-  layout of one `fmpz` (one `slong`); if so an `fmpz_mat_t` window can be
-  built on the Eigen storage without copying it, transposes and blocks
-  included (strides).
-- gmp and flint have different designs, so they need different answers:
-  - flint has the matrix kernels; the work is the bridge.
-  - gmp has no matrix kernel. For `mpq_class` the same idea as
-    `fmpq_mat_mul_cleared` can be written once: scale the rows of A and the
-    columns of B to integers, multiply the `mpz_class` matrices, divide once
-    per entry. For `mpz_class` the per-term temporary of `acc += a * b` (see
-    above) is the first thing to remove, through a specialized kernel using
-    `mpz_addmul`.
-  - The boost types are a third case (`mpz_int` fuses `acc += a*b` itself).
-- It must stay exact and dimension independent. The sizes that matter are
-  small (5 to 20, with a few rows of up to a few hundred), so the dispatch
-  overhead has to be smaller than these kernels.
-
-### Call sites to revert to `a * b * c` once this works
-
-`MatrixProduct` is now used for this reason in polyhedral_common at
-`src_latt/InvariantVectorFamily.h` (projection step of
-`inner_span_iterated_shortest_rec`), `src_latt/LatticeRootDecomposition.h`
-(`WeylChamberCharacteristicFamily`), `src_latt/LatticeRootSystem.h`
-(Dynkin graph), `src_latt/LatticeAutomorphismVinberg.h` (conjugation of the
-generators) and `src_group/PolytopeEquiStab.h`
-(`T_TranslateToMatrix_ListMat_SHV`). `grep -rn 'MatrixProduct(' src_*` lists
-all of them, the older ones included.
-
-### Action items
-
-- [ ] Specialize the Eigen product evaluator for `fmpz_class` / `fmpq_class`
-      so that `a * b * c` reaches `fmpz_mat_mul` / `fmpq_mat_mul`, without
-      copying when the layout allows it; benchmark on the table above.
+- [ ] With Eigen 3.3 (the CI version) the cutoff is the literal 20, not the
+      macro: the products with rows + cols + depth < 20 (about 6x6 and
+      below) stay on the generic coefficient loop there. Correct, slower.
+- [ ] `.dot()` and the 1x1 product `v.transpose() * w` go through Eigen's
+      coefficient reduction, not through these kernels.
 - [ ] A product kernel for `mpq_class` (cleared denominators) and for
-      `mpz_class` (`mpz_addmul`, no per-term temporary).
-- [ ] The same for matrix-vector products and dot products.
-- [ ] Then replace the `MatrixProduct(MatrixProduct(a, b), c)` call sites by
-      `a * b * c` and remove `MatrixProduct`, or keep it only as an alias.
+      `mpz_class` (`mpz_addmul`, no per-term temporary): gmp has no matrix
+      kernel, so this has to be written. `mpz_class` 19x19 takes 288 us
+      in the generic kernel against 3.9 us for `fmpz_class` above.
+- [ ] Column-major vs row-major storage of `MyMatrix`: to be discussed.
+      Not needed for the products; it matters for the flint routines that
+      work in place (Hermite normal form), which see the transpose.

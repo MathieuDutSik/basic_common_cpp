@@ -92,7 +92,7 @@ template <typename T> void bench_arith(std::string const &name) {
     MyMatrix<T> B = build_matrix<T>(n, n, random_entries(n * n, 100, 72));
     MyMatrix<T> C;
     announce("product");
-    report("product", time_best(5, [&]() { C = MatrixProduct(A, B); }));
+    report("product", time_best(5, [&]() { C = A * B; }));
     announce("product_eigen");
     report("product_eigen", time_best(5, [&]() { C = A * B; }));
   }
@@ -117,7 +117,7 @@ template <typename T> void bench_arith(std::string const &name) {
     MyMatrix<T> B = build_big(e2, e3, e1);
     MyMatrix<T> C;
     announce("product_big");
-    report("product_big", time_best(5, [&]() { C = MatrixProduct(A, B); }));
+    report("product_big", time_best(5, [&]() { C = A * B; }));
   }
   // determinant
   {

@@ -3,6 +3,7 @@
 #define SRC_MATRIX_MATRIXTYPES_H_
 
 // clang-format off
+#include "EigenProductThreshold.h"
 #include <Eigen/Dense>
 #include <Eigen/LU>
 // clang-format on
@@ -25,6 +26,12 @@ template <typename T> using MyVector = Eigen::Matrix<T, Eigen::Dynamic, 1>;
 
 template <typename T>
 using MyMatrix = Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
+
+// The products of the flint types go to the flint kernels. This has to be
+// seen wherever such a product is instantiated, so it comes with the types.
+#ifdef ENABLE_FLINT_SUPPORT
+#include "EigenFlintProduct.h"
+#endif
 
 // clang-format off
 #endif  // SRC_MATRIX_MATRIXTYPES_H_
