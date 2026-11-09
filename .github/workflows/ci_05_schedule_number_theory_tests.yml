@@ -51,7 +51,7 @@ jobs:
     - name: Build number theory tests
       run: |
         cd src_number
-        make Test_SquareRoot Test_Factorize Test_QuoInt Test_Operations Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo
+        make Test_SquareRoot Test_Factorize Test_QuoInt Test_Operations Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo Test_ModularRoots
 
     - name: Test_SquareRoot
       run: cd src_number && ./Test_SquareRoot
@@ -133,3 +133,9 @@ jobs:
 
     - name: Test_PrintStaticInfo
       run: cd src_number && ./Test_PrintStaticInfo
+
+    # power_modulo, the Jacobi and Kronecker symbols, the p-adic
+    # valuations and the exact integer roots of NumberTheoryModular.h, and
+    # the real roots of PolynomialRealRoots.h, against brute force
+    - name: Test_ModularRoots
+      run: cd src_number && ./Test_ModularRoots

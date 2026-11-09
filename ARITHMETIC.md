@@ -463,6 +463,21 @@ This is used in particular for deciding local square classes
   * **Quotient and residue** (`src_number/QuoIntFcts.h`,
     `src_number/ResidueQuotient.h`) -- Euclidean division primitives `QuoInt`
     and `ResInt`.
+  * **Modular and p-adic operations** (`src_number/NumberTheoryModular.h`)
+    -- `power_modulo`, `jacobi_symbol`, `kronecker_symbol`,
+    `prime_valuation`, `rational_prime_valuation` and `exact_integer_root`,
+    written with `ResInt` and `QuoInt` only, so that they run on every
+    integer type (and `mod_inv` of `NumberTheoryGeneric.h` for the
+    modular inverse). Code that needs such an operation calls these instead
+    of a library function such as `mpz_powm` or `fmpz_jacobi`.
+  * **Real roots** (`src_number/PolynomialRealRoots.h`) -- the real roots
+    of a squarefree polynomial with rational coefficients, isolated by a
+    Sturm sequence and refined by bisection, and the square root of a
+    rational, both to a given rational precision with exact arithmetic over
+    any rational type: no floating point, so the error bound is rigorous.
+
+Both are checked over int64_t, mpz_class, fmpz_class, the boost integers
+and the four rational types by `src_number/Test_ModularRoots`.
 
 ## Runtime arithmetic selection
 
