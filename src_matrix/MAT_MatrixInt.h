@@ -3922,6 +3922,57 @@ T GetDenominatorQuotientSolution(MyMatrix<T> const &Amat) {
   return T_abs(DeterminantMat(AmatRed2));
 }
 
+/*
+  The integral left kernel of an integral matrix K, the integral x with
+  x K = 0, of dimension dim, as rows. With U K = H the row Hermite normal
+  form, the rows of U facing the zero rows of H are a Z-basis of it, U being
+  unimodular.
+ */
+template <typename T>
+MyMatrix<T> IntegralLeftKernelHermite(MyMatrix<T> const &K, int const &dim) {
+  std::pair<MyMatrix<T>, MyMatrix<T>> pair = ComputeRowHermiteNormalForm(K);
+  MyMatrix<T> const &U = pair.first;
+  MyMatrix<T> const &H = pair.second;
+  MyMatrix<T> Ker(dim, K.rows());
+  int pos = 0;
+  for (int i = 0; i < H.rows(); i++) {
+    bool is_zero = true;
+    for (int j = 0; j < H.cols(); j++) {
+      if (H(i, j) != 0) {
+        is_zero = false;
+        break;
+      }
+    }
+    if (is_zero) {
+#ifdef SANITY_CHECK_MATRIX_INT
+      if (pos == dim) {
+        std::cerr << "IntegralLeftKernelHermite: more than " << dim
+                  << " zero rows\n";
+        throw TerminalException{1};
+      }
+#endif
+      Ker.row(pos) = U.row(i);
+      pos++;
+    }
+  }
+#ifdef SANITY_CHECK_MATRIX_INT
+  if (pos != dim) {
+    std::cerr << "IntegralLeftKernelHermite: " << pos << " zero rows where "
+              << dim << " were expected\n";
+    throw TerminalException{1};
+  }
+#endif
+  return Ker;
+}
+
+/*
+  A Z-basis of the integral vectors of the rational span of the rows of
+  TheSpace, which one being unspecified. They are the integral x orthogonal to
+  the orthogonal complement, the integral left kernel of the complement taken
+  as columns. Over Z and Q that kernel is read off a Hermite normal form,
+  much faster than the general integral kernel, which the other Euclidean
+  domains keep.
+ */
 template <typename T>
 MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const &TheSpace) {
   int nbRow = TheSpace.rows();
@@ -3939,8 +3990,20 @@ MyMatrix<T> IntegralSpaceSaturation(MyMatrix<T> const &TheSpace) {
     return IdentityMat<T>(nbRow);
   }
   MyMatrix<T> eOrth = NullspaceTrMat(TheSpace);
-  MyMatrix<T> TheSpaceInt = NullspaceIntTrMat(eOrth);
-  return TheSpaceInt;
+  if constexpr (is_implementation_of_Z<T>::value) {
+    MyMatrix<T> K = eOrth.transpose();
+    return IntegralLeftKernelHermite(K, nbRow);
+  } else if constexpr (is_implementation_of_Q<T>::value) {
+    // A positive rescaling of the complement leaves its integral kernel alone,
+    // so it is made integral and the normal form is taken over the ring.
+    using Tring = typename underlying_ring<T>::ring_type;
+    MyMatrix<Tring> K = UniversalMatrixConversion<Tring, T>(
+        RemoveFractionMatrix(eOrth).transpose());
+    return UniversalMatrixConversion<T, Tring>(
+        IntegralLeftKernelHermite(K, nbRow));
+  } else {
+    return NullspaceIntTrMat(eOrth);
+  }
 }
 
 template <typename T>
