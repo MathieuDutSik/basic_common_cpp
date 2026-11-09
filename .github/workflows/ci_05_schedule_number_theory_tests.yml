@@ -51,7 +51,7 @@ jobs:
     - name: Build number theory tests
       run: |
         cd src_number
-        make Test_SquareRoot Test_Factorize Test_QuoInt Test_Operations Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo Test_ModularRoots
+        make Test_SquareRoot Test_Factorize Test_QuoInt Test_Operations Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant Test_UnorderedMapMpzq Test_ComputePairGcdDot Test_RealCubicField Test_QuadField Test_Rational Test_PracticalInf Test_PrintStaticInfo Test_ModularRoots Test_MprealConversion
 
     - name: Test_SquareRoot
       run: cd src_number && ./Test_SquareRoot
@@ -139,3 +139,7 @@ jobs:
     # the real roots of PolynomialRealRoots.h, against brute force
     - name: Test_ModularRoots
       run: cd src_number && ./Test_ModularRoots
+
+    # the conversions between the integer and rational types and mpreal
+    - name: Test_MprealConversion
+      run: cd src_number && ./Test_MprealConversion

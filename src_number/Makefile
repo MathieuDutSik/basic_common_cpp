@@ -1,4 +1,4 @@
-PROGRAM		= Test_Format TestOverflowConversion Test_SquareRoot Test_UnorderedMapMpzq Factorize Factorize_help Test_Factorize Test_PracticalInf Test_QuoInt Test_Operations Test_PrintStaticInfo Test_RealCubicField Test_RealRing Test_Frexp Bench_real_ring Test_QuadField Test_ImagQuadRing Test_Rational Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant ReadValueString ComputeQuadraticResidue Test_ComputePairGcdDot Test_Conversion Test_AlgebraicConversion Test_UnderlyingTraits Test_ModularRoots SequenceApproximant Nearest UniversalConversion TEST_jet_number Bench_fma_strategy
+PROGRAM		= Test_Format TestOverflowConversion Test_SquareRoot Test_UnorderedMapMpzq Factorize Factorize_help Test_Factorize Test_PracticalInf Test_QuoInt Test_Operations Test_PrintStaticInfo Test_RealCubicField Test_RealRing Test_Frexp Bench_real_ring Test_QuadField Test_ImagQuadRing Test_Rational Test_TypeBoostGmp Test_GetBit Test_QuadraticResidue Test_PrimeGenerator Test_SequenceApproximant ReadValueString ComputeQuadraticResidue Test_ComputePairGcdDot Test_Conversion Test_AlgebraicConversion Test_UnderlyingTraits Test_ModularRoots Test_MprealConversion SequenceApproximant Nearest UniversalConversion TEST_jet_number Bench_fma_strategy
 #PROGRAM		= test_mpz_givaro
 #PROGRAM		= test_unordered_map_mpzq
 #PROGRAM		= Factorize
@@ -41,6 +41,12 @@ CDEBUG 		= -DDEBUG
 CTOTAL 		= $(CLOCAL) $(CFLAGS) $(CDEBUG)
 
 LIBS		= -lm $(GMP_CXX_LINK) $(BOOST_LINK)
+
+# MPFR, with the mpfrc++ wrapper of ExternalLib (MprealConversion.h).
+MPFR_INCDIR	?= $(GMP_INCDIR)
+MPFR_LINK	?= -lmpfr
+CFLAGS		+= -I$(MPFR_INCDIR) -I../ExternalLib/mpfrc++-3.6.8
+LIBS		+= $(MPFR_LINK)
 
 # Optional flint arithmetic: build with `make ENABLE_FLINT_SUPPORT=1`.
 # FLINT_INCDIR / FLINT_LINK can be set in the environment; the defaults
