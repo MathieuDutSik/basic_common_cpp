@@ -143,3 +143,11 @@ jobs:
     # the conversions between the integer and rational types and mpreal
     - name: Test_MprealConversion
       run: cd src_number && ./Test_MprealConversion
+
+    # the Arb balls of ArbReal.h (flint) and their conversions
+    - name: Test_ArbReal with flint
+      env:
+        ENABLE_FLINT_SUPPORT: "1"
+        FLINT_INCDIR: /home/runner/opt/flint/include
+        FLINT_LINK: "-L/home/runner/opt/flint/lib -lflint -Wl,-rpath,/home/runner/opt/flint/lib"
+      run: cd src_number && make Test_ArbReal && ./Test_ArbReal
