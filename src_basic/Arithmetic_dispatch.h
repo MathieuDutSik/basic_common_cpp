@@ -122,6 +122,28 @@ struct ArithmeticDispatch {
   }
 };
 
+/*
+  For the programs with positional arguments: an argument arithmetic=NAME,
+  anywhere on the command line, is removed from argv (argc decreases) and
+  NAME is returned; default_name when there is none.
+ */
+inline std::string ExtractArithmeticOption(int &argc, char *argv[],
+                                           std::string const &default_name) {
+  std::string res = default_name;
+  std::string const key = "arithmetic=";
+  int j = 0;
+  for (int i = 0; i < argc; i++) {
+    std::string a = argv[i];
+    if (a.rfind(key, 0) == 0) {
+      res = a.substr(key.size());
+    } else {
+      argv[j++] = argv[i];
+    }
+  }
+  argc = j;
+  return res;
+}
+
 // clang-format off
 #endif  // SRC_BASIC_ARITHMETIC_DISPATCH_H_
 // clang-format on
