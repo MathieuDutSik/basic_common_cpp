@@ -13,6 +13,8 @@
 // --- ComputeRowHermiteNormalForm: H = U M with U unimodular, echelon
 //     shape, and canonicity (invariance under left multiplication by a
 //     unimodular matrix, idempotence).
+// --- The same on wide matrices, against the generic kernel (the full row
+//     rank ones go through RowHermiteNormalFormFullRowRank_or_none).
 // --- ComputeColHermiteNormalForm: the transposed statements.
 // --- SmithNormalForm: ROW M COL diagonal with unimodular ROW and COL,
 //     the divisibility chain of the invariant factors, consistency with
@@ -120,6 +122,53 @@ template <typename T> void process_hnf(int n, int nb) {
   }
 }
 
+// Wide matrices (more columns than rows), where the row normal form goes
+// through RowHermiteNormalFormFullRowRank_or_none when the rank is full:
+// the same H and U as the generic kernel, which is run directly. A few
+// leading zero columns and a few columns copied from earlier ones make the
+// pivots differ from the first columns.
+template <typename T> void process_hnf_wide(int n, int nb) {
+  for (int i = 0; i < nb; i++) {
+    int n_col = n + 1 + (i % 5);
+    MyMatrix<T> M = RandomMatrix<T>(n, n_col, 6);
+    if (i % 4 == 1)
+      for (int r = 0; r < n; r++)
+        M(r, 0) = 0;
+    if (i % 4 == 2 && n_col >= 3)
+      for (int r = 0; r < n; r++)
+        M(r, 1) = 2 * M(r, 0);
+    if (i % 4 == 3 && n >= 2)
+      // rank deficient: the last row a combination of the others
+      for (int j = 0; j < n_col; j++)
+        M(n - 1, j) = M(0, j) - 3 * M(1, j);
+    std::pair<MyMatrix<T>, MyMatrix<T>> pairRow = ComputeRowHermiteNormalForm(M);
+    MyMatrix<T> Hgen = M;
+    MyMatrix<T> Ugen = IdentityMat<T>(n);
+    auto f = [&](auto g) -> void {
+      g(Hgen);
+      g(Ugen);
+    };
+    ComputeRowHermiteNormalForm_Kernel(Hgen, f);
+    MyMatrix<T> Hsec = ComputeRowHermiteNormalForm_second(M);
+    if (!TestEqualityMatrix(pairRow.second, Hgen) ||
+        !TestEqualityMatrix(Hsec, Hgen) ||
+        !TestEqualityMatrix(MyMatrix<T>(pairRow.first * M), pairRow.second) ||
+        !IsUnimodular(pairRow.first) || !IsRowEchelon(pairRow.second)) {
+      std::cerr << "The row Hermite normal form of a wide matrix fails\n";
+      std::cerr << "M=\n";
+      WriteMatrix(std::cerr, M);
+      throw TerminalException{1};
+    }
+    // For full row rank the transform is unique.
+    if (i % 4 != 3 && !TestEqualityMatrix(pairRow.first, Ugen)) {
+      std::cerr << "The transform of a full row rank matrix differs\n";
+      std::cerr << "M=\n";
+      WriteMatrix(std::cerr, M);
+      throw TerminalException{1};
+    }
+  }
+}
+
 template <typename T> void process_smith(int n, int nb) {
   for (int i = 0; i < nb; i++) {
     int n_row = n + (i % 3);
@@ -206,6 +255,7 @@ template <typename T> void process_smith(int n, int nb) {
 template <typename T> void process(int n) {
   int nb = 30;
   process_hnf<T>(n, nb);
+  process_hnf_wide<T>(n, nb);
   std::cerr << "process_hnf done\n";
   process_smith<T>(n, nb);
   std::cerr << "process_smith done\n";

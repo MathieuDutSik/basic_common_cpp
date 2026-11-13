@@ -924,6 +924,9 @@ void ComputeRowHermiteNormalForm_Kernel(MyMatrix<T> &H, F f) {
 #endif
 }
 
+template <typename T>
+std::optional<MyMatrix<T>> HermiteNormalFormModD_or_none(MyMatrix<T> const &M);
+
 // The pair (U, H) through the modulo-D form: for a square nonsingular M
 // the transform U = H M^{-1} is unique and integral (the rows of H lie in
 // the row lattice of M), so it is recovered by one inversion over the
@@ -946,6 +949,109 @@ HermiteNormalFormModDTransform_or_none(MyMatrix<T> const &M) {
   return std::pair<MyMatrix<T>, MyMatrix<T>>{std::move(U), std::move(*optH)};
 }
 
+/*
+  The rank profile of the columns modulo a prime p < 2^31: the columns where
+  the rank of the prefix increases, at most M.rows() of them. A column
+  independent modulo p is independent over Q, so the profile modulo p is
+  the profile over Q except when p divides a minor; the users check.
+ */
+template <typename T>
+std::vector<int> ColumnRankProfileModPrime(MyMatrix<T> const &M) {
+  int64_t const p = 2147483629;
+  T const p_T = UniversalScalarConversion<T, int64_t>(p);
+  int n = M.rows();
+  int k = M.cols();
+  auto mod = [&](T const &x) -> int64_t {
+    return UniversalScalarConversion<int64_t, T>(ResInt(x, p_T));
+  };
+  auto inv = [&](int64_t a) -> int64_t {
+    // a^(p-2) modulo p
+    int64_t res = 1, base = a, e = p - 2;
+    while (e > 0) {
+      if (e & 1)
+        res = (res * base) % p;
+      base = (base * base) % p;
+      e >>= 1;
+    }
+    return res;
+  };
+  std::vector<std::vector<int64_t>> basis; // reduced, pivot entry 1
+  std::vector<int> pivpos;
+  std::vector<int> profile;
+  for (int c = 0; c < k && static_cast<int>(basis.size()) < n; c++) {
+    std::vector<int64_t> v(n);
+    for (int r = 0; r < n; r++)
+      v[r] = mod(M(r, c));
+    for (size_t b = 0; b < basis.size(); b++) {
+      int64_t f = v[pivpos[b]];
+      if (f != 0)
+        for (int r = 0; r < n; r++)
+          v[r] = ((v[r] - f * basis[b][r]) % p + p) % p;
+    }
+    int pv = -1;
+    for (int r = 0; r < n; r++)
+      if (v[r] != 0) {
+        pv = r;
+        break;
+      }
+    if (pv < 0)
+      continue;
+    int64_t i_pv = inv(v[pv]);
+    for (int r = 0; r < n; r++)
+      v[r] = (v[r] * i_pv) % p;
+    for (size_t b = 0; b < basis.size(); b++) {
+      int64_t f = basis[b][pv];
+      if (f != 0)
+        for (int r = 0; r < n; r++)
+          basis[b][r] = ((basis[b][r] - f * v[r]) % p + p) % p;
+    }
+    basis.push_back(v);
+    pivpos.push_back(pv);
+    profile.push_back(c);
+  }
+  return profile;
+}
+
+/*
+  The row Hermite normal form (U, H) of an n x k matrix M of rank n, by the
+  modulo-D form of n columns, without the coefficient growth of the
+  generic kernel on wide matrices. With P the pivot columns (the rank
+  profile) and A_P the square submatrix on them, H_P = HNF(A_P) = U A_P with
+  U unimodular; then H = U M is the normal form of M: the pivots of H are
+  the diagonal of H_P, the entries above them are reduced, and the entries
+  of row i before column P_i vanish, every such column being a rational
+  combination of pivot columns of the rows above i. The profile is found
+  modulo a prime, so that vanishing is checked, and nothing is returned
+  when it fails, M has a lower rank, or the modulo-D form declines. For a
+  matrix of full row rank U is unique, so this is the output of the
+  generic kernel.
+ */
+template <typename T>
+std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>>
+RowHermiteNormalFormFullRowRank_or_none(MyMatrix<T> const &M) {
+  int n = M.rows();
+  int k = M.cols();
+  if (n == 0 || k < n)
+    return {};
+  std::vector<int> piv = ColumnRankProfileModPrime(M);
+  if (static_cast<int>(piv.size()) != n)
+    return {};
+  MyMatrix<T> A_P(n, n);
+  for (int j = 0; j < n; j++)
+    A_P.col(j) = M.col(piv[j]);
+  std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>> opt =
+      HermiteNormalFormModDTransform_or_none(A_P);
+  if (!opt)
+    return {};
+  MyMatrix<T> H = opt->first * M;
+  for (int i = 0; i < n; i++)
+    for (int c = 0; c < piv[i]; c++)
+      if (H(i, c) != 0)
+        return {};
+  return std::pair<MyMatrix<T>, MyMatrix<T>>{std::move(opt->first),
+                                             std::move(H)};
+}
+
 template <typename T>
 std::pair<MyMatrix<T>, MyMatrix<T>>
 ComputeRowHermiteNormalForm(MyMatrix<T> const &M) {
@@ -958,7 +1064,8 @@ ComputeRowHermiteNormalForm(MyMatrix<T> const &M) {
 #endif
   if constexpr (use_hnf_mod_D<T>::value) {
     std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>> opt =
-        HermiteNormalFormModDTransform_or_none(M);
+        (M.rows() < M.cols()) ? RowHermiteNormalFormFullRowRank_or_none(M)
+                              : HermiteNormalFormModDTransform_or_none(M);
     if (opt)
       return std::move(*opt);
   }
@@ -1144,9 +1251,16 @@ MyMatrix<T> ComputeRowHermiteNormalForm_second(MyMatrix<T> const &M) {
   }
 #endif
   if constexpr (use_hnf_mod_D<T>::value) {
-    std::optional<MyMatrix<T>> opt = HermiteNormalFormModD_or_none(M);
-    if (opt)
-      return std::move(*opt);
+    if (M.rows() < M.cols()) {
+      std::optional<std::pair<MyMatrix<T>, MyMatrix<T>>> opt =
+          RowHermiteNormalFormFullRowRank_or_none(M);
+      if (opt)
+        return std::move(opt->second);
+    } else {
+      std::optional<MyMatrix<T>> opt = HermiteNormalFormModD_or_none(M);
+      if (opt)
+        return std::move(*opt);
+    }
   }
   MyMatrix<T> H = M;
   auto f = [&](auto g) -> void { g(H); };
