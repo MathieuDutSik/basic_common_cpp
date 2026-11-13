@@ -3,6 +3,9 @@
 #include "NumberTheoryBoostCppInt.h"
 #include "NumberTheory.h"
 #include "NumberTheorySafeInt.h"
+#ifdef ENABLE_FLINT_SUPPORT
+#include "NumberTheoryFlint.h"
+#endif
 #include "Boost_bitset.h"
 #include "MAT_Matrix_SubsetSolver.h"
 #include "MAT_MatrixRankmat.h"
@@ -278,6 +281,10 @@ void benchmark_all(int n, int amp) {
   benchmark<mpz_class>("mpz_class", n, amp);
   benchmark<boost::multiprecision::cpp_int>("boost_cpp_int", n, amp);
   benchmark<SafeInt64>("safe_integer", std::min(n, 6), amp);
+#ifdef ENABLE_FLINT_SUPPORT
+  benchmark<fmpq_class>("fmpq_class", n, amp);
+  benchmark<fmpz_class>("fmpz_class", n, amp);
+#endif
 }
 
 int main(int argc, char *argv[]) {
@@ -307,6 +314,12 @@ int main(int argc, char *argv[]) {
         return process<boost::multiprecision::cpp_int>(n);
       if (arith == "safe_integer")
         return process<SafeInt64>(n);
+#ifdef ENABLE_FLINT_SUPPORT
+      if (arith == "fmpq_class")
+        return process<fmpq_class>(n);
+      if (arith == "fmpz_class")
+        return process<fmpz_class>(n);
+#endif
       std::cerr << "Failed to find a matching entry\n";
       throw TerminalException{1};
     };

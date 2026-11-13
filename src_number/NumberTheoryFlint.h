@@ -1028,6 +1028,19 @@ template <> struct use_bareiss_for_determinants<fmpq_class> {
   static const bool value = true;
 };
 
+// The corank one kernels of SubsetRankOneSolver go through the Fp reduction
+// with lifting, as for mpz_class / mpq_class. Without it the kernel is the
+// exact NullspaceIntTrMat at every call, which was 42% of an iso-Delaunay
+// enumeration (n=3 Hermitian forms over Z[i]); with it the run takes 1.55x
+// less CPU time.
+template <> struct has_reduction_subset_solver<fmpz_class> {
+  static const bool value = true;
+};
+
+template <> struct has_reduction_subset_solver<fmpq_class> {
+  static const bool value = true;
+};
+
 template <> struct use_hnf_mod_D<fmpz_class> {
   static const bool value = true;
 };
