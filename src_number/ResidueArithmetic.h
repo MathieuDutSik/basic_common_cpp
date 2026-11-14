@@ -10,6 +10,7 @@
 #include <limits>
 #include <sstream>
 #include <string>
+#include <type_traits>
 // clang-format on
 
 /*
@@ -29,7 +30,15 @@
   exponent m / 2) is a valid modulus when m <= 2^61.
  */
 
-int64_t const kMaxResidueModulus = int64_t(1) << 62;
+// A small prime, and a residue modulo a word-sized modulus (a prime or a
+// prime power), in [0, m). Both are unsigned: a signed value enters only
+// through ResModSigned or ResModOf, and the operations below refuse signed
+// arguments (deleted templates), so that a negative number is never
+// silently read as a huge residue.
+using T_small_prime = uint64_t;
+using T_residue = uint64_t;
+
+T_residue const kMaxResidueModulus = T_residue(1) << 62;
 
 [[noreturn]] inline void ResidueModulusTooLarge(std::string const &what) {
   std::cerr << "RESIDUE: the modulus " << what << " exceeds 2^62\n";
@@ -37,8 +46,8 @@ int64_t const kMaxResidueModulus = int64_t(1) << 62;
 }
 
 // p^k as a modulus, p >= 2, k >= 0.
-inline int64_t ResiduePrimePower(int64_t p, int k) {
-  int64_t res = 1;
+inline T_residue ResiduePrimePower(T_small_prime p, int k) {
+  T_residue res = 1;
   for (int i = 0; i < k; i++) {
     if (res > kMaxResidueModulus / p) {
       ResidueModulusTooLarge(std::to_string(p) + "^" + std::to_string(k));
@@ -49,8 +58,8 @@ inline int64_t ResiduePrimePower(int64_t p, int k) {
 }
 
 // An unbounded positive integer as a modulus.
-template <typename Tint> int64_t ResidueModulusOf(Tint const &m) {
-  Tint max_T = UniversalScalarConversion<Tint, int64_t>(kMaxResidueModulus);
+template <typename Tint> T_residue ResidueModulusOf(Tint const &m) {
+  Tint max_T = UniversalScalarConversion<Tint, uint64_t>(kMaxResidueModulus);
   if (m < Tint(1)) {
     std::cerr << "RESIDUE: the modulus " << m << " is not positive\n";
     throw TerminalException{1};
@@ -60,49 +69,52 @@ template <typename Tint> int64_t ResidueModulusOf(Tint const &m) {
     os << m;
     ResidueModulusTooLarge(os.str());
   }
-  return UniversalScalarConversion<int64_t, Tint>(m);
+  return UniversalScalarConversion<uint64_t, Tint>(m);
 }
 
-// a mod m in [0, m), for any a.
-inline int64_t ResMod(int64_t a, int64_t m) {
-  int64_t r = a % m;
-  return (r < 0) ? r + m : r;
+// a mod m in [0, m) for a signed machine integer a.
+inline T_residue ResModSigned(int64_t a, T_residue m) {
+  int64_t m_s = static_cast<int64_t>(m);
+  int64_t r = a % m_s;
+  return static_cast<T_residue>((r < 0) ? r + m_s : r);
 }
 
-// x mod m in [0, m), for an unbounded integer x.
-template <typename Tint> int64_t ResModOf(Tint const &x, int64_t m) {
-  Tint m_T = UniversalScalarConversion<Tint, int64_t>(m);
+// x mod m in [0, m), for an unbounded integer x of either sign.
+template <typename Tint> T_residue ResModOf(Tint const &x, T_residue m) {
+  Tint m_T = UniversalScalarConversion<Tint, uint64_t>(m);
   Tint r = ResInt(x, m_T);
   if (r < Tint(0)) {
     r += m_T;
   }
-  return UniversalScalarConversion<int64_t, Tint>(r);
+  return UniversalScalarConversion<uint64_t, Tint>(r);
 }
 
+// a residue as a signed machine integer, in [0, m), m <= 2^62
+inline int64_t ResToSigned(T_residue a) { return static_cast<int64_t>(a); }
+
 // The operations on residues a, b in [0, m).
-inline int64_t ResAdd(int64_t a, int64_t b, int64_t m) {
-  int64_t s = a + b;
+inline T_residue ResAdd(T_residue a, T_residue b, T_residue m) {
+  T_residue s = a + b;
   return (s >= m) ? s - m : s;
 }
 
-inline int64_t ResSub(int64_t a, int64_t b, int64_t m) {
-  int64_t s = a - b;
-  return (s < 0) ? s + m : s;
+inline T_residue ResSub(T_residue a, T_residue b, T_residue m) {
+  return (a >= b) ? a - b : a + (m - b);
 }
 
-inline int64_t ResNeg(int64_t a, int64_t m) { return (a == 0) ? 0 : m - a; }
-
-// a b mod m in [0, m), for any signs of a and b.
-inline int64_t ResMul(int64_t a, int64_t b, int64_t m) {
-  __int128 prod = static_cast<__int128>(a) * static_cast<__int128>(b);
-  int64_t r = static_cast<int64_t>(prod % static_cast<__int128>(m));
-  return (r < 0) ? r + m : r;
+inline T_residue ResNeg(T_residue a, T_residue m) {
+  return (a == 0) ? 0 : m - a;
 }
 
-// a^e mod m in [0, m), e >= 0, by binary exponentiation.
-inline int64_t ResPow(int64_t a, int64_t e, int64_t m) {
-  int64_t res = ResMod(1, m);
-  a = ResMod(a, m);
+inline T_residue ResMul(T_residue a, T_residue b, T_residue m) {
+  unsigned __int128 prod =
+      static_cast<unsigned __int128>(a) * static_cast<unsigned __int128>(b);
+  return static_cast<T_residue>(prod % m);
+}
+
+// a^e mod m, by binary exponentiation.
+inline T_residue ResPow(T_residue a, uint64_t e, T_residue m) {
+  T_residue res = (m == 1) ? 0 : 1;
   while (e > 0) {
     if (e & 1) {
       res = ResMul(res, a, m);
@@ -114,9 +126,9 @@ inline int64_t ResPow(int64_t a, int64_t e, int64_t m) {
 }
 
 // The inverse of a modulo m, an error when a is not invertible. The
-// coefficients of the extended Euclid algorithm are bounded by m.
-inline int64_t ResInv(int64_t a, int64_t m) {
-  int64_t r0 = m, r1 = ResMod(a, m);
+// coefficients of the extended Euclid algorithm are bounded by m <= 2^62.
+inline T_residue ResInv(T_residue a, T_residue m) {
+  int64_t r0 = static_cast<int64_t>(m), r1 = static_cast<int64_t>(a % m);
   int64_t s0 = 0, s1 = 1;
   while (r1 != 0) {
     int64_t q = r0 / r1;
@@ -131,8 +143,35 @@ inline int64_t ResInv(int64_t a, int64_t m) {
     std::cerr << "RESIDUE: " << a << " is not invertible modulo " << m << "\n";
     throw TerminalException{1};
   }
-  return ResMod(s0, m);
+  return ResModSigned(s0, m);
 }
+
+// No signed argument, not even a literal: a negative value would be read
+// as a huge residue (ResMul(a, -1, p) is not -a for an odd p). Reduce it
+// with ResModSigned first, and write the constants as T_residue(c).
+template <typename T>
+concept ResidueSignedArgument = std::is_signed_v<T>;
+template <typename A, typename B, typename M>
+  requires(ResidueSignedArgument<A> || ResidueSignedArgument<B> ||
+           ResidueSignedArgument<M>)
+T_residue ResAdd(A, B, M) = delete;
+template <typename A, typename B, typename M>
+  requires(ResidueSignedArgument<A> || ResidueSignedArgument<B> ||
+           ResidueSignedArgument<M>)
+T_residue ResSub(A, B, M) = delete;
+template <typename A, typename B, typename M>
+  requires(ResidueSignedArgument<A> || ResidueSignedArgument<B> ||
+           ResidueSignedArgument<M>)
+T_residue ResMul(A, B, M) = delete;
+template <typename A, typename M>
+  requires(ResidueSignedArgument<A> || ResidueSignedArgument<M>)
+T_residue ResNeg(A, M) = delete;
+template <typename A, typename M>
+  requires(ResidueSignedArgument<A> || ResidueSignedArgument<M>)
+T_residue ResInv(A, M) = delete;
+template <typename A, typename E, typename M>
+  requires(ResidueSignedArgument<A> || ResidueSignedArgument<M>)
+T_residue ResPow(A, E, M) = delete;
 
 // The product of sizes, saturated at the largest size_t, for the bounds of
 // the listings: a product too large to be listed is never mistaken for a
