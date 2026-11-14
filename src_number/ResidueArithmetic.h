@@ -1,6 +1,6 @@
 // Copyright (C) 2026 Mathieu Dutour Sikiric <mathieu.dutour@gmail.com>
-#ifndef SRC_GENERA_RESIDUEARITHMETIC_H_
-#define SRC_GENERA_RESIDUEARITHMETIC_H_
+#ifndef SRC_NUMBER_RESIDUEARITHMETIC_H_
+#define SRC_NUMBER_RESIDUEARITHMETIC_H_
 
 // clang-format off
 #include "NumberTheory.h"
@@ -92,9 +92,25 @@ inline int64_t ResSub(int64_t a, int64_t b, int64_t m) {
 
 inline int64_t ResNeg(int64_t a, int64_t m) { return (a == 0) ? 0 : m - a; }
 
+// a b mod m in [0, m), for any signs of a and b.
 inline int64_t ResMul(int64_t a, int64_t b, int64_t m) {
   __int128 prod = static_cast<__int128>(a) * static_cast<__int128>(b);
-  return static_cast<int64_t>(prod % static_cast<__int128>(m));
+  int64_t r = static_cast<int64_t>(prod % static_cast<__int128>(m));
+  return (r < 0) ? r + m : r;
+}
+
+// a^e mod m in [0, m), e >= 0, by binary exponentiation.
+inline int64_t ResPow(int64_t a, int64_t e, int64_t m) {
+  int64_t res = ResMod(1, m);
+  a = ResMod(a, m);
+  while (e > 0) {
+    if (e & 1) {
+      res = ResMul(res, a, m);
+    }
+    a = ResMul(a, a, m);
+    e >>= 1;
+  }
+  return res;
 }
 
 // The inverse of a modulo m, an error when a is not invertible. The
@@ -129,5 +145,5 @@ inline size_t SaturatedSizeProduct(size_t a, size_t b) {
 }
 
 // clang-format off
-#endif  // SRC_GENERA_RESIDUEARITHMETIC_H_
+#endif  // SRC_NUMBER_RESIDUEARITHMETIC_H_
 // clang-format on

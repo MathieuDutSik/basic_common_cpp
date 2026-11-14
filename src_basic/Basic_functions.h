@@ -91,11 +91,30 @@ template <typename T> constexpr T PrevIdx(T const &len, T const &i) {
   return i - 1;
 }
 
+// eVal^n by binary exponentiation, 1 for n <= 0. The base is squared only
+// while higher bits remain, so a machine integer result that fits never
+// overflows in between.
 template <typename T> constexpr T MyPow(T const &eVal, int const &n) {
   T eRet(1);
-  for (int i = 0; i < n; i++)
-    eRet *= eVal;
-  return eRet;
+  if (n <= 0)
+    return eRet;
+  T base = eVal;
+  int e = n;
+  while (true) {
+    if (e & 1)
+      eRet *= base;
+    e >>= 1;
+    if (e == 0)
+      return eRet;
+    base *= base;
+  }
+}
+
+// eVal^n for any sign of n, in a field.
+template <typename T> constexpr T MyPowSigned(T const &eVal, int const &n) {
+  if (n >= 0)
+    return MyPow(eVal, n);
+  return T(1) / MyPow(eVal, -n);
 }
 
 template <typename T> int PositionVect(std::vector<T> const &V, T const &eVal) {

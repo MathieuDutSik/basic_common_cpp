@@ -44,3 +44,12 @@ jobs:
     # fewer spaces per modulus.
     - name: Test_MatrixMod
       run: ./CI_tests/MatrixMod/run_test.sh
+
+    # The linear algebra modulo a prime of MAT_MatrixModPrime.h against the
+    # determinant, the echelon shape and the defining equations, and the
+    # powers MyPow, MyPowSigned and ResPow against repeated products.
+    - name: Test_MatrixModPrime
+      run: |
+        cd src_matrix
+        make Test_MatrixModPrime
+        ./Test_MatrixModPrime
