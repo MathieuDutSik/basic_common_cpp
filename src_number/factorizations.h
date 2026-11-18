@@ -142,6 +142,26 @@ template <typename T> std::map<T, size_t> FactorsIntMap(T const &N) {
   return map;
 }
 
+// The positive divisors of N > 0, sorted.
+template <typename T> std::vector<T> DivisorsOf(T const &N) {
+  std::vector<T> divisors{T(1)};
+  if (N > 1) {
+    for (auto const &[q, mult] : FactorsIntMap(N)) {
+      std::vector<T> next;
+      for (auto const &x : divisors) {
+        T y = x;
+        for (size_t i = 0; i <= mult; i++) {
+          next.push_back(y);
+          y *= q;
+        }
+      }
+      divisors = next;
+    }
+  }
+  std::sort(divisors.begin(), divisors.end());
+  return divisors;
+}
+
 // 389258285913703137976972453410674957488110405
 // 2265346989680430163430848057126071 10374024096391 Factorizing is expensive,
 // so if you know some number that could get you some factors, then use them.
