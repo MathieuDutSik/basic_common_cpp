@@ -290,13 +290,27 @@ inline int CanonicalizationUnit(int const &eVal) {
   return 1;
 }
 
+// The value of an optional that has to be set. A named optional gives a
+// reference to its value, so that no copy is made unless the caller asks for
+// one; a temporary, or a named optional passed with std::move, gives its value
+// moved out. The second overload also means that the reference of the first
+// is never taken from a temporary.
 template <typename T>
-T unfold_opt(std::optional<T> const &opt, std::string const &str) {
+T const &unfold_opt(std::optional<T> const &opt, std::string const &str) {
   if (!opt) {
     std::cerr << "Error in unfold_opt at str=" << str << "\n";
     throw TerminalException{1};
   }
   return *opt;
+}
+
+template <typename T>
+T unfold_opt(std::optional<T> &&opt, std::string const &str) {
+  if (!opt) {
+    std::cerr << "Error in unfold_opt at str=" << str << "\n";
+    throw TerminalException{1};
+  }
+  return std::move(*opt);
 }
 
 // clang-format off
