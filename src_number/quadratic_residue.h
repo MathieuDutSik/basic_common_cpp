@@ -5,6 +5,7 @@
 // clang-format off
 #include "TemplateTraits.h"
 #include "factorizations.h"
+#include "ResidueArithmetic.h"
 #include <limits>
 #include <map>
 #include <utility>
@@ -146,6 +147,97 @@ std::optional<T> find_quadratic_residue_exhaustive(T const &a_in,
   return find_quadratic_residue_exhaustive_kernel(a, m);
 }
 
+/*
+  A square root of a modulo p^k (p prime, k >= 1), or nothing. With a =
+  p^v u modulo p^k, u prime to p: a = 0 modulo p^k gives 0; otherwise v
+  must be even, and x = p^(v/2) y with y^2 = u modulo p^e, e = k - v.
+  - p odd: the root y of u modulo p (Tonelli-Shanks, ResSqrtPrime) is
+    lifted by Hensel's lemma one power at a time, y <- y - t p^j / (2 y)
+    with t = (y^2 - u) / p^j, the inverse of 2 y being taken modulo p.
+  - p = 2: u = 1 modulo 8 is needed (modulo 4 for e = 2, nothing for e =
+    1), and y = 1 is corrected bit by bit, y <- y + 2^(j-1) when y^2 != u
+    modulo 2^(j+1).
+  A prime beyond the word size falls back on the exhaustive search.
+ */
+template <typename T>
+std::optional<T> find_quadratic_residue_prime_power(T const &a_in, T const &p,
+                                                    size_t k) {
+  static_assert(is_implementation_of_Z<T>::value, "Requires T to be a Z ring");
+  T pk(1);
+  for (size_t i = 0; i < k; i++) {
+    pk *= p;
+  }
+  T a = ResInt(a_in, pk);
+  if (a == 0) {
+    return T(0);
+  }
+  size_t v = 0;
+  T u = a;
+  while (ResInt(u, p) == 0) {
+    u = QuoInt(u, p);
+    v++;
+  }
+  if (v % 2 == 1) {
+    return {};
+  }
+  size_t e = k - v;
+  T scale(1);
+  for (size_t i = 0; i < v / 2; i++) {
+    scale *= p;
+  }
+  T y(1);
+  T two(2);
+  if (p == two) {
+    T eight(8), four(4);
+    if (e >= 3 && ResInt(u, eight) != 1) {
+      return {};
+    }
+    if (e == 2 && ResInt(u, four) != 1) {
+      return {};
+    }
+    T pow2(4);
+    for (size_t j = 3; j < e; j++) {
+      // y^2 = u modulo 2^j; pow2 = 2^(j-1)
+      T mod = pow2 * four;
+      if (ResInt(T(y * y - u), mod) != 0) {
+        y += pow2;
+      }
+      pow2 *= two;
+    }
+  } else {
+    if (p > UniversalScalarConversion<T, int64_t>(
+                static_cast<int64_t>(kMaxResidueModulus))) {
+      T pe(1);
+      for (size_t i = 0; i < e; i++) {
+        pe *= p;
+      }
+      std::optional<T> opt = find_quadratic_residue_exhaustive(u, pe);
+      if (!opt) {
+        return {};
+      }
+      y = *opt;
+    } else {
+      T_residue p_r =
+          static_cast<T_residue>(UniversalScalarConversion<int64_t, T>(p));
+      std::optional<T_residue> y0 = ResSqrtPrime(ResModOf(u, p_r), p_r);
+      if (!y0) {
+        return {};
+      }
+      y = UniversalScalarConversion<T, int64_t>(static_cast<int64_t>(*y0));
+      T_residue inv2y = ResInv(ResAdd(*y0, *y0, p_r), p_r);
+      T pj = p;
+      for (size_t j = 1; j < e; j++) {
+        // y^2 = u modulo p^j
+        T t = QuoInt(T(y * y - u), pj);
+        T_residue c = ResMul(ResModOf(t, p_r), inv2y, p_r);
+        y -= UniversalScalarConversion<T, int64_t>(static_cast<int64_t>(c)) * pj;
+        pj *= p;
+      }
+    }
+  }
+  return ResInt(T(scale * y), pk);
+}
+
 template <typename T>
 std::optional<T> find_quadratic_residue_map(T const &a_in,
                                             std::map<T, size_t> const &m_map) {
@@ -163,7 +255,7 @@ std::optional<T> find_quadratic_residue_map(T const &a_in,
     for (size_t u = 1; u < kv.second; u++) {
       prod *= p;
     }
-    std::optional<T> opt = find_quadratic_residue_exhaustive(a_in, prod);
+    std::optional<T> opt = find_quadratic_residue_prime_power(a_in, p, kv.second);
     if (opt) {
       T val = *opt;
       a.push_back(val);

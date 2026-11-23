@@ -2,6 +2,7 @@
 #ifndef SRC_COMB_COMB_COMBINATORICS_H_
 #define SRC_COMB_COMB_COMBINATORICS_H_
 
+#include "ArithmeticFunctions.h"
 #include "Boost_bitset.h"
 #include "COMB_Combinatorics_elem.h"
 #include "COMB_Stor.h"
@@ -414,21 +415,6 @@ std::vector<Tint> ListRepresentativeConnectedComponent(
     ComputeFullOrbit(TheFirst);
   }
   return ListOrbRepresentative;
-}
-
-// Relation of binomial coefficients is
-// C_n^k = (n/k) C_{n-1}^{k-1}
-//
-template <typename T, typename Tint>
-T BinomialCoefficient(Tint const &n, Tint const &k) {
-  T eRet = 1;
-  for (Tint i = 1; i <= k; i++) {
-    T eNum = n - (k - i);
-    T eDen = i;
-    eRet *= eNum;
-    eRet /= eDen;
-  }
-  return eRet;
 }
 
 // functionality for directly accessing to binomial coefficients

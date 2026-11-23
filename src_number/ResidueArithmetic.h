@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <type_traits>
@@ -144,6 +145,63 @@ inline T_residue ResInv(T_residue a, T_residue m) {
     throw TerminalException{1};
   }
   return ResModSigned(s0, m);
+}
+
+// The least quadratic non-residue modulo the odd prime p, by Euler's
+// criterion.
+inline T_residue ResLeastNonResidue(T_residue p) {
+  T_residue u = 2;
+  while (ResPow(u, (p - 1) / 2, p) != p - 1) {
+    u++;
+  }
+  return u;
+}
+
+/*
+  A square root of a modulo the prime p, or nothing when a is not a
+  square. Tonelli-Shanks: with p - 1 = 2^s q, q odd, and c = z^q for a
+  non-residue z, r = a^((q+1)/2) and t = a^q satisfy r^2 = a t; while t !=
+  1, its order 2^i < 2^m is lowered by the factor b^2, b = c^(2^(m-i-1)).
+  For p = 3 mod 4 (s = 1) this is a^((p+1)/4) at once.
+ */
+inline std::optional<T_residue> ResSqrtPrime(T_residue a, T_residue p) {
+  a %= p;
+  if (a == 0 || p == 2) {
+    return a;
+  }
+  if (ResPow(a, (p - 1) / 2, p) != 1) {
+    return {};
+  }
+  T_residue q = p - 1;
+  int s = 0;
+  while (q % 2 == 0) {
+    q /= 2;
+    s++;
+  }
+  if (s == 1) {
+    return ResPow(a, (p + 1) / 4, p);
+  }
+  int m = s;
+  T_residue c = ResPow(ResLeastNonResidue(p), q, p);
+  T_residue t = ResPow(a, q, p);
+  T_residue r = ResPow(a, (q + 1) / 2, p);
+  while (t != 1) {
+    int i = 0;
+    T_residue t2 = t;
+    while (t2 != 1) {
+      t2 = ResMul(t2, t2, p);
+      i++;
+    }
+    T_residue b = c;
+    for (int j = 0; j < m - i - 1; j++) {
+      b = ResMul(b, b, p);
+    }
+    m = i;
+    c = ResMul(b, b, p);
+    t = ResMul(t, c, p);
+    r = ResMul(r, b, p);
+  }
+  return r;
 }
 
 // No signed argument, not even a literal: a negative value would be read
