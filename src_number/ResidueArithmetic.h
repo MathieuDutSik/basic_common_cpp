@@ -4,6 +4,7 @@
 
 // clang-format off
 #include "NumberTheory.h"
+#include "NumberTheoryModular.h"
 #include "ExceptionsFunc.h"
 #include <cstdint>
 #include <iostream>
@@ -202,6 +203,57 @@ inline std::optional<T_residue> ResSqrtPrime(T_residue a, T_residue p) {
     r = ResMul(r, b, p);
   }
   return r;
+}
+
+// The Legendre symbol of a residue a modulo the prime p.
+inline int ResKronecker(T_residue a, T_small_prime p) {
+  return kronecker_symbol<int64_t>(static_cast<int64_t>(a),
+                                   static_cast<int64_t>(p));
+}
+
+// v_p(x) of a residue modulo p^K, K for x = 0.
+inline int ResValuation(T_residue x, T_small_prime p, int K) {
+  if (x == 0) {
+    return K;
+  }
+  int v = 0;
+  while (x % p == 0) {
+    x /= p;
+    v++;
+  }
+  return v;
+}
+
+// The residue modulo M of the M-integral rational x.
+template <typename T, typename Tint>
+T_residue ResModOfRational(T const &x, T_residue M) {
+  Tint num = UniversalScalarConversion<Tint, T>(GetNumerator(x));
+  Tint den = UniversalScalarConversion<Tint, T>(GetDenominator(x));
+  return ResMul(ResModOf(num, M), ResInv(ResModOf(den, M), M), M);
+}
+
+// The residue in [0, mod) of the integer val held in any type T, reduced
+// exactly before the conversion to 64 bits (val itself may not fit), and
+// the centered residue in (-mod/2, mod/2]
+template <typename T> int64_t ResidueOfInteger(T const &val, int64_t mod) {
+  T mod_T = UniversalScalarConversion<T, int64_t>(mod);
+  T fl = UniversalFloorScalarInteger<T, T>(val / mod_T);
+  T r = val - mod_T * fl;
+  return UniversalScalarConversion<int64_t, T>(r);
+}
+
+template <typename T>
+int64_t CenteredResidueOfInteger(T const &val, int64_t mod) {
+  int64_t r = ResidueOfInteger(val, mod);
+  return (r > mod / 2) ? r - mod : r;
+}
+
+inline int64_t CenteredModP(int64_t x, int64_t mod) {
+  int64_t r = x % mod;
+  if (r < 0) {
+    r += mod;
+  }
+  return (r > mod / 2) ? r - mod : r;
 }
 
 // No signed argument, not even a literal: a negative value would be read
