@@ -131,6 +131,16 @@ MyMatrix<T> IntersectionLatticeMod(MyMatrix<T> const &M1, MyMatrix<T> const &M2,
 }
 
 template <typename T>
+bool IsZeroVectorMod(MyVector<T> const &V, T const &TheMod) {
+  for (int i = 0; i < V.size(); i++) {
+    if (ResInt(V(i), TheMod) != 0) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template <typename T>
 bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M,
                                               MyVector<T> &V, T const &TheMod) {
   int n = M.rows();
@@ -152,15 +162,27 @@ bool Kernel_FindIsotropicVectorModQuadResidue(MyMatrix<T> const &M,
   // 0 = cst + 2 lin x_n + x_n^2
   // 0 = cst + (x_n + lin)^2 - lin^2
   // lin^2 - cst = (x_n + lin)^2
-  T Cinv = mod_inv(C, TheMod);
-  lin *= Cinv;
-  cst *= Cinv;
-  T a = lin * lin - cst;
-  std::optional<T> opt = find_quadratic_residue(a, TheMod);
-  if (opt) {
-    T const &y = *opt;
-    T xn = y - lin;
-    V(n - 1) = xn;
+  // Completing the square needs 2 to be invertible. Modulo 2 the term
+  // 2 lin x_n vanishes and x_n^2 = x_n, so that with C odd the equation
+  // is cst + x_n = 0.
+  auto get_last_coordinate = [&]() -> std::optional<T> {
+    if (TheMod == 2) {
+      return ResInt(cst, TheMod);
+    }
+    T Cinv = mod_inv(C, TheMod);
+    T lin_red = lin * Cinv;
+    T cst_red = cst * Cinv;
+    T a = lin_red * lin_red - cst_red;
+    std::optional<T> opt = find_quadratic_residue(a, TheMod);
+    if (opt) {
+      T const &y = *opt;
+      return y - lin_red;
+    }
+    return {};
+  };
+  std::optional<T> opt_xn = get_last_coordinate();
+  if (opt_xn) {
+    V(n - 1) = *opt_xn;
 #ifdef SANITY_CHECK_MATRIX_MOD
     T sum = 0;
     for (int i = 0; i < n; i++)
@@ -202,7 +224,10 @@ MyVector<T> FindIsotropicVectorModRandom(MyMatrix<T> const &M,
       V(i) = val_T;
     }
     bool test = Kernel_FindIsotropicVectorModQuadResidue(M, V, TheMod);
-    if (test) {
+    // A vector that is zero modulo TheMod is isotropic but useless: it
+    // occurs when all the random coordinates are multiples of TheMod,
+    // often for TheMod = 2.
+    if (test && !IsZeroVectorMod(V, TheMod)) {
       return V;
     }
   }
