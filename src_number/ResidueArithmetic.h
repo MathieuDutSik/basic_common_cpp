@@ -3,7 +3,7 @@
 #define SRC_NUMBER_RESIDUEARITHMETIC_H_
 
 // clang-format off
-#include "NumberTheory.h"
+#include "NumberTheoryCommon.h"
 #include "NumberTheoryModular.h"
 #include "ExceptionsFunc.h"
 #include <cstdint>

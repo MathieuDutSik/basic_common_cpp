@@ -3,7 +3,7 @@
 #define SRC_NUMBER_ARITHMETICFUNCTIONS_H_
 
 // clang-format off
-#include "NumberTheory.h"
+#include "NumberTheoryCommon.h"
 #include "NumberTheoryModular.h"
 #include "factorizations.h"
 #include <map>
