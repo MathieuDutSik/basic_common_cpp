@@ -313,6 +313,7 @@ T read_entry_checked(std::istream &is, char const *context, size_t iRow,
   std::istringstream is_token(token + " ");
   T eVal;
   is_token >> eVal;
+  CanonicalizeAfterRead(eVal);
   bool is_ok = !is_token.fail();
   if (is_ok) {
     is_token >> std::ws;

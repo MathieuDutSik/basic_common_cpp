@@ -192,18 +192,32 @@ std::vector<T> Filtered(std::vector<T> const &V, UnaryPredicate const &f) {
   return LRet;
 }
 
+// A value just read from a stream, in canonical form. The operator>> of
+// gmpxx reads "20088/10000" as it is, without reducing the fraction, while
+// the comparisons of mpq_class assume canonical operands: such a value
+// compares unequal to 2511/1250. The types that can hold a non-canonical
+// value have a canonicalize() member, which is called; the others are left
+// as they are (fmpq_class canonicalizes when it reads).
+template <typename T> void CanonicalizeAfterRead(T &val) {
+  if constexpr (requires { val.canonicalize(); }) {
+    val.canonicalize();
+  }
+}
+
 // Parsing strings (It takes a std::string because we would need a const char*
 // with a null terminated string and this we would not have with string_view
 
 template <typename T> T ParseScalar(std::string const &estr) {
   T ret_val;
   std::istringstream(estr) >> ret_val;
+  CanonicalizeAfterRead(ret_val);
   return ret_val;
 }
 
 template <typename T>
 void ParseScalar_inplace(std::string const &estr, T &ret_val) {
   std::istringstream(estr) >> ret_val;
+  CanonicalizeAfterRead(ret_val);
 }
 
 // clang-format off

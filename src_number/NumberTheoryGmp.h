@@ -973,6 +973,8 @@ inline void load(Archive &ar, mpq_class &val,
   ar &make_nvp("mpq", str);
   std::istringstream is(str);
   is >> val;
+  // operator>> does not reduce the fraction.
+  val.canonicalize();
 }
 
 template <class Archive>

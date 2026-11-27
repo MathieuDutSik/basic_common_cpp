@@ -171,6 +171,7 @@ std::istream &operator>>(std::istream &is, std::vector<T> &obj) {
   for (int i = 0; i < n; i++) {
     T eVal;
     is >> eVal;
+    CanonicalizeAfterRead(eVal);
     obj[i] = eVal;
   }
   return is;
